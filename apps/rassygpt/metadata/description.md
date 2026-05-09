@@ -4,9 +4,10 @@ RassyGPT is a Runtipi-native, hardware-aware OpenAI-compatible AI gateway for Ia
 
 - `rassy-general` on the V100 32GB for all-purpose work
 - `rassy-coder` across the two V100 16GB cards for code
-- `rassy-fast` on the V100 12GB for quick utility tasks
+- `rassy-coder-secondary` on the V100 12GB for worker code tasks
+- `rassy-fast` on the P40 24GB for quick utility tasks
 - `rassy-embed` and `rassy-rerank` on the P100 for retrieval
-- optional image and audio connectors for ComfyUI, Speaches, LocalAI, or other OpenAI-compatible services
+- `rassy-image` plus `rassy-audio` on the RTX 2080 Ti through LocalAI
 - integrated internal Qdrant storage with an external connector mode
 - the M40 is excluded from the RassyGPT stack and is not assigned to any lane
 

@@ -11,7 +11,7 @@ These defaults are chosen for Ian's hardware and for runtime compatibility over 
 | embed | `nomic-ai/nomic-embed-text-v1.5-GGUF` / `nomic-embed-text-v1.5.Q8_0.gguf` | Compact embedding model with llama.cpp compatibility. |
 | rerank | `klnstpr/bge-reranker-v2-m3-Q8_0-GGUF` / `bge-reranker-v2-m3-q8_0.gguf` | GGUF reranker model; gateway falls back to embedding cosine if the backend endpoint is unavailable. |
 | image | `flux.2-klein-4b` via LocalAI | Image generation lane on the RTX 2080 Ti. |
-| audio | `whisper-large-turbo-q8_0` and `voice-en_US-lessac-medium` via LocalAI | STT and TTS on the RTX 2080 Ti. |
+| audio | `whisper-large-turbo-q8_0` and `qwen3-tts-cpp` via LocalAI | STT and TTS on the RTX 2080 Ti. |
 
 ## Safer fallback models
 

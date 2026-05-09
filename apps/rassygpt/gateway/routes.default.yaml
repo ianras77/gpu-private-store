@@ -1,6 +1,6 @@
 server:
   name: RassyGPT
-  version: "0.2.0"
+  version: "1.0.0"
   require_auth: ${RASSYGPT_REQUIRE_AUTH:-true}
   qdrant_url: ${RASSYGPT_QDRANT_URL:-http://rassygpt-qdrant:6333}
 
@@ -41,11 +41,11 @@ backends:
   image:
     type: openai-image
     base_url: ${RASSYGPT_IMAGE_BACKEND_URL:-}
-    health_path: /health
+    health_path: /readyz
   audio:
     type: openai-audio
     base_url: ${RASSYGPT_AUDIO_BACKEND_URL:-}
-    health_path: /health
+    health_path: /readyz
 
 models:
   rassy-smart:
@@ -92,7 +92,7 @@ models:
     kind: audio
     backend: audio
     upstream_model: ${RASSYGPT_STT_MODEL:-whisper-large-turbo-q8_0}
-    tts_model: ${RASSYGPT_TTS_MODEL:-voice-en_US-lessac-medium}
+    tts_model: ${RASSYGPT_TTS_MODEL:-qwen3-tts-cpp}
     description: LocalAI STT/TTS lane on the RTX 2080 Ti.
 
 aliases:

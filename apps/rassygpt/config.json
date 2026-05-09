@@ -12,7 +12,7 @@
   ],
   "description": "RassyGPT is a Runtipi-native OpenAI-compatible AI gateway and model stack designed for Ian Rasmussen's V100/P100/P40 hardware while excluding the M40 from the stack. It exposes one clean /v1 endpoint while routing to specialized local backends for chat, coding, embeddings, reranking, image, speech, and future GPU experiments.",
   "tipi_version": 1,
-  "version": "0.2.0",
+  "version": "1.0.0",
   "source": "https://github.com/ianras/rassygpt",
   "website": "https://github.com/ianras/rassygpt",
   "exposable": true,
@@ -71,7 +71,7 @@
       "type": "text",
       "label": "LocalAI CUDA media image",
       "env_variable": "RASSYGPT_LOCALAI_IMAGE",
-      "default": "quay.io/go-skynet/local-ai:latest-gpu-nvidia-cuda-12",
+      "default": "localai/localai:v4.1.3-gpu-nvidia-cuda-12",
       "required": true
     },
     {
@@ -176,7 +176,7 @@
       "type": "text",
       "label": "Text-to-speech model",
       "env_variable": "RASSYGPT_TTS_MODEL",
-      "default": "voice-en_US-lessac-medium",
+      "default": "qwen3-tts-cpp",
       "required": true
     },
     {

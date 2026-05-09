@@ -6,7 +6,7 @@ services:
     build:
       context: ./gateway
       dockerfile: Dockerfile
-    image: runtipi-local-rassygpt-gateway:0.2.0
+    image: runtipi-local-rassygpt-gateway:1.0.0
     restart: unless-stopped
     environment:
       TZ: ${TZ}
@@ -312,12 +312,14 @@ services:
       NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_MEDIA}
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
       LOCALAI_MODELS_PATH: /models
+      LOCALAI_BACKENDS_PATH: /backends
       LOCALAI_GENERATED_CONTENT_PATH: /generated
       LOCALAI_UPLOAD_PATH: /uploads
       LOCALAI_DISABLE_WEBUI: "true"
       LOCALAI_LOG_LEVEL: info
     volumes:
       - ${RASSYGPT_FAST_STORAGE_DIR}/localai/models:/models
+      - ${RASSYGPT_FAST_STORAGE_DIR}/localai/backends:/backends
       - ${RASSYGPT_FAST_STORAGE_DIR}/localai/generated:/generated
       - ${RASSYGPT_FAST_STORAGE_DIR}/localai/uploads:/uploads
       - ${RASSYGPT_FAST_STORAGE_DIR}/localai/data:/data

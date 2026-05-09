@@ -15,7 +15,7 @@ import yaml
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
-APP_VERSION = "0.2.0"
+APP_VERSION = "1.0.0"
 CONFIG_PATH = Path(os.getenv("RASSYGPT_CONFIG_FILE", "/data/config/routes.yaml"))
 DEFAULT_CONFIG_PATH = Path(os.getenv("RASSYGPT_DEFAULT_CONFIG_FILE", "/app/routes.default.yaml"))
 if not DEFAULT_CONFIG_PATH.exists():
@@ -88,6 +88,8 @@ def _auth_required(path: str) -> bool:
     if path in {"/", "/health", "/ready", "/favicon.ico"}:
         return False
     if path.startswith("/static"):
+        return False
+    if path.startswith("/generated-images/"):
         return False
     cfg = _load_config()
     return _truthy(os.getenv("RASSYGPT_REQUIRE_AUTH", cfg.get("server", {}).get("require_auth", True)))
@@ -236,8 +238,8 @@ async def health() -> dict[str, Any]:
 @app.get("/ready")
 async def ready() -> dict[str, Any]:
     statuses = await _backend_statuses()
-    required = ["general", "coder", "embed"]
-    ok = all(statuses.get(name, {}).get("healthy") for name in required if name in statuses)
+    required = ["general", "coder", "coder_secondary", "fast", "embed", "rerank", "image", "audio"]
+    ok = all(statuses.get(name, {}).get("healthy") for name in required)
     return {"ready": ok, "required": required, "backends": statuses}
 
 
@@ -405,19 +407,44 @@ async def _forward_raw(request: Request, backend_kind: str, path: str) -> Respon
             payload = json.loads(body or b"{}")
             if isinstance(payload, dict):
                 if backend_kind == "audio" and path.endswith("/speech"):
-                    payload["model"] = payload.get("model") or model_cfg.get("tts_model") or model_cfg.get("upstream_model", canonical)
+                    payload["model"] = model_cfg.get("tts_model") or model_cfg.get("upstream_model", canonical)
+                    if payload["model"] == "qwen3-tts-cpp":
+                        payload.pop("voice", None)
                 else:
-                    payload["model"] = payload.get("model") or model_cfg.get("upstream_model", canonical)
+                    payload["model"] = model_cfg.get("upstream_model", canonical)
                 body = json.dumps(payload).encode("utf-8")
         except Exception:
             pass
     upstream = await _http().request(request.method, url, content=body, headers=headers)
-    return Response(content=upstream.content, status_code=upstream.status_code, media_type=upstream.headers.get("content-type", "application/json"))
+    content = upstream.content
+    media_type = upstream.headers.get("content-type", "application/json")
+    if backend_kind == "images" and upstream.status_code == 200 and "application/json" in media_type:
+        try:
+            payload = json.loads(content)
+            public_base = str(request.base_url).rstrip("/")
+            upstream_base = _base_url(backend.get("base_url"))
+            for item in payload.get("data", []):
+                image_url = item.get("url")
+                if isinstance(image_url, str) and upstream_base and image_url.startswith(upstream_base):
+                    item["url"] = public_base + image_url[len(upstream_base):]
+            content = json.dumps(payload).encode("utf-8")
+        except Exception:
+            pass
+    return Response(content=content, status_code=upstream.status_code, media_type=media_type)
 
 
 @app.post("/v1/images/generations")
 async def images_generations(request: Request) -> Response:
     return await _forward_raw(request, "images", "/v1/images/generations")
+
+
+@app.get("/generated-images/{asset_path:path}")
+async def generated_image(asset_path: str) -> Response:
+    cfg = _load_config()
+    backend = cfg.get("backends", {}).get("image", {})
+    url = f"{_base_url(backend.get('base_url'))}/generated-images/{asset_path}"
+    upstream = await _http().get(url)
+    return Response(content=upstream.content, status_code=upstream.status_code, media_type=upstream.headers.get("content-type", "application/octet-stream"))
 
 
 @app.post("/v1/audio/transcriptions")
@@ -446,7 +473,7 @@ async def _check_backend(name: str, backend: dict[str, Any]) -> dict[str, Any]:
         async with httpx.AsyncClient(timeout=httpx.Timeout(3.0)) as client:
             resp = await client.get(url)
         ms = round((time.perf_counter() - started) * 1000, 1)
-        return {"healthy": resp.status_code < 500, "configured": True, "status_code": resp.status_code, "latency_ms": ms, "url": base}
+        return {"healthy": 200 <= resp.status_code < 300, "configured": True, "status_code": resp.status_code, "latency_ms": ms, "url": base}
     except Exception as exc:
         return {"healthy": False, "configured": True, "message": str(exc), "url": base}
 
