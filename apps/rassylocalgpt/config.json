@@ -52,10 +52,11 @@
       "required": true
     },
     {
-      "type": "random",
-      "label": "LocalAI P2P swarm token",
-      "min": 48,
-      "env_variable": "LOCALAI_P2P_TOKEN"
+      "type": "boolean",
+      "label": "Enable LocalAI P2P swarm mode",
+      "env_variable": "LOCALAI_P2P",
+      "default": true,
+      "required": true
     },
     {
       "type": "text",
@@ -89,7 +90,7 @@
       "type": "boolean",
       "label": "LAN-only P2P discovery",
       "env_variable": "LOCALAI_P2P_DISABLE_DHT",
-      "default": false,
+      "default": true,
       "required": true
     }
   ],

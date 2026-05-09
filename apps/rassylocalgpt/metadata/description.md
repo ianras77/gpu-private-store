@@ -22,8 +22,9 @@ This app starts LocalAI as the M40 swarm entrypoint:
 
 - P2P is enabled with `LOCALAI_P2P=true`.
 - Federated mode is enabled by default for load-balanced peer sharing.
-- A generated `LOCALAI_P2P_TOKEN` is reused as `P2P_TOKEN` and `TOKEN` for worker compatibility.
+- LocalAI generates the P2P token at startup. Copy the generated `TOKEN` value from the app logs when joining workers.
 - The network ID defaults to `rassylocalgpt-m40-master`.
+- LAN-only discovery is enabled to avoid DHT/QUIC startup crashes in LocalAI's P2P stack.
 - Host networking is enabled because LocalAI requires it for containerized P2P discovery.
 
 After install, open LocalAI and use the Swarm section to copy the join instructions for any peer or worker machines.
