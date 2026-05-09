@@ -8,7 +8,7 @@
   "categories": [
     "ai",
     "automation",
-    "developer-tools"
+    "development"
   ],
   "description": "RassyGPT is a Runtipi-native OpenAI-compatible AI gateway and model stack designed for Ian Rasmussen's V100/P100/P40 hardware while reserving the M40 outside the default LLM lanes. It exposes one clean /v1 endpoint while routing to specialized local backends for chat, coding, embeddings, reranking, image, speech, and future GPU experiments.",
   "tipi_version": 1,
