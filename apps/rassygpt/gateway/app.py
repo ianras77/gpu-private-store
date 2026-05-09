@@ -109,10 +109,17 @@ def _internal_ollama_compat_allowed(request: Request) -> bool:
         ip = ipaddress.ip_address(host)
     except ValueError:
         return False
-    return ip.version == 4 and (
-        ip in ipaddress.ip_network("10.0.0.0/8")
-        or ip in ipaddress.ip_network("172.16.0.0/12")
-    )
+    cidrs = os.getenv("RASSYGPT_INTERNAL_COMPAT_CIDRS", "10.0.0.0/8,172.16.0.0/12")
+    for cidr in cidrs.split(","):
+        cidr = cidr.strip()
+        if not cidr:
+            continue
+        try:
+            if ip in ipaddress.ip_network(cidr, strict=False):
+                return True
+        except ValueError:
+            continue
+    return False
 
 
 async def _require_key(request: Request) -> None:
@@ -343,6 +350,20 @@ async def models() -> dict[str, Any]:
             "kind": m.get("kind"),
             "description": m.get("description", ""),
         })
+    known_models = cfg.get("models", {})
+    for alias, target in sorted(cfg.get("aliases", {}).items()):
+        canonical = cfg.get("aliases", {}).get(target, target)
+        model = known_models.get(canonical)
+        if not model:
+            continue
+        data.append({
+            "id": alias,
+            "object": "model",
+            "created": 1778284800,
+            "owned_by": "rassygpt",
+            "kind": model.get("kind"),
+            "description": f"Alias for {canonical}",
+        })
     return {"object": "list", "data": data}
 
 
@@ -364,19 +385,17 @@ async def embeddings(request: Request) -> Response:
 @app.get("/api/tags")
 async def ollama_tags() -> dict[str, Any]:
     now = "2026-05-09T00:00:00Z"
-    models = [
-        {"name": "rassy-smart", "model": "rassy-smart"},
-        {"name": "rassy-general", "model": "rassy-general"},
-        {"name": "rassy-coder", "model": "rassy-coder"},
-        {"name": "rassy-coder-secondary", "model": "rassy-coder-secondary"},
-        {"name": "rassy-fast", "model": "rassy-fast"},
-        {"name": "rassy-embed", "model": "rassy-embed"},
-        {"name": "gpt-oss:20b", "model": "rassy-smart"},
-        {"name": "qwen3.6:27b", "model": "rassy-smart"},
-        {"name": "qwen2.5-coder:7b", "model": "rassy-coder-secondary"},
-        {"name": "nomic-embed-text", "model": "rassy-embed"},
-        {"name": "qwen3-embedding:8b", "model": "rassy-embed"},
-    ]
+    cfg = _load_config()
+    models = [{"name": name, "model": name} for name in cfg.get("models", {})]
+    models.extend({"name": alias, "model": target} for alias, target in cfg.get("aliases", {}).items())
+    seen: set[str] = set()
+    deduped = []
+    for model in models:
+        name = model["name"]
+        if name in seen:
+            continue
+        seen.add(name)
+        deduped.append(model)
     return {
         "models": [
             {
@@ -386,17 +405,12 @@ async def ollama_tags() -> dict[str, Any]:
                 "digest": "",
                 "details": {"format": "rassygpt", "family": "rassygpt", "parameter_size": "", "quantization_level": ""},
             }
-            for model in models
+            for model in deduped
         ]
     }
 
 
-@app.post("/api/chat")
-async def ollama_chat(request: Request) -> Response:
-    try:
-        payload = await request.json()
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Request body must be JSON.")
+def _ollama_chat_payload(payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     messages = payload.get("messages")
     if not isinstance(messages, list):
         prompt = payload.get("prompt")
@@ -411,22 +425,91 @@ async def ollama_chat(request: Request) -> Response:
         "temperature": options.get("temperature", payload.get("temperature", 0.2)),
         "max_tokens": max(1, int(max_tokens)),
     }
+    for ollama_key, openai_key in {"top_p": "top_p", "seed": "seed"}.items():
+        if ollama_key in options:
+            chat_payload[openai_key] = options[ollama_key]
+        elif ollama_key in payload:
+            chat_payload[openai_key] = payload[ollama_key]
+    stop = options.get("stop") or payload.get("stop")
+    if stop:
+        chat_payload["stop"] = stop
+    if payload.get("format") == "json":
+        chat_payload["response_format"] = {"type": "json_object"}
     if _canonical_model_name(model, "chat") == "rassy-smart":
         chat_payload["model"] = _smart_chat_target(chat_payload)
+    return model, chat_payload
+
+
+def _extract_json_content(content: str) -> str:
+    stripped = content.strip()
+    if stripped.startswith("```"):
+        stripped = re.sub(r"^```(?:json)?", "", stripped, flags=re.IGNORECASE).strip()
+        stripped = re.sub(r"```$", "", stripped).strip()
+    start = stripped.find("{")
+    end = stripped.rfind("}")
+    if start >= 0 and end > start:
+        candidate = stripped[start:end + 1].strip()
+        try:
+            json.loads(candidate)
+            return candidate
+        except json.JSONDecodeError:
+            pass
+    return stripped
+
+
+async def _run_ollama_chat(request: Request, payload: dict[str, Any]) -> tuple[str, str]:
+    model, chat_payload = _ollama_chat_payload(payload)
     canonical, model_cfg, backend = _resolve_model(chat_payload["model"], "chat")
     chat_payload["model"] = model_cfg.get("upstream_model", canonical)
     upstream = await _http().post(_backend_url(backend, "/v1/chat/completions"), json=chat_payload, headers=_forward_headers(request))
     if upstream.status_code >= 400:
-        return Response(content=upstream.content, status_code=upstream.status_code, media_type=upstream.headers.get("content-type", "application/json"))
+        raise HTTPException(status_code=upstream.status_code, detail=upstream.text)
     data = upstream.json()
     content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+    if payload.get("format") == "json":
+        content = _extract_json_content(content)
+    return model, content
+
+
+def _ollama_chat_json(model: str, content: str, requested_model: str | None) -> dict[str, Any]:
     response = {
-        "model": payload.get("model") or model,
+        "model": requested_model or model,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "message": {"role": "assistant", "content": content},
         "response": content,
         "done": True,
     }
+    return response
+
+
+@app.post("/api/chat")
+async def ollama_chat(request: Request) -> Response:
+    try:
+        payload = await request.json()
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Request body must be JSON.")
+    model, content = await _run_ollama_chat(request, payload)
+    response = _ollama_chat_json(model, content, payload.get("model"))
+    if payload.get("stream"):
+        return StreamingResponse(iter([json.dumps(response).encode("utf-8") + b"\n"]), media_type="application/x-ndjson")
+    return JSONResponse(response)
+
+
+@app.post("/api/generate")
+async def ollama_generate(request: Request) -> Response:
+    try:
+        payload = await request.json()
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Request body must be JSON.")
+    model, content = await _run_ollama_chat(request, payload)
+    response = {
+        "model": payload.get("model") or model,
+        "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "response": content,
+        "done": True,
+    }
+    if payload.get("stream"):
+        return StreamingResponse(iter([json.dumps(response).encode("utf-8") + b"\n"]), media_type="application/x-ndjson")
     return JSONResponse(response)
 
 

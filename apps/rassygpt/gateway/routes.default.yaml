@@ -96,6 +96,11 @@ models:
     description: LocalAI STT/TTS lane on the RTX 2080 Ti.
 
 aliases:
+  gpt-oss:20b: rassy-smart
+  qwen3.6:27b: rassy-smart
+  qwen2.5-coder:7b: rassy-coder-secondary
+  nomic-embed-text: rassy-embed
+  qwen3-embedding:8b: rassy-embed
   gpt-4o-mini: rassy-fast
   gpt-4o: rassy-smart
   o4-mini: rassy-smart
