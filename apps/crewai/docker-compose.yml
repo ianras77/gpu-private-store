@@ -7,20 +7,20 @@ services:
     depends_on:
     - crewai-qdrant
     environment:
-      LOCALAI_API_BASE: ${CREWAI_LOCALAI_API_BASE:-http://host.docker.internal:8111/v1}
-      LOCALAI_API_KEY: ${CREWAI_LOCALAI_API_KEY:-Mycobacteri@98}
-      LOCALAI_LLM_MODEL: ${CREWAI_LOCALAI_LLM_MODEL:-chat-smart}
-      LOCALAI_EMBED_MODEL: ${CREWAI_LOCALAI_EMBED_MODEL:-embed-nomic-text}
-      LOCALAI_RERANK_MODEL: ${CREWAI_LOCALAI_RERANK_MODEL:-rerank-bge-m3}
-      LOCALAI_IMAGE_MODEL: ${CREWAI_LOCALAI_IMAGE_MODEL:-image-dreamshaper}
+      LOCALAI_API_BASE: ${CREWAI_LOCALAI_API_BASE:-http://rassygpt-gateway:8080/v1}
+      LOCALAI_API_KEY: ${CREWAI_LOCALAI_API_KEY:-}
+      LOCALAI_LLM_MODEL: ${CREWAI_LOCALAI_LLM_MODEL:-rassy-smart}
+      LOCALAI_EMBED_MODEL: ${CREWAI_LOCALAI_EMBED_MODEL:-rassy-embed}
+      LOCALAI_RERANK_MODEL: ${CREWAI_LOCALAI_RERANK_MODEL:-rassy-rerank}
+      LOCALAI_IMAGE_MODEL: ${CREWAI_LOCALAI_IMAGE_MODEL:-rassy-image}
       QDRANT_URL: ${CREWAI_QDRANT_URL:-http://crewai-qdrant:6333}
       QDRANT_COLLECTION: ${CREWAI_QDRANT_COLLECTION:-qdrant_docs}
       JUPYTERHUB_USERS: ${CREWAI_JUPYTERHUB_USERS:-ian:Mycobacteri@98}
       JUPYTERHUB_ADMIN_USERS: ${CREWAI_JUPYTERHUB_ADMIN_USERS:-ian}
       PYTHONUNBUFFERED: '1'
       CREWAI_TELEMETRY_ENABLED: 'false'
-      OLLAMA_BASE_URL: ${CREWAI_OLLAMA_BASE_URL:-http://ollama-proxy:8080/v1}
-      OLLAMA_MODEL: ${CREWAI_OLLAMA_MODEL:-gpt-oss:20b}
+      OLLAMA_BASE_URL: ${CREWAI_OLLAMA_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      OLLAMA_MODEL: ${CREWAI_OLLAMA_MODEL:-rassy-coder}
     volumes:
     - ${APP_DATA_DIR}/app-data/crewai/named/workspace:/workspace
     - ${APP_DATA_DIR}/app-data/crewai/named/audio-library:/workspace/audio_library

@@ -36,9 +36,9 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql://rassy:password@postgres:5432/rassy}
       CHESHIRE_BASE_URL: ${CHESHIRE_BASE_URL:-http://cheshire:1865}
       CHESHIRE_API_KEY: ${CHESHIRE_API_KEY}
-      CHESHIRE_MODEL: ${CHESHIRE_MODEL:-gpt-oss:20b}
+      CHESHIRE_MODEL: ${CHESHIRE_MODEL:-rassy-smart}
       CHESHIRE_REQUEST_TIMEOUT_MS: ${CHESHIRE_REQUEST_TIMEOUT_MS:-120000}
-      CHESHIRE_EMBED_MODEL: ${CHESHIRE_EMBED_MODEL:-nomic-embed-text}
+      CHESHIRE_EMBED_MODEL: ${CHESHIRE_EMBED_MODEL:-rassy-embed}
       STATION_DESCRIPTION: ${STATION_DESCRIPTION:-}
       STATION_NAME: ${STATION_NAME:-Mr Rassy Radio}
       ICECAST_PUBLIC_URL: ${ICECAST_PUBLIC_URL:-}
@@ -119,7 +119,7 @@ services:
       RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-change-me-rassys-radio-admin-key}
       CHESHIRE_BASE_URL: ${CHESHIRE_BASE_URL:-http://cheshire:1865}
       CHESHIRE_API_KEY: ${CHESHIRE_API_KEY}
-      CHESHIRE_MODEL: ${CHESHIRE_MODEL:-gpt-oss:20b}
+      CHESHIRE_MODEL: ${CHESHIRE_MODEL:-rassy-smart}
       RADIO_CHESHIRE_MODEL: ${RADIO_CHESHIRE_MODEL:-}
       DJ_REQUEST_TIMEOUT_MS: ${DJ_REQUEST_TIMEOUT_MS:-20000}
       MPLAYER_STREAM_URL: ${MPLAYER_STREAM_URL:-}
@@ -237,14 +237,14 @@ services:
       dockerfile: services/cheshire-proxy/Dockerfile
     environment:
       PORT: 1865
-      LLM_BASE_URL: ${CHESHIRE_LLM_BASE_URL:-http://ollama-proxy:8080}
-      LLM_MODE: ${CHESHIRE_LLM_MODE}
-      LLM_MODEL: ${CHESHIRE_MODEL:-gpt-oss:20b}
+      LLM_BASE_URL: ${CHESHIRE_LLM_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      LLM_MODE: ${CHESHIRE_LLM_MODE:-openai}
+      LLM_MODEL: ${CHESHIRE_MODEL:-rassy-smart}
       LLM_API_KEY: ${CHESHIRE_LLM_API_KEY}
       REQUEST_TIMEOUT_MS: ${CHESHIRE_REQUEST_TIMEOUT_MS:-120000}
-      EMBED_BASE_URL: ${CHESHIRE_EMBED_BASE_URL:-http://ollama-proxy:8080}
-      EMBED_MODE: ${CHESHIRE_EMBED_MODE}
-      EMBED_MODEL: ${CHESHIRE_EMBED_MODEL:-nomic-embed-text}
+      EMBED_BASE_URL: ${CHESHIRE_EMBED_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      EMBED_MODE: ${CHESHIRE_EMBED_MODE:-openai}
+      EMBED_MODEL: ${CHESHIRE_EMBED_MODEL:-rassy-embed}
       EMBED_API_KEY: ${CHESHIRE_EMBED_API_KEY}
     networks:
       - internal

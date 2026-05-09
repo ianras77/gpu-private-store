@@ -14,13 +14,13 @@ services:
       APP_URL: ${TRT_PUBLIC_WEB_URL:-http://192.168.1.162:3190}
       API_URL: ${TRT_PUBLIC_API_URL:-http://192.168.1.162:3191}
       DEV_AUTH_BYPASS: ${TRT_DEV_AUTH_BYPASS:-true}
-      OPENAI_ENABLED: ${TRT_OPENAI_ENABLED:-false}
-      LOCALAI_BASE_URL: ${TRT_LOCALAI_BASE_URL:-http://host.docker.internal:8111/v1}
+      OPENAI_ENABLED: ${TRT_OPENAI_ENABLED:-true}
+      LOCALAI_BASE_URL: ${TRT_LOCALAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
       LOCALAI_API_KEY: ${TRT_LOCALAI_API_KEY:-}
-      LOCALAI_CHAT_MODEL: ${TRT_LOCALAI_CHAT_MODEL:-qwen3-1.7b}
-      LOCALAI_MODERATION_MODEL: ${TRT_LOCALAI_MODERATION_MODEL:-ibm-granite.granite-4.0-1b}
-      LOCALAI_EMBED_MODEL: ${TRT_LOCALAI_EMBED_MODEL:-granite-embedding-125m-english}
-      LOCALAI_TRANSCRIBE_MODEL: ${TRT_LOCALAI_TRANSCRIBE_MODEL:-whisper-1}
+      LOCALAI_CHAT_MODEL: ${TRT_LOCALAI_CHAT_MODEL:-rassy-smart}
+      LOCALAI_MODERATION_MODEL: ${TRT_LOCALAI_MODERATION_MODEL:-rassy-fast}
+      LOCALAI_EMBED_MODEL: ${TRT_LOCALAI_EMBED_MODEL:-rassy-embed}
+      LOCALAI_TRANSCRIBE_MODEL: ${TRT_LOCALAI_TRANSCRIBE_MODEL:-rassy-audio}
       CHESHIRE_CAT_URL: http://trt-cheshire-cat:80
       CHESHIRE_CAT_API_KEY: ${TRT_CHESHIRE_CAT_API_KEY:-change_me}
       SUPABASE_URL: ${TRT_SUPABASE_URL:-}
@@ -59,10 +59,10 @@ services:
     environment:
       CCAT_DEBUG: "false"
       CCAT_METADATA_FILE: /data/metadata.json
-      OLLAMA_GENERAL_BASE_URL: ${TRT_OLLAMA_GENERAL_BASE_URL:-http://ollama-general:11434}
-      OLLAMA_EMBED_BASE_URL: ${TRT_OLLAMA_EMBED_BASE_URL:-http://ollama-embed:11434}
-      OLLAMA_GENERAL_MODEL: ${TRT_OLLAMA_GENERAL_MODEL:-gpt-oss:20b}
-      OLLAMA_EMBED_MODEL: ${TRT_OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      OLLAMA_GENERAL_BASE_URL: ${TRT_OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_EMBED_BASE_URL: ${TRT_OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_MODEL: ${TRT_OLLAMA_GENERAL_MODEL:-rassy-smart}
+      OLLAMA_EMBED_MODEL: ${TRT_OLLAMA_EMBED_MODEL:-rassy-embed}
     volumes:
       - ${APP_DATA_DIR}/app-data/web-totallyrighteoustales/named/trt-cat-data:/data
       - /data/repos/apps/web-totallyrighteoustales/ops/bootstrap_cat_ollama.py:/app/cat/bootstrap/bootstrap_cat_ollama.py:ro
@@ -144,13 +144,13 @@ services:
       APP_URL: ${TRT_PUBLIC_WEB_URL:-http://192.168.1.162:3190}
       API_URL: ${TRT_PUBLIC_API_URL:-http://192.168.1.162:3191}
       DEV_AUTH_BYPASS: ${TRT_DEV_AUTH_BYPASS:-true}
-      OPENAI_ENABLED: ${TRT_OPENAI_ENABLED:-false}
-      LOCALAI_BASE_URL: ${TRT_LOCALAI_BASE_URL:-http://host.docker.internal:8111/v1}
+      OPENAI_ENABLED: ${TRT_OPENAI_ENABLED:-true}
+      LOCALAI_BASE_URL: ${TRT_LOCALAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
       LOCALAI_API_KEY: ${TRT_LOCALAI_API_KEY:-}
-      LOCALAI_CHAT_MODEL: ${TRT_LOCALAI_CHAT_MODEL:-qwen3-1.7b}
-      LOCALAI_MODERATION_MODEL: ${TRT_LOCALAI_MODERATION_MODEL:-ibm-granite.granite-4.0-1b}
-      LOCALAI_EMBED_MODEL: ${TRT_LOCALAI_EMBED_MODEL:-granite-embedding-125m-english}
-      LOCALAI_TRANSCRIBE_MODEL: ${TRT_LOCALAI_TRANSCRIBE_MODEL:-whisper-1}
+      LOCALAI_CHAT_MODEL: ${TRT_LOCALAI_CHAT_MODEL:-rassy-smart}
+      LOCALAI_MODERATION_MODEL: ${TRT_LOCALAI_MODERATION_MODEL:-rassy-fast}
+      LOCALAI_EMBED_MODEL: ${TRT_LOCALAI_EMBED_MODEL:-rassy-embed}
+      LOCALAI_TRANSCRIBE_MODEL: ${TRT_LOCALAI_TRANSCRIBE_MODEL:-rassy-audio}
       CHESHIRE_CAT_URL: http://trt-cheshire-cat:80
       CHESHIRE_CAT_API_KEY: ${TRT_CHESHIRE_CAT_API_KEY:-change_me}
       S3_ENDPOINT: ${TRT_S3_ENDPOINT:-}

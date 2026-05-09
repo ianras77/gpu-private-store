@@ -34,6 +34,11 @@ services:
       MLFLOW_FLASK_SERVER_SECRET_KEY: ${LEARNING_MLFLOW_SECRET_KEY:-Mycobacteri@98}
       MLFLOW_BACKEND_STORE_URI: postgresql+psycopg2://mlflow:mlflow@postgres:5432/mlflow
       MLFLOW_ARTIFACT_ROOT: /mlflow
+      OPENAI_API_KEY: ${MLFLOW_OPENAI_API_KEY:-}
+      OPENAI_API_BASE: ${MLFLOW_OPENAI_API_BASE:-http://rassygpt-gateway:8080/v1}
+      OPENAI_BASE_URL: ${MLFLOW_OPENAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      RASSYGPT_CHAT_MODEL: ${MLFLOW_RASSYGPT_CHAT_MODEL:-rassy-smart}
+      RASSYGPT_EMBED_MODEL: ${MLFLOW_RASSYGPT_EMBED_MODEL:-rassy-embed}
     entrypoint:
       - mlflow
     command:

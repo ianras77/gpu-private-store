@@ -37,10 +37,10 @@ services:
     environment:
       CCAT_DEBUG: "false"
       CCAT_METADATA_FILE: /data/metadata.json
-      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://ollama-proxy:8080}
-      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://ollama-proxy:8080}
-      OLLAMA_GENERAL_MODEL: ${OLLAMA_GENERAL_MODEL:-gpt-oss:20b}
-      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_MODEL: ${OLLAMA_GENERAL_MODEL:-rassy-smart}
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-rassy-embed}
     networks:
       - default
       - llm-net
@@ -70,7 +70,7 @@ services:
       API_URL: http://localhost:3191
       DEV_AUTH_BYPASS: "true"
       OPENAI_ENABLED: "false"
-      LOCALAI_BASE_URL: http://host.docker.internal:8111/v1
+      LOCALAI_BASE_URL: http://rassygpt-gateway:8080/v1
       LOCALAI_API_KEY: ""
       LOCALAI_CHAT_MODEL: qwen3-1.7b
       LOCALAI_MODERATION_MODEL: ibm-granite.granite-4.0-1b
@@ -121,7 +121,7 @@ services:
       API_URL: http://localhost:3191
       DEV_AUTH_BYPASS: "true"
       OPENAI_ENABLED: "false"
-      LOCALAI_BASE_URL: http://host.docker.internal:8111/v1
+      LOCALAI_BASE_URL: http://rassygpt-gateway:8080/v1
       LOCALAI_API_KEY: ""
       LOCALAI_CHAT_MODEL: qwen3-1.7b
       LOCALAI_MODERATION_MODEL: ibm-granite.granite-4.0-1b

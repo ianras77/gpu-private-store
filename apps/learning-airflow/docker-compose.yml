@@ -37,6 +37,12 @@ services:
       AIRFLOW_ADMIN_FIRSTNAME: ${AIRFLOW_ADMIN_FIRSTNAME:-Ian}
       AIRFLOW_ADMIN_LASTNAME: ${AIRFLOW_ADMIN_LASTNAME:-Rasmussen}
       AIRFLOW_ADMIN_EMAIL: ${AIRFLOW_ADMIN_EMAIL:-ian@rasies.com}
+      OPENAI_API_KEY: ${AIRFLOW_OPENAI_API_KEY:-}
+      OPENAI_API_BASE: ${AIRFLOW_OPENAI_API_BASE:-http://rassygpt-gateway:8080/v1}
+      OPENAI_BASE_URL: ${AIRFLOW_OPENAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      RASSYGPT_CHAT_MODEL: ${AIRFLOW_RASSYGPT_CHAT_MODEL:-rassy-smart}
+      RASSYGPT_CODER_MODEL: ${AIRFLOW_RASSYGPT_CODER_MODEL:-rassy-coder}
+      RASSYGPT_EMBED_MODEL: ${AIRFLOW_RASSYGPT_EMBED_MODEL:-rassy-embed}
     command: >-
       bash -lc "airflow db migrate &&
       (airflow users create

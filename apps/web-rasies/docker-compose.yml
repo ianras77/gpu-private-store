@@ -19,7 +19,7 @@ services:
       - SEARXNG_TIMEOUT_MS=9000
       - CAT_BASE_URL=${RASIES_CAT_BASE_URL:-http://rasies-cheshire-cat:80}
       - CAT_CHAT_PATH=/message
-      - CAT_MODEL=${RASIES_CAT_MODEL:-gpt-oss:20b}
+      - CAT_MODEL=${RASIES_CAT_MODEL:-rassy-smart}
       - CAT_TIMEOUT_MS=60000
       - HEIMDALL_URL=https://apps.rasies.com
       - GLANCE_URL=https://glance.rasies.com
@@ -79,10 +79,10 @@ services:
       - CCAT_DEBUG=false
       - CAT_METADATA_PATH=/data/metadata.json
       - CCAT_METADATA_FILE=/data/metadata.json
-      - OLLAMA_GENERAL_BASE_URL=${RASIES_OLLAMA_GENERAL_BASE_URL:-http://ollama-proxy:8080}
-      - OLLAMA_EMBED_BASE_URL=${RASIES_OLLAMA_EMBED_BASE_URL:-http://ollama-embed:11434}
-      - OLLAMA_GENERAL_MODEL=${RASIES_OLLAMA_GENERAL_MODEL:-qwen2.5-coder:7b}
-      - OLLAMA_EMBED_MODEL=${RASIES_OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      - OLLAMA_GENERAL_BASE_URL=${RASIES_OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
+      - OLLAMA_EMBED_BASE_URL=${RASIES_OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      - OLLAMA_GENERAL_MODEL=${RASIES_OLLAMA_GENERAL_MODEL:-rassy-smart}
+      - OLLAMA_EMBED_MODEL=${RASIES_OLLAMA_EMBED_MODEL:-rassy-embed}
     volumes:
       - ${APP_DATA_DIR}/app-data/web-rasies/named/rasies-cat-data:/data
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rasies/bootstrap_cat_ollama.py:/app/cat/bootstrap/bootstrap_cat_ollama.py:ro

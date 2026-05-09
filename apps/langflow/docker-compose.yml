@@ -20,6 +20,19 @@ services:
       LANGFLOW_REDIS_DB: '0'
       LANGFLOW_REDIS_CACHE_EXPIRE: '3600'
       LANGFLOW_CONFIG_DIR: /config
+      OPENAI_API_KEY: ${LANGFLOW_OPENAI_API_KEY:-}
+      OPENAI_API_BASE: ${LANGFLOW_OPENAI_API_BASE:-http://rassygpt-gateway:8080/v1}
+      OPENAI_BASE_URL: ${LANGFLOW_OPENAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      RASSYGPT_CHAT_MODEL: ${LANGFLOW_RASSYGPT_CHAT_MODEL:-rassy-smart}
+      RASSYGPT_CODER_MODEL: ${LANGFLOW_RASSYGPT_CODER_MODEL:-rassy-coder}
+      RASSYGPT_EMBED_MODEL: ${LANGFLOW_RASSYGPT_EMBED_MODEL:-rassy-embed}
+    command:
+    - langflow
+    - run
+    - --host
+    - 0.0.0.0
+    - --port
+    - '7860'
     volumes:
     - ${APP_DATA_DIR}/app-data/langflow/bind/langflow-data:/config
     - ${APP_DATA_DIR}/app-data/langflow/bind/custom-components:/app/custom_components:ro
