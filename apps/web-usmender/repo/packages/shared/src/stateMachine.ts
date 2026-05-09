@@ -1,0 +1,103 @@
+export const SESSION_STATUS = {
+  DRAFT: 'DRAFT',
+  INVITE_READY: 'INVITE_READY',
+  INVITED: 'INVITED',
+  ACTIVE_INTAKE: 'ACTIVE_INTAKE',
+  PROPOSAL_V1: 'PROPOSAL_V1',
+  VOTING_V1: 'VOTING_V1',
+  REFINEMENT: 'REFINEMENT',
+  PROPOSAL_V2: 'PROPOSAL_V2',
+  VOTING_V2: 'VOTING_V2',
+  AGREED: 'AGREED',
+  CLOSED_NO_AGREEMENT: 'CLOSED_NO_AGREEMENT',
+  ABORTED_SAFETY: 'ABORTED_SAFETY'
+} as const;
+
+export type SessionStatus = (typeof SESSION_STATUS)[keyof typeof SESSION_STATUS];
+
+export const SESSION_EVENT = {
+  SUBMIT_NEED: 'SUBMIT_NEED',
+  SEND_INVITE: 'SEND_INVITE',
+  INVITE_ACCEPTED: 'INVITE_ACCEPTED',
+  INVITE_DECLINED: 'INVITE_DECLINED',
+  INVITE_EXPIRED: 'INVITE_EXPIRED',
+  INTAKE_COMPLETE: 'INTAKE_COMPLETE',
+  PROPOSAL_READY: 'PROPOSAL_READY',
+  VOTE_ALL_YES: 'VOTE_ALL_YES',
+  VOTE_NEEDS_CHANGES: 'VOTE_NEEDS_CHANGES',
+  REFINEMENT_DONE: 'REFINEMENT_DONE',
+  PROPOSAL_V2_READY: 'PROPOSAL_V2_READY',
+  VOTE_NOT_AGREED: 'VOTE_NOT_AGREED',
+  EXIT: 'EXIT',
+  SAFETY_ABORT: 'SAFETY_ABORT'
+} as const;
+
+export type SessionEventType = (typeof SESSION_EVENT)[keyof typeof SESSION_EVENT];
+
+export type SessionEvent = {
+  type: SessionEventType;
+};
+
+const TRANSITIONS: Record<SessionStatus, Partial<Record<SessionEventType, SessionStatus>>> = {
+  DRAFT: {
+    SUBMIT_NEED: SESSION_STATUS.INVITE_READY
+  },
+  INVITE_READY: {
+    SEND_INVITE: SESSION_STATUS.INVITED
+  },
+  INVITED: {
+    INVITE_ACCEPTED: SESSION_STATUS.ACTIVE_INTAKE,
+    INVITE_DECLINED: SESSION_STATUS.CLOSED_NO_AGREEMENT,
+    INVITE_EXPIRED: SESSION_STATUS.CLOSED_NO_AGREEMENT
+  },
+  ACTIVE_INTAKE: {
+    INTAKE_COMPLETE: SESSION_STATUS.PROPOSAL_V1
+  },
+  PROPOSAL_V1: {
+    PROPOSAL_READY: SESSION_STATUS.VOTING_V1
+  },
+  VOTING_V1: {
+    VOTE_ALL_YES: SESSION_STATUS.AGREED,
+    VOTE_NEEDS_CHANGES: SESSION_STATUS.REFINEMENT
+  },
+  REFINEMENT: {
+    REFINEMENT_DONE: SESSION_STATUS.PROPOSAL_V2
+  },
+  PROPOSAL_V2: {
+    PROPOSAL_V2_READY: SESSION_STATUS.VOTING_V2
+  },
+  VOTING_V2: {
+    VOTE_ALL_YES: SESSION_STATUS.AGREED,
+    VOTE_NOT_AGREED: SESSION_STATUS.CLOSED_NO_AGREEMENT
+  },
+  AGREED: {},
+  CLOSED_NO_AGREEMENT: {},
+  ABORTED_SAFETY: {}
+};
+
+const GLOBAL_TRANSITIONS: Partial<Record<SessionEventType, SessionStatus>> = {
+  EXIT: SESSION_STATUS.CLOSED_NO_AGREEMENT,
+  SAFETY_ABORT: SESSION_STATUS.ABORTED_SAFETY
+};
+
+export const ALL_STATUSES: SessionStatus[] = Object.values(SESSION_STATUS);
+export const ALL_EVENTS: SessionEventType[] = Object.values(SESSION_EVENT);
+
+export function transition(current: SessionStatus, event: SessionEvent): SessionStatus {
+  const global = GLOBAL_TRANSITIONS[event.type];
+  if (global) return global;
+
+  const next = TRANSITIONS[current]?.[event.type];
+  if (!next) {
+    throw new Error(`Invalid transition from ${current} on ${event.type}`);
+  }
+  return next;
+}
+
+export function isTerminal(status: SessionStatus): boolean {
+  return (
+    status === SESSION_STATUS.AGREED ||
+    status === SESSION_STATUS.CLOSED_NO_AGREEMENT ||
+    status === SESSION_STATUS.ABORTED_SAFETY
+  );
+}

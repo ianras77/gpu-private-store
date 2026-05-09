@@ -1,0 +1,28 @@
+{
+  "name": "jogmania",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.1.0",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @jogmania/web dev\" \"pnpm --filter @jogmania/ios dev\" \"cd api && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload\"",
+    "dev:web": "pnpm --filter @jogmania/web dev",
+    "dev:api": "cd api && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+    "dev:ios": "pnpm --filter @jogmania/ios dev",
+    "native:apple:bootstrap": "pnpm --filter @jogmania/ios native:bootstrap",
+    "native:apple:bootstrap:force": "pnpm --filter @jogmania/ios native:bootstrap:force",
+    "native:apple:pods": "pnpm --filter @jogmania/ios native:pod-install",
+    "seed:live-demo": "node scripts/seed-live-demo.mjs",
+    "gen:client": "pnpm --filter @jogmania/api-client generate",
+    "lint:api": "cd api && ruff check .",
+    "test:api": "cd api && pytest",
+    "lint:web": "pnpm --filter @jogmania/web lint",
+    "typecheck:ios": "pnpm --filter @jogmania/ios typecheck",
+    "typecheck:web": "pnpm --filter @jogmania/web typecheck",
+    "lint": "pnpm lint:web && pnpm lint:api",
+    "test": "pnpm test:api && pnpm typecheck:web && pnpm typecheck:ios"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "typescript": "^5.7.3"
+  }
+}

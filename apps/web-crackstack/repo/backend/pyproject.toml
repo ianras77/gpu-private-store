@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crackstack-backend"
+version = "0.1.0"
+description = "Backend for XLCRACK + TAPECRACK"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "httpx>=0.26",
+  "duckdb>=1.0.0",
+  "psycopg[binary]>=3.1",
+  "pandas>=2.2",
+  "pyarrow>=15.0.0",
+  "openpyxl>=3.1",
+  "python-multipart>=0.0.9",
+  "pyodbc>=5.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "httpx>=0.26",
+  "ruff>=0.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:anyio"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]

@@ -1,0 +1,53 @@
+###############################
+# CORE AI / AGENTIC FRAMEWORKS
+###############################
+crewai[tools]
+qdrant-client
+python-dotenv
+requests
+pydantic
+litellm==1.72.6
+
+###############################
+# DATA / ANALYSIS
+###############################
+numpy
+pandas
+pyarrow
+openpyxl
+xlrd
+xlwt
+XlsxWriter
+
+###############################
+# DOCUMENTS / TEXT
+###############################
+beautifulsoup4
+lxml
+pypdf
+python-docx
+python-pptx
+markdown
+ebooklib   # EPUB parsing
+
+###############################
+# AUDIO / MUSIC
+###############################
+librosa
+pydub
+soundfile
+mutagen
+
+###############################
+# JUPYTER
+###############################
+jupyterlab
+notebook
+jupyterhub
+ipykernel
+
+###############################
+# MISC UTILITIES
+###############################
+tqdm
+pyyaml

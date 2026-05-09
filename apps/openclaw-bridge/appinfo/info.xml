@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+  <id>openclaw_bridge</id>
+  <name>OpenClaw Bridge</name>
+  <summary>Nextcloud ExApp bridge for OpenClaw with per-user Nextcloud context</summary>
+  <description>
+    Nextcloud-native OpenClaw bridge for AppAPI ExApp deployments.
+    Registers Nextcloud UI surfaces on enable and keeps per-user preferences in Nextcloud.
+  </description>
+  <version>0.2.0</version>
+  <licence>AGPL</licence>
+  <author>OpenClaw Bridge</author>
+  <namespace>OpenClawBridge</namespace>
+  <types>
+    <external-app/>
+  </types>
+  <dependencies>
+    <nextcloud min-version="29" max-version="33"/>
+    <app id="app_api" min-version="3.0.0"/>
+  </dependencies>
+  <external-app>
+    <routes>
+      <route>
+        <url>^/health$</url>
+        <verb>GET</verb>
+        <access_level>PUBLIC</access_level>
+      </route>
+      <route>
+        <url>^/heartbeat$</url>
+        <verb>GET</verb>
+        <access_level>PUBLIC</access_level>
+      </route>
+      <route>
+        <url>^/img/.*$</url>
+        <verb>GET</verb>
+        <access_level>PUBLIC</access_level>
+      </route>
+      <route>
+        <url>^/(?:$|chat$|file-action$|settings$|assets/.*|ui$|ui/.*)$</url>
+        <verb>GET</verb>
+        <access_level>USER</access_level>
+      </route>
+      <route>
+        <url>^/api/.*$</url>
+        <verb>GET,POST,PUT,PATCH,DELETE</verb>
+        <access_level>USER</access_level>
+      </route>
+      <route>
+        <url>^/file-actions/.*$</url>
+        <verb>POST</verb>
+        <access_level>USER</access_level>
+      </route>
+    </routes>
+  </external-app>
+</info>

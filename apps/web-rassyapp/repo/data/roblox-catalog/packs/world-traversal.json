@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "description": "Reviewed traversal and route-shaping packs for readable beginner paths.",
+  "packs": [
+    "frost-peak-trails",
+    "desert-dune-paths",
+    "volcano-challenge-lane",
+    "race-track-modules",
+    "space-station-raceway"
+  ],
+  "bundleFamilies": [
+    "frost/*",
+    "desert/*",
+    "volcano/*",
+    "race/*",
+    "space/*"
+  ],
+  "notes": [
+    "Use traversal packs to make the path obvious before adding extra scenery.",
+    "One route family per zone usually reads better than mixing many traversal vocabularies."
+  ]
+}

@@ -1,0 +1,350 @@
+—RANDOM ENCOUNTERS—
+
+COALITION ENCOUNTERS
+
+01-04 Heavy MECHANIZED RECON SquaD
+05-07 LigHT MECHANIZED RECON SQUAD
+
+—QUICK NPC GENERATION—
+
+The key to quick NPC generation is to keep in mind
+the limited number of stats that are necessary for an NPC. It
+is in the Game Master's best interest to keep the typical NPC
+
+)S - PACK y
+
+as simple as possible, not only for time's sake. but especially
+
+
+
+
+
+
+
+
+REPAIR RATES
+
+Bopy ARMOR
+TYPE CrepITS
+Plate (per 10 M.D.C.): 7000
+Chain (per 10 M.D.C.): 5500
+Composite Armor (per 10 M.D.C.): 6500
+Plastic (per 10 M.D.C.): 6300
+Padded (per 10 M.D.C.): 6200
+
+Some alien suits (such as the Naruni Camouflage Variable
+Armor) may be difficult to repair, garnering an increase of 50-
+200%, while special features may be impossible to fix without
+returning to the manufacturer.
+
+Repla anti
+
+Oe OEE bY nen Get en Peet ae eS
+
+Power ARMOR
+TYPE
+M.D.C. Armor (per 10 M.D.C.):
+Wings- Light (30 M.D.C. or less):
+Wings- Heavy:
+Jet Pack:
+Optics & Sensors:
+Rail Guns:
+Weapon Systems- Rocket Launcher:
+Weapon Systems- Ion or Laser:
+Weapon Systems- Plasma or Particle Beams:
+Rosot VEHICLES
+
+TYPE
+MDC Armor (ner IONMDC
+
+
+
+
+QUICK REFERENCE CHARTS
+
+ATTRIBUTE BONUS CHART
+
+— jth | 18 | 19) 20 | 2h 22 28 2 2S 6 2 eS
+pe time boous} +3% | +4% | +59 bY +6% | +e 8% | 428 bse +1 212 1415 | ose toh as
+Sinumx Lp 45% | 50% | 55% | Taser] cox [ese] 70% [Ise] sox [ese | gee [ose oie eee oe
+p hand damage bonus L +2 1 +3 1 +4 1 45 | +6 [+7 f +8 foo [+10 f oit | +12 [sis | ois Teas
+
+the. sary and doder bows ee se ae ee
+Save vs. poison & mag a
+ands/meters per melee g Pas 90 195 00 | Prost 110-115-1201] 130 [13s] 140 [14st so
+Recast perioer ri so [Wa27 [12.93 [13.631 14.31 [15 115.68 116.361 17.04 [17.701 18.41 [1900] 1977 aa
+
+HAND TO HAND SKILLS
+HAND TO HAND:BASIC HAND TO HAND:MARTIAL ARTS——
+
+PU ae
+WO ATTACKS PER MELEE: PO PULL/ROLL WITH PUNCH, FALL OR IMPA Two ATs ) oo | | d
+
+
+
+
+
+Boor Armor
+
+CRrebiTs
+
+70-140
+
+40-80
+
+IMD.C.): 60-120
+
+55-110
+
+IMDC.): 50-100
+Boy ~ Light (per 1 M.D.C.): 105-195
+Dead Boy - Heavy (per 1 M.D.C.): 120-210
+NGR Cyclops (per 1 M_D.C.): 135-230
+Plain Clothes (per 1 M.D.C.): 560-930
+Eeo-Skeleton (per | M.D.C.): 125-205
+A@eanced Allen (per 1 M.D.C.): 600-900
+
+Note that at least 15% of the original M.D.C.
+(50% for exoskeleton, 60% for plain clothes & ad-
+waneed alien armor) must be intact for the armor to be
+seliebic. The lower prices reflect the cost of repairs to
+being 2 suit up to its original M.D.C. before resale. Note
+thet Characters may be able to find suits in similar states
+of Gisrepair for 20 to 30% more than the prices listed
+above.
+
+PoweR ARMOR
+Divide the original value of the suit as follows:
+Sof cost Component
+
+7% Rail Gun
+
+2% per Mini-Missile capacity
+
+3% lon Beam or Laser
+
+4% Plasma or Particle Beam
+5% per Vibro-Blade
+
+3% Optic & Sensor Systems
+5% Flight System - per small jet
+1% Flight System - per large jet
+.5% Flight System - per small wing
+1% Flight System - per large wing’
+.25% per P.S. point above 20
+3% Special Systems (if any)
+
+Divide the remaining percentage by the original
+M.D.C. of the suit (minus the M.D.C. of external weapon
+systems, such as the SAMAS Rail-Gun). For salvage
+rates, subtract 65 to 80% (55 to 70% for old Coalition,
+Triax Military, Naruni & Kittani, 50 to 65% for new
+Coalition, Advanced Alien & Techno-Wizard).
+
+Note that at least 50% of the original M.D.C.
+must still be intact for the above rates. If only 25 to 49%
+is still intact, reduce the value of each component by an
+additional 5 to 10%. If only 15 to 24% is still intact,
+reduce the original value to .05%! If less than 15% of the
+original M.D.C. is intact, characters would be lucky to
+sell the remains for .005 to .0001% of their original
+value! At this point the only place a character could
+possibly sell it is a manufacturing center that could break
+each piece down to its core elements to be recycled.
+
+SALVAGE RATES
+
+Rosots & OTHER HI-TECH VEHICLES
+Divide the original value of the vehicle as follows:
+
+%of cost Component —_
+7% Rail Gun
+2% per Mini-Missile capacity
+3% per Short Range Missile capacity
+4% per Medium Range Missile capacity
+5% per Long Range Missile capacity
+3% lon Beam or Laser
+4% Plasma or Particle Beam
+5% per Vibro-Blade
+3% Sensor Systems (per set/turret)
+5% Flight System - per small jet
+1% Flight System - per large jet
+5% Flight System - per small wing
+1% Flight System - per large wing
+1% per Passenger/Crew capacity
+.25% per P.S. point above 24
+3% Special Systems (if any)
+7% Sensor Systems (per set/turret)
+15% Engine/Propulsion System
+1% per Wheel/Jet/Tread
+2% per Passenger/Crew capacity
+.25% per 1 cubic feet of storage
+1% per Special System (if any)
+
+Divide the remaining percentage by the original
+M.D.C. of the vehicle (minus the M.D.C. of external
+weapon systems, such as the TX-250 Rail-Gun). For
+salvage rates, subtract 65 to 80% (55 to 70% for old
+Coalition, Triax Military, Naruni & Kittani, 50 to 65%
+for new Coalition, Advanced Alien & Techno-Wizard).
+
+Note that at least 50% of the original M.D.C.
+must still be intact for all of the above rates. If only 25
+to 49% is still intact, reduce the value of each component
+by an additional 5 to 10%. If only 15 to 24% is still intact,
+reduce the above rates by an additional 15%. If less than
+15% of the original M.D.C. is intact, characters would
+be lucky to sell the remains for .0005 to .00001 % of their
+original value! Atthis point the only place to sell the pile
+of scrap is a manufacturing center that could break each
+piece down to its core elements to be recycled.
+
+»M.D.C. WEAPONS
+TYPE Jo OF ORIGINAL VALUE
+
+Pistols (undamaged): 10 to 30%
+Pistols (damaged): 3 to 8%
+
+Rifles (undamaged): 12 to 35%
+Rifles (damaged): 6 to 10%
+Heavy Weapons (undamaged): 15 to 40%
+Heavy Weapons (damaged): 8 to 12%
+
+Note that at least 20% of the weapon's original
+M.D.C. must be intact for it to be repairable.
+
+
+
+
+Boor Armor
+
+CRrebiTs
+
+70-140
+
+40-80
+
+IMD.C.): 60-120
+
+55-110
+
+IMDC.): 50-100
+Boy ~ Light (per 1 M.D.C.): 105-195
+Dead Boy - Heavy (per 1 M.D.C.): 120-210
+NGR Cyclops (per 1 M_D.C.): 135-230
+Plain Clothes (per 1 M.D.C.): 560-930
+Eeo-Skeleton (per | M.D.C.): 125-205
+A@eanced Allen (per 1 M.D.C.): 600-900
+
+Note that at least 15% of the original M.D.C.
+(50% for exoskeleton, 60% for plain clothes & ad-
+waneed alien armor) must be intact for the armor to be
+seliebic. The lower prices reflect the cost of repairs to
+being 2 suit up to its original M.D.C. before resale. Note
+thet Characters may be able to find suits in similar states
+of Gisrepair for 20 to 30% more than the prices listed
+above.
+
+PoweR ARMOR
+Divide the original value of the suit as follows:
+Sof cost Component
+
+7% Rail Gun
+
+2% per Mini-Missile capacity
+
+3% lon Beam or Laser
+
+4% Plasma or Particle Beam
+5% per Vibro-Blade
+
+3% Optic & Sensor Systems
+5% Flight System - per small jet
+1% Flight System - per large jet
+.5% Flight System - per small wing
+1% Flight System - per large wing’
+.25% per P.S. point above 20
+3% Special Systems (if any)
+
+Divide the remaining percentage by the original
+M.D.C. of the suit (minus the M.D.C. of external weapon
+systems, such as the SAMAS Rail-Gun). For salvage
+rates, subtract 65 to 80% (55 to 70% for old Coalition,
+Triax Military, Naruni & Kittani, 50 to 65% for new
+Coalition, Advanced Alien & Techno-Wizard).
+
+Note that at least 50% of the original M.D.C.
+must still be intact for the above rates. If only 25 to 49%
+is still intact, reduce the value of each component by an
+additional 5 to 10%. If only 15 to 24% is still intact,
+reduce the original value to .05%! If less than 15% of the
+original M.D.C. is intact, characters would be lucky to
+sell the remains for .005 to .0001% of their original
+value! At this point the only place a character could
+possibly sell it is a manufacturing center that could break
+each piece down to its core elements to be recycled.
+
+SALVAGE RATES
+
+Rosots & OTHER HI-TECH VEHICLES
+Divide the original value of the vehicle as follows:
+
+%of cost Component —_
+7% Rail Gun
+2% per Mini-Missile capacity
+3% per Short Range Missile capacity
+4% per Medium Range Missile capacity
+5% per Long Range Missile capacity
+3% lon Beam or Laser
+4% Plasma or Particle Beam
+5% per Vibro-Blade
+3% Sensor Systems (per set/turret)
+5% Flight System - per small jet
+1% Flight System - per large jet
+5% Flight System - per small wing
+1% Flight System - per large wing
+1% per Passenger/Crew capacity
+.25% per P.S. point above 24
+3% Special Systems (if any)
+7% Sensor Systems (per set/turret)
+15% Engine/Propulsion System
+1% per Wheel/Jet/Tread
+2% per Passenger/Crew capacity
+.25% per 1 cubic feet of storage
+1% per Special System (if any)
+
+Divide the remaining percentage by the original
+M.D.C. of the vehicle (minus the M.D.C. of external
+weapon systems, such as the TX-250 Rail-Gun). For
+salvage rates, subtract 65 to 80% (55 to 70% for old
+Coalition, Triax Military, Naruni & Kittani, 50 to 65%
+for new Coalition, Advanced Alien & Techno-Wizard).
+
+Note that at least 50% of the original M.D.C.
+must still be intact for all of the above rates. If only 25
+to 49% is still intact, reduce the value of each component
+by an additional 5 to 10%. If only 15 to 24% is still intact,
+reduce the above rates by an additional 15%. If less than
+15% of the original M.D.C. is intact, characters would
+be lucky to sell the remains for .0005 to .00001 % of their
+original value! Atthis point the only place to sell the pile
+of scrap is a manufacturing center that could break each
+piece down to its core elements to be recycled.
+
+»M.D.C. WEAPONS
+TYPE Jo OF ORIGINAL VALUE
+
+Pistols (undamaged): 10 to 30%
+Pistols (damaged): 3 to 8%
+
+Rifles (undamaged): 12 to 35%
+Rifles (damaged): 6 to 10%
+Heavy Weapons (undamaged): 15 to 40%
+Heavy Weapons (damaged): 8 to 12%
+
+Note that at least 20% of the weapon's original
+M.D.C. must be intact for it to be repairable.
+
+
+
+

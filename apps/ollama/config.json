@@ -1,0 +1,24 @@
+{
+  "name": "Ollama",
+  "available": true,
+  "port": 11435,
+  "exposable": false,
+  "dynamic_config": true,
+  "id": "ollama",
+  "description": "Ollama provides a shared multi-GPU inference layer with a hardened proxy, role-specific model listeners, and internal app-to-app access through the Runtipi main network.",
+  "tipi_version": 1,
+  "version": "0.22.1",
+  "categories": [
+    "ai"
+  ],
+  "short_desc": "Shared multi-GPU Ollama inference layer with a hardened internal proxy.",
+  "author": "https://github.com/ianras77/ollama.git",
+  "source": "https://github.com/ianras77/ollama",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": true,
+  "created_at": 1774316487191,
+  "updated_at": 1774316487191
+}

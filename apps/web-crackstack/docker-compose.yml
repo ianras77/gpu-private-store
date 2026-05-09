@@ -1,0 +1,162 @@
+services:
+  crackstack-postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${CRACKSTACK_POSTGRES_USER:-crackstack}
+      POSTGRES_PASSWORD: ${CRACKSTACK_POSTGRES_PASSWORD:-crackstack}
+      POSTGRES_DB: ${CRACKSTACK_POSTGRES_DB:-crackstack}
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-crackstack/named/crackstack-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${CRACKSTACK_POSTGRES_USER:-crackstack} -d ${CRACKSTACK_POSTGRES_DB:-crackstack}
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  crackstack-redis:
+    image: redis:7
+    restart: unless-stopped
+
+  crackstack-minio:
+    image: minio/minio:RELEASE.2024-01-16T16-07-38Z
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${CRACKSTACK_MINIO_ROOT_USER:-crackstack}
+      MINIO_ROOT_PASSWORD: ${CRACKSTACK_MINIO_ROOT_PASSWORD:-crackstack123}
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-crackstack/named/crackstack-minio:/data
+
+  crackstack-temporal:
+    image: temporalio/auto-setup:1.23
+    restart: unless-stopped
+    environment:
+      DB: postgresql
+      DB_PORT: 5432
+      POSTGRES_USER: ${CRACKSTACK_POSTGRES_USER:-crackstack}
+      POSTGRES_PWD: ${CRACKSTACK_POSTGRES_PASSWORD:-crackstack}
+      POSTGRES_SEEDS: crackstack-postgres
+      TEMPORAL_BROADCAST_ADDRESS: 127.0.0.1
+      BIND_ON_IP: 0.0.0.0
+    depends_on:
+      crackstack-postgres:
+        condition: service_healthy
+
+  crackstack-temporal-ui:
+    image: temporalio/ui:latest
+    restart: unless-stopped
+    environment:
+      TEMPORAL_ADDRESS: crackstack-temporal:7233
+    depends_on:
+      crackstack-temporal:
+        condition: service_started
+
+  crackstack-backend:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-crackstack/repo/backend
+      dockerfile: Dockerfile
+    image: runtipi-local-web-crackstack-backend:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${CRACKSTACK_POSTGRES_USER:-crackstack}:${CRACKSTACK_POSTGRES_PASSWORD:-crackstack}@crackstack-postgres:5432/${CRACKSTACK_POSTGRES_DB:-crackstack}
+      CRACKSTACK_API_KEYS: ${CRACKSTACK_API_KEYS:-local-dev-key:tenant_demo}
+      CRACKSTACK_AUTO_MIGRATE_ON_STARTUP: ${CRACKSTACK_AUTO_MIGRATE_ON_STARTUP:-1}
+      CRACKSTACK_DATA_DIR: /app/data
+      LOCALAI_BASE_URL: ${CRACKSTACK_LLM_BASE_URL:-http://ollama-general:11434}
+      LOCALAI_MODEL: ${CRACKSTACK_LLM_MODEL:-gpt-oss:20b}
+      LOCALAI_API_KEY: ${CRACKSTACK_LLM_API_KEY:-}
+    depends_on:
+      crackstack-postgres:
+        condition: service_healthy
+      crackstack-redis:
+        condition: service_started
+      crackstack-minio:
+        condition: service_started
+      crackstack-temporal:
+        condition: service_started
+    ports:
+      - ${CRACKSTACK_API_PORT:-3214}:8000
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-crackstack/named/crackstack-backend:/app/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).read()
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    x-runtipi:
+      add_to_main_network: true
+
+  crackstack-xlcrack:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-crackstack/repo/web
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: xlcrack
+    image: runtipi-local-web-crackstack-xlcrack:latest
+    restart: unless-stopped
+    environment:
+      CRACKSTACK_API_BASE_URL: ${CRACKSTACK_API_BASE_URL:-http://crackstack-backend:8000}
+      CRACKSTACK_API_KEY: ${CRACKSTACK_WEB_API_KEY:-local-dev-key}
+      CRACKSTACK_USER_ID: ${CRACKSTACK_DEFAULT_USER_ID:-user_demo}
+      HOST: 0.0.0.0
+      PORT: 3000
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      crackstack-backend:
+        condition: service_healthy
+    ports:
+      - ${CRACKSTACK_XL_PORT:-3212}:3000
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+
+  crackstack-tapecrack:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-crackstack/repo/web
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: tapecrack
+    image: runtipi-local-web-crackstack-tapecrack:latest
+    restart: unless-stopped
+    environment:
+      CRACKSTACK_API_BASE_URL: ${CRACKSTACK_API_BASE_URL:-http://crackstack-backend:8000}
+      CRACKSTACK_API_KEY: ${CRACKSTACK_WEB_API_KEY:-local-dev-key}
+      CRACKSTACK_USER_ID: ${CRACKSTACK_DEFAULT_USER_ID:-user_demo}
+      HOST: 0.0.0.0
+      PORT: 3000
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      crackstack-backend:
+        condition: service_healthy
+    ports:
+      - ${CRACKSTACK_TAPE_PORT:-3213}:3000
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+x-runtipi:
+  schema_version: 2

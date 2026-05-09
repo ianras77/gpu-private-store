@@ -1,0 +1,66 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${HOST_PORT:-3189}:3000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: "file:/data/dev.db"
+      NEXT_TELEMETRY_DISABLED: "1"
+      CAT_HTTP_BASE: "http://cheshire-cat-core:80"
+      CAT_WS_BASE: "ws://cheshire-cat-core:80"
+    volumes:
+      - prisma_data:/data
+    depends_on:
+      - cheshire-cat-core
+    restart: unless-stopped
+
+  cheshire-cat-core:
+    build:
+      context: .
+      dockerfile: docker/cat-core.Dockerfile
+    container_name: cheshire_cat_core_web_rassy
+    env_file:
+      - .env
+    environment:
+      CCAT_QDRANT_HOST: "cheshire-cat-vector-memory"
+      CCAT_QDRANT_PORT: "6333"
+      CAT_METADATA_PATH: "/app/cat/data/metadata.json"
+    ports:
+      - "${CAT_HOST_PORT:-3185}:80"
+    volumes:
+      - cat_static:/app/cat/static
+      - cat_plugins:/app/cat/plugins
+      - cat_data:/app/cat/data
+    depends_on:
+      - cheshire-cat-vector-memory
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - ollama
+    restart: unless-stopped
+
+  cheshire-cat-vector-memory:
+    image: qdrant/qdrant:v1.13.6
+    container_name: cheshire_cat_vector_memory_web_rassy
+    ports:
+      - "${QDRANT_HOST_PORT:-6333}:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+
+volumes:
+  prisma_data:
+  cat_static:
+  cat_plugins:
+  cat_data:
+  qdrant_storage:
+
+networks:
+  ollama:
+    external: true
+    name: ollama_llm-net

@@ -1,0 +1,224 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PlayLog {
+  id        String   @id @default(cuid())
+  trackId   String
+  title     String?
+  artist    String?
+  album     String?
+  duration  Int?
+  mood      String?
+  playedAt  DateTime @default(now())
+}
+
+model RequestLog {
+  id        String   @id @default(cuid())
+  request   String
+  ip        String?
+  status    String   @default("queued")
+  createdAt DateTime @default(now())
+}
+
+model DjScript {
+  id           String   @id @default(cuid())
+  mood         String?
+  script       String
+  source       String   @default("cheshire")
+  reason       String?
+  eventType    String?
+  trackIds     Json?
+  setlist      Json?
+  currentTrack Json?
+  boothSignature String?
+  boothDossier Json?
+  createdAt    DateTime @default(now())
+
+  @@index([boothSignature])
+}
+
+model AdminAction {
+  id        String   @id @default(cuid())
+  action    String
+  payload   Json?
+  createdAt DateTime @default(now())
+}
+
+model BotEvent {
+  id        String   @id @default(cuid())
+  type      String
+  payload   Json
+  createdAt DateTime @default(now())
+}
+
+model TrackVote {
+  id        String   @id @default(cuid())
+  trackId   String
+  title     String?
+  artist    String?
+  vote      Int
+  createdAt DateTime @default(now())
+
+  @@index([trackId, createdAt])
+}
+
+model LibraryTrack {
+  id            String   @id
+  path          String   @unique
+  relativePath  String?
+  sourceKind    String   @default("music")
+  title         String
+  artist        String
+  album         String?
+  albumArtUrl   String?
+  hasArtwork    Boolean  @default(false)
+  year          Int?
+  genres        String[] @default([])
+  duration      Int?
+  bpm           Int?
+  energy        Float
+  moodTags      String[] @default([])
+  format        String?
+  sampleRate    Int?
+  bitsPerSample Int?
+  bitrate       Int?
+  lossless      Boolean?
+  scanToken     String?
+  lastSeenAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  artworkCache  LibraryTrackArtwork?
+
+  @@index([artist, album, title])
+  @@index([sourceKind, artist])
+  @@index([scanToken])
+}
+
+model LibraryTrackArtwork {
+  trackId     String   @id
+  mimeType    String
+  data        Bytes
+  byteLength  Int
+  source      String   @default("local")
+  sourceUrl   String?
+  fetchedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  track       LibraryTrack @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@index([updatedAt])
+}
+
+model LibraryTrackInsight {
+  canonicalKey    String   @id
+  trackId         String?
+  title           String
+  artist          String
+  album           String?
+  year            Int?
+  summary         String
+  artistContext   String
+  trackContext    String
+  setHook         String
+  listenFor       String
+  requestTags     String[] @default([])
+  sonicSignatures String[] @default([])
+  funFacts        String[] @default([])
+  boothMemories   String[] @default([])
+  embeddingText   String
+  embeddingModel  String?
+  embedding       Json?
+  confidence      Float    @default(0.35)
+  source          String   @default("heuristic")
+  playCount       Int      @default(0)
+  refinementCount Int      @default(0)
+  lastPlayedAt    DateTime?
+  lastAnalyzedAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([trackId])
+  @@index([artist, title])
+  @@index([updatedAt])
+}
+
+model LibrarySnippet {
+  id           String   @id
+  path         String   @unique
+  relativePath String?
+  label        String
+  duration     Int?
+  format       String?
+  sourceKind   String   @default("dj")
+  scanToken    String?
+  lastSeenAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([label])
+  @@index([scanToken])
+}
+
+model LibraryPodcastSeries {
+  id           String                 @id
+  slug         String
+  title        String
+  description  String?
+  hasArtwork   Boolean                @default(false)
+  episodeCount Int                    @default(0)
+  updatedAt    DateTime
+  scanToken    String?
+  createdAt    DateTime               @default(now())
+  indexedAt    DateTime               @updatedAt
+  episodes     LibraryPodcastEpisode[]
+
+  @@index([scanToken, updatedAt])
+  @@index([slug])
+}
+
+model LibraryPodcastEpisode {
+  id            String               @id
+  seriesId      String
+  seriesTitle   String
+  title         String
+  description   String?
+  path          String               @unique
+  relativePath  String
+  duration      Int?
+  publishedAt   DateTime
+  episodeNumber Int?
+  seasonNumber  Int?
+  hasArtwork    Boolean              @default(false)
+  fileSize      BigInt?
+  format        String?
+  sampleRate    Int?
+  bitsPerSample Int?
+  bitrate       Int?
+  lossless      Boolean?
+  scanToken     String?
+  lastSeenAt    DateTime             @default(now())
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  series        LibraryPodcastSeries @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@index([seriesId, seasonNumber, episodeNumber, relativePath])
+  @@index([scanToken])
+}
+
+model LibraryScanState {
+  scope        String   @id
+  status       String   @default("idle")
+  activeToken  String?
+  pendingToken String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  itemCount    Int?
+  error        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

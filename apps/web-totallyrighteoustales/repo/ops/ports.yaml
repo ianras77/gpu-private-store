@@ -1,0 +1,31 @@
+app:
+  name: web-totallyrighteoustales
+  type: web+api
+  runtime: node
+services:
+  - name: web
+    port: 3190
+    protocol: http
+    purpose: "Primary web UI"
+    health: "/"
+  - name: api
+    port: 3191
+    protocol: http
+    purpose: "Backend API"
+    health: "/healthz"
+  - name: db
+    port: 3192
+    protocol: tcp
+    purpose: "Postgres"
+  - name: redis
+    port: 3193
+    protocol: tcp
+    purpose: "Redis"
+notes:
+  - "Contiguous app block: 3190-3193."
+env:
+  required:
+    - APP_URL
+    - API_URL
+  optional:
+    - PORT

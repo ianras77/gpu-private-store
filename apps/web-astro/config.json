@@ -1,0 +1,26 @@
+{
+  "name": "Astro Multibrand",
+  "available": true,
+  "port": 3201,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "web-astro",
+  "description": "Five branded astrology fronts powered by one shared API, Postgres, Redis, and a Qdrant-backed lore engine.",
+  "tipi_version": 1,
+  "version": "1.0.0",
+  "min_tipi_version": "v4.0.0",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Five branded astrology experiences on one shared API and data stack.",
+  "author": "Ian Rasmussen",
+  "source": "https://github.com/ianras77/web-astrology",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1776589448000,
+  "updated_at": 1776589448000
+}

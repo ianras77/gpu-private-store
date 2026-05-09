@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "description": "Reviewed foliage and low-risk dressing packs for map richness without route clutter.",
+  "packs": [
+    "forest-trail-foliage",
+    "frost-peak-trails",
+    "castle-courtyard-builder",
+    "underwater-reef-decor"
+  ],
+  "bundleFamilies": [
+    "forest/*",
+    "frost/*",
+    "castle/*",
+    "reef/*"
+  ],
+  "notes": [
+    "Use foliage in clusters, not perfect spacing.",
+    "Keep the path corridor readable and let foliage live on edges and calm zones."
+  ]
+}

@@ -1,0 +1,29 @@
+app:
+  name: web-lickingvape
+  type: web+api
+  runtime: mixed
+services:
+  - name: web
+    port: 3199
+    protocol: http
+    purpose: "Primary web UI"
+    health: "/"
+  - name: api
+    port: 3200
+    protocol: http
+    purpose: "Backend API"
+    health: "/healthz"
+  - name: cat
+    port: 3201
+    protocol: http
+    purpose: "Cheshire Cat admin"
+    health: "/"
+notes:
+  - "Contiguous app block: 3199-3201."
+env:
+  required:
+    - NODE_ENV
+  optional:
+    - LICKINGWEB_WEB_PORT
+    - LICKINGWEB_API_PORT
+    - LICKINGWEB_CAT_PORT

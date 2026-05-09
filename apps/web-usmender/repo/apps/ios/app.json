@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "USMender",
+    "slug": "usmender",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#f4f1ec"
+    }
+  }
+}

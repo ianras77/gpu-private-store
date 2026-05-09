@@ -1,0 +1,34 @@
+# Prevent large, unnecessary files from being sent to Docker build contexts
+.git
+.gitignore
+.env
+.env.*
+.pnpm-store
+node_modules
+npm-debug.log*
+yarn-error.log*
+
+# App artifacts
+.next
+.next*
+dist
+*.log
+
+# Workspace packages
+apps/**/node_modules
+apps/**/.next
+apps/**/.next*
+apps/**/dist
+services/**/node_modules
+services/**/dist
+services/**/.turbo
+services/**/.cache
+
+# Keep Runtipi package metadata out of the Docker contexts
+metadata
+config.json
+conversion-notes.md
+docker-compose.generated.yml
+
+# Media content is mounted at runtime, not baked into images
+media

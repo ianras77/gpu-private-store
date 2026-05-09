@@ -1,0 +1,90 @@
+server:
+  name: RassyGPT
+  version: "0.1.0"
+  require_auth: ${RASSYGPT_REQUIRE_AUTH:-true}
+  qdrant_url: ${RASSYGPT_QDRANT_URL:-http://rassygpt-qdrant:6333}
+
+defaults:
+  chat: rassy-general
+  completions: rassy-general
+  embeddings: rassy-embed
+  rerank: rassy-rerank
+  images: rassy-image
+  audio: rassy-audio
+
+backends:
+  general:
+    type: openai
+    base_url: ${RASSYGPT_GENERAL_URL:-http://rassygpt-general:8080}
+    health_path: /health
+  coder:
+    type: openai
+    base_url: ${RASSYGPT_CODER_URL:-http://rassygpt-coder:8080}
+    health_path: /health
+  fast:
+    type: openai
+    base_url: ${RASSYGPT_FAST_URL:-http://rassygpt-fast:8080}
+    health_path: /health
+  embed:
+    type: openai
+    base_url: ${RASSYGPT_EMBED_URL:-http://rassygpt-embed:8080}
+    health_path: /health
+  rerank:
+    type: rerank
+    base_url: ${RASSYGPT_RERANK_URL:-http://rassygpt-rerank:8080}
+    health_path: /health
+    path: /v1/rerank
+  image:
+    type: openai-image
+    base_url: ${RASSYGPT_IMAGE_BACKEND_URL:-}
+    health_path: /health
+  audio:
+    type: openai-audio
+    base_url: ${RASSYGPT_AUDIO_BACKEND_URL:-}
+    health_path: /health
+
+models:
+  rassy-general:
+    kind: chat
+    backend: general
+    upstream_model: rassy-general
+    description: General-purpose 30B-class Qwen3 instruct model on GPU 7, V100 32GB.
+  rassy-coder:
+    kind: chat
+    backend: coder
+    upstream_model: rassy-coder
+    description: Coding specialist on GPUs 0 and 2, dual V100 16GB.
+  rassy-fast:
+    kind: chat
+    backend: fast
+    upstream_model: rassy-fast
+    description: Fast utility model on GPU 6, V100 12GB.
+  rassy-embed:
+    kind: embeddings
+    backend: embed
+    upstream_model: rassy-embed
+    description: Embeddings service on GPU 5, P100 16GB.
+  rassy-rerank:
+    kind: rerank
+    backend: rerank
+    upstream_model: rassy-rerank
+    description: Reranker service on GPU 5, with embedding-cosine fallback.
+  rassy-image:
+    kind: images
+    backend: image
+    upstream_model: rassy-image
+    description: Optional image backend connector. Set RASSYGPT_IMAGE_BACKEND_URL.
+  rassy-audio:
+    kind: audio
+    backend: audio
+    upstream_model: rassy-audio
+    description: Optional audio backend connector. Set RASSYGPT_AUDIO_BACKEND_URL.
+
+aliases:
+  gpt-4o-mini: rassy-fast
+  gpt-4o: rassy-general
+  o4-mini: rassy-general
+  coder: rassy-coder
+  embedding: rassy-embed
+  text-embedding-3-small: rassy-embed
+  text-embedding-3-large: rassy-embed

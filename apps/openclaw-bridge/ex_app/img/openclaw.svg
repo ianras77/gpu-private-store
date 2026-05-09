@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>OpenClaw</title>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#173042"/>
+      <stop offset="100%" stop-color="#0d8a76"/>
+    </linearGradient>
+    <linearGradient id="claw" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f4f8f7"/>
+      <stop offset="100%" stop-color="#d2ebe6"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="108" height="108" rx="28" fill="url(#bg)"/>
+  <path d="M38 80c0-18 10-30 26-30 7 0 13 3 18 7l10-22c2-5 8-7 13-4s7 8 4 13l-16 34c-2 5-8 7-13 4l-6-3c-3 15-14 25-30 25-4 0-6-1-6-1 0-7 0-14 0-23z" fill="url(#claw)"/>
+  <circle cx="47" cy="41" r="7" fill="#ff8d52"/>
+  <circle cx="67" cy="34" r="6" fill="#ffb36c"/>
+  <circle cx="87" cy="42" r="7" fill="#ff8d52"/>
+</svg>

@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: crackstack-postgres
+    restart: unless-stopped
+    ports:
+      - "3206:5432"
+    env_file:
+      - ./dev-secrets/postgres.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: crackstack-redis
+    restart: unless-stopped
+    ports:
+      - "3207:6379"
+
+  minio:
+    image: minio/minio:RELEASE.2024-01-16T16-07-38Z
+    container_name: crackstack-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "3208:9000"
+      - "3209:9001"
+    env_file:
+      - ./dev-secrets/minio.env
+    volumes:
+      - minio_data:/data
+
+  temporal:
+    image: temporalio/auto-setup:1.23
+    container_name: crackstack-temporal
+    restart: unless-stopped
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=crackstack
+      - POSTGRES_PWD=crackstack
+      - POSTGRES_SEEDS=postgres
+      - TEMPORAL_BROADCAST_ADDRESS=127.0.0.1
+      - BIND_ON_IP=0.0.0.0
+    depends_on:
+      - postgres
+    ports:
+      - "3210:7233"
+
+  temporal-ui:
+    image: temporalio/ui:latest
+    container_name: crackstack-temporal-ui
+    restart: unless-stopped
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+    ports:
+      - "3211:8080"
+    depends_on:
+      - temporal
+
+volumes:
+  postgres_data:
+  minio_data:

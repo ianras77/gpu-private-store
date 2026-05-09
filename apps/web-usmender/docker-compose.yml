@@ -1,0 +1,72 @@
+services:
+  api:
+    build:
+      context: /app-repos/web-usmender
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgres://usmender:usmender@postgres:5432/usmender
+      CAT_BASE_URL: ${CAT_BASE_URL:-http://127.0.0.1:9}
+      CAT_TIMEOUT_MS: ${CAT_TIMEOUT_MS:-1200}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      USMENDER_DEMO_SEED: ${USMENDER_DEMO_SEED:-true}
+    ports:
+    - ${USMENDER_API_PORT:-3295}:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - node
+      - -e
+      - fetch('http://127.0.0.1:3001/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    image: runtipi-local-web-usmender-api:latest
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: usmender
+      POSTGRES_PASSWORD: usmender
+      POSTGRES_DB: usmender
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-usmender/named/postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U usmender -d usmender
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+  web:
+    build:
+      context: /app-repos/web-usmender
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3295}
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - node
+      - -e
+      - fetch('http://127.0.0.1:3000').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    image: runtipi-local-web-usmender-web:latest
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+x-runtipi:
+  schema_version: 2

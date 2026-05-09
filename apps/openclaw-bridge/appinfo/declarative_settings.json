@@ -1,0 +1,181 @@
+{
+  "forms": [
+    {
+      "id": "openclaw_bridge_admin",
+      "priority": 50,
+      "section_type": "admin",
+      "section_id": "declarative_settings",
+      "title": "OpenClaw Bridge",
+      "description": "Operator-level settings for the Nextcloud OpenClaw bridge.",
+      "fields": [
+        {
+          "id": "openclaw_gateway_base_url",
+          "title": "OpenClaw gateway base URL",
+          "type": "url",
+          "default": "http://127.0.0.1:18789",
+          "description": "HTTP base URL for the OpenClaw gateway service."
+        },
+        {
+          "id": "openclaw_gateway_token_auth",
+          "title": "Gateway auth is token based",
+          "type": "checkbox",
+          "default": true,
+          "description": "Enable bearer-token auth when calling the OpenClaw gateway."
+        },
+        {
+          "id": "openclaw_gateway_token",
+          "title": "OpenClaw gateway token",
+          "type": "password",
+          "default": "",
+          "description": "Shared gateway token stored as a sensitive app config value.",
+          "sensitive": true
+        },
+        {
+          "id": "openclaw_control_ui_url",
+          "title": "Full OpenClaw control UI URL",
+          "type": "url",
+          "default": "",
+          "description": "Optional direct URL for opening the full OpenClaw control surface."
+        },
+        {
+          "id": "openclaw_transport",
+          "title": "Gateway transport",
+          "type": "select",
+          "default": "http",
+          "description": "Transport used for OpenClaw gateway chat traffic.",
+          "options": [
+            {
+              "name": "HTTP",
+              "value": "http"
+            },
+            {
+              "name": "WebSocket",
+              "value": "ws"
+            }
+          ]
+        },
+        {
+          "id": "openclaw_public_wss_url",
+          "title": "Public OpenClaw WSS URL",
+          "type": "url",
+          "default": "",
+          "description": "Optional public WebSocket URL exposed by the OpenClaw gateway."
+        },
+        {
+          "id": "reverse_proxy_wss_public_url",
+          "title": "Reverse proxy / WSS public URL",
+          "type": "url",
+          "default": "",
+          "description": "Optional reverse-proxy URL used when the gateway is exposed through another endpoint."
+        },
+        {
+          "id": "openclaw_chat_backend",
+          "title": "Chat backend",
+          "type": "select",
+          "default": "auto",
+          "description": "Select whether to prefer OpenClaw, Ollama, or automatic fallback.",
+          "options": [
+            {
+              "name": "Automatic",
+              "value": "auto"
+            },
+            {
+              "name": "OpenClaw",
+              "value": "openclaw"
+            },
+            {
+              "name": "Ollama",
+              "value": "ollama"
+            }
+          ]
+        },
+        {
+          "id": "ollama_general_base_url",
+          "title": "Ollama general base URL",
+          "type": "url",
+          "default": "http://127.0.0.1:8090"
+        },
+        {
+          "id": "ollama_code_base_url",
+          "title": "Ollama code base URL",
+          "type": "url",
+          "default": "http://127.0.0.1:8092"
+        },
+        {
+          "id": "ollama_embed_base_url",
+          "title": "Ollama embed base URL",
+          "type": "url",
+          "default": "http://127.0.0.1:8091"
+        },
+        {
+          "id": "ollama_chat_model",
+          "title": "Preferred Ollama chat model",
+          "type": "text",
+          "default": ""
+        },
+        {
+          "id": "ollama_code_model",
+          "title": "Preferred Ollama code model",
+          "type": "text",
+          "default": ""
+        },
+        {
+          "id": "ollama_embed_model",
+          "title": "Preferred Ollama embed model",
+          "type": "text",
+          "default": ""
+        },
+        {
+          "id": "enable_openai_compat_mode",
+          "title": "Enable OpenAI-compatible mode",
+          "type": "checkbox",
+          "default": false,
+          "description": "Operator-level compatibility mode. Requests are not isolated per user."
+        },
+        {
+          "id": "output_folder",
+          "title": "Saved outputs folder",
+          "type": "text",
+          "default": "OpenClaw/Outputs",
+          "description": "Relative folder in the user's files where saved responses are uploaded."
+        },
+        {
+          "id": "safe_text_mime_types",
+          "title": "Safe text MIME types",
+          "type": "text",
+          "default": "text/plain,text/markdown,text/csv,application/json,application/xml,application/x-yaml",
+          "description": "Comma-separated MIME types that may be previewed inline for file context."
+        }
+      ]
+    },
+    {
+      "id": "openclaw_bridge_user",
+      "priority": 50,
+      "section_type": "personal",
+      "section_id": "declarative_settings",
+      "title": "OpenClaw Bridge",
+      "description": "Per-user OpenClaw preferences stored in Nextcloud.",
+      "fields": [
+        {
+          "id": "sessionKey",
+          "title": "Preferred OpenClaw session key",
+          "type": "text",
+          "default": "default"
+        },
+        {
+          "id": "sendFileContent",
+          "title": "Send file content from file actions",
+          "type": "checkbox",
+          "default": true,
+          "description": "Allow text-like files to send content previews to OpenClaw."
+        },
+        {
+          "id": "advancedModeNewTab",
+          "title": "Open advanced mode in a new tab",
+          "type": "checkbox",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "usmender",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace apps/api run dev",
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:ios": "npm --workspace apps/ios run dev",
+    "lint": "npm --workspaces run lint",
+    "typecheck": "npm --workspaces run typecheck",
+    "test": "npm --workspace packages/shared run test"
+  }
+}

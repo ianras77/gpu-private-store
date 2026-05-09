@@ -1,0 +1,30 @@
+{
+  "name": "@jogmania/ios",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "native:bootstrap": "node scripts/bootstrap-native-apple.mjs",
+    "native:bootstrap:force": "node scripts/bootstrap-native-apple.mjs --force",
+    "native:pod-install": "cd ios && pod install"
+  },
+  "dependencies": {
+    "@jogmania/api-client": "workspace:*",
+    "@jogmania/shared": "workspace:*",
+    "expo": "^50.0.0",
+    "expo-location": "~16.5.2",
+    "expo-router": "^3.5.7",
+    "expo-secure-store": "~12.8.1",
+    "react": "18.2.0",
+    "react-native": "0.73.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "typescript": "^5.7.3"
+  }
+}

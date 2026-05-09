@@ -1,0 +1,24 @@
+# Optional media extension for RassyGPT.
+# Copy selected services into docker-compose.yml or use as an override if your Runtipi setup supports overrides.
+# Then set RASSYGPT_AUDIO_BACKEND_URL=http://rassygpt-speaches:8000
+
+services:
+  rassygpt-speaches:
+    image: ghcr.io/speaches-ai/speaches:latest-cuda
+    container_name: ${APP_ID}-speaches
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+      NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_FAST}
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    volumes:
+      - ${APP_DATA_DIR}/models/speaches:/home/ubuntu/.cache/huggingface/hub
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    x-runtipi:
+      add_to_main_network: true
+      internal_port: 8000

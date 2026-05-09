@@ -1,0 +1,100 @@
+import unittest
+
+import httpx
+
+from services.cat_client import (
+    _build_llm_payload,
+    _clamp_generation_tokens,
+    _compose_prompt_payload,
+    _generation_timeout_seconds,
+    _is_retryable_llm_error,
+    _looks_like_cat_not_configured,
+)
+
+
+class CatClientTests(unittest.TestCase):
+    def test_cat_prompt_profile_trims_more_aggressively_than_llm(self) -> None:
+        system_prompt = "System line. " * 500
+        task_prompt = "Task line. " * 300
+        context = "Context line. " * 600
+        output_contract = "Output line. " * 200
+
+        cat_prompt = _compose_prompt_payload(
+            system_prompt=system_prompt,
+            task_prompt=task_prompt,
+            context=context,
+            output_contract=output_contract,
+            profile="cat",
+            include_system_prompt=True,
+        )
+        llm_prompt = _compose_prompt_payload(
+            system_prompt=system_prompt,
+            task_prompt=task_prompt,
+            context=context,
+            output_contract=output_contract,
+            profile="llm",
+            include_system_prompt=False,
+        )
+
+        self.assertIn("Layer A: System Editorial Constitution", cat_prompt)
+        self.assertNotIn("Layer A: System Editorial Constitution", llm_prompt)
+        self.assertLess(len(cat_prompt), len(llm_prompt))
+        self.assertLess(len(cat_prompt), 8000)
+        self.assertIn("truncated for runtime safety", cat_prompt.lower())
+
+    def test_native_ollama_payload_uses_keep_alive_and_options(self) -> None:
+        payload = _build_llm_payload(
+            url="http://localhost:11435/api/chat",
+            system_prompt="System",
+            prompt="User prompt",
+            temperature=0.42,
+            max_tokens=777,
+        )
+
+        self.assertEqual(payload["keep_alive"], "15m")
+        self.assertEqual(payload["options"]["num_predict"], 777)
+        self.assertEqual(payload["options"]["num_ctx"], 8192)
+        self.assertEqual(payload["messages"][0]["role"], "system")
+
+    def test_openai_compatible_payload_keeps_max_tokens_shape(self) -> None:
+        payload = _build_llm_payload(
+            url="http://localhost:11435/v1/chat/completions",
+            system_prompt="System",
+            prompt="User prompt",
+            temperature=0.52,
+            max_tokens=333,
+        )
+
+        self.assertEqual(payload["max_tokens"], 333)
+        self.assertEqual(payload["temperature"], 0.52)
+        self.assertNotIn("keep_alive", payload)
+        self.assertNotIn("options", payload)
+
+    def test_cat_not_configured_detector_matches_runtime_error(self) -> None:
+        self.assertTrue(_looks_like_cat_not_configured("You did not configure a Language Model. Do it in the settings!"))
+        self.assertFalse(_looks_like_cat_not_configured("CAT_READY"))
+
+    def test_retryable_llm_error_matches_busy_responses(self) -> None:
+        request = httpx.Request("POST", "http://localhost:11435/api/chat")
+        response = httpx.Response(503, request=request)
+        error = httpx.HTTPStatusError("busy", request=request, response=response)
+
+        self.assertTrue(_is_retryable_llm_error(error))
+
+    def test_retryable_llm_error_rejects_bad_requests(self) -> None:
+        request = httpx.Request("POST", "http://localhost:11435/api/chat")
+        response = httpx.Response(400, request=request)
+        error = httpx.HTTPStatusError("bad request", request=request, response=response)
+
+        self.assertFalse(_is_retryable_llm_error(error))
+
+    def test_generation_token_clamp_allows_long_form_budget(self) -> None:
+        self.assertEqual(_clamp_generation_tokens(1600), 1600)
+        self.assertEqual(_clamp_generation_tokens(4800), 2400)
+
+    def test_generation_timeout_scales_with_requested_tokens(self) -> None:
+        short_timeout = _generation_timeout_seconds(requested_tokens=260, base_timeout_seconds=30.0)
+        long_timeout = _generation_timeout_seconds(requested_tokens=1800, base_timeout_seconds=30.0)
+
+        self.assertGreater(long_timeout, short_timeout)
+        self.assertGreaterEqual(short_timeout, 30.0)

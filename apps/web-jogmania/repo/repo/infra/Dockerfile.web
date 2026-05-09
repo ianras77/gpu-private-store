@@ -1,0 +1,14 @@
+FROM node:20-alpine
+
+WORKDIR /repo
+
+COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
+COPY apps/web/package.json apps/web/package.json
+COPY packages/shared/package.json packages/shared/package.json
+COPY packages/api-client/package.json packages/api-client/package.json
+
+RUN corepack enable && pnpm install
+
+COPY . .
+
+CMD ["pnpm", "--filter", "@jogmania/web", "dev", "-p", "3000"]

@@ -1,0 +1,145 @@
+services:
+  deer-flow-nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on:
+      deer-flow-frontend:
+        condition: service_healthy
+      deer-flow-gateway:
+        condition: service_healthy
+    environment:
+      LANGGRAPH_UPSTREAM: ${LANGGRAPH_UPSTREAM:-deer-flow-gateway:8001}
+      LANGGRAPH_REWRITE: ${LANGGRAPH_REWRITE:-/api/}
+    command:
+      - sh
+      - -c
+      - |
+        envsubst '$$LANGGRAPH_UPSTREAM $$LANGGRAPH_REWRITE' \
+          < /etc/nginx/nginx.conf.template \
+          > /etc/nginx/nginx.conf
+        exec nginx -g 'daemon off;'
+    volumes:
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/deer-flow/repo/docker/nginx/nginx.conf:/etc/nginx/nginx.conf.template:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:2026/ >/dev/null || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    x-runtipi:
+      is_main: true
+      internal_port: 2026
+
+  deer-flow-frontend:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/deer-flow/repo
+      dockerfile: frontend/Dockerfile
+      target: prod
+    image: runtipi-local-deer-flow-frontend:latest
+    restart: unless-stopped
+    depends_on:
+      deer-flow-gateway:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      DEER_FLOW_RUNTIME_CONFIG_DIR: /app/runtime-config
+      DEER_FLOW_AUTH_SECRET_FILE: /app/runtime-config/.better-auth-secret
+      DEER_FLOW_INTERNAL_GATEWAY_BASE_URL: http://deer-flow-gateway:8001
+      DEER_FLOW_INTERNAL_LANGGRAPH_BASE_URL: http://deer-flow-gateway:8001/api
+      BETTER_AUTH_GITHUB_CLIENT_ID: ${BETTER_AUTH_GITHUB_CLIENT_ID:-}
+      BETTER_AUTH_GITHUB_CLIENT_SECRET: ${BETTER_AUTH_GITHUB_CLIENT_SECRET:-}
+      GITHUB_OAUTH_TOKEN: ${GITHUB_OAUTH_TOKEN:-}
+    command:
+      - sh
+      - /app/runtipi/entrypoint-frontend.sh
+    volumes:
+      - ${APP_DATA_DIR}/app-data/deer-flow/named/runtime-config:/app/runtime-config
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/deer-flow/runtipi:/app/runtipi:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+
+  deer-flow-gateway:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/deer-flow/repo
+      dockerfile: backend/Dockerfile
+    image: runtipi-local-deer-flow-gateway:latest
+    restart: unless-stopped
+    environment:
+      CI: "true"
+      HOME: /app/backend/.deer-flow/home
+      XDG_CACHE_HOME: /app/backend/.deer-flow/.cache
+      DEER_FLOW_RUNTIME_CONFIG_DIR: /app/runtime-config
+      DEER_FLOW_CONFIG_TEMPLATE_PATH: /app/runtipi/config.template.yaml
+      DEER_FLOW_EXTENSIONS_TEMPLATE_PATH: /app/runtipi/extensions.template.json
+      DEER_FLOW_AUTH_SECRET_FILE: /app/runtime-config/.better-auth-secret
+      DEER_FLOW_HOME: /app/backend/.deer-flow
+      DEER_FLOW_CONFIG_PATH: /app/runtime-config/config.yaml
+      DEER_FLOW_EXTENSIONS_CONFIG_PATH: /app/runtime-config/extensions_config.json
+      DEER_FLOW_CHANNELS_LANGGRAPH_URL: http://deer-flow-gateway:8001/api
+      DEER_FLOW_CHANNELS_GATEWAY_URL: http://deer-flow-gateway:8001
+      DEERFLOW_OLLAMA_BASE_URL: ${DEERFLOW_OLLAMA_BASE_URL:-http://ollama-proxy:8080}
+      DEERFLOW_OLLAMA_DEFAULT_MODEL: ${DEERFLOW_OLLAMA_DEFAULT_MODEL:-gpt-oss:20b}
+      DEERFLOW_OLLAMA_CODE_MODEL: ${DEERFLOW_OLLAMA_CODE_MODEL:-qwen2.5-coder:7b}
+      DEERFLOW_OLLAMA_EMBED_MODEL: ${DEERFLOW_OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      NOVITA_API_KEY: ${NOVITA_API_KEY:-}
+      MINIMAX_API_KEY: ${MINIMAX_API_KEY:-}
+      VLLM_API_KEY: ${VLLM_API_KEY:-}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      JINA_API_KEY: ${JINA_API_KEY:-}
+      INFOQUEST_API_KEY: ${INFOQUEST_API_KEY:-}
+      EXA_API_KEY: ${EXA_API_KEY:-}
+      FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY:-}
+      FEISHU_APP_ID: ${FEISHU_APP_ID:-}
+      FEISHU_APP_SECRET: ${FEISHU_APP_SECRET:-}
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN:-}
+      SLACK_APP_TOKEN: ${SLACK_APP_TOKEN:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
+      WECOM_BOT_ID: ${WECOM_BOT_ID:-}
+      WECOM_BOT_SECRET: ${WECOM_BOT_SECRET:-}
+      WECHAT_BOT_TOKEN: ${WECHAT_BOT_TOKEN:-}
+      WECHAT_ILINK_BOT_ID: ${WECHAT_ILINK_BOT_ID:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      LANGSMITH_TRACING: ${LANGSMITH_TRACING:-false}
+      LANGSMITH_ENDPOINT: ${LANGSMITH_ENDPOINT:-}
+      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY:-}
+      LANGSMITH_PROJECT: ${LANGSMITH_PROJECT:-}
+    command:
+      - sh
+      - /app/runtipi/entrypoint-gateway.sh
+    volumes:
+      - ${APP_DATA_DIR}/app-data/deer-flow/named/runtime-config:/app/runtime-config
+      - ${APP_DATA_DIR}/app-data/deer-flow/named/deer-flow-home:/app/backend/.deer-flow
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/deer-flow/repo/skills:/app/skills:ro
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/deer-flow/runtipi:/app/runtipi:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=5).read()
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    x-runtipi:
+      add_to_main_network: true
+
+x-runtipi:
+  schema_version: 2

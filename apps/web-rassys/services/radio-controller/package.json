@@ -1,0 +1,33 @@
+{
+  "name": "radio-controller",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "node --watch dist/index.js",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@prisma/client": "^5.22.0",
+    "fast-glob": "^3.3.2",
+    "fastify": "^4.28.1",
+    "ioredis": "^5.4.1",
+    "music-metadata": "^10.8.0",
+    "pino": "^9.4.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@types/node": "^22.10.2",
+    "eslint": "^9.13.0",
+    "prisma": "^5.22.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

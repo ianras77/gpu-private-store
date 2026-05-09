@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: labelstudio
+      POSTGRES_PASSWORD: labelstudio
+      POSTGRES_DB: labelstudio
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-label-studio/named/postgres:/var/lib/postgresql/data
+
+  labelstudio:
+    image: heartexlabs/label-studio:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - 3222:8080
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-label-studio/named/data:/label-studio/data
+    environment:
+      DATABASE_URL: postgresql://labelstudio:labelstudio@db:5432/labelstudio
+      LABEL_STUDIO_HOST: ${LABEL_STUDIO_HOST:-http://192.168.1.162:3222}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://192.168.1.162:3222}
+    x-runtipi:
+      is_main: true
+      internal_port: 8080
+
+x-runtipi:
+  schema_version: 2

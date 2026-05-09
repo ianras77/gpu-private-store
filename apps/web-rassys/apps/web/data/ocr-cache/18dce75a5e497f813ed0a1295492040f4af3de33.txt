@@ -1,0 +1,33 @@
+Player’s Handbook® 2
+Updated 3/09
+
+Update version 1
+
+Implement Expertise [Addition]
+
+Player’s Handbook 2, page 185
+
+Add the following sentence to the end of the Benefits section: “Even if an implement
+qualifies for this bonus more than once, you can apply the bonus only once when using
+that implement.”
+
+Weapon Expertise [Addition]
+
+Player’s Handbook 2, page 190
+
+Add the following sentence to the end of the Benefits section: “Even if a weapon
+qualifies for this bonus more than once, you can apply the bonus only once when using
+that weapon.”
+
+The tables below track the changes to each release of the update document.
+
+Version 1 (3/09):
+
+Page 185 Implement Expertise [Addition]
+
+Page 190 Weapon Expertise [Addition]
+
+
+
+
+

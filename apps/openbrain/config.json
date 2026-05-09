@@ -1,0 +1,94 @@
+{
+  "name": "Open Brain",
+  "available": true,
+  "port": 3230,
+  "exposable": false,
+  "dynamic_config": true,
+  "id": "openbrain",
+  "description": "Self-hosted Open Brain starter for RunTipi with local PostgreSQL + pgvector, an MCP endpoint, and read-only mounts for shared media/data plus your Obsidian vault.",
+  "tipi_version": 1,
+  "version": "1.0.0-selfhost",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Self-hosted OB1 core with local pgvector, MCP, and Obsidian/media mounts.",
+  "author": "Nate B. Jones / Open Brain community",
+  "source": "https://github.com/NateBJones-Projects/OB1",
+  "form_fields": [
+    {
+      "type": "random",
+      "label": "Database Password",
+      "min": 32,
+      "env_variable": "POSTGRES_PASSWORD"
+    },
+    {
+      "type": "random",
+      "label": "MCP Access Key",
+      "min": 48,
+      "env_variable": "MCP_ACCESS_KEY"
+    },
+    {
+      "type": "text",
+      "label": "Media/Data Host Path",
+      "required": false,
+      "default": "",
+      "env_variable": "MEDIA_DATA_HOST_PATH"
+    },
+    {
+      "type": "text",
+      "label": "Obsidian Vault Host Path",
+      "required": false,
+      "default": "",
+      "env_variable": "OBSIDIAN_VAULT_HOST_PATH"
+    },
+    {
+      "type": "text",
+      "label": "Embedding API Base",
+      "required": false,
+      "default": "https://openrouter.ai/api/v1",
+      "env_variable": "EMBEDDING_API_BASE"
+    },
+    {
+      "type": "password",
+      "label": "Embedding API Key",
+      "required": false,
+      "default": "",
+      "env_variable": "EMBEDDING_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "Embedding Model",
+      "required": false,
+      "default": "openai/text-embedding-3-small",
+      "env_variable": "EMBEDDING_MODEL"
+    },
+    {
+      "type": "text",
+      "label": "Chat API Base",
+      "required": false,
+      "default": "",
+      "env_variable": "CHAT_API_BASE"
+    },
+    {
+      "type": "password",
+      "label": "Chat API Key",
+      "required": false,
+      "default": "",
+      "env_variable": "CHAT_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "Chat Model",
+      "required": false,
+      "default": "openai/gpt-4o-mini",
+      "env_variable": "CHAT_MODEL"
+    }
+  ],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1777156674035,
+  "updated_at": 1777156674035
+}

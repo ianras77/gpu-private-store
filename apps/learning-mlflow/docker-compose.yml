@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-mlflow/named/postgres:/var/lib/postgresql/data
+      - /app-repos/learning/init-scripts/create_dbs.sql:/docker-entrypoint-initdb.d/10-create-dbs.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mlflow:
+    build: /app-repos/learning/mlflow
+    image: runtipi-local-learning-mlflow:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 3221:5000
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-mlflow/named/mlflow:/mlflow
+      - /app-repos/learning/mlflow/basic_auth.ini:/etc/mlflow/basic_auth.ini:ro
+    environment:
+      MLFLOW_AUTH_CONFIG_PATH: /etc/mlflow/basic_auth.ini
+      MLFLOW_FLASK_SERVER_SECRET_KEY: ${LEARNING_MLFLOW_SECRET_KEY:-Mycobacteri@98}
+      MLFLOW_BACKEND_STORE_URI: postgresql+psycopg2://mlflow:mlflow@postgres:5432/mlflow
+      MLFLOW_ARTIFACT_ROOT: /mlflow
+    entrypoint:
+      - mlflow
+    command:
+      - server
+      - --host=0.0.0.0
+      - --port=5000
+      - --app-name=basic-auth
+      - --workers=1
+    x-runtipi:
+      is_main: true
+      internal_port: 5000
+
+x-runtipi:
+  schema_version: 2

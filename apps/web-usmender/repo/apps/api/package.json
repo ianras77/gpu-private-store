@@ -1,0 +1,42 @@
+{
+  "name": "@usmender/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "predev": "npm --workspace @usmender/shared run build && prisma generate",
+    "dev": "tsx watch src/index.ts",
+    "prebuild": "npm --workspace @usmender/shared run build && prisma generate",
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.json",
+    "db:migrate": "prisma migrate dev --name init",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "prisma:generate": "prisma generate",
+    "lint": "echo 'no lint yet'",
+    "pretypecheck": "npm --workspace @usmender/shared run build && prisma generate",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.18.0",
+    "@usmender/shared": "*",
+    "@fastify/cors": "^8.4.2",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.28.1",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "prisma": "^5.18.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

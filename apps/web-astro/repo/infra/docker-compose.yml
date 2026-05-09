@@ -1,0 +1,194 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+      - "${ASTRO_DB_PORT:-4026}:5432"
+    environment:
+      POSTGRES_USER: astro
+      POSTGRES_PASSWORD: astro
+      POSTGRES_DB: astro
+    volumes:
+      - astro_db:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "${ASTRO_REDIS_PORT:-4027}:6379"
+    volumes:
+      - astro_redis:/data
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - "${ASTRO_QDRANT_PORT:-4028}:6333"
+    volumes:
+      - astro_qdrant:/qdrant/storage
+
+  api:
+    image: node:20-bullseye-slim
+    working_dir: /repo
+    restart: unless-stopped
+    volumes:
+      - ..:/repo
+      - ${ASTRO_ESOTERICA_SOURCE_DIR_HOST:-/media/esoterica}:/esoterica:ro
+    environment:
+      PORT: ${ASTRO_API_PORT:-4020}
+      HOST: 0.0.0.0
+      LOG_LEVEL: info
+      ASTRO_ENGINE: ${ASTRO_ENGINE:-swiss}
+      SWISS_EPHEMERIS_ENABLED: ${SWISS_EPHEMERIS_ENABLED:-true}
+      SWISS_EPHEMERIS_PATH: ${SWISS_EPHEMERIS_PATH:-}
+      PNPM_STORE_DIR: ${PNPM_STORE_DIR:-/repo/.pnpm-store/v3}
+      DATABASE_URL: postgresql://astro:astro@db:5432/astro
+      REDIS_URL: redis://redis:6379
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-esoterica}
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+      ESOTERICA_SOURCE_DIR: /esoterica
+      ESOTERICA_INDEX_PATH: /repo/.esoterica-index
+      ESOTERICA_AUDIT_LOG: "1"
+      ESOTERICA_AUDIT_LOG_PATH: /repo/.esoterica-index/lore-audit.jsonl
+      ESOTERICA_ADMIN_TOKEN: ${ESOTERICA_ADMIN_TOKEN:-}
+      ESOTERICA_AUTO_REFRESH: "1"
+      ESOTERICA_REFRESH_ON_START: "1"
+      ESOTERICA_REFRESH_HOURS: "24"
+      ESOTERICA_ROTATE_DAILY: "1"
+      ESOTERICA_STRICT_BRAND_FILTER: "0"
+      ALLOW_DEV_AUTH: "true"
+      DEV_USER_EMAIL: dev@example.com
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-localai}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-http://localai-lb:8080/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-qwen3-1.7b}
+      MAPBOX_TOKEN: ${MAPBOX_TOKEN:-}
+      OPENCAGE_KEY: ${OPENCAGE_KEY:-}
+      NOMINATIM_BASE_URL: ${NOMINATIM_BASE_URL:-https://nominatim.openstreetmap.org}
+      NOMINATIM_USER_AGENT: ${NOMINATIM_USER_AGENT:-astro-multibrand/1.0}
+      NOMINATIM_CONTACT_EMAIL: ${NOMINATIM_CONTACT_EMAIL:-you@domain.com}
+      NOMINATIM_MAX_RPS: ${NOMINATIM_MAX_RPS:-1}
+      GEO_PROVIDER_ALLOW_NOMINATIM_IN_PROD: ${GEO_PROVIDER_ALLOW_NOMINATIM_IN_PROD:-0}
+      GEO_RATE_LIMIT_MAX: ${GEO_RATE_LIMIT_MAX:-90}
+      GEO_RATE_LIMIT_WINDOW_MS: ${GEO_RATE_LIMIT_WINDOW_MS:-60000}
+      READING_RATE_LIMIT_MAX: ${READING_RATE_LIMIT_MAX:-20}
+      READING_RATE_LIMIT_WINDOW_MS: ${READING_RATE_LIMIT_WINDOW_MS:-60000}
+    command: >
+      sh -c "apt-get update
+      && apt-get install -y --no-install-recommends python3 make g++
+      && rm -rf /var/lib/apt/lists/*
+      && corepack enable
+      && pnpm --store-dir $$PNPM_STORE_DIR install
+      && pnpm --store-dir $$PNPM_STORE_DIR --filter @astro/astro-engine-swiss rebuild swisseph
+      && pnpm --filter @astro/api exec prisma generate
+      && pnpm --filter @astro/api exec prisma db push --accept-data-loss
+      && pnpm --filter @astro/api exec tsx src/server.ts"
+    depends_on:
+      - db
+      - redis
+      - qdrant
+    ports:
+      - "${ASTRO_API_PORT:-4020}:4020"
+    networks:
+      - default
+      - localai
+
+  web-jupiterseek:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    volumes:
+      - ..:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: "http://localhost:${ASTRO_API_PORT:-4020}"
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-jupiterseek exec next build
+      && pnpm --filter @astro/web-jupiterseek exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      - api
+    ports:
+      - "${ASTRO_WEB_JUPITERSEEK_PORT:-4021}:3000"
+
+  web-maleficme:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    volumes:
+      - ..:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: "http://localhost:${ASTRO_API_PORT:-4020}"
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-maleficme exec next build
+      && pnpm --filter @astro/web-maleficme exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      - api
+    ports:
+      - "${ASTRO_WEB_MALEFICME_PORT:-4022}:3000"
+
+  web-saturnleo:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    volumes:
+      - ..:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: "http://localhost:${ASTRO_API_PORT:-4020}"
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-saturnleo exec next build
+      && pnpm --filter @astro/web-saturnleo exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      - api
+    ports:
+      - "${ASTRO_WEB_SATURNLEO_PORT:-4023}:3000"
+
+  web-saturnseer:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    volumes:
+      - ..:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: "http://localhost:${ASTRO_API_PORT:-4020}"
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-saturnseer exec next build
+      && pnpm --filter @astro/web-saturnseer exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      - api
+    ports:
+      - "${ASTRO_WEB_SATURNSEER_PORT:-4024}:3000"
+
+  web-oracleveil:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    volumes:
+      - ..:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: "http://localhost:${ASTRO_API_PORT:-4020}"
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-oracleveil exec next build
+      && pnpm --filter @astro/web-oracleveil exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      - api
+    ports:
+      - "${ASTRO_WEB_ORACLEVEIL_PORT:-4025}:3000"
+
+volumes:
+  astro_db:
+  astro_redis:
+  astro_qdrant:
+
+networks:
+  localai:
+    external: true
+    name: localai_default

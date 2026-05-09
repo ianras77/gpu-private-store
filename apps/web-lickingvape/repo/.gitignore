@@ -1,0 +1,34 @@
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
+.next
+.vercel
+out
+
+# Env
+.env
+.env.local
+.env.*.local
+.pytest_cache/
+__pycache__/
+
+# Builds
+apps/web/.next
+apps/web/out
+apps/web/node_modules
+*.tsbuildinfo
+cat/data/
+
+# OS
+.DS_Store
+
+# Capacitor
+ios
+android
+*.bak
+*.bak-*

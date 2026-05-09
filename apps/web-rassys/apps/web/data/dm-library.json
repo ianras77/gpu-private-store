@@ -1,0 +1,925 @@
+{
+  "root": "/media/roleplay",
+  "generatedAt": "2026-02-26T01:22:05.950Z",
+  "systems": [
+    {
+      "id": "alternity",
+      "name": "Alternity",
+      "manuals": [
+        {
+          "title": "Alternity - Core - Beyond Science - A Guide To FX",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Core - Beyond Science - A Guide To FX.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Alternity - Core - Dataware",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Core - Dataware.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Alternity - Core - Game Master's Guide",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Core - Game Master's Guide.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Alternity - Core - Mindwalking - A Guide To Psionics",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Core - Mindwalking - A Guide To Psionics.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Alternity - Core - Player's Handbook",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Core - Player's Handbook.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Alternity - Core - Starships",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Core - Starships.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Alternity - Core - Tangents",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Core - Tangents.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Alternity - Core - Warships",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Core - Warships.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Alternity - Dark Matter - Arms And Equipment Guide",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Dark Matter - Arms And Equipment Guide.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Alternity - Fastplay - Core - Gamemaster Rules",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Fastplay - Core - Gamemaster Rules.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Alternity - Fastplay - Core - Player Rules",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Fastplay - Core - Player Rules.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Alternity - Fastplay - Dark Matter - GM Info Pack",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Fastplay - Dark Matter - GM Info Pack.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Alternity - Fastplay - Dark Matter - Rules",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Fastplay - Dark Matter - Rules.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Alternity - Star Drive - Outbound - Alien Compendium II",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Star Drive - Outbound - Alien Compendium II.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Alternity - Stardrive - Alien Compendium",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Stardrive - Alien Compendium.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Alternity - Stardrive - Arms And Equipment Guide",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Stardrive - Arms And Equipment Guide.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Alternity - Stardrive - Star Compendium - Systems On The Verge",
+          "path": "Tabletop collections/AlternityComplete/Alternity - Stardrive - Star Compendium - Systems On The Verge.pdf",
+          "category": "reference"
+        }
+      ]
+    },
+    {
+      "id": "ars-magica",
+      "name": "Ars Magica",
+      "manuals": [
+        {
+          "title": "Ars Magica - Core",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Atlas Games/Ars Magica/Ars Magica - Core.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Ars Magica - CORE Formulae - 5th ed",
+          "path": "Tabletop collections/Ars Magica collection/Ars Magica - CORE Formulae - 5th ed.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Ars Magica - CORE Rulebook - 3rd ed",
+          "path": "Tabletop collections/Ars Magica collection/Ars Magica - CORE Rulebook - 3rd ed.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Ars Magica - CORE Rulebook - 4th ed",
+          "path": "Tabletop collections/Ars Magica collection/Ars Magica - CORE Rulebook - 4th ed.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Ars Magica - CORE Rulebook - 5th ed",
+          "path": "Tabletop collections/Ars Magica collection/Ars Magica - CORE Rulebook - 5th ed.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Ars Magica - Medieval Bestiary - 3rd ed",
+          "path": "Tabletop collections/Ars Magica collection/Ars Magica - Medieval Bestiary - 3rd ed.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Ars Magica - Spell Guidelines - 5th ed",
+          "path": "Tabletop collections/Ars Magica collection/Ars Magica - Spell Guidelines - 5th ed.pdf",
+          "category": "spells"
+        }
+      ]
+    },
+    {
+      "id": "call-of-cthulhu",
+      "name": "Call of Cthulhu",
+      "manuals": [
+        {
+          "title": "0319 - The Gaslight Equipment Catalogue",
+          "path": "Tabletop collections/Call of Cthulhu/0319 - The Gaslight Equipment Catalogue.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "2301 - 2nd Edition Rulebook (Boxed Set)",
+          "path": "Tabletop collections/Call of Cthulhu/2301 - 2nd Edition Rulebook (Boxed Set).pdf",
+          "category": "core"
+        },
+        {
+          "title": "Bestiary v1.71",
+          "path": "Tabletop collections/Call of Cthulhu/Extras/Dark Ages/Bestiary v1.71.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Cthulhu Weaponry 1",
+          "path": "Tabletop collections/Call of Cthulhu/Extras/Accessory/Cthulhu Weaponry 1.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Cthulhu Weaponry 2",
+          "path": "Tabletop collections/Call of Cthulhu/Extras/Accessory/Cthulhu Weaponry 2.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "CthulhuTech - Core Book",
+          "path": "Tabletop collections/Call of Cthulhu/CthulhuTech/CthulhuTech - Core Book.pdf",
+          "category": "core"
+        },
+        {
+          "title": "GM Screen",
+          "path": "Tabletop collections/Call of Cthulhu/d20/GM Screen.pdf",
+          "category": "reference"
+        }
+      ]
+    },
+    {
+      "id": "dnd-35e",
+      "name": "D&D 3.5e",
+      "manuals": [
+        {
+          "title": "Advanced Bestiary v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Bestiary v3.5.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Advanced Race Codex (Drow) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Race Codex (Drow) v3.5.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Advanced Race Codex (Dwarves) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Race Codex (Dwarves) v3.5.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Advanced Race Codex (Elves) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Race Codex (Elves) v3.5.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Advanced Race Codex (Gnomes) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Race Codex (Gnomes) v3.5.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Advanced Race Codex (Half-Elves) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Race Codex (Half-Elves) v3.5.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Advanced Race Codex (Halflings) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Race Codex (Halflings) v3.5.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Advanced Race Codex (Humans) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Race Codex (Humans) v3.5.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Arcana Evolved (A Varient Players Handbook) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Arcana Evolved (A Varient Players Handbook) v3.5.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Arcana Unearthed (A Variant Players Handbook) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Arcana Unearthed (A Variant Players Handbook) v3.5.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Arcana Unearthed DM's Screen & Player's Guide v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Arcana Unearthed DM's Screen & Player's Guide v3.5.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Creature Collection III (Savage Bestiary) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Creature Collection III (Savage Bestiary) v3.5.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "D&D 3.5 - Dungeon Master's Guide [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Dungeon Master's Guide [OEF].pdf",
+          "category": "gm"
+        },
+        {
+          "title": "D&D 3.5 - Dungeon Master's Guide II [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Dungeon Master's Guide II [OEF].pdf",
+          "category": "gm"
+        },
+        {
+          "title": "D&D 3.5 - Dungeon Master's Screen",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Dungeon Master's Screen.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "D&D 3.5 - Fiendish Codex I - Hordes of the Abyss [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Fiendish Codex I - Hordes of the Abyss [OEF].pdf",
+          "category": "reference"
+        },
+        {
+          "title": "D&D 3.5 - Fiendish Codex II - Tyrants of the Nine Hells [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Fiendish Codex II - Tyrants of the Nine Hells [OEF].pdf",
+          "category": "reference"
+        },
+        {
+          "title": "D&D 3.5 - Magic Item Compendium [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Magic Item Compendium [OEF].pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "D&D 3.5 - Monster Manual I [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Monster Manual I [OEF].pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "D&D 3.5 - Monster Manual III [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Monster Manual III [OEF].pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "D&D 3.5 - Monster Manual IV [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Monster Manual IV [OEF].pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "D&D 3.5 - Monster Manual V [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Monster Manual V [OEF].pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "D&D 3.5 - More Ultimate Equipment",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - More Ultimate Equipment.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "D&D 3.5 - Players Handbook [OCR]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Players Handbook [OCR].pdf",
+          "category": "player"
+        },
+        {
+          "title": "D&D 3.5 - Players Handbook [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Players Handbook [OEF].pdf",
+          "category": "player"
+        },
+        {
+          "title": "D&D 3.5 - Players Handbook II [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Players Handbook II [OEF].pdf",
+          "category": "player"
+        },
+        {
+          "title": "D&D 3.5 - Rules Compendium [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Rules Compendium [OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "D&D 3.5 - Spell Compendium [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Spell Compendium [OEF].pdf",
+          "category": "spells"
+        },
+        {
+          "title": "D&D 3.5 - Weapons of Legacy [OEF]",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 - Weapons of Legacy [OEF].pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "D&D 3.5 Arms And Equipment Guide",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/D&D 3.5 Arms And Equipment Guide.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "D20 - D&D - Forgotten Realms - Player's Guide To Faerun",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/Fae run/D20 - D&D - Forgotten Realms - Player's Guide To Faerun.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Fiendish Codex I - Hordes of the Abyss",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/Fiendish Codex I - Hordes of the Abyss.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Fiendish Codex II - Tyrants of the Nine Hells",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/Fiendish Codex II - Tyrants of the Nine Hells.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Iron Heroes (A Varient Players Handbook) v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Iron Heroes (A Varient Players Handbook) v3.5.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Iron Heroes Bestiary v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Iron Heroes Bestiary v3.5.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Item Bible (A Compilation Of 3e & v3.5 Magic Items)",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/XX Various Random and Unsorted/Item Bible (A Compilation Of 3e & v3.5 Magic Items).pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Player's Guide To Clerics & Druids v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Player's Guide To Clerics & Druids v3.5.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Player's Guide to Eberron",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/Eberron/Player's Guide to Eberron.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Player's Guide To Fighters & Barbarians v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Player's Guide To Fighters & Barbarians v3.5.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Player's Guide To Monks & Paladins v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Player's Guide To Monks & Paladins v3.5.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Player's Guide To Rangers & Rogues v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Player's Guide To Rangers & Rogues v3.5.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Player's Guide To Wizards, Bards & Sorcerers v3.5",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Player's Guide To Wizards, Bards & Sorcerers v3.5.pdf",
+          "category": "player"
+        },
+        {
+          "title": "The Most Ridiculous D&D 3.0 3.5 D20 Spellbook Ever V1",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/The Most Ridiculous D&D 3.0 3.5 D20 Spellbook Ever V1/The Most Ridiculous D&D 3.0 3.5 D20 Spellbook Ever V1.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Ultimate Equipment Guide Vol I",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/Ultimate Equipment Guide Vol I.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Ultimate Equipment Guide Vol II",
+          "path": "Tabletop collections/dungeons and dragons 3.5e book collection/Ultimate Equipment Guide Vol II.pdf",
+          "category": "equipment"
+        }
+      ]
+    },
+    {
+      "id": "dnd-4e",
+      "name": "D&D 4e",
+      "manuals": [
+        {
+          "title": "Alea Publishing Group - Medieval Bestiary - Anthropophagi",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/NotWizards/Alea Publishing Group - Medieval Bestiary - Anthropophagi.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "D20 DND Dragon Magazine Forgotten Realms Compendium v1 (3.x 274-353)",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Dragon Magazine/D20 DND Dragon Magazine Forgotten Realms Compendium v1 (3.x 274-353).pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Deluxe Power Cards - Blank Powers and Items(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Blank Powers and Items(v1.0)[OEF].pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Cleric Pack(v1.1)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Cleric Pack(v1.1)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Divinity Feat Power Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Divinity Feat Power Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Epic Destiny Power Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Epic Destiny Power Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - FAQ(v1.3)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - FAQ(v1.3)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Fighter Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Fighter Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Paladin Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Paladin Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Racial Power Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Racial Power Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Ranger Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Ranger Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Rogue Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Rogue Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Warlock Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Warlock Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Warlord Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Warlord Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Deluxe Power Cards - Core - Wizard Pack(v1.0)[OEF]",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Deluxe Power Cards/Deluxe Power Cards - Core - Wizard Pack(v1.0)[OEF].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Dragon Magazine Compendium",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Dragon Magazine/Dragon Magazine Compendium.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Dungeon Master 4th Edition For Dummies",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Dungeon Master 4th Edition For Dummies.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Dungeon Master's Guide",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Dungeon Master's Guide.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Dungeon Master's Guide - 20 Jan 2009",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Errata/Dungeon Master's Guide - 20 Jan 2009.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Dungeon Master's Guide Deluxe Edition",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Dungeon Master's Guide Deluxe Edition.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Dungeon Master’s Screen",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Dungeon Master’s Screen.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Dungeon Master’s Screen - 20 Jan 2009",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Errata/Dungeon Master’s Screen - 20 Jan 2009.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Eberron - Player's Guide",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Eberron - Player's Guide.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Expeditiuos Retreat Press - Advanced Player's Guide",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/NotWizards/Expeditiuos Retreat Press - Advanced Player's Guide.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Forgotten Realms - Forgotten Realms Player Guide",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Forgotten Realms - Forgotten Realms Player Guide.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Forgotten Realms Player's Guide",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Forgotten Realms Player's Guide.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Forgotten Realms Player's Guide - 2 Jul 2009",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Errata/Forgotten Realms Player's Guide - 2 Jul 2009.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Miniatures battle rules",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Miniatures battle rules.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Monster Manual",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Monster Manual.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Monster Manual - 20 Jan 2009",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Errata/Monster Manual - 20 Jan 2009.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Monster Manual 2",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Monster Manual 2.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Monster Manual 3",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Monster Manual 3.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Player's Handbook - 2 Jul 2009",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Errata/Player's Handbook - 2 Jul 2009.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Player's Handbook 2 - 25 Mar 2009",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Errata/Player's Handbook 2 - 25 Mar 2009.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Player's Handbook Races - Dragonborn",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Player's Handbook Races - Dragonborn.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Player's Handbook Races - Tieflings",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Player's Handbook Races - Tieflings.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Players Handbook",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Players Handbook.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Players Handbook 2",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Players Handbook 2.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Players Handbook 3",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Players Handbook 3.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Red Box - Dungeon Masters Book",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Red Box - Dungeon Masters Book.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Rules Compendium",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/Rules Compendium.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Wiley Publishing - Dungeon Master 4th Edition For Dummies",
+          "path": "dnd_4th_completeCollection/dnd_4th_completeCollection/NotWizards/Wiley Publishing - Dungeon Master 4th Edition For Dummies.pdf",
+          "category": "gm"
+        }
+      ]
+    },
+    {
+      "id": "gamma-world",
+      "name": "Gamma World",
+      "manuals": [
+        {
+          "title": "Gamma World (original Rules)",
+          "path": "Gamma World/Gamma World (original Rules).pdf",
+          "category": "core"
+        },
+        {
+          "title": "Gamma World 5th Edition",
+          "path": "Gamma World/Gamma World 5th Edition.pdf",
+          "category": "reference"
+        }
+      ]
+    },
+    {
+      "id": "hackmaster",
+      "name": "Hackmaster",
+      "manuals": [
+        {
+          "title": "Core - GameMaster's Guide",
+          "path": "Tabletop collections/Hackmaster/Core - GameMaster's Guide.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Core - Player's Handbook",
+          "path": "Tabletop collections/Hackmaster/Core - Player's Handbook.pdf",
+          "category": "player"
+        }
+      ]
+    },
+    {
+      "id": "merp",
+      "name": "MERP",
+      "manuals": [
+        {
+          "title": "MERP 2000 Rulebook 2nd Edition",
+          "path": "MERP - Middle-Earth Role Playing/MERP 2000 Rulebook 2nd Edition.pdf",
+          "category": "core"
+        },
+        {
+          "title": "MERP 8000 Rulebook 1st Edition",
+          "path": "MERP - Middle-Earth Role Playing/MERP 8000 Rulebook 1st Edition.pdf",
+          "category": "core"
+        },
+        {
+          "title": "MERP Armor and Weapon Design",
+          "path": "MERP - Middle-Earth Role Playing/MERP Armor and Weapon Design.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Merp Rules - Armor And Weapon Design Ocr",
+          "path": "MERP - Middle-Earth Role Playing/Merp Rules - Armor And Weapon Design Ocr.pdf",
+          "category": "equipment"
+        }
+      ]
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "manuals": [
+        {
+          "title": "2900 - Elric Core Book",
+          "path": "Tabletop collections/Elric/2900 - Elric Core Book.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Advanced Bestiary WE1 - Avian Creature",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Bestiary WE1 - Avian Creature.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Advanced Bestiary WE2 - Chaosborne",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Bestiary WE2 - Chaosborne.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Advanced Bestiary WE3 - Drider",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Bestiary WE3 - Drider.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Advanced Bestiary WE4 - Eye King",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Advanced Bestiary WE4 - Eye King.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Arcana Evolved (Spell Treasury)",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Arcana Evolved (Spell Treasury).pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Artifacts Of The Ages - Legendary Weapons",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/The Game Mechanics/Artifacts Of The Ages - Legendary Weapons.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Behind The Spells Collection",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/XX Various Random and Unsorted/Behind The Spells Collection.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Bestiary",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Green Ronin Publishing/Bestiary.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Buck-A-Batch - Magic Items, Armor, Weapons",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/XX Various Random and Unsorted/Buck-A-Batch - Magic Items, Armor, Weapons.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Cursed Items",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Ronin Arts/Cursed Items.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Earthdawn - 3rd ed [RBL] - Gamemaster's Compendium",
+          "path": "Tabletop collections/Earthdawn/Earthdawn - 3rd ed [RBL] - Gamemaster's Compendium.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Earthdawn - 3rd ed [RBL] - Name Giver's Compendium",
+          "path": "Tabletop collections/Earthdawn/Earthdawn - 3rd ed [RBL] - Name Giver's Compendium.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "Earthdawn - 3rd ed [RBL] - Player's Compendium",
+          "path": "Tabletop collections/Earthdawn/Earthdawn - 3rd ed [RBL] - Player's Compendium.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Earthdawn - 3rd ed [RBL] - Player's Guide",
+          "path": "Tabletop collections/Earthdawn/Earthdawn - 3rd ed [RBL] - Player's Guide.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Earthdawn - 3rd ed [RBL] - Spell Library",
+          "path": "Tabletop collections/Earthdawn/Earthdawn - 3rd ed [RBL] - Spell Library.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Encyclopaedia Arcane - Magic Item Creation, Forging Legendary Weapons",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Mongoose Publishing/Encyclopaedia Arcane - Magic Item Creation, Forging Legendary Weapons.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Exodus - Wasteland Bestiary",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Exodus (Modern)/Exodus - Wasteland Bestiary.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Expert Player's Guide Vol III - Epic Monsters",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Mongoose Publishing/Expert Player's Guide Vol III - Epic Monsters.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Forbidden Arcana - Wizard's Spellbooks",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/XX Various Random and Unsorted/Forbidden Arcana - Wizard's Spellbooks.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Gnoll Crocuta Spells",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Skirmisher Publishing/Gnoll Crocuta Spells.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Goods And Gear - The Ultimate Adventurer's Guide",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/XX Various Random and Unsorted/Goods And Gear - The Ultimate Adventurer's Guide.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Great City Player's Guide",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/0one Roleplaying Games/Great City Player's Guide.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Judges Guild -  Player's Guide to the Wilderlands",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Malhavoc Press - Sword & Sorcery Studios/Judges Guild -  Player's Guide to the Wilderlands.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Lord Erbian's Stellar Bestiary",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Holistic Design/Lord Erbian's Stellar Bestiary.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Lustria - Cities of gold [rulebook]",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/XX Various Random and Unsorted/Lustria - Cities of gold [rulebook].pdf",
+          "category": "core"
+        },
+        {
+          "title": "Magic Items Of The Senses",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Ronin Arts/Magic Items Of The Senses.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Munchkin Monster Manual",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Munchkin/Munchkin Monster Manual.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Munchkin Player's Handbook",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Munchkin/Munchkin Player's Handbook.pdf",
+          "category": "player"
+        },
+        {
+          "title": "Noble Wild Spell Lists",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Skirmisher Publishing/Noble Wild Spell Lists.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Rifts - Game Master Guide",
+          "path": "Tabletop collections/Rifts/Rifts - Game Master Guide.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Rifts - Game Master Reference Screen",
+          "path": "Tabletop collections/Rifts/Rifts - Game Master Reference Screen.pdf",
+          "category": "gm"
+        },
+        {
+          "title": "Slayer's Guide To Rules Lawyers",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Mongoose Publishing/Slayer's Guide To Rules Lawyers.pdf",
+          "category": "core"
+        },
+        {
+          "title": "Slayer's Guide to Rules Lawyers (d20, MP, 2002)",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Mongoose Publishing/Slayer's Guide to Rules Lawyers (d20, MP, 2002).pdf",
+          "category": "core"
+        },
+        {
+          "title": "Spells & Magic",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Bastion Press/Spells & Magic.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Spells & Spellcraft 3e",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Fantasy Flight Games (Legends & Lairs)/Spells & Spellcraft 3e.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Spells Of The Vampire",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Ronin Arts/Spells Of The Vampire.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "The complete prestige - classes compendium v1.4",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/XX Various Random and Unsorted/The complete prestige - classes compendium v1.4.pdf",
+          "category": "reference"
+        },
+        {
+          "title": "The Weapon Rack - Daggers",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Dark Quest Games/The Weapon Rack - Daggers.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Thieves World - Player's Guide to Sanctuary",
+          "path": "Tabletop collections/Chaosium/Thieves World - Player's Guide to Sanctuary.pdf",
+          "category": "player"
+        },
+        {
+          "title": "True20-Bestiary",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/True20/True20-Bestiary.pdf",
+          "category": "monsters"
+        },
+        {
+          "title": "Ultimate Arcane Spellbook",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Mongoose Publishing/Ultimate Arcane Spellbook.pdf",
+          "category": "spells"
+        },
+        {
+          "title": "Ultimate Equipment Guide Volume 1",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Mongoose Publishing/Ultimate Equipment Guide Volume 1.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Ultimate Equipment Guide Volume 2",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Mongoose Publishing/Ultimate Equipment Guide Volume 2.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Ultimate Equipment Guide Volume 3 More Ultimate Equipment",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Mongoose Publishing/Ultimate Equipment Guide Volume 3 More Ultimate Equipment.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Ultimate Magic Items",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Mongoose Publishing/Ultimate Magic Items.pdf",
+          "category": "equipment"
+        },
+        {
+          "title": "Violet Dawn - The Broken Isles, Player's Guide",
+          "path": "Dungeons and Dragons 3rd Party D20 3.0 3.5 Collection/Inner Circle/Violet Dawn - The Broken Isles, Player's Guide.pdf",
+          "category": "player"
+        }
+      ]
+    }
+  ]
+}

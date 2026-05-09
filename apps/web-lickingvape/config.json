@@ -1,0 +1,26 @@
+{
+  "name": "Lickingvape",
+  "available": true,
+  "port": 3195,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "web-lickingvape",
+  "description": "Editorial community stack with Next.js, FastAPI, background jobs, Postgres, and a Cheshire Cat sidecar.",
+  "tipi_version": 1,
+  "version": "1.0.0",
+  "min_tipi_version": "v4.0.0",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Editorial community stack with FastAPI, worker jobs, and Cheshire Cat.",
+  "author": "Ian Rasmussen",
+  "source": "https://github.com/ianras77/web-lickingvape",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1776589448000,
+  "updated_at": 1776589448000
+}

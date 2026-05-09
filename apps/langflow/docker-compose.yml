@@ -1,0 +1,59 @@
+services:
+  langflow:
+    image: langflowai/langflow:latest
+    restart: unless-stopped
+    depends_on:
+    - postgres
+    - redis
+    env_file:
+    - /app-repos/langflow/.env
+    environment:
+      LANGFLOW_DATABASE_URL: postgresql://langflow:${POSTGRES_PASSWORD}@postgres:5432/langflow
+      LANGFLOW_AUTO_LOGIN: 'False'
+      LANGFLOW_SUPERUSER: ${LF_SUPERUSER}
+      LANGFLOW_SUPERUSER_PASSWORD: ${LF_SUPERUSER_PASSWORD}
+      LANGFLOW_NEW_USER_IS_ACTIVE: 'False'
+      LANGFLOW_SECRET_KEY: ${LF_SECRET_KEY}
+      LANGFLOW_CACHE_TYPE: redis
+      LANGFLOW_REDIS_HOST: redis
+      LANGFLOW_REDIS_PORT: '6379'
+      LANGFLOW_REDIS_DB: '0'
+      LANGFLOW_REDIS_CACHE_EXPIRE: '3600'
+      LANGFLOW_CONFIG_DIR: /config
+    volumes:
+    - ${APP_DATA_DIR}/app-data/langflow/bind/langflow-data:/config
+    - ${APP_DATA_DIR}/app-data/langflow/bind/custom-components:/app/custom_components:ro
+    networks:
+    - langflow_net
+    x-runtipi:
+      is_main: true
+      internal_port: 7860
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    env_file:
+    - /app-repos/langflow/.env
+    environment:
+      POSTGRES_USER: langflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: langflow
+    volumes:
+    - ${APP_DATA_DIR}/app-data/langflow/bind/pg-data:/var/lib/postgresql/data
+    networks:
+    - langflow_net
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+    - ${APP_DATA_DIR}/app-data/langflow/bind/redis-data:/data
+    command:
+    - redis-server
+    - --appendonly
+    - 'yes'
+    networks:
+    - langflow_net
+x-runtipi:
+  schema_version: 2
+networks:
+  langflow_net:
+    driver: bridge

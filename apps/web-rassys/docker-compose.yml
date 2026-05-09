@@ -1,0 +1,382 @@
+services:
+  web:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_STREAM_URL: ${NEXT_PUBLIC_STREAM_URL:-}
+        NEXT_PUBLIC_STREAM_LOSSLESS_URL: ${NEXT_PUBLIC_STREAM_LOSSLESS_URL:-}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_MUSIC_LIBRARY_URL: ${NEXT_PUBLIC_MUSIC_LIBRARY_URL}
+        NEXT_PUBLIC_MINECRAFT_MAP_URL: ${NEXT_PUBLIC_MINECRAFT_MAP_URL}
+        NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS: ${NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS}
+        NEXT_PUBLIC_RADIO_API_URL: ${NEXT_PUBLIC_RADIO_API_URL}
+        NEXT_PUBLIC_MINECRAFT_API_URL: ${NEXT_PUBLIC_MINECRAFT_API_URL}
+        DATABASE_URL: ${DATABASE_URL:-postgresql://rassy:password@postgres:5432/rassy}
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_STREAM_URL: ${NEXT_PUBLIC_STREAM_URL:-}
+      NEXT_PUBLIC_STREAM_LOSSLESS_URL: ${NEXT_PUBLIC_STREAM_LOSSLESS_URL:-}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      NEXT_PUBLIC_MUSIC_LIBRARY_URL: ${NEXT_PUBLIC_MUSIC_LIBRARY_URL}
+      NEXT_PUBLIC_MINECRAFT_MAP_URL: ${NEXT_PUBLIC_MINECRAFT_MAP_URL}
+      STREAM_HEALTHCHECK_URL: ${STREAM_HEALTHCHECK_URL:-http://icecast:${ICECAST_PORT:-8000}/live.mp3}
+      STREAM_PROXY_URL: ${STREAM_PROXY_URL:-http://icecast:${ICECAST_PORT:-8000}/live.mp3}
+      STREAM_LOSSLESS_PROXY_URL: ${STREAM_LOSSLESS_PROXY_URL:-http://icecast:${ICECAST_PORT:-8000}/live-lossless.ogg}
+      RADIO_CONTROLLER_URL: ${RADIO_CONTROLLER_URL:-http://radio-controller:4000}
+      MINECRAFT_BRIDGE_URL: ${MINECRAFT_BRIDGE_URL:-http://minecraft-bridge:4100}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-ian}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-rassys-admin}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-change-me-rassys-admin-jwt-secret}
+      RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-change-me-rassys-radio-admin-key}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://rassy:password@postgres:5432/rassy}
+      CHESHIRE_BASE_URL: ${CHESHIRE_BASE_URL:-http://cheshire:1865}
+      CHESHIRE_API_KEY: ${CHESHIRE_API_KEY}
+      CHESHIRE_MODEL: ${CHESHIRE_MODEL:-gpt-oss:20b}
+      CHESHIRE_REQUEST_TIMEOUT_MS: ${CHESHIRE_REQUEST_TIMEOUT_MS:-120000}
+      CHESHIRE_EMBED_MODEL: ${CHESHIRE_EMBED_MODEL:-nomic-embed-text}
+      STATION_DESCRIPTION: ${STATION_DESCRIPTION:-}
+      STATION_NAME: ${STATION_NAME:-Mr Rassy Radio}
+      ICECAST_PUBLIC_URL: ${ICECAST_PUBLIC_URL:-}
+      RADIO_UPSTREAM_TIMEOUT_MS: ${RADIO_UPSTREAM_TIMEOUT_MS:-7000}
+      RADIO_UPSTREAM_RETRIES: ${RADIO_UPSTREAM_RETRIES:-1}
+      RADIO_UPSTREAM_RETRY_DELAY_MS: ${RADIO_UPSTREAM_RETRY_DELAY_MS:-250}
+      RADIO_HEARS_TIMEOUT_MS: ${RADIO_HEARS_TIMEOUT_MS:-18000}
+      RADIO_HEARS_RETRIES: ${RADIO_HEARS_RETRIES:-1}
+      RADIO_HEARS_RETRY_DELAY_MS: ${RADIO_HEARS_RETRY_DELAY_MS:-400}
+      RADIO_ARTWORK_TIMEOUT_MS: ${RADIO_ARTWORK_TIMEOUT_MS:-7000}
+      RADIO_ARTWORK_RETRIES: ${RADIO_ARTWORK_RETRIES:-1}
+      RADIO_ARTWORK_RETRY_DELAY_MS: ${RADIO_ARTWORK_RETRY_DELAY_MS:-250}
+      ADMIN_UPSTREAM_TIMEOUT_MS: ${ADMIN_UPSTREAM_TIMEOUT_MS:-7000}
+      ADMIN_UPSTREAM_RETRIES: ${ADMIN_UPSTREAM_RETRIES:-1}
+      ADMIN_UPSTREAM_RETRY_DELAY_MS: ${ADMIN_UPSTREAM_RETRY_DELAY_MS:-250}
+      ADMIN_AUTH_RATE_LIMIT_COUNT: ${ADMIN_AUTH_RATE_LIMIT_COUNT:-10}
+      ADMIN_AUTH_RATE_LIMIT_WINDOW_SECONDS: ${ADMIN_AUTH_RATE_LIMIT_WINDOW_SECONDS:-60}
+      DM_JWT_SECRET: ${DM_JWT_SECRET:-}
+      DM_COOKIE_SECURE: ${DM_COOKIE_SECURE:-}
+      DM_DB_POOL_MAX: ${DM_DB_POOL_MAX:-15}
+      DM_CONTEXT_MAX_CHARACTERS: ${DM_CONTEXT_MAX_CHARACTERS:-12}
+      DM_CONTEXT_MAX_INVENTORY_PER_CHARACTER: ${DM_CONTEXT_MAX_INVENTORY_PER_CHARACTER:-12}
+      DM_CONTEXT_MAX_QUESTS: ${DM_CONTEXT_MAX_QUESTS:-12}
+      DM_CONTEXT_MAX_OBJECTIVES_PER_QUEST: ${DM_CONTEXT_MAX_OBJECTIVES_PER_QUEST:-8}
+      DM_CONTEXT_MAX_RECENT_TURNS: ${DM_CONTEXT_MAX_RECENT_TURNS:-14}
+      DM_CONTEXT_MAX_ROLLING_SUMMARIES: ${DM_CONTEXT_MAX_ROLLING_SUMMARIES:-4}
+      DM_CONTEXT_MAX_PINNED_FACTS: ${DM_CONTEXT_MAX_PINNED_FACTS:-18}
+      DM_CONTEXT_MAX_SEMANTIC_MEMORY: ${DM_CONTEXT_MAX_SEMANTIC_MEMORY:-8}
+      DM_CONTEXT_MAX_COMPENDIUM_HITS: ${DM_CONTEXT_MAX_COMPENDIUM_HITS:-10}
+      DM_CONTEXT_SEMANTIC_THRESHOLD: ${DM_CONTEXT_SEMANTIC_THRESHOLD:-0.2}
+      DM_ACTION_RATE_LIMIT_COUNT: ${DM_ACTION_RATE_LIMIT_COUNT:-24}
+      DM_ACTION_RATE_LIMIT_WINDOW_MS: ${DM_ACTION_RATE_LIMIT_WINDOW_MS:-60000}
+      DM_AUTH_RATE_LIMIT_COUNT: ${DM_AUTH_RATE_LIMIT_COUNT:-12}
+      DM_AUTH_RATE_LIMIT_WINDOW_SECONDS: ${DM_AUTH_RATE_LIMIT_WINDOW_SECONDS:-60}
+      MINECRAFT_TROUPE_BOT_PORT: ${MINECRAFT_TROUPE_BOT_PORT:-3000}
+      MINECRAFT_TROUPE_STATUS_TIMEOUT_MS: ${MINECRAFT_TROUPE_STATUS_TIMEOUT_MS:-2500}
+      MINECRAFT_TROUPE_BOT_NAMES: ${MINECRAFT_TROUPE_BOT_NAMES:-}
+      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/thoughts}
+    depends_on:
+      cheshire:
+        condition: service_healthy
+      radio-controller:
+        condition: service_healthy
+      minecraft-bridge:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+    volumes:
+      - ${ROOT_FOLDER_HOST}/media/data/web-rassys:${BLOG_STORAGE_PATH:-/media/thoughts}
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O - http://127.0.0.1:3000/api/healthz || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    image: runtipi-local-web-rassys-web:latest
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+
+  radio-controller:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys
+      dockerfile: services/radio-controller/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://rassy:password@postgres:5432/rassy}
+      RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-change-me-rassys-radio-admin-key}
+      CHESHIRE_BASE_URL: ${CHESHIRE_BASE_URL:-http://cheshire:1865}
+      CHESHIRE_API_KEY: ${CHESHIRE_API_KEY}
+      CHESHIRE_MODEL: ${CHESHIRE_MODEL:-gpt-oss:20b}
+      RADIO_CHESHIRE_MODEL: ${RADIO_CHESHIRE_MODEL:-}
+      DJ_REQUEST_TIMEOUT_MS: ${DJ_REQUEST_TIMEOUT_MS:-20000}
+      MPLAYER_STREAM_URL: ${MPLAYER_STREAM_URL:-}
+      MSTREAM_BASE_URL: ${MSTREAM_BASE_URL}
+      MSTREAM_LIBRARY_ROOT: ${MSTREAM_LIBRARY_ROOT:-/library/}
+      MSTREAM_TOKEN: ${MSTREAM_TOKEN}
+      MUSIC_LIBRARY_PATH: ${MUSIC_LIBRARY_PATH:-/media/music}
+      SNIPPETS_PATH: ${SNIPPETS_PATH:-/media/dj}
+      PODCAST_LIBRARY_PATH: ${PODCAST_LIBRARY_PATH:-/media/podcasts}
+      PHOTOS_LIBRARY_PATH: ${PHOTOS_LIBRARY_PATH:-/media/photos}
+      IMMICH_BASE_URL: ${IMMICH_BASE_URL:-}
+      IMMICH_API_KEY: ${IMMICH_API_KEY:-}
+      IMMICH_ALBUM_NAME: ${IMMICH_ALBUM_NAME:-}
+      IMMICH_ALBUM_ID: ${IMMICH_ALBUM_ID:-}
+      IMMICH_REQUEST_TIMEOUT_MS: ${IMMICH_REQUEST_TIMEOUT_MS:-12000}
+      LIQUIDSOAP_HOST: liquidsoap
+      LIQUIDSOAP_TELNET_PORT: 1234
+      LIQUIDSOAP_META_URL: ${LIQUIDSOAP_META_URL:-http://icecast:${ICECAST_PORT:-8000}/status-json.xsl}
+      STATION_NAME: ${STATION_NAME:-Mr Rassy Radio}
+      STATION_DESCRIPTION: ${STATION_DESCRIPTION:-Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.}
+      STATION_GENRE: ${STATION_GENRE:-eclectic}
+      STREAM_MOUNT: ${STREAM_MOUNT:-/live.mp3}
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-change-me-rassys-icecast-source}
+      ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD:-change-me-rassys-icecast-admin}
+      ICECAST_RELAY_PASSWORD: ${ICECAST_RELAY_PASSWORD:-change-me-rassys-icecast-relay}
+      ICECAST_HOST: icecast
+      ICECAST_PORT: ${ICECAST_PORT:-8000}
+      ICECAST_USERNAME: ${ICECAST_USERNAME:-source}
+      ICECAST_PUBLIC_URL: ${ICECAST_PUBLIC_URL:-}
+      RADIO_MOOD: ${RADIO_MOOD:-late-night warmth / candlelit drift}
+      RADIO_TRACK_COOLDOWN_DAYS: ${RADIO_TRACK_COOLDOWN_DAYS}
+      RADIO_ARTIST_COOLDOWN_TRACKS: ${RADIO_ARTIST_COOLDOWN_TRACKS}
+      RADIO_QUEUE_TARGET: ${RADIO_QUEUE_TARGET}
+      RADIO_SET_TARGET_SIZE: ${RADIO_SET_TARGET_SIZE:-11}
+      RADIO_SNIPPET_CHANCE: ${RADIO_SNIPPET_CHANCE}
+      RADIO_MIN_TALK_MINUTES: ${RADIO_MIN_TALK_MINUTES}
+      RADIO_LIBRARY_REFRESH_SECONDS: ${RADIO_LIBRARY_REFRESH_SECONDS:-30}
+      RADIO_FEEDBACK_WEIGHT: ${RADIO_FEEDBACK_WEIGHT}
+      RADIO_HEARS_LOCK_SECONDS: ${RADIO_HEARS_LOCK_SECONDS:-90}
+      RADIO_HEARS_BACKGROUND_TIMEOUT_MS: ${RADIO_HEARS_BACKGROUND_TIMEOUT_MS:-45000}
+      RADIO_HEARS_BACKGROUND_MIN_INTERVAL_MS: ${RADIO_HEARS_BACKGROUND_MIN_INTERVAL_MS:-600000}
+      RADIO_CHAT_ACTIVITY_GRACE_MS: ${RADIO_CHAT_ACTIVITY_GRACE_MS:-120000}
+      RADIO_ARTWORK_CACHE_TIMEOUT_MS: ${RADIO_ARTWORK_CACHE_TIMEOUT_MS:-7000}
+      RADIO_ARTWORK_CACHE_MAX_BYTES: ${RADIO_ARTWORK_CACHE_MAX_BYTES:-12582912}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      TTS_ENABLED: ${TTS_ENABLED}
+      TTS_PROVIDER: ${TTS_PROVIDER}
+      TTS_ENDPOINT: ${TTS_ENDPOINT}
+    depends_on:
+      cheshire:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      icecast:
+        condition: service_healthy
+      liquidsoap:
+        condition: service_healthy
+    networks:
+      - internal
+    volumes:
+      - ${ROOT_FOLDER_HOST}/media/data/music:${MUSIC_LIBRARY_PATH:-/media/music}:ro
+      - type: bind
+        source: ${HOST_MUSIC_SYMLINK_ROOT:-${ROOT_FOLDER_HOST}/media/data/music}
+        target: ${HOST_MUSIC_SYMLINK_ROOT:-/media/music}
+        read_only: true
+        bind:
+          create_host_path: true
+      - ${ROOT_FOLDER_HOST}/media/data:${ROOT_FOLDER_HOST}/media/data:ro
+      - ${ROOT_FOLDER_HOST}/media/data/dj:${SNIPPETS_PATH:-/media/dj}:ro
+      - ${ROOT_FOLDER_HOST}/media/data/podcasts:${PODCAST_LIBRARY_PATH:-/media/podcasts}:ro
+      - ${ROOT_FOLDER_HOST}/media/data/photos:${PHOTOS_LIBRARY_PATH:-/media/photos}:ro
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O - http://127.0.0.1:4000/readyz || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
+    image: runtipi-local-web-rassys-radio-controller:latest
+    x-runtipi:
+      add_to_main_network: true
+
+  minecraft-bridge:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys
+      dockerfile: services/minecraft-bridge/Dockerfile
+    environment:
+      PORT: 4100
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      MINECRAFT_EVENTS_URL: ${MINECRAFT_EVENTS_URL}
+      MINECRAFT_MOCK: ${MINECRAFT_MOCK}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O - http://127.0.0.1:4100/healthz || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    image: runtipi-local-web-rassys-minecraft-bridge:latest
+
+  cheshire:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys
+      dockerfile: services/cheshire-proxy/Dockerfile
+    environment:
+      PORT: 1865
+      LLM_BASE_URL: ${CHESHIRE_LLM_BASE_URL:-http://ollama-proxy:8080}
+      LLM_MODE: ${CHESHIRE_LLM_MODE}
+      LLM_MODEL: ${CHESHIRE_MODEL:-gpt-oss:20b}
+      LLM_API_KEY: ${CHESHIRE_LLM_API_KEY}
+      REQUEST_TIMEOUT_MS: ${CHESHIRE_REQUEST_TIMEOUT_MS:-120000}
+      EMBED_BASE_URL: ${CHESHIRE_EMBED_BASE_URL:-http://ollama-proxy:8080}
+      EMBED_MODE: ${CHESHIRE_EMBED_MODE}
+      EMBED_MODEL: ${CHESHIRE_EMBED_MODEL:-nomic-embed-text}
+      EMBED_API_KEY: ${CHESHIRE_EMBED_API_KEY}
+    networks:
+      - internal
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O - http://127.0.0.1:1865/healthz || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    image: runtipi-local-web-rassys-cheshire:latest
+    x-runtipi:
+      add_to_main_network: true
+
+  liquidsoap:
+    image: savonet/liquidsoap:v2.2.5
+    volumes:
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys/infra/liquidsoap/rassy.liq:/etc/liquidsoap/rassy.liq:ro
+      - ${ROOT_FOLDER_HOST}/media/data/music:${MUSIC_LIBRARY_PATH:-/media/music}:ro
+      - type: bind
+        source: ${HOST_MUSIC_SYMLINK_ROOT:-${ROOT_FOLDER_HOST}/media/data/music}
+        target: ${HOST_MUSIC_SYMLINK_ROOT:-/media/music}
+        read_only: true
+        bind:
+          create_host_path: true
+      - ${ROOT_FOLDER_HOST}/media/data:${ROOT_FOLDER_HOST}/media/data:ro
+      - ${ROOT_FOLDER_HOST}/media/data/dj:${SNIPPETS_PATH:-/media/dj}:ro
+    environment:
+      MUSIC_LIBRARY_PATH: ${MUSIC_LIBRARY_PATH:-/media/music}
+      SNIPPETS_PATH: ${SNIPPETS_PATH:-/media/dj}
+      MPLAYER_STREAM_URL: ${MPLAYER_STREAM_URL:-}
+      ICECAST_HOST: icecast
+      ICECAST_PORT: ${ICECAST_PORT:-8000}
+      ICECAST_USERNAME: ${ICECAST_USERNAME:-source}
+      ICECAST_LOSSLESS_USERNAME: ${ICECAST_LOSSLESS_USERNAME:-source-lossless}
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-change-me-rassys-icecast-source}
+      STREAM_MOUNT: ${STREAM_MOUNT:-/live.mp3}
+      STREAM_LOSSLESS_MOUNT: ${STREAM_LOSSLESS_MOUNT:-/live-lossless.ogg}
+      STATION_NAME: ${STATION_NAME:-Mr Rassy Radio}
+      STATION_DESCRIPTION: ${STATION_DESCRIPTION:-Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.}
+      STATION_GENRE: ${STATION_GENRE:-eclectic}
+    command:
+      - liquidsoap
+      - /etc/liquidsoap/rassy.liq
+    depends_on:
+      icecast:
+        condition: service_healthy
+    networks:
+      - internal
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -lc 'exec 3<>/dev/tcp/127.0.0.1/1234 && printf "queue.queue\nquit\n" >&3 && head -n 20 <&3 | tr -d "\r" | grep -q "END"'
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 45s
+
+  icecast:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys/infra/icecast
+    environment:
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-change-me-rassys-icecast-source}
+      ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD:-change-me-rassys-icecast-admin}
+      ICECAST_RELAY_PASSWORD: ${ICECAST_RELAY_PASSWORD:-change-me-rassys-icecast-relay}
+      ICECAST_PORT: ${ICECAST_PORT:-8000}
+      ICECAST_HOSTNAME: ${ICECAST_HOSTNAME:-localhost}
+      ICECAST_USERNAME: ${ICECAST_USERNAME:-source}
+      ICECAST_LOSSLESS_USERNAME: ${ICECAST_LOSSLESS_USERNAME:-source-lossless}
+      STREAM_MOUNT: ${STREAM_MOUNT:-/live.mp3}
+      STREAM_LOSSLESS_MOUNT: ${STREAM_LOSSLESS_MOUNT:-/live-lossless.ogg}
+    networks:
+      - internal
+    ports:
+      - ${RASSY_ICECAST_PUBLIC_PORT:-3188}:${ICECAST_PORT:-8000}
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O - http://127.0.0.1:${ICECAST_PORT:-8000}/status-json.xsl >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    image: runtipi-local-web-rassys-icecast:latest
+
+  redis:
+    image: redis:7.4-alpine
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-rassys/named/redis-data:/data
+    networks:
+      - internal
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: rassy
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: rassy
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-rassys/named/pg-data:/var/lib/postgresql/data
+    networks:
+      - internal
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U rassy -d rassy
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+x-runtipi:
+  schema_version: 2
+
+networks:
+  internal: null

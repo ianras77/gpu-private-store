@@ -1,0 +1,246 @@
+services:
+  ollama-code:
+    image: ollama/ollama:0.22.1
+    restart: unless-stopped
+    runtime: nvidia
+    init: true
+    stop_grace_period: ${OLLAMA_STOP_GRACE_PERIOD:-90s}
+    pids_limit: ${OLLAMA_PIDS_LIMIT:-1024}
+    shm_size: ${OLLAMA_SHM_SIZE:-2g}
+    security_opt:
+    - no-new-privileges:true
+    ulimits:
+      nofile:
+        soft: ${OLLAMA_NOFILE_SOFT:-65536}
+        hard: ${OLLAMA_NOFILE_HARD:-65536}
+    logging:
+      driver: json-file
+      options:
+        max-size: ${OLLAMA_LOG_MAX_SIZE:-50m}
+        max-file: ${OLLAMA_LOG_MAX_FILE:-5}
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - ollama list >/dev/null 2>&1
+      interval: ${OLLAMA_HEALTH_INTERVAL:-20s}
+      timeout: ${OLLAMA_HEALTH_TIMEOUT:-5s}
+      retries: ${OLLAMA_HEALTH_RETRIES:-18}
+      start_period: ${OLLAMA_HEALTH_START_PERIOD:-90s}
+    ports:
+    - ${OLLAMA_LOCAL_BIND_HOST:-127.0.0.1}:8092:11434
+    volumes:
+    - /data/models/ollama-code/ollama:/root/.ollama
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_MODELS: /root/.ollama/models
+      OLLAMA_ORIGINS: ${OLLAMA_ORIGINS:-}
+      OLLAMA_GPU_OVERHEAD: ${OLLAMA_GPU_OVERHEAD:-1073741824}
+      OLLAMA_LOAD_TIMEOUT: ${OLLAMA_LOAD_TIMEOUT:-10m}
+      OLLAMA_FLASH_ATTENTION: ${OLLAMA_CODE_FLASH_ATTENTION:-1}
+      OLLAMA_KV_CACHE_TYPE: ${OLLAMA_CODE_KV_CACHE_TYPE:-q8_0}
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_CODE_KEEP_ALIVE:--1}
+      OLLAMA_NUM_PARALLEL: ${OLLAMA_CODE_NUM_PARALLEL:-2}
+      OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_CODE_MAX_LOADED_MODELS:-1}
+      OLLAMA_MAX_QUEUE: ${OLLAMA_CODE_MAX_QUEUE:-128}
+      OLLAMA_LLM_LIBRARY: ${OLLAMA_CODE_LLM_LIBRARY:-cuda_v13}
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CODE_CONTEXT_LENGTH:-16384}
+      NVIDIA_VISIBLE_DEVICES: GPU-b9b6fa94-347e-3b4d-d920-8627b0ef5897
+    x-runtipi:
+      add_to_main_network: true
+  ollama-embed:
+    image: ollama/ollama:0.22.1
+    restart: unless-stopped
+    runtime: nvidia
+    init: true
+    stop_grace_period: ${OLLAMA_STOP_GRACE_PERIOD:-90s}
+    pids_limit: ${OLLAMA_PIDS_LIMIT:-1024}
+    shm_size: ${OLLAMA_SHM_SIZE:-2g}
+    security_opt:
+    - no-new-privileges:true
+    ulimits:
+      nofile:
+        soft: ${OLLAMA_NOFILE_SOFT:-65536}
+        hard: ${OLLAMA_NOFILE_HARD:-65536}
+    logging:
+      driver: json-file
+      options:
+        max-size: ${OLLAMA_LOG_MAX_SIZE:-50m}
+        max-file: ${OLLAMA_LOG_MAX_FILE:-5}
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - ollama list >/dev/null 2>&1
+      interval: ${OLLAMA_HEALTH_INTERVAL:-20s}
+      timeout: ${OLLAMA_HEALTH_TIMEOUT:-5s}
+      retries: ${OLLAMA_HEALTH_RETRIES:-18}
+      start_period: ${OLLAMA_HEALTH_START_PERIOD:-90s}
+    ports:
+    - ${OLLAMA_EMBED_BIND_HOST:-127.0.0.1}:11437:11434
+    - ${OLLAMA_LOCAL_BIND_HOST:-127.0.0.1}:8091:11434
+    volumes:
+    - /data/models/ollama-embed/ollama:/root/.ollama
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_MODELS: /root/.ollama/models
+      OLLAMA_ORIGINS: ${OLLAMA_ORIGINS:-}
+      OLLAMA_GPU_OVERHEAD: ${OLLAMA_GPU_OVERHEAD:-1073741824}
+      OLLAMA_LOAD_TIMEOUT: ${OLLAMA_LOAD_TIMEOUT:-10m}
+      OLLAMA_FLASH_ATTENTION: ${OLLAMA_EMBED_FLASH_ATTENTION:-1}
+      OLLAMA_KV_CACHE_TYPE: ${OLLAMA_EMBED_KV_CACHE_TYPE:-q8_0}
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_EMBED_KEEP_ALIVE:--1}
+      OLLAMA_NUM_PARALLEL: ${OLLAMA_EMBED_NUM_PARALLEL:-4}
+      OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_EMBED_MAX_LOADED_MODELS:-2}
+      OLLAMA_MAX_QUEUE: ${OLLAMA_EMBED_MAX_QUEUE:-256}
+      OLLAMA_LLM_LIBRARY: ${OLLAMA_EMBED_LLM_LIBRARY:-cuda_v12}
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_EMBED_CONTEXT_LENGTH:-8192}
+      NVIDIA_VISIBLE_DEVICES: GPU-aa4fe9a9-bc80-df98-ea0f-0d152446d84c
+    x-runtipi:
+      add_to_main_network: true
+  ollama-general:
+    image: ollama/ollama:0.22.1
+    restart: unless-stopped
+    runtime: nvidia
+    init: true
+    stop_grace_period: ${OLLAMA_STOP_GRACE_PERIOD:-90s}
+    pids_limit: ${OLLAMA_PIDS_LIMIT:-1024}
+    shm_size: ${OLLAMA_SHM_SIZE:-2g}
+    security_opt:
+    - no-new-privileges:true
+    ulimits:
+      nofile:
+        soft: ${OLLAMA_NOFILE_SOFT:-65536}
+        hard: ${OLLAMA_NOFILE_HARD:-65536}
+    logging:
+      driver: json-file
+      options:
+        max-size: ${OLLAMA_LOG_MAX_SIZE:-50m}
+        max-file: ${OLLAMA_LOG_MAX_FILE:-5}
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - ollama list >/dev/null 2>&1
+      interval: ${OLLAMA_HEALTH_INTERVAL:-20s}
+      timeout: ${OLLAMA_HEALTH_TIMEOUT:-5s}
+      retries: ${OLLAMA_HEALTH_RETRIES:-18}
+      start_period: ${OLLAMA_HEALTH_START_PERIOD:-90s}
+    ports:
+    - ${OLLAMA_LOCAL_BIND_HOST:-127.0.0.1}:8090:11434
+    volumes:
+    - /data/models/ollama-general/ollama:/root/.ollama
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_MODELS: /root/.ollama/models
+      OLLAMA_ORIGINS: ${OLLAMA_ORIGINS:-}
+      OLLAMA_GPU_OVERHEAD: ${OLLAMA_GPU_OVERHEAD:-1073741824}
+      OLLAMA_LOAD_TIMEOUT: ${OLLAMA_LOAD_TIMEOUT:-10m}
+      OLLAMA_FLASH_ATTENTION: ${OLLAMA_GENERAL_FLASH_ATTENTION:-1}
+      OLLAMA_KV_CACHE_TYPE: ${OLLAMA_GENERAL_KV_CACHE_TYPE:-q8_0}
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_GENERAL_KEEP_ALIVE:--1}
+      OLLAMA_NUM_PARALLEL: ${OLLAMA_GENERAL_NUM_PARALLEL:-1}
+      OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_GENERAL_MAX_LOADED_MODELS:-1}
+      OLLAMA_MAX_QUEUE: ${OLLAMA_GENERAL_MAX_QUEUE:-128}
+      OLLAMA_LLM_LIBRARY: ${OLLAMA_GENERAL_LLM_LIBRARY:-cuda_v12}
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_GENERAL_CONTEXT_LENGTH:-32768}
+      NVIDIA_VISIBLE_DEVICES: GPU-da459626-429e-72e2-1fe9-b08d791ff949
+    x-runtipi:
+      add_to_main_network: true
+  ollama-proxy:
+    build: /app-repos/ollama/proxy
+    restart: unless-stopped
+    init: true
+    depends_on:
+      ollama-general:
+        condition: service_healthy
+      ollama-code:
+        condition: service_healthy
+      ollama-embed:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options:
+        max-size: ${OLLAMA_PROXY_LOG_MAX_SIZE:-10m}
+        max-file: ${OLLAMA_PROXY_LOG_MAX_FILE:-3}
+    environment:
+      OLLAMA_BASE_URL: http://ollama-general:11434
+      CODE_OLLAMA_BASE_URL: http://ollama-code:11434
+      EMBEDDING_OLLAMA_BASE_URL: http://ollama-embed:11434
+      RERANK_OLLAMA_BASE_URL: http://ollama-embed:11434
+      MODEL_LOCKDOWN: ${OLLAMA_PROXY_MODEL_LOCKDOWN:-1}
+      STRICT_MODEL_ALLOWLIST: ${OLLAMA_PROXY_STRICT_MODEL_ALLOWLIST:-1}
+      GENERAL_MODEL_NAME: ${GENERAL_MODEL:-qwen3.6:27b}
+      GENERAL_MODEL_NAMES: ${GENERAL_MODEL_NAMES:-qwen3.6:27b,gpt-oss:20b}
+      EMBEDDING_MODEL: ${EMBED_MODEL:-qwen3-embedding:8b}
+      EMBEDDING_UPSTREAM_MODEL: ${EMBED_UPSTREAM_MODEL:-qwen3-embedding:0.6b}
+      EMBEDDING_MODEL_NAMES: ${EMBEDDING_MODEL_NAMES:-qwen3-embedding:8b,nomic-embed-text}
+      EMBEDDING_DIMENSIONS: ${EMBED_DIMENSIONS:-768}
+      RERANK_STRATEGY: ${RERANK_STRATEGY:-generate}
+      RERANK_MODEL: ${RERANK_MODEL:-dengcao/Qwen3-Reranker-4B:Q4_K_M}
+      RERANK_GENERATE_CONCURRENCY: ${RERANK_GENERATE_CONCURRENCY:-4}
+      RERANK_MAX_DOCS: ${RERANK_MAX_DOCS:-24}
+      RERANK_INSTRUCTION: ${RERANK_INSTRUCTION:-Given a web search query, retrieve relevant passages that answer the query}
+      PUBLIC_MODEL_NAMES: ${PUBLIC_MODEL_NAMES:-}
+      EXPOSE_EMBED_MODELS_IN_CATALOG: ${OLLAMA_PROXY_EXPOSE_EMBED_MODELS_IN_CATALOG:-0}
+      EXPOSE_RERANK_MODEL_IN_CATALOG: ${OLLAMA_PROXY_EXPOSE_RERANK_MODEL_IN_CATALOG:-0}
+      CORS_ORIGINS: ${OLLAMA_PROXY_CORS_ORIGINS:-}
+      TRUSTED_HOSTS: ${OLLAMA_PROXY_TRUSTED_HOSTS:-*}
+      REQUEST_BODY_LIMIT_BYTES: ${OLLAMA_PROXY_REQUEST_BODY_LIMIT_BYTES:-10485760}
+      REDACT_SENSITIVE_LOGS: ${OLLAMA_PROXY_REDACT_SENSITIVE_LOGS:-1}
+      ALLOW_ADMIN_PASSTHROUGH: ${OLLAMA_PROXY_ALLOW_ADMIN_PASSTHROUGH:-0}
+      AUTO_INDEX_EMBED_REQUESTS: ${OLLAMA_PROXY_AUTO_INDEX_EMBED_REQUESTS:-0}
+      EMBED_FALLBACK_MODEL_ON_404: ${OLLAMA_PROXY_EMBED_FALLBACK_MODEL_ON_404:-0}
+      OLLAMA_HTTP_TIMEOUT_SEC: ${OLLAMA_PROXY_HTTP_TIMEOUT_SEC:-900}
+      HEALTH_TAGS_TIMEOUT_SEC: ${OLLAMA_PROXY_HEALTH_TAGS_TIMEOUT_SEC:-5}
+      HEALTH_EMBED_TIMEOUT_SEC: ${OLLAMA_PROXY_HEALTH_EMBED_TIMEOUT_SEC:-5}
+      HEALTH_RERANK_TIMEOUT_SEC: ${OLLAMA_PROXY_HEALTH_RERANK_TIMEOUT_SEC:-5}
+      HTTP_MAX_CONNECTIONS: ${OLLAMA_PROXY_HTTP_MAX_CONNECTIONS:-400}
+      HTTP_MAX_KEEPALIVE_CONNECTIONS: ${OLLAMA_PROXY_HTTP_MAX_KEEPALIVE_CONNECTIONS:-100}
+      HTTP_KEEPALIVE_EXPIRY_SEC: ${OLLAMA_PROXY_HTTP_KEEPALIVE_EXPIRY_SEC:-60}
+      EMBED_UPSTREAM_MAX_RETRIES: ${OLLAMA_PROXY_EMBED_UPSTREAM_MAX_RETRIES:-3}
+      EMBED_UPSTREAM_RETRY_BACKOFF_MS: ${OLLAMA_PROXY_EMBED_UPSTREAM_RETRY_BACKOFF_MS:-250}
+      ALLOW_CODE_MODEL_PREFIX_ROUTING: ${OLLAMA_PROXY_ALLOW_CODE_MODEL_PREFIX_ROUTING:-0}
+      CODE_MODEL_NAMES: ${CODE_MODEL_NAMES:-granite4.1:8b,qwen2.5-coder:7b}
+      CODE_MODEL_PREFIXES: ${CODE_MODEL_PREFIXES:-granite4.1,granite4,granite,qwen2.5-coder,qwen-coder,deepseek-coder,codegemma,starcoder,coder}
+      CHAT_MAX_MESSAGES: ${OLLAMA_PROXY_CHAT_MAX_MESSAGES:-64}
+      CHAT_MAX_TOTAL_CHARS: ${OLLAMA_PROXY_CHAT_MAX_TOTAL_CHARS:-500000}
+      GENERATE_MAX_PROMPT_CHARS: ${OLLAMA_PROXY_GENERATE_MAX_PROMPT_CHARS:-400000}
+      MAX_NUM_CTX: ${OLLAMA_PROXY_MAX_NUM_CTX:-81920}
+      SHOW_MAX_NAME_CHARS: ${OLLAMA_PROXY_SHOW_MAX_NAME_CHARS:-512}
+      REDIS_URL: ${REDIS_URL:-}
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-ollama_gpu_private_store_knowledge}
+      QDRANT_VECTOR_SIZE: ${QDRANT_VECTOR_SIZE:-768}
+      QDRANT_DISTANCE: ${QDRANT_DISTANCE:-Cosine}
+      QDRANT_UPSERT_WAIT: ${QDRANT_UPSERT_WAIT:-1}
+      PGHOST: ${PGHOST:-}
+      PGPORT: ${PGPORT:-5432}
+      PGDATABASE: ${PGDATABASE:-}
+      PGUSER: ${PGUSER:-}
+      PGPASSWORD: ${PGPASSWORD:-}
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -fsS http://127.0.0.1:8080/health >/dev/null && curl -fsS http://127.0.0.1:8080/health/embed
+        >/dev/null && curl -fsS http://127.0.0.1:8080/health/code >/dev/null && curl -fsS http://127.0.0.1:8080/health/rerank
+        >/dev/null
+      interval: ${OLLAMA_PROXY_HEALTH_INTERVAL:-20s}
+      timeout: ${OLLAMA_PROXY_HEALTH_TIMEOUT:-10s}
+      retries: ${OLLAMA_PROXY_HEALTH_RETRIES:-10}
+      start_period: ${OLLAMA_PROXY_HEALTH_START_PERIOD:-20s}
+    image: runtipi-local-ollama-ollama-proxy:latest
+    x-runtipi:
+      is_main: true
+      internal_port: 8080
+      add_to_main_network: true
+x-runtipi:
+  schema_version: 2

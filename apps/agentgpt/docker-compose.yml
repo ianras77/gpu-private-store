@@ -1,0 +1,122 @@
+services:
+  agentgpt:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/agentgpt/repo/next
+      dockerfile: Dockerfile.runtipi
+      args:
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-/platform}
+        NEXT_PUBLIC_VERCEL_ENV: ${NEXT_PUBLIC_VERCEL_ENV:-production}
+        NEXT_PUBLIC_MAX_LOOPS: ${NEXT_PUBLIC_MAX_LOOPS:-25}
+    image: runtipi-local-agentgpt-web:latest
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      platform:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${APP_PROTOCOL}://${APP_DOMAIN}
+      LOCAL_SIGNIN_PASSWORD: ${LOCAL_SIGNIN_PASSWORD}
+      DATABASE_URL: mysql://agentgpt:${MYSQL_PASSWORD}@mysql:3306/agentgpt
+      DATABASE_HOST: mysql
+      DATABASE_PORT: "3306"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-/platform}
+      NEXT_PUBLIC_VERCEL_ENV: ${NEXT_PUBLIC_VERCEL_ENV:-production}
+      NEXT_PUBLIC_MAX_LOOPS: ${NEXT_PUBLIC_MAX_LOOPS:-25}
+    networks:
+      - agentgpt_internal
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/api/health').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+      add_to_main_network: true
+
+  platform:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/agentgpt/repo/platform
+      dockerfile: Dockerfile.runtipi
+    image: runtipi-local-agentgpt-platform:latest
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      REWORKD_PLATFORM_HOST: 0.0.0.0
+      REWORKD_PLATFORM_PORT: "8000"
+      REWORKD_PLATFORM_RELOAD: "false"
+      REWORKD_PLATFORM_ENVIRONMENT: production
+      REWORKD_PLATFORM_FRONTEND_URL: ${APP_PROTOCOL}://${APP_DOMAIN}
+      REWORKD_PLATFORM_DB_HOST: mysql
+      REWORKD_PLATFORM_DB_PORT: "3306"
+      REWORKD_PLATFORM_DB_USER: agentgpt
+      REWORKD_PLATFORM_DB_PASS: ${MYSQL_PASSWORD}
+      REWORKD_PLATFORM_DB_BASE: agentgpt
+      REWORKD_PLATFORM_FF_MOCK_MODE_ENABLED: "false"
+      REWORKD_PLATFORM_OPENAI_API_BASE: ${OPENAI_API_BASE:-https://api.openai.com/v1}
+      REWORKD_PLATFORM_OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      REWORKD_PLATFORM_SERP_API_KEY: ${SERP_API_KEY:-}
+      REWORKD_PLATFORM_REPLICATE_API_KEY: ${REPLICATE_API_KEY:-}
+      PLATFORM_SECRET_SEED: ${PLATFORM_SECRET_SEED}
+    volumes:
+      - ${ROOT_FOLDER_HOST}:/runtipi:ro
+      - ${APP_DATA_DIR}/app-data/agentgpt/named/workspace:/workspace
+    networks:
+      - agentgpt_internal
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 50s
+    x-runtipi:
+      add_to_main_network: true
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    command:
+      - mysqld
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: agentgpt
+      MYSQL_USER: agentgpt
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ${APP_DATA_DIR}/app-data/agentgpt/named/mysql:/var/lib/mysql
+    networks:
+      - agentgpt_internal
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping -h 127.0.0.1 -uagentgpt -p${MYSQL_PASSWORD} --silent
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+x-runtipi:
+  schema_version: 2
+
+networks:
+  agentgpt_internal:
+    driver: bridge

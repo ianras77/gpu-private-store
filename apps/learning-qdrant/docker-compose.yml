@@ -1,0 +1,16 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - 3223:6333
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-qdrant/named/storage:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__GRPC_ENABLE: "true"
+    x-runtipi:
+      is_main: true
+      internal_port: 6333
+
+x-runtipi:
+  schema_version: 2

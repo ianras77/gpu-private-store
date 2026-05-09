@@ -1,0 +1,25 @@
+{
+  "name": "Astro Multibrand",
+  "available": true,
+  "port": 3201,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "astro",
+  "description": "Multi-brand astrology suite with a shared API, Postgres, Redis, and Qdrant plus five branded web fronts: Jupiterseek, Maleficme, Saturnleo, Saturnseer, and Oracleveil.",
+  "tipi_version": 1,
+  "version": "0.1.0-local",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Multi-brand astrology suite with a shared API and five branded web fronts.",
+  "author": "https://github.com/ianras77/web-astrology.git",
+  "source": "https://github.com/ianras77/web-astrology",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1774316487204,
+  "updated_at": 1774598400000
+}

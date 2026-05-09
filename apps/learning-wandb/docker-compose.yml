@@ -1,0 +1,20 @@
+services:
+  wandb:
+    image: wandb/local
+    restart: unless-stopped
+    user: "999:0"
+    ports:
+      - 3226:8080
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-wandb/named/env:/vol/env
+    environment:
+      WANDB_BASE_URL: ${WANDB_BASE_URL:-http://192.168.1.162:3226}
+      WANDB_SERVER_ADDRESS: 0.0.0.0
+      WANDB_SERVER_LICENSE: ${WANDB_SERVER_LICENSE}
+      WANDB_API_KEY: ${WANDB_API_KEY}
+    x-runtipi:
+      is_main: true
+      internal_port: 8080
+
+x-runtipi:
+  schema_version: 2

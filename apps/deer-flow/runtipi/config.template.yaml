@@ -1,0 +1,79 @@
+# DeerFlow Configuration
+# Seeded automatically by the Runtipi package on first boot.
+# This template targets the local Ollama stack in this app store through ollama-proxy.
+# If your Ollama model names differ, edit the generated config.yaml after install.
+
+config_version: 8
+
+models:
+  - name: ollama-general
+    display_name: Ollama / General
+    use: langchain_ollama:ChatOllama
+    model: $DEERFLOW_OLLAMA_DEFAULT_MODEL
+    base_url: $DEERFLOW_OLLAMA_BASE_URL
+    num_predict: 8192
+    temperature: 0.7
+
+  - name: ollama-code
+    display_name: Ollama / Code
+    use: langchain_ollama:ChatOllama
+    model: $DEERFLOW_OLLAMA_CODE_MODEL
+    base_url: $DEERFLOW_OLLAMA_BASE_URL
+    num_predict: 8192
+    temperature: 0.2
+
+tools:
+  - name: web_search
+    use: deerflow.community.ddg_search.tools:web_search_tool
+    group: web
+    max_results: 5
+
+  - name: web_fetch
+    use: deerflow.community.jina_ai.tools:web_fetch_tool
+    group: web
+    timeout: 10
+
+  - name: image_search
+    use: deerflow.community.image_search.tools:image_search_tool
+    group: web
+    max_results: 5
+
+  - name: ls
+    use: deerflow.sandbox.tools:ls_tool
+    group: file:read
+
+  - name: read_file
+    use: deerflow.sandbox.tools:read_file_tool
+    group: file:read
+
+  - name: glob
+    use: deerflow.sandbox.tools:glob_tool
+    group: file:read
+
+  - name: grep
+    use: deerflow.sandbox.tools:grep_tool
+    group: file:read
+
+  - name: write_file
+    use: deerflow.sandbox.tools:write_file_tool
+    group: file:write
+
+  - name: str_replace
+    use: deerflow.sandbox.tools:str_replace_tool
+    group: file:write
+
+sandbox:
+  use: deerflow.sandbox.local:LocalSandboxProvider
+  allow_host_bash: false
+
+skills:
+  path: /app/skills
+  container_path: /mnt/skills
+
+memory:
+  storage_path: /app/backend/.deer-flow/memory.json
+  model_name: ollama-general
+
+checkpointer:
+  type: sqlite
+  connection_string: /app/backend/.deer-flow/checkpoints.db

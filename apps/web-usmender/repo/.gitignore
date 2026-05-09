@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+dist
+.env
+.DS_Store
+.expo
+__pycache__/
+services/cat/data/
+*.tsbuildinfo
+*.bak
+*.bak-*

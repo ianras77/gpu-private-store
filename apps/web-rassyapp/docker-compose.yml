@@ -1,0 +1,57 @@
+services:
+  app:
+    build:
+      context: /app-repos/web-rassyapp
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: ${RASSY_DATABASE_URL:-file:/data/dev.db}
+      NEXT_TELEMETRY_DISABLED: '1'
+      CAT_HTTP_BASE: http://cheshire-cat-core:80
+      CAT_WS_BASE: ws://cheshire-cat-core:80
+      APP_SESSION_SECRET: ${RASSY_APP_SESSION_SECRET:-change-me}
+      CAT_HTTP_API_KEY: ${RASSY_CAT_HTTP_API_KEY:-}
+      CAT_WS_API_KEY: ${RASSY_CAT_WS_API_KEY:-}
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-rassyapp/named/prisma-data:/data
+    depends_on:
+    - cheshire-cat-core
+    restart: unless-stopped
+    image: runtipi-local-web-rassyapp-app:latest
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+  cheshire-cat-core:
+    build:
+      context: /app-repos/web-rassyapp
+      dockerfile: docker/cat-core.Dockerfile
+    environment:
+      CCAT_QDRANT_HOST: cheshire-cat-vector-memory
+      CCAT_QDRANT_PORT: '6333'
+      CAT_METADATA_PATH: /app/cat/data/metadata.json
+      CAT_ADMIN_USERNAME: ${RASSY_CAT_ADMIN_USERNAME:-admin}
+      CAT_ADMIN_PASSWORD: ${RASSY_CAT_ADMIN_PASSWORD:-change-me}
+      OLLAMA_BASE_URL: ${RASSY_OLLAMA_BASE_URL:-http://ollama-general:11434}
+      OLLAMA_EMBED_BASE_URL: ${RASSY_OLLAMA_EMBED_BASE_URL:-http://ollama-embed:11434}
+      OLLAMA_LLM_MODEL: ${RASSY_OLLAMA_LLM_MODEL:-gpt-oss:20b}
+      OLLAMA_EMBED_MODEL: ${RASSY_OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      OLLAMA_APPLY_EMBEDDER: ${RASSY_OLLAMA_APPLY_EMBEDDER:-1}
+      BOOTSTRAP_TIMEOUT_SECONDS: ${RASSY_BOOTSTRAP_TIMEOUT_SECONDS:-180}
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-rassyapp/named/cat-static:/app/cat/static
+    - ${APP_DATA_DIR}/app-data/web-rassyapp/named/cat-plugins:/app/cat/plugins
+    - ${APP_DATA_DIR}/app-data/web-rassyapp/named/cat-data:/app/cat/data
+    depends_on:
+    - cheshire-cat-vector-memory
+    extra_hosts:
+    - host.docker.internal:host-gateway
+    restart: unless-stopped
+    image: runtipi-local-web-rassyapp-cheshire-cat-core:latest
+    x-runtipi:
+      add_to_main_network: true
+  cheshire-cat-vector-memory:
+    image: qdrant/qdrant:v1.13.6
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-rassyapp/named/qdrant-storage:/qdrant/storage
+    restart: unless-stopped
+x-runtipi:
+  schema_version: 2

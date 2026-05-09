@@ -1,0 +1,63 @@
+{
+  "name": "Rassys",
+  "available": true,
+  "port": 3187,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "web-rassys",
+  "description": "Public site, live radio, Minecraft bridge, Cheshire, Icecast, Liquidsoap, Redis, and Postgres in one stack.",
+  "tipi_version": 7,
+  "version": "1.0.5",
+  "min_tipi_version": "v4.0.0",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Rassys site and live radio stack with Cheshire, Icecast, and a Minecraft bridge.",
+  "author": "Ian Rasmussen",
+  "source": "https://github.com/ianras77/web-rassy",
+  "form_fields": [
+    {
+      "type": "random",
+      "label": "Admin Password",
+      "min": 24,
+      "env_variable": "ADMIN_PASSWORD"
+    },
+    {
+      "type": "random",
+      "label": "Admin JWT Secret",
+      "min": 48,
+      "env_variable": "ADMIN_JWT_SECRET"
+    },
+    {
+      "type": "random",
+      "label": "Radio Admin API Key",
+      "min": 32,
+      "env_variable": "RADIO_ADMIN_API_KEY"
+    },
+    {
+      "type": "random",
+      "label": "Icecast Source Password",
+      "min": 24,
+      "env_variable": "ICECAST_SOURCE_PASSWORD"
+    },
+    {
+      "type": "random",
+      "label": "Icecast Admin Password",
+      "min": 24,
+      "env_variable": "ICECAST_ADMIN_PASSWORD"
+    },
+    {
+      "type": "random",
+      "label": "Icecast Relay Password",
+      "min": 24,
+      "env_variable": "ICECAST_RELAY_PASSWORD"
+    }
+  ],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1776589448000,
+  "updated_at": 1777768050864
+}

@@ -1,0 +1,193 @@
+services:
+  bat-api:
+    build: /data/repos/apps/blondesagainsttrump/apps/api
+    env_file:
+      - ${ROOT_FOLDER_HOST}/user-config/${APP_STORE_ID}/blondesagainsttrump/app.env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://bat:bat_password_change_me@bat-postgres:5432/bat}
+      REDIS_URL: ${REDIS_URL:-redis://bat-redis:6379/0}
+      QDRANT_URL: ${QDRANT_URL:-http://bat-qdrant:6333}
+      CHESHIRE_CAT_URL: ${CHESHIRE_CAT_URL:-http://bat-cheshire-cat:80}
+      SOCIAL_PUBLISHER_URL: ${SOCIAL_PUBLISHER_URL:-http://bat-social-publisher:8100}
+      LLM_API_URL: ${LLM_API_URL:-http://ollama-general:11434/v1/chat/completions}
+      EMBEDDING_API_URL: ${EMBEDDING_API_URL:-http://ollama-embed:11434/api/embeddings}
+    ports:
+      - ${BAT_API_PORT:-3198}:8000
+    depends_on:
+      bat-postgres:
+        condition: service_healthy
+      bat-redis:
+        condition: service_healthy
+      bat-qdrant:
+        condition: service_started
+      bat-cheshire-cat:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/live', timeout=5)
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    image: runtipi-local-blondesagainsttrump-api:latest
+    x-runtipi:
+      add_to_main_network: true
+
+  bat-cheshire-cat:
+    image: ghcr.io/cheshire-cat-ai/core:latest
+    env_file:
+      - ${ROOT_FOLDER_HOST}/user-config/${APP_STORE_ID}/blondesagainsttrump/app.env
+    environment:
+      CCAT_DEBUG: "false"
+      CAT_METADATA_PATH: /data/metadata.json
+      CCAT_METADATA_FILE: /data/metadata.json
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://ollama-general:11434}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://ollama-embed:11434}
+      OLLAMA_GENERAL_MODEL: ${OLLAMA_GENERAL_MODEL:-gpt-oss:20b}
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-nomic-embed-text}
+    volumes:
+      - ${APP_DATA_DIR}/app-data/blondesagainsttrump/named/bat-cat-data:/data
+      - /data/repos/apps/blondesagainsttrump/infra/scripts/bootstrap_cat_ollama.py:/app/cat/bootstrap/bootstrap_cat_ollama.py:ro
+    command:
+      - /bin/sh
+      - -lc
+      - python3 /app/cat/bootstrap/bootstrap_cat_ollama.py || true; exec python3 -m cat.main
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1', timeout=5)
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 40s
+    restart: unless-stopped
+    x-runtipi:
+      add_to_main_network: true
+
+  bat-postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: bat
+      POSTGRES_USER: bat
+      POSTGRES_PASSWORD: bat_password_change_me
+    volumes:
+      - ${APP_DATA_DIR}/app-data/blondesagainsttrump/named/bat-postgres-data:/var/lib/postgresql/data
+      - /data/repos/apps/blondesagainsttrump/infra/sql/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+      - /data/repos/apps/blondesagainsttrump/infra/sql/002_seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
+      - /data/repos/apps/blondesagainsttrump/infra/sql/003_trend_observation_uniqueness.sql:/docker-entrypoint-initdb.d/003_trend_observation_uniqueness.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U bat -d bat
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  bat-qdrant:
+    image: qdrant/qdrant:latest
+    volumes:
+      - ${APP_DATA_DIR}/app-data/blondesagainsttrump/named/bat-qdrant-data:/qdrant/storage
+    restart: unless-stopped
+
+  bat-redis:
+    image: redis:7
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  bat-social-publisher:
+    build: /data/repos/apps/blondesagainsttrump/apps/social-publisher
+    env_file:
+      - ${ROOT_FOLDER_HOST}/user-config/${APP_STORE_ID}/blondesagainsttrump/app.env
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8100/health', timeout=5)
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
+    image: runtipi-local-blondesagainsttrump-social-publisher:latest
+
+  bat-web:
+    build:
+      context: /data/repos/apps/blondesagainsttrump/apps/web
+      dockerfile: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/blondesagainsttrump/Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://192.168.1.162:3198}
+    env_file:
+      - ${ROOT_FOLDER_HOST}/user-config/${APP_STORE_ID}/blondesagainsttrump/app.env
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://192.168.1.162:3198}
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      bat-api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/admin-login').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    image: runtipi-local-blondesagainsttrump-web:latest
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+
+  bat-worker:
+    build: /data/repos/apps/blondesagainsttrump/apps/api
+    command:
+      - python
+      - -m
+      - workers.main
+    env_file:
+      - ${ROOT_FOLDER_HOST}/user-config/${APP_STORE_ID}/blondesagainsttrump/app.env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://bat:bat_password_change_me@bat-postgres:5432/bat}
+      REDIS_URL: ${REDIS_URL:-redis://bat-redis:6379/0}
+      QDRANT_URL: ${QDRANT_URL:-http://bat-qdrant:6333}
+      CHESHIRE_CAT_URL: ${CHESHIRE_CAT_URL:-http://bat-cheshire-cat:80}
+      SOCIAL_PUBLISHER_URL: ${SOCIAL_PUBLISHER_URL:-http://bat-social-publisher:8100}
+      LLM_API_URL: ${LLM_API_URL:-http://ollama-general:11434/v1/chat/completions}
+      EMBEDDING_API_URL: ${EMBEDDING_API_URL:-http://ollama-embed:11434/api/embeddings}
+    depends_on:
+      bat-postgres:
+        condition: service_healthy
+      bat-redis:
+        condition: service_healthy
+      bat-qdrant:
+        condition: service_started
+      bat-cheshire-cat:
+        condition: service_started
+    restart: unless-stopped
+    image: runtipi-local-blondesagainsttrump-worker:latest
+    x-runtipi:
+      add_to_main_network: true
+
+x-runtipi:
+  schema_version: 2

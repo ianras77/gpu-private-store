@@ -1,0 +1,35 @@
+{
+  "slug": "happy-obby-pieces",
+  "version": 1,
+  "reviewMode": "Kid-safe shelf",
+  "items": [
+    {
+      "slug": "obby-checkpoint-arch",
+      "localBundleKey": "obby/checkpoint-arch",
+      "kind": "model",
+      "storageMode": "inventory-library",
+      "targetPath": "Workspace/Map/Checkpoints"
+    },
+    {
+      "slug": "obby-coin-ring",
+      "localBundleKey": "obby/coin-ring",
+      "kind": "model",
+      "storageMode": "inventory-library",
+      "targetPath": "Workspace/Map/Collectibles"
+    },
+    {
+      "slug": "obby-platform-skin",
+      "localBundleKey": "obby/platform-skin",
+      "kind": "mesh",
+      "storageMode": "inventory-library",
+      "targetPath": "Workspace/Map/Platforms"
+    },
+    {
+      "slug": "obby-finish-confetti",
+      "localBundleKey": "obby/finish-confetti",
+      "kind": "effect",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/CelebrationFX"
+    }
+  ]
+}

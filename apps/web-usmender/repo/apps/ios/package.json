@@ -1,0 +1,19 @@
+{
+  "name": "@usmender/ios",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "expo start",
+    "lint": "echo 'no lint yet'",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "expo": "^50.0.0",
+    "expo-haptics": "~12.8.0",
+    "react": "18.2.0",
+    "react-native": "0.73.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

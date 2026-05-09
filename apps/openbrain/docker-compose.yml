@@ -1,0 +1,105 @@
+services:
+  db:
+    image: ankane/pgvector:v0.5.1
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: openbrain
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: openbrain
+    volumes:
+      - ${APP_DATA_DIR}/app-data/openbrain/named/postgres:/var/lib/postgresql/data
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/openbrain/mcp-server/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U openbrain -d openbrain || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  mcp-server:
+    build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/openbrain/mcp-server
+    image: runtipi-local-openbrain-mcp-server:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: "8000"
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: openbrain
+      DB_USER: openbrain
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      MCP_ACCESS_KEY: ${MCP_ACCESS_KEY}
+      EMBEDDING_API_BASE: ${EMBEDDING_API_BASE:-https://openrouter.ai/api/v1}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-openai/text-embedding-3-small}
+      CHAT_API_BASE: ${CHAT_API_BASE:-}
+      CHAT_API_KEY: ${CHAT_API_KEY:-}
+      CHAT_MODEL: ${CHAT_MODEL:-openai/gpt-4o-mini}
+      MEDIA_DATA_PATH: /media/data
+      OBSIDIAN_VAULT_PATH: /vault/obsidian
+      IMPORT_STATE_DIR: /state
+      IMPORTER_API_BASE: http://obsidian-importer:8090
+    volumes:
+      - ${MEDIA_DATA_HOST_PATH:-${ROOT_FOLDER_HOST}/media/data}:/media/data:ro
+      - ${OBSIDIAN_VAULT_HOST_PATH:-${ROOT_FOLDER_HOST}/media/data/obsidian}:/vault/obsidian:ro
+      - ${APP_DATA_DIR}/app-data/openbrain/named/import-state:/state
+    healthcheck:
+      test:
+        - CMD
+        - deno
+        - eval
+        - --allow-net
+        - const r = await fetch("http://127.0.0.1:8000/health"); if (!r.ok) Deno.exit(1);
+      interval: 30s
+      timeout: 10s
+      retries: 6
+      start_period: 20s
+    x-runtipi:
+      is_main: true
+      internal_port: 8000
+
+  obsidian-importer:
+    build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/openbrain/obsidian-importer
+    image: runtipi-local-openbrain-obsidian-importer:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - python
+      - /app/service.py
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: openbrain
+      DB_USER: openbrain
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      PORT: "8090"
+      VAULT_PATH: /vault/obsidian
+      IMPORT_SCRIPT: /app/import-obsidian.py
+      EMBEDDING_API_BASE: ${EMBEDDING_API_BASE:-https://openrouter.ai/api/v1}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-openai/text-embedding-3-small}
+      CHAT_API_BASE: ${CHAT_API_BASE:-}
+      CHAT_API_KEY: ${CHAT_API_KEY:-}
+      CHAT_MODEL: ${CHAT_MODEL:-openai/gpt-4o-mini}
+      STATE_DIR: /state
+    volumes:
+      - ${MEDIA_DATA_HOST_PATH:-${ROOT_FOLDER_HOST}/media/data}:/media/data:ro
+      - ${OBSIDIAN_VAULT_HOST_PATH:-${ROOT_FOLDER_HOST}/media/data/obsidian}:/vault/obsidian:ro
+      - ${APP_DATA_DIR}/app-data/openbrain/named/import-state:/state
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 6
+      start_period: 15s
+
+x-runtipi:
+  schema_version: 2

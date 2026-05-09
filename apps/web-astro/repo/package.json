@@ -1,0 +1,25 @@
+{
+  "name": "astro-multibrand",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "db:migrate": "pnpm --filter @astro/api db:migrate",
+    "db:seed": "pnpm --filter @astro/api db:seed",
+    "db:studio": "pnpm --filter @astro/api db:studio",
+    "format": "turbo run format",
+    "test:pw": "playwright test"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "eslint": "8.57.1",
+    "eslint-config-next": "14.2.35",
+    "turbo": "^1.13.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5",
+    "@playwright/test": "^1.46.1"
+  }
+}

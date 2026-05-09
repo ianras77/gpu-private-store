@@ -1,0 +1,48 @@
+app:
+  name: web-astrology
+  type: web+api
+  runtime: node
+services:
+  - name: api
+    port: 4020
+    protocol: http
+    purpose: "Core astrology API"
+    health: "/healthz"
+  - name: web-jupiterseek
+    port: 4021
+    protocol: http
+    purpose: "Brand web app"
+    health: "/"
+  - name: web-maleficme
+    port: 4022
+    protocol: http
+    purpose: "Brand web app"
+    health: "/"
+  - name: web-saturnleo
+    port: 4023
+    protocol: http
+    purpose: "Brand web app"
+    health: "/"
+  - name: web-saturnseer
+    port: 4024
+    protocol: http
+    purpose: "Brand web app"
+    health: "/"
+  - name: web-oracleveil
+    port: 4025
+    protocol: http
+    purpose: "Brand web app"
+    health: "/"
+notes:
+  - "Contiguous app block: 4020-4028 (api/webs/db/redis/qdrant)."
+  - "Compose file declares db=4026, redis=4027, qdrant=4028."
+env:
+  required:
+    - NODE_ENV
+  optional:
+    - ASTRO_API_PORT
+    - ASTRO_WEB_JUPITERSEEK_PORT
+    - ASTRO_WEB_MALEFICME_PORT
+    - ASTRO_WEB_SATURNLEO_PORT
+    - ASTRO_WEB_SATURNSEER_PORT
+    - ASTRO_WEB_ORACLEVEIL_PORT

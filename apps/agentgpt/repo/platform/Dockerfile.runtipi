@@ -1,0 +1,25 @@
+FROM python:3.11-slim-bullseye
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  build-essential \
+  default-libmysqlclient-dev \
+  gcc \
+  netcat-openbsd \
+  openjdk-11-jdk-headless \
+  openssl \
+  pkg-config \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN pip install poetry==1.4.2
+RUN poetry config virtualenvs.create false
+
+WORKDIR /app/src
+
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --only main --no-root
+
+COPY . .
+RUN poetry install --only main && chmod +x /app/src/entrypoint.sh
+
+ENTRYPOINT ["sh", "/app/src/entrypoint.sh"]
+CMD ["/usr/local/bin/python", "-m", "reworkd_platform"]

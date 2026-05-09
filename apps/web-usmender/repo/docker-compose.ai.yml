@@ -1,0 +1,21 @@
+services:
+  cat:
+    environment:
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://ollama-general:11434}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://ollama-embed:11434}
+    networks:
+      - default
+      - ollama
+
+  cat-support:
+    environment:
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_SUPPORT_GENERAL_BASE_URL:-http://ollama-code:11434}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_SUPPORT_EMBED_BASE_URL:-http://ollama-embed:11434}
+    networks:
+      - default
+      - ollama
+
+networks:
+  ollama:
+    external: true
+    name: ollama_llm-net

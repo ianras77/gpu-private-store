@@ -1,0 +1,124 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lickingvape
+      POSTGRES_PASSWORD: lickingvape
+      POSTGRES_DB: lickingvape
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  api:
+    build: ../apps/api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://lickingvape:lickingvape@db:5432/lickingvape
+      INTERNAL_TOOL_TOKEN: ${INTERNAL_TOOL_TOKEN:-change-me}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      PHONE_HASH_SECRET: ${PHONE_HASH_SECRET:-change-me}
+      AUTH_SECRET: ${AUTH_SECRET:-change-me}
+      SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-30}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      WEB_ORIGIN: ${WEB_ORIGIN:-*}
+      ALLOW_PROFANITY: ${ALLOW_PROFANITY:-true}
+      REQUIRE_ADMIN_REVIEW: ${REQUIRE_ADMIN_REVIEW:-false}
+      MAX_SMS_PER_MINUTE: ${MAX_SMS_PER_MINUTE:-5}
+      SEED_DEMO_CONTENT: ${SEED_DEMO_CONTENT:-true}
+      WORLD_CONTEXT_QUERY_LIMIT: ${WORLD_CONTEXT_QUERY_LIMIT:-4}
+      WORLD_CONTEXT_ITEMS_LIMIT: ${WORLD_CONTEXT_ITEMS_LIMIT:-4}
+      WORLD_CHAT_CONTEXT_ITEMS: ${WORLD_CHAT_CONTEXT_ITEMS:-3}
+    depends_on:
+      - db
+    ports:
+      - "${LICKINGWEB_API_PORT:-3200}:8000"
+    networks:
+      - internal
+
+  worker:
+    build: ../apps/worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://lickingvape:lickingvape@db:5432/lickingvape
+      CAT_REVIEW_ENDPOINT: ${CAT_REVIEW_ENDPOINT:-http://cat:80/custom/editor/review}
+      CAT_API_KEY: ${CAT_API_KEY:-}
+      CAT_USER_ID: ${CAT_USER_ID:-}
+      CAT_INTERNAL_TOKEN: ${CAT_INTERNAL_TOKEN:-}
+      CAT_DRAFT_ENDPOINT: ${CAT_DRAFT_ENDPOINT:-http://cat:80/custom/editor/draft}
+      ALLOW_PROFANITY: ${ALLOW_PROFANITY:-true}
+      REQUIRE_ADMIN_REVIEW: ${REQUIRE_ADMIN_REVIEW:-false}
+      WORKER_POLL_SECONDS: ${WORKER_POLL_SECONDS:-10}
+      WORKER_BATCH_SIZE: ${WORKER_BATCH_SIZE:-10}
+      WORLD_INGEST_ENABLED: ${WORLD_INGEST_ENABLED:-true}
+      WORLD_INGEST_INTERVAL_SECONDS: ${WORLD_INGEST_INTERVAL_SECONDS:-1800}
+      WORLD_SEARCH_BASE_URL: ${WORLD_SEARCH_BASE_URL:-https://search.rasies.com/search}
+      WORLD_SEARCH_LANGUAGE: ${WORLD_SEARCH_LANGUAGE:-en-US}
+      WORLD_SEARCH_SAFESEARCH: ${WORLD_SEARCH_SAFESEARCH:-0}
+      WORLD_SEARCH_RESULTS_LIMIT: ${WORLD_SEARCH_RESULTS_LIMIT:-6}
+      WORLD_SEARCH_MAX_AGE_DAYS: ${WORLD_SEARCH_MAX_AGE_DAYS:-21}
+      WORLD_SEARCH_QUERIES: ${WORLD_SEARCH_QUERIES:-}
+      WORLD_CONTEXT_ITEMS_FOR_DRAFT: ${WORLD_CONTEXT_ITEMS_FOR_DRAFT:-4}
+      WORLD_AUTOPUBLISH_ENABLED: ${WORLD_AUTOPUBLISH_ENABLED:-true}
+      WORLD_AUTOPUBLISH_INTERVAL_SECONDS: ${WORLD_AUTOPUBLISH_INTERVAL_SECONDS:-14400}
+      WORLD_AUTOPUBLISH_MAX_PER_DAY: ${WORLD_AUTOPUBLISH_MAX_PER_DAY:-3}
+      WORLD_AUTOPUBLISH_STATUS: ${WORLD_AUTOPUBLISH_STATUS:-published}
+      WORLD_AUTOPUBLISH_MAX_WORDS: ${WORLD_AUTOPUBLISH_MAX_WORDS:-150}
+      WORLD_AUTOPUBLISH_DISPLAY_NAME: ${WORLD_AUTOPUBLISH_DISPLAY_NAME:-night desk}
+    depends_on:
+      - db
+      - api
+      - cat
+    networks:
+      - internal
+
+  web:
+    build: ../apps/web
+    restart: unless-stopped
+    environment:
+      API_PROXY_TARGET: ${API_PROXY_TARGET:-http://api:8000}
+      NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE:-/api}
+    depends_on:
+      - api
+    ports:
+      - "${LICKINGWEB_WEB_PORT:-3199}:3000"
+    networks:
+      - internal
+
+  cat:
+    image: ghcr.io/cheshire-cat-ai/core:latest
+    restart: unless-stopped
+    environment:
+      INTERNAL_API_BASE: http://api:8000
+      INTERNAL_TOOL_TOKEN: ${INTERNAL_TOOL_TOKEN:-change-me}
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://ollama-proxy:8080}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://ollama-proxy:8080}
+      OLLAMA_GENERAL_MODEL: ${OLLAMA_GENERAL_MODEL:-gpt-oss:20b}
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-nomic-embed-text}
+      EDITOR_WORLD_CONTEXT_QUERY_LIMIT: ${EDITOR_WORLD_CONTEXT_QUERY_LIMIT:-2}
+      EDITOR_WORLD_CONTEXT_ITEMS_LIMIT: ${EDITOR_WORLD_CONTEXT_ITEMS_LIMIT:-3}
+    volumes:
+      - ../cat/plugins:/app/cat/plugins
+      - ../cat/data:/app/cat/data
+      - ../cat/bootstrap:/app/cat/bootstrap:ro
+    command:
+      - /bin/sh
+      - -lc
+      - python3 /app/cat/bootstrap/auto_configure_ollama.py || true; exec python3 -m cat.main
+    ports:
+      - "${LICKINGWEB_CAT_PORT:-3201}:80"
+    networks:
+      - internal
+      - ollama
+
+volumes:
+  db_data:
+
+networks:
+  internal:
+    driver: bridge
+  ollama:
+    external: true
+    name: ollama_llm-net

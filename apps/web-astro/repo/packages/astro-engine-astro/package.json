@@ -1,0 +1,17 @@
+{
+  "name": "@astro/astro-engine-astro",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "echo 'lint not configured'",
+    "test": "vitest --run --config ../../vitest.config.ts"
+  },
+  "dependencies": {
+    "astronomy-engine": "^2.1.19",
+    "@astro/astro-core": "workspace:*",
+    "@astro/utils": "workspace:*"
+  }
+}

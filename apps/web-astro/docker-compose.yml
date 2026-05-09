@@ -1,0 +1,258 @@
+services:
+  astro-postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${ASTRO_POSTGRES_USER:-astro}
+      POSTGRES_PASSWORD: ${ASTRO_POSTGRES_PASSWORD:-astro}
+      POSTGRES_DB: ${ASTRO_POSTGRES_DB:-astro}
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-astro/named/astro-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${ASTRO_POSTGRES_USER:-astro} -d ${ASTRO_POSTGRES_DB:-astro}
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  astro-redis:
+    image: redis:7
+    restart: unless-stopped
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-astro/named/astro-redis:/data
+
+  astro-qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-astro/named/astro-qdrant:/qdrant/storage
+
+  astro-api:
+    image: node:20-bullseye-slim
+    working_dir: /repo
+    restart: unless-stopped
+    init: true
+    volumes:
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
+      - ${ROOT_FOLDER_HOST}/media/data/books/2-Collections/Esoterica:/esoterica:ro
+    environment:
+      PORT: 4020
+      HOST: 0.0.0.0
+      LOG_LEVEL: ${ASTRO_LOG_LEVEL:-info}
+      ASTRO_ENGINE: ${ASTRO_ENGINE:-swiss}
+      SWISS_EPHEMERIS_ENABLED: ${SWISS_EPHEMERIS_ENABLED:-true}
+      SWISS_EPHEMERIS_PATH: ${SWISS_EPHEMERIS_PATH:-}
+      PNPM_STORE_DIR: ${ASTRO_PNPM_STORE_DIR:-/repo/.pnpm-store/v3}
+      DATABASE_URL: postgresql://${ASTRO_POSTGRES_USER:-astro}:${ASTRO_POSTGRES_PASSWORD:-astro}@astro-postgres:5432/${ASTRO_POSTGRES_DB:-astro}
+      REDIS_URL: redis://astro-redis:6379
+      QDRANT_URL: http://astro-qdrant:6333
+      QDRANT_COLLECTION: ${ASTRO_QDRANT_COLLECTION:-esoterica}
+      QDRANT_API_KEY: ${ASTRO_QDRANT_API_KEY:-}
+      ESOTERICA_SOURCE_DIR: /esoterica
+      ESOTERICA_INDEX_PATH: ${ASTRO_INDEX_PATH:-/repo/.esoterica-index}
+      ESOTERICA_AUDIT_LOG: ${ASTRO_AUDIT_LOG_ENABLED:-1}
+      ESOTERICA_AUDIT_LOG_PATH: ${ASTRO_AUDIT_LOG_PATH:-/repo/.esoterica-index/lore-audit.jsonl}
+      ESOTERICA_ADMIN_TOKEN: ${ASTRO_ESOTERICA_ADMIN_TOKEN:-}
+      ESOTERICA_AUTO_REFRESH: ${ASTRO_AUTO_REFRESH:-1}
+      ESOTERICA_REFRESH_ON_START: ${ASTRO_REFRESH_ON_START:-1}
+      ESOTERICA_REFRESH_HOURS: ${ASTRO_REFRESH_HOURS:-24}
+      ESOTERICA_ROTATE_DAILY: ${ASTRO_ROTATE_DAILY:-1}
+      ESOTERICA_STRICT_BRAND_FILTER: ${ASTRO_STRICT_BRAND_FILTER:-0}
+      ALLOW_DEV_AUTH: ${ASTRO_ALLOW_DEV_AUTH:-true}
+      DEV_USER_EMAIL: ${ASTRO_DEV_USER_EMAIL:-ian@rasies.com}
+      DEV_USER_NAME: ${ASTRO_DEV_USER_NAME:-Ian}
+      OPENAI_API_KEY: ${ASTRO_OPENAI_API_KEY:-ollama}
+      OPENAI_BASE_URL: ${ASTRO_OPENAI_BASE_URL:-http://ollama-general:11434/v1}
+      OPENAI_MODEL: ${ASTRO_OPENAI_MODEL:-gpt-oss:20b}
+      ESOTERICA_EMBED_BASE_URL: ${ASTRO_EMBED_BASE_URL:-http://ollama-embed:11434/v1}
+      ESOTERICA_EMBED_MODEL: ${ASTRO_EMBED_MODEL:-nomic-embed-text}
+      MAPBOX_TOKEN: ${ASTRO_MAPBOX_TOKEN:-}
+      OPENCAGE_KEY: ${ASTRO_OPENCAGE_KEY:-}
+      NOMINATIM_BASE_URL: ${ASTRO_NOMINATIM_BASE_URL:-https://nominatim.openstreetmap.org}
+      NOMINATIM_USER_AGENT: ${ASTRO_NOMINATIM_USER_AGENT:-astro-multibrand/1.0}
+      NOMINATIM_CONTACT_EMAIL: ${ASTRO_NOMINATIM_CONTACT_EMAIL:-ian@rasies.com}
+      NOMINATIM_MAX_RPS: ${ASTRO_NOMINATIM_MAX_RPS:-1}
+      GEO_PROVIDER_ALLOW_NOMINATIM_IN_PROD: ${ASTRO_ALLOW_NOMINATIM_IN_PROD:-0}
+      GEO_RATE_LIMIT_MAX: ${ASTRO_GEO_RATE_LIMIT_MAX:-90}
+      GEO_RATE_LIMIT_WINDOW_MS: ${ASTRO_GEO_RATE_LIMIT_WINDOW_MS:-60000}
+      READING_RATE_LIMIT_MAX: ${ASTRO_READING_RATE_LIMIT_MAX:-20}
+      READING_RATE_LIMIT_WINDOW_MS: ${ASTRO_READING_RATE_LIMIT_WINDOW_MS:-60000}
+    command: >
+      sh -c "apt-get update
+      && apt-get install -y --no-install-recommends python3 make g++
+      && rm -rf /var/lib/apt/lists/*
+      && corepack enable
+      && pnpm --store-dir $$PNPM_STORE_DIR install
+      && pnpm --store-dir $$PNPM_STORE_DIR --filter @astro/astro-engine-swiss rebuild swisseph
+      && pnpm --filter @astro/api exec prisma generate
+      && pnpm --filter @astro/api exec prisma db push --accept-data-loss
+      && pnpm --filter @astro/api exec tsx src/server.ts"
+    depends_on:
+      astro-postgres:
+        condition: service_healthy
+      astro-redis:
+        condition: service_started
+      astro-qdrant:
+        condition: service_started
+    ports:
+      - ${ASTRO_API_PORT:-3200}:4020
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:4020/healthz').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+    x-runtipi:
+      add_to_main_network: true
+
+  astro-web-jupiterseek:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    init: true
+    volumes:
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-jupiterseek exec next build
+      && pnpm --filter @astro/web-jupiterseek exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      astro-api:
+        condition: service_healthy
+    ports:
+      - ${ASTRO_JUPITERSEEK_PORT:-3201}:3000
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+
+  astro-web-maleficme:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    init: true
+    volumes:
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-maleficme exec next build
+      && pnpm --filter @astro/web-maleficme exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      astro-api:
+        condition: service_healthy
+    ports:
+      - ${ASTRO_MALEFICME_PORT:-3202}:3000
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+
+  astro-web-saturnleo:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    init: true
+    volumes:
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-saturnleo exec next build
+      && pnpm --filter @astro/web-saturnleo exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      astro-api:
+        condition: service_healthy
+    ports:
+      - ${ASTRO_SATURNLEO_PORT:-3203}:3000
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+
+  astro-web-saturnseer:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    init: true
+    volumes:
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-saturnseer exec next build
+      && pnpm --filter @astro/web-saturnseer exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      astro-api:
+        condition: service_healthy
+    ports:
+      - ${ASTRO_SATURNSEER_PORT:-3204}:3000
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+
+  astro-web-oracleveil:
+    image: node:20-alpine
+    working_dir: /repo
+    restart: unless-stopped
+    init: true
+    volumes:
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
+    environment:
+      NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+    command: >
+      sh -c "corepack enable
+      && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
+      && pnpm --filter @astro/web-oracleveil exec next build
+      && pnpm --filter @astro/web-oracleveil exec next start -p 3000 -H 0.0.0.0"
+    depends_on:
+      astro-api:
+        condition: service_healthy
+    ports:
+      - ${ASTRO_ORACLEVEIL_PORT:-3205}:3000
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+
+x-runtipi:
+  schema_version: 2

@@ -1,0 +1,6619 @@
+EEE ad
+
+Py Nie ae
+ig
+
+Ve
+‘aK
+4)
+Wile
+
+STEVE JACKSON GAMES
+
+UAL HL 1 Hit isi:
+ii at) We i
+
+
+
+
+INTRODUCTION .......- 3 -HALFLINGS ........ sees
+Why d20?. sc... de eee: 3 es Base Ea « +3
+About the Authors ...... 4 Ore Racial Traits ......
+
+What Do You Get When
+
+]. ABILITIES ..........- 4 mee e..
+
+Your ABILITY SCORES ..... 4
+Strength << na0iw 4 dee 4  3.CLASSES ..........
+Dexterity ..........--- 5
+Constitution . . "5 BARDS ......-02eeeeeee
+faeries |e ne 5 Bard Class Features ... .
+
+ii dil ne aa Bards in Munchkin ....
+Wisdom «..6cciiada esas 5 Cc s
+
+Charisma ..........-45 5 a ch Adee coke
+; pg MONKS ool. ce eb eee
+MoRrE! Mooooo0000re! : . . 5 Cleric Class Features ...
+\ Monk Class Features ...
+
+a 2. RACES eer cece 6 eotil, nauk
+This Is Not Your "THIEVES: <6 as ae Se beeeees
+Daddy's Elf ......+-- 6 Thief Class Features ....
+
+HUMANS .... ig PAGS) 8 oie 6 WARRIORS .....--2-00005
+Human Racial Traits ....7 Warrior Class Features .
+
+DWARVES ..... cee tees Zz WIZARDS... 2 cele
+Dwarven Racial Traits .. . 8 Wizard Class Features .. .
+
+ELVES 0.0. ccc eee cde co oee 9
+rd _ : 9 4. SKILLS AND
+
+ark Elves? .........
+Elven Racial Traits ..... 11 FEATS .....+++++-
+
+GNOMES .....----- eee: 1] SKILLS .....--- +e eee
+Gnomes in Munchkin .. 11 CHEATS ... UH, FEATS .....
+Gnome Racial Traits ...12
+
+13
+13
+14
+
+14
+
+15
+
+15
+17
+17
+18
+18
+19
+20
+
+21
+
+21
+21
+22
+
+23
+
+23
+24
+
+5. DESCRIPTIONS ..... 32
+MUNCHKIN ALIGNMENTS .. . 32
+Good and Evil ........ 32
+Law and Chaos .... s+ 32
+RELIGIONS 433556. 5 ae 32
+
+Nine Paths to Nirvana . . 33
+LOOKS, PERSONALITY, AND
+
+BACKGROUND ....... 34
+Quick Appearance
+Tablé cs. .isice «eae 34
+6. EQUIPMENT ....... 36
+WEAPONS 0c « sees 36
+STUPP . i.¢3cvgaes ve eee 37
+7 SPRIAS os os vax 38
+The Munchkin Clerical
+DOMGIR 5 o oarvs eo ooo 38
+CUTSES S50 shes, 6 od EES 40
+Spells in Modern
+d20 Games ........ 43
+Si? —— rer 48
+OPEN GAMING
+LRSM. cc 48
+
+Steve Jackson Games is committed to full
+
+support of Munchkin d20, except when we’re
+disclaiming any responsibility for its existence.
+Our address is SJ Games, Box 18957,
+Austin, TX 78760. Please include a self-
+addressed, stamped envelope
+(SASE) any time you write us
+(putting a blank check inside the
+SASE is optional, but highly recom-
+' mended if you want a speedy reply)!
+: Resources include:
+i d20 Weekly (www.d20weekly.com).
+Our newest online magazine covers
+Dungeons and Dragons, Spy-
+craft, d20 Modern — and, of *
+course, Munchkin d20. It is your
+first, best source of news about all d20
+releases, with articles, editorials, and reviews.
+d20 Weekly subscribers also have access to
+playtest files online!
+
+About Steve Jackson Games
+
+New supplements and adventures. SJ
+Games continues to grow, and we’ ll be happy to
+let you know what’s new. Check out
+
+our website (below).
+
+Errata. Everyone makes mis-
+
+takes, including us — but we do
+
+our best to fix our errors. Up-
+to-date errata sheets for all
+releases, including this book,
+are available on our website.
+Gamer input. We value
+your comments, for new prod-
+ucts as well as updated
+printings of existing titles!
+Internet. Visit us on
+
+the World Wide Web at
+www.sjgames.com for an online
+catalog, errata, updates, Q&A, and much more.
+Gobs and gobs of munchkinly goodness can be
+found at www.sjgames.com/munchkin/.
+
+CONTENTS
+
+
+
+
+
+For far too long, fantasy roleplayers have tried to
+convince the rest of the world that they are interested
+in building a story, a “shared narrative experience,”
+and that they are not simply about killing monsters,
+looting: the corpses, and making their PCs like unto
+gods. Recently, a new style of RPG has appeared . . .
+games which encourage the creation of an epic tale,
+rewarding the pure roleplaying experience and the
+ingenuity of those who share in its creation.
+
+This is not one of those games.
+
+The Munchkin Player’s Handbook presents
+fantasy roleplaying distilled to its monster-slaying,
+treasure-grubbing, power-corrupting essence. No
+more tedious interaction with the long-lost prince of
+
+se >
+
+No, Really. Why?
+
+d20 games are compatible with the first and
+still most popular of the fantasy roleplaying
+games on the market. It only seems logical that,
+if one wishes to create a humorous — one might
+even say “parody,” especially if one’s lawyers
+have strongly suggested the frequent use of the
+word — roleplaying game, that it use the system
+with which the most players are familiar. With
+the advent of the Open Gaming License (see
+www.opengamingfoundation.org for more
+details than anyone but a copyright attorney
+could possibly care about), this game system has
+opened up for all game companies to (ab)use
+in their own products. It all relates back to the
+theory of network externalities, you see.
+
+“Network Externalities’?
+What the Heck
+Does That Mean?
+
+Money.
+
+the distant elven king-
+dom — hold him for
+ransom, or just off him
+and loot the corpse. No more
+intricate strategies for infiltrating the
+mountain stronghold of the bandit
+king — blast down the front gate and
+kill everyone in the way. Heck, just
+kill everyone! No more time-
+wasting royal parties — while
+all the nobles are (ugh) danc- —.
+ing, you have time to ransack the cloakroom.
+
+In the end, all that matters is what fell beasties
+you kill, what sparkly trinkets you recover from their
+lairs, and — most important of all — how much experi-
+ence you get. As the sages wrote in The Munchkin’s
+Guide to Power Gaming: If it’s not about winning,
+why is it called a game?
+
+WHAT YOU NEED TO PLAY
+
+Most important, you will need imagination. It
+will help you to visualize the world the GM has buried
+under a tsunami of adjectives and adverbs, in the
+process exhausting his thesaurus and half of the Latin-
+English dictionary he hadn’t opened since the 11th
+grade. It will help you craft exciting combat scenes
+and exquisite prayers. Mostly, though, it will help you
+justify all the bonuses you’ve assigned your character,
+with reference to a history and family he didn’t have
+until you started talking.
+
+You will also need a character sheet (paper usu-
+ally works well), a soft-lead pencil (for faster erasing
+of old stats as you level, and level, and level again),
+this book, the Dungeons & Dragons Player’s Hand-
+book (the authors would like to point out that its glossy
+cover makes for an excellent coaster), and dice. Buck-
+ets of dice. Scads and oodles and metric tons of dice.
+Many gamers are fanatical about their own dice, so
+you’re unlikely to be able to scam dice from your
+friends after the first game or two. Next time you
+visit your parents, raid the Monopoly box. And
+Yahtzee . . . that’s good for five at once...
+
+THE MUNCHKIN PLAYERS
+HANDBOOK_
+
+With this book, munchkins can finally use the
+d20 system to play the game they want to play.
+Shorn of all the irrelevancies of diplomacy, eti-
+quette, and (ugh) court dances, the d20 system is a
+perfect tool for gamers who want to get down to
+the nitty-gritty of killing monsters and taking their
+stuff. Here’s an overview:
+
+The Introduction is what you’re reading
+now. If you haven’t figured that out, put this book
+down and pick up a strategy guide to Old Maid.
+
+INTRODUCTION
+
+
+
+
+Chapter 1 presents a discussion of munchkin
+ability scores — what they mean, how they’re used,
+and why we want them to be as high as possible.
+(Or higher. Be greedy.)
+
+Chapter 2 lists the races available to PCs in
++ Munchkin d20; for the most part, these are taken
+from the Munchkin card game, although some
+races are new here.
+
+Chapter 3 lists the classes available to
+munchkin adventurers. While you may be familiar
+with other classes that go by the same names, rest
+assured that the classes in this book are most defi-
+nitely the ones you have been looking for.
+
+Chapter 4 has a selection of skills and feats
+that every munchkin should have. And some that
+no one should have.
+
+Chapter 5 talks about the mundane stuff that
+gets in the way of true munchkinry, but which
+GMs insist on for arcane reasons of their own. For-
+tunately, it’s short.
+
+Chapter 6 talks about equipment. Here’s
+where all the weapons are — a subject of true inter-
+est to every munchkin.
+
+Chapter 7 contains a discussion of munchkin
+magic, both divine and arcane. If you think wish is
+at too high a level, this chapter is definitely for
+you.
+
+Andrew Hackard is the Managing Editor of
+Steve Jackson Games and a munchkin of long
+standing. His roleplaying experience dates back
+two decades to The Keep on the Borderlands, in
+which he learned that detect magic is not the best
+choice for one’s sole first-level spell. When he is
+not making award-winning authors cry for their
+mommies or writing game supplements of dubi-
+ous merit, Andrew can be found sitting at home
+in the dark, watching movies that everyone else
+saw five years ago.
+
+Steve Jackson’s first roleplaying campaign
+involved three little books in a cardboard box,
+
+About the Authors
+
+and a DM who didn’t really understand the
+encounter tables OR the combat system, but
+thought cloudkill was cool. His party wandered
+through the wilderness, encountering one bandit
+group after another, smothering them in choking
+death and taking their stuff. No later campaign
+has quite measured up. More recently, he is the
+designer of Munchkin, the card game on which
+this series of supplements is based. Despite this,
+his membership in the Academy of Adventure
+Game Design’s Hall of Fame has not been
+revoked . . . yet.
+
+CHAPTER ONE
+
+ABILITIES
+
+A Munchkin d20 PC has six
+ability scores, which typically
+range from 3-18 but can go much
+higher — and should, at the first
+available opportunity. (Some
+races have bonuses
+which allow some initial
+scores to be higher than
+18. They rock.) Three abil-
+ities — Strength, Dexterity, \
+and Constitution — are physi-
+cal traits, and the other three —
+Intelligence, Wisdom, and
+Charisma — are mental.
+
+a
+
+M ABILITIES
+
+aM
+
+YOUR ABILITY
+SCORES
+
+Each of the six ability scores describes a
+different facet of your character. Every char-
+acter class is associated with one of these scores
+
+~ its “prime requisite” — and it is usually good for that
+score to be the highest of the six. Of course, all scores
+should be as high as possible. . .
+
+STRENGTH (STR)
+
+Strength is the measure of raw physical power. It
+controls how well your hero can attack monsters and
+how hard he hits them when he succeeds. Obvious-
+ly, it is very important for STR to be as high as
+
+possible. Strength also is the key ability for
+
+
+
+
+
+several skill checks, and is used when your PC needs
+to throw or break something. Strength gets used a lot.
+
+DEXTERITY (DEX)
+
+Heroes use Dexterity to wiggle out of tough situ-
+ations, slip out of bindings when the GM decides to
+capture them, and dodge the whirling blades of the bad
+guys. Thieves use Dexterity to slither through narrow
+openings, disarm intricate traps on locked chests con-
+taining stuff that shortly will belong to them, and
+dodge the whirling blades of the good guys, including
+the rest of their own party. For all these reasons, it is
+important for Dexterity to be as high as possible.
+Reflex saving throws are modified by Dexterity. Dex-
+terity gets used a lot.
+
+CONSTITUTION (CON)
+
+Constitution describes physical hardiness and
+ability to withstand infection, illness, and sudden-
+onset steel poisoning. With a high Constitution, a
+PC gets bonus hit points. With a low Constitution, a
+PC has to take a hit point penalty. The math is obvious
+... itis important for Constitution to be as high as pos-
+sible.
+
+Characters also use Constitution to help with
+physical endurance (running, swimming, staying up
+all night and all the next day rolling dice). Spellcasters
+use Constitution to allow them to ignore pain and con-
+tinue hurling fireballs at the helpless goblins down the
+passageway. Fighters use Constitution to allow them
+to ignore fireballs and continue hurling goblins down
+the passageway. Fortitude saving throws are modified
+by Constitution. Constitution gets used a lot.
+
+INTELLIGENCE (INT)
+
+Intelligence is book learning and raw brainpower.
+Characters with high Intelligence can speak more lan-
+guages, pick up skills more quickly, and don’t have to
+have the DM repeat the boxed text. (Wait, that last one
+refers to the players . . . oh, skip it. We’ve never yet
+seen a dumb player who could play a smart character.
+The reverse is not at all true, however.) It is important
+for Intelligence to be as high as possible — even a fight-
+er needs some skill points. Wizards also use Intelli-
+gence to control how many spells they receive and how
+quickly they receive them. Intelligence gets used a lot.
+
+WISDOM (WIS)
+
+Wisdom describes native cunning, willpower,
+and intuition — all the things which factor into
+“brainpower” but can’t be learned in books. People
+with high Wisdom scores get a bonus to their Will
+saves. High Wisdom also increases the acuity of
+your senses, as you seem to know where to look or
+listen almost before there’s anything there to see or
+hear. Finally, divine power manifests as received
+wisdom, so clerics use this ability to determine
+what bonus spells they get, and what spell levels
+they can use. Of course, it’s often difficult to distin-
+guish ineffable wisdom from the ravings of a dun-
+derhead, so don’t dismiss a street beggar just
+because he sounds addlepated. He’s probably a
+
+20th-level Zen monk who understands that it is
+important for Wisdom to be as high as possible and
+is about to unleash divine thunder on your butt.
+Wisdom gets used a lot.
+
+Monsters (and characters) with low Wisdom
+scores will fall for anything.
+
+CHARISMA (CHA)
+
+A character’s charisma determines both looks
+and personality — all the things that attract others . . .
+or repel them. Any attempts to influence others are
+modified by Charisma, and this ability governs a
+bard’s spell selection and rate of progress. Many
+other bardic powers are aided by Charisma (just ask
+the Backstreet Boys and Britney Spears). Addition-
+ally, clerics’ ability to turn or command undead is
+influenced by Charisma — apparently undead are
+repelled by cuteness. Charisma gets used . . . almost
+never, in a true Munchkin game. Them’s the
+breaks. If your GM insists that you should have a
+low score, this is probably the one you want to
+assign (at least while you search for a more pliable
+GM). No one ever slaughtered a room full of icky
+nasties with a charming personality, and “looks to
+die for” is, we hate to tell you, just a figure of
+speech.
+
+Nevertheless, if you wind up with a high
+Charisma, all is not lost. You can, of course, be a
+bard. You can also take every opportunity to “use
+your Charisma” by rolling to impress every shop-
+keeper, barmaid, and slavering foe that you meet.
+“Give me a break on the price. Serve me loyally.
+Here’s my room key.” A high enough Charisma can
+be abused. Have fun.
+
+MORE!
+MOOOOOOOOORE)
+
+We can’t emphasize enough the importance of
+changing your ability scores . . . upward, ever upward.
+These are the very basis of your character . . . in their
+own way, just as important as acquiring the Armor of
+Foe Repulsion and the Sword of Slaying Everything
+But Squid . . . and you should never miss a chance for
+a permanent improvement. A good eraser and a soft
+pencil should be part of every player’s arsenal.
+
+ABILITIES ©
+
+
+
+
+
+CHAPTER_I WO
+
+Most of this chapter is Closed Content.
+Open Content appears in boxes such as this one.
+
+The world is home to many intelligent races, as
+well as orcs. Most of these races have been around a
+long time, to the astonishment of draconic observers.
+The distinction between a “civilized” race and a “tar-
+get” is sometimes fuzzy, and adventurers are advised
+to keep the following questions in mind:
+
+1. Are there any of this race in my adventuring
+group?
+
+2. Did a member of this race fund my current
+expedition?
+
+3. Are they putting up any resistance?
+
+If the answers to all three of these questions is
+“no,” hack and slash with a clear conscience. Even if
+only one answer is “yes,” you’re probably in the clear
+... as long as you can come up with a good story.
+
+This Is Not
+Your Daddy's Elf
+
+Most races apply bonuses
+to certain ability scores. This
+is good. Most races apply
+penalties to others. You may
+be forgiven for conveniently
+forgetting this second step;
+remember, everybody likes a
+positive attitude.
+
+Note that these are not
+the same races as
+found in Certain
+Other Books. Nay,
+not even close. These
+are much more fun. We’ ve
+done studies.
+
+HUMANS
+
+This is the “default” choice in Munchkin.
+Humans make up most of the population — largely
+because they breed faster than any other race except
+orcs, and humans aren’t usually hunted by roaming
+bands of adventurers. Many humans, recognizing that
+they are becoming the dominant race in many lands,
+have taken it upon themselves to “understand” other
+cultures, the better to “preserve” them. This
+usually translates as inept humans bumbling into well-
+
+RACES
+
+established ways of life and attempting to remold
+them in the humans’ image of how they think the race
+in question lives, as distinct — dramatically so — from
+how they actually do. It’s all good-hearted and gener-
+ally well-intentioned, which only makes it more
+annoying to those who have to either put with the
+humans’ interference or kill them.
+
+The human lifespan is short — averaging around
+50 years, with exceptionally old individuals reaching
+70 or 80 — and so the race’s historical perspective is
+somewhat lacking. On the other hand, this reduced
+tudes about whom to kill, and a
+human kingdom tends to be unpre-
+
+lifespan gives most humans a
+remarkable ability to learn new
+dictable, as the human element adds
+
+sense of urgency in what they do, Capa
+ways to kill things.
+a sort of “wild card” to the pro-
+
+and humankind has made stun-
+ning advances in the fields of
+killing things faster and
+
+killing them in greater quanti-
+
+ties. Humans also tend to have
+more flexibility in their atti-
+
+As a fairly young race, human-
+ity doesn’t have the ancient alliances
+or enmities that characterize rela-
+tions among some of the other
+races. Accordingly, any sort of
+negotiation or interaction involving a
+
+ceedings. Many other races have The
+described the interplay among human average
+nations as the bickering of children —prynan,
+
+on a grand scale. The humans, for
+
+their part, think of the older races as uncles and aunts
+who make them eat vegetables and give them woolen
+drawers for birthdays. Many of these older races fear
+what might happen if these “children” ever grow up
+... and dream of ways to, metaphorically, smother
+them in their cradles. Or maybe not so metaphorically.
+
+ROLEPLAYING HUMANS
+
+Be yourself (assuming that in the mundane
+world you are actually human, rather than a dolphin,
+Labrador retriever, or professional wrestler). Look
+around you. Realize that humans have custody of the
+world, and make sure that people of all other races
+realize that you respect their quaint little customs and
+charming quirks, even as you are blessedly free of
+them yourself. It is a terrible but thrilling task to
+shoulder the human’s burden in this world.
+
+
+
+
+
+“I don’t have anything against the other
+races, really; I’m just glad they mostly keep to
+themselves. Dwarves aren’t any fun, but they
+make wonderful weapons. Elves are kinda
+stuffy, but once you get em drinkin’, they tell
+the most amazing stories about things they sup-
+posedly saw. Gnomes are a lot of fun to be
+around, but don’t ever trust anything you see,
+and feel your chair before sitting down to din-
+ner. (And always, always carry a spare hanky
+when you're traveling with a gnome.) Halflings
+are sorta cute, but really they belong in carni-
+vals with the bearded ladies — hey, I bet those
+are dwarves! — and the fire-eaters, and not out
+in public where they might get stepped on. And
+orcs... ugh. I swear, the last time an orc took
+a bath, it must have drowned. I once knew an
+orc who was so stupid that he — what was that?
+Your mother’s mother was an orc? That
+explains the nose, then — urk!”
+
+— Last words of Sallin Dullwit,
+human, explaining his philosophy
+of intercultural appreciation
+
+OTHER RACES SAY...
+
+Dwarves have found humans to be a nigh-
+insatiable market for dwarven weapons, armor, and
+tools — and, best of all, humans show an amazing apti-
+tude for leveling forests, which annoys elves to no
+end. If only humans weren’t so cheerful all the time,
+and if they showed the proper respect for the earth . . .
+Dwarves are amused (as amused as dwarves ever get)
+that humans build beautiful cities under the stars and
+then proceed to live under roofs. Faster, easier, and
+cheaper just to live in caves.
+
+Elves see humans as flighty, short-sighted, irre-
+sponsible, and prone to arrogance. They don’t have
+nearly enough respect for history, they waste
+resources with abandon, and their puny rounded ears
+can’t flick elegantly the way elven ears do. The
+human fondness for blood sports is also quite dis-
+tasteful (if strangely alluring — not that any self-
+respecting elf would ever admit to it)... and human
+“art”? True art takes decades to develop, if not cen-
+turies. So far, the only human talent seems to be prop-
+agating themselves across the lands, at which they are
+
+HUMAN RACIAL TRAITS
+
+Base Speed: 30 feet.
+
+Ability Modifiers: None.
+
+Special Qualities: Humans receive an extra
+feat at first level, representing their astonishing
+breadth of knowledge and skill. Humans also
+receive four extra skill points at first level and
+one extra point at every level after, representing
+... 0h hell, it’s the only way we can get people
+to play humans at all in this game.
+
+disturbingly proficient — almost as bad as orcs, though
+slightly more prone to bathe.
+
+Gnomes think of humanity as one big mark, ripe
+to be fleeced. They tend to mingle freely in human
+cities, selling off technological wares and playing all
+manner of practical jokes. Gnomes also, inexplicably,
+like to stand immobile in human gardens for hours,
+even days at a time. Humans provide an unending
+series of gullible fools for them to exploit.
+
+Halflings, of all the races, seem to have the best
+relationship with humanity. This may be because
+humans tend to stick up for their “little friends,” but
+most likely it has more to do with the human inven-
+tion of the all-night diner. Halfling pipeweed mer-
+chants get along very well with human wizards, for
+whom smoking a pipe is almost a job requirement.
+Many humans also keep a looser grip on their purses
+than they really ought to, which delights many
+halflings to no end.
+
+Orcs think humans tasty. Go good with beer.
+Human women very pretty.
+
+Ju
+
+DWARVES
+
+Many people of other races think that they under-
+stand dwarves. They fail to realize that much of the
+dwarven spirit lies hidden from others. (To say noth-
+ing of themselves — most dwarves wouldn’t be any dif-
+ferent if you scooped their brains out and replaced
+them with a double handful of gravel.) And yet...
+some dwarves do venture out of the mountains, and
+some dwarves do open up to others. Dwarves tend to
+be quick to mistrust and slow to offer friendship, but
+once you gain that friendship, it is as steadfast as the
+rocks that the dwarves keep talking about. Dwarven
+society is resistant to change, but once a change is
+made, the society devotes all its attention to the new
+direction. It’s not that dwarves lack imagination . . .
+precisely . . . it’s just that their imaginations all tend to
+run in the same direction at the same time. Dwarves
+are thought to live about 250 years, but as many an elf
+has said, “You call this living?”
+
+RACES (am 7
+
+
+
+
+“BARKEEP! More ale for my friend and me!
+
+“You were asking how I got to be here, so far
+from the mountains. "Tis a sad tale, indeed, and
+not one suited for telling tonight. No, tonight I will
+share with you the story of how I forged my sev-
+enth axe, the one I gave to my grandfather's first
+cousin's third daughter. It begins . . .
+
+[Much detail omitted in the public good. ]
+; “And, finally, the axe was done and I began
+to journey back to my father’s clan. WHERE’S
+THAT DAMN ALE? Now, as I set out, 1... *thud*
+
+— Bombin Steelaxe, indulging in a
+quick anecdote before bedtime
+
+Dwarves are justly famous as metal- and
+stoneworkers. Many fine weapons and armor, magical
+and mundane, have come out of dwarven smithies.
+They’ re not so hot on horseshoes, andirons, and deco-
+rative gates, but that may just be because they haven’t
+figured out how to kill people with them yet. Gems are
+hard and often have sharp crystals poking out at odd
+angles, which makes them wonderful sling stones.
+That gems might have value was a discovery left to
+other races.
+
+Adventuring dwarves usually take up the war-
+rior’s life; their focus on weapons and work in the
+smithies gives them the upper-body strength needed to
+really drive an axe blade home. Dwarves also produce
+many fine bards; the chanting of a dwarven town at
+work is a haunting sound never forgotten by the few
+nondwarves who hear it. (Dwarves claim to like it.
+Other races would rather listen to tortured spirits in
+hell.) Dwarven clerics tend to stay in their towns, but
+some few are motivated to strike out on their own and
+seek adventure. Wizardry is nearly unheard-of among
+the dwarves; dwarven wizards are actually more like-
+ly to be adventurers than not, simply because they are
+already half-outcast just from their vocation. (It’s con-
+sidered not quite sporting to use burning hands to light
+one’s smelting fire . . .) Thievery is nearly anathema to
+the dwarven character, and those dwarves who do
+attempt the roguish life tend not to be very good at it —
+the dwarven mindset focuses on bulling one’s way
+through problems, not evading or sneaking up on
+them.
+
+Finally, yes, dwarven women do have beards —
+modest ones, often sparse in comparison to those of
+dwarven men. Only men can grow mustaches, how-
+ever (and only dwarven women have back hair, so it
+balances . . . sort of). Dwarves are also, despite being
+short and stocky, quite aerodynamic — once you get a
+dwarf into the air, it flies quite nicely, and the sport of
+“dwarf tossing” has become quite popular in certain
+disreputable establishments around the land. (Ogres,
+in particular, are extremely good at it.) A well-tossed
+dwarf can often be made to “skip” across the surface
+of a pond, lake, or harbor, although then one has to
+deal with a sopping wet and rather annoyed dwarf.
+Assuming one fishes him out, that is, instead of run-
+ning like blazes in the other direction. We recommend
+the latter.
+
+ROLEPLAYING DWARVES
+
+You love gold, ale, axes, and hitting things with
+axes. You hate orcs, elves, dragons, elves, and the out-
+doors — especially if there are elves out there. And
+there are always elves out there. You know best what
+to do with metal, so demand all the gold from party
+treasure. When there is none, accuse the thief of mak-
+ing off with it. (If the thief is an elf, so much the bet-
+ter. If not, perhaps you can accuse the elf of being a
+thief in the bargain.)
+
+Kill orcs. Kill orc men, orc women, and orc
+babies. Kill them when they fight. Kill them when
+they surrender. Kill them as they sleep. If, by some
+chance, one of your comrades should. let an orc live
+(probably that bloody elf again), find an excuse at the
+first opportunity, then kill him. Remember that torture
+— oh, that’s a nasty word; let’s call it something nicer
+— persuasion often loosens an orc’s tongue. Of course,
+you don’t want him telling your companions some
+unflattering version of what happened (e.g., “The
+dwarf did it!”), so then you'll have to kill him. Blame
+it on the elf.
+
+Killing elves is frowned on in polite society, and
+even more so among other elves. This is a very good
+reason to get them alone. As long-lived as they are, it’s
+good to thin the herd from time to time. Of course,
+many elves feel the same way about dwarves, and
+those sneaky bastards have bows, so be careful. Wait
+until you can wrap your hands around their skinny
+necks . . . then squeeze.
+
+For some reason, other races think that their
+excessive height allows them to laugh at your proper
+stature. This is your chance to make allies of the
+gnomes and halflings, who are useful for walking
+ahead to spring traps and absorb damage. The words
+“short,” “small,” “little,” and so on are always good
+for a rousing argument about perceived insults. So are
+“tall,” “big,” and even “man-sized.”
+
+DWARYEN RACIAL
+TRAITS
+
+Base Speed: 20 feet (more when hurled).
+
+Ability Modifiers: +2 Strength, +2 Con-
+stitution, -2 Dexterity, -2 Charisma.
+
+Special Qualities:
+
+Darkvision: Dwarves can see up to 60 feet
+even in pitch darkness.
+
+Stonecunning: Dwarves get a +2 on all
+checks to notice unusual stonework and on
+Craft checks with metal- and stonework.
+Dwarves can also sense their approximate
+depth underground.
+
+Saving Throw Bonuses: +2 versus poisons,
+spells, and spell-like effects.
+
+Enhanced Carrying Capacity: Dwarves
+ignore any encumbrance effects less than
+“total.” They may use items which seem too
+large for their frame.
+
+
+
+
+
+Dwarf women are not the business of other races.
+They have their own females to abuse.
+
+Quaff ale. If you aren’t measuring your intake in
+barrels, you are not worthy to be called a
+dwarf. Sing loudly. Ignore the key.
+Watch bards cringe. Repeat a verse.
+
+Tell stories. The best stories
+are about making things, or about
+your very large family. Non-
+dwarves are always amazed at the
+depth and variety of tales a
+dwarf can spin on these sub-
+jects: things your family
+made, the family of the
+dwarf who made something,
+things you made for your
+family, the family of the
+dwarf who made some-
+thing . . . Oh, we already
+did that last one. Well, that’s
+all right; it was a good story. If anoth-
+er dwarf tells a story, listen carefully.
+It is good manners to ask him to
+repeat it from the beginning when he finishes, so you
+can learn it and tell it yourself. Your non-dwarf com-
+panions will learn to appreciate this if you repeat it
+often enough.
+
+When you see equipment being abused, lecture
+the owner on proper care. Use visual aids. Walk off
+with the visual aids if possible, so that you will be sure
+that they will be cared for properly in the future.
+Armor is a particular problem, as — if it serves its func-
+tion — it will take on a disreputable appearance rather
+suddenly.
+
+If, by some chance, you should happen to have
+another dwarf among your party, spend hours arguing,
+at the top of your lungs, about the minutiae of weapon-
+smithing, armorcrafting, and the like. You want to be
+sure that everyone around recognizes that you are the
+superior authority here. Pay no attention to com-
+plaints; students always grumble when lesson time
+approaches.
+
+Finally, never willingly spend a night under the
+open sky. If the gods had meant for people to sleep
+outdoors, they would not have invented weather.
+
+OTHER_RACES SAY...
+
+Humans are impressed with the way dwarves
+focus on a task and do not quit until they have com-
+pleted it or they have died trying. They are far more
+impressed by the quantity and quality of armaments
+pouring out of the mountains. Humans like to think
+that they have a great deal in common with dwarves,
+and that they understand the dwarvish way of life.
+They are, of course, completely wrong.
+
+Elves think dwarves are far too much like the
+rocks they live under, with taste and manner as flat as
+their anvils. They do admit that dwarven weapons are
+unmatched; whether this is good or bad depends on
+whether the dwarf is using the weapon to behead sev-
+eral dozen orcs or to carve “Gurg Wuz Heer” in the
+mightiest tree in the forest.
+
+Dwarf wizard?
+These third edition
+rules are bogus!
+
+Gnomes look at dwarves as a warning of what
+can happen when you lose your sense of humor. They
+respect dwarven abilities, but think dwarves would be
+a lot happier if they’d come out in the sun and have a
+picnic once a day or so. And maybe shave. Gnomes
+also utterly fail to understand why
+
+dwarves seem to shun gems .. .
+pretty, pretty gems...
+Halflings are still trying to
+figure out why everyone else
+thinks dwarves are short. They
+respect the dwarven fondness for ale,
+although they hold out hope that some
+dwarf, some day, will eat a proper meal
+rather than a sausage pulled half-aflame
+from the campfire. Halflings admire
+dwarven jewelry, and tend to think that
+it would look much better on a lovely
+halfling lass than the hairy dwarven
+matron who’s currently wearing it.
+Orcs think dwarves tough and flavorless.
+Beard hair good for flossing teeth and making
+rope. In that order.
+
+ELVES
+
+Elves like to point out how they live in harmony
+with nature, how they have curbed their excesses, and
+how they and they alone understand the great sweep of
+history. For a race that claims to want only to live in
+peace, they sure butt into everyone else’s affairs a lot
+~ always, of course, in a serene, we-know-better-than-
+you manner. It’s a wonder there are any elves left.
+
+Their condescending amusement at the antics of
+“lesser” races would be intolerable if they weren’t
+right so annoyingly often. Elves seemingly live forev-
+er (an illusion understood by anyone who has ever
+attended an elven poetry recital and survived), but
+actually only live about 500 years or so. This longevi-
+ty causes them to lack any form of urgency . . . elves
+think nothing whatever of taking years to pen an ode,
+paint a portrait, or hold an election. Other races often
+find elves boring; elves prefer the word “meticulous.”
+Elves are so dedicated that they do not even sleep;
+instead, they enter a four-hour meditation state during
+which they plan their activities for the next day.
+
+What About Dark Elves?
+
+Many fantasy games have a “dark” elven
+race, one which lives underground, has strange
+magical powers, and is irredeemably evil. This is
+the ultimate munchkin race, but good luck get-
+ting your DM to agree to allow you to play one.
+We recommend playing a reformed dark elf who
+has forsworn the path of violence and depravity,
+having returned to the surface to live a life of
+purity and goodness. DMs eat that stuff up, the
+fools. Once he agrees, steer the campaign back
+underground as soon as possible, backstab your
+fellow adventurers, and play your new friend to
+the hilt!
+
+RACES 9
+
+
+
+
+
+Sudden confrontation repels
+elves, who prefer to simply outlast
+problems. Elves naturally shy away
+from situations in which they might
+be killed. This strikes other races as
+| * rank cowardice, but elves feel that
+they are a valuable natural
+resource, not to be squandered.
+This tendency has led elves to
+develop proficiency with mis-
+sile weapons, especially
+bows — all the better to fire a
+few arrows and then flee into
+the darkness of the forest.
+They gravitate toward wiz-
+ardry, being willing to spend
+the years of study which most
+other creatures would find bor-
+ing after a decade or so. Elven
+clerics are quite devout, and
+it’s a rare decorative shrub-
+bery which does not have its
+elven cleric praying to it and leaving little gifts under
+the branches. Elven bards are talented, but take many
+years to master the Jong songs in the standard reper-
+toire. (“Listening to an elfsong” is a dwarven idiom for
+mt, death.) Elves make good thieves, when they try, but
+"4 they find it is often more fruitful simply to wait for an
+inheritance later than to steal now . . . and if you can
+help that inheritance along, well, who’s to know?
+
+Elves tend to be tall and slender, with angular fea-
+tures and long, pointed ears. Blond hair has become
+very popular among elves recently, for reasons passing
+understanding, and some young elves have even
+explored ways to bleach their hair. Reports that elves
+can walk atop snow, or even walk on the surface of
+water itself, are greatly exaggerated.
+
+ROLEPLAYING ELVES
+
+Never forget that your longevity makes you supe-
+rior. Lose no chance to remind the rest of your party
+that you were an adult while their grandparents were
+in diapers. If, by some mischance, you are a young elf,
+hide this fact well. Humans are especially irritating,
+
+w with their pretense of caring about other people as they
+
+_ despoil the environment. Dwarves come in a close
+second, just because they are totally no fun to be
+around.
+
+Give your PC a name that instantly marks it as an
+elf. “Eoren Moonglimmer’” is a good one. You want to
+leave no chance that people will confuse your name
+with that of the gnome, human, or (worst of all) dwarf
+in the party.
+
+Elves are reputed to be excellent wizards, and
+you would do well to exploit the reputation, even if
+you have the magical talent of a garden slug. Scare
+foes with grand gestures and “booga booga” noises.
+Make them worry what spell is coming at them . . . if
+you are really good, they’ll burn their own spells for
+defensive purposes.
+
+Similarly, use a bow. Every elf should carry at
+least one bow. You get a bonus to its attacks; what’s
+the down side?
+
+RACES
+
+“Of course you would think that. You’re
+human. In the course of my life, I've seen your
+kingdom evolve from a few mud huts along the
+river to the decadent, plague-ridden place it is
+today. At least you don’t live in. caves. Oooh, I’m
+so frustrated. I feel a song coming on. This one is
+titled, ‘To All the Elves I’ve Loved Before, Part I:
+The Early Years.’ I’ll be busy for the next couple
+of hours; don’t bother me.”
+
+— Eoren Moonglimmer, to a human
+companion who remarked that his
+home city was especially advanced
+
+Don’t be motivated primarily by money . . . or at
+least, not where people can see you. There’s nothing
+wrong with money, but you’re supposed to be above
+all that materialist rot. If you must accept a large sum
+
+of money, try to get it in gems and jewelry.
+
+Sing a lot, especially when the dwarf is warm-
+ing up for another story. A 20-minute song about a but-
+terfly you saw half a century ago is excellent. A
+30-minute song is better still.
+
+Love your ears. Care for them. Pretend to hear
+far-off things, even when under the influence of mag-
+ical silence.
+
+OTHER RACES SAY...
+
+Humans find elves to be a perplexing combina-
+tion of flighty and lazy. They think elves focus far too
+much on trivialities, and not nearly enough on what is
+important — that is, killing each other and looting the
+corpses. Humans like to think that they have a great
+deal in common with elves, and that they understand
+the elvish way of life. They are, of course, completely
+wrong.
+
+Dwarves find elves to be foppish, overly con-
+cerned with their appearances, and completely useless
+for anything to do with real work. Elves wilt three
+steps from the entrance to a dwarven smithy; dwarves
+claim it’s from the heat, but elves know it’s the stench.
+Dwarves would be jealous that elves can walk atop of
+snow, but that would require dwarves to want to be in
+the snow in the first place.
+
+Gnomes get along very well with elves, although
+they do feel that the elves take themselves entirely too
+seriously. Gnomes appreciate elves’ huge, pointy
+ears, because they’re one of the few things which can
+distract onlookers from gnomes’ huge, not-pointy
+noses. Gnomes are very fond of dipping elves’ ears in
+inkwells while they meditate.
+
+Haliflings love visiting elven villages. After tak-
+ing 200 years to learn, an elven cook can prepare a
+meal of such delicacy that one weeps to consider it —
+for a decent few seconds, after which one inhales it
+and offers a respectful belch. Halflings don’t under-
+stand why elves are so reluctant to leave their homes,
+since there’s certainly nothing in the forest worth
+stealing.
+
+Orcs love elves. Especially in casseroles with
+wild mushrooms. Ears tasty snacks.
+
+
+
+
+
+Base Speed: 30 feet.
+
+Ability Modifiers: +2 Dexterity, +2 Intelli-
+gence, -2 Strength, -2 Constitution.
+
+Special Qualities:
+
+Spell Immunities: Elves do not sleep, and are
+even immune to magical sleep spells and spell
+effects. Elves also receive +2 on any saves against
+Enchantment spells or effects.
+
+ Low-Light Vision: Elves can see in poor illu-
+mination as a human can in daylight. Even
+starlight is sufficient for elven sight.
+
+ELVEN RACIAL TRAITS
+
+Weapon Proficiency: Elves are proficient
+with all true bows (but not crossbows).
+
+Skill Bonuses: Elves receive +2 to Spot, Lis-
+ten, and Search checks — their patience enables
+them to find hidden items more easily.
+
+Running Away: Elves do not lose Dexterity
+bonuses to AC when running away from a
+combat.
+
+Assist Another: An elf receives a 50 XP
+bonus for any monster it wounds which is then
+killed by someone else.
+
+GNOMES
+
+Gnomes are an enigma to many other races; they
+seem a sort of bizarre crossbreed of elves, dwarves,
+and halflings. It is true that gnomes revere nature and
+have some sort of innate magical nature, like elves;
+
+Gnomes in Munchkin
+
+Gnomes are not currently supported
+as a race in the Munchkin card game.
+If you would like to add them, how-
+ever, the card text follows. Also
+note that the Floating Nose and
+Shadow Nose will ignore a
+Gnome (though _ the
+Gnome can certainly
+attack the Nose,
+if it wishes
+
+A Gnome in combat alone may play a single
+monster from his hand as an Illusion; cards may
+enhance this monster normally. The illusionary
+monster fights beside the Gnome for a single com-
+bat and then vanishes; its levels add to the
+Gnome’s levels.
+
+Gnomes are -1 to Run Away.
+
+Monsters (except the Noses) will react to
+Gnomes as though they were Halflings. They’re
+too dumb to tell the difference.
+
+that gnomes enjoy working with stone and metal, like
+dwarves; and that gnomes are silly and short, like
+halflings. But there is so very much more to gnomes
+than that. Mostly, it’s the nose.
+
+Gnomes have never been mistaken for other
+races except in the very dimmest of light. Their noses
+are simply too large to be ignored. Small birds have
+been known to perch on gnomish noses, and at least
+one halfling has taken shelter from inclement weath-
+er by cozying up to a gnome. A group of chattering
+gnomes has a high, twangy sound that makes other
+people desperately want to head the other way, or just
+to pierce their eardrums with hatpins. A gnome with a
+head cold is practically mute. Gnomish bards are,
+thankfully, not common.
+
+Illusions come easily to gnomes. Gnomes are
+infamous for their warped sense of humor, heavy on
+practical jokes. Coupled with their magical talent, this
+is a dangerous combination, which they spend much
+of their 200-year lifespan mastering. Anyone who
+adventures with a gnome more than once learns that a
+wand of dispel magic is a very sound investment, and
+that a cautious approach to life is well rewarded.
+
+Gnomes are also good engineers, and many of
+their technological items are superior even to dwar-
+ven and elven craftsmanship. A (hypothetical) gnome
+who actually tries to make something useful, instead
+of building an even more elaborate joke than the last
+one he pulled, can usually come up with something
+which is unique, if not always exactly what he had in
+mind. Gnomes are also very fond of gemwork, and it
+is a rare gnome who cannot identify and roughly
+appraise valuable stones on sight and sometimes even
+by feel, as he decides which stones to switch from
+your pocket to his.
+
+ROLEPLAYING GNOMES
+
+The key to gnomes is that they want to have fun
+at all times. Formal ball, three-day hike through the
+mountains, the state funeral of a dear friend... .
+doesn’t matter. Nothing is so important, so somber,
+that it can’t be livened up with a quick joke or a
+whoopie cushion at the bottom of the grave. Jokes are
+funny. They make people laugh. If nobody laughs at
+the time, that just proves how much it was needed.
+They’ ll get it later.
+
+
+
+
+
+Be proud of the nose; polish it often. But do be
+aware that it is something only other gnomes find
+attractive, and if you’re at all interested in dating peo-
+ple from other races (and, honestly, why wouldn’t you
+be?), you should do what you can to minimize it. Fail-
+* ing that, plead a tumor. .
+
+No one expects much from gnomes other than
+cheap witticisms and jokes of dubious merit. Surprise
+them occasionally. Pass up the pun and be serious.
+That sets ’em up better for the next time.
+
+Gems are pretty. Collect them whenever possible.
+You can appreciate them much more than the other
+party members can; they should be yours.
+
+OTHER _RACES SAY...
+
+Humans find gnomes amusing . . . until the
+gnomes play a joke on them. Humans know that
+gnomish craftsmen have the best prices and best qual-
+ity of gems, and that gnomish magic is very useful
+when one needs to conceal the truth. Humans like to
+think that they have a great deal in common with
+gnomes, and that they understand the gnomish way of
+life. They are, of course, completely wrong.
+
+Dwarves fail to understand why gnomes would
+want to clutter up perfectly nice silver and gold with
+gaudy rocks — some dwarven sages speculate that the
+whole gemstone thing is a hugely elaborate practical
+joke that all the gnomes are in on. Some dwarves have
+apprenticed to gnome engineers, learning quickly that
+singed beards are an occupational hazard.
+
+Elves find gnomes annoying . . . until the gnomes
+play a joke on the humans. They do not understand the
+gnomish saying, “Life’s too short not to have fun.”
+Those elves who have had their ears dunked in
+inkwells have an opinion of gnomes which is far less
+flattering and completely unprintable.
+
+Halflings think of gnomes as distant cousins,
+although they’re the ones you have to tell not to climb
+the drapes at your party. Repeatedly. Halflings share
+the gnomish enthusiasm for gems, but not the gnomish
+enthusiasm for working on them; fortunately, gems are
+small and portable. Many a gnome has complimented
+
+GNOME RACIAL TRAITS
+
+Base Speed: 20 feet.
+
+Ability Modifiers: +2 Constitution, +2
+Intelligence, -2 Strength, -2 Wisdom.
+
+Special Qualities:
+
+Small: Gnomes are Small creatures, not
+Medium; they gain a +1 size bonus to Armor
+Class and attack rolls and a +4 size bonus to
+Hide checks, but cannot use much man-sized
+equipment.
+
+Low-Light Vision: Gnomes can see in poor
+illumination as a human can in daylight. Even
+starlight is sufficient for gnomish sight.
+
+Skill Bonuses: Gnomes receive a +2 racial
+skill bonus to Alchemy and Listen checks.
+
+Illusion Abilities: Gnomes have a +2 racial
+bonus on saving throws against all illusion spells
+and effects. Gnomes with an Intelligence of 10
+or higher may cast dancing lights, ghost sound,
+and prestidigitation, once each per day. Treat the
+gnome as a first-level caster unless he has Wiz-
+ard levels.
+
+“So you followed my directions and ended
+up in the city cemetery? At night? Under a full
+moon? Well, yes, I can see where that would be
+distressing to you. Let me take another look. . .
+ah, here’s the problem. You must have turned left
+when I said to turn right. Easy mistake to make,
+nothing to be ashamed of. But I know a better
+way to get there now — I looked it up while you
+were out. Here, take this map. Free, of course; I
+don’t want you getting lost again. By the way,
+watch out for the street signs; youngsters will
+often switch or deface them. They have no
+respect.”
+
+—A gnome who wished to remain
+anonymous, setting up a group of
+elves who didn’t learn anything
+the first time
+
+a halfling on the aroma of a meal well before anyone
+else in the party knew it was cooking . . . and halflings,
+not immune to flattery, find this immensely appealing.
+
+Orcs like gnome nose stew. Rest of gnome not
+bad, either.
+
+HALFLINGS
+
+Ever since the dawn of human history, halflings
+have lived among humans, and neither race is quite
+sure how they came to be. (The elves may know more,
+but they aren’t talking.) Their childlike appearance is
+deceiving, as halflings are actually quite talented at
+slipping into places they aren’t supposed to be, retriev-
+ing information and goods they aren’t supposed to
+have, and taking them to people they aren’t supposed
+to know — all right under the noses of “big folk” who
+are supposed to stop them. Many human children have
+been blamed for the actions of halflings who were
+having a bit of fun. Halflings have a nasty tendency to
+end up with horribly evil artifacts they weren’t ever
+meant to have. Naturally, no one will realize this until
+far too late — and as halflings live for around 120 years,
+that can be very late indeed.
+
+Halflings are known for their cooking and their
+pipeweed, both of which have shortened many human
+lives, For some reason, halflings have an innate under-
+standing of the culinary arts, and a halfling-prepared
+meal is a delicacy every race but the dwarves appreci-
+ates. (Ores like halfling meals, too, although their
+interpretation of the term is a bit odd . . .) The only rea-
+son more halflings aren’t making their livings as cooks
+is because it’s a bit too reputable. Halflings make a
+great deal of money from growing pipeweed, of which
+humans — especially, for some reason, human wizards
+— have grown very fond.
+
+
+
+
+
+HALFLING RACIAL TRAITS
+
+Base Speed: 20 feet.
+
+Ability Modifiers: +2 Dexterity, +2 Intel-
+ligence, -2 Strength, -2 Wisdom.
+
+Special Qualities:
+
+Small: Halflings are Small creatures, not
+Medium; they gain a +1 size bonus to Armor
+Class and attack rolls and a +4 size bonus to
+Hide checks, but cannot use much man-sized
+equipment.
+
+Skill Bonuses: Halflings have a +2 racial
+bonus on Climb, Jump, Move Silently, and Lis-
+ten checks. Halflings also have a +1 to attack
+with any thrown weapon.
+
+Saving Throw Bonuses: Halflings get a
+racial +1 bonus to all saving throws. They also
+receive a +2 morale bonus to saves against fear.
+These bonuses stack.
+
+Super Salesman: Once a day, a halfling
+may take 20 on a Bluff check to sell an item for
+twice its actual value.
+
+ROLEPLAYING HALFLINGS
+
+Always be on the lookout for a good meal.
+Always be on the lookout for shiny objects that every-
+one else has ignored. Use your size and appearance to
+your advantage, but avoid nearsighted truant officers.
+Know, in your heart, that it is the halflings who are
+destined to save the world. Avoid this destiny at all
+costs.
+
+Remember that your team values your contribu-
+tion highly, as you can get into places they can’t
+even see into. Make them pay for this expert-
+ise; talent does not come cheap.
+
+Jokes about “smoking weed,” or about
+hairy feet, are unwelcome. The former is a
+wholesome activity, suitable for almost all
+ages, and the latter is simply the way
+halflings are. People wouldn’t walk
+up to elves and tell them to be
+careful not to put an eye out with
+those ears. (Well, gnomes might.
+But gnomes are idiots.)
+
+Did we mention the food?
+Mmmmmmm.
+
+OTHER RACES SAY...
+
+Humans are very fond of their “little buddies.”
+Even when the halflings are robbing them blind —
+which is frequently — humans can’t seem to bring
+themselves to be upset. Halflings know this and take
+full advantage. Humans like to think that they have a
+great deal in common with halflings, and that they
+understand the halfling way of life. They are, of
+course, completely wrong.
+
+Dwarves think that halflings are just like humans.
+At least they’re smaller and easier to corral when nec-
+essary. They produce nothing, stealing the best of what
+
+other races create and keeping it for themselves, and
+they get away with it because they’re so darn cute.
+
+Elves see a lot of potential in halflings, if they
+could ever get out from under the human influence.
+Their skill in the kitchen and their talents for infiltra-
+tion point to several ways they could make a real con-
+tribution to nature and to history, by which elves mean
+“to elvenkind.” So far, halflings don’t seem all that
+interested.
+
+Gnomes like halflings a lot, although the halflings
+are often too serious. Many gnomes have, at one time
+or another, been totally mesmerized by the scent of
+halfling bread in the oven — even three days later.
+Gnomes also appreciate having someone to look down
+on; it’s a rare but pleasant event.
+
+Orcs think halflings very tasty. Lots of spice. Not
+big enough for full meal, but great for snacking.
+
+ORGS
+
+When some long-ago sage referred to life as
+“nasty, brutish, and short,” he was talking about orcs.
+Orcs live in tribal villages, often nothing more
+than a collection of rudely crafted mud-and-stick huts
+in a swamp that nobody else wants. Their average
+lifespan is very short, about 30 years; they are capa-
+ble of breeding starting at age 10 and can
+continue to bear children until death (theirs, not the
+children’s). Orc villages are always overrun with
+squalling, filthy orclings (a phrase with at least two
+redundancies). All civilized races loathe orcs, and
+orcs return the favor. It was not too long ago that orcs
+were exterminated on sight, and orcs still raid human,
+elven, and dwarven settlements on a regular basis —
+not usually the same orcs, mind, but it’s not as
+though that matters to the villagers, to
+
+whom one set of night-riding raiders
+
+looks much like another.
+
+“What am I doing here?
+Funny story, that. The
+cook sent me to find
+some of those toothsome
+mushrooms from your
+garden — you know, the ones
+with the pink caps and yellow
+a stems? You don’t? Oh,
+( J SD they're succulent. They
+aren't as good as the —
+“Oh, right. Here. I think I
+got lost, because I followed the directions and I
+didn’t see anything at all like a garden. This
+looked like a library from down here, so I figured
+I'd pop in and see if they had a map of the place.
+“Hmm? You don’t have a garden? Well, I
+shall certainly have some cross words for that
+cook, then! I'll just be heading back over there
+now. Cheerio!” ‘
+— Mondo Shortbreeches, upon his
+discovery inside the largest of the
+royal treasure vaults
+
+
+
+
+
+Base Speed: 30 feet.
+
+Ability Modifiers: +2 Strength, +2 Constitu-
+tion, -2 Intelligence, -2 Wisdom, -2 Charisma.
+Note that Intelligence below 3 is subsentient, and
+not recommended for PCs unless the players also
+qualify.
+
+Special Qualities:
+
+Darkvision: Orcs can see up to 60 feet
+even in pitch darkness.
+
+Orcs are grayish-green, with
+piglike noses, protruding tusks, tufts of
+hair everywhere, and an overwhelmingly
+fetid stench. Especially civilized ones
+may be clothed and have learned to
+eat only evil sentient beings.
+
+ROLEPLAYING
+ORGS
+
+Playing an orc makes an inter-
+esting roleplaying challenge for a
+preppy-type player who really wants
+to break the mold. Since the authors
+know very few preppy-type roleplay-
+ers, we confess that we don’t have a
+clue why anyone would want to play an orc at all,
+apart from the fleeting pleasure one gets from being
+overtly coarse of manner and rude of speech. On the
+other hand, people seem to enjoy exactly that behav-
+ior online, too, so perhaps further study is warranted.
+
+OTHER RACES SAY .
+
+Humans are glad orcs are around . . . to keep the
+other races from ganging up on them instead. That
+humans often fall prey to orc raids seems a small
+price to pay, at least to the humans in well-
+fortified cities far away from the brackish fens the
+orcs call home. (Actually, they call it
+“BRAAAGHEKKKK!” But then, they call every-
+thing “BRAAAGHEKKKK!” Orcish is not a lan-
+guage of extreme nuance.) Humans like to think that
+they have nothing at all in common with orcs, and
+
+ORG RACIAL TRAITS
+
+jokes ..
+
+Light Sensitivity: Orcs suffer a -1 attack
+penalty in bright light.
+Saving Throw Bonus: Orcs have a +2 racial
+bonus against any curse spell or spell-like effect.
+Battle Prowess: An orc who defeats a superi-
+or foe unaided (GM’s decision on
+what constitutes “superior’)
+earns double XP.
+
+that they. have grown
+beyond the orcish way of
+life. They are, of course,
+completely wrong.
+
+Dwarves often have to
+deal with orcs infesting their
+delves, for sufficiently violent
+
+values of “deal with.” They are
+heartened that few orcs seem hun-
+gry enough to eat dwarf meat,
+though they wish the orcs would
+go pick on the elves for a
+while. (If the dwarves ever
+popped their heads above
+ground, they would realize
+that the orcs pick on everyone;
+there are just too many orcs not to.)
+
+Elves can’t stand the sight, smell, sound, or even
+the merest wisp of a memory of orcs. There’s a nasty
+rumor that orcs are actually corrupted elves. Elves
+accuse dwarves of starting and spreading the rumors.
+Dwarves think it was the orcs, playing for sympathy.
+Halflings think it might be the elves, trying to
+inflame sentiment against the orcs. Gnomes just sit
+there and snicker quietly.
+
+Gnomes dislike orcs for all the usual reasons, but
+also because they’re too stupid to appreciate good
+. and react rather badly when they finally do
+figure them out. Ore humor seems to center around
+belching after a meal better left unidentified.
+
+Halflings are appalled by orcish manners and
+habits. Really, the idea of eating people . . . just bar-
+baric. We must swap recipes.
+
+The Munchkin card game is very liberal
+with its “Half-Breed” rules, in defiance of both
+common sense and genetics. The d20 system
+allows for half-elves and half-orcs (both also half-
+human — as though any sensible human would
+voluntarily have anything to do with either race),
+but doesn’t have rules for other hybrids.
+Munchkin d20, however, does away with such
+silly restrictions; if you want to play a half-
+gnome/half-halfling, go for it! To determine the
+racial abilities, follow these simple rules:
+
+What Do You Get When You Fall in Lave aS,
+
+1. If both races have a trait, then the
+cross-breed has it at the better value.
+
+2. If one race has a trait and the other
+doesn’t, the cross-breed has it.
+
+3. If neither race has a trait, see if you
+can’t make a case for it anyway. Maybe
+you'll catch your DM in a generous mood.
+
+
+
+
+
+CHAPTER_THREE
+
+CLASSES
+
+Open Content in this chapter is found in
+boxes such as this one. Text outside these boxes
+is closed content, so keep your bloody hands off
+of it.
+
+There is no such thing as a “classless society” in
+the land of Munchkin. Even those poor unfortunates
+who start off without any class (heh heh heh) try to
+acquire one as quickly as possible. It is the rare bar-
+keep who isn’t a retired warrior, the rare village elder
+who doesn’t have a few fireball spells tucked away,
+and the rare high priest who isn’t, uh, a high priest. The
+simple fact is, in such a dangerous world, being
+simply common is tantamount to being lunch.
+
+Some adventurers doggedly pursue a single class
+all through their lives, becoming the best tomb-looters,
+magic-hurlers, or wrath-of-god-upon-the-infidel-
+callers they can be. (The “focused” or “workaholic”
+approach.) Others dabble with a bit of fighting here, a
+bit of sonnetry there, and try to meld all their disparate
+skills into a viable career. (The “liberal arts” or
+“wouldst thou like fries with that?” approach.) Many
+strike a balance between these two extremes, mainly
+pursuing one class but dabbling in one or two others
+along the way. (The “best of both worlds” or “I was
+younger and foolish then” approach.)
+
+BARDS
+
+Everyone has one of those annoying friends who
+has one story, poorly told, and insists on relating that
+story, over and over, ad nauseam, while you’ re trying to
+sleep, or read, or make points with that hottie at the next
+table. Set that friend to music, and you have a bard.
+
+Bards use their musical talents to inspire confi-
+dence and. determination in their allies, and to create
+uncertainty and terror in their foes. It’s amazing what
+feats of warcraft an army can attain when a bard picks
+up his lute and threatens to start playing, and how the
+morale of an opposing force drops when they realize
+that the closer they get to the enemy ranks, the louder
+that horrid screeching noise gets as well.
+
+Another aspect of the bardic personality is an
+inquisitive nature. When combined with a good memo-
+ry, this means that a bard can effectively gossip about
+anyone he has ever met. An adventurer’s best bet to
+uncover hidden, potentially embarrassing secrets about
+the Lord High Inquisitor is to ask any local bard. Of
+course, gold pieces help a bard’s synapses fire faster, as
+does a promise of protection from the inevitable. A bard
+who isn’t on the run from dozens of angry nobles and
+tentates just isn’t trying.
+
+What a Gyp!!
+
+So, this chapter probably looks a lot like a
+similar chapter in another book you almost cer-
+tainly have on your shelf, and some of you may
+be wondering if we’ve simply reprinted informa-
+tion to pad out our page count?
+
+Would we do that? Of course we would!
+
+But fear not, intrepid gamer! — we didn’t. If
+you take a moment or two to compare, you’ II note
+that the information in these tables is different —
+and, in our completely biased opinion, much bet-
+ter. Just look at that attack -progression, for
+instance. So what you are paying for is entirely
+new information . . . that just happens to be for-
+matted in a way similar to previous efforts. We
+hope you are now fully confident in your pur-
+chase of this fine gaming product.
+
+“Level” means two different things when
+applied to characters. “Class level” is the level of
+achievement in a specific class; “character level”
+is the sum of the character’s class levels. Both
+types of levels confer certain benefits, as seen
+below:
+
+TABLE 3], CHARACTER LEVEL
+AND BENEFITS
+
+Character Ability
+Level Feats Increases
+I Yes
+2 cat a
+3 Yes Yes
+4 = _
+5 Yes _
+6 ~ Yes
+7 Yes -
+8 4 =
+9 Yes Yes
+10 - -
+11 Yes -
+12 - Yes
+13 Yes =
+14 ~ -
+15 Yes Yes
+16 - -
+17 Yes -
+18 ~ Yes
+19 Yes -
+20 - -
+
+Character Level is the character level (equal
+to the sum of the class levels).
+
+Feats and Ability Increases show at what
+character levels new feats and ability increases
+are attained.
+
+CLASSES
+
+
+
+
+
+TABLE 3.2, SAVE AND ATTACK BONUSES BY CLASS LEVEL
+Class Level BSB Warrior BAB Cleric/Thief/Bard BAB Wizard BAB
+1 —/+2 +2 +1 +1
++3 : 43 +2 +1
+3 +1/+3 +4 +3 +2
++ +1/+4 +5/+1 +3 +2
+1 5 +1/+4 +6/+2 4 +3
+: 6 +2/+5 +7/+3 +5/+1 43
+: 7 +2/+5 +8/+4 +6/+2 +4
+| 8 +2/+6 +9/+5/+1 +6/+2 4+
+9 +3/+6 +10/+6/+2 +7/+3 +5/+1
+10 +3/+7 +11/47/43 +8/+4 +5/+1
+{1 +3/+7 +12/+8/+4 +9/+5/+1 +6/+2
+12 +4/+8 +13/+9/+5/+1 +9/+5/+1 +6/+2
+3 +4/+8 +14/+10/+6/+2 +10/+6/+2 +7/+3
+14 +4/4+9 + +15/411/4+7/43 +11/4+-7/43 +7/43
+15 +5/+9 +16/+12/+8/+4 +12/+8/+4 +8/+4
+16 +5/+10 +17/+13/+9/+5/+1 +12/+8/+4 +8/+4
+17 +5/+10 +18/+14/+10/+6/+2 +13/+9/+5/+1 +9/+5/+1
+18 +6/+11 +19/4+15/+11/47/43 +14/+10/+6/+2 +9/45/+1
+19 +6/+11 +20/+16/+12/+8/+4 +15/+11/4+7/+3 +10/+6/+2
+20 +6/+12 +21/4+17/4+13/+9/+5/+1 +15/+11/4-7/+3 +10/+6/+2
+Class Level is the level in a specific class. higher bonus on Reflex. The BSBs for each class
+— BSB is the base save bonus at the given class are cumulative for multiclass characters.
+aa level. Which BSB is used for each saving throw BAB is the base attack bonus for a given
+depends on the class in question; warriors get the class. Multiple numbers separated by a slash indi-
+lower bonus on Reflex and Will saves, but the cate multiple attacks in each round. These bonus-
+i higher bonus on Fortitude saves, but thieves get es are cumulative for multiclass characters (so a
+: the lower bonus on Fortitude and Will and the Warrior 6/Bard 3 has a total BAB of +8/+1).
+
+The ancient Celts considered bards sacred, and
+their persons were legally immune from harm.
+Fortunately, this idea didn’t catch on.
+
+“I’m taking requests for my next
+numbARRRRRGH!! .. .”
+— Marto Cantor, trying for
+one encore too many
+
+OTHER CLASSES
+SAY...
+
+Clerics find bards to be useful repositories
+of religious lore, and many bards venerate
+a god of music or magic. Clerics also
+have access to the silence spell, which
+goes a long way toward explaining their
+tolerance.
+
+Monks accept the existence of bards
+as merely one more event on the path to
+Nirvana. That they often remove this
+obstacle to enlightenment cannot fair-
+ly be held against them; it is difficult
+
+to meditate when one’s auditory system is under
+
+assault.
+
+Mm CLASSES
+
+Thieves respect bards as fellow roguish types, but
+they don’t invite them to the best parties. Often, they'll
+pay the bard to go play outside a completely different
+
+house, providing an extra distraction for the city
+guard. Sometimes, if the haul was especially
+good, they'll even bail the
+bard out later.
+Warriors are inspired
+by bardic music to fight harder, faster . .
+. anything to get the battle
+over with that much more
+quickly. Many warriors
+have discovered that a
+lute makes a dandy
+improvised weapon, espe-
+cially when you use it to attack the
+bard himself.
+
+Wizards can’t
+quite wrap their brains
+around the bard’s use
+of magic, which
+
+seems a bit unfair to
+
+them. “I study for
+years to learn how to
+
+work a few simple
+spells, and all she has to do is
+play a madrigal? Badly, no less?” is the common cry
+around libraries and wizard’s towers.
+
+
+
+
+
+BARD CLASS FEATURES
+
+Abilities: Bards use Charisma to determine
+what level of spells they can cast and how many
+bonus spells they receive.
+
+Hit Die: d6.
+
+Bards are proficient with all simple
+weapons, as well as any one of the longbow,
+composite longbow, longsword, rapier, sap,
+composite shortbow, shortsword, shortbow, or
+whip. Bards may use light or medium armor,
+and may carry a shield (but bear in mind armor
+penalties to certain skills, and to spellcasting).
+Bards cast arcane spells from the bard spell list,
+with the number known and number of slots per
+day as found in Table 3.3, below. Bards do not
+need to prepare spells or keep a spellbook. All
+bard spells have verbal components.
+
+The first number is the number of spells of
+that level which the bard can cast each day (and
+does not include bonus spells for high Charisma).
+
+TABLE 3.3: BARD SPELLS
+
+The second number is how many spells of that
+level the bard knows. “0/2*” indicates that the
+bard receives spells of this level only if his
+Charisma is high enough that he receives bonus
+spells of this level, and then he can cast only
+those spells.
+
+Enthralling Song: Once per day per level,
+the bard may use his musical talents to convince
+an opponent to attack an ally, or even not to
+attack at all. Make a Perform check. On DC 15,
+the opponent will attack the ally nearest to the
+bard instead of the bard himself. On DC 25, the
+opponent will not attack at all. (If the bard
+prefers, he may enthrall an ally to cover his
+retreat, on a DC 25.) These effects last as long
+as the bard continues playing, singing, or chant-
+ing, up to a total number of rounds equal to the
+bard’s level. (The bard may not take 10 or 20 on
+this check.)
+
+Knowledge: Bards
+are the ultimate gossip
+hounds, picking up all
+
+Spells Per Day/Spells Known manner of utterly useless
+
+Bard trivia. Using a special
+Level 0 1 2 3 4 5 6 “bardic lore” check, with
+1 2/4 = ee = = S a bonus equal to the
+a 3/5 0/2* a a si a = bard’s Intelligence modi-
+3 3/6 1/3 = _ _ _ _ fier plus his level, the
+4 4/6 2/3 0/2* _ = = = bard may uncover or
+5 4/6 3/4 1/3 af ae Pa a recall some _ relevant
+6 4/6 3/4 2/3 Re is ses se information about the sit-
+7 4/6 4/4 2/4 0/2* _ _ _ uation at hand. The GM
+8 4/6 4/4 3/4 1/3 = = _ will determine what is
+9 4/6 4/4 3/4 3 ie a = revealed on a case-by-
+10 4/6 4/4 4/4 4 0/2* ue sie case basis, but should
+11 4/6 4/4 4/4 3/4 1/3 _ _ bear in mind that the bet-
+12 4/6 4/4 4/4 3/4 2/3 = _ ter the check result, the
+13 4/6 4/4 A/4 4/4 24 0/2* = more obscure and/or
+
+detailed the information
+
+14 5/6 4/4 4/4 aa 3/4 1/3 -
+should be. The bard may
+
+15 5/6 5/4 4/4 4/4 3/4 2/3 -
+16 5/6 5/5 5/4 4/4 not take 10 or 20 on this
+i 5/6 5/5 5/5 5/4 4/4 3/4 1/3 check.
+
+18 5/6 55 5/5 aS 5/4 3/4 2/3
+
+19 5/6 5/5 5/5 S/S 5/5 4/4 3/4
+
+20 5/6 5/5 5/5 5/5 5/5 5/5 4/4
+
+Bards in Munchkin
+
+Bards make a good additional class for the
+Munchkin card game. If you decide to add them,
+use the following text:
+
+Bard
+
+Enthrall: When you are facing a monster,
+you may discard three cards and select one of your
+rivals. Each of you roll one die; if your die equals
+
+or beats his, he is forced to help you and cannot
+ask for any reward!
+
+Bardic Luck: When you win a combat, alone
+or assisted, draw one more Treasure card that you
+are entitled to. Immediately discard one of the
+Treasures (your choice).
+
+CLASSES
+
+
+
+
+
+“Almighty Lord, I, your humble servant,
+beseech you to grant us rain to help these crops
+grow, and to —”
+
+“Ow! A paper cut!”
+
+“Sigh. Almighty-Lord-give-me-the-strength-
+to-ease-this-man’s-pain-and-heal-his-wound-
+amen. There, all better. Go away now.”
+
+— Markus, vicar of a small village
+whose residents all perished from
+malnutrition later that year, and an
+
+_ unnamed villager
+
+CLERICS
+
+Clerics, more than any
+other class, are defined by
+the gods they serve. Cler-
+ics oversee sacrifices,
+ceremonies, and
+recruitment of new
+members to their partic-
+ular sect. A cleric cele-
+brates every time he
+brings a new person into
+the faith. The cleric also
+tends to wade into hordes
+of infidels and crack skulls in
+the name of the deity he serves, with a fervor not usu-
+ally found among holy men. But none of these servic-
+es are why munchkins like to have clerics around.
+Munchkins like clerics for one reason:
+
+Clerics heal people.
+
+When you're in combat as often as munchkins
+are, you need lots of healing, right away, and there is a
+practical limit to the number of potions a single person
+can carry. Most adventuring clerics have the ability to
+swap prepared spells for curative magic. Their tenden-
+cy to lecture, pray loudly at inconvenient times, and
+generally annoy the rest of the party is less attractive
+to adventuring parties. There’s something inherently
+unattractive about the guy who wants to stop a head-
+long flight from a horde of angry demons to give
+thanks that everyone wasn’t killed outright. The easi-
+est thing to do is urge him to go ahead and stop, which
+may distract the demons long enough to everyone else
+to escape.
+
+That’s not to say that clerics can’t munchkin out
+themselves. Their combat abilities are almost compa-
+rable to those of warriors, and some of their spells
+(especially at higher levels) are flat-out, scary, hurling-
+thunderbolts-at-the-helpless-villagers fun. As long as
+the cleric isn’t bullied into converting that spell into a
+first aid kit, that is.
+
+OTHER CLASSES SAY...
+
+Bards think that clerics are way too single-mind-
+ed about this whole “religion” thing. There’s room for
+so much more freedom in life than
+clerics are willing to admit. And they don’t have
+nearly enough music in their services . . .
+
+Mm CLASSES
+
+Monks respect clerics’ faith, and respect the heal-
+ing powers that come from that faith even more. It’s a
+rare monk who doesn’t need patching up after a big
+battle.
+
+Thieves really wish that clerics would get off that
+whole “not stealing” thing they harp on so much. They
+are enormously grateful, however, that most temples
+use cheap locks on the poorbox. As the person most
+likely to spring a trap, the thief is also very glad to
+have healing around, and is willing to feign any
+amount of piety in order to get it.
+
+Warriors are the most direct beneficiaries of the
+clerical healing ability, and they try very hard to make
+their clerics more experienced so that the cleric can
+heal them faster and better. If this entails paying lip
+service to a god or two, well, it’s not like warriors will
+be called upon to actually do any fighting for their
+
+churches.
+
+Wizards enjoy watching cleri¢s work, and are
+hugely envious that clerics can wear armor and still
+cast spells. As, usually, the physically weakest mem-
+bers of the party, wizards are very fond of the healing
+ability as well.
+
+MONKS
+
+Monks talk a lot about inner peace, searching for
+their true selves, and being one with the universe. It
+seems like this cosmic unity is best found by retiring
+to a hideout in the mountains, shaving one’s head, and
+learning to kick the stuffing out of everything that
+moves. This approach has a lot to recommend it.
+
+Typical monks dress either in dark earth tones or
+fiery yellow and orange. They walk around with their
+palms pressed together, spouting completely nonsensi-
+cal phrases, and now and then just beat the snot out of
+whatever is in their path. Often, monks scream some
+mystic word or phrase as they are pummeling their
+foes into marmalade; examples include “Banzai!,”
+“Hiiii-YA!,” and the dreaded “Waaaaaaa-TSEEEEE!”
+Evidently, ripping the legs off people brings a great
+deal of inner peace, as excessive bodily harm 8
+is one of the monk’s specialties . . . * e ¥, 0
+
+Oo
+
+
+
+
+
+CLERIC CLASS FEATURES
+
+Abilities: Clerics use Wisdom to determine
+what levels of spells they can cast and how many
+bonus spells they receive.
+
+Hit Die: d8.
+
+Clerics have proficiency in all simple
+weapons, as well as with their deity’s favored
+weapon (if any). They have proficiency in all types
+of armor and shields (but bear in mind the armor
+penalties to certain skills). Clerics cast divine
+spells from the cleric spell list and from their two
+chosen domains, with the number of spells avail-
+able as seen in Table 3.4, below. Clerics also pick
+two domains, short spell lists which in some way
+reflect their deities. Good domains for Munchkin
+clerics include Death, Destruction, Luck, Magic,
+Protection, Trickery, and War. Clerics must pray
+for their spells, except that they may leave the
+domain spell slot free and choose one of their two
+domain spells “on the fly.”
+
+This totals do not include bonus spells for
+Wisdom, but (except for 0-level spells) do include
+one domain spell per spell level. This spell may be
+chosen from either of the cleric’s two domains.
+
+Spontaneous Casting: A cleric may attempt
+to “swap out” a prepared spell for one he has just
+discovered he desperately needs. The closer to his
+deity’s area of control the new spell is, the more
+likely that this need will be met. Make it a good
+plea; beg, whine, and threaten to change deities if
+your god won’t come through and prove he’s
+worth all the trouble you’ve gone through for him.
+
+TABLE 3.4: CLERIC SPELLS
+
+If that doesn’t work, you may always swap a
+prepared spell for a domain spell of the same or
+lower spell level, and you may always swap a pre-
+pared spell (except a domain spell) for a cure spell
+(for good clerics) or inflict spell (for evil clerics) of
+the same spell level. (Neutral clerics pick one or
+the other, which is then fixed — unless you’re a
+smooth talker or have a very forgetful person run-
+ning the game.)
+
+Chaotic, Evil, Good, and Lawful Spells:
+Clerics can’t cast spells opposed to their own
+alignments or those of their deities. Unfortunately,
+at high levels, these can be some of the very best
+spells . . . so it’s encouraged to conveniently “for-
+get” which spells are opposed..The other players
+aren’t likely to give you away, so your real chal-
+lenge is to convince the DM that the game will be
+more fun if his “house rules” allow the clerics
+more power. “It will make the class more attrac-
+tive and enhance roleplaying” is a good argument
+if your DM is not a munchkin. “It will make cler-
+ics kick ass better” is a good argument if he is.
+
+Turn or Rebuke Undead: Good clerics can
+cause undead to flee in supernatural terror. Evil
+clerics can cause undead to cower in awe, or even
+to follow mental commands. Neutral clerics get to
+choose (although a neutral cleric of a good or evil
+deity must pick the appropriate power). Turning is
+based on Charisma, so cute clerics make undead
+run away faster. It appears that undeath reverses
+the natural order in ways we can only begin to
+comprehend.
+
+Spell Slots Per Day
+
+Cleric
+Level
+
+N
+| &
+>
+
+SePDMIADNEWNK
+
+11
+12
+5
+14
+
+16
+17
+18
+19
+20
+
+YAANAANDAADAMMNAAL HLPwWwWDh
+NAYAADAAAMMANANAHHHWWDHD
+
+YYAYIYIYYYI YY IY AAA AUURK CS
+ADDAUUNUAWNAKR ER RWWD !]
+
+NANAYAAAYAYNADAADAAMAANAWNHS HD WWH =
+
+ANANDAMNNbPBHRWWHN! |
+AnNAMAARHHPWWY ] | |
+Ane ARWWN! | |
+
+UO Poe wD wet | | |
+AbWN | |
+
+CLASSES
+
+
+
+
+
+OTHER CLASSES SAY...
+
+Bards don’t know what to make of monks. No
+fashion sense, they rarely use weapons, and they don’t
+seem to appreciate good music — yet they’re more at
+__ peace with the world than anyone else around. Perhaps
+
+if the local monk would write the lyrics, we could have
+
+“Warriors carry weapons because they plan
+
+“to engage in battle. We do not plan. We do not
+
+think. We simply fight. This is the essence of wis-
+dom.”
+— Yu Goh Nau, confusing another
+in a long line of befuddled initiates
+
+a song of enlightenment.
+
+Clerics respect monks, even if they are on a
+wrong path toward salvation. The point is not to bash
+skulls for some nebulous “enlightenment,” but to bash
+skulls for the greater glory of one’s deity.
+
+Thieves are not fond of monks, as they tend to
+shun material things and thus are poor targets. Having
+an ally who can bash down a door without breaking a
+sweat does make things easier, however.
+
+Abilities: Strength, Dexterity, and Wisdom are
+all important; the monk uses all three in various
+techniques of beating people up.
+
+Hit Die: d8.
+
+Monks are proficient with the club, light and
+heavy crossbows, dagger, handaxe, javelin, kama
+(like a small sickle), nunchaku (short sticks on a
+short chain — all the best posers have them),
+quarterstaff, shuriken (throwing stars — very effec-
+tive in delivering flesh wounds), siangham (a very
+small spear), and sling. A monk using the kama,
+nunchaku, or siangham can use his unarmed base
+attack to hit, but uses the weapon’s information for
+damage and critical hits. Monks may not use armor
+or shields, but add their Wisdom bonus as well as
+their Dexterity modifier to their Armor Class.
+Additionally, higher-level monks have inherent AC
+bonuses as well; see Table 3.5 for this and other
+
+TABLE 3.5: MONK ABILITIES
+
+Unarmed
+
+Monk AC Attack Unarmed
+Level Bonus Bonus Damage
+
+1 +0 +0 1d4/1d6
+
+ps +0 +1 1d4/1d6
+
+3 +1 +2 1d4/1d6
+
+4 +1 +3 1d6/1d8
+
+5 +1 +3 1d6/1d8
+
+6 +1 +4/+1 1d6/1d8
+
+7 +2 +5/+2 1d6/1d8
+
+8 +2 +6/43 1d8/1d10
+9 +2 +6/+3 1d8/1d10
+10 +2 +7/+4/+1 1d8/1d10
+11 +3 +8/+5/+2 1d8/1d10
+12 +3 +9/+6/+3 1d10/1d12
+13 +3 +9/+6/+3 1d10/1d12
+14 +3 +10/+7/+4/+1 1d10/1d12
+15 +4 +11/+8/+5/+2 1d10/1d12
+16 +4 +12/+9/+6/+3 2d6/1d20
+t7 +4 +12/+9/+6/+3 2d6/1d20
+18 +4 +13/+10/+7/+4/+1 2d6/1d20
+19 +5 +14/+11/+8/+5/+2 2d6/1d20
+20 +5 +15/+12/+9/+6/+3 2d6/1d20
+
+MONK_CLASS FEATURES
+
+information. A monk does not lose either the Wis-
+dom bonus or the level-dependent bonus unless he
+is completely immobilized.
+
+Unarmed Strike: Monks deal more punish-
+ment than other classes when fighting unarmed, as
+shown on Table 3.5. An unarmed monk does not
+provoke attacks of opportunity from armed oppo-
+nents. A monk can use a full attack action to gain an
+extra unarmed attack each round at his highest base
+attack bonus. Finally, a monk can use a “stunning
+attack” once per round, no more than once per level
+per day, and must declare the stunning blow before
+the attack is rolled. If it is successful, the foe must
+make a Fortitude save at DC 10 + the monk’s level
++ the monk’s Wisdom modifier or be stunned for
+one round per level of the monk.
+
+Evasion: A monk who makes a Reflex save
+
+against damaging spells and similar effects (breath
+weapons, for instance) takes no
+damage. At 9th level, even a
+failed save results in half dam-
+age rather than full, as the monk
+Unarmored — gances away on nimble feet.
+Speed Ki Strike: At 10th level,
+20 ft/30 ft. the monk’s unarmed strike may
+20 £t./30 ft. injure monsters only hurt by +1
+25 ft./40 ft. or better magical weapons. At
+25 ft/40 ft. 13th level, this expands to
+25 ft/40 ft. —_ include those monsters hurt by
+35 ft/50 ft. +2 or better, and at 16th level,
+35 ft/50 ft. this goes up to +3. The unarmed
+35 ft/S0 ft. strike itself does not have any
+40 ft/60 ft. — magical bonus.
+40 ft./60 ft. Phantasmal Form: A
+40 ft/60 ft. monk’s training allows him to
+45 ft/70 ft. project an aura of confidence
+45 ft/70 ft. and strength; once per day, the
+45 ft/70 ft. monk may add his level to
+55 ft./80 ft. all his unarmed attacks for the
+55 ft/80 ft. round, as the monk appears
+55 ft/80 ft to his opponent to be an
+60 ft/90 ft. older, stronger member of the
+60 ft/90 ft. gpponent’s race. This is a super-
+60 ft./90 ft. natural ability.
+
+In the final two columns, the first number is for Small monks
+(gnomes and halflings), and the second is for Medium-sized monks.
+
+CLASSES
+
+
+
+
+
+love to learn how monks achieve many of their com-
+
+Monks in Mu nc h k in ’ | bat feats; they are doomed to be disappointed.
+
+: Wizards have done everything up to and includ-
+Monks may be added to the Munchkin card | ing probing monks’ minds for secrets, and still don’t
+
+game. Use the text below: understand them. All they know is that monks make
+M o nk excellent bodyguards while they’re casting spells . . .
+
+Ki Strike: The Monk gets +5 to any combat THIEVES
+
+in which he does not use weapons.
+
+Phantasmal Form: During any unassisted Thieves are unusual in that they usually steal
+combat, the Monk may play monster-enhancing | from [iving victims, instead of looting the bodies and
+cards on himself! The cards go away at the end of | airs of foes who had the decency to go ahead and die
+
+the combat. — it’s more sporting. (Not that thieves turn down a
+treasure hoard in a long-disused dungeon — mercy no!
+
+Monks cannot wear armor or helmets, or use | _ but they hope for at least a few traps to add some
+shields. A Super Munchkin monk may ignore this | spice to the lives of the people marching in the front of
+limitation! the party.) Thieves are like warriors, only more subtle
+
+and less effective; they are like bards, only quieter;
+they are like clerics, only less: pious; they are like
+monks, only less inscrutable; and they are...uh...
+
+th Marries a ae owe ri stay out of nothing like wizards at all, really, except that they try
+SS a A ee ee eee to stay at the back of the group.
+
+even the most virile combatant insensible for an
+embarrassing length of time. Many warriors would
+
+THIEF CLASS FEATURES
+Abilities: Dexterity is crucially important for Thieves are proficient in small, easily con-
+thieves. Intelligence is also important, as it controls cealed weapons — even the longsword is well
+many thiefly skills and gives extra points to put in beyond their ken. Thieves are proficient in light
+those skills. armor, but not shields; leather armor is practically
+Hit Die: d6. the official uniform of the thief.
+
+Backstab: A thief who flanks an oppo-
+nent, or whose opponent is in a situation
+negating its Dexterity bonus to AC (even if
+
+TABLE 36. THIEF ABILITIES ha i is 0), etd c a backstab — even
+. Backstab if he’s not attacking his opponent’s back. A
+
+Thief Bonus —_ Uncanny successful backstab does extra damage as on
+
+Level Damage Dodge Table 3-6. (This damage is not multiplied on a
+1 1d6 se! critical hit.) A creature without discernible
+2 1d6 = anatomy, or which is immune to critical hits,
+3 2d6 Does not lose DEX bonus to AC, jg also immune to backstabs.
+
+even when flatfooted Traps: Only thieves can use the Search
+
+4 2d6 as skill to locate traps with a DC higher than 20.
+5 3d6 * Thieves can even find magical traps, with a
+6 3d6 Cannot be flanked DC of 25 + the spell level. Thieves can then
+7 4d6 - use the Disable Device skill to disarm the trap.
+8 4d6 = Evasion: Thieves gain this ability at
+2 5d6 ms level 2 . For effects such as fireballs that allow
+10 5d6 o Reflex saves, thieves avoid damage entirely
+11 6d6 +1 to saves vs. all traps on a successful save.
+12 6d6 = Uncanny Dodge: Starting at level 3,
+iy 16 2s thieves begin to react to events almost before
+4-1 +2 to saves vs. all traps they occur. The thief gains benefits as listed on
+15 8d6 = Table 3-6.
+16  8d6 - No Honor Among Thieves: A thief who
+Tr. 9a6 +3 to saves vs. all traps successfully steals an item from a party mem-
+18 9d6 a ber gets an experience bonus of 50 XP per
+19 10d6 = thief level. This bonus rises to 100 XP per
+20 10d6 +4 to saves vs. all traps level if the person he steals from is also a thief.
+
+= —_ ae” GF
+
+
+
+
+
+“That’s OK, I know I’ve got this trap
+disar—”
+— Last words of Nilos Quickfingers
+
+Thieves and toddlers live by the same credo:
+“Anything that isn’t nailed down is mine. Anything
+that I can pry out of the tomb of the first king of the
+land, after disabling eight traps, dodging his skeletal
+minions, and losing 10 years of my life to his ghost. . .
+isn’t nailed down.” The main difference is that thieves
+usually have more tools with which they accomplish
+their transfers of property and more skills at evading
+the notice of the rightful owners.
+
+Many thieves in larger cities join a guild, a
+collection of like-minded individuals who are also all
+competing for the contents of the same poorly guard-
+ed vaults. Thieves join a guild for much the same rea-
+son that peasants join the king’s army: it’s more fun
+than being dead. There is a benefit, however. Many
+guilds provide tools of the trade which are either more
+costly to get elsewhere or simply illegal — often both.
+And guildhouses have more secret rooms than public
+rooms; it’s a pretty safe bet that the hall closet leads to
+a sumptuous suite, if you can just figure out which
+hangers to twirl around the rod.
+
+Having a thief in the party is useful when you’re
+worried about trapped doors and the like. It’s incon-
+venient if you expect to make a profit clearing out dun-
+geons; thieves seem to come across lovely gems and
+other trinkets more often than chance would dictate.
+
+OTHER CLASSES SAY...
+
+Bards and thieves usually get along nicely, as
+long as the bard stays quiet when the thief is trying to
+be stealthy. Both of them are overly attracted to bright,
+shiny objects (gems, gold pieces, etc.) and both tend to
+acquire things on their travels. Bards acquire knowl-
+edge; thieves acquire everything else.
+
+Clerics frown upon stealing, of course, but if the
+thief is paying his tithe to the church, the provenance
+of the donation may well be overlooked. Thieves
+also spot traps, meaning that the cleric has a
+lot less healing to
+worry about and can
+actually use some of
+his other spells.
+
+Monks ° abhor
+thieves’ material-
+ism, but admire the
+dedication and skill
+with which they are able
+to become as nothing and
+glide silently through the
+shadows toward the
+goal.
+
+Warriors are
+glad of thieves’ sneak
+attack abilities, as it often frees them to take a foe
+straight on, from whom they otherwise would have
+run away. And, of course, no one likes to blunder into
+a trap.
+
+meee Ae
+
+»
+at
+
+CLASSES
+
+Wizards often feel as though thieves are irrele-
+vant, what with spells like knock, invisibility, and of
+course fireball — the ultimate Speed Atack. However,
+it’s frequently useful to have a specialist on the scene
+to handle those weird situations spells just can’t quite
+cope with ... an angry dragon trying to recapture her
+eggs, to pick one (random) example.
+
+WARRIORS
+
+Some people just aren’t born with any real skills.
+But any fool (i.e., orc) can be trained to beat other
+people over the head with heavy objects, impale them
+on pointy things, and generally help them kick the
+oxygen habit. Teachers help identify warriors at an
+early age. They’re the kids who stand. and watch the
+ball home in on their heads, the ones who can’t figure
+out where the world goes when they close their eyes,
+and the ones who dismember classmates to play in the
+pretty red blood. Most warriors don’t take long to get
+sent to a special school, where they can play with other
+special children and build up tolerance to excruciating
+pain in a controlled setting. Fatalities drop off after the
+first couple of years, as the protowarriors learn tactics
+and basic fighting techniques (“Don’t get hit.”).
+
+“Yeah, diplomacy is fine and all, but I just want
+to kill him.”
+—Gart the Mighty, about to meet the king
+
+Many warriors end up as soldiers, city guards-
+men, or other dreary jobs where you mostly just kill
+other two-legged intelligent creatures. Oh, and orcs.
+But some warriors strike out on their own, killing
+nasty things that have four, six, even eight legs. And
+orcs. Rumors of heavier objects, pointier things, and
+more oxygen-dependent creatures are what keep this
+sort of warrior motivated to keep exploring — that, and
+the thief’s seemingly bottomless pockets of money,
+gems that look vaguely familiar, signet rings that bear
+your grandfather’s initials - amazing, that coinci-
+dence. Well, that and the chance to spot new colors
+and tastes of blood out there in the wide world. And
+
+everyone lets you walk in front; that’s so nice of
+them, isn’t it?
+
+OTHER CLASSES SAY...
+
+First and foremost, everyone appreciates
+the big guys who walk in front and kill
+things. Okay, we may not want to
+socialize with them, but we have to
+have a couple in the party and they
+have to be as tough as possible,
+because if they die, it’s US playing foot-
+sie with the Enraged Plutonium Dragon
+and its Mate.
+Bards may find warriors personally
+obnoxious . . . but they provide the very best
+song material, and they’re sometimes good listeners,
+especially if the song is about them.
+Clerics wish the warriors would be a bit more
+careful and not need so much healing. Battle-type
+
+
+
+
+
+Abilities: Strength for melee attacks; Dexter-
+ity for ranged attacks. Constitution bonuses apply
+to many of the warrior’s skills,-to say nothing of hit
+point bonuses.
+
+Hit Die: d12.
+
+Warriors are proficient with all weapons. Yes,
+all of them. If it has ever been used to kill a person,
+or might someday conceivably be used to kill a
+person, a warrior knows how to wield it. Warriors
+even see weapon possibilities in things that aren’t
+weapons, such as fluffy clouds and cute little duck-
+ies. Warriors are scary.
+
+Warriors can use any armor
+and any shield — and they need
+the help, because lots of nasty
+fell beasties are attempting to
+poke them in tender spots or
+squish them into goo. An unar-
+mored warrior might as well be
+
+clerics have a lot in common with
+warriors, though . . . they’re
+both on the front line.
+
+Monks think war-
+riors are wussies when
+you get them out of
+that armor.
+
+Thieves _ think
+warriors are great dis-
+tractions. Let the war-
+riors romp and stomp
+while the thief is preparing a
+nice backstab . . . or just going
+straight for the loot.
+
+Wizards look at warriors exactly
+the way a warrior looks at his
+shield. It’s there to take dam-
+age. Valuable, necessary, and
+completely expendable.
+
+WIZARDS
+
+At last, the nerds get their revenge. The introvert-
+ed, bookish stereotype of gamers ties very neatly into
+the introverted, bookish stereotype of wizards, which
+probably explains their popularity. Or perhaps it’s the
+innate desire of every person to be able to immolate a
+particularly annoying neighbor (especially a bard)
+without getting caught. Regardless, for sheer visceral
+joy, there’s nothing that beats a well-crafted spell going
+off and obliterating your foes. Warriors deal death in
+person; wizards sell it wholesale, with a discount if you
+also buy the “writhing in flames” package.
+
+The most satisfying part of being a wizard is being
+able to churn out magic items when they’re needed (or
+when you need a few hundred extra gold to cover the
+rent). Seems like every adventuring party in the world
+needs a few potions and a magic sword or two; you’d
+
+WARRIOR CLASS FEATURES
+
+naked . . . and that’s nothing no one should ever
+have to see.
+
+Bonus Feats: In addition to the feat gained at
+every odd character level, warriors gain a bonus
+feat at the first and second character levels and then
+every even warrior level after that (fourth, sixth,
+etc.). These feat slots must, as if we had to tell you
+this, be used on some form of martial feat — if it
+doesn’t directly relate to bashing, poking, sticking,
+skewering, or otherwise causing life-threatening
+injury to someone, warriors aren’t interested.
+
+Weapons Specialization: Start-
+ing at 4th level, the warrior may take
+the warrior-only feat Weapon Spe-
+
+cialization, which adds +2 to dam-
+age with a chosen type of weapon
+(longsword, bastard sword, short
+sword, etc.). This may be taken
+either as a regular feat or as a war-
+rior-specific bonus feat.
+
+be doing adventurers every-
+where a disservice if you =
+refused. Besides, it’s a good [=
+way to unload cursed stuff
+onto people who aren’t going
+to live long enough to find out.
+
+OTHER CLASSES
+SAY...
+
+Bards think wizards are
+weird, greedy, and unappreciative.
+A warrior who doesn’t like your
+music may give you an honest
+thump, but a wizard will turn your
+belly button into an eyeball.
+Clerics and wizards
+have spellcasting in com-
+mon, but that makes them
+competitors too. A munchkin cleric will have his own
+mass-death spells but knows the wizard has more, and
+is jealous. On the other hand, the cleric is the one who
+can heal, and he won’t let the wizard forget it.
+
+Monks say “Wizards are just like us, but they
+study magic instead of combat. I could have been a
+wizard if I’d wanted to.” The wizards just smile
+quietly.
+
+“... An eye of newt, some tears from a
+scorned lover, and a pinch of bat guano.”
+[Pause.]
+“Class, remember that when you cast this —
+spell, you are advised to use dried bat guano,”
+— Elmunchster, remembering why q
+he hated that spell in the first |
+place
+
+
+
+
+
+Thieves think wizards are great customers for the
+magic stuff they steal. Too bad that stealing from a
+wizard is so risky.
+
+Warriors are very, very leery of enemy wizards,
+who provide the greatest and most terrifying threat
+_ to their continued careers. They know that the wiz-
+ards of their own party are a necessary counter to
+the Other Guys, but distrust lingers. And when the
+fighter is hopping around after a combat, looking
+for his left leg, while the party’s wizard came
+through unscratched and expects an equal share of
+the goodies . .. This can breed resentment.
+
+Abilities: Bar none, Intelligence is the single
+most important ability for wizards. It governs
+bonus spells and many wizardly skills. Second in
+importance are Dexterity, which allows wizards to
+dodge out of the way of unfriendly attacks, and
+Constitution, which gives bonus hit points and
+controls the wizard’s Concentration checks when
+he gets jostled by the oaf in the plate armor.
+
+Hit Die: d4.
+
+Wizards are proficient in a paltry collection
+of weapons: club, light and heavy crossbows, dag-
+ger, and quarterstaff. They aren’t proficient with
+any armor or shields, and wearing armor screws
+up spellcasting. The best protection for a wizard in
+combat is a warrior right in front of him. Wizards
+cast arcane spells; Table 3.7 tells how many spells
+of each level a wizard can cast each day. Wizards
+may know any number of spells of each level.
+Wizards do not have to prepare spells beforehand.
+
+TABLE 3.7. WIZARD SPELLS
+
+Wizard
+Level
+
+—
+j=)
+
+nAbPpRHA HAHAHAHA HHH HAH HHA HHS
+
+APRA HHHA HA HHA A HWWWNHNHS
+
+AbPRHAHHHAR HHH AR WWWNHNH |] VN
+
+Ah HHHH AA HWWHWWNNHY- !
+
+WIZARD CLASS FEATURES
+
+w
+P=
+
+APRA AHH AR WWWNHNH- |
+
+Scribe Scroll: All wizards can write magic
+scrolls. This should give you an idea of how potent
+a power this is.
+
+Bonus Feats: At every fifth level, wizards
+gain a bonus feat which must be spent on a meta-
+magic feat or item creation feat. These are above
+and beyond the feats granted every odd character
+level.
+
+Spells per Day
+
+5 6 7 8 9
+
+PHAR HA A HWYHWNN-— |
+ADL HPADWWWHY LHe |
+ABBRWWWNN- |
+fPWWN NY =]
+
+
+
+
+
+CHAPTER FOUR_
+
+KILLS AND FEATS
+
+Every other word in this chapter, starting
+with the first one, is Open Content. Other text is
+closed content. Boxes like this do not occur in
+this chapter, except for this one, so don’t worry
+about it.
+
+Skills and feats are both ways to Do Stuff. A skill
+is generally applicable, and usually has some basis in
+reality. You will need some appropriate skills. If you
+can find a skill-granting magic item, so much the
+better . . . but you will get more skills each time you
+level up, anyway.
+
+A feat is one specific stunt. As a rule, a feat is
+either a completely bogus trick drawn straight from
+comic books and kung-fu movies, or a shameless and
+direct manipulation of the game stats. This is why they
+are harder to get, and why we love them so much!
+
+SKILLS
+
+Here’s where your Intelligence stat pays for itself
+... the smarter you are, the faster you get the skills that
+you can use to KILL THINGS. Isn’t it a shame that
+real life isn’t more like this?
+
+Okay, not all skills are used for death and destruc-
+tion. Some are used for stealing, wheedling, conniv-
+ing, and running away. It’s good to be flexible.
+
+CAROUSE (CON, ARMOR CHECK,
+PENALTY)
+
+You are an experienced
+party-goer, who knows his limits
+and waves as he shoots past them
+on his way to total inebriation.
+
+Check: If you want to know
+if you’re having fun, roll this check
+(DC 20; apply the number of drinks
+you’ve had in the last hour as a
+bonus to your roll). You MAY take
+10 or 20 on your check — in fact, we
+highly recommend the latter.
+
+Retry: You are a party animal,
+aren’t you? Go, dog!
+
+ECDYSIAST (CHA,
+ARMOR CHECK PENALTY)
+
+You may use this skill to distract opponents.
+Check: On a DC 15 skill check, opponents must
+make a Will save (DC equal to what you rolled on
+
+SKILLS AND FEATS ©
+
+your check) or be distracted by your activities. Oppo-
+nents predisposed to find someone of your race and
+sex attractive add 10 to this DC. You may take 10, but
+not 20, on your skill check; your opponents may do
+neither on their Will save.
+
+Retry: You may retry once per combat round. If
+your last attempt failed, your DC is 5 greater than the
+previous attempt’s DC. If your last attempt succeeded,
+your DC is 2 lower than the previous attempt’s DC.
+
+Special: Your AC must be greater than 10 to use
+this skill. Each successful attempt reduces your AC
+by 1.
+
+GAMBLE (WIS)
+
+Baby needs a new chainmail bikini!
+
+Check: This is the skill you use to cheat NPCs —
+hell, other PCs — out of their hard-looted income. You
+roll an opposed check, your Gamble skill against your
+opponent’s Spot. Now’s where that masterwork d20
+comes in handy!
+
+Retry: If you live, sure.
+
+KNOWLEDGE (ADVENTURE
+SPOILERS) (INT, TRAINED ONLY)
+
+You know what’s coming!
+
+Check: As for the other Knowledge skills
+(although a smart DM will always set the DC high).
+
+Retry: Yeah, right. You weren’t supposed to
+peek the first time.
+
+Special: This skill may not be used untrained.
+
+POSE (DEX)
+
+Looking cool is almost as important as being
+cool.
+
+Check: When you do something cool in the
+game (score a critical hit, fell an opponent,
+succeed at a difficult saving throw), roll this
+check. If it is successful, your foes incur a
+
+-2 circumstance penalty to their morale.
+
+SEDUCE (CHA)
+If you need us to tell you what this is
+for, you shouldn’t be taking this skill.
+Check: This has a special skill check.
+If the other person (or persons) chooses
+not to resist, then the check has a DC of, oh,
+call it 5. If the other person is resisting, even playful-
+ly, then roll an opposed check, your Seduce against the
+other person’s Sense Motive. In either case, if you crit-
+ically fail, bad things happen — a drink thrown in your
+face is about the mildest you can hope for.
+
+a5
+
+
+
+
+
+Retry: Until you succeed, your banter partner
+leaves, or closing time, whichever comes first.
+Special: This skill has no hope of success against
+people who are not even slightly attracted to your
+gender, race, or whatever. But you never know till
+
+. youtry...
+
+WHINE (CHA)
+
+Use this skill to get your way.
+
+Check: When you don’t like a game event, role-
+play this skill to the best of your ability. Eventually the
+DM will either give in or kill off your PC just to shut
+you up.
+
+Retry: Each attempt after the first has a DC +5
+higher than the previous one.
+
+Special: Gnomes, halflings, and those of noble
+birth get a +4 circumstance bonus to this skill
+check.
+
+CHEATS
+
+Cheats are inherently bogus and
+wonderfully powerful abilities which
+characters can choose for
+themselves as they go up in
+levels. A mind-bogglingly
+huge variety of cheats is
+available in both. . .
+
+Beg pardon?
+
+It is? Really? With an
+“PF?
+
+Okay, fine. We'll do it their
+
+way.
+
+FEATS
+
+Feats, with an F, are inherently bogus
+and wonderfully powerful abilities which characters
+can choose for themselves as they go up in levels. A
+mind-bogglingly huge variety of feats is available in
+ge both unofficial and third-party material for the d20
+system. Any feat you can possibly imagine has
+already been published somewhere, or will be within
+the next week or so.
+4 Basically, any time you are in trouble, you can
+| feat your way out of it if you can quickly make up an
+interesting name for what you want to do and claim
+you got that feat out of a book you left at home. If the
+DM catches you feating, of course, he will disallow
+the attempt, but he’s probably feated himself once or
+twice and will at the least admire a bold invention.
+Below are some sample feats, both to build up
+your munchkins “legitimately” and to inspire you to
+inventions of your own.
+
+AMMO WRITTEN IN PENCIL
+(GENERAL)
+
+Arrows? Um, sure, you’ve got plenty!
+
+Prerequisites: Cha 12+
+
+Benefit: Whenever you use ammunition in a
+ranged attack (arrow, bolt, bullet, etc.), you may make
+a Bluff check. If you succeed at the check, you need
+
+ag
+UG q o (GENERAL)
+
+not mark off that ammo. The DC of the Bluff check is
+18 for non-magic ammo, but DC 28 for magic ammo;
+the gods pay more attention to the big-ticket items.
+
+Normal: You can’t fire your arrow and keep it
+too.
+
+BAD TOUCH (GENERAL)
+
+A foe is overcome by lust in the middle of com-
+bat.
+
+Prerequisite: An.alignment other than Good.
+
+Benefit: Once per session, you may turn any
+combat situation involving a member of the appropri-
+ate sex (PCs excluded) into a proposition. The target
+of your attention must make a saving throw vs. Will at
+a +5 bonus to successfully resist your wiles. All dam-
+age sustained during this encounter is subdual damage
+unless it is the result of a critical hit.
+
+Normal: It. . . just... doesn’t. .. WORK this
+
+way, all right?
+
+ag BULLET SPONGE
+
+Ordinary _ projectiles
+don’t hurt, if you have your
+lucky thingie.
+Prerequisite:
+Greatest Gift
+Benefit: As long as you
+possess your lucky talisman,
+any ranged-attack projectile
+that would have successfully
+hit you does you no damage.
+Any successful critical hit will
+hit your talisman, destroying it
+utterly and completely stunning
+you for the number of rounds equal to the
+amount of damage it would have done. This feat does
+not protect from supernatural or magical ranged
+attacks or projectiles.
+Normal: Projectiles hurt.
+
+CROSS-TRAINING (GENERAL)
+
+Steal your friend’s abilities. Hah!
+
+Prerequisite: Another player who will not open
+a can of whupass on you for attempting this feat.
+
+Benefit: At any time during a session, you may
+select another PC with whom you will trade effective
+skill levels for the rest of the session. You each roll all
+further skill attempts against your own stats but with
+the skill levels and bonuses of the other. Treat your
+class and cross-class skills as if they were his and vice
+versa.
+
+Normal: Ordinary characters must use their own
+record sheet and not someone else’s.
+
+CUISINART ATTACK (GENERAL)
+
+You need not waste valuable combat rounds
+dealing with low-level foes.
+
+Prerequisite: Str 13+, Cleave, Warrior level 6+.
+
+Benefit: When faced with opponents whose CR
+is at least 5 lower than your warrior level, you may
+
+uy 7OO
+
+The
+
+SKILLS AND FEATS
+
+
+
+
+
+attack all of them at once at your highest Base Attack
+Bonus.
+
+Normal: You may not attack more times in a
+round than you have attacks, and attacks after the first
+are not as effective.
+
+DEVASTATING WIT (GENERAL)
+
+Talk your way out of trouble!
+Prerequisites: A sense of humor, or reasonable
+facsimile thereof.
+
+If you re the only member of
+
+your own prestige class, called
+
+oMG oe.
+... you might be a Munchkin.
+
+Benefit: When your PC is conversing with any
+other PC or NPC, you may attempt a pun or witticism
+in order to provoke a visible reaction from the con-
+trolling player or DM. This must be in-character,
+unless it provokes a reaction from all players
+(observers do not count but are entertaining to prac-
+tice upon). If you succeed (DM’s ruling), you imme-
+diately apply the your PC’s Charisma bonus as a
+penalty to the target’s Wisdom stat, stacking with any
+other penalties (including previous invocations of
+this feat); this penalty lasts until the end of the inter-
+action.
+
+Normal: Punsters are beaten.
+
+HIDDEN DIE ROLL (GENERAL)
+
+No, you don’t have to roll where everyone can
+see you. See, it says so right here.
+
+Prerequisites: Dice.
+
+Benefit: You may execute one hidden die roll
+every half-hour of playing time for every level your
+PC currently has. Any player may challenge the
+results of this roll; if they do, you must show them the
+actual roll. If they are wrong, you may at any time
+during the rest of the session direct them to take the
+worst of three rolls for any roll they attempt. If they
+are correct, your roll is immediately converted to an
+automatic failure as if you had rolled it naturally, with
+any extra penalties that may result.
+
+Normal: You have to roll your dice where peo-
+ple can see them. Duh.
+
+HIT THE DECK! (GENERAL)
+
+Draw a card and make the DM do something
+nice for you.
+
+Prerequisites: At least 1/4 of the cards in a full
+retail Munchkin deck (any variety). You do not need
+to be the owner of the deck, but you must possess the
+cards for the entire gaming session. The actual owner
+of the full deck has sole discretion over which cards
+you borrow.
+
+SKILLS AND FEATS
+
+Benefit: You may use this feat once per session
+to draw the top card from your deck. The player to
+your left must cut the deck before you draw the card
+and may require you to shuffle it first if they desire.
+The DM must apply that card to your current situation
+in a favorable fashion.
+
+Normal: People will laugh at you and say
+“Wrong game! Good try, Bozo!”
+
+HUMILIATING SHOT (GENERAL)
+
+Hit ‘em where it hurts.
+
+Prerequisites: Point Blank Shot, Precise Shot.
+
+Benefit: You can use a ranged weapon to shame
+your foes, planting arrows in body parts your foes
+won’t even mention in front of their mothers. This
+attack is made with a -2 penalty, but if successful, the
+target suffers a -2 morale penalty to all all checks and
+saves for a number of rounds equal to the damage you
+inflict. .
+
+Normal: This requires getting lucky.
+
+] AM CHARMING! (GENERAL)
+
+If you are already Charismatic, you become more
+so.
+
+Prerequisites: A high Charisma stat.
+
+Benefit: At any time, check to see if your PC pos-
+sesses the highest Charisma stat of all PCs and NPCs
+currently in your party; if you do, you gain an addi-
+tional +1 bonus to your Charisma with regard to other
+characters for the rest of the session. Count the effects
+of all active spells, potions, artifacts, and magic items
+when making this determination. You may not exer-
+cise this feat during the middle of combat. This is a
+supernatural ability. Saying “I’m still the prettiest!” is
+optional.
+
+Normal: Being good doesn’t make you better.
+
+If your character quests for
+demigodhood so he can start
+granting his own wishes...
+
+... you might be a Munchkin.
+
+] AM HARDY! (GENERAL)
+As per I Am Charming!, except that the affected
+stat is Constitution.
+
+] AM NIMBLE! (GENERAL)
+
+As per I Am Charming!, except that the affected
+stat is Dexterity.
+
+| AM SMART! (GENERAL)
+As per I Am Charming!, except that the affected
+stat is Intelligence.
+
+a
+
+97)
+
+
+
+
+
+] AM STRONG! (GENERAL)
+As per I Am Charming!, except that the affected
+stat is Strength.
+
+] AM WISE! (GENERAL)
+’ As per I Am Charming!, except that the affected
+stat is Wisdom.
+
+If you get combat bonuses
+
+from your languages . . .
+... you might be a Munchkin.
+
+IMPRESSIVE FLOURISH (GENERAL)
+
+Merely unsheathing a weapon can deliver a stun-
+ning whack.
+
+Prerequisite: A weapon.
+
+Benefit: At your first melee attack of any combat,
+as long as your weapon was stowed (in its sheath, car-
+ried in a non-ready position, etc.), your act of readying
+your weapon will allow an automatic attack against
+any foe (as designated by your PC) in range of your
+weapon. This is a subdual attack and must be execut-
+ed in order to ready your weapon. Roll once for your
+attack and damage rolls vs. the foe most directly in
+front of you and apply those rolls to all affected foes.
+
+Normal: Readying your weapon makes your
+weapon ready, and that’s it.
+
+IMPROVED HIT THE DECKL
+(GENERAL)
+
+As per Hit the Deck!, except that you do not need
+to have the cards cut or shuffled by any other player.
+You must use your regular Hit the Deck! draw first in
+the session before using this extra draw.
+
+IMPROVISED WEAPONS
+PROFICIENCY (GENERAL,
+WARRIORS ONLY)
+
+If you can lift it, you can hurt people with it.
+
+Prerequisite: Warrior level 5+, or Warrior level
+2+ and Exotic Weapon Proficiency.
+
+Benefit: Any item you can pick up, as long as it
+either weighs more than a half-ounce or has a surface
+area of more than 4 square inches, can be used as an
+effective weapon. You can see the potential for horri-
+ble mayhem in every ordinary item around you. The
+DM assigns weapon stats to your chosen item based
+on whatever vague similarity he can find to a “real”
+weapon, but must pick a real weapon to compare
+to... so nothing, even a playing card or a soft pillow,
+does less damage than a dagger -1.
+
+Normal: If you want to hurt someone, use a
+weapon.
+
+JUGGLE THE NUMBERS (GENERAL)
+
+Mess with your character sheet, legally.
+
+Prerequisite: Juggling skill.
+
+Benefit: Once per game session, on a successful
+Dexterity check (DC 20), you can switch any two of
+the following numbers on your character sheet: spells
+you have cast that day, usage of any one feat during
+the game session, damage taken, number of 11-foot
+poles in your inventory.
+
+Normal: Normally, after you get caught fooling
+around with your character sheet, nobody will play
+with you expect Stinky George and that crazy woman
+at the library.
+
+Special: This feat is also called Cooking The
+Books, but uses an Intelligence check and Cooking
+skill instead.
+
+KARMA CHAMELEON (GENERAL)
+
+Hide your alignment, no matter what!
+
+Benefit: You may successfully disguise your
+alignment from anyone or anything, no matter what
+means they use to discern it; you will appear to them
+to be the alignment that would most benefit you. This
+works on an unlimited number of targets simultane-
+ously. If they observe you perform an action grossly
+against the alignment they believe you have, they may
+attempt a saving throw vs. Will at a -7 penalty. Success
+means they have seen through you and will react to
+your true alignment; failure means they immediately
+forget any discrepancy and cannot be reminded of it
+by any means.
+
+Normal: Alignment, whatever that really is, is
+normally detectable by a variety of means.
+
+MARKER MAGIC (METAMAGIC)
+
+Spellcasting for everyone. Yum. Just don’t bathe
+or wear too many clothes.
+
+Prerequisites: Skin, and something to write
+with.
+
+Benefit: Any non-magic user with this feat is
+allowed to cast spells as if they were a wizard merely
+by drawing an inked pattern upon your PC’s exposed
+skin. This pattern must be exposed and easily visible
+at all times; if covered by clothing, bandages, mud,
+blood, or other materials, your PC will lose the spell-
+casting ability until it the pattern is re-drawn. The pat-
+tern will stay fresh for one day for every five levels
+you have, but will fade and require redrawing after
+that. Use the level of your primary class
+as if were the wizard class to deter-
+mine what spell levels you pos-
+sess. You may select one spell
+from each level; these selec-
+tions may not be changed.
+You cast your spells
+per the wizard
+class rules.
+
+™ SKILLS AND FE
+
+
+
+
+
+Normal: You can draw all over yourself, no
+problem, but it doesn’t DO anything.
+
+MARKER MAYHEM (METAMAGIC)
+Like Marker Magic, but twice as good.
+
+Jve
+
+Prerequisites: Marker
+Magic, a forehead, a perma-
+nent marker.
+
+Benefit: You may
+double the spell
+selection (two spells per
+each_ spell _ level)
+granted by Marker D)
+Magic by the sim-
+ple expedient of draw-
+ing the pattern upon
+your own forehead with
+a permanent marker.
+This applies to the player,
+not the character.
+
+Normal: Drawing
+on your forehead with
+a marker will have no
+game effects, and no
+desirable social ones.
+
+MUNCHKIN
+TOUGHNESS
+
+(GENERAL)
+
+How you managed to
+sneak this past your DM is one
+for the record books.
+
+Prerequisites: Toughness,
+$2 donation to the DM, Con
+15+.
+
+Benefit: You gain +6 hit points.
+
+Normal: Characters without this cheat (err,
+FEAT) die 6 points sooner.
+
+Special: You may gain this feat multiple times.
+
+NORM! (GENERAL)
+
+Other characters visit taverns because it’s a
+cliché. You have a reason!
+
+Prerequisites: A tavern, or something like it,
+containing people, or something like that, drinking
+alcohol, or something like that.
+
+Benefit: Anytime you enter a pub or inn, every-
+body there will know your name and yell it out
+cheerfully. They will ask how you’ve been
+and what you’re currently doing. Clever
+replies will earn you the appreciation of the
+crowd and gain you free and accurate infor-
+mation directly relating to your current
+goal. You also never pay for your own
+drinks, but you must never turn down a
+drink just because it’s peculiar, if those
+around you are drinking the same thing.
+
+Normal: Most people don’t get
+yelled at when they walk into a pub, and
+if they do, it means they should turn
+around and leave.
+
+SKILLS AND FEATS
+
+ONE IN EVERY PORT (GENERAL)
+
+and they all still like you.
+
+You have former Significant Others everywhere,
+
+Prerequisites: We’re not gonna say it. We’re just
+not gonna say it.
+
+Benefit: You may not be a sailor, but you
+encounter a past romantic interest
+in every major city or region
+A you enter. Usually they are at
+least tempted to renéw their
+relationship with you,
+despite any past history or
+present entanglements. At
+the DM’s discretion, they
+may attempt to resist your
+blandishments with a say-
+ing throw vs. Will at a -5
+penalty. Even if they suc-
+ceed in this save, they will
+continue to remain friendly.
+If they do not succeed in
+their saving throw, they will
+aid you in any fashion they
+can. Be discreet! If the DM
+feels your assignations
+cause significant harm in
+your target’s life, he can
+replace this feat with Trail
+
+of Hearts.
+Normal: You should be
+
+so lucky.
+
+A comrade dies so you can live!
+Prerequisites: Another PC.
+
+Benefit: Sometimes, true heroism requires the
+ultimate sacrifice. This feat ensures that someone else
+will make it on your behalf. If you are put in danger in
+the course of an attempt to acquire a magic item, treas-
+ure, artifact, spell book, or scroll in the current room or
+area, you may invoke this feat against another PC in
+the vicinity, who must immediately make a saving
+throw vs. Fortitude at a -10 penalty. If they fail, they die
+horribly in your place in a fashion that allows you to
+gain the object. If they succeed, you get the object . . .
+and the other PC takes half the damage required (at
+that point) to kill him, while you take a like amount.
+
+You may only attempt this feat once per session.
+
+Normal: In general, your
+fellow PCs wish to survive and
+would be happy to see you die.
+
+OWN GOAL ACE
+(GENERAL)
+
+The whole party dies
+so you can live!
+Prerequisite: Five suc-
+cessful invocations of Own
+Goal.
+Benefit: You have per-
+fected the art of allowing
+others to sacrifice on your
+
+29
+
+
+
+
+
+behalf and may now attempt to sacrifice your entire
+party to achieve a major plot point. All members of
+the party must fail their saving throw vs. Fortitude at
+a -10 penalty. All who succeed take half of the dam-
+age the GM rules you would have received (those
+who fail their saving throw are dead). If there are any
+survivors other than yourself, you also take half dam-
+age from the attack. You may only attempt this feat
+once per session.
+Normal: Normally, even suggest-
+ing something like this would cause
+the rest of your party to erect a tall
+stake in the deepest portion
+of the dungeon, and
+mount you tastefully
+atop it. They would
+then take all your
+weapons, armor,
+magical items,
+and gold _ to
+remember you by.
+They would then
+forget you.
+
+"e
+
+, %
+
+——
+
+SCRIPTED IMMUNITY (GENERAL)
+
+Unless they’re ALL trying to get you, you can’t
+be hurt.
+
+Prerequisite: Shagging the DM
+
+Benefit: Your PC is now immune from any
+attack received in a round in which any other PC is
+also attacked by any entity. In order to successfully
+harm you, all foes must focus entirely upon you dur-
+ing that round. You are, after all, the star of the story;
+live it up.
+
+Normal: Weapons hurt.
+
+SEARCH FOR TREASURE
+(GENERAL)
+
+You find treasure every time you bend over.
+
+Prerequisites: Munchkin T-shirt (available from
+www.warehouse23.com), stupid DM.
+
+Benefit: No matter when or where you are, you
+can take a full-round action to bend over and search
+for treasure, finding some lying right at your feet. Flip
+through whatever book you want and pick a magic
+item. You found that item. Artifacts are off-limits
+(unless you bribe your DM with some soda or some-
+thing).
+
+Normal: Without this feat, you can only find
+treasure where the DM has written it down, or where
+
+some book or other gives you a chance to roll it on the
+dice.
+
+SHAGGING THE DM (GENERAL)
+
+Shrug off a bad die roll every half-hour.
+
+Prerequisites: See the title.
+
+Benefit: If you actually fulfill the prerequisite,
+the DM must offer you the one-time opportunity to
+select this feat (privately or publicly, according to the
+DM’s whim) as soon as the PC has a free slot. Once
+per half-hour of playing time, you may re-roll any one
+die roll involving you merely by clearing your throat
+and looking meaningfully at the DM. If the DM fails
+to recognize this sign within 30 seconds, you receive
+the benefits of this feat without counting against your
+time limit.
+
+Normal: Actually, if you play your cards right, it
+can work this way without the feat.
+
+SMOOTH OPERATOR (GENERAL)
+
+Big bonuses to hit on random strangers.
+
+Prerequisite: An alignment other than Evil.
+
+Benefit: Once per session, you may turn any
+non-combat situation involving a member of the
+appropriate sex (PCs excluded) into a proposition. The
+target of your attention must make a Will Save at a +5
+bonus to successfully resist your wiles.
+
+Normal: In real life, the random approach draws
+more slaps than cuddles.
+
+Special: This feat gives you a +2 bonus on
+Seduce skill.
+
+SPARKLING SMILE (GENERAL)
+
+Smile and re-roll.
+
+Prerequisites: Teeth.
+
+Benefit: You may execute this feat once per play
+session, but you may take multiple instances of the
+feat (so if you take it three times, you may execute it
+three times per session). You must grin your cheesiest
+grin to every player, as if you are getting away with
+
+If “Flying Feet of Instant
+
+Annihilation” seems like a
+
+reasonable feat for second
+
+level...
+
+... you might be a Munchkin.
+
+something (which you are), and then you may pick the
+best of three re-rolls to apply to any roll that you made.
+Normal: Roll the dice and live with it, Twinkie.
+
+SWORD-FU (GENERAL)
+You’re one cool dude with a sword.
+Prerequisites: A sword, something to stab,
+Power Attack.
+
+SKILLS AND FEATS
+
+
+
+
+
+Benefit: +4 attack bonus with swords and swords
+only.
+Normal: You miss more.
+
+TABLE BUMPING (GENERAL)
+Clumsy accident or clever game mechanic? You
+decide.
+
+If you have better-than-even
+
+chances of hiding in shadows at
+high noon in an open field...
+... you might be a Munchkin.
+
+Prerequisites: Sufficient muscular coordination
+to bump the table without completely wrecking the
+game.
+
+Benefit: Once per session per player in the group
+(including the DM, not including any observers), you
+may physically bump the table. Any counters, minia-
+tures, or dice that are moved lay as they are as if they
+were originally placed or rolled that way. If you acci-
+dentally bump the table enough to move something, it
+uses up one of your bumps. If you bump the table and
+are out of bumps, the DM and players may devise an
+appropriate (but non-lethal) penalty for your character.
+Any effects of the bump, however, stay in effect.
+
+Normal: Things that are moved when the table is
+bumped are replaced as closely as possible, and the
+idiot who bumped the table is verbally abused and
+made to replace any books spoiled by spilled drinks.
+Come to think of it, that last bit should apply anyway.
+
+THE GREATEST GIFT (GENERAL)
+You have a Lucky Thingie, and it really works for
+you.
+Prerequisite: An item. Any item, as long as you
+can carry it.
+Benefit: Upon taking this feat, designate an
+item your PC carries as your lucky talisman.
+It may be a new item (bought, stolen, or
+looted) or an existing item. As long as you
+are within 100’ of this item and no other
+entity has touched it since you have, it will
+give you a +2 bonus to all saving throws.
+However, if any other entity sees this
+object, they must immediate make a saving
+throw vs. Will af a -10 penalty. If they fail, they will
+be under the effects of a Lesser Geas (ignore the
+target’s hit die) to take this item for themselves
+(although it will not grant them any bonuses
+or special effects unless they also possess
+this feat, in which case this item will
+replace their current lucky talisman).
+This feat must be written on your char-
+acter sheet in normal writing for you to receive
+the bonuses. Any player who sees this feat upon your
+
+SKILLS AND FEATS
+
+character sheet must have his PC make a Save vs. Will
+at -5 to avoid the Lesser Geas described above.
+
+If you lose the talisman for any reason, this feat is
+removed from your character sheet. You may not
+replace it until the next session.
+
+Normal: The grass grows, the birds sing . . . Is
+anybody reading this part?
+
+UBERMUNCH (GENERAL)
+
+You may apply extra bonuses to skill checks.
+
+Benefit: Once per day per level, you may add
+your primary class stat to any existing class skill. If
+you are multiclassed, you may pick and choose up to
+however many levels you have.
+
+Normal: You can’t DO that!
+
+Example: K’van the Secluded is an 8th-level
+character (5 Monk, 3 Thief) with Str 14, Dex 16, Con
+13, Int 12, Wis 18, Cha 14. Eight times per day, he can
+use the Ubermunch feat to add +3 to any Thief class
+skill (Dex 16) or +4 to any Monk class skill (Wis 18).
+
+WHACK THEM ALL! (GENERAL)
+
+You can hit everyone within reach with a single
+blow.
+
+Prerequisite: A weapon, or a bare-handed attack.
+
+Benefit: In any round in which you melee attack
+an entity (including attacks of opportunity,) every
+other entity that is within your weapon reach will also
+get attacked. Apply the original attack and damage
+rolls from your first attack in that round to each affect-
+ed entity.
+
+Normal: One swing, one attack.
+
+«
+
+
+
+
+
+mA
+
+CHAPTER FIVE
+
+DESCRIPTIONS
+
+This entire chapter is closed content, except
+for words beginning with the letter “P.”
+
+A true munchkin describes his character by listing
+weapons and magic items. But there ARE these other
+little things, like sex, race, class . .. and some DMs will
+insist on knowing about them. OK, fine, whatever.
+
+Sex is easy — pick whichever one .you aren't.
+That’ll earn you roleplaying points right there, even if
+your female gnome bard behaves like the hairy-
+chested linebacker who’s playing her. We’ ve already
+discussed race and class. There are a few other things,
+however, that your DM may want to know; here’s the
+munchkinly take on them.
+
+MUNCHKIN
+ALIGNMENTS
+
+The d20 system uses a wholly artificial, coarse
+system of personality description called “alignment.”
+Roleplayers (the ones with snooty voices who repaint
+their miniatures every week to show the latest battle
+damage, and insist that anything said at the gaming
+table, from “Who ordered broccoli on the pizza?” to
+“Let's give Beelzebub a wedgie!” is actually said by
+the appropriate character in the game) abhor align-
+ment because it’s an artificial crutch used by people
+who don’t understand the true roleplaying experience.
+
+Munchkins, on the other hand, like alignment
+because it gives a quick and painless way to describe
+a character, and makes the rudiments of roleplaying
+much easier. But it has its drawbacks. Any alignment
+that you choose, except good old Neutral-Neutral, will
+gets in the way from time to time — it’s tough to argue
+that one’s hero is “good” when he has just incinerated
+a medium-sized village because the bad guys might be
+hiding there.
+
+GOOD AND EVIL
+
+This is the bog-obvious way to describe some-
+one’s motivations, which explains why it came second
+in the history of alignment. Good and Evil are defined
+pretty much how one would expect. “Good” means
+that the hero is kind to orphans, widows, and cripples,
+donates regularly to several charities, helps old people
+across the street, and never uses violence when an
+unkind word will do. “Evil,” on the other hand, means
+that one wears all black, all the time, steals from the
+rich and overtaxes the poor, beats up atlas merchants
+for their lunch money, and sneers at children. By this
+strict distinction, most munchkins would be playing
+nothing but evil characters — there’s simply no profit
+
+™
+7
+
+DESCRIPTIONS
+
+sa = See
+
+to being good. The problem is that many DMs object
+to evil PCs, and either forbid them entirely, or hamper
+them with piously good NPCs, hordes of revenge-
+maddened paladins, and other distractions.
+
+Fortunately, there’s an out — a third alignment,
+“neutral,” which sits halfway between good and evil.
+Depending on one’s viewpoint, neutral can mean that
+an adventurer tries to maintain a balance between the
+good and evil factions, or that he is completely uncon-
+cerned with the larger morality of his actions. It should
+be obvious which of these two viewpoints gives more
+scope to your hacking and slashing.
+
+Of course, a player whose DM actually allows
+him to play an evil PC should jump at the chance — it
+may never come again. Especially if he plays it well.
+
+LAW AND CHAOS
+
+The original alignments were lawful and chaotic,
+cribbed completely wholesale from the novels the
+designer was reading that week. As such, they have
+suffered some changing definitions over the years.
+Originally, “lawful” meant “good” and “chaotic”
+meant “evil,” and some gamers have never quite
+shaken that association. In fact, being chaotic is FAR
+more fun than merely being evil.
+
+Lawful now means that the adventurer adheres to
+a code of ethics, be it the legal structure of his society
+or a more personal, idiosyncratic system of beliefs.
+Lawful characters tend to be neat and orderly, sepa-
+rating their money by type, spell components by state
+of matter, and killings into justified, unjustified, and
+just plain fun. Lawful heroes can always be counted
+on to know whether “anal-retentive” is hyphenated.
+
+Chaotic, conversely, means that the PC has no
+respect for authority or structure, does not have any
+consistent system of ethics or beliefs, and in general is
+hell on wheels. Disorder is the order of the day. If this
+sounds like your typical munchkin PC, well, it is — and
+it’s quite a lot of fun, to boot.
+
+There’s also a neutral option here, with pretty
+much the same implications as in “Good and Evil,”
+above.
+
+RELIGIONS
+
+The d20 system treats gods and religions as a
+game mechanic. This means that your choice of a deity
+to worship is not academic — serving the right god will
+be worth significant game benefits, while serving the
+wrong god and slow your advancement and even lead
+to SMITEage. For most characters, though, the deci-
+sion will be quick; pick the god that has the most to do
+with your character class. Wizards worship the god of
+
+
+
+
+Regardless of anything else we say here (let
+alone anything that anybody else says anywhere
+else) . . . there is no “wrong” alignment if you are
+having a good time. Any one of the nine alignment
+combinations can lead to wretched excess, massive
+overacting, and wholesale carnage . . . and that’s
+what we’re here for.
+
+Lawful Good — Sure, it limits you. But look at
+the good points. You are required by your ethics and
+your god to smite evil “without mercy” wherever
+you find it! That means that anything you can char-
+acterize as Eeeevil, from wretched villages of orcs
+to entire dark empires, is your lawful prey. Any-
+thing that builds up your own personal power is
+increasing your ability to serve Good and smite
+Evil, so it would be wrong of you to turn it down
+... or to share it with any party member who does
+not meet your strict standards. And you can, and
+should, be very snotty with other party members
+who do not meet your standards. You can explain to
+them how it’s because of their own failings that you
+are taking the best treasure, warning the guard, or
+whatever. They will hate this. You will love it.
+
+Lawful Neutral — Perhaps the best thing about
+this alignment is the way it lets you harass Lawful
+Good characters. You are philosophically inclined
+to uphold all laws, both good and evil, because they
+are laws. Therefore, find laws that let you oppress
+the weak and enrich yourself, and uphold them
+fully. Lawful Goods hate this, and they hate it worse
+when you tell them that because they are lawful,
+they should obey and support the bad laws, not
+break them. “A real Lawful,” you can tell them,
+“would work within the law to free the slaves and
+to change those laws! You’re being chaotic by
+killing the Dark Lord’s slavers!” You yourself, of
+course, are free to support either your Lawful side
+or your Neutral side.
+
+Lawful Evil — As for Lawful Neutral, but with
+the disadvantage that Good party members will
+really, really want to kill you, which makes teasing
+them dangerous. But if you can cloud their minds
+with the (evil) idea that “lawful” is a kind of good,
+and you are just a harsh, uncompromising good guy
+who really likes to wear black . . . then the world
+can be yours. All the most successful Dark Lords
+and Evil Emperors prefer lawful evil henchmen,
+because face it, that’s the only way to get Evil real-
+ly organized. And as the henchman, you are well
+positioned to replace your dark master when the
+time comes. Or even sooner.
+
+Neutral Good — You’re good, but you don’t
+have to be compulsive about it. Almost any DM will
+allow this alignment. But if (okay, WHEN) you
+really feel like slaying somebody, a flimsy excuse
+will do, because you can explain that your neutrali-
+ty overwhelmed your goodness. Some DMs will be
+very impressed if you get all noisy and angsty about
+your inner turmoil every time this happens. If
+they’re impressed enough to cough up some extra
+bonuses or a magic item-here and there, you win!
+
+Nine Paths To Nirvana
+
+Neutral — Do whatever you want. If some-
+body complains, ignore them. If they say that
+“doing whatever you want means you're really
+Chaotic,” you can ignore that too, because you’re
+Neutral and don’t care. In fact, any time anyone
+tries to get you to do anything you don’t want to do,
+you can shake your head and say “But that’s unbal-
+anced.” The other advantage of the True Neutral
+alignment is that you can suck up to
+anyone and call it roleplaying. No matter their
+alignment, you can say “I’m neutral on that. I’m not
+against you. Give me a reason to be for you.” You
+can take that to the bank. :
+
+Neutral Evil — Most would agree that this
+is the most self-centered alignment. You can do just
+about anything you like, as long as it’s not actually
+nice. You can roleplay “neutral evil” as a lifelong
+commitment to the Great Force of Evil, if that’s
+what you’re into, but you can also just say “Me
+first!”
+
+Chaotic Good — For some people this is the
+best of both worlds. As a Chaotic, you can ignore
+any rules that annoy you. But you’re still Good. So
+other Good players can’t kill you . . . theoretically,
+at least. And being Chaotic can, if you talk fast
+enough, justify whatever deals you want to make
+with the Forces of Badness, even if it’s only accept-
+ing their lunch money in return for letting them live.
+This alignment obligates you to at least think about
+the welfare of others, but you are unconstrained by
+any framework of laws or customs. Any player who
+doesn’t see how that can be abused is not munchkin
+material . . .
+
+Chaotic Neutral — Seen by many as the
+ultimate munchkin alignment. The chaotic half
+gives the perfect excuse to ignore any sense of
+camaraderie or fellowship, betray the rest of the
+party, and pocket the proceeds — or for the tax col-
+lector to fleece the peasants dry, then underreport
+his income to the king. Laws are for the uncreative.
+The neutral component, properly played, means
+that infantile concepts such as “good” and “evil” are
+for petty minds who have to be guided by moral
+precepts, rather than their consciences. (It’s impor-
+tant to note that chaotic neutral individuals do not
+act at random; they simply do not adhere to any sort
+of ethical code in determining what to do. The
+effects, it must be conceded, are often similar.)
+
+Chaotic Evil — This is the alignment for some-
+one who wants to roleplay the over-the-top bad guy.
+You’re not just bad. . . you are gleefully, randomly,
+mondo gonzo wacko bad. The one thing you really
+shouldn’t do is make sense . . . and you can always
+claim you were only making sense to fool the forces
+of Good, or to make the paint on your dog dry
+faster, or whatever. A properly roleplayed Chaotic
+Evil character is an amoral loner, as dangerous to
+his “friends” as to those he names his foes. Let’s
+hear it for proper roleplaying!
+
+DESCRIPTIONS
+
+
+
+
+
+magic, warriors worship the god of war, and bards
+worship the god of really awful poetry. (But be sure to
+check out the new Munchkin Clerical Domain on p. 38,
+and do your best to get your DM to implement it!)
+Clerics have a harder time deciding what deity to
+
+4 serve, since there’s no “god of religions” (though if
+
+one shows up, burn an ox to him quickly). When you
+create a clerical character, look carefully at the avail-
+able deities . . . there’s usually one that offers substan-
+tially better granted powers and domain selection than
+the rest. (Helpful hint: check the god of magic first,
+death second.) Then go for it.
+
+At low levels, your religious involvement will be
+fairly simple:
+
+@ If your god has an opposed deity, you know
+whose servants to persecute and plunder.
+
+Do your best to claim a reaction bonus from
+any other worshiper of your god, and high-level cler-
+ics make great patrons. ;
+
+# Remember to make a sacrifice once in a
+while, preferably while you’re broke, because “Here
+is half my treasure” is a lot less painful when you're
+down to your last gold piece anyway.
+
+@ And when you're in deep, deep trouble,
+scream and cry for divine intervention, because a slim
+chance is better than nothing.
+
+At higher levels, all this changes — an experi-
+enced munchkin’s character usually attracts the atten-
+tion of a deity for the first time by 10th level, with
+increasing frequency as the hero becomes more
+annoying to the powers who are trying to run theuni-
+verse. Suddenly, a character who hasn’t paid the prop-
+er homage to the deity who has just appeared in his koi
+pond learns the meaning of the word SMITE!!! and
+begins a new adventuring career as a three-legged ger-
+bil. Fortunately, a high-level PC usually has gold to
+burn on donations to all the appropriate temples —
+donations which, of course, are tax-deductible.
+
+LOOKS,
+PERSONALITY,
+AND BACKGROUND
+
+If you can get the DM to give you any sort of
+bonus for any of these things, go for it.
+
+@ “I’mcute. Says so on my character sheet. That
+guard should react better to me.”
+
+@ “Ihave an outgoing personality. Says soon my
+character sheet. That guard should react better to me.”
+
+@ “I’m from Salabunga. Says so on my charac-
+ter sheet. Can we roll to see if any of the guards are
+Salabungan?”
+
+Otherwise, go for fearsome looks, cheerfully
+murderous personality, and mysterious unknown
+background, and start hacking. You may, however,
+want to name your character. Giving your character
+your own name is simple but pointless. However,
+naming your character after one of the other players
+can lead to all kinds of confusion which you may turn
+to your advantage.
+
+* DESCRIPTIONS
+
+Quick Appearance Table
+
+Appearance is important! Why? Because it can
+give you bonuses. Select an entry you like, or roll a
+d20 if you are in a hurry to begin the slaughter.
+
+Height Table
+
+Roll Result
+1-3. Midget (4’6”). You are a Small character; if
+you are already Small, you become Tiny. »
+
+4-7 — Short (5’3”). Gain a +2 circumstance bonus
+to AC when you are in combat with someone
+taller than yourself, as you are able to duck
+under their swings.
+
+8-13. Normal (5°10”). No special effects. What fun
+is that? Roll again if you want to.
+
+14-17 Tall (6’3”). +1 Charisma. or +1 Constitution —
+you choose.
+
+18-20 NBA Center (7’2”). Gain Wéather Sense: you
+are sensitive to upper atmospheric distur-
+bances, and can predict the next day’s weath-
+er on an Intelligence check (DC 20).
+However, you cannot use this check yourself;
+you must be asked “How’s the weather up
+there?” before you may roll. Also, Enhanced
+Reach: you get attacks of opportunity at 10
+feet, rather than at 5 feet as for normal char-
+acters,
+
+Dwarves multiply the given heights by 4/5; gnomes
+and halflings by 1/2.
+
+Weight Table
+
+Roll Result
+
+1-3. Toothpick (80 Ibs.). You need not actually
+digest food to derive sustenance; you may
+simply eat it and then regurgitate it immedi-
+ately. This grants a +4 circumstance bonus to
+saves against all but immediate-onset poisons.
+You may also wiggle down holes ordinarily
+suitable for creatures one Size class smaller,
+and get a +4 circumstance bonus to hide in
+shadows.
+
+4-7 Slender (120 Ibs.). Flattering Garments: you
+never have difficulty finding nice clothes.
+Any time you pay 1.5 times the listed price
+for clothes, you receive a +2 enhancement
+bonus to Charisma when you wear them.
+
+8-13 Normal (160 Ibs.). A special advantage if you
+have both normal height and normal weight:
+any clothing store, armory, pile of bodies
+being looted, etc., will always have some-
+thing in your size. Even a pile of three-armed
+midget aliens from Atlantis.
+
+14-17 Stout (225 lbs.). Super Size: gain a +2 inher-
+ent bonus to any attempt to swim, or to knock
+down, break through, or overbear anything by
+sheer magnificent mass.
+
+18-20 Wide Load!! (300+ Ibs.). Your inherent bonus
+to swim is +4. You don’t move quickly
+enough to get a bonus for knocking things
+down, but any attempt to knock you down is
+at a -4.
+
+Dwarves multiply the listed weights by 2/3; gnomes
+
+and halflings by 1/2.
+
+
+
+
+
+Hair Color
+Roll Result
+
+1-3 Black. You get a +2 circumstance bonus to
+any attempt to pass for Evil. If you are actual-
+ly Evil, you receive a +1 enhancement bonus
+to Charisma.
+
+4-6 Brown. You get a +5 circumstance bonus to
+any attempt to pass for any sort of Neutral.
+
+7-9 Red. You are fiery and impulsive. Any time
+
+’ someone points this out, you must whap them
+for stereotyping you. +2 to Charisma, but -1 to
+Wisdom.
+
+10-12 Blond. You may giggle at a member of the
+opposite sex once per day, causing an effect
+identical to the charm person spell. If you bat
+your eyelashes, they are at -4 to the save. You
+also (life isn’t fair) get a +2 circumstance
+bonus to any attempt to pass for Good. If you
+are actually Good, you receive a +1 enhance-
+ment bonus to Charisma.
+
+13-14 White. You get a +1 enhancement bonus to
+Wisdom.
+
+15 Gray. Any spellcaster gets a bonus spell,
+usable once per day, of the highest spell level
+available to him.
+
+16-18 Blue, Green, Purple, or something more exotic
+yet. You are an anime character, and are clear-
+ly in the wrong game entirely. That being the
+case, roll twice on the Special Effects table
+below, ignoring all results of 10 or less, until
+you get two compatible effects.
+
+19-20 None. +1 to Strength because your body is not
+wasting energy growing hair. Ignore any hair-
+related Special Effects and roll again.
+
+Beard and Mustache
+
+If your character is female, skip this table, unless you
+are a Dwarf and enjoy settling arguments about the hir-
+suteness of your kind by an impromptu demonstration.
+If your character is a Dwarf, your culture expects you
+to have a loooong beard and a bushy mustache.
+Whether you go along with them is up to you.
+
+Roll Result
+
+1-8 | You have both a beard and a mustache, so
+keep rolling till you get both.
+
+9-10 Pointy little beard. As for black hair, and yes,
+it stacks.
+
+11 _ Long, twirlable mustache. As for black hair,
+and yes, it stacks.
+
+12-13 Manly, short-cropped beard. +1 to Constitution.
+
+14-15 Long, silky beard. +1 to Wisdom.
+
+16-17 Bushy beard down to your knees. +1 AC to all
+attacks from the front.
+
+18 Bushy mustache. Filters your drinks, giving
++2 circumstance bonus to saves against all
+poisons administered in liquid.
+
+19 Charlie Chaplin mustache. +6 circumstance
+bonus to any use of sign language or nonver-
+bal communication. +2 to any save against
+falling.
+
+20 Something weird — long waxed mustaches,
+beard only on the right side, whatever you
+like. Any foe who faces you for the first time
+will have a -5 on his first strike, as he boggles.
+
+Special Effects
+
+Roll Result
+
+1-5 Nothing special. By all means, roll again if
+you feel special.
+
+6 Perfect, sparkling teeth. +1 to Charisma.
+
+Z Slight nearsightedness which does not have
+any ill effects but which lets you wear really
+cool glasses and gives +1 to Intelligence.
+
+8 Strong, heroic chin. You get a +2 circumstance
+bonus to any attempt to pass for Good. If you
+are actually Good, you receive a +1 enhance-
+ment bonus to Charisma.
+
+9 Long, perfectly maintained fingernails give
+you an edge in weaponless combat; you may
+choose to inflict actual damage instead of sub-
+dual damage.
+
+10 Amazingly bushy eyebrows. Spellcasters get a
+bonus spell (as for Gray hair, above).
+
+11-12 Very long hair. +1 to Strength; it worked for
+Samson.
+
+13-15 Hair worn in a bristly buzz cut. If you are a
+Warrior, select an extra martial Feat. If you are
+not a Warrior, this was a stupid choice.
+
+16 Dramatic white stripe. Effect as for black hair,
+and yes, it stacks.
+
+17 Spiky Mohawk. Your helmet must be specially
+made to let it stick out. +1 to Dexterity from
+all the practice you gain from getting your hair
+to stay up. Also, you are immune to Chicken
+On The Head, as there is nowhere for it to
+perch.
+
+18 Spectacular tattoos. Increase your AC by 2 at
+any time it is not already above 16.
+
+19 Thick back hair. +1 AC to all attacks from
+behind. Dwarf women have this effect auto-
+matically (see, it pays to read the fine print in
+the tables!).
+
+20 Yow are an albino. Hair color becomes White
+or None — your choice — but without the
+normal effects from the Hair table. Instead,
+you get +2 Charisma and a nasty tendency to
+sunburn.
+
+Skin Color
+
+We’re just not going there. It is assumed
+that you have skin. It can be any color
+you like. In this enlightened fantasy
+world, nobody will notice, Besides,
+you're bloody well going to cover it
+up with armor, right? O's
+
+Eye Color
+
+Pick a die at random from your bag.
+Your eyes are that color. If you come
+up with a multicolored die, deal with it.
+
+DESCRIPTIONS
+
+
+
+
+
+CHAPTER SIX
+
+QUIPMENT
+
+— but not bold italic! — which are open content.
+
+This chapter is all closed content, except for
+the words in this box and any words in italic type
+
+Most of the best munchkin equipment is
+either already official (gotta love that
+throwable flask of holy water), or mag-
+ical (which will put them in the
+Munchkin Master’s Guide), or both
+(Bag of Holding! Bag of Holding!).
+So this will be a short chapter, with
+just a few little things you don’t want
+to leave home without:
+
+WEAPONS
+
+The better to maim
+with!
+
+Boots, Butt-Kicking:
+These metal boots have
+long metal spikes pro-
+truding from the toes.
+They allow the wearer to
+deliver a_ kick attack,
+doing 1d4 damage on a
+successful hit. In all other
+respects, they behave as normal
+leather boots.
+
+Cost: 15 gp. Weight: 5 lbs.
+Damage: Piercing, 1d4. Critical:
+20/2.
+
+If your plate
+mail has a weapon
+
+cack :..
+
+... you might be a Munchkin.
+
+Bow, Ribboned: This elven weapon acts as a
+normal longbow when used as a weapon. It can also
+be twirled, however, distracting any opponent firing
+missiles at the elf’s party (-2 to hit). Blind opponents
+
+are not affected by this secondary power.
+
+Cost: 100 gp. Other statistics as for a regular
+
+longbow.
+
+Chainsaw, gnome: This terrible two-handed
+weapon uses a clockwork engine to literally tear apart
+
+~ EQUIPMENT
+
+an enemy’s flesh. It runs on alcohol (pure, ideally,
+although any hard liquor will do in a pinch), and must
+be started (1 combat round and a Dex check, DC 20)
+before it can be used effectively in combat. One gal-
+lon of alcohol will power the saw for one hour.
+
+Cost: 30 gp. Weight: 6, lbs. Damage:
+Slashing, 1d10. Critical: 18-20/x3.
+
+Chainsaw, ore: The same as above,
+
+only used in one hand and not started, and
+
+therefore doing only 1d6 damage.
+Requires no fuel in this
+mode.
+
+Polearm, Swiss
+Army: It’s not the
+most elegant weapon
+in the world, but you
+are guaranteed to
+have the polearm
+
+you need. It con-
+tains one of
+every type of
+polearm
+found in the
+PHB; chang-
+ing from one
+to another is a
+full-round
+action.
+Cost:
+500 gp.
+Weight: 10
+lbs. (Those
+Swiss . . . how do
+they do it?) Damage and criti-
+cal as per the polearm in use.
+
+Rock, Huge: The weapon of
+choice for boulder warriors. (Ahem.)
+
+Cost: Free. Weight: 150 lbs. Dam-
+age: 2d8 per 10 ft. fallen or hurled. Critical: 20/x2.
+
+Slug-Thrower: A hand catapult loaded with
+your slimy garden friends. Treat as a repeating cross-
+bow, but instead of doing damage, the slugs distract
+all humanoids (except orcs and half-orcs) they hit:
+adds +3 to DC for any task requiring concentration,
+and an additional +1 for each additional slug. Double
+the penalty for elves and females; triple it for elvish
+females; and double it again if you can get the slug
+down the front of her armor (requiring a critical hit)
+
+Cost: 250 gp. Weight 16 lbs. Damage: Special.
+Critical: 19-20/special effect; see above.
+
+Slugs: Cost: 1 cp, or look under a rock. Weight:
+20 to a pound.
+
+
+
+
+
+STUFF
+
+You need more stuff.
+Armor, Slimy:
+Ewwwwwwww.
+
+But at least you’re pro-
+tected. Attacks are more like-
+ly to slide right on off you;
+take a +2 circumstance bonus to
+your AC. Slime must be reapplied
+after each combat; fortunately, there
+seems to be quite a lot of it in your
+typical dungeon. Unfortunately, you
+also take a -2 penalty to any skills
+based on Charisma — and if
+you make a natural 1 on
+any Reflex save, you
+fall down and suffer
+double effects!
+
+Cost: As per
+the underlying
+armor. Weight:
+
+As per the underlying
+armor plus 1 lb.
+
+Balloon,
+Water: These
+blessed bits of
+latex are almost
+weightless and easy to carry. They work by divine
+
+Holy
+
+power and radiate no magic. Filled with six ounces of
+
+any liquid, they transmute it to holy water, and may
+then be used exactly like a holy water flask. Note that
+if the liquid is poured out of the balloon instead, it
+turns back into whatever it was before.
+
+Cost: 50 gp. Weight: 50 to a pound.
+
+If your characters name is
+
+used as the title of a prestige
+class...
+. you might be a Munchkin.
+
+Balloons, Pretty: You may inflate these and bat
+them around to distract impressionable monsters. If
+you’re lucky, they’Il want to play, too, instead of eat-
+ing you. (They’re also very useful in conjunction with
+a levitate spell . . .)
+
+Cost: 50 gp. Weight: 50 to a pound.
+
+Bandanna, Bad-Ass: Just what it sounds like.
+Tie this in a band around your head, and you get a +2
+enhancement bonus to your AC just from the sheer
+intimidation of your raw prowess. Doubles as a dinner
+napkin.
+
+Cost: 8 gp. Weight: negligible.
+
+Die, Masterwork: This finely made die gives a
++1 to all uses. Thus, for instance, if you possess a
+
+Masterwork d6, whenever you roll 6-siders, one of
+them is considered to roll 2-7! But you need a separate
+Masterwork die for each type of die; your Masterwork
+d6 does you no good if you need to roll a d20.
+
+Cost: 1,000 gp. Weight: 20 to a pound.
+
+Glue: It’s glue. It sticks stuff together. Not a
+tough concept. Alcohol will dissolve the glue;
+otherwise, a Strength check at DC 25 is
+required to separate two things that are glued
+together. The check falls by 5 for every full
+
+day that elapses.
+
+Cost: 5 gp per flask; each flask holds
+one application. Weight: 1/2 Ib.
+
+Pole, 11-Foot: For the things you
+wouldn’t touch with a 10-foot pole. And
+there are a lot of these. Consider: the
+guy who designed that dun-
+
+geon knows you’re going to
+
+be poking at things with a 10-
+foot pole. And he’s going to
+
+plan accordingly. Now, do
+
+you want that ten-ton block of
+
+stone falling ON you, or a foot in
+front of you?
+
+Cost: 2.2 sp.
+
+Weight: 8.8 lbs.
+
+Sports Drink, fo
+Nasty-Tasting: Its [7
+
+better for you than water, really.
+
+When an adventurer drinks a pint of the stuff, he
+must make a Fortitude save (DC 20)
+to keep it down. If this succeeds, he
+gains a +1 enhancement bonus to his
+Constitution for the next 1d6 hours,
+as he is ultra-hydrated and his elec-
+trolytes are in perfect balance. Sub-
+sequent drinks of the beverage do
+not stack (but do force more Forti-
+tude saves, which can cause the
+initial successful drink to be vom-
+ited back up, ending its effects
+prematurely).
+
+Cost: 2 gp per pint. Weight:
+I Ib. per pint.
+
+Water, Yuppie: This fizzy
+beverage is equivalent to water
+in most respects. However, for
+the eight hours after you drink
+a pint, you must make a For-
+titude save (DC 20) any time
+you are trying to be stealthy,
+to see if you burp at an
+
+inopportune moment. The
+
+DC goes up by 5 for every
+pint after the first. Elves,
+being genteel creatures,
+are immune to this
+effect.
+Cost: 10 gp per
+pint (hey, it’s French).
+Weight: 1 Ib. per pint.
+Ak.
+“EQUIPMENT
+
+
+
+
+
+CHAPTER SEVEN
+
+SPELLS
+
+This entire chapter is Open Content, except
+for spell titles and the words “munchkin,” “dice,”
+and “the,” which are Product Identity.
+
+No treatise on the fine art of munchkinry
+(munchkinship? munchkination?) would be complete
+without a discussion of the ways a magical munchkin
+may toast his foes . . . from a safe distance. Luckily,
+there any many satisfyingly destructive spells already
+in the d20 rules, and there is no need to repeat them
+here. In general, a munchkin spell is one which either
+(a) allows the player to roll bucketloads of dice for
+damage, or (b) allows the character to sidestep nasty
+negative effects. If the spell is new, so much the better
+... it means the DM hasn’t already figured out a way
+to defeat it.
+
+This chapter, then, presents a collection of spells
+designed for the most gleefully munchkin of players
+and DMs. Enjoy. Destroy!
+
+THE SPELLS
+
+The spells follow an easily understood format
+that should be old hat to anyone who has ever come
+within about 30 feet of a d20 rulebook. So, without
+further ado. . .
+
+AIDE
+Conjuration (Summoning)
+Level: Clr 2
+Components: V, S, DF
+Casting Time: | action
+Range: Close (25 ft. + 5 ft/2 levels)
+Effect: One summoned creature
+Duration: One round/level (D)
+Saving Throw: None
+Spell Resistance: No
+
+Aide summons an assistant to help fight for the
+caster . . . or, more specifically, to be there to soak up
+damage. The summoned aide has 1d8 hit points, and
+any damage suffered by the caster first comes from the
+aide’s hit points instead. The caster gains a +1 morale
+bonus to attack rolls and fear effects as long as he has
+his aide there to back him up.
+
+ALTER OTHER_
+
+Transmutation
+
+Level: Wiz 2
+
+Components: V, S
+
+Casting Time: | action
+
+Range: Medium (100 ft. + 10 ft-/level)
+
+Target: Any one ugly creature
+
+Duration: 10 minutes/level or until midnight,
+whichever comes first
+
+Saving Throw: Fortitude negates
+
+Spell Resistance: Yes (harmless, you would think, but
+nooooo.. .) ‘
+
+This spell takes a hideous creature within range
+and reshapes its features so it is slightly less hideous.
+It cannot perform extensive changes — no making a
+4’6”, 300-Ib. person into a fashion model — but it can
+remove unsightly blemishes, hide inappropriate facial
+hair, and even smooth out a hunched back or untwist a
+club foot. It is very popular with young wizards who
+have delayed too long in finding a date for the Wiz-
+ards’ Ball, and are now stuck with whoever they can
+find lounging in a gutter between their tower and the
+ballroom.
+
+Yes, this spell can mask odors of all sorts . . . at
+least those which are present when the spell is cast.
+Wizards are advised to watch the diet of the spell
+recipient if there is any worry.
+
+The Munchkin
+
+Clerical Domain
+
+No book of d20 player rules would be com-
+plete without a new clerical domain. It should be
+noted that this clerical domain is not currently
+allowed by any deities. This is to allow you, the
+creative player, the opportunity to help shape your
+campaign world — in this case, by convincing your
+DM that your deity would naturally have access
+to this domain. To this end, you might change the
+name of this domain to “Self-Defense,” “Neces-
+sary Roughness,” or another innocuous-sounding
+term. We’ ll never tell.
+
+Granted Power: +1 to everything, all the
+time, whenever you could possibly find it useful.
+Is that simple, or what?
+
+Munchkin Domain Spells
+
+Fireball. BOOM!!!
+
+Lightning Bolt. ZARK!!!
+
+Flame Strike. Eat fiery death, infidel!!!
+
+Power Word: Kill. Die!!!
+
+Finger of Death. I said, DIE!!!
+
+Limited Wish. See, it says it’s Limited.
+
+This is game balance, kids.
+
+Wish. And here’s its big brother!
+
+Miracle. As if you really need one .. .
+
+but it never hurts to have it.
+
+9 Magic Missile. Oops . . . how’d we
+forget this one earlier?
+
+Anh WN
+
+on
+
+
+
+
+
+ANIMAL MAGNETISM
+
+Transmutation
+Level: Brd 2, Clr 1, Wiz 1
+Components: V, S, F
+Casting Time: 1 action
+Range: Close (25 ft. + 5 ft./2 levels)
+Target: One animal
+Duration: 1 hour/level
+Saving Throw: Fortitude negates
+Spell Resistance: Yes
+
+This spell makes a single animal magnetic. It is
+useful for storing small metallic items in an accessible
+location, for locating north, and for delivering touch
+spells to iron golems. It is also a great deal of fun at
+parties.
+
+Focus: A small metal bar, painted red at one end
+and black at the other.
+
+ANTI EM FIELD
+Transmutation
+Level: Brd 6, Clr 6, Wiz 6
+Components: V, S
+Casting Time: | action
+Range: Long (400 ft. + 40 ft/level)
+Area: 100-yard-radius emanation, centered on any
+
+point chosen within the range
+Duration: | hour/level
+Saving Throw: None
+Spell Resistance: No
+
+This dastardly spell leaches all the color and fun
+out of life within its area of effect. Colors turn to gray,
+the landscape becomes flat, and otherwise intelligent,
+fun people turn into farmers. What’s worse, this spell
+is a focus for tornadic activity; there is a 15% chance
+that a tornado will strike some portion of the spell area
+during its duration. (The chance rises to 95% if an
+adorable girl and yapping dog are within the affected
+region.)
+
+If you cast Meteor Swarm to
+
+avoid wasting your really good
+
+spells...
+... you might be a Munchkin.
+
+ANTIHARM SHELL
+Abjuration
+Level: Clr 8, Wiz 8
+Components: V, S, M/DF
+Casting Time: 1 full round
+Range: 10 ft.
+Area: 10-ft.-radius emanation, centered on you
+Duration: 5 minutes/level
+Saving Throw: None
+Spell Resistance: Yes (harmless)
+This potent spell protects all within its emanation
+from harm — they can suffer no damage from any
+
+source less potent than artifacts or deities. Unfortu-
+nately, enemies who sneak into its area of effect also
+gain this protection (although they may, of course, be
+bodily ejected from the area by the warriors cowering
+in terror . . . er, we mean “guarding the spellcaster’).
+
+BIG B'S INSULTING GESTURE
+Evocation
+
+Level: Brd 3, Clr 4, Wiz 3
+
+Components: V, S, F/DF
+
+Casting Time: | action
+
+Range: Medium (100 ft. + 10 ft/level)
+
+If V*cn* wants the Hand of
+You .
+
+... YOu might be a Munchkin.
+
+Effect: 10-ft. hand
+Duration: | round/level (D)
+Saving Throw: Will negates
+Spell Resistance: No
+
+The famous wizard Bartholomew Maximus, or
+“Big B” to his friends (he was actually quite short and
+slight of build; the nickname’s derivation is obvious, if
+a bit derisive), invented several spells which used dis-
+embodied hands of force to carry out his wishes. The
+first is this one, which presents foes with a huge hand
+engaged in one of any number of rude gestures. The
+opponents must succeed at a Will save or become so
+enraged that they immediately charge to the attack,
+heedless of potential consequences. The results, need-
+less to say, can be quite amusing — frequently they will
+attack the hand, rather than the spellcaster, providing
+ample opportunity to make an
+escape.
+
+The hand has as many
+hit points as the caster
+when it is first
+brought into
+being, and has
+AC 20 (-1 size,
++11 natural). It
+does not impede
+progress or
+attacks.
+
+Arcane
+Focus: — The
+middle finger of
+a calfskin glove.
+
+«
+
+SPELLS
+
+ei
+
+a
+
+
+
+
+Curses
+
+The Munchkin card game provides many,
+entertaining curses which you may inflict on
+your fellow players (and which may pop up to
+bite your butt as well). Many of these would
+make amusing curses in a Munchkin roleplaying
+game as well; about the only ones that don’t
+
+- work are the “Lose Your Class” and “Lose Your
+Race” curses. Unless your DM is really, really,
+nasty .. . and as we all know, that never happens.
+Players who really want to capture the feel of
+Munchkin may use the following spell:
+
+CURSE OF THE MUNCHKIN
+Transmutation
+
+Level: Brd 4, Clr 4, Wiz 4
+
+Components: V, S, M/DF
+
+Casting Time: | action
+
+Range: Medium (100 ft. + 10 ft-/level)
+Target: One creature
+
+Duration: Instantaneous
+
+Saving Throw: Will negates
+Spell Resistance: Yes
+
+This spell allows you to impose
+any one curse from a Curse card in
+any of the Munchkin sets. The only
+curses which may not be used are
+“Lose Your Class” and “Lose Your
+Race,” as those are features far too
+fundamental to characters in a role-
+playing game. (“Lose a Level,”
+of course, is fair game!)
+
+oat
+
+BIG B'S INTERLOCUTORY HAND
+Evocation
+Level: Brd 6, Clr 6, Wiz 6
+Components: V, S, F/DF
+Saving Throw: None
+As above, except that instead of making a rude
+gesture, the hand actually blocks all sound between
+the caster and anyone on the other side of the hand.
+This makes the caster immune to any sound-based
+attacks, but does inhibit his ability to eavesdrop.
+Arcane Focus: A piece of cork shaped like a
+human hand.
+
+BIG B'S PEACEFUL SIGN
+Abjuration
+Level: Brd 5, Clr 5, Wiz 4
+Components: V, S, F/DF
+Saving Throw: Will negates
+
+Big B used this spell to turn enemies into friends,
+to bring love to the world, and . . . oh, who are we kid-
+ding? He used it to keep himself from being turned
+into a mage-kabob.
+
+When this spell is cast, a large hand appears,
+holding up its index and middle fingers in a V shape.
+Any creature with hostile intent toward the caster who
+
+YY SPELLS
+
+can see this hand must make a Will save in order to
+attack him or use hostile spells which include the cast-
+er in the effect. Once this save is made, the effect of the
+spell is broken.
+
+Focus: A tie-dyed article of clothing.
+
+BIG B'S UNWELCOME TOUCH
+Evocation
+Level: Clr 7, Wiz 7
+Components: V, S, F/DF
+Saving Throw: Reflex negates
+The less said about this spell, the better.
+Arcane Focus: A sweaty glove.
+
+CAN TRIP
+Conjuration (Creation)
+Level: Wiz 0
+Components: V, S
+Casting Time: | action
+
+Range: Close (25 ft. + 5 ft./2 levels)
+
+Target: One creature
+
+Duration: Instantaneous
+Saving Throw: Reflex negates
+Spell Resistance: No
+
+This spell summons a small metal cylinder
+
+right at the feet of the target. If he fails his saving
+throw, he steps on it and falls down — suffering no
+damage, but certainly far too embarrassed to do
+much of anything for the next couple of rounds.
+
+CANT RIP
+
+Transmutation
+Level: Brd 0, Wiz 0
+Components: V, S
+Casting Time: | action
+
+Range: Touch
+
+Target: The object touched
+Duration: Permanent
+Saving Throw: None
+Spell Resistance: No (harmless)
+
+This spell renders.a piece of cloth or paper
+immune to tearing. It can be quite useful for items that
+need to last a long time, such as maps or legal docu-
+ments, or for creating an improvised ladder. It can also
+be very amusing to cast this on privy tissue, and most
+wizards learn after the first time to bring a backup sup-
+ply of paper with them, just in case.
+
+CLOWN
+
+Transmutation
+
+Level: Brd 2, Wiz 3
+
+Components: V, S, M
+
+Casting Time: | action
+
+Range: Touch
+
+Target: One creature
+
+Duration: | minute/level
+
+Saving Throw: Fortitude
+negates
+
+Spell Resistance:
+(harmless)
+
+AS)
+
+Yes
+
+
+
+
+
+When this spell is cast, the bard or wizard touch-
+es a creature, who immediately assumes all the physi-
+cal characteristics of a clown: painted face, big floppy
+shoes, red nose, and so on. This spell does not convey
+any of the other typical abilities of clowns, such as a
+seltzer bottle attack, the ability to.cram into any mode
+of conveyance, or the potent fear effect of the true
+clown.
+
+If a Critical Failure means you
+only do normal damage this
+round...
+
+... you might be a Munchkin.
+
+CON TRIP
+Transmutation
+Level: Brd 0, Clr 0, Wiz 0
+Components: V, S
+Casting Time: | action
+Range: Personal and touch
+Target: You and the rest of your party
+Duration: Instantaneous
+Saving Throw: None
+Spell Resistance: No
+
+This potent spell is a variant of teleport which
+sends your group to the nearest large gathering of
+adventurers; you have no control over your destination
+(but will arrive safely). A particularly nasty side effect
+of this spell is that when you arrive, you will appear as
+though you had traveled the entire distance; this fre-
+quently results in poor grooming and hygiene, lack of
+sleep, and other deleterious effects. You are also
+afflicted with a strange compulsion to buy, at higher
+prices, goods readily available in your home town.
+
+On the up side, you’ ll have a great time.
+
+CURE INSIGNIFICANT WOUNDS
+Conjuration (Healing)
+Level: Brd 0, Clr 0
+Components: V, S
+Casting Time: | action
+Range: Personal or touch
+Target: You or creature touched
+Duration: Instantaneous
+Saving Throw: None
+Spell Resistance: No
+Now you can fix that paper cut, you big baby.
+
+DETECT BEST TREASURE
+
+Universal
+
+Level: Brd 1, Wiz 1
+
+Components: V, S
+
+Casting Time: 1 action
+
+Range: Medium (100 ft. + 10 ft/level)
+
+Area: Quarter-circle emanating from you to the
+extreme of the range
+
+Duration: Concentration, up to | minute/level (D)
+Saving Throw: None
+Spell Resistance: No
+
+This one isn’t too hard; it points out the best treas-
+ure in a recently cleared monster lair. Now it’s up to
+you to keep everyone else away from it. (This is where
+those thief levels come in really handy .. .)
+
+DORKYISION
+
+Enchantment [Mind-Affecting]
+Level: Brd 3, Wiz 3
+
+Components: V, S, M, F
+
+Casting Time: | action
+
+Range: Close (25 ft. + 5 ft./2 levels)
+Target: One creature
+
+Duration: 10 minutes/level
+
+Saving Throw: Will negates
+
+Spell Resistance: Yes .
+
+This potent spell has several nasty effects.
+
+1) It forces the victim to focus his attention on the
+single most unattainable person at a social gathering,
+to the exclusion of all others, even those who might
+find him cute.
+
+2) It allows the examination of minutiae, with an
+eye toward criticizing any and all mistakes found.
+
+3) It shows you rules (and footnotes to rules!)
+which cannot otherwise be found in the complete col-
+lection of resources for your favorite RPG.
+
+Material Component: A good pint of ale.
+
+Arcane Focus: A small lead figurine and a
+scratched lens.
+
+HALF-ACID ARROW
+Conjuration (Creation) [Acid]
+Level: Wiz |
+Components: V, S, M, F
+Casting Time: | action
+Range: Long (400 ft. + 40 ft/level)
+Effect: One arrow of acid
+Duration: Instantaneous
+Saving Throw: None
+Spell Resistance: Yes
+
+This spell conjures an arrow which has a 50%
+chance to be made of acid. You must succeed at a
+ranged touch attack for this arrow to strike its target. If
+the arrow is made of acid, apply damage as per the
+acid arrow spell. If it is not, apply damage as per a
+standard arrow fired from a short bow.
+
+Material Component: Powdered rhubarb.
+
+Focus: A dart.
+
+ax pyeres° C
+
+
+
+
+
+HALLUCINATORY TRAIN
+Illusion (Glamer)
+Level: Brd 4, Wiz 4
+Components: V, S
+Casting Time: | action
+Range: Long (400 ft. + 40 ft-/level)
+Effect: One train
+Duration: 2 minutes/level
+Saving Throw: Will disbelief (if inter-
+acted with)
+Spell Resistance: No
+You create an illusory train, complete with belch-
+ing smoke and chugga-chugga noises, which overlays
+the existing landscape. If the train gets close enough
+for people to actually interact with it, they may dis-
+cover that this is a glamer. Structures, equipment, and
+creatures in the area are not covered by this illusion.
+
+If what you call “improved
+continual flame” others call
+
+“sunrise...
+
+... you might be a Munchkin.
+
+HALT DEAD
+Necromancy
+Level: Clr 7, Wiz 8
+Components: V, S, M/DF
+Casting Time: | action
+Range: Infinite. What the hell.
+Target: Up to three dead, no two of which can be
+more than 30 ft. apart
+Duration: Permanent
+Saving Throw: None
+Spell Resistance: No
+This potent spell halts the advance of dead crea-
+tures. Stops ’em right in their tracks. Forever. This
+spell has no effect on undead.
+Arcane material component: A pinch of dirt from
+a freshly dug grave.
+
+HEEL
+Enchantment (Charm)
+Level: Brd 4
+Components: V, S, M
+Casting Time: | action
+Range: Medium (100 ft. + 10 ft./level)
+Target: One creature
+Duration: | minute/level
+Saving Throw: Will negates
+Spell Resistance: Yes
+This bard spell causes one person to follow the
+bard obsessively, willing to perform any manner of
+servile duties in exchange for a meager scrap of the
+bard’s attention . .. and maybe a tummy rub.
+Material component: A short piece of braided
+leather.
+
+~ SPELLS
+
+«cL“G ds
+
+HOLY COW
+Evocation [Good]
+Level: Clr 2
+Components: V, S, DF
+Casting Time: | action
+Range: Close (25 ft. + 2
+ft.level)
+Target: One cow
+Duration: Until the cow is con-
+sumed
+Saving Throw: None
+Spell Resistance: If your cow has spell resistance, go
+for it.
+The cleric who casts this spell turns one cow into
+
+a sacred relic. Undead and summoned evil creatures
+cannot get close to it, and even nonmagical evil crea-
+tures prefer to stay away when possible. Further, the
+flesh of the cow is especially succulent, and confers
+the same advantages as the bless spell for eight hours
+after being eaten. Grilling the steaks for too long can-
+cels both of these benefits.
+
+INFLICT INSIGNIFICANT WOUNDS
+Necromancy
+Level: Brd 0, Clr 0
+Components: V, S
+Casting Time: | action
+Range: Touch
+Target: Creature touched
+Duration: Instantaneous
+Saving Throw: None
+Spell Resistance: Yes
+
+Ooh, ow! Paper cut! Nasty one! Right between
+two fingers on your right hand! This spell does no
+damage, but it hurts like hell and adds +3 to the DC to
+any task involving concentration.
+
+If your character sheet is
+
+longer than the Player's
+
+Handbook...
+... you might be a Munchkin.
+
+INVISIBILITY TO THE BLIND
+
+Illusion (Glamer)
+
+Level: Brd 1, Wiz |
+
+Components: V, S, M
+
+Casting Time: | action
+
+Range: Personal or touch
+
+Target: You or a creature or object weighing no more
+than 100 Ib./level
+
+Duration: 10 minutes/level (D)
+
+Saving Throw: None or Will negates (harmless,
+object)
+
+Spell Resistance: No or Yes (harmless, object)
+This potent spell makes the caster, or a creature or
+
+object he touches, totally invisible to anyone who is
+
+
+
+
+
+Spells In
+Modern d20 Games
+
+Some purists would argue that there is no
+place for spellcasting in modern-era games, that
+it destroys the atmosphere to have your superspy
+or brainy scientist solve problems with magic
+instead of nifty gadgets or raw intellect.
+
+Balderdash, say we.
+
+To illustrate, let’s take a perfectly good fan-
+tasy spell and see how we can translate it to mod-
+ern terms:
+
+“Death spell! Cool! Takes 3 rounds to cast.”
+
+BLAM!! BLAM!! BLAM!!
+
+“Hey, it works!”
+
+blind. Blind creatures are totally unable to see the sub-
+ject of the spell for its duration. When the spell
+expires, they are unable to see him normally.
+
+Arcane material component: A mole’s whisker or
+a bat’s wing.
+
+INVISIBILITY TO THE BLOND
+
+Enchantment (Charm)
+
+Level: Brd 1, Wiz 1
+
+Components: V, S, M
+
+Casting Time: | action
+
+Range: Personal or touch
+
+Target: You or a creature or object weighing no more
+than 100 Ib./level
+
+Duration: 10 minutes/level (D)
+
+Saving Throw: None or Will negates (harmless,
+object)
+
+Spell Resistance: No or Yes (harmless, object)
+
+As invisibility to the blind, except that the subject
+of the spell cannot be seen by any person or creature
+with blond hair or fur, whether natural or dyed. (Note
+that dyed blonds are at -4 on their rolls to detect the
+invisible person, creature, or thing. They brought it on
+themselves.) The verbal component is a simple decla-
+ration: “Hey, I’m invisible!”
+
+Arcane material component: Hydrogen peroxide.
+
+KANT TRP
+Enchantment [Mind-Affecting]
+
+Level: Brd 0, Clr 0, Wiz 0
+
+Components: V, S, M
+
+Casting Time: 1 action
+
+Range: Personal or touch
+
+Target: You or creature touched
+
+Duration: 1d4 hours
+
+Saving Throw: None or Will negates (creature)
+Spell Resistance: No or yes (creature)
+
+This spell causes its subject to fall into a
+delirious state, during which he thinks he is an
+18th-century German philosopher . . . and
+explains this anyone who will listen, at
+length, disrupting sleep and any
+attempts to keep him quiet short of a
+silence spell.
+
+Material component: A small piece of mush-
+room.
+
+L33T
+Illusion (Glamer)
+Level: Clr 3
+Components: V, S, DF
+Casting Time: | action
+Range: Touch
+Target: One piece of writing or inscription
+Duration: One week/level (D)
+Saving Throw: None
+Spell Resistance: Yes
+
+Acleric who casts this spell turns a single page of
+writing or a single inscription into a meaningless jum-
+ble of letters, numbers, and symbols. It does not actu-
+ally encode the text, and there are rumors of certain
+sages who can decipher /33t without needing to dispel
+the magic. Certainly, such men would be wise indeed.
+
+MAIZE
+
+Conjuration (Creation)
+
+Level: Wiz 7
+
+Components: V, S
+
+Casting Time: | action
+
+Range: Close (25 ft. + 2 ft/level)
+Target: One creature
+
+Duration: 10 minutes
+
+Saving Throw: None
+
+Spell Resistance: No
+
+You conjure up an extradimensional labyrinth of
+corn plants, and the subject vanishes into it. The maize
+disappears after 10 minutes, forcing the subject to
+leave. On leaving the maize, the subject reappears in
+the spot it had occupied when the maize spell was cast,
+appearing nearby if this spot is now filled with a solid
+object.
+
+Spells and abilities that move a creature within a
+plane do not help a creature escape a maize spell,
+although some plant-affecting spells may (DM’s
+option). Farmers are not affected by this spell.
+
+onp
+rT AD
+
+
+
+
+
+If the God of Destiny asks
+you what's going to happen
+next...
+
+... you might be a Munchkin.
+
+MEAT SWARM
+Evocation
+Level: Wiz 3
+Components: V, S, M
+Casting Time: | action
+Range: Long (400 ft. + 40 ft/level)
+Area: 20-ft.-radius spread
+Duration: Instantaneous
+Saving Throw: Reflex half
+Spell Resistance: Yes
+
+This disgusting spell brings into being several
+pounds of dripping wet raw meat, then blows it up in
+an explosion of gore. Any being within the area of
+effect is pelted with bits of bloody carcass, suffering
+1d6 points of damage per caster level, up to a maxi-
+
+= mum of 10d6. (Vegetarians and vegans take double
+74 damage.) The meat is edible, although not from any
+
+known creature; when cooked, it tastes like chicken.
+When not cooked, it’s just kind of gross. What would
+happen if you tried to raise or animate it? We don’t
+know.
+
+Why don’t you try it?
+
+Material component: A small piece of
+charcoal.
+
+MEATIER SWARM
+Evocation
+Level: Wiz 7
+Area: 30-ft.-radius spread
+This is an enhanced
+version of the above spell;
+it does 1d8 points of
+damage per caster
+level, up to 15d8,
+to creatures in
+its area of effect.
+As before,
+vegetarians
+and vegans
+take double
+damage.
+
+Mm SPELLS
+
+MINER CREATION
+Conjuration (Creation)
+Level: Wiz 4
+Components: V, S, F
+Casting Time: | action
+Range: Close (25 ft. + 2 ft/level)
+Effect: One miner
+Duration: | hour/level
+Saving Throw: None
+Spell Resistance: No
+This spell brings into being a dwarf. For the
+length of his existence, he mines. It’s not a hard
+concept.
+Focus: A small yellow hemisphere of ceramic,
+which has been the target of a light spell at some point
+in the past.
+
+MINER JMAGE
+Illusion (Figment)
+Level: Brd 2, Wiz 2
+Components: V, S
+Casting Time: | action
+Range: Close (25 ft. + 2 ft/level)
+Effect: Visual figment of one dwarf
+Duration: Concentration + 2 rounds
+Saving Throw: Will disbelief (if interacted with)
+Spell Resistance: Yes
+
+As miner creation, except that the caster only
+produces the image of a dwarven miner. If this image
+tries to do any work, it vanishes. Strangely, this makes
+it more realistic, not less.
+
+MARRIAGE ARCANA
+Illusion (Glamer)
+Level: Brd 5, Wiz 5
+Components: V, S
+Casting Time: | action
+Range: Close (25 ft. + 2 ft/level)
+Area: One 20-ft. cube/level (S)
+Duration: Concentration + 1 hour/level (D)
+Saving Throw: Will disbelief
+Spell Resistance: Yes
+A potent illusion, this
+spell has many uses
+around the home. It can
+make a cluttered room
+appear clean, a_ yard
+appear mowed and raked,
+and even a neglected ice-
+box seem defrosted. In
+short, it can cover a mul-
+titude of faults . . . briefly.
+The illusion includes
+sight, sound, smell, and
+even touch in the senses
+it can fool. It cannot
+hide or disguise any
+creatures in the area of
+effect (though creatures can hide them-
+selves within the illusion, for instance by
+crawling behind a repotted plant).
+
+
+
+
+MOVE HEAVEN
+Transmutation
+
+Level: Wiz 8
+Components: V, S, F (sometimes M; see below)
+Casting Time: | action
+
+Range: Unlimited
+
+Target: One heaven
+
+Duration: Instantaneous
+
+Saving Throw: None
+
+Spell Resistance: No
+
+One of the most potent spells in the wizard’s list,
+move heaven is (of course) the higher-level companion
+to move earth. This spell allows the wizard to relocate
+a single heaven to anywhere else in the multiverse —
+hell, the astral plane, the Lincoln bedroom, you name
+it. The souls and celestial spirits within the heaven
+don’t seem to notice.
+
+Focus: An atlas. (To move heaven to the Lincoln
+bedroom, the wizard must also make a sizable dona-
+tion to the Republican National Committee; this dona-
+tion is considered a material component.)
+
+If you think of Excalibur as a
+“decent back-up weapon’...
+
+... you might be a Munchkin.
+
+NEUTRALIZE POISSON
+Abjuration
+Level: Brd 3, Clr 2, Wiz 3
+Components: V, S, M
+Casting Time: | action
+Range: Touch
+Target: One plate
+Duration: Instantaneous
+Saving Throw: None
+Spell Resistance: No
+Popular in certain restaurants, this spell has only
+one purpose: to make sushi edible. Sometimes, it even
+works.
+Material component: Wasabi.
+
+NUNDETECTION
+Divination
+Level: Clr 2
+Components: V, S, DF
+Casting Time: | action
+Range: 60 ft.
+Area: Quarter circle emanating from you to the
+extreme of the range
+Duration: Concentration, up to 1 minute/level
+Saving Throw: None
+Spell Resistance: No
+Clerics use this spell to locate nuns nearby. Those
+educated in parochial school will then usually flee.
+Repeated use of this spell is dangerous, as it can be
+habit-forming.
+
+If you have a scenic way to kill
+foes: Grapple, teleport to low
+orbit, bounce...
+
+... you might be a Munchkin.
+
+PASSDOORWAY
+Transmutation
+Level: Wiz 2
+Components: V, S, F
+Casting Time: | action
+Range: Close (25 ft. + 5 ft./2 levels)
+Target: One doorway
+Duration: | hour/level (D)
+Saving Throw: None
+Spell Resistance: No
+You create a passage through any open doorway.
+This spell cannot breach closed doors, openings with-
+out doors, or any wall spell, nor does it move aside any
+creatures or nondoor objects which may be in the
+doorway at the time.
+Focus: A small brass knob.
+
+PASS WITHOUT STUDY
+
+Transmutation
+
+Level: Brd 6, Clr 6, Wiz 6
+Components: V, S, F/DF
+
+Casting Time: | action
+
+Range: Touch
+
+Target: One creature/level touched
+Duration: One hour/level
+
+Saving Throw: Will negates (harmless)
+Spell Resistance: Yes (harmless)
+
+This spell is the bane of educators everywhere, as
+it magically empowers the subject to write or speak
+the correct answer to exam questions, regardless of
+what the student is actually trying to write or say.
+
+Arcane focus: The skin of a pig, sewn into a ball
+and inflated.
+
+rw,
+err
+
+
+
+
+
+POWER WORD, BLINK_
+Conjuration (Creation)
+Level: Wiz |
+Components: V
+_ Casting Time: 1 action :
+Range: Close (25 ft. + 5 ft/2 levels)
+Target: One creature with up to 150 hit
+points
+Duration: Instantaneous
+Saving Throw: None
+Spell Resistance: Yes
+When power word, blink is uttered, one creature
+of your choice within the spell’s range is forced to
+blink, once. The spell fails if the creature does not have
+eyelids. Blinking has no combat effect.
+
+REALLY LIMITED WISH
+
+Universal
+Level: Wiz |
+Components: V, M
+Casting Time: | action
+Range: Personal
+Target: You
+Duration: Instantaneous
+Saving Throw: None
+Spell Resistance: No
+This (much) weaker version of the wish spell
+allows the caster to alter the recent past, to dictate the
+result of an action, or to have any other minor effect on
+events in the game. The caster merely says something
+such as, “I wish Bob had hit that orc that just impaled
+me on a stalagmite,” and the unchangeable past is sud-
+denly, er, changed.
+Material component:
+A $20 bill, handed to the
+DM while casting the
+spell.
+
+If you have a magic item that
+can destroy the world... with
+four charges left...
+
+... you might be a Munchkin.
+
+If you need a caddy to carry all your
+rods, wands, and staves...
+
+. you might be a Munchkin.
+
+SUMMON MOBSTER |
+Conjuration (Summoning)
+Level: Brd 1, Clr 1, Wiz 1
+Components: V, S, F/DF
+Casting Time: | full round
+Range: Close (25 ft. + 5 ft/2 levels) .
+Effect: One summoned creature
+Duration: | round/level (D)
+Saving Throw: None
+Spell Resistance: No
+
+This spell summons a first-level Sicilian (usually
+a warrior or thief) who attacks your enemies. He
+appears where you designate and acts immediately, to
+the best of his ability. If you can speak Italian or oth-
+erwise communicate with him, you can direct him not
+to attack, to attack particular enemies, or to do some-
+thing else. The Sicilian acts normally on the last round
+of the spell and then disappears.
+
+Arcane focus: A tiny bag and a small silver
+horse’s head. .
+
+SUMMON MOBSTER II
+
+Conjuration (Summoning)
+
+Level: Brd 2, Clr 2, Wiz 2
+
+Effect: One or more summoned Sicilians, no two of
+which can be more than 30 ft. apart.
+
+As summon mobster I, except . . . oh, screw it.
+Y’all can just fill in the rest of these yourself.
+
+
+
+
+the rest of the group out for pizza while
+
+UMPIRIC
+
+you add up the total.
+TOUCH Focus: A small purple
+Abjuration velvet bag with a gold
+
+Level: Wiz 4 drawstring.
+
+Components: V, S
+
+Casting Time: | action WEBB
+Range: Touch Conjuration (Sum-
+Target: Creature touched moning)
+(see text) Level: Clr 3, Wiz 3
+Duration: 1 hour/level (D) Components: V, S, F/DF
+(see text) Casting Time: 1 action
+
+Range: Close (25 ft. + 5 ft./2
+levels)
+Effect: One creature sum-
+moned —
+Duration: 30 minutes,
+including.commercials
+Saving Throw: None
+
+Spell Resistance: No
+
+Webb is used by crimi-
+
+nal investigators. It —
+summons upamanina
+rumpled suit, who pro-
+
+Saving Throw: Will negates
+Spell Resistance: Yes
+
+Once umpiric touch is
+cast, you may attempt to
+make touch attacks against a
+chosen target creature.
+Umpiric touch’s duration is
+permanent until you make
+three successful touch
+attacks against a single
+target, at which time
+the spell’s magic takes
+
+effect. If the target fails its Will save, it must go home ceeds to speak to any witnesses to a crime.
+
+and take a shower, remaining there for the duration They are strangely compelled not to ramble, only giv-
+
+listed above. ing salient information in as concise a manner as pos-
+Evil target creatures are likely to take their ball sible — ideally, just the facts.
+
+home with them. “Arcane and divine focus: A small net, dragged
+
+behind the wizard or cleric during the casting.
+
+If your character is 9th level
+and still doesn’t have a Iast
+name ... ora first...
+
+... you might be a Munchkin.
+
+; WALL OF DICE
+Evocation
+Level: Wiz 7
+Components: V, S, F
+Casting Time: | action
+Range: Long (400 ft. + 40 ft.level)
+Effect: Plane of dice, up to one 10-ft. square per level
+Duration: Instantaneous
+Saving Throw: Reflex half
+Spell Resistance: Yes C0, i“ y,
+
+This offensive spell can devastate fe
+whole armies at once. When cast, a huge
+wall of many-sided dice appears, then rolls ( (
+over anyone on the other side. The caster \\\
+determines the orientation of the wall, as
+well as which side is safe from the damage.
+To determine the damage caused by the
+
+wall of dice, you roll all the dice you have at the time.
+(No fair borrowing dice from other players . . . unless
+you think you can do it without getting caught!) Send
+
+oer = = 17
+
+
+
+
+
+Ability scores, 4-5.
+
+Aide spell, 38.
+
+Alignments, 32-33.
+
+Alter Other spell, 38.
+
+Ammo Written in Pencil
+feat, 26.
+
+Animal Magnetism spell, 39.
+
+Anti Em Field spell, 39.
+
+Antiharm Shell spell, 39.
+
+Armor, of Foe Repulsion, 5
+slimy, 37.
+
+Background, 34.
+
+Bad Touch feat, 26.
+
+Balloons, holy water, 37;
+pretty, 37.
+
+Bandannas, bad-ass, 37.
+
+Bards, 15-17; and other
+classes, 16; class features,
+17; in Munchkin, 17,
+sacred, 16.
+
+Beelzebub, 32.
+
+Big B’s Insulting Gesture
+spell, 39.
+
+Big B’s Interlocutory Hand
+spell, 40.
+
+Big B’s Peaceful Sign
+spell, 40.
+
+Big B’s Unwelcome Touch
+spell, 40.
+
+Boots, butt-kicking, 36.
+
+Bows, ribboned, 36.
+
+Boys, Backstreet, 5.
+
+BRAAAGHEKKKK|, 14.
+
+Broccoli, on pizza???, 32.
+
+Bullet Sponge feat, 26.
+
+Can Trip spell, 40.
+
+Can't Rip spell, 40.
+
+Carouse skill, 25.
+
+Chainsaw, gnome, 36; orc, 36.
+
+Charisma, 5.
+
+Cheats, 1-48; see also Feats.
+Classes , 15-24.
+
+Clerics, 18-19; and other
+
+domain, 38.
+Clown spell, 40-41.
+
+ss features,
+
+INDE
+
+Colors, eye, 35; hair, 35;
+skin, 35.
+Con Trip spell, 41.
+
+Constitution, 5; sea also Bill of
+
+Rights.
+Cooking the Books feat, 28.
+Cross-Training feat, 26.
+Cuisinart Attack feat, 26-27.
+Cure Insignificant Wounds
+spell, 41.
+Curse of the Munchkin
+spell, 40.
+Curses, 40; see also Foiled
+again!.
+Descriptions, 32-35.
+Detect Best Treasure spell, 41.
+Devastating Wit feat, 27.
+Dexterity, 5.
+Dice, masterwork, 37.
+Dorkvision spell, 41.
+
+Dwarves, 7-9; and other races,
+
+9; racial traits, 8;
+roleplaying, 8-9.
+
+dysiast skill, 25.
+
+Elves, 9-11; and other races,
+10; dark, 9; racial traits,
+11; roleplaying, 10.
+
+Equipment, 36-37.
+
+Feats, 26-31.
+
+Fireballs, 5, 15, 21, 22, 38.
+
+Flying Feet of Instant
+Annihilation feat, 30.
+
+Gamble skill, 25.
+
+Glue, 37.
+
+Gnomes, 11-12; and other
+races, 12; in Munchkin,
+11; racial traits, 12;
+roleplaying, 11-12.
+
+Gyps, 15.
+
+Half-Acid Arrow spell, 41.
+
+Half-breeds, 14.
+
+Halflings, 12-13; and other
+races, 13; racial traits, 13;
+roleplaying, 13.
+
+Hallucinatory Train spell, 42.
+
+Halt Dead spell, 42.
+
+Heel spell, 42.
+
+Hidden Die Roll feat, 27.
+
+Hit the Deck! feat, 27.
+
+Holy Cow spell, 42.
+
+Humans, 6-7; and other races,
+7; racial traits, 7;
+roleplaying, 6.
+
+Humiliating Shot feat, 27.
+
+I Am Charming! feat, 27.
+
+1 Am Hardy! feat, 27.
+
+I Am Nimble! feat, 27.
+
+I Am Smart! feat, 27.
+
+I Am Strong! feat, 28.
+
+I Am Wise! feat, 28.
+
+Impressive Flourish feat, 28.
+
+Improved Hit the Deck!
+feat, 28.
+
+Improvised Weapons
+Proficiency feat, 28.
+
+Index, 48.
+
+Infinite loop, see Loop, Infinite.
+
+Inflict Insignificant Wounds
+spell, 42.
+
+Intelligence, 5.
+
+Invisibility to the Blind
+spell, 42-43.
+
+Invisibility to the Blond
+spell, 42.
+
+Juggle the Numbers feat, 28.
+
+Kant Trip spell, 43.
+
+Karma Chameleon feat, 28.
+
+Knowledge (adventure
+spoilers) skill, 25.
+
+L33T spell, 43.
+Levels, 15-16.
+Looks, 34
+
+Loop, infinite, see Infinite Loop.
+
+Love, falling in, 14; see also
+Time, complete waste of.
+Maize spell, 43.
+Marker Magic feat, 28-29.
+Market Mayhem feat, 29
+Marmalade, 18.
+Marriage Arcana spell, 44.
+Meat Swarm spell, 44.
+Meatier Swarm spell, 44.
+Miner Creation spell, 44.
+Miner Image spell, 44.
+
+Monks, 18, 20-21; and other
+classes, 20-21; class
+features, 20; in
+Munchkin, 21.
+
+Move Heaven spell, 45.
+
+Munchkin Toughness feat, 29.
+
+Munchkin, you might be, 27,
+28, 30, 31, 36, 37, 39, 41,
+42, 44-47.
+
+Network externalities, 3; see
+also Money.
+
+Neutralize Poisson spell, 45.
+
+Norm! feat, 29.
+
+Noses, Floating, 11;
+Shadow, 11.
+
+Nundetection spell, 45.
+
+One in Every Port feat, 29.
+Ores, 13-14; and other races,
+14; racial traits, 14,
+
+roleplaying, 14.
+
+Own Goal Ace feat, 29-30.
+
+Own Goal feat, 29.
+
+Pass Without Study spell, 45.
+
+Passdoorway spell, 45.
+
+Personality, 34.
+
+Polearm, Swiss Army, 36.
+
+Poles, //-foot, 37.
+
+Pose skill, 25.
+
+Power Word, Blink spell, 46.
+
+Races, 6-14.
+
+Really Limited Wish spell, 46.
+
+Religions, 32-33.
+
+Rocks, huge, 36; see also
+Cojones.
+
+Scripted Immunity feat, 30.
+
+Search for Treasure feat, 30.
+
+Seduce skill, 25-26.
+
+Shagging the DM feat, 30.
+
+Shared narrative experience, 3.
+
+Skills, 25-26.
+
+Slug-throwers, 36.
+
+Smooth Operator feat, 30.
+
+Sparkling Smile feat, 30.
+
+Spears, Britney, 5.
+
+Spells, 38-47; in modern
+games, 43.
+
+Sports drinks, nasty-tasting,
+
+Strength, 4-5.
+
+Stuff, 37.
+
+Summon Mobster spells, 46.
+
+Sword-Fu feat, 30-31.
+
+Swords, of Slaying Everything
+But Squid, 5.
+
+Table Bumping feat, 3
+
+Tables, bard spells, 17; beard,
+35; character level and
+benefits, 15; cleric spells,
+19; contents, 2; hair color,
+35; height, 34; monk
+abilities, 20; mustache, 35;
+quick appearance, 34-35;
+save and attack bonuses by
+class level, 16; special
+effects, 35; thief abilities,
+21; weight, 34; wizard
+spells, 24.
+
+The Greatest Gift feat, 31.
+
+The Munchkin’s Guide to
+Power Gaming, 3.
+
+Thieves, 21-22; and other
+classes, 22; class
+features, 21.
+
+Time, complete waste of, 1-48.
+
+Toddlers, 22.
+
+Ubermunch feat, 31.
+
+Umpiric Touch spell, 47.
+
+Wall of Dice spell, 47.
+
+Warriors, 22-23; and other
+classes, 22-23; class
+features, 23.
+
+Water, yuppie, 37.
+
+Weapons, 36.
+
+Webb spell, 47.
+
+Whack Them All! feat, 31.
+
+Whine skill, 26.
+
+Wisdom, 5.
+
+Wizards, 23-24; and other
+classes, 23-24; class
+features, 24.
+
+Zug-zug, see Shagging the
+GM.
+
+ICENSE
+
+OPEN GAME LICENSE Version 1.0a
+
+The following: text is the property of Wizards of the
+Coast, Inc. and is Copyright 2000 Wizards of the Coast, Inc
+(“Wizards”). All Rights Reserved.
+
+1. Definitions: (a)”"Contributors” means the copyright
+and/or trademark owners who have contributed Open Game
+Content; (b)”Derivative Material” means copyrighted mate-
+rial including derivative works and translations (including
+into other comp lang ), potation, modifica cor-
+rection, addition, extension, upgrade, improvement, compi-
+lation, abridgment or other form in which an existing work
+may be recast, transformed or adapted; (c) “Distribute”
+means to reproduce, license, rent, lease, sell, broadcast, pub-
+licly display, transmit or otherwise distribute; (d)”Open
+Game Content” means the game mechanic and includes the
+methods, procedures, processes and routines to the extent
+such content does not embody the Product Identity and is an
+enhancement over the prior art and any additional content
+clearly identified as Open Game Content by the Contributor,
+and means any work covered by this License, includi
+
+Contributor (g) “Use”, “Used” or “Using” means to use, Dis-
+tribute, copy, edit, format, modify, translate and otherwise
+create Derivative Material of Open Game Content. (h)
+“You” or “Your” means the licensee in terms of this agree-
+ment.
+
+2. The License: This License applies to any Open Game
+Content that contains a notice indicating that the Open Game
+Content may only be Used under and in terms of this
+License. You must affix such a notice to any Open Game
+Content that you Use. No terms may be added to or sub-
+tracted from this License except as described by the License
+itself. No other terms or conditions may be applied to any
+Open Game Content distributed using this License.
+
+3.Offer and Acceptance: By Using the Open Game
+Content You indicate Your acceptance of the terms of this
+License.
+
+4. Grant and Consideration: In consideration for agree-
+ing to use this License, the Contributors grant You a perpet-
+ual, worldwide, royalty-free, non-exclusive license with the
+exact terms of this License to Use, the Open Game Content.
+
+translations and derivative works under copyright law, but
+specifically excludes Product Identity. (e) “ “Product Identity”
+
+means product and product line names, logos and identify-
+
+ing marks including trade dress; artifacts; creatures charac-
+ters; stories, storylines, plots, thematic elements, dialogue,
+incidents, language, artwork, symbols, designs, depictions,
+likenesses, formats, poses, concepts, themes and graphic,
+photographic and other visual or audio representations;
+names and descriptions of characters, spells, enchantments,
+personalities, teams, personas, likenesses and special abili-
+ties; places, locati envi
+
+magical or supernatural abilities or effects, logos, "symbols,
+
+or graphic designs; and any other trademark or registered
+trademark clearly identified as Product identity by the owner
+of the Product Identity, and which specifically excludes the
+Open Game Content; (f) “Trademark” means the logos,
+names, mark, sign, motto, designs that are used by a Con-
+tributor to identify itself or its products or the associated
+products contributed to the Open Game License by the
+
+5.Rep ion of Authority to Contribute: If You are
+contributing original material as Open Game Content, You
+represent that Your Contributions are Your original creation
+and/or You have sufficient rights to grant the rights conveyed
+by this License.
+
+6.Notice of License Copyright: You must update the
+COPYRIGHT NOTICE portion of this License to include
+the exact text of the COPYRIGHT NOTICE of any Open
+Game Content You are copying, modifying or distributing,
+and You must add the title, the copyright date, and the copy-
+right holder’s name to the COPYRIGHT NOTICE of any
+original Open Game Content you Distribute.
+
+7. Use of Product Identity: You agree not to Use any
+Product Identity, including as an indication as to compatibil-
+ity, except as expressly licensed in another, independent
+Agreement with the owner of each element of that Product
+Identity. You agree not to indicate compatibility or co-adapt-
+ability with any Trademark or Registered Trademark in con-
+junction with a work containing Open Game Content except
+as Be soee' Be licensed in another, i al Agreement
+
+* INDEX AND LICENSE
+
+with the owner of such Trademark or Regi d Trademark
+The use of any Product Identity in Open Game Content does
+not constitute a challenge to the ownership of that Product
+Identity. The owner of any Product Identity used in Open
+Game Content shall retain all rights, title and interest in and
+to that Product Identity.
+
+8. Identification: If you distribute Open Game Content
+You must clearly indicate which portions of the work that
+you are distributing are Open Game Content.
+
+9. Updating the License: Wizards or its designated
+Agents may publish updated versions of this License. You
+may use any authorized version of this License to copy,
+modify and distribute any Open Game Content originally
+distributed under any version of this License.
+
+10. Copy of this License: You MUST include a copy of
+this License with every copy of the Open Game Content You
+Distribute.
+
+11. Use of Contributor Credits: You may not market or
+advertise the Open Game Content using the name of any
+Contributor unless You have written permission from the
+Contributor to do so.
+
+12. Inability to Comply: If it is impossible for You to
+comply with any of the terms of this License with respect to
+some or all of the Open Game Content due to statute, judi-
+cial order, or governmental regulation then You may not Use
+any Open Game Material so affected.
+
+13. Termination: This License will terminate automati-
+cally if You fail to comply with all terms herein and fail to
+cure such breach within 30 days of becoming aware of the
+breach. All sublicenses shall survive the termination of this
+License.
+
+14. Reformation: If any provision of this License is held
+to be unenforceable, such provision shall be reformed only
+to the extent necessary to make it enforceable.
+
+15. COPYRIGHT NOTICE
+
+Open Game License v 1.0 Copyright 2000, Wizards of
+the Coast, Inc.
+
+Munchkin Player’s Handbook Copyright 2003, Steve
+Jackson Games Incorporated.
+
+
+
+
+
+D2O ... THE WAY IT
+SHOULD BE PLAYED!
+
+Munchkin is the Origins Award-winning
+card game of dungeon delving. Now the
+great characters, monsters, and loot have
+flown off the cards... and right into
+your d20 game!
+
+" i | The Munchkin d20 Player's Handbook
+‘ii vl Mi 8 is the ultimate guide to roleplaying 7
+i J that is fast, dirty, and hellaciously fun!
+Fully compatible with other d20 games, \
+Munchkin d20 will jazz up your sessions
+as your characters rocket up in power!
+This book includes munchkin classes,
+races, skills, feats, and spells designed to
+go through a dungeon like a rock through |
+a window. (But DMs, don’t worry . . . '
+your book is coming soon...)
+
+Watch for more Munchkin d20 books,
+
+coming soon from Steve Jackson Games!
+
+IANA ls
+
+Requires the use of the Dungeons & Dragons* Player's
+Handbook, Third Edition, published by Wizards of the Coast*,
+
+WRITTEN. BY: ANDREW. HACKARD
+AND STEVE JACKSON
+AX ILLUSTRATED BY. JOHN KOVALIC
+
+First EDITION, FIRST PRINTING
+
+qf: PUBLISHED JANUARY 2003
+STEVE JACKSON GAMES eon -
+www:sjgames:com ISBN 1-55b34- “a
+
+: WANN
+
+SJG001495 3401
+
+
+
+

@@ -1,0 +1,42 @@
+FROM node:20-bullseye-slim AS deps
+WORKDIR /app
+COPY apps/web/package.json apps/web/package-lock.json* ./
+RUN npm install --no-audit --no-fund
+
+FROM node:20-bullseye-slim AS builder
+WORKDIR /app
+ARG NEXT_PUBLIC_STREAM_URL
+ARG NEXT_PUBLIC_STREAM_LOSSLESS_URL
+ARG NEXT_PUBLIC_SITE_URL
+ARG NEXT_PUBLIC_MUSIC_LIBRARY_URL
+ARG NEXT_PUBLIC_MINECRAFT_MAP_URL
+ARG NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS
+ARG NEXT_PUBLIC_RADIO_API_URL
+ARG NEXT_PUBLIC_MINECRAFT_API_URL
+ARG DATABASE_URL
+ENV NEXT_PUBLIC_STREAM_URL=${NEXT_PUBLIC_STREAM_URL}
+ENV NEXT_PUBLIC_STREAM_LOSSLESS_URL=${NEXT_PUBLIC_STREAM_LOSSLESS_URL}
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+ENV NEXT_PUBLIC_MUSIC_LIBRARY_URL=${NEXT_PUBLIC_MUSIC_LIBRARY_URL}
+ENV NEXT_PUBLIC_MINECRAFT_MAP_URL=${NEXT_PUBLIC_MINECRAFT_MAP_URL}
+ENV NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS=${NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS}
+ENV NEXT_PUBLIC_RADIO_API_URL=${NEXT_PUBLIC_RADIO_API_URL}
+ENV NEXT_PUBLIC_MINECRAFT_API_URL=${NEXT_PUBLIC_MINECRAFT_API_URL}
+ENV DATABASE_URL=${DATABASE_URL}
+COPY --from=deps /app/node_modules ./node_modules
+COPY apps/web/ ./
+RUN npm run build
+
+FROM node:20-bullseye-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends wget libheif-examples \
+  && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/.next-usr-a/standalone ./
+COPY --from=builder /app/.next-usr-a/static ./.next-usr-a/static
+COPY --from=builder /app/public ./public
+EXPOSE 3000
+CMD ["node", "server.js"]

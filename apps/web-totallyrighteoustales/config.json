@@ -1,0 +1,25 @@
+{
+  "name": "Web Totallyrighteoustales",
+  "available": true,
+  "port": 3190,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "web-totallyrighteoustales",
+  "description": "A whimsical long-form storytelling commons with moderation, voting, and a leaderboard. - Web: Next.js App Router + Tailwind CSS - API: Fastify + Prisma + Postgres + Redis/BullMQ - iOS: Expo (React Native) - Auth: Supabase magic links (JWT verified by API) - Storage: S3-compatible (presigned upload) make up Canonical st.",
+  "tipi_version": 1,
+  "version": "latest",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "A whimsical long-form storytelling commons with moderation, voting, and a leaderboard. - Web: Next.js App Router + Tailw",
+  "author": "https://github.com/ianras77/web-totallyrighteoustales.git",
+  "source": "https://github.com/ianras77/web-totallyrighteoustales",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1774316487251,
+  "updated_at": 1774316487251
+}

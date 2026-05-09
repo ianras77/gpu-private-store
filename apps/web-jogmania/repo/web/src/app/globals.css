@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --cabinet: #120018;
+  --screen: #071116;
+  --glow-pink: #ff39f8;
+  --glow-blue: #33d6ff;
+  --glow-green: #62ff7d;
+  --glow-yellow: #ffe066;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 20% 20%, #2b0040 0%, #0a0014 45%, #050008 100%);
+  color: #f8f6ff;
+}
+
+.pixel-border {
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 0 12px rgba(255, 57, 248, 0.35),
+    inset 0 0 12px rgba(51, 214, 255, 0.2);
+}
+
+.arcade-frame {
+  background:
+    linear-gradient(160deg, rgba(255, 57, 248, 0.12), transparent 50%),
+    linear-gradient(300deg, rgba(51, 214, 255, 0.1), transparent 40%), #16001f;
+  border: 2px solid rgba(255, 57, 248, 0.4);
+  box-shadow:
+    0 0 30px rgba(255, 57, 248, 0.35),
+    0 0 90px rgba(51, 214, 255, 0.2);
+}
+
+.crt {
+  position: relative;
+  overflow: hidden;
+  background: var(--screen);
+  border-radius: 18px;
+}
+
+.crt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.crt::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.2), transparent 55%);
+  opacity: 0.45;
+  animation: flicker 4s infinite;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, rgba(51, 214, 255, 0.14), transparent);
+  mix-blend-mode: screen;
+  animation: scan 6s linear infinite;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.insert-coin {
+  text-shadow: 0 0 12px rgba(255, 57, 248, 0.9);
+}
+
+.neon-button {
+  border: 2px solid rgba(255, 57, 248, 0.8);
+  box-shadow:
+    0 0 12px rgba(255, 57, 248, 0.5),
+    inset 0 0 10px rgba(51, 214, 255, 0.4);
+}
+
+.game-canvas {
+  image-rendering: pixelated;
+}

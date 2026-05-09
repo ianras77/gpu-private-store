@@ -1,0 +1,35 @@
+{
+  "slug": "storybook-camp-decor",
+  "version": 1,
+  "reviewMode": "Kid-safe shelf",
+  "items": [
+    {
+      "slug": "camp-clue-board",
+      "localBundleKey": "camp/clue-board",
+      "kind": "model",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/StoryProps"
+    },
+    {
+      "slug": "camp-lantern",
+      "localBundleKey": "camp/lantern",
+      "kind": "model",
+      "storageMode": "roblox-reference",
+      "targetPath": "Workspace/Map/LightingProps"
+    },
+    {
+      "slug": "camp-puzzle-table",
+      "localBundleKey": "camp/puzzle-table",
+      "kind": "model",
+      "storageMode": "roblox-reference",
+      "targetPath": "Workspace/Map/PuzzleProps"
+    },
+    {
+      "slug": "camp-reveal-banner",
+      "localBundleKey": "camp/reveal-banner",
+      "kind": "ui",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/RevealStage"
+    }
+  ]
+}

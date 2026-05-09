@@ -1,0 +1,25 @@
+# Optional ExLlamaV3 / TabbyAPI extension lane.
+# Keep this experimental until you have a known-good EXL3 model and config.
+# Then add a backend/model entry in gateway routes.yaml and expose it as rassy-coder-exl3.
+
+services:
+  rassygpt-tabby-exl3:
+    image: ghcr.io/theroyallab/tabbyapi:latest
+    container_name: ${APP_ID}-tabby-exl3
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+      NVIDIA_VISIBLE_DEVICES: GPU-b9b6fa94-347e-3b4d-d920-8627b0ef5897
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    volumes:
+      - ${APP_DATA_DIR}/tabby/models:/models
+      - ${APP_DATA_DIR}/tabby/config:/app/config
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    x-runtipi:
+      add_to_main_network: false
+      internal_port: 5000

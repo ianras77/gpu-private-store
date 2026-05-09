@@ -1,0 +1,316 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// To switch to Postgres, change provider to "postgresql" and update DATABASE_URL.
+
+model User {
+  id                 String              @id @default(cuid())
+  username           String              @unique
+  engineUserId       String?             @unique
+  createdAt          DateTime            @default(now())
+  sessions           Session[]
+  threads            ChatThread[]
+  personas           Persona[]
+  memories           MemoryMirror[]
+  agentRoutines      AgentRoutine[]
+  workspaceMembers   WorkspaceMember[]
+  workspaceSessions  WorkspaceSession[]
+  workspacePresences WorkspacePresence[]
+  studioProjects     StudioProject[]
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  engineJwt  String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ChatThread {
+  id         String         @id @default(cuid())
+  userId     String
+  title      String         @default("New Thread")
+  personaId  String?
+  pinned     Boolean        @default(false)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  persona    Persona?       @relation(fields: [personaId], references: [id], onDelete: SetNull)
+  messages   Message[]
+  routines   AgentRoutine[] @relation("RoutineSourceThread")
+
+  @@index([userId, updatedAt])
+}
+
+model Message {
+  id        String     @id @default(cuid())
+  threadId  String
+  role      String
+  content   String
+  createdAt DateTime   @default(now())
+  metaJson  String?
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+}
+
+model Persona {
+  id           String       @id @default(cuid())
+  userId       String
+  name         String
+  systemPrompt String
+  createdAt    DateTime     @default(now())
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threads      ChatThread[]
+
+  @@index([userId])
+}
+
+model MemoryMirror {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  value     String
+  source    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, key])
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  repoRoot  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members   WorkspaceMember[]
+  sessions  WorkspaceSession[]
+  runs      WorkspaceRun[]
+  routines  AgentRoutine[]
+  presences WorkspacePresence[]
+  studioProjects StudioProject[]
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        String
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+model WorkspaceSession {
+  id            String   @id @default(cuid())
+  workspaceId   String
+  title         String
+  status        String
+  ownerId       String?
+  openFilesJson String?
+  activeFile    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  owner     User?          @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  runs      WorkspaceRun[]
+  routines  AgentRoutine[]
+
+  @@index([workspaceId, updatedAt])
+}
+
+model WorkspaceRun {
+  id          String   @id @default(cuid())
+  workspaceId String
+  sessionId   String?
+  routineId   String?
+  label       String
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  session   WorkspaceSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  routine   AgentRoutine?     @relation(fields: [routineId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, updatedAt])
+}
+
+model WorkspacePresence {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  status      String
+  lastSeenAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+model AgentRoutine {
+  id                   String   @id @default(cuid())
+  userId               String
+  workspaceId          String
+  sessionId            String?
+  sourceThreadId       String?
+  kind                 String
+  stageKey             String?
+  agentKey             String?
+  dependsOnRoutineId   String?
+  status               String   @default("Active")
+  triggerMode          String   @default("Manual")
+  scheduleText         String?
+  name                 String
+  description          String
+  draftSlug            String?
+  promptBrief          String
+  workspaceContextJson String?
+  handoffJson          String?
+  projectSnapshotJson  String?
+  lastRunAt            DateTime?
+  nextRunAt            DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace     Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  session       WorkspaceSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  sourceThread  ChatThread?       @relation("RoutineSourceThread", fields: [sourceThreadId], references: [id], onDelete: SetNull)
+  runs          AgentRoutineRun[]
+  workspaceRuns WorkspaceRun[]
+
+  @@index([userId, updatedAt])
+  @@index([workspaceId, status])
+}
+
+model AgentRoutineRun {
+  id          String   @id @default(cuid())
+  routineId   String
+  status      String
+  trigger     String
+  stageStatus String?
+  outputText  String?
+  errorText   String?
+  handoffJson String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
+  routine AgentRoutine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+
+  @@index([routineId, createdAt])
+}
+
+model StudioProject {
+  id                String        @id @default(cuid())
+  userId            String
+  workspaceId       String?
+  slug              String        @unique
+  title             String
+  theme             String
+  heroGoal          String?
+  templatePackSlug  String?
+  worldProfileSlug  String?
+  mapPatternSlug    String?
+  selectedAssetPackSlugsJson String?
+  targetAudience    String        @default("Kids 7-12")
+  connectionStatus  String        @default("Guest")
+  publishReadiness  String        @default("Planning")
+  parentModeEnabled Boolean       @default(true)
+  lastEditedByUserId String?
+  robloxUsername    String?
+  robloxUserId      String?
+  universeId        String?
+  placeId           String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace     Workspace?    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  templatePack  TemplatePack? @relation(fields: [templatePackSlug], references: [slug], onDelete: SetNull)
+  buildPlans    BuildPlan[]
+  publishTargets PublishTarget[]
+
+  @@index([userId, updatedAt])
+  @@index([workspaceId, updatedAt])
+}
+
+model BuildPlan {
+  id                String        @id @default(cuid())
+  projectId         String
+  status            String        @default("Drafting")
+  oneLiner          String?
+  coreLoop          String?
+  scenesJson        String?
+  mechanicsJson     String?
+  questsJson        String?
+  npcsJson          String?
+  scriptsJson       String?
+  artDirectionJson  String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  project StudioProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, updatedAt])
+}
+
+model PublishTarget {
+  id           String        @id @default(cuid())
+  projectId    String
+  authMode     String        @default("Parent-reviewed")
+  ownerType    String        @default("Personal")
+  creatorLabel String?
+  reviewStatus String        @default("Needs connection")
+  universeId   String?
+  placeId      String?
+  notesJson    String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  project StudioProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, updatedAt])
+}
+
+model TemplatePack {
+  slug                 String         @id
+  name                 String
+  genre                String
+  ageBand              String
+  difficulty           String
+  summary              String
+  starterPrompt        String
+  defaultTheme         String
+  starterScenesJson    String?
+  primaryMechanicsJson String?
+  starterQuestText     String?
+  artDirection         String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  projects StudioProject[]
+}

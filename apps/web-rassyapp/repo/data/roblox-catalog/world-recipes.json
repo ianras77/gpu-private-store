@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "description": "Saved shared world-profile and map-pattern combinations for the world-building crew.",
+  "recipes": [
+    {
+      "profile": "sky-islands",
+      "pattern": "island-hop-chain",
+      "headline": "Sky Islands + Island Hop Chain",
+      "why": "Great for first-look wow moments and fast visible progress."
+    },
+    {
+      "profile": "forest-camp",
+      "pattern": "story-loop",
+      "headline": "Forest Camp + Story Loop",
+      "why": "Great for cozy quest games and clue trails."
+    },
+    {
+      "profile": "space-station",
+      "pattern": "race-circuit",
+      "headline": "Space Station + Race Circuit",
+      "why": "Great for racing and speed-focused play."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+region,invoice_date,revenue,status
+NE,01/04/24,120900,open
+North East,4 Jan 2024,,paid
+n.e.,2024-01-04,118400,paid
+South,2024-01-05,98300,open
+West,01-05-2024,110750,paid
+North East,2024-01-06,125800,open
+South,01/06/24,99000,paid
+West,2024-01-06,111300,paid
+NE,7 Jan 2024,119400,open
+n.e.,2024-01-07,121200,paid

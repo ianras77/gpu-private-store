@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  MOD
+  ADMIN
+}
+
+enum TaleStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NEEDS_EDITS
+}
+
+enum TaleAssistMode {
+  HANDMADE
+  STUDIO
+}
+
+enum ModerationSource {
+  AUTO
+  HUMAN
+}
+
+enum ModerationResult {
+  PASS
+  FLAG
+  BLOCK
+}
+
+enum ImageStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ImagePurpose {
+  STORY
+  AVATAR
+}
+
+model User {
+  id               String        @id @default(uuid())
+  email            String        @unique
+  createdAt        DateTime      @default(now())
+  pseudonym        String
+  displayName      String?
+  bio              String?
+  personaName      String?
+  personaVoice     String?
+  personaSignature String?
+  avatarSeed       String
+  avatarImageId    String?       @unique
+  role             UserRole      @default(USER)
+  creditsTotal     Int           @default(0)
+  deletedAt        DateTime?
+
+  tales            Tale[]
+  votes            Vote[]
+  credits          CreditLedger[]
+  images           ImageAsset[]
+  avatarImage      ImageAsset?   @relation("UserAvatar", fields: [avatarImageId], references: [id])
+}
+
+model Tale {
+  id              String       @id @default(uuid())
+  authorId        String
+  title           String
+  body            String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  status          TaleStatus   @default(PENDING)
+  assistMode      TaleAssistMode @default(HANDMADE)
+  personaName     String?
+  personaVoice    String?
+  personaSignature String?
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  hotScore        Float        @default(0)
+  topScore        Int          @default(0)
+  score           Int          @default(0)
+  upvotes         Int          @default(0)
+  downvotes       Int          @default(0)
+  commentCount    Int          @default(0)
+  isAnonymous     Boolean      @default(false)
+  storyPrompt     String?
+  imageId         String?
+  deletedAt       DateTime?
+
+  author          User         @relation(fields: [authorId], references: [id])
+  image           ImageAsset?  @relation(fields: [imageId], references: [id])
+  votes           Vote[]
+  moderation      ModerationEvent[]
+  embedding       TaleEmbedding?
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([hotScore])
+  @@index([topScore])
+}
+
+model TaleEmbedding {
+  id        String   @id @default(uuid())
+  taleId    String   @unique
+  model     String
+  embedding Json
+  createdAt DateTime @default(now())
+
+  tale      Tale     @relation(fields: [taleId], references: [id])
+
+  @@index([createdAt])
+}
+
+model Vote {
+  id        String   @id @default(uuid())
+  userId    String
+  taleId    String
+  value     Int
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  tale      Tale     @relation(fields: [taleId], references: [id])
+
+  @@unique([userId, taleId])
+  @@index([taleId])
+}
+
+model CreditLedger {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  delta     Int
+  metaJson  Json?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model ModerationEvent {
+  id            String            @id @default(uuid())
+  taleId        String?
+  imageId       String?
+  source        ModerationSource
+  result        ModerationResult
+  categoriesJson Json?
+  scoreJson     Json?
+  notes         String?
+  createdAt     DateTime          @default(now())
+
+  tale          Tale?             @relation(fields: [taleId], references: [id])
+  image         ImageAsset?       @relation(fields: [imageId], references: [id])
+
+  @@index([createdAt])
+}
+
+model ImageAsset {
+  id          String       @id @default(uuid())
+  uploaderId  String
+  storageKey  String
+  url         String
+  width       Int
+  height      Int
+  createdAt   DateTime     @default(now())
+  status      ImageStatus  @default(PENDING)
+  purpose     ImagePurpose @default(STORY)
+  hasFace     Boolean      @default(false)
+  moderationJson Json?
+
+  uploader    User         @relation(fields: [uploaderId], references: [id])
+  avatarFor   User?        @relation("UserAvatar")
+  tales       Tale[]
+  moderation  ModerationEvent[]
+
+  @@index([createdAt])
+}

@@ -1,0 +1,25 @@
+{
+  "name": "Crewai",
+  "available": true,
+  "port": 3215,
+  "exposable": false,
+  "dynamic_config": true,
+  "id": "crewai",
+  "description": "Internal JupyterHub-based Crewai workbench with Qdrant state, preserved Docker tooling, and model access via the existing host AI gateway.",
+  "tipi_version": 1,
+  "version": "latest",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Internal Crewai JupyterHub workbench with Qdrant and preserved host-tool access.",
+  "author": "https://github.com/ianras77/crewai-app.git",
+  "source": "https://github.com/ianras77/crewai-app",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1774316487140,
+  "updated_at": 1774316487140
+}

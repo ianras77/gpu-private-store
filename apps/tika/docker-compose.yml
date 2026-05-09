@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ocr
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ocrdb
+    volumes:
+    - ${APP_DATA_DIR}/app-data/tika/named/ocr-data:/var/lib/postgresql/data
+  ocr-ingester:
+    build: /app-repos/tika/ocr-ingester
+    restart: unless-stopped
+    environment:
+    - DB_HOST=db
+    - DB_NAME=ocrdb
+    - DB_USER=ocr
+    - DB_PASS=secret
+    - TIKA_URL=http://tika:9998/tika
+    depends_on:
+    - tika
+    - db
+    image: runtipi-local-tika-ocr-ingester:latest
+  tika:
+    image: apache/tika:latest-full
+    restart: unless-stopped
+    x-runtipi:
+      is_main: true
+      internal_port: 9998
+x-runtipi:
+  schema_version: 2

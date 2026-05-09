@@ -1,0 +1,3099 @@
+pay \—\ a \_ NF
+naw: =a &
+
+—
+
+—— » James Desborough “ER
+
+une
+
+> jm,
+
+»
+3 £ PP 2
+~ - — ee = - — f
+: Coe.
+~~ ™e, = ——"
+; Se =, a
+~ al - 3
+
+
+
+
+
+Che
+
+Slayers Guide
+
+Co
+Rules Lauwiyers
+
+James Desborough
+
+Contents Credits
+2 Introduction Editor: Matthew Sprange
+° Rules Lawyer Physiology Cover Art: Brent Chumley
+
+16 Habitat
+20 ~Rules Lawyer Society
+
+25 Methods of Warfare
+28 Role-Playing with Rules Lawyers Production Manager: Alexander Fennell
+
+Interior Illustrations: Anne Stokes,
+Nathan Webb
+
+29 Rules Lawyer Character Class
+32. D20 & OGL License
+
+Proof-Reading: lan Barstow
+
+Open Game Content & Copyright Information
+
+The Slayer’s Guide to Rules Lawyers is ©2002 Mongoose Publishing. All rights reserved. Reproduction of non-Open Game Content
+
+of this work by any means without the written permission of the publisher is expressly forbidden. The Slayer's Guide to Rules
+Lawyers is presented under the Open Game and D20) Licences. See pages 32 for the text of these licences, All game mechanics and
+statistics derivative of Open Game Content and the System Refernce Document are to be considered Open Gaming Content. All other
+significant characters, names, places, items, art and text herein are copyrighted by Mongoose Publishing. All rights reserved. If you
+
+have any questions on the Open Game Content of this product please contact Mongoose Publishing. ‘d20 System’ and the *d20
+System’ logo are Trademarks owned by Wizards of the Coast and are used according to the terms of the d20 System Licence version
+
+3.0. A copy of this Licence can be found at www.wizards.com, The mention of or reference to any company or product in these
+pages is not a challenge to the trademark or copyright concemed. Dungeons & Dragons® and Wizards of the Coast® are Registered
+
+Trademarks of Wizards of the Coast, and are used with Permission. Printed in the UK.
+
+MONGOOSE PUBLISHING
+
+Mongoose Publishing, PO Box 1018, Swindon, SN3 1DG, United Kingdom
+info(aimongoosepublishing.com
+
+Visit the Mongoose Publishing website at www.mongoosepublishing.com for regular updates, new spells,
+additional tribes and much, much more.
+
+
+
+
+
+INTRODUCTION
+
+INTRODUCTION
+
+ules-Lawyers are an unexpectedly hardy
+breed of disgusting humanoid (at least in
+hysique) creature.
+
+To all outward appearances they ate a normal human
+being, like you or me, and it is only by their strange
+behaviour and by very close (often post-mortem)
+physical examination that they are revealed to be
+anything other than Homo Sapiens.
+
+Scholars are in agreement that Rules-Lawyers have
+been around at Icast as long as games of any kind
+have existed. Some go as far as to say they have
+existed as long as ru/es themselves have existed in
+this universe. They are said to have lived among us,
+alongside man and his more primitive and slope-
+headed ancestors since time itself began, waiting for
+them to lose interest in football and develop the
+wheel.
+
+There is a school of thought that accredits God
+Almighty with being the supreme, original, Rules-
+Lawyer. What other kind of consciousness would
+have the necessary mindset and tenacity to come up
+with every single one of the laws of nature and
+physics? The way the biosphere interacts with it's
+complex ecological niches, the way the various
+chemicals mix and react with one another, the force
+of gravity, the laws of thermodynamics and all the
+other sundry little rules of the universe that we all
+have to live with day to day. Rules-Lawyers refer to
+this particular aspect of the divine as ‘The Source’,
+that from which all rules are spawned. The rest of us
+tend to refer to it as ‘A pain in the arse’. Especially
+when we find ourselves dropping buttered toast or
+searching for missing socks in the back of the
+washing machine.
+
+When the first amino acid chains formed in the
+primeval oceans Lawyers were there, tutting at their
+organic molecule cousins and telling them that they
+could not possibly do that.
+
+When a few primitive cells got together and decided
+to cooperate with each other, they were there, bluntly
+protesting that such a thing was impossible and
+could only lead to trouble.
+
+When the first amphibious fish fitfully dragged
+themselves onto dry land to test their flippers on soil,
+the Rules-Lawyers were shouting that nothing good
+
+_.
+
+would come of it and that it went against all
+precedent. After all, did it not say on page 37 of the
+‘Fish Scales & Clamshells’ player's guide that ‘Dry
+Land‘ meant instant doom to all who travelled there?
+
+In Egypt they ruled the land with their geometry and
+their religious laws, adding more and wilder gods to
+their pantheon and more and more religious
+observances until every day of the year was a
+religious holiday with full pay and the empire
+collapsed. ;
+
+In the Middle Ages they were the ones who sided
+with Prince John and the Sheriff Of Ngttingham
+against Robin Hood (after all, he was breaking the
+law of the land, whatever his motives).
+
+Just this morning you may have met one of this
+ancient breed telling you. . .
+
+‘You can't park there mate, not even for just a
+couple of minutes while you unload. Its more than
+my jobs worth.’
+
+But it is not in ‘Real Life’ that they most make their
+terrible presence felt, for reality is fluid, mercurial,
+changing, the laws of physics and of life have yet to
+be completely discovered and pinned down,
+opinions change as often as hairstyles, theories
+override each other on a daily basis. There does
+exist within the Rules-Lawyers’ hearts the faint hope
+that on one glorious day all of reality will conform to
+The Rules and be under their sway but with Chaos
+Theory still in vogue the Rules-Lawyers are filled
+with such an abiding sense of dread that they find
+themselves seeking refuge in the one place they can
+be sure of how everything works.
+
+In games.
+
+Games have set and defined rules that are laid out
+plainly visible, that do not have to be discovered
+and are not subject to the whim of longhaired
+Californian scientists, The Rules-Lawyers can even
+create rules for themselves thereby controlling the
+games, their own little pockets of reality in which all
+things must conform to the glorious numerical laws
+that they worship so completely and wholeheartedly.
+
+The most famous of these Rules-Lawyer experiments
+into creating their own rules is known colloquially
+as ‘Rulesmaster’, a spirited and frighteningly
+fanatical attempt to provide a rule and table for
+
+
+
+
+
+INTRODUCTION
+
+absolutely every possibility in existence, including
+killing yourself by tripping over invisible turtles and
+stoving your skull in on a rock.
+
+Times do change though and the general trend of
+role-playing has shifted away from the heavily rules-
+intensive and realistic books of yesteryear! and more
+towards story-based and background-intensive
+games with minimalist or cinematic rules. This has
+decreased the power of the Rules-Lawyers
+dramatically and has placed them under threat but
+you should not discount them too readily, for they
+are still there, ready to launch a fresh fight for control
+once this simplistic, populist nonsense in science has
+faded away again.
+
+In these mathematical domains they like unto gods
+but they stray into other realms that are not their
+own, stalking the land, seeking to leech the fun and
+enjoyment from the games of others, to enforce their
+own twisted perception of The Rules upon others.
+
+Here then, oh brave adventurer, is the terrible truth
+about this ancient and dreaded foe of all role-players.
+Read and be damned!
+
+THE SLAYER’S GUIDES
+
+This series of game supplements are normally
+designed with the d20 System firmly in mind. This
+book however is an exception, a piss take, a piece of
+humour and a satire. It extracts the urine, removes
+the Michael and otherwise plinks the nose of sober
+and serious discussion with a comedically
+appropriate fruit.
+
+Here, instead of carefully and painstakingly
+analysing the various habits and characteristics of a
+minor fantasy race of underdeveloped baddies, we
+will be turning the gaming microscope outwards to
+you, the players. In particular, towards a certain type
+of player who sits out there hidden in plain sight
+amongst you, The Rules-Lawyer, the killjoy, the fun-
+vampire, Many names, but a single horrific purpose.
+
+Role-playing has long been ripe (even overripe) for
+some self-referential humour and as any proponent of
+fortune cookie wisdom will tell you ‘Many a true
+word is spoken in jest’. Hopefully you will find
+something of at least passing interest in this book,
+
+@
+
+hopefully something in here will be funny enough to
+make you laugh, or at least crack a smile. In case
+you do not, here are some amusing potty words to
+make the purchase worth your while.
+
+Bum, wank, poop, scat, peepee and crap.
+
+RULES-LAWYERS — A
+THREAT TO THE
+MULTIVERSE
+
+The Slayer’s Guides focus on a single ‘race’ in each
+book, this time the Rules-Lawyers. Within this book
+you will find invaluable and hard to find information
+about this dreaded breed of player, feared even more
+than the more common Rampant Fatbeard, the
+expensive Model-Crushing Oaf or even the
+ubiquitous Munchkin. You will learn all about the
+complexities of their physiology, society, unique
+habitat and devoted worship of The Rules.
+
+This will give you an important understanding of
+these creatures and the threat they pose to the greater
+gaming world. With a true understanding of their
+motives and methods you will be able to counter
+their attacks, make them work for you, or defeat them
+wherever they raise their bespectacled, acne-ravaged
+heads.
+
+If you are a Rules-Lawyer reading this then we hope,
+perhaps, you will see the error of your ways and turn
+back from the evil path of page references, clean
+books and designer interviews.
+
+‘Ph'nglui mglw'nafh Rulawyah Li'braya wgah ‘nagl
+Shtagn?
+
+LEXICON
+
+Fatbeard
+
+A common type of gamer, especially amongst the
+older fans of the hobby, fat and bearded, The clue is
+in the name. More generally this can refer to a fan
+boy of any geekish pastime such as comic collecting,
+Star Trek or anime fandom. Remember kids, FIJAGH,
+not FIAWOL,
+
+
+
+
+
+INTRODUCTION
+
+Munchkin
+A gamer that places their character’s own personal
+power above every single other aspect of the game.
+
+Rules-Lawyer
+
+Also called the ‘Lawyer’ or the ‘Fun- Vampire’ or
+even ‘You Git’. A Rules-Lawyer is a role-player who
+places the letter of the rules above all other aspects of
+gaming. Even fun.
+
+The Rules
+
+A higher ideal of predictable normalcy that the
+Lawyers worship. The embodiment of every law or
+rule in the Universe.
+
+The Source
+This is a mythical place or person from which The
+Rules originate.
+
+
+
+
+
+RULES LAWYER PHYSIOLOGY
+
+RULES-
+LAWYER
+PHYSIOLOGY
+
+he Rules-Lawyers seem hardly to be the most
+| alien of threats. At worst they appear to be
+ordinary human scum, much like thieves,
+muggers, infomercial presenters or people who drive
+Volvos, They are very easy indeed to write off as
+harmless compared to other threats either in the real
+world or to your continued gaming success.
+
+This is an casy mistake to make, and certainly they
+appear to have once been human, before evolution
+
+diverged.
+
+Perhaps an
+somewhere // A
+
+in their ice K
+cold hearts wn \
+
+and reptilian
+
+brains there still
+lurks some last
+pathetic dreg of their
+lost humanity that has
+not been pushed out by
+various rules interpretations
+and quotes from obscure
+magazines.*
+
+Other gamers, for all their
+multitudinous faults, enormous bulk,
+hideously pronounced Adam’s apples,
+polluting body odour, abysmally poor
+personal hygiene and distinct lack of
+social skills are still basically human
+(provided we grant generous
+leeway), with human needs and
+weaknesses. The Rules-
+Lawyers, in the state they are
+now, are not entirely human, as
+we shall see. Combining the
+very worst traits of The Borg,
+
+The Daleks, The Saurians and Traffic Wardens they
+are a much bigger threat to world happiness than we
+give them credit for.
+
+Rules-Lawyers live a peculiar existence, one
+bounded by hard and fast rules that cannot be
+questioned and an absolute degree of right and
+wrong, black and white. Where humanity is intuitive
+they wield cold logic and solid interpretation,
+
+Many’of you will have never even met a Rules-
+Lawyer in person; in recent years the role-playing
+scene has undergone some drastic and fundamental
+changes. Story has taken supreme precedence over
+the rules, loose guidelines have replaced tables or
+complex mathematical formulae, house rules are
+even talked about within the main core books but still
+r. “\ Rules-Lawyers remain, clinging
+Te Neate y, to the far fringes of the hobby.
+
+ot Ay
+
+Yet, across the gulf of the
+gaming table, minds that are to
+our minds as ours are to those of
+the beasts that perish, intellects
+small minded, cold and
+unsympathetic, regard our games
+with envious eyes and slowly
+and surely they draw their plans
+against us.
+
+A CLOSER
+VIEW
+
+We contacted several player
+groups around the world (several
+desperate groups contacted us
+once word had gotten around)
+and arranged several ‘accidents’
+for their resident Rules-
+Lawyers. After breaking into
+the morgues and making off
+with the bodies like ninjas’,
+we returned to The
+Alexandrian Institute For
+Pointless Studies and
+began a detailed
+
+
+
+
+
+RULES LAWYER PHYSIOLOGY
+
+examination of the bodies using our keen minds and
+an array of kitchen, garden and DIY equipment.
+
+The video of this intriguing autopsy is available
+from our subsidiary company, Gullible Mongoose
+Films for a knockdown price of £5.99 plus postage
+and packing and contains all the highlights of our
+extensive examination. Regardless what you might
+have heard from other unreliable sources the tape is
+entirely genuine and the apparent continuity errors
+are actually considered to be signs of authenticity.
+We assure you that any fakers would have taken
+much greater pains to ensure everything was the
+same in each and every scene.
+
+Examination of the dead on the kitchen table and
+observation of living specimens existing in the wild
+showed an amazing diversity in the Rules-Lawyer
+species, Their diversity matched the humans of the
+usual Role-Player/Counterculture stereotypes and
+the mimicry was almost perfect, undetectable to any
+but the most trained of eyes.
+
+The Rules-Lawyers are omnivorous, bipedal tool
+users with opposable thumbs for greater manual
+dexterity and a straight-backed, upright stance.
+While most appeared to be of the role-playing gamer
+
+subtype, many of those examined were also relatively
+successful in real life positions. The majority of
+these were found to work as security guards, traffic
+wardens or middle management in large
+corporations. Places where a strict and utterly insane
+adherence to the letter of The Rules was not a
+disadvantage but a positive boon.
+
+PHYSIOLOGY
+
+The surface mimicry of the gamer form was
+absolutely perfect; in fact it appeared that changes
+had been imposed upon the standard gamer
+physiology rather than a brand new creation or a
+separate species.
+
+One specimen appeared, at least externally, to be a
+prime example of the standard gamer subtype, the
+‘Aging Fatbeard’. The stomach was full of real ale
+and red meat, and the sample even had the unique
+offensive underarm musk glands of this particular
+gamer subspecies. At first we thought we had made a
+terrible mistake and vivisected the wrong person
+(especially after loose scalpel work pierced one of
+the glands) but as we examined the cadaver further
+we realised that it was indeed a Rules-Lawyer.'
+
+This discovery had profound and far-reaching
+implications on our study of Rules-Lawyers and so
+we procured many more samples looking for the
+telltale taint of Rules-Lawyer in carefully selected
+samples of the ‘Gaunt Bookish’, the ‘Hippy’ and the
+“Young Munchkin’ gamer types. The taint was
+present in each and every sample.
+
+The Pod People are amongst us.
+
+The distinctive changes in the body that made the
+taint of Rules-Lawyerdom clear to us were as
+follows...
+
+Ocular Streamlining
+
+Upon opening the braincase and removing the pulpy
+grey matter from within we vomited profusely and
+with some force for around ten minutes. After having
+recovered, and from a fair distance with a pair of
+tongs while we shrieked like first year schoolgirls in
+a spider farm, we examined the remaining cavity and
+discovered something particularly interesting. The
+optic nerve had shortened dramatically in the
+specimen and was much thicker than normal, and far
+
+
+
+
+
+RULES LAWYER PHYSIOLOGY
+
+more densely packed with nerve fibres, linking
+directly to the memory centre of the brain as well as
+the visual cortex. This specialised adaptation
+appears to enable the Rules-Lawyer to almost
+instantly absorb any form of written information and
+to store it for immediate use in the situations the
+Lawyer finds himself in. This seems to be at the cost
+of picking up the more subtle nuances of visual
+information, such as the rest of the group glowering
+at them and beating their heads on the table.
+
+Aural Selectivism
+Much like the nictating eye membrane im lizards, or
+the secondary eyelids of camels that protect them
+from flying dust and sand, the Rules-Lawyer has an
+adaptation to the outside of the eardrum. A very fast
+reacting sphincter-like muscle enables the Rules-
+Lawyer to selectively cul oul any conversation or
+protest that is not to their liking. Above the ear on
+cither side of the skull are two small, specialised
+nerve clusters attached directly to the Aural
+Sphincter. These are not linked to the conscious
+mind of the Lawyer but appear to be mildly
+telepathic, picking up any comment that agrees with
+or supports the Rules-Lawyers position on an issue
+and reflexively opening the Aural Sphincter to
+accept those words. These neural nodes may also be
+able to hear a short way into the future,
+closing before anyone else has even begun to
+state their counterargument.
+
+Cranial Modifications
+The skull was slightly thinned out,
+perhaps two-thirds of the thickness of
+
+a normal human skull and the ~
+brain was pressed up against
+it on all sides rather then
+being suspended and
+cushioned by cranial
+i)
+
+fluid. This appears to
+cause pressure on the
+brain leading to
+increased irritability in
+monitored live subjects.
+
+In addition, the areas of the brain
+related to social interaction were
+comparatively atrophied, while the
+parts concerning memory and the
+logical areas of the brain had
+expanded in size and were
+
+much denser than normal brain
+tissue, containing thousands
+
+of times the normal amount of interconnections,
+
+Sticky Pads
+
+The fingertips of the Lawyer cadavers were slightly
+tacky and the wrist joint adapted almost exclusively
+for left to right movement. Observing the live
+specimens in action we concluded that this
+modification was extremely useful for quickly
+flipping through source books, turning the pages at a
+phenomenal speed. This adaptation must make
+masturbation, something thought in folklore to be
+very strongly associated with Rules-Lawyers, very
+difficult. Perhaps this helps us explain why, being
+unable to commit the solitary act for relief, the
+Rules-Lawyer reacts so very badly to being called a
+wanker.
+
+Spinal and Anal Flexibility
+
+The extreme bendiness of the spine and the
+expansive stretchiness of the subjects’ sphincter
+muscles appeared to have been developed to allow
+the subjects to spend a great deal of their time curled
+up tightly into defensive balls, This may, perhaps,
+be an evolutionary adaptation held over from a time
+in which they were spineless invertebrates and in that
+time they would roll up inside their shell for self
+defence.
+
+
+
+
+
+“> Pametety -
+
+RULES LAWYER PHYSIOLOGY
+
+Scarlet Cheek Pouches
+
+Rules-Lawyers were found to have extremely
+stretchy cheeks on their faces packed with large
+blood vessels and containing a small air bladder that
+enabled it to be pufted up in size and turned scarlet.
+
+This is used when getting into loud and shouted
+arguments, and is usually accompanied by profuse
+sweating and a deep furrowing of the brow. Ln times
+of yore this may have been used by the Rules-
+Lawyer as a dominance or mating signal. These days
+of, course, it’s just funny to laugh at.
+
+THE RULES-LAWYER IN
+FOLKLORE
+
+In times of yore people would believe (being
+credulous and covered in cow muck) that the fairies
+would, on occasion, come into their houses and take
+away their children replacing them with Changelings
+crafted from the fairies’ flawed glamour. These days
+we can account for these legends through various
+
+mental and physical hereditary diseases.
+
+It is not as well known that there are similar folk
+stories that appear in legend relating to Rules-
+Lawyers. Sometimes a peasant’s children would be
+taken and replaced, not with a faine changeling but
+with an officious and supercilious little brat. In these
+cases they would think to themselves that their own
+children had been taken away and replaced, not by
+the fairies or the wee folk but by the tax collectors of
+the realm.
+
+ORIGINS
+
+There is much in the way of scholastic infighting
+over the true origins of the Rules-Lawyer here at The
+Institute. There are several rival theories as to the
+source of this great menace and no one outside the
+Institute in the real world really giving that much of
+a monkey's about it in the first place greatly hampers
+effective research. Ata scientific Symposium, at The
+Rat & Parrot in Highgate, the various theories over
+their origins were summarised thusly.’
+
+
+
+
+
+\
+RULES LAWYER PHYSIOLOGY ai
+
+Parallel Evolution
+
+This theory postulates that Rules-Lawyers have
+evolved alongside humans in lockstep, existing
+among humanity as a separate race, yet
+masquerading as normal people, This theory has
+been largely discredited since perfectly normal
+gamers appear to spontaneously turn into Rules-
+Lawyers.
+
+A more recent take on the theory suggests that Rules-
+Lawyers are so close to human, even closer than
+bonobo chimps, that they are able to interbreed with
+humans and that, occasionally, the Rules-Lawyer
+traits come to the fore in the offspring, causing the
+physiological and psychological changes during the
+onset of puberty. This theory falls down because the
+idea of a gamer getting any nookie, let alone a
+Rules-Lawyer, is considered laughable and far too
+improbable by the scientific community at large and,
+more importantly, by the fairer sex. Discounting the
+use of drugs and alcohol to subdue potential mates,
+this is rather unlikely.
+
+Infection
+
+This theory suggests that Rules-Lawyerdom is
+acquired from an outside source rather than being
+innate, that normal individuals are infected by and
+subsequently changed by a pathogen. This theory
+has somewhat more in the way of scholastic support
+but as of yct no viral spore, bacterium or rogue
+protein chain has been found in the samples we
+took that could wreak such massive and wholesale
+change upon a person. However, a correlation has
+Been found between the ownership of certain Role-
+Playing game products and Rules-Lawyerdom, It is a
+chicken and egg affair, hard to distinguish. Does
+ownership of Rulesmaster or Delvings & Dingos
+cause Rules-Lawyerdom, or does Rules-Lawyerdom
+cause ownership of these products? Do the products
+carry the pathogen? Is it deliberate? Why does it
+only affect some people and not others?
+
+A more modem and progressive theory doing the
+rounds is that Rules-Lawyerdom is a meme, a viral
+idea that spreads from mind to mind by
+conversational contact changing the way they
+operate but this does not explain the physiological
+changes associated with the condition, unless
+one believes that mind over matter is really that
+powerful. If it were so potent then surely gamers
+would be constantly mutating into their
+characters mid-session. That being the case we
+do not think that this is an entirely plausible
+explanation,
+
+Chosen Race Of The Gods
+
+This speculation infers that Rules-Lawyers were
+human right up until the very point they gave their
+eternal and binding pledge to The Rules. Rules-
+Lawyers do not just follow the rules, that doesn’t
+begin to cover the devotion they have - they embody
+them and The Rules are their one and only god. The
+Rules are also a powerful force over reality, an
+incarnation of all that is possible or impossible, and
+a manifestation of the boundaries of reality.
+Admittedly this theory was arrived at after an
+unwisely large sampling of imported Czech Absinthe
+but it is compelling whether you're hallucinating out
+of your tree or not.
+
+a
+
+
+
+
+RULES LAWYER PHYSIOLOGY
+
+MATING PRACTICES
+
+None, zip, zilch, nada, nowt, nothing, nuffink, not a
+sausage, fuck all, less chance of happening than of
+Satan tobogganing to work on a toboggan pulled by
+flying pigs who've just had a massive tax rebate from
+the government.
+
+Oh come on, they’re gamers and analy-retentive?
+What kind of massively improbable odds are there
+that they will ever get the chance to breed?"
+
+Fine, fine, you will not let me cop out on this chapter
+.,, That or your weascl-like, perverted little virgin
+
+minds are hoping for a healthy dollop of filthy smut.
+| remember the Breasts of Fantasy calendars, you
+cannot fool me.
+
+Rules-Lawyers do not get to mate with anything the
+vast and overwhelming majority of the time but it is
+not for want of attempting to. Unfortunately for their
+race and fortunately for ours, Rules-Lawyers are
+almost exclusively male and attempts to seduce
+human females are so insanely difficult for them as to
+be nigh on impossible.
+
+All a Rules-Lawyer knows is rules, so when a
+potential mate joins the gaming group, their
+
+
+
+
+
+behaviour intensifies by a factor of ten or even a
+hundred. Amongst other Rules-Lawyers knowledge
+of the various intricacies of The Rules is taken as a
+sign of great intelligence and supreme dedication, so
+they will try to impress females with what they know
+- The Rules. For fairly obvious reasons, this rarely
+works.
+
+There was a brief and intense flurry of
+excitement in the Rules-Lawyer community
+when a certain book came out about dating
+called The Rules but when this turned out to be
+some kind of annoying feminine self-help book
+and not to contain any Romantic Encounter
+Tables or Wandering Poontang charts they soon lost
+interest.
+
+Rules-Lawyers may also try to bedazzle, woo and
+impress the current object of their affections by
+building a well designed little fort around
+themselves, constructed
+entirely out of rulebooks,
+games supplements, role-
+playing magazines,
+computer printouts,
+character sheets, pens,
+pencils (wooden and
+propelling), dice of
+all kinds and snack
+food. Just like
+those little
+weaverbirds in
+Africa. To the
+Rules-Lawyer
+this represents a
+fine and
+impressive
+investment of time,
+effort and money and
+also displays the
+breadth of their
+knowledge. The
+interpretation of their
+beloved is usually
+far different from
+what the Rules-
+Lawyer might wish.
+
+Like the majority
+of the gamer
+subspecies the
+Rules-Lawyer will
+interpret any sign
+of acceptance or
+
+affection displayed by a
+woman as a green light for
+wooing and will read a
+tremendous amount into it,
+If there are any single girl
+
+gamers reading this, my
+best advice is to not let
+them do anything for
+you, not even so
+much as pass you the
+bow! of sweets. Then
+again, maybe you get
+off on the idea of
+being trailed by love-
+slave minions, in
+which case knock
+yourself out,
+
+For these reasons,
+amongst others, the
+gamer Rules-Lawyer
+is rarely, if ever,
+successful in finding
+a mate. The only
+form of Rules-Lawyer
+to show anything even
+approaching moderate
+success in the romantic field
+is the Real Life Rules-
+Lawyer, especially those
+who manage to make it as
+far as middle management, and therefore have money
+and a powerful car to compensate for a lack of social
+skills and personality.
+
+WEASELLING &
+QUOTATION
+
+These amazing offensive/defensive abilities of the
+Rules-Lawyer are possible only due to the
+remarkable physiological changes that have taken
+place within him. With such a vast memory capacity
+for rules trivia and the ability to use convoluted and
+twisted logic to cut them any way he wishes, the
+Rules-Lawyer is able to bombard others with an
+endless stream of elegantly constructed rules
+interpretations, compelling examples and cases that
+make his personal position on the call seem
+completely unassailable, no matter how it runs
+counter to the progress of the game.
+
+This intense stream of data overwhelms the meagre
+cognitive functions of the targets, rendering them
+
+
+
+
+
+RULES LAWYER PHYSIOLOGY
+
+slack-jawed and incoherent, unable to resist. Even
+the most hardened and experienced Games Masters
+can be overcome when the Rules-Lawyer is quoting
+verbatim from the game-writer himself, deriving his
+information from online interviews the rest of the
+group have never even heard of, let alone read
+themselves. The Rules-Lawyer is capable of
+speaking with such convincing authority and
+personal gravitas that he can seem even more
+authoritative than the person running the game, or
+even the person who wrote it! In most cases this
+cows the group so much that the Rules-Lawyer is
+able to get his way in anything he sets his mind to.
+The Rules have been observed and he has served his
+god all the better for it.
+
+An extreme example of this incident occurred dunng
+
+an online question period that was supposed to allow
+
+people to talk to the designer of a popular series of
+games. Barry Manning of Victoria, Australia, ended
+up answering a great deal more questions than the
+game’s designer, thereby showing him up something
+rotten and demonstrating his own, seemingly
+
+ea
+
+unparalleled, mastery of the system to all present at
+the time.
+
+The Rules-Lawyer uses these powers freely and
+indiscriminately but his assaults become most
+strident if his character comes under threat during a
+game or is about to die from any cause. At this point
+the gloves are well and truly off, for a character death
+is an element of chaos and the Rules-Lawyer requires
+order above all things (unless it’s someone else’s
+character and The Rules are being followed).
+
+This does backfire sometimes when The Rules would
+definitely require the death of their character - The
+Rules are above all things, even possessions and
+characters. Some Games Masters and players would
+regard this as poetic justice, a ‘hoisting by their own
+petard’ of the annoying bastards but the Rules-
+Lawyer will be perfectly satisfied so Jong as the letter
+of the ‘Law’ is followed, even if he pays the price for
+it.
+
+Our researchers secretly taped some of these assaults
+and when they were played back under careful,
+clinical conditions it was discovered that the Rules-
+Lawyers were taking many different spins on the
+rules and using the same quotes to support entirely
+different conjectures at different times. Conjectures
+that most suited them in that instance. >
+
+Since this has only previously been seen in religious
+sects of a fanatical or dubious nature it supports the
+idea that the Rules-Lawyers are some kind of cult.
+Albeit one without nubile female followers, drugs,
+money, guns, or any of the other attractions that cults
+normally have. Which explains why they're usually
+a cult of one.
+
+TECHNOLOGY
+
+Rules-Lawyers are capable of using all forms of
+human technology from the jawbone of an ass to
+high tech video recorders and DVD players as well as
+all the gaming paraphernalia in existence However
+they make noteworthy and particular use of a few
+choice items . . .
+
+Dice
+
+As with other things in The Rules, Rules-Lawyers
+require everything to be just so with their dice. The
+usual gamer entertainments of dropping them in
+people’s drinkspants, or sticking them up your nose
+will not be appreciated and can lead to screaming
+fits. The Rules-Lawyers will always keep their dice
+
+oe
+
+
+
+
+
+RULES LAWYER PHYSIOLOGY [iia
+
+in a proper bag or box, not their pocket, and certainly
+not in the very bottom of their overnight gaming bag
+
+amongst the pants, socks and rotting snack debris of
+
+yesteryear. Rules-Lawyer dice are generally clean,
+
+unchipped and uniform in colour and size. Normal
+
+gamer dice are chipped, doodled on and covered in
+various bodily excrescences,
+
+Books
+
+Books are extremely important to the Rules-Lawyer
+as part of his worship of The Rules. These hallowed
+tomes contain the various laws that govern the
+Rules-Lawyer’s gaming: they are his sword, his
+shield and his hopelessly out-of-control drug
+addiction. Use of these tomes varies though and the
+Lawyers appear to be divided into two distinct
+camps,
+
+One camp, The Evangelists, take their books with
+them everywhere, finding their weaselling all the
+more effective when they can yank out a printed
+sourcebook and jab their finger at something that
+agrees with them, there on the page in black and
+white for all to see, It lends a note of finality to an
+argument usually only achievable through firearms.
+
+Evangelists cvolve to become either muscular
+(relatively) or squat due to carrying all their books
+everywhere they go. An Evangelist will ofien show
+up for a quick two to three hour session with his
+entire book collection and boxes of printed notes
+from online all in a big rucksack on his back.
+Sometimes the sheer volume of books means there is
+fio room for people to get to the table and play.
+
+The other camp, The Librarians, gather the books
+together and preserve them for posterity. They keep
+shelf upon shelf of carefully protected books, many
+of them still in the shop’s plastic, or sealed in new
+plastic wrappers and vapour lock bags to prevent
+them being damaged or destroyed by air, bacteria,
+fungus or careless drink spillage. Not for them the
+well-thumbed, stained and blim-burned books of
+your normal gamer. It has even been rumoured that a
+Rules-Lawyer of this camp has the ability to
+maintain a first edition copy of ‘Dark & Spooky
+Industries’, without the pages falling out and
+scattering throughout the land, though we are yet to
+corroborate this story with an actual sighting.
+
+Some go as far as to buy two copies of everything,
+
+keeping one in pristine, mint condition and the other
+
+designated for day-to-day use. This probably helps
+
+keep some of the smaller gaming companies in
+business. Every cloud has a silver lining.
+
+Librarians spend a lot of time in their cave-like
+rooms and may have additional physical adaptations
+to enable them to better use their library. Big cow-
+like eyes behind thick glasses giving them dark
+sight, more cranial adaptations to help them better
+catalogue their games internally within their
+cerebrum and find what they need when they go into
+their library, and a more noticeable Fatbeard-like
+defensive musk that dissuades others from entering
+their library on pain of gagging.
+
+Lifecycle
+
+Rules-Lawyerdom may or may not be in-bred from
+the very start but susceptibility and tendencies
+towards it can be spotted from the very first
+squealing blood-soaked moments of life when the
+little homunculus first emerges from the birth canal.
+
+They are born just the same as normal human
+children but while in infancy they require absolutely
+everything to be ‘just so’ or they will be reduced to
+screaming, tearful fits of the heebie-jeebies. The
+food must be correct and properly ordered, their cot
+in exactly the right place and their toys arranged in
+precisely the correct order. Anything else is less than
+satisfactory. Watch out for regimented teddy bears,
+regular polyhedral building block structures, their
+sides exactly the same length, and other telltale signs
+of an impressively anal-retentive mind, If only
+babies were anal retentive in the more literal sense,
+all would be well.
+
+Once they can walk and talk and can start getting
+their grubby little mitts into important and breakable
+things they have an insatiable desire to know how
+everything works. Endlessly they will question
+‘why' and ‘how’ and it is generally at this age that
+they gain their first exposure to games of any kind,
+usually something like Snakes & Ladders. While
+this game is simple enough and requires little in the
+way of rules, they may well add more rules to the
+existing set, typically of a needlessly complex
+nature. Slotting therm in as they see fit, often
+reducing entire groups of children to snotty-faced
+tears of confusion and defeat, they give different
+breeds of snake different qualities and change the
+numbers on the dice so that only they can
+understand the game, and therefore win.
+
+e
+
+_—
+
+
+
+
+RULES LAWYER PHYSIOLOGY
+
+Once they get to school they begin development of
+their full potential. Board and schoolyard games
+become rigidly and unswervingly enforced when
+they are present and they are always the banker when
+playing monopoly, which is convenient for rhyming
+slang if nothing else. This love, this ardour for The
+Rules will not go unnoticed by the machinery of
+school bureaucracy and will almost certainly
+guarantee that the child gets chosen as a Hall
+Monitor or Prefect, a position of power from which
+the Rules-Lawyer wil! make sure all other children
+feel the bite of his unwavering tyranny.
+
+It is usually at around this time that they first
+discover the glories of role-playing games and with
+them a new and exciting world of Rules, a vista of
+interpretations, arguments, applications and
+misapplications. With exposure to these games and
+their wonderful levels of complexity, they transcend,
+something tn them finding its place in the universe,
+and they turn to it with their full and devoted
+attention. Itis not long after this that The Cult OF
+The Rules finds them out and inducts them into its
+many-layered secrets, at which point they become
+fully-fledged Rules-Lawyers able to bring their
+unique brand of terror to gaming groups the
+world over.
+
+Rules Lawyer Mindset
+To fully understand the Rules-Lawyer mindset
+you must put yourself into their position,
+immersing yourself in their ideas, concepts
+and culture. Much like in Gorillas In The
+Mist you must learn to imitate them so as to
+not arouse suspicion, all the while making
+sure you don't take your cover identity too
+far and become one of them.
+
+According to their belicfs
+everything must be ordered,
+tabulated and governed by
+nice, controllable rules and
+numbers. Everything must
+make sense to their logical
+brains and have the rules of its
+existence governed and defined
+somewhere, preferably on paper
+or if not, then on computer disc
+or CD.
+
+Anything chaotic or troublesome,
+anything that threatens the balance or
+the supremacy of The Rules must be
+
+removed from the existence of the game, quickly,
+
+Plot? Story? Why would you need those things?
+Often they clash with the beautiful symmetry of The
+Rules. The Rules provide for every single
+eventuality and every possible circumstance and if
+they do not? Well, we can make up another Rule!
+There is no need to ‘wing it’. Rules for everything!
+Tables for everything! What kind of beer do they
+serve at the tavern? What kind of ammunition does
+the Desert Smuggler have for sale? Which shops are
+on Littke Walnut Street in the City Of Skeldermir?
+You can fill volumes with every conceivable
+circumstance and question until no room is left for
+personal creativity or interpretation, just hour upon
+hour of trying to find the right table. = =
+
+
+
+
+
+RULES LAWYER PHYSIOLOGY §
+
+No matter what is occurring in the game the Rules-
+Lawyer will always insist on following the absolute
+letter of The Rules. Even if it’s a key plot moment
+that requires everyone to just stop for a second and
+listen...
+
+Outside Context Problems
+
+Rules-Lawyers have a mind as tight and narrow as a
+duck’s arse; anything that does not conform to their
+expectations causes a brain-fry deep inside their
+cerebrum, sometimes causing a spluttering of the
+mouth and vocal outbursts. This is tragic for them
+and a weakness that can be exploited in the right
+situations. It is also highly amusing, at least once
+
+the spittle dries. This tragic problem is most
+commonly observed at conventions, where in the
+middle of the free gaming hall Rules-Lawyers can be
+seen leaving games in a massive huff, pronouncing;
+
+‘I signed up to play ‘Wizards & Wombats’! Not
+someone § half-baked home rules! This is
+ridiculous!”
+
+The O.C.P. causes such massive disruption in the
+Rules-Lawyers’ minds that they will probably knock
+over a chair or spill beer on themselves in the
+exodus, Boo hoo,
+
+/
+
+
+
+
+HABITAT
+
+HABITAT
+
+ules-Lawyers like a predictable and well-
+Ree environment in which to reside.
+
+This much is obvious from what we know
+about them. Occasionally economic circumstances
+will require the Rules-Lawycr to share its lair with
+other creatures such as the Greater Slovenly
+Fatbeard, (also known as a Borelax) but this just
+makes them easier to spot, as the ground around their
+sleeping area will be the only clean spot in the entire
+lair - just like The Odd Couple, only with gaming
+books. Other key things to watch out for are
+spreadsheets, databases, alphabetisation and card
+indexes, all a dead giveaway a Rules-Lawyer lives
+within.
+
+The Rules-Lawyer’s collections of things will be
+ordered, bound, cased, sealed, bagged and otherwise
+protected from the elements, They will be gathered
+in a strict order and placed neatly, probably in a
+bookcase made especially for the task.
+
+Action figures will always be in the original
+packaging, Never Removed From Box, to keep their
+value as collectables, These things are not toys to a
+Rules-Lawyer, they're financial investments, Comics
+will be in PH Neutral storage boxes, bagged and
+back boarded and collected not only by numerical
+order but also by storyline. Often multiple copies
+will exist, one for reading, one for keeping. Gaming
+is not the only hobby that can have the fun sucked
+out of it by these nefarious creatures,
+
+GAMES SHOPS
+
+These places are a dying breed, driven to the dingier
+corners of towns by endless and forgettable shopping
+malls and town-centre improvement schemes, They
+cling on despite Internet ordering and sell Pokey-
+Thing cards to pre-teens, or crack, whichever that
+particular shopkeeper finds the least morally
+questionable. It is pretty much 50/50.
+
+These Oases are wonderful places in which to
+observe many different breeds of gamer in the wild,
+from the Character-Proud Bigmouth and the
+Whensthiscomingout to the Confused Mother and
+her |-Want-That offspring. Our interest, however, lies
+solely with the Rules-Lawyer.
+
+Within the relatively safe confines of the Games
+Shop and with what he believes to be a sympathetic
+
+@
+
+audience, the Rules-Lawyer feels very much at case.
+After a time he may feel comfortable enough to talk
+about his gaming experiences. This conversation
+will always take the form of talking about statistics;
+good rolls he made or how he found a loophole in
+the rules that gave him extra abilities. The quests he
+has taken part in, the enemies he has fought, his
+character’s background or story, these things will be
+rarely touched on, if at all, in the Rules-Lawyer’s
+meandering conversation, They will always think
+that the person behind the counter will be one of
+their kind, this being part of their natural feelings of :
+egotism and superiority combined with the thought
+
+that anyone who looks after ledgers and money must
+
+be at least a little anal retentive. This also leads to
+
+the poor till guy having to put up with things like . . .
+
+‘And he entirely forgot | had plus one to my attack
+for being on slightly higher ground, I mean, in my ,
+opinion he's just not fit to run a game. If you forget
+one of the most basic and simple rules, like then how
+can you be trusted with something more complex?
+What if one of us had been playing a wizard? I
+don't have to tell you how complex the magic rules
+can get; you know, I'm sure, So anyway, he then
+rules that the goblin was trying to strike past my
+armour! Honestly, that’s not even in any of the
+optional rules that I've got, he just ‘made it up’ if
+you can believe that. Well, if it’ not in the rules-I
+think he must just be picking on me for some reason.
+Maybe its just because in the previous game his *
+warrior was killed. He might construe that as being
+my fault but all I did was point out that he wasn't
+entitled to a saving throw in such a confined space.
+I find it rather petty, he went on for hours about that
+and really, its a minor thing. Its not really that
+important is it? He can always make up another
+character; it'll take a while to get five years of
+experience on a new one again though. Yeah, so
+anyway, I'll buy these two dice and this booster pack
+of cards please...’
+
+After a time and if sufficiently flush with money, the
+Rules-Lawyer will begin to browse through the store
+looking for a new purchase. The Rules-Lawyer will
+not tend to go to the shelf for his favourite game
+straight away. Rather, he will go through each and
+every shelf methodically and thoroughly, searching
+for lost or rare treasure. When he arrives at a
+particularly thick tome, or rules based supplement,
+he will stop and read. Lately the pickings have
+become slim and many ‘poisonous’ non-rules items
+have been as thick and heavy as rules supplements.
+The trend towards story-based systems with lots of
+
+
+
+
+HABITAT / J;
+
+background means rare pickings for the Lawyer's
+voracious mind, the book equivalent of tofu or
+nouvelle cuisine, all presentation and no substance.
+For this reason he is more likely to attend those
+games shops that have book swapping or trade in
+services. These places are likely to have the older
+games and books the Rules-Lawyer craves. Musty
+and old, torn and tattered they might be, but to the
+Lawyer it’s like fine aged wine (overrated because of
+its mystique and age). For this same reason they are
+frequently the highest bidders at convention
+auctions, bidding for signed copies of various games
+in the hope that the wnter had made some notes
+about some of the rules, or scribbled something in
+the margins.
+
+Having selected a potential purchase, the Rules-
+Lawyer approaches the desk where, reclining, sits the
+resident (usually Fatbeard) shopkeeper. Before
+buying, the Rules-Lawyer will test the patience of
+this Buddha of gaming by asking a great many
+questions about the new rules and how they interact
+with the old, release dates of new supplements, and
+rumours the shopkeeper may have heard about any
+and all aspects of the gaming business. Should the
+shopkeeper be able to satisfy the Rules-Lawyer’s
+curiosity then he shall be rewarded with money and
+repeat business. Should he not, he will likely still
+get paid but will have to sit through grumbling and
+the possibility of a five minute tirade on how people
+that work in these shops should know the ins and
+outs of everything they sell, no matter how many
+products there are.
+
+CONVENTIONS
+
+Here the Rules-Lawyer is in his true element. Herds
+of Majestic Games Masters and players far from their
+own comfortable stomping grounds, many without
+their friends or their familiar gaming groups, and
+therefore psychologically weak and easy prey.
+
+Here the cosy rules agreed to by friends in their front
+rooms do not apply. Here the game book truly is
+King and The Rules paramount. Here they can really
+shine, here they can win tournaments, here their
+knowledge is guaranteed to be useful.
+
+Tournament Games
+
+Ofien overseen by the (relatively) Big Cheese
+Companies of the role-playing world these are where
+it’s at for the Rules-Lawyers. The Games Masters are
+on a strict time limit, have to use the official rules of
+the game and the players may not have met each
+
+other before they started the tournament.
+
+Here the Rules-Lawyer reigns supreme. His rules
+knowledge is quite likely to outstrip that of the
+Games Masters and his commanding presence will
+allow him to dominate the group, scaring them into
+cowering submission and thereby scoring the most
+points for himself personally. The time limit means
+the Games Master is far more likely to cave in once
+the argument has dragged on for a little while and
+the constant pressure is in the Rules-Lawyer’s favour.
+
+You can spot the groups afflicted with Rules-
+Lawyers by observing the Games Master flicking
+frantically through his
+books with knotted brow
+desperately trying to find
+the obscure rule the
+Lawyer just referred to
+while the other players
+look on in frustration and
+anger as time ticks slowly
+and inexorably by.
+
+One thing is for certain;
+they’ll never
+win any awards
+for Role-
+Playing. Their
+delaying and
+argumentative
+tactics often
+mean the group does not
+complete the game and does not
+win any prizes. The Lawyer is
+satisfied so long as The Rules
+are followed and the points they
+are scoring are for an entirely
+different level system . . .
+
+This can be self-defeating
+behaviour as the rest of the party
+comes to resent the Lawyer and
+slowly edges him out as they try
+to get on with the scenario so
+they can move up the leader
+board to claim their prize of
+goodies. Sometimes the tension
+becomes too much to bear and
+somebody snaps. This is a risk
+all Rules-Lawyers run and one
+they accept, even after 1998's
+‘Black Saturday’ when six
+Rules-Lawyers were lynched on
+
+.
+e
+
+a
+
+
+
+
+HABITAT
+
+the second day of a Tournament at PixieCon after an
+argument over a cocked die-roll spread between
+several tables. Their bodies hung undisturbed for the
+crows to feast on for the rest of the convention as a
+warming to others. Rules-Lawyerdom does have its
+martyrs to The Rules.
+
+Unofficial Games
+
+These are the ones that take place in people’s hotel
+rooms after the Con has officially closed down, the
+free tables or any other available nook or cranny
+where two plump gawky adolescents and a six-sided
+die can squeeze,
+
+These are less vulnerable to Rules-Lawyer
+depredations since the Games Master may have some
+of his home group with him for these sessions,
+willing to go along with his evil and nefarious use of
+‘House Rules’ but the odds of it being a disparate
+group of strangers who've never met are high and in
+this peculiarly conflicting mix of ideas and rules the
+Rules-Lawyer can seem very much like the eye of the
+storm, a place of peace and solidity that can be relied
+upon when everything else is so uncertain. The
+other players cling to this rock foolishly, dooming
+themselves.
+
+Fantasy Cliché Drinking Game
+
+Kill a goblin Half a shot.
+
+Rescue a princess | Take two shots.
+Big fairytale castle Take a shot.
+
+Take four shots to numb
+the pain.
+
+Lost heir to a kingdom Take two shots.
+
+Talking magic sword
+
+Mysterious evil twin Take two shots.
+
+brother
+
+ee ce
+ge
+
+Unofficial games are harder and harder to find at the
+bigger and more commercial conventions. Perhaps
+Lawyers have infiltrated the ranks of the organizers
+to make sure that those who play are playing in the
+more easily corruptible tournament games, rather
+than being scattered all over the place. Free tables
+too have been harder and harder to find and without
+set accommodation nearby at some of these
+conventions, retiring to your rooms for a game
+becomes more complex than ever.
+
+Soon the poor hapless Games Master will be trying
+to guide the players through his story while the
+Lawyer acts as his unofficial sidekick Games Master,
+making calls on every rule and practically running
+every combat themselves while getting their kicks
+unsettling yet another game for the sake of The
+Rules.’
+
+The Bar
+
+The convention bar, the site of illicit business
+meetings, drunken character comparison, tales of
+gaming glory and attempts by sex starved adolescent
+Fatbeard Babylon 5 fans getting one of the visiting
+star guests drunk, again (often with success). Not to
+mention vomiting, drinking competitions and role-
+playing based drinking games.
+
+Some people come here in order to relax, shoot the
+breeze, smoke, and there is generally less gaming
+talk in the bar and more socialising. Some pcople,
+perhaps, might regale others with tales of their
+character but the Rules-Lawyer would rather bitch
+and moan about the tiniest matters of the game they
+just completed. Drink does not ease the pain of
+having an irate Rules-Lawyer buzzing in your ear
+after you've just run a six-hour session of
+Rulesmaster.
+
+LAIRS
+
+While it is becoming more common for young adults
+to not leave the familial home for an extended period
+of time after leaving education, many Rules-Lawyers
+take this to an absolute extreme, some not leaving
+home until their parents are deceased and not even
+then. Fortunately there have not been any confirmed
+
+
+
+
+
+HABITAT
+
+instances of them dressing up as their mothers and
+killing people yet. About the worst excesses you'll
+see are an unhealthy obsession with Sailor Moon and
+panty raiding.
+
+This can, perhaps, be attributed to the Rules-
+Lawyers’ preference for everything being in its place
+and predictable - the real-life equivalent of a well
+indexed players’ guide that’s seen many game’s use.
+It could also be attributed to their common lack of
+social skills and inability to deal with the outside
+world. Either way, they are likely to be found within
+this domestic setting, waited on hand and foot (they
+are usually the only child of the family) and
+otherwise indulged. One or two rooms will be set
+aside, dedicated entirely for their use and it is here
+where you should seek them out.
+
+The Lair Of The Beast
+
+Wherever they choose to live, Rules-Lawyers create
+a lair all their own. This room is usually a bedroom
+but if the Lawyer finds himself in shared
+accommodation with other gamer subspecies he can
+migrate into the lounge. Generally though, the
+Rules-Lawyers cannot stand other people getting
+their horrible mess all over their precious tomes and
+files and so they will not be kept somewhere that is
+available to the ‘public’. Other gamer species use
+their books for everything from nesting material to
+food trays and flat surfaces from which to snort
+sherbert and so cannot be trusted to look after them
+properly. A Lawyer never lends his books to another
+gamer after the first time. At least not without a
+signed agreement (in blood) that they will make
+good any damage that they do to it.
+
+The books will likely be ordered alphabetically or
+by the publisher’s own numerical system. They may
+possibly still be in their original plastic wrappers, in
+pristine and uncrumpled boxes, or hermetically
+scaled with a mystical wax covering, awaiting the
+attention of archaeologists in years to come,
+
+There is some speculation that the Dead Sea Scrolls
+are in fact the campaign notes of a particularly
+assiduous Rules-Lawyer from days of yore but this is
+obscenely blasphemous and has lead to people being
+burned at the stake before now. Therefore we
+absolutely cunnot confirm that a Players’ Guide To
+Disciples, or The Quintessential Messiah exists and
+we certainly do not have copies of those books.
+There are no plans for a Slayer’s Guide To Firstborn
+Sons Of Egypt or a Jericho campaign pack and we do
+not recommend walk on water spells as a way to pick
+up sailors.
+
+Against all previous experience with other gamer
+subspecies, the Rules-Lawyer’s nesting area is
+usually clean and tidy, even spotless. It is devoid of
+the scattered books, empty pizza boxes, food
+wrappers, beer cans, ashtrays, bhongs and other
+general detritus, which are so de rigueur for your
+normal gamer. The only remaining slight area of
+familiar mess might be a stack of books which are
+currently being perused and a desk covered in
+copious character notes, schemes, game exploits and
+extensive and detailed plans for world domination.’
+The Rules-Lawyer spends a lot of time lurking deep
+within his lair. That is the place that computer access
+is found, and via that he can access the hive-mind of
+his like-brained brethren across the world.
+
+Your games will be assimilated; your rules calls and
+page references shall be added to our own; role-
+playing is futile.
+
+lhe lair is also where vast collections of various
+tomes resides. These books need to be protected and
+the Lawyer does not like to stray too far away from
+them except to make his way to games and
+conventions.
+
+
+
+
+
+RULES LAWYER SOCIETY
+
+RULES
+LAWYER
+SOCIETY
+
+he Rules-Lawyer is by nature a solitary beast.
+He is reclusive, perhaps a natural defence to
+
+prevent identification and eradication by
+others. Each Lawyers latch onto a gaming group
+where they leech fun from the other players to feed
+themselves, imposing The Rules brutally upon all
+who are around them. More than one Lawyer in a
+group is rare but scholars have observed entire
+groups made up of Lawyers playing the older, more
+rules-intensive games, perhaps to hone their skills
+before they take on the more normal groups. These
+events are rare because The Rules are complicated
+things and Rules-Lawyers often argue over the most
+minor nuance of them, often leading to internecine
+violence, which, in turn, could cause blood to get on
+the precious books.
+
+Games in Rules-Lawyer exclusive groups can take
+many times the normal amount of playtime to
+complete due to the complications of rules
+arguments. An cxtreme case of this is the
+Birkhamsted Gaming Society's ‘Delvings & Dingos'
+Session which has been going on since the original
+white-box edition first came out and is yet to
+progress beyond the tavern in which the adventurers
+have met. The Games Master’s plans for the dungeon
+now make up the foundation of the newest offshore
+expansion in Hong Kong, having been abandoned
+for a revision in late 1996.
+
+E-MAIL LISTS & USENET
+
+Unable to stand each other in person, Rules-Lawyers
+have to resort to other methods of communication.
+
+In The Good Old Days this used to be via magazines,
+fanzines and other gaming periodicals that eked out
+a hand-to-mouth existence. In those times they were,
+thankfully, subject to editing, censure and were
+forced to be somewhat concise and to the point,
+These days, thanks to the wonder of the Internet, we
+can experience pure, unadulterated, one hundred
+percent proof Rules-Lawyer arguments on such
+wonderfully diverse forums as Usenet, Bulletin
+Boards and e-mail lists. These arguments spawn sub-
+
+@&
+
+arguments and flames over the minutiae of The Rules
+and spread to become online wars of words between
+the role-playing and rules camps.
+
+A typical Rules-Lawyer e-mail can be spotted fairly
+easily. It will be longwinded to the point of
+absurdity and will contain a plethora of references.
+References by book, references by chapter, references
+by page, references by paragraph, references by word,
+references by letter and sometimes all of the above at
+once in a beautiful moebius stip of numerical
+complexity perfectly capable of disappearing up it’s
+own arse. Their interpretation will be represented as
+the only possible one anyone but a fook could come
+up with and it will make-you feel like you're back in
+school, being lectured at length by a teacher for a
+slight spelling mistake.
+
+In extreme cases the sheer amount of condescension
+and platitudes contained in one of these e-mails can
+cause the reader to feel so small, insignificant and
+childish that nothing is left but a poor little confused
+looking foetus sat on a slowly rotating swivel chair.
+For the love of god, and to spare your parents having
+to bring you up again, screen your e-mails.
+
+Rules-Lawyers are incapable of accepting that any
+other interpretation of the rules is possible. If
+another view is presented, even backed up in the
+usual Rules-Lawyer fashion, this will send them into
+a frenzy during which they may send in excess of
+twenty ¢-mails an hour!
+
+The absolute worst thing you can do though is to
+rouse their ire by talking about making up your own
+‘House Rules’ or waiving The Rules for any reason.
+This will earn you the indignant huffy e-mails of
+several Rules-Lawyers who will seek to impress upon
+you that...
+
+‘The Rules are there for a reason!’
+
+‘If you play it like that, then you're not playing the
+game!’
+
+‘We all have to use the same rules so it's easier to
+play together.
+
+‘Its not on, its morally wrong and it’s against the
+spirit of the game_
+
+All things considered, it is better to ignore these
+kinds of posts but it can also be a good idea to
+monitor them without replying - forewamed is
+
+
+
+
+
+RULES LAWYER SOCIETY
+
+forearmed, as they say, Amongst the normal posts
+and flames, Rules-Lawyers from different places all
+around the world confer, swap notes, compare books,
+plot, scheme and try to find new and interesting
+twists on obscure rulings. By observing this
+complex exchange of data the wilier Games Master
+can stay one step ahead of the game, knowing
+exactly what tricks his own resident Rules-Lawyer is
+going to attempt pull at the next session.
+
+SCORING POINTS
+
+Within The Cult Of The Rules, advancement is
+gained by several different methods combined
+together to give one overall rank. The various
+methods are described as follows, .
+
+Method One: Tome Ownership
+
+This is marked in three ways, first by sheer volume
+for which ‘Delvings & Dingos’ in all it’s various
+incarnations is a must have.
+
+Second, by completeness. A complete collection is
+worth a lot in the cult, for it houses almost every
+ruling ever made in regard to a game. With a
+complete collection at their disposal, they can speak
+with complete authority in any argument they find
+themselves in.
+
+Third, by obscurity. The more obscure and difficult
+to get the reference material, the more kudos it earns
+Lawyers within their twisted society, and the more
+unlikely it is an opponent in an argument will have
+access to the book in question.
+
+The largest gaming collection in the known world
+belongs to one Mary ‘Galadriel’ Winnower of
+Austin, Texas, who owns not only every role-playing
+game in existence but also every edition and print
+run of those role-playing games, along with every
+published role-playing magazine and fanzine ever
+printed. Mary herself has not been seen since Spring
+2001 when she disappeared into her labyrinthine
+gaming collection looking for her original edition
+‘Wanderer 2300’ boxed set. Seismic detectors
+placed within the area by the local university picked
+up an earth tremor similar in magnitude to a
+complete Grey Puppy Games collection toppling
+over catastrophically. Emergency services dug for
+two hours trying to find her but so many of the books
+had pictures of blood of some kind on the front cover
+that they could not tell if they had found her or just a
+slightly garish gaming supplement, Eventually the
+search was given up and the collection is slowly
+
+being auctioned off. So, if you find a tooth in your
+second hand books, can you please send it back so
+they can confirm it was her from dental records.
+
+Method Two: Longevity
+
+The longer the Lawyer has played one particular
+system, the more seniority he has and therefore the
+more rank. This is also an argument winner for them
+since they will be able to claim greater experience in
+the system than newbies, thereby dismissing their
+questions and comment without the need to
+formulate a counterargument.
+
+The need for rank amongst Lawyers has led some of
+them to claim ridiculous amounts of time for their
+experience in games. The longest amount of time
+claimed to have been played in any system was made
+by Brian Taylor of the Wicklestaff Gaming Society in
+1997 when he claimed to have been playing
+‘Advanced Delvings & Dingos 2nd Edition’ since
+1971, When it was pointed out to him that the
+original ‘Delvings & Dingos’ had not been written
+until the mid-seventies he claimed to be an alien
+with a time machine who had taken a copy back to
+1971 BC and begun playing. He later claimed the
+Pyramids are in fact giant polyhedral d8’s half-buried
+in the sand and that it was his sacred mission to
+assassinate the chairman of Hasborg to save the art
+of role-playing for the future, without which we were
+at the mercy of invaders from another galaxy who
+played “‘Delvings & Dingos’ to the death.
+
+Truly ancient Rules-Lawyers are acclaimed with the
+rather grand Commemorative Gygax Gaming
+Grandad Award For Extended Geekdom, a
+meaningful accolade indeed, not to mention shiny.
+
+Method Three: Point Scoring
+
+Even with the other two methods ranked highly, a
+Rules-Lawyer needs to be ‘blooded’ before he can
+rise in the ranks. This is achieved either on the
+Internet or at a game; raising rules-based objections
+to the running of the game or tenaciously arguing a
+point with the Games Master until they are finally
+forced to give in scores such points,
+
+The Lawyer can also score points by raising Rules-
+Objections that cause characters to live or die and by
+insisting that every single little minor rules
+fluctuation be enforced regardless of circumstance.
+The more experienced the character this destroys, the
+more points are accrued.
+
+
+
+
+
+RULES LAWYER SOCIETY
+
+The largest number of points scored in one sitting by
+any Rules-Lawyer was 237, amassed by Jeremy
+Monroe of Scunthorpe, who argued the point on
+every single individual action during a fight
+between his second level adventuring party and
+some kobolds, thereby making a two minute fight
+scene last twenty-six hours and resulting in the death
+of three characters,
+
+THE RANKS OF
+LAWYERDOM
+
+Initiate
+
+Ah, that precious moment, when you open your first
+role-playing game. The delicious new-book smell,
+the discarded carcinogenic package wrapping, all the
+promise contained in that one little book you so
+eagerly claw open.
+
+It is within this very moment that most neophyte
+gamers" destinies are made. Some will begin to read
+the background material, absorbing it and reflecting
+upon it. Some will turn to the Monster and
+
+e
+
+Equipment sections looking for what to
+y kill and how to kill it, some use it as a
+: tea tray and others will turn straight the
+rules,
+
+Those who do are forever damned. ..
+
+I teld you
+thet rock diaat | Fell
+
+: | reuow
+Qwe you Ke cover! -
+
+; Young Lawyers begin to progress
+¥ aa along their chosen path with their
+' } system, and have made themselves as
+au fait as possible with its rulings and
+idiosyncrasies. They can only progress
+further by scoring their first point and
+achieving their first year of seniority in
+that game system, Once they pass this
+point, the process of change is irreversible
+and the physical and mental changes
+begin to make themselves manifest
+throughout the nascent Rules-Lawyer’s
+body.
+
+Master
+The Master has seniority in several systems
+and a library to match, Such members are
+active on the Internet and in spite of who is
+‘running’ the game, the Master is truly in
+charge of each and every one. This is as high
+as one can progress but Masters have their own”
+pecking order, apparently loosely based on how
+many Games Masters they have driven to gibbering
+insanity. Virginia Croft's interpretation of the ‘Evil
+Tentacled Things’ sanity system caused a mental
+breakdown of an entire room of Games Masters
+during a panel discussion at DeCon in 1988, though
+some were grateful afterwards and felt that
+experiencing true otherworldly incomprehension
+and terror, expressed by a truly alien and inhuman
+intellect, actually improved their games.
+
+The Source
+
+The Source is the font from which all Rules flow, a
+mythical place and intelligence that gives order to
+the universe and to games in particular. The Source
+manifests as a large, bearded man with pens arrayed
+in his top pocket, holding The Rules and with his
+arsecrack on show for all to see.
+
+
+
+
+RULES LAWYER SOCIETY
+
+RULES LAWYER
+PERVERSITY
+
+There is a paradox deep in the hearts of Rules-
+Lawyers, They insist that without The Rules there
+can be no game and they take The Rules above all
+other constituents of the game. However, without
+the game, there would be no Rules.
+
+Rules-Lawyers are self-destructive in that they are
+perfectly willing for a game to crash in flames as a
+total disaster and die, rather than for them to concede
+a point or waive the rules. To a Lawyer, The Rules
+are the game and anyone who says differently is a
+fool, probably a communist or an alien pod-person to
+boot. Liam Lloyd of Reading has not played a game
+since his first session in 1983, but nonetheless owns
+a large collection of gaming books and gains his
+enjoyment by reading, creating never-to-be-used
+characters and running test scenes with himself under
+various circumstances. Liam never cuts his
+fingernails, lives exclusively on ice cream, believes a
+small blue leprechaun named Derek makes him start
+fires, and masturbates like a wild spider monkey in
+the cinema during the jeans adverts.
+
+RELATIONS WITH
+OTHER PLAYERS
+
+Rules-Lawyers are not team players by any stretch of
+the imagination and do not get on well with others.
+This is, in part, due to their acute degree of social
+rétardation but is mostly to do with the fact theyre
+
+weasel-faced little bastards who gleefully destroy
+games.
+
+Pretentious Art Whores
+
+Artsy gamers are the antithesis of everything the
+Rules-Lawyer stands for. With their concentration on
+characterisation, story and plot over The Rules they
+flaunt the very qualities the Rules-Lawyer regards as
+being destructive and chaotic to the world of games,
+In return, the Artsy types regard the Rules-Lawyers as
+stifling, dull and difficult to role-play with since
+they keep making little asides about this or that
+attack roll and how that skill combination is not
+allowed.
+
+Artsy gamers currently have the upper hand in the
+gaming subculture, something that Rules-Lawyers
+resent - it makes them go out of their way to pick on
+the Artsy types. The two are opposites, like matter
+and antimatter. When they mix there is always a
+nasty reaction and the rest of the group will be
+caught in the explosion or rendered sterile by hard
+radiation,
+
+The record for a Rules-Lawyer reducing an Artsy
+player to tears is 4.3 seconds, which was achieved by
+Jason Jones at character check-in during a large
+convention-based *Bloodsucker’ live-action event.
+He loudly insisted that the victim, a Miss Jennifer
+Hollister, should wear a badge to describe her
+character's appearance since The Rules stated she
+must do that for anything that was wildly different to
+her appearance and she clearly was not gorgeous,
+seductive or sexy. Jennifer spent over ten thousand
+
+
+
+
+
+RULES LAWYER SOCIETY
+
+dollars on plastic surgery and never played again.
+Jason now runs his own live action game for himself
+and no one else.
+
+Munchkins
+
+Munchkins and Rules-Lawyers would seem to be
+natural allies on first appearances but this is entirely
+misleading. Rules-Lawyers enjoy the purity of The
+Rules and finding exploits within them is its own
+reward, Munchkins take or leave The Rules as they
+please, using them where they help, arguing against
+them when they do not and even cheating or asking
+for (gasp!) House Rules!
+
+To the Lawyer, what he does is not cheating. This is
+an important distinction, for the Lawyer merely
+quotes the ‘Bible’ to support whatever contention he
+is making at the time. The fact that it supports
+contradictory explanations is beside the point - it is
+there in black and white for each situation.
+
+Munchkins, however, gleefully admit to cheating
+when outside of the games themselves and score
+their own points by putting one past the Games
+Master. It is this important philosophical difference
+that stands between the two.
+
+Ze
+
+re
+
+—
+>
+
+Br
+Vs i)
+
+4° en
+
+<2) i)
+aS ~
+
+Casual Gamers
+
+Casual gamers are those who game on occasion but
+gencrally would rather go out for a beer with friends
+in some loud, obnoxious, overpriced and dark theme
+pub. They are the ones who used to do it when they
+were younger and still have some of the same gamer
+friends hanging around, clinging to their college
+years with desperate tenacity,
+
+To the Rules-Lawyer, who takes everything very
+seriously, the Casual’s approach to the game ts
+unacceptable. The Rules and the game are the most
+important things in the world, and should be taken
+seriously with The Rules treated with the pseudo-
+religious awe they are due. The frivolity of the
+Casual gamer can drive the Lawyer into a frenzy of
+incomprehension.
+
+Fatbeards
+
+The Fatbeard is as close to an ally of the Rules-
+Lawyer as you can get, The Fatbeard shares the
+Lawyer's obsession with details, it is only the focus
+that differs. Fatbeards are more concerned with
+accurate and faithful portrayal of the setting but the
+sheer attention to detail and the role The Rules play
+in portraying the setting is important. Fatbeards are
+also fanatically loyal to The Rules of old and even
+original editions, and are a valuable resource for
+locating historical rulings that the Rules-Lawyer
+may have difficulty unearthing. The only sources of
+friction between the two are the Fatbeard’s refusal to
+accept the supremacy of The Rules over setting and
+the Rules-Lawyers perception that new, additional
+rules are a good thing.
+
+Everyone Else
+
+All gamer breeds tolerate Rules-Lawyers and seek
+them out for their services from time to time. They're
+not only called Lawyers because of their intricate
+knowledge of the game system. Other players
+sometimes seek ‘representation’, getting the Rules-
+Lawyer to argue on their behalf after looking into the
+intricacies of The Rules.
+
+This is particularly prevalent in large gaming
+organisations, clubs and LARP groups where the
+
+“A internal bureaucracy can be as choking and
+yy slow as the real world judicial system,
+especially since those who make up The
+Rules for the organisations tend to be Rules-Lawyers
+themselves, as nobody else cares enough to get
+involved. It also takes place in smaller groups
+though, usually following character death.
+
+ew
+
+al
+
+*
+
+
+
+
+METHODS OF WARFARE
+
+METHODS OF
+WARFARE
+
+he Lawyer’s approach to games is, as with
+
+everything else he does, guided by The Rules.
+
+The Lawyer will not stray from The Rules, as
+the most he will do is to reinterpret them, or choose
+different rules for different occasions.
+
+The character type he plays will be characterised by
+having either beneficial rulings attached to it, or by a
+profligate amount of associated rules. Generally this
+means specialist classes such as magicians, hackers
+or other similar character types with lots of complex
+fiddly bits and their own sourcebooks. The Lawyer
+does not regard characterisation as an important part
+of the character design process and will generally
+play as himself, regardless of the game, character
+class, race or background (if there is one).
+
+Lawyers do not see themselves truly in the role of
+players. Rather, they see themselves as a sort of
+auxiliary Games Master or narrator, making sure the
+game runs smoothly (to their perception) and that
+The Rules are followed to the letter - sort of like a
+film’s continuity person for the game. This can
+become wearing to even the most experienced
+Games Master after a time so they usually fall into a
+sort of uneasy equilibrium where both vie for overall
+control of the game. Eventually a Games Master’s
+willpower can be broken and they're lefi a shallow,
+empty husk while the rest of the players turn to the
+Rules-Lawyer for answers to almost every query they
+have.
+
+Lawyers are not especially interested in gathering
+experience or wealth in the game; most of their
+concems exist away from the table, such as the
+acquisition of new books, or the learning of new
+rules. It’s as though you plucked a mage from a
+game and contorted them so to fit into the real world,
+poring over tomes and finding new ‘spells’ with
+which to wield power, The only time they do seek
+such in-game rewards is where extra experience
+means that they can gain access to all kinds of
+additional powers and rules, cither by purchasing
+items or by gaining new abilities through new levels.
+
+Lawyers do find the loss of a character a setback
+though, as they specialise (while they have the
+
+character) in The Rules associated with it, and while
+
+creating a carbon copy of the original character again
+can be done, not many gaming groups are especially
+tolerant of the practice, To that end you can expect
+Lawyers to use every ‘legal’ loophole they know to
+preserve the continued existence of their characters.
+
+The main tool in the Lawycr’s arsenal is the
+indignant complaint. This is used when the Games
+Master does something with which the Lawyer does
+not agree. The Lawyer leans back in his chair and
+puffs up his cheek pouches, thereby making him
+seem bigger and more aggressive, much like a cat
+arching it’s back or a halfling fetching a stepladder.
+Then will begin the tirade at the Games Master,
+roving over such topics as older rules supplements,
+precedent, magazine articles, the intentions of the
+designer, discussions over e-mail lists and Usenet, as
+well as their own interpretations of the vagaries of
+the English language.
+
+‘This isn't on! Lightning bolts normally do that
+amount of damage, | concede that, but we're in a
+damp dungeon in a temperate zone - the dampness of
+the air will dispel some of the charge into the walls
+and floor. In addition to that, you stated earlier that
+the roof supports were held in with iron spikes.
+Surely one of those would ground the blast before it
+ever got to me. That's without even touching on the
+interesting answer to this very problem that was
+printed in Kobold Magazine back in ‘87. There they
+decided that metal armour over leather (like mine)
+would act as a sort of Faraday’s Cage deflecting
+most of the current. Then, if vou remember way back
+when we started playing two years ago, I wasn't sure
+what particular breed of elf I wanted to play and
+you said | could choose at a later date, I think I
+want to be a Storm Elf, those get a natural
+resistance to Lightning, halving the damage, not
+that any of it should actually hit me since last week
+you clearly used the Realistic Physics option from
+the Third Edition World Book when we were fighting
+the lava beast, and that means the lightning
+automatically strikes the first person in the party
+order, and that’s Jim's Dwarf Stonebutt. Take him!
+Not me! Dear lord, dear sweet Jesus I've only been
+playing this character four years, hes too young to
+die, you hear me?”
+
+DICE
+
+Lawyers like their little security blankets. Regular
+gaming at a regular time, their books close to hand
+for reference and people they know well (and know
+they can bully) to play with. They also have their
+
+
+
+
+
+METHODS OF WARFARE
+
+special dice.
+
+Lots of players have special dice, Munchkins being
+the most exceptional in this regard believing certain
+dice have their own special Chi, Lawyers have their
+own hang-ups, The dice may well be official sets for
+the particular games the Lawyer plays’ and they will
+be clean and pristine. No colouring in the white
+numbers with a biro for the Rules-Lawyer, oh no.
+
+As far as using the dice goes, Lawyers always roll on
+a clear flat surface where everyone can sce exactly
+what he or she rolls. They get extremely irate at
+people who obscure their dice rolls and are
+immediately suspicious of cheating when anyone
+covers their roll with their hand or otherwise fiddles
+the numbers.
+
+The only instance in which a Lawyer could be
+construed to be fiddling the dice would be when
+determining if the litthe dot means the number is a
+six, ora nine. If there is a ruling set out in the book
+(actually present in some games) they will go with
+that, otherwise they can argue the toss either way to
+get the result they desire.
+
+TOMES
+
+The Lawyer, above all other things in his possession,
+values his books. They are taken care of in a fashion
+the most diligent lepidopterist would be proud of
+and most people would regard as a sure sign of
+obsessive-compulsive disorder. If they had the
+means, most Rules-Lawyers would enclose their
+book collection in a climate-controlled Area 51 style
+edifice with armed men on duty 24 hours a day and a
+dedicated security guard constantly patrolling the
+warehouse solely tasked to making sure there are no
+bookworms. Should there be a nuclear apocalypse,
+the one thing we can be sure of is that the
+cockroaches will be able to role-play.
+
+Lawyer books (unless they ‘keep one for best’) are
+
+Rasscrpassa to
+@
+
+generally well thumbed, even with the care some
+take over them, cleaning the tweezers every time a
+page is turned and using ultra-low UY lighting.
+
+Neophyte Rules-Lawyers will fill their tomes with
+bookmarks and post-it notes at the positions of
+particularly interesting rules. The truly advanced
+Lawyer will know the page references by heart,
+which is damned useful when most gaming books do
+not have anything approaching a useful index
+(which is in and of itself a source of much vexation
+to Rules-Lawyers).
+
+HARANGUING
+
+This is an extension of the indignant complaint and
+may go on for months or even years. Haranguing
+occurs when the Lawyer has made his indignant
+complaint and has been overruled regardless. He
+will continue to protest, long past the point at which
+it matters any longer, talking about it after the game,
+before the game, at the pub, while you're watching
+TV, on the phone, if he runs into you on the street,
+and discussing it on the Internet with other Lawyers
+
+
+
+
+
+METHODS OF WARFARE
+
+to strengthen his case and get additional arguments in until the Games Master is either driven mad, gives in,
+support. or the Rules-Lawyer dies.
+
+It is not a reversal of the Games Master’s decision The longest known haranguing took place between
+that he is secking; all he wants is to be proven right Messrs Andrew ‘Nobber’Jacobs and Philip ‘Wiz’
+
+and to have that admitted. Correctness to The Rules Musty from spring 1976 to summer 2001, a period of
+is everything - anything else, even the loss of a almost 25 years. The feud (over a particularly lucky
+character, is secondary, The haranguing continucs hit by an orc) was only ended when Philip was struck
+
+by lightning during a live-action role-play session in
+the Cotswolds and killed. Even then, incorporated
+into his will was an appeal asking that Andrew
+apologise for his mistake and acknowledge Philip’s
+correctness. Since Andrew did not attend the funeral,
+technically the dispute is still ongoing.
+
+
+
+
+
+ROLEPLAYING WITH RULES LAWYERS
+
+ROLE-PLAYING
+WITH RULES-
+LAWYERS
+
+aming with Rules-Lawyers can be a
+
+harrowing experience for the rest of the
+
+group at the best of times, but there are ways
+to handle their participation in a useful manner
+without them leeching the enjoyment for the other
+participants. They can even contribute to the fun.
+
+The first and most obvious solution is to play
+something with a minimum of rules, or no rules at all.
+Fringe games are the best bet for this, as are home-
+brewed concoctions of the Games Master’s own
+devising. The drawback to this is that the Lawyer
+may in turn invent a system of his own and
+expect you to play it. With their home-
+brewed rules consisting of a minimum of
+five large ring binders filled with very
+small type double-sided printout, this
+
+can be something of a headache, Sa
+before you resort to that, think of the
+
+trees!
+
+Another thing you can try to do is
+to simply ignore the Lawyer's
+twittering and carry on regardless.
+This does marginalize one of the
+group and excludes them from the
+action somewhat but does allow the
+rest of you to complete the scenario
+at some kind of exciting pace rather
+than a slow, desperate crawl. The
+Rules-Lawyer player may not be
+expendable to your group though.
+They are likely to take offence at
+being left out and may quit your
+group forever, taking their extensive
+game collection and knowledge
+with them.
+
+One particularly cunning solution is
+for the Games Master to defer every
+single rules matter to the Lawyer as
+asort of reserve Games Master.
+
+Once they are busy dealing with the
+everyday mundane matters of
+initiative, combat and encumbrance
+
+they will have less time to worry about finer points
+and nitpickings. This has the added advantage of
+taking a massive load of work off the Games Master’s
+shoulders, leaving them free to devote a lot more
+time to plot and role-play - the real meat and gravy
+of the game.
+
+RULES-LAWYER NAMES
+
+Rules-Lawyers do, of course, have normal human
+sounding names appropriate to the culture within
+which they live and hide. There does seem to be a
+preponderance of Steves and Daves but this may just
+be a local phenomenon. '
+
+Within The Cult Of The Rules, our undercover
+reporter Dave Steve managed to discover that the
+Lawyers give themselves glorious titles and
+appellations, recounting their deeds in the service of
+The Rules. He encountered such book-thumping
+luminaries as . . .
+
+The Grand High Lord Of All Things THACO.
+
+He Who Maketh Games Masters Tremble.
+
+The Eternal Dread Lord Of Page Referencing.
+
+That Which Rolleth Dice In Plain View And Yet Still
+Succeeds.
+
+The Steel Duke Of Haranguing.
+
+She Who Enforces Encumbrance On The
+Unwilling.
+
+He That Interrupts The Games Master
+
+With No Comeback.
+
+Bringer Of Books, He That Memorizes.
+The Librarian, Master Of All Things
+Shrink Wrapped.
+
+She Who Argues Without Breath.
+
+These are their secret names of
+power and so are not a warning to
+gamers but a proclamation of
+strength to other Rules-Lawyers. It
+is a part of their internal power
+structure that also enables them to
+
+call on the correct person for assistance
+
+with their personal problems. For example She
+Who Knows All About Cyberpunk would know
+to call upon That Which Had A Hand In D20
+for advice on such games.
+
+
+
+
+
+RULES LAWYER CHARACTER CLASS
+
+RULES- CHARACTERISTICS
+
+Rules-Lawyers are the embodiment of law, rules and
+stability in the world and as such are good at smiting
+LAWYE ima the chaotic and enforcing order. Rather than a
+standard cleric’s ability to turn undead a Lawyer can
+drive away creatures of chaos. This ability can cause
+C Kei AR ACTER disgust and horror in non-chaotic creatures but this is
+
+just a side effect. Lawyers have little combat
+training and rely on their brains and magic to get
+
+C L AS et them through any conflict.
+
+© become a Rules-Lawyer is a calling, a ALIGNM ENT
+
+feeling deep within one’s bones that order is
+
+correct and proper, and that the world must be
+made to conform to The Rules. In a world of chaos
+and disorder, the Lawyer sets out to bring some
+solidity and dependability, whether people like it or
+not. Mostly not.
+
+Rules-Lawyers may only be lawful in alignment.
+Lawful good, lawful evil or lawful neutral are all
+permissible but whichever way you cut it, they're on
+the side of order. Good, evil or in-between, they all
+serve law above all things and so it is not really
+much of a source of contention within them,
+Ifowever, The Rules themselves lead to wars and
+schisms between groups of Lawyers especially
+during the times of the New Editions.
+
+The Rules-Lawyer class is like a specialist form of
+cleric and any character may convert to it at any
+time. They keep all of their old abilities and powers
+
+but are adjusted to reflect their new position. se
+A great war between factions was just fought as the
+
+era changed from The Time Of The Second Edition
+ADVENTURES to the Time Of The Third Edition. The
+Superhighways of the land are still littered with the
+bodies of the fallen and flames which refuse to die
+oul. Such a great schism has not been seen since The
+
+Rules-Lawyer adventures take them to acquire new
+rare tomes, learn new laws or take those they already
+know into chaotic regions and impose order. In all
+
+things they serve The Rules, even if it means their Coming Of The Plot Stomp in the Land Of The Wolf, P
+own grisly death at the hands of an angry, torch- an event that caused great distress to many wizards N
+wielding mob, Everything they do is for this motive in the land as well. Some fighting continues. 4
+and nothing else will move them unless it also serves I
+The Rules.
+
+Lawyers sometimes receive callings
+
+from The Rules or are granted new
+
+chapters to The Rules from The Source.
+During these times (which they call The
+Time Of The New Edition) they can
+become positively evangelical, going
+
+out into the world to spread the word
+
+and the ‘good news’. According to the
+Lawyers, we currently all live in the
+
+Time Of The Third Edition and they are
+already preparing for a fourth age and
+
+the great upheaval this will bring. Other
+motivations for adventuring might be to
+collect money with which to buy new
+books or to outfit their library, though they
+might also decide to accompany others to make
+sure chaotic elements continue to conform to The
+Rules in their presence.
+
+
+
+
+
+RULES LAWYER CHARACTER CLASS
+
+RELIGION
+Lawyers do not see their belief as a religion and
+many also worship other gods. Religious law is a
+great source of rules that Lawyers descend on
+hungrily and enforce, sometimes to the surprise of
+the temple leader as he is carted off and burned for
+some obscure and long forgotten blasphemy.
+In this way Lawyers have usurped many temples and
+while things carry on as normal to outward
+appearances, inside the Lawyers hold sway, creating
+new and interesting religious prohibitions to inflict
+upon the masses,
+
+BACKGROUND
+
+Most Lawyers are educated. literate, good with
+magic and live with their parents. They are often the
+children of merchants or minor nobility and are
+spoiled rotten while they are young.
+
+It is generally during adolescence or later that they
+feel the calling in their blood and take up the banner
+of The Rules. If they are not diverted by a career in
+the local Traffic Guard, clamping carts for illegal
+parking, or as a tax collector making the common
+folk’s lives miserable, they may be spotted by
+another Rules-Lawyer and sect upon their path.
+
+Hit Die: d4
+
+Armour & Weapon Proficiency
+
+Lawyers can wear any armour and use any weapon,
+provided they can lift it, The Rules do not care what
+they use to execute their duties. Some Rules-
+Lawyers get their comeuppance by using weaponry
+and armour that The Rules say they can wield and
+use but which common sense (and practice)
+demonstrate they cannot.
+
+Lawyers receive no special weapon proficiency but
+their intense knowledge of books and paper cuts
+enables them to wield a sheet of paper as though it
+were a non-magical dagger.
+
+Class Features
+
+Direct Memorisation
+
+A Lawyer can completely memorise and recite a
+number of books equal to his Intelligence + Wisdom
++ character level. Every time they receive a new feat
+they can instead choose to memorise an additional
+tome. This does not mean they can use magic from
+magic books in this way. That would be Munchkin,
+not Rules-Lawyery.
+
+@&
+
+Aural Selectivism
+
+Lawyers are immune to any sound or speech-based
+attacks as well as any attempts to fast-talk or
+persuade them. This is a very useful ability and very
+itritating.
+
+Irritability
+
+Upon becoming a Rules-Lawyer, you lose one
+permanent point of Charisma because you're an
+annoying, pedantic berk.
+
+Sticky Pads
+
+You can read through books somewhat faster than
+normal individuals and also gain a +1 Bonus to
+Climb checks thanks to your natural gooey ichor.
+
+Anal/Cranial Inversion
+No use other than comedy value.
+
+Cheek Pouches
+
+Inflating their cheeks the Lawyers become bigger
+looking and more intimidating, gaining a +] bonus
+to any attempt to scare people or to turn the chaotic.
+(Games Master Note: In fact, if they succeed at all, it
+just makes enemies laugh).
+
+New Feat
+
+Harangue (Rules-Lawyer)
+By virtue of nagging incessantly the Lawyer can
+(given enough time) wear down any resistance to any
+idea. This takes a number of hours equal to the
+target’s Wisdom plus character level, minus the
+Lawyer's Charisma. It may be complicated by factors
+such as earplugs, deafness, or snapping and killing
+the Lawyer before the time period is up.
+
+RULES LAWYER SPELLS
+Fix Minor Wear
+
+Transmutation
+
+Level: Clr, RL 1
+
+Components: V,S
+
+Casting Time: | Action
+
+Range: Touch
+
+Target: One book
+
+Duration: Instant
+
+Saving Throw: Will, (harmless, object)
+Spell Resistance: Yes, (harmless object)
+
+Fix minor wear mends the little tears, fingerprints,
+wrinkles and scuffs that occur to a Lawyer's valued
+tomes in the presence of other gamers. In addition it
+removes the smell of beer, cigarettes, dope, and
+
+
+
+
+RULES LAWYER CHARACTER CLASS
+
+cleans the shreds of tobacco out of the spine. In the All the participants lose one hit point and the
+case of Elmore illustrated works and fantasy art Lawyer gains a pool of an equal number of points
+books by the likes of Chris Achilleos it also removes that they can use to boost their Intelligence and
+more dubious stains. Wisdom ability scores temporarily for one day, or
+
+heal their own damage.
+
+Uttering a curse and cradling the book, the Lawyer is
+able to work seemingly mundane repairs that
+nonetheless magically fix the problems. If cast on an
+undamaged book it enables it be surrounded by a
+translucent force field protecting it from any of the
+normal causes of harm.
+
+Book Bond
+
+Abjuration
+
+Level; Clr, RL |
+
+Components: V, 8, F/DF
+
+Casting time: One hour per twenty tomes
+Range: Close (25ft. + 5 fi.’2 levels)
+Area: Entire library
+
+Duration: Since last use of library
+Saving Throw: None
+
+Spell Resistance: No
+
+Book bond sounds a little alarm inside the Rules-
+Lawyer’s head when someone other than them
+touches their book collection. The hairs stand up on
+the back of their neck and they may involuntarily
+inflate their cheek pouches.
+
+The tocus for this spell can take many forms from
+sticking a hair across the door, leaving books and
+papers on the floor of the room, or leaving the door
+to their library ajar.
+
+Leech The Fun
+
+Necromancy
+
+Level; Clr, RL 0
+
+Components: V, 5
+
+Casting Time: | gaming session or one hour
+Range: 10 fi.
+
+Area: 10 ft. radius
+
+Duration: As per casting time
+
+Saving Throw: Will
+
+Spell Resistance: Yes
+
+Leech the fun is how the Rules-Lawyers feed on the
+special bioelectric energy they need to power their
+peculiar minds and to store their memorisations. The
+Lawyers engage in proselytising about The Rules
+and picking up those around them on their
+transgressions of The Rules, until all humour and joy
+gained from the happy occasion of a group of friends
+
+getting together to have fun is drained away.
+
+
+
+
+
+LICENCES
+
+OPEN GAME LICENSE Version 1.00
+The followmy text is the property of Wizards uf the Coot, Ine. and is Copyright 2000
+Wizards of the Coss, inc 7 Wirards) Al) Ragits Reserved
+
+1, Defiminens: (a) Contributors” means the copyright and/or trademark owners who have
+comributed Open Game Coosent: (by "Derivative Material” means copyrighted material
+including derivative works and translations (inchoding imiv other computer lenguages),
+petation, modification, correction, addition. extension, upurade, improvement, compilation
+abridgement or other form in which an existing work may be rocast, transfoemed or
+adapted; (c) “Distribute” means to reproduce, Licemsc, rent, lease, sell, broadease, publicly
+display, transmit or otherwise distribute; (d)"Open Game Concer” means the pame
+mechanic and includes the methods, procedures, peoecsses and fevitines to the extent such
+content does not embody the Product Identity and is ae enhancement over the prior art and
+any additional content clcarty sdeatified #8 Open Game Content by the Contributor, und
+means any work covered by this License, including translatkms and derivative works
+under copynght low, but specifically excludes Product Identity. (¢} “Product Identity”
+means product and product line names, logos and identifying marks incheding trade dress;
+artifacts; creatures characters; stories, storylines, plots, themate elements, dialogue,
+incidents, language. utiwuth, syiivols, desegns, depictions, likenesses, formats, poses,
+concepts, themes and graphic, photographic and other visual or sudio representations
+names and descriptions of characters, spells, cnchantments, personalitics, teams, personas,
+likenesses and special abilities; pliors, Jucations, environments, creatures, equipenent,
+magical ur supernatural sbilitecs o¢ effects, logos, symbols, or gruphic designs; and any
+other trademark of repestered trademark clearly identified as Product identity by the owner
+of the Prodeet Identity, and which specifically excludes the Open Game Comtent: (f)
+“Trademark” means the lngos, names, mark, sign, motion, designs that are used by 2
+Contributor to identify itself or its products or the associated products contribeted to the
+Open Game License by the Coetributor (g) “Use™, “Used” or “Using” mrcans Wu use,
+Distribute, copy, edit, format, moclily, translese and otherwise create Derivative Material of
+Open Game Content (hj “You or “Your” means the licensee im terms of thix ayreement.
+
+2. The License: This License applies to any Open Game Content that cantaima a moter
+indicating that the Open Game Cuntent nay only be Used under and m terms of this
+License. You must affix auch a entice to any Open Game Content that you Use. Na terms
+my be achdexd ao or sultrected from this License except as described by the Licunsw itextf
+No other terms or conditions may be upplied to any Open Game Content distributed usnag
+this License.
+
+3.0ffer und Acceptance: By Using the Open Game Content You indicate Your acceptance
+of the terms of this License
+
+4. Grant and Consideration: Ip consideration for agreeing suse this License, the
+Cuntributors geant You a perpetual, worldwide, royalty-free, non-exclusive lacense with the
+cadet terme of this Locense tn Use, the Open Game Content
+
+5. Representation of Authority to Cuentribute: If You are contribiaing original material as
+Open Game Cantent, You represent thet Your Connrunens are Your onginal creation and!
+or You have sulficseet nights t grant the rights conveyed by this License.
+
+6. Notice of License Copyright: You must update the COPYRIGHT NOTICE portion of this
+License w include the exact text of the COPY RIGHT NOTICE of any Open Game
+(Content You are copying, modifying or distributing, and You must ack) the tith:, the copyright
+date, and the copyright holder's name to the COPYRIGHT NOTICE of any original Open
+Game Content you Distevtute
+
+7, Use of Proctuct Identity: You agree nee to Use any Product Identely, inclucling as an
+indecanon as to compatibility, except as expressly Loensed m another, independent
+Agreement with the owner of each element of thal Product Identity You agree net to
+indicmte compatibility or co-adaplability weth any Trademark or Registered Trademark in
+conjunction with a work containing Open Game Content except as expressly licensed in
+another, independent Agreemnent with the owner of such Trademark or Registered
+Trademark. The use of any Product Identity m Open Game Content dors not constinuic 4
+challenge Ww the owaerstup of that Product Identity. The owner of any Product Identity used
+in Open Game Content shall reeain all rights, title and interest in amd to thar Prockuet entity
+
+¥ Wennfication: If you distribute Open Gane Content You mpst clearly indicate which
+portions of the work that you are distributing are Open Game Comtent.
+
+9. Updating the Locense: Wizards or its designated Agents may publish updated verseons of
+this License. You tay use any aathorized version of this Livease to copy, moxlify aad
+distribute any Open Game Coment originally distybuted undet any version of this License.
+
+10 Copy of this License: You MUST mclude a copy of this Li¢ense with every copy of the
+Open Game Content You Dusiributc.
+
+11. Use of Cantetbutur Credits: You may not market or advertise the Open Game Content
+using tbe same of any Coneritutor unless You have written permission frum the Contribusor
+iw de so.
+
+12 Lnebilety to Coenpty: If it is impossible for You to comply with any of the termes of this
+License with respect to some ur all of the Open Game Content due so statute, judicial
+order, or governmental regulation then You may not Use any Open Game Material so
+affected
+
+14 Termination: This Licuuse will (crmenate automatically if You fail to comply with all
+terms herein and fil Wo care such breach within 30 days of becoming sware of the breach
+All subliccescs shall survive the termination of this License
+
+14 Reformation: If any peovision of this License is held to be anenfiwceahle, such
+provision shall be reformed only to the oxtent necessary to make it enforveuble
+
+15 COPYRIGHT NOTICE
+
+Open Game Liveawe ¥ 1.0 Copyright 2000, Wizands of the Coast, Inc
+
+D260 System Rules & Comjont Copyright 2000, Wizurds of the Coast, Inc.; Authors
+Jonathan Tevet, Monte Cook, Skip Williams, based on orginal maternal by E Gary Gygax
+and Dave Armmesun.
+
+Open game consent froen The Slayer's Guide to Rules Lawyers copyright 2002, Mongoose
+Publishing
+
+The a2 System* I jeense version 5 0]
+Ry downloading the enclosed graphic files and‘or hy returning the Confirmation Curd ws
+presented in the file “card. pef" the Licensee (“You™) accept ta he bound by the fitlowing
+terms and condstions:
+
+|, Copyright & Trademark
+
+Wizards of the Corst, Inc. retains title and ownership of the d20 System trademark logos,
+the d20 System trademark, and all other copyrights and trademarks claimed by Wicards of
+the Coust in The Offiew! Wizards of the Coast 220 System Trademark Logo Guide
+version 1.0, invurpocuted bere by reference
+
+2. Livemse to use
+
+You are hereby granted the non-transferable, non-exclusive, myalty-free license to use
+the €20 Symem trademark bogus, the d20 System trademark, and cortaen other trademarks
+and copyrights owned hy Wizards of the Coast in acourd: with the cond
+
+specified in The Official Wizards of the Coast d20 System Trademark Logo Guede
+version 1.0. {the “Licensed Artickes”)
+
+3. Agreement not to Contest
+
+By making ase of andor destribeting material using the d20 System Trademark under the
+terms of this License, You agree not Ww cuerecsl the ownership of the Liceiacd Amicles
+
+4. Breach and Qure -
+in the event that You fail tn coenply with the terms of this License, You will be considered
+to be in breach of thes Lecense, Wizards of che Coast will artempe to notify you in writing
+by semieny a Registered Letter to the address listed on the most recent Confiemation Card
+oe file, of any, You will have M) days from the date the notice (the “cure period’) to cure
+ibe breach so the samstaction of Wizards of the Coast. If no Confirmation Card is on file,
+you will be considered to be in breach of this License immediately.
+
+5, Teminapen
+Uf, at the end of the cure penod, the breach is not cured, Wizards of the Coust may
+icrmenate te License withour further written notice to You,
+
+6. Effects of Termanation
+
+Upon termination. You shall imenediately stop all use of the Lacensed Articles and will
+destroy any inventory or marketing material in Your possession bearmg the d20 System
+Trademark logos. You will remove any ase of the d20 System Trademark loges from your
+advertising, ecb site, letterhead, of any other use, You must instroct any company or
+individual that You are or become aware of who is in possession of any materials
+distrihuted hy You bearing the d20 System Trademark Jogos to destroy those matenals
+
+You will solely bear any costs related to carrying oul this term of the Licemac
+
+7, Penalty for Fatlure to Comply with Termination Instructions
+
+If You fail to comply with the Effects of Termination, Wizards of the Coast may, at its
+opten, pursue litigation. for which You shall be responsible for all loyal costs, ageinet You
+to the full extent of the law for bevach of contract, copyright aed wadermark enfrggement,
+damages and any other remedy availeble
+
+&. Updates
+
+Waards of the Coast may issue updates and/or new releases af the d20 System
+Trademark logos without prior notice. You will, at the earliest possible oppertunity, update
+all material distributed hy You to use the updated and/or new version of the d20 System
+Tradkinark logos, You may continue to distribute any pre-existing mater! thet bears an
+vider version of the d20 System Trademark Ingo.
+
+9. Changes to Terms of the Lacense
+
+Wizards of the Cazsl may suc updates andor revisions to this License without prior
+notice. You will, at the earliest possible opportunity, conform ip all respects to the updated
+or revised terms of this License. For a penad of 90 days You may comtinue to distribute
+any pre-existing material that complies with a previous version of the License. Thereafter
+written consent should he obeained from Wizards of the Coast. Subsequoat versions of this
+License will bear a different version namber.
+
+10. Updates of Licensee information
+You may transenit an updated version of the “card pdf” Confirmation Card at any tiene to
+Wizards of the Coast.
+
+Ll. Notees to Licensor:
+
+Wizards of the Coast
+2) System Livesse Dept
+PO Bax 707
+
+Rentom, WA 980370707
+
+12. Ne maintenance or support
+Wizards of the Coast shall have no obliguison whatsoever to provide You with any kind of
+maintenance or support in relution tv the dU System Trademark logos.
+
+13. No Warranty / Disclaimer
+
+THE d20 SYSTEM TRADEMARK LOGO FILES ARE MADE AVAILABLE ON AN
+“AS [8" BASIS. WIZARDS OF THE COAST DOES NOT MAKE ANY REPRESENTA-
+TION OR WARRANTY, WHETHER EXPRESS OR IMPLIED, 43 10 THE FITNESS
+FOR A PARTICULAR PURPOSE, USE OR MERCHANTABILITY, WIZARDS OF THE
+COAST MAKES NO REPRESENTATION OR WARRANTY THAT THE 2) SYSTEM
+TRADEMARK LOGO FILFS ARF FRROR-FREE.MAKES NO REPRESENTATION OR
+WARRANTY THAT THE 120 SYSTPM TRADEMARK LOKiO FILES ARE ERROR-
+FREE
+
+
+
+
+
+BD \ \ Poy) ps SMe rue ty
+
+. den Hao, Wiad
+
+E okel Mouroe tne Os
+Ox syinor Ww. K Nine
+L \peleath oe
+
+Fionash
+
+yout ah BS \
+9 WEAK
+
+y
+
+Feak, Oke Od
+Be vex Olde Hrcausy
+¢C WO. Ok USE:
+
+‘
+
+vA. Caskrars
+oa
+
+
+
+
+
+~~ a
+
+~~
+
+ULES LAWYERS
+
+A Fiend in Human Form
+
+Rules-Lawyers are an unexpectedly hardy breed of disgusting humanoid (at least in
+physique) creature. To all outward appearances they are a normal human being, like you or
+me, and it is only by their strange behaviour and very close (olen post-mortem) physical
+examination that they are revealed to be anything other than Homo Sapiens. Scholars are in
+agreement that Rules-Lawyers have been around at least as long as games of any kind have
+existed,
+
+™
+4
+
+as ee EG
+
+Some go as lar as to say they have existed as long as rules themselves have existed in this
+
+universe. They ure said to have lived among us, alongside man and his more primitive and
+
+slope headed ancestors since time itself began, waiting for them to lose interest in football
+and develop the wheel.
+
+~
+
+ae Ny te . at SF
+
+Pia
+Inside You Will Find: 4
+4
+Physiology: It is a dirty job but someone has to direst of consequences for normal gamers like )
+do it, Our team of experts have dissected a you or I, ‘
+Rules Lawyer and made some disturbing ;
+discoveries, Includes the acclaimed Wandering Methods of Warfare: Be prepared, Here we r
+Poontang Table. give you a full arsenal with which to combat the Pe
+dreaded Rules Lawyer. “
+Habitat: There are few lairs more recognisable 2
+than that of the Rules Lawyer. Find out just Role-Playing with Rules Lawyers: |i can at
+where they ure likely to be found. and how to happen to the best of us. A Rules Lawyer makes
+avoid them. his way into the gaming group and refuses to ¢ fe
+leave. Here we have a look at how to co-exist > =
+Rules Lawyer Society: It is hard to believe, but with this feckless creature. |
+Rules Lawyers actually congregate together. + = :
+Such an unholy meeting can only have the And introducing the Rules Lawyer character © | j
+class, together with unique spells and feats! | a
+
+FOR GAMES MASTERS AND PLAYERS ALIKE
+MONGOOSE PUBLISHING
+
+www.mongoosepublishing.com
+
+Handbook Third Edition, _-
+iblished by Wizards-of the Coast@™ 1!
+
+
+
+
+

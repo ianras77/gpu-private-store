@@ -1,0 +1,22 @@
+{
+  "results": [
+    {
+      "title": "Court blocks Trump administration action",
+      "url": "https://apnews.com/article/example-court-action",
+      "content": "Federal judge blocked action from White House",
+      "engine": "bing"
+    },
+    {
+      "title": "Gains Definition & Meaning",
+      "url": "https://www.dictionary.com/browse/gains",
+      "content": "Dictionary definition",
+      "engine": "bing"
+    },
+    {
+      "title": "Court blocks Trump administration action (duplicate)",
+      "url": "https://apnews.com/article/example-court-action?utm_source=feed",
+      "content": "Duplicate URL",
+      "engine": "yahoo"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "slug": "cozy-village-props",
+  "version": 1,
+  "reviewMode": "Kid-safe shelf",
+  "items": [
+    {
+      "slug": "village-lantern-path",
+      "localBundleKey": "village/lantern-path",
+      "kind": "model",
+      "storageMode": "roblox-reference",
+      "targetPath": "Workspace/Map/Paths"
+    },
+    {
+      "slug": "village-market-stall",
+      "localBundleKey": "village/market-stall",
+      "kind": "model",
+      "storageMode": "roblox-reference",
+      "targetPath": "Workspace/Map/HubProps"
+    },
+    {
+      "slug": "village-garden-fence",
+      "localBundleKey": "village/garden-fence",
+      "kind": "model",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/Boundaries"
+    },
+    {
+      "slug": "village-cottage-door",
+      "localBundleKey": "village/cottage-door",
+      "kind": "model",
+      "storageMode": "roblox-reference",
+      "targetPath": "Workspace/Map/Landmarks"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+app:
+  name: web-jogmania
+  type: web+api
+  runtime: mixed
+services:
+  - name: web
+    port: 3177
+    protocol: http
+    purpose: "Primary web UI"
+    health: "/"
+  - name: api
+    port: 3178
+    protocol: http
+    purpose: "Backend API"
+    health: "/healthz"
+  - name: db
+    port: 3179
+    protocol: tcp
+    purpose: "Postgres"
+  - name: redis
+    port: 3180
+    protocol: tcp
+    purpose: "Redis"
+  - name: minio
+    port: 3181
+    protocol: http
+    purpose: "Object storage"
+    health: "/minio/health/live"
+  - name: minio-console
+    port: 3182
+    protocol: http
+    purpose: "MinIO console"
+    health: "/"
+notes:
+  - "Contiguous app block: 3177-3182."
+env:
+  required:
+    - JOGMANIA_WEB_PORT
+    - JOGMANIA_API_PORT
+  optional:
+    - JOGMANIA_DB_PORT
+    - JOGMANIA_REDIS_PORT

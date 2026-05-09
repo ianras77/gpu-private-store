@@ -1,0 +1,322 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum SessionStatus {
+  DRAFT
+  INVITE_READY
+  INVITED
+  ACTIVE_INTAKE
+  PROPOSAL_V1
+  VOTING_V1
+  REFINEMENT
+  PROPOSAL_V2
+  VOTING_V2
+  AGREED
+  CLOSED_NO_AGREEMENT
+  ABORTED_SAFETY
+}
+
+enum ParticipantRole {
+  INITIATOR
+  INVITEE
+}
+
+enum ConsentStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum MessageVisibility {
+  PRIVATE_TO_AUTHOR
+  SHARED_REPHRASE
+  SYSTEM
+}
+
+enum MessageKind {
+  USER_RAW
+  CAT_REPHRASE
+  CAT_QUESTION
+  USER_REPLY
+  CAT_PROPOSAL
+  CAT_SUMMARY
+}
+
+enum VoteValue {
+  YES
+  NO
+  NEEDS_CHANGES
+}
+
+enum InviteStatus {
+  SENT
+  OPENED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum AuditActor {
+  USER
+  SYSTEM
+  CAT
+}
+
+enum PlanType {
+  FREE
+  PREMIUM
+}
+
+enum DeliveryChannel {
+  IN_APP
+  SMS_LINK
+  EMAIL_LINK
+  IMESSAGE_HANDOFF
+}
+
+enum DeliveryAttemptStatus {
+  PENDING
+  SIMULATED
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum DeliveryKind {
+  INVITE_LINK
+  MESSAGE_NUDGE
+}
+
+enum MediatedTurnSource {
+  INTAKE
+  MESSAGE
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  displayName  String
+  createdAt    DateTime      @default(now())
+  plan         UserPlan?
+  relationshipsCreated Relationship[] @relation("RelationshipCreatedBy")
+  relationshipsAsA     Relationship[] @relation("RelationshipParticipantA")
+  relationshipsAsB     Relationship[] @relation("RelationshipParticipantB")
+  sessionsCreated      MediationSession[] @relation("SessionCreatedBy")
+  participants         Participant[]
+  messages             Message[]
+  mediatedTurns        MediationTurn[]
+  votes                Vote[]
+  sessionEvents        SessionEvent[]
+}
+
+model UserPlan {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  plan      PlanType @default(FREE)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Relationship {
+  id                 String   @id @default(uuid())
+  createdByUserId    String
+  label              String?
+  participantAUserId String
+  participantBUserId String?
+
+  createdBy    User  @relation("RelationshipCreatedBy", fields: [createdByUserId], references: [id])
+  participantA User  @relation("RelationshipParticipantA", fields: [participantAUserId], references: [id])
+  participantB User? @relation("RelationshipParticipantB", fields: [participantBUserId], references: [id])
+
+  sessions MediationSession[]
+}
+
+model MediationSession {
+  id              String        @id @default(uuid())
+  relationshipId  String
+  status          SessionStatus @default(DRAFT)
+  revision        Int           @default(0)
+  stateSnapshot   Json?
+  lastEventAt     DateTime?
+  topic           String
+  createdByUserId String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  closedAt        DateTime?
+
+  relationship Relationship @relation(fields: [relationshipId], references: [id])
+  createdBy   User         @relation("SessionCreatedBy", fields: [createdByUserId], references: [id])
+  participants Participant[]
+  messages     Message[]
+  mediatedTurns MediationTurn[]
+  proposals    Proposal[]
+  invites      Invite[]
+  deliveryAttempts DeliveryAttempt[]
+  sessionEvents SessionEvent[]
+  auditLogs    AuditLog[]
+}
+
+model Participant {
+  id            String          @id @default(uuid())
+  sessionId     String
+  userId        String
+  role          ParticipantRole
+  consentStatus ConsentStatus   @default(PENDING)
+  lastSeenAt    DateTime?
+  lastReadSequence Int          @default(0)
+
+  session MediationSession @relation(fields: [sessionId], references: [id])
+  user    User             @relation(fields: [userId], references: [id])
+
+  @@unique([sessionId, userId])
+  @@unique([sessionId, role])
+}
+
+model Message {
+  id            String            @id @default(uuid())
+  sessionId     String
+  authorUserId  String?
+  visibility    MessageVisibility
+  kind          MessageKind
+  content       String
+  createdAt     DateTime          @default(now())
+
+  session MediationSession @relation(fields: [sessionId], references: [id])
+  author  User?            @relation(fields: [authorUserId], references: [id])
+  rawTurn       MediationTurn?    @relation("TurnRawMessage")
+  moderatedTurn MediationTurn?    @relation("TurnModeratedMessage")
+}
+
+model Proposal {
+  id                 String   @id @default(uuid())
+  sessionId          String
+  version            Int
+  title              String
+  bulletPoints       Json
+  acceptanceCriteria Json
+  createdAt          DateTime @default(now())
+
+  session MediationSession @relation(fields: [sessionId], references: [id])
+  votes   Vote[]
+
+  @@unique([sessionId, version])
+}
+
+model Vote {
+  id         String    @id @default(uuid())
+  proposalId String
+  userId     String
+  value      VoteValue
+  comment    String?
+  createdAt  DateTime  @default(now())
+
+  proposal Proposal @relation(fields: [proposalId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([proposalId, userId])
+}
+
+model Invite {
+  id                   String       @id @default(uuid())
+  sessionId            String
+  token                String       @unique
+  inviteeEmailOrPhone  String
+  status               InviteStatus @default(SENT)
+  deliveryChannel      DeliveryChannel @default(EMAIL_LINK)
+  expiresAt            DateTime
+  openedAt             DateTime?
+  acceptedAt           DateTime?
+  declinedAt           DateTime?
+  expiredAt            DateTime?
+  createdAt            DateTime     @default(now())
+
+  session MediationSession @relation(fields: [sessionId], references: [id])
+  deliveries DeliveryAttempt[]
+}
+
+model AuditLog {
+  id         String     @id @default(uuid())
+  sessionId  String
+  actor      AuditActor
+  eventType  String
+  payload    Json
+  createdAt  DateTime   @default(now())
+
+  session MediationSession @relation(fields: [sessionId], references: [id])
+}
+
+model SessionEvent {
+  id             String         @id @default(uuid())
+  sessionId      String
+  sequence       Int
+  actor          AuditActor
+  actorUserId    String?
+  eventType      String
+  previousStatus SessionStatus?
+  nextStatus     SessionStatus?
+  payload        Json
+  createdAt      DateTime       @default(now())
+
+  session   MediationSession @relation(fields: [sessionId], references: [id])
+  actorUser User?            @relation(fields: [actorUserId], references: [id])
+
+  @@unique([sessionId, sequence])
+}
+
+model MediationTurn {
+  id                String             @id @default(uuid())
+  sessionId         String
+  authorUserId      String
+  clientMessageId   String
+  eventSequence     Int?
+  rawMessageId      String             @unique
+  moderatedMessageId String            @unique
+  source            MediatedTurnSource @default(MESSAGE)
+  deliveryChannel   DeliveryChannel    @default(IN_APP)
+  approvedAt        DateTime           @default(now())
+  createdAt         DateTime           @default(now())
+
+  session          MediationSession @relation(fields: [sessionId], references: [id])
+  author           User             @relation(fields: [authorUserId], references: [id])
+  rawMessage       Message          @relation("TurnRawMessage", fields: [rawMessageId], references: [id])
+  moderatedMessage Message          @relation("TurnModeratedMessage", fields: [moderatedMessageId], references: [id])
+  deliveries       DeliveryAttempt[]
+
+  @@unique([sessionId, authorUserId, clientMessageId])
+  @@index([sessionId, eventSequence])
+}
+
+model DeliveryAttempt {
+  id              String                @id @default(uuid())
+  sessionId       String?
+  inviteId        String?
+  mediatedTurnId  String?
+  kind            DeliveryKind
+  channel         DeliveryChannel
+  provider        String
+  recipient       String
+  status          DeliveryAttemptStatus @default(PENDING)
+  providerMessageId String?
+  payload         Json?
+  errorMessage    String?
+  sentAt          DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  session      MediationSession? @relation(fields: [sessionId], references: [id])
+  invite       Invite?           @relation(fields: [inviteId], references: [id])
+  mediatedTurn MediationTurn?    @relation(fields: [mediatedTurnId], references: [id])
+
+  @@index([sessionId, kind, createdAt])
+  @@index([inviteId, createdAt])
+  @@index([mediatedTurnId, createdAt])
+}

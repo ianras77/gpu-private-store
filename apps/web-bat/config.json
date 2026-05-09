@@ -1,0 +1,26 @@
+{
+  "name": "BAT",
+  "available": true,
+  "port": 3197,
+  "exposable": true,
+  "dynamic_config": false,
+  "id": "web-bat",
+  "description": "Editorial platform with Next.js, FastAPI, worker automation, Qdrant retrieval, and a Cheshire Cat sidecar.",
+  "tipi_version": 1,
+  "version": "1.0.0",
+  "min_tipi_version": "v4.0.0",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Editorial workflow stack with FastAPI, worker automation, and Cheshire Cat.",
+  "author": "Ian Rasmussen",
+  "source": "https://github.com/ianras77/web-bat",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1776589448000,
+  "updated_at": 1776589448000
+}

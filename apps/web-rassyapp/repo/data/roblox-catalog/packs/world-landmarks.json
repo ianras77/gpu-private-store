@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "description": "Reviewed landmark-oriented packs for route anchors and skyline silhouettes.",
+  "packs": [
+    "pirate-harbor-landmarks",
+    "jungle-ruins-explorer",
+    "castle-courtyard-builder",
+    "space-station-raceway"
+  ],
+  "bundleFamilies": [
+    "pirate/*",
+    "jungle/*",
+    "castle/*",
+    "space/*"
+  ],
+  "notes": [
+    "Each zone should usually get one hero landmark and one supporting landmark family.",
+    "Landmarks should teach direction before they teach lore."
+  ]
+}

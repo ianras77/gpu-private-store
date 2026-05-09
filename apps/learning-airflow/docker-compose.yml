@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-airflow/named/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U airflow -d airflow
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow:
+    image: apache/airflow:2.7.1-python3.10
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 3220:8080
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-airflow/named/dags:/opt/airflow/dags
+      - ${APP_DATA_DIR}/app-data/learning-airflow/named/logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "True"
+      AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:-airflow}
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-airflow}
+      AIRFLOW_ADMIN_FIRSTNAME: ${AIRFLOW_ADMIN_FIRSTNAME:-Ian}
+      AIRFLOW_ADMIN_LASTNAME: ${AIRFLOW_ADMIN_LASTNAME:-Rasmussen}
+      AIRFLOW_ADMIN_EMAIL: ${AIRFLOW_ADMIN_EMAIL:-ian@rasies.com}
+    command: >-
+      bash -lc "airflow db migrate &&
+      (airflow users create
+      -u \"$AIRFLOW_ADMIN_USERNAME\"
+      -p \"$AIRFLOW_ADMIN_PASSWORD\"
+      -f \"$AIRFLOW_ADMIN_FIRSTNAME\"
+      -l \"$AIRFLOW_ADMIN_LASTNAME\"
+      -r Admin
+      -e \"$AIRFLOW_ADMIN_EMAIL\" || true) &&
+      exec airflow webserver"
+    x-runtipi:
+      is_main: true
+      internal_port: 8080
+
+x-runtipi:
+  schema_version: 2

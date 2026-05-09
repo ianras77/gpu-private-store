@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "description": "Reviewed atmosphere, lighting, and backdrop packs for low-complexity world polish.",
+  "packs": [
+    "weather-and-lighting",
+    "cloud-backdrop-fx",
+    "underwater-reef-decor",
+    "volcano-challenge-lane"
+  ],
+  "bundleFamilies": [
+    "weather/*",
+    "cloud/*",
+    "reef/*",
+    "volcano/*"
+  ],
+  "notes": [
+    "Reserve the boldest mood change for reveals, finales, or major biome shifts.",
+    "Atmosphere should make landmarks easier to read, not harder."
+  ]
+}

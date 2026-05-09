@@ -1,0 +1,35 @@
+{
+  "slug": "celebration-fx",
+  "version": 1,
+  "reviewMode": "Kid-safe shelf",
+  "items": [
+    {
+      "slug": "celebration-confetti",
+      "localBundleKey": "celebration/confetti-burst",
+      "kind": "effect",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/CelebrationFX"
+    },
+    {
+      "slug": "celebration-reward-glow",
+      "localBundleKey": "celebration/reward-glow",
+      "kind": "effect",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/RewardMarkers"
+    },
+    {
+      "slug": "celebration-finish-banner",
+      "localBundleKey": "celebration/finish-banner",
+      "kind": "ui",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/GoalMarkers"
+    },
+    {
+      "slug": "celebration-victory-sparkle",
+      "localBundleKey": "celebration/victory-sparkle",
+      "kind": "effect",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/HighlightFX"
+    }
+  ]
+}

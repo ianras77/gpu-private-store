@@ -1,0 +1,24 @@
+{
+  "name": "Tika",
+  "available": true,
+  "port": 8088,
+  "exposable": false,
+  "dynamic_config": true,
+  "id": "tika",
+  "description": "Tika is an internal service stack. with persistent supporting data services.",
+  "tipi_version": 1,
+  "version": "latest-full",
+  "categories": [
+    "utilities"
+  ],
+  "short_desc": "Tika is an internal service stack. with persistent supporting data services.",
+  "author": "https://github.com/ianras77/tika.git",
+  "source": "https://github.com/ianras77/tika",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": true,
+  "created_at": 1774316487202,
+  "updated_at": 1774316487202
+}

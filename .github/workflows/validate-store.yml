@@ -1,0 +1,29 @@
+name: Validate Store
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validation dependency
+        run: python -m pip install pyyaml
+
+      - name: List apps
+        run: ./scripts/list-apps.sh
+
+      - name: Validate store
+        run: ./scripts/validate-store.sh

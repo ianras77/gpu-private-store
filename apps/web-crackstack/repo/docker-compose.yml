@@ -1,0 +1,160 @@
+name: crackstack
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    env_file:
+      - ./infra/dev-secrets/postgres.env
+    ports:
+      - "${CRACKSTACK_POSTGRES_PORT:-3206}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crackstack -d crackstack"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "${CRACKSTACK_REDIS_PORT:-3207}:6379"
+
+  minio:
+    image: minio/minio:RELEASE.2024-01-16T16-07-38Z
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    env_file:
+      - ./infra/dev-secrets/minio.env
+    ports:
+      - "${CRACKSTACK_MINIO_PORT:-3208}:9000"
+      - "${CRACKSTACK_MINIO_CONSOLE_PORT:-3209}:9001"
+    volumes:
+      - minio_data:/data
+
+  temporal:
+    image: temporalio/auto-setup:1.23
+    restart: unless-stopped
+    environment:
+      DB: postgresql
+      DB_PORT: 5432
+      POSTGRES_USER: crackstack
+      POSTGRES_PWD: crackstack
+      POSTGRES_SEEDS: postgres
+      TEMPORAL_BROADCAST_ADDRESS: 127.0.0.1
+      BIND_ON_IP: 0.0.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${CRACKSTACK_TEMPORAL_PORT:-3210}:7233"
+
+  temporal-ui:
+    image: temporalio/ui:latest
+    restart: unless-stopped
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+    depends_on:
+      - temporal
+    ports:
+      - "${CRACKSTACK_TEMPORAL_UI_PORT:-3211}:8080"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://crackstack:crackstack@postgres:5432/crackstack
+      CRACKSTACK_API_KEYS: ${CRACKSTACK_API_KEYS:-local-dev-key:tenant_demo}
+      CRACKSTACK_AUTO_MIGRATE_ON_STARTUP: "1"
+      CRACKSTACK_DATA_DIR: /app/data
+      LOCALAI_BASE_URL: ${LOCALAI_BASE_URL:-}
+      LOCALAI_MODEL: ${LOCALAI_MODEL:-qwen3-1.7b}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+      temporal:
+        condition: service_started
+    ports:
+      - "${CRACKSTACK_API_PORT:-3800}:8000"
+    volumes:
+      - backend_data:/app/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).read()",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  xlcrack:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: xlcrack
+    restart: unless-stopped
+    environment:
+      CRACKSTACK_API_BASE_URL: http://backend:8000
+      CRACKSTACK_API_KEY: ${CRACKSTACK_WEB_API_KEY:-local-dev-key}
+      CRACKSTACK_USER_ID: ${CRACKSTACK_DEFAULT_USER_ID:-user_demo}
+      HOST: 0.0.0.0
+      PORT: 3000
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${CRACKSTACK_XL_PORT:-3300}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  tapecrack:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: tapecrack
+    restart: unless-stopped
+    environment:
+      CRACKSTACK_API_BASE_URL: http://backend:8000
+      CRACKSTACK_API_KEY: ${CRACKSTACK_WEB_API_KEY:-local-dev-key}
+      CRACKSTACK_USER_ID: ${CRACKSTACK_DEFAULT_USER_ID:-user_demo}
+      HOST: 0.0.0.0
+      PORT: 3000
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${CRACKSTACK_TAPE_PORT:-3301}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  postgres_data:
+  minio_data:
+  backend_data:

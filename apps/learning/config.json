@@ -1,0 +1,25 @@
+{
+  "name": "Learning",
+  "available": false,
+  "port": 8085,
+  "exposable": false,
+  "dynamic_config": true,
+  "id": "learning",
+  "description": "Learning exposes a primary web interface. with persistent supporting data services.",
+  "tipi_version": 1,
+  "version": "2.7.1-python3.10",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Learning exposes a primary web interface. with persistent supporting data services.",
+  "author": "https://github.com/ianras77/learning.git",
+  "source": "https://github.com/ianras77/learning",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1774316487169,
+  "updated_at": 1774316487169
+}

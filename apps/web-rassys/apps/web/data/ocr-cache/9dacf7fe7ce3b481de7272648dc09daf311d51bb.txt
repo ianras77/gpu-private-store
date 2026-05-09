@@ -1,0 +1,750 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ARMOR CLASS MODIFIERS (PH PAGE I51) CLIMB DCS (PH PAGE 69)
+
+Defenderis... Melee Ranged DC Example Surface or Activity
+Behind cover +4 +4 0 A slope too steep to walk up, or a knotted rope with a wall to brace against.
+Blinded -2 =e 5 A rope with a wall to brace against, or a knotted rope, or a rope affected by
+Concealed 20% miss chance the rope trick spell.
+Total concealment 10 A surface with ledges to hold on to and stand on, such as a very rough wall
+or invisible 50% miss chance or a ship's rigging.
+Cowering ~2 72 Any surface with adequate handholds and footholds (natural or artificial),
+Entangled ~4 to Dex. may affect Armor Class 15 such as a very rough natural rock surface or a tree, or an unknotted rope, or
+Flat-footed defender loses Dex. bonus to AC pulling yourself up when dangling by your hands.
+Grappling (attacker free) defender loses Dex. bonus to AC 90 An uneven surface with some narrow handholds and footholds, such as a typ-
+Helpless = -4 +0 (0 Dex = -5) ical wall in a dungeon or ruins.
+ae GF annnd = 25 A rough surface, such as a natural rock wall or a brick wall
++
+Sane os A 25 An overhang or ceiling with handholds but no foothalds.
+Squeezing through a space ~4 x _— A perfectly smooth, flat, vertical surface cannot be climbed.
+t p = ~
+Stunned : : Modifier Example Surface or Activity
+: = SKILLS (PH PAGE 61-86) “40 Climbing a chimney (artificial or natural) or other location where you can
+Skill (Key Ability) Untrained = Armor Provokes AoO brace against two opposite walls (reduces DC by 10).
+ieee “i = os Mn 5 Climbing a corner where you can brace against perpendicular walls (reduces
+alance (Dex @s es 0 ~ DC by 5)
+Bluff (Cha) Yes No No a ‘
+| j
+Climb (Str) Yes Yes Maybe +5 esa is sl ippety (increases DC by i as
+Concentration (Con) Yes No No +5 Accelerated climbing (move half your speed rather than one-quarter)
+bold a is Ne a CONCENTRATION CHECK DCS (PH PAGE 69-70)
+Decipher Script (Int) No No No c tration DC Distracti
+Diplomacy (Cha) Yes No No pes - ~ it om ae _ sac the act
+Disable Device (Dex) Yes Yes Yes aan ig igi i ite ;
+Disguise (Cha) Ves No No 10 + half continuous dmg. Taking continuous damage during the action.
+Escape Artist (Dex) Yes Yes No Distracting spell's save DC Distracted by nondamaging spell
+10 Vigorous motion (on a moving mount, taking a bouncy wagon
+Forgery (Int) Yes No No ae
+: ride, ina small boat in rough water, belowdecks in a storm-
+Gather Information (Cha) Yes No _ tossed ship)
+Handle Animal (Cha) No No No areca y
+: Violent motion (on a galloping horse, taking a very rough
+Heal (Wis) Yes No No : : ;
+; ; 15 wagon ride, in a small boat in rapids, on the deck of a storm-
+Hide (Dex) Yes Yes No tossed ship)
+Intimidate (Cha) Yes No No ic Entangled ;
+Jump (Str) Yes Yes Maybe 20 ie ang " ity viol , rina
+Knowledge (Int) No No No nao inarily'via ent motion (earthquake). ;
+Listen (Wis) Yes No No Grappling or pet vo can cast only Spells without —
+Move Silently (Dex) Yes Yes Maybe 20 ic components ‘or which you have any required material com-
+: ponent in hand.)
+Open Lock (Dex) No Yes Yes 5 Wi : , ; a . |
+Perform (Cha) Yes No No _— ae carey = blinding rain or sleet.
+Profession (Wis) No No ny 10 . Weather is wind-driven hail, dust, or debris.
+Ride (Dex) ers No No Distracting spell’s save DC Weather caused by a spell, such as storm of vengeance.
+Search (Int) Yes No Yes INFLUENCING NPC REACTIONS (DIPLOMACY) (PH PAGE 72-73)
+Sense Motive (Wis) Yes No No “ , -
+: Initial ———————— New Attitude (DC to achieve)
+Sleight of Hand (Dex) No Yes No : , ' ; 3
+Attitude Hostile Unfriendly Indifferent Friendly Helpful
+Speak Language (None) Na No — : i
+Spot (Wis) Yes No No Hostile Less than 20 20 25 35 50
+Survival (Wis) Yes No No oo scabs 7 than 1 - " a
+Swim (Str) Yes Yes (double) Maybe ne aie — sata trswacaaapce: 6 0
+Tumble (Dex) No Yes Maybe ant a = = ess than rare
+Use Magic Device (Cha) No No No on _ a eats
+Use Rope (Dex) Yes No No
+
+LARGE SIZE FIGURE
+NOT IN SCALE 10
+OTHER IMAGES.
+
+UMBER HULK 76 OF 80
+
+a2
+
+MIND FLAYER 50 OF 80
+
+HOUND ARCHON 7 OF 80 BARGHEST 39 OF 80
+
+
+
+
+BALANCE DCS (PH PAGE 67)
+
+Narrow Surface DC Difficult Surface pc
+7-12 inches wide 10 Uneven flagstone 10
+2-6 inches wide 15 Hewn stone floor 10
+Less than 2 inches wide 20 Sloped or angled floor 10
+Surface DC Modifier
+Lightly obstructed (scree, light rubble) +2
+Severely obstructed (natural cavern floor, dense rubble) +5
+Lightly slippery (wet floor) +2
+Severely slippery (ice sheet) +5
++2
+
+Sloped or angled
+
+BLUFF DCS (PH PAGE 67-69)
+
+Example Circumstances
+
+Sense Motive Mod.
+
+The target wants to believe you. -5
+The blutf is believable and doesn’t affect the target much. +0
+The bluff is a little hard to believe or puts the target at some risk. +5
+The bluff is hard to believe or puts the target at significant risk. +10
+The bluff is way out there, almost too incredible to consider, +20
+
+ao
+
+DISABLE DEVICE DCS (PH PAGE 72-73)
+
+Device Time DC Example
+
+Simple 1 round 10 Jama lock
+
+Tricky 1d4 rounds 15 Sabotage a wagon wheel
+
+Difficult © 2d4 rounds 20 Disarm a trap, reset a trap
+
+Wicked 2d4 rounds 25 Disarm a complex trap, cleverly sabotage a clockwork device
+if you attempt to leave behind no trace of your tampering, add 5 to the DC.
+
+USE ROPE (PH PAGE 86) ATTACK ROLL MODIFIERS (PH PAGE I5I)
+oC Task Attacker is... Melee Ranged
+10 ‘Tie a firm knot Dazzled - “4
+
+Secure a grappling hook (add 2 to the C ny =
+10 for every 10 feet the hook is thrown) Entangled 2 2
+15 Tie a special knot, such as one that slips, Flanking defender = +2 a
+slides slowly, or loosens with a tug Invisible +2 +2
+15 Tie a rope around yourself one-handed On higher ground +1 +0
+15 Splice two ropes together Prone 4 _—
+Varies Bind a character Shaken or frightened -2 -2
+DISGUISE DCS (PH PAGE 72-73) ap sa MUG ag 4
+
+Modifier Disguise
+
++5 Minor details only
+
+-2 Disguised as different gender
+
+-2 Disguised as different race
+
+2 Disguised as different age category
+(per category)
+
+These modifiers are cumulative; use any that apply.
+
+Impersonate a Specific Individual (PH page 73)
+Viewer’s Spot
+
+Familiarity Check Bonus
+
+Recognizes on sight +4
+
+Friends or associates +6
+
+Close friends +8
+
+Intimate +10
+
+JOZAN, CLERIC OF PELOR 14 OF 80
+
+HUMAN WANDERER 25 OF 80
+
+TURNING UNDEAD (PH PAGE 159)
+
+Most Powerful
+
+Turning Check Result Undead Affected
+0 or lower Cleric's level 4
+1-3 Cleric's level —3
+4-6 Cleric's level —2
+7-9 Cleric's level —1
+10-12 Cleric's level
+13-15 Cleric's level +1
+16-18 Cleric's level +2
+19-21 Cleric's level +3
+
+Cleric's level +4
+
+22 or higher
+
+PERFORM (PH PAGE 79)
+
+Performance
+
+Routine performance. Trying to earn money by playing
+in public is essentially begging. You can earn 1410
+cp/day.
+
+Enjoyable performance. In a prosperous city, you can
+earn 1010 sp/day.
+
+Great performance. In a prosperous city, you can earn
+3d10 sp/day. In time, you may be invited to join a pro-
+fessional troupe and may develop a regional reputation,
+
+Memorable performance. In a prosperous city, you can
+earn 106 gp/day. In time, you may come to the atten-
+tion of noble patrons and develop a national reputation,
+
+Extraordinary performance. In a prosperous city, you
+can earn 3d6 gp/day. In time, you may draw attention
+from distant potential patrons, or even from extraplanar
+beings.
+
+DC
+
+5
+
+10
+15
+15
+15
+15
+20
+20
++5
+
+RIDE (PH PAGE 80)
+Task
+Guide with knees
+Stay in saddle
+Fight with warhorse
+Leap
+Soft fall
+Spur mount
+Use mount as cover
+Control mount in battle
+Fast mount or dismount
+Riding bareback
+
+SEARCH (PH PAGE 81)
+
+DC Task
+
+10 Ransack a chest full of junk to find a
+certain item
+
+20 Notice a typical secret door or a simple
+trap
+
+21 or higher Find a difficult nonmagical trap (rogue
+
+25 + level of spell
+
+only) (dwart can find stone traps)
+
+Find a magic trap (rogue only)
+
+used to create trap
+
+30
+
+Notice a well-hidden secret door
+
+A successtul Search check can find a footprint or similar sign of a crea-
+ture's passage, but it won't let you find or follow a trail. See the Track
+feat (PH page 101) for the appropriate DC.
+
+Condition
+
+SPOT (PH PAGE 83)
+Penalty
+
+Per 10 feet of distance -1
+Spotter distracted a)
+
+DC
+10
+15
+20
+
+WILD ELF BARBARIAN 30 OF 80
+
+SWIM (PH PAGE 84)
+Water
+Calm water
+Rough water
+Stormy water
+
+ORC BERSERKER 73 OF 80
+
+
+
+
+ESCAPE ARTIST (PH PAGE 73)
+
+MOVE SILENTLY (PH PAGE 79)
+Surface Check Modifier
+Noisy (scree, undergrowth, dense rubble) -2
+Very noisy (dense undergrowth, snow) —5
+
+SENSE MOTIVE (PH PAGE 81)
+
+oC Restraint
+
++10 Ropes (modifies binder’s Use Rope check)
+
+00 Net, animate rope spell, command plants spell, contro!
+plants spell, or entangle spell
+
+23 Snare spell
+
+30 Manacles
+
+30 Tight space
+
+35 Masterwork manacles
+
+Opposed by grappler's grapple check result when attempting to escape a grapple
+
+HANDLE ANIMAL (PH PAGE 74)
+
+pc
+10
+
+Task
+Handle an animal
+
+25
+oc
+15
+15
+
+15
+Poison’s save DC
+
+JUMP (PH PAGE 77)
+
+oc
+
+ao
+
+10
+15
+20
+25
+30
+
+“Push” an animal
+
+Task Heal
+First aid
+Long-term care
+
+Treat wound from caltrop, spike growth, or spike stones
+
+HEAL (PH PAGE 75-76)
+
+Treat poison (see DMG page 297)
+Disease's save DC _— Treat disease (see DMG page 292)
+
+Long Jump Distance
+5 feet
+
+10 feet
+
+15 feet
+
+20 feet
+
+25 feet
+
+30 feet
+
+Requires a 20-foot running start, Without a running start, double the DC
+
+oc
+
+=
+
+32
+
+Not including vertical reach, Requires a 20-foot running start. Without a running start,
+
+double the DC
+
+High Jump Distance Jump
+1 foot
+2 feet
+3 feet
+4 feet
+5 feet
+6 feet
+7 feet
+8 feet
+
+LISTEN (PH PAGE 78)
+
+DC Task
+
+20 Hunch
+
+25 or 15 Sense enchantment
+
+Varies Discern secret message
+
+Dc Task
+
+10 Palm a coin-sized object
+
+20 Lift a small object from a person
++20 Use skill as a free action
+
+SPELLCRAFT (PH PAGE 82)
+
+DC Task
+13 When using read magic, identify a glyph of warding. No action
+15 + spell level \dentify a spell being cast. (You must see or hear the spell’s verbal
+
+or somatic components.) No action required. No retry.
+Learn a spell from a spellbook or scroll (wizard only), No retry for
+
+15 + spell level that spell until you gain at least 1 rank in Spellcraft, 8 hours.
+Prepare a spell from a borrowed spellbook (wizard only). One try
+alk aici per day. No extra time required.
+When casting detect magic, determine the school of magic involved
+15 + spell level in the aura of a single item or creature you can see. (If the aura is
+not a spell effect, the DC is 15 + one-half caster level.) No action
+required.
+19 When using read magic, identify a symbol. No action required.
+
+\dentify a spell that’s already in place and in effect. You must be
+20 + spell level able to see or detect the effects of the spell. No action required. No
+retry.
+|dentify materials created or shaped by magic, such as noting that
+20 + spell level an iron wall is the result of a wall of /ron spell. No action required.
+No retry
+Decipher a written spell (such as a scroll) without using read
+magic. One try per day. Requires a full-round action.
+After rolling a saving throw against a spell targeted on you, deter-
+mine what that spell was. No action required. No retry.
+5 \dentify a potion. Requires 1 minute. No retry.
+0 Draw a diagram to allow dimensional anchor to be cast on a magic
+circle spell. Requires 10 minutes. No retry,
+Understand a strange or unique magical effect, such as the effects
+of a magic stream. Time required varies. No retry.
+
+LISTEN DCS TO DETECT INVISIBLE CREATURES (DMG PAGE 295)
+
+20 + spell level
+
+25 + spell level
+
+So nw
+
+30 or higher
+
+oc Sound
+
+-10 A battle
+
+0 People talking (If you beat the DC by 10 or more, you can make out
+what's being said, assuming that you understand the language.)
+
+5 A person in medium armor walking at a slow pace (10 ft./round)
+trying not to make any noise.
+
+10 An unarmored person walking at a slow pace (15 ft./round) trying
+not to make any noise
+
+15 A {st-level rogue using Move Silently to sneak past the listener
+
+15 People whispering
+
+19 A cat stalking
+
+30 An owl gliding in for a kill
+
+bc Modifier Condition
+
++5 Through a door
+
++15 Through a stone wall
+
++1 Per 10 feet of distance
+
+45 Listener distracted
+
+MAN-AT-ARMS 10 OF 80
+
+ELF ARCHER 21 OF 80
+
+Invisible Creature Is...
+
+In combat or speaking
+
+Moving at half speed
+
+Moving at full speed
+
+Running or charging
+
+Some distance away
+
+Behind an obstacle (door)
+Behind an obstacle (stone wall)
+
+DC
+
+0
+
+Move Silently check result
+Move Silently check result 4
+Move Silently check result —20
++1 per 10 feet
+
++5
+
+#15
+
+USE MAGIC DEVICE (PH PAGE 85)
+
+DC
+
+5
+
+25 + spell level
+20 + caster level
+0
+
+20
+
+See text
+
+Nh
+
+i]
+
+WOLF SKELETON 57 of 80
+
+Task
+
+Activate blindly
+Decipher a written spell
+Use a scroll
+
+Use a wand
+
+Emulate a class feature
+Emulate an ability score
+Emulate a race
+
+Emulate an alignment
+
+KOBOLD WARRIOR 48 OF 80
+
+
+
+
+ACTIONS (PH PAGE 133-160)
+
+Provokes
+Action Type Atk. of Opp.
+Attack (melee) Standard No
+Attack (ranged) Standard Yes
+Attack (unarmed) Standard Yes
+Activate ring, rod, staff, wand, or misc. item Standard No
+Aid another Standard Maybe
+Bull rush Standard No
+Cast quickened spell Free No
+Cast a spell (1 action casting time) Standard Yes
+Cast a spell defensively (using Concentrate) Standard No
+Cease concentration (on activated spell/ability) Free No
+Charge Full or Standard No
+Concentrate on spell or special ability Standard No
+Control a frightened mount Move Yes
+Coup de grace attack Full-round Yes
+Delay action _— No
+Direct or redirect an active spell Move No
+Disarm foe Varies Yes
+Dismiss a spell Standard No
+Draw a hidden weapon (using Sleight of Hand) Standard No
+Draw a weapon Move No
+Drink a potion Standard Yes
+Drop and item Free No
+Drop to prone Free No
+Escape a grapple Standard No
+Escape from entanglement Full-round Yes
+Extinguish flames Full-round No
+Feint (using Bluff skill) Standard No
+Fight defensively Free No
+Five-foot step = No
+Full attack (melee) Full-round No
+Full attack (ranged) Full-round Yes
+Full attack (unarmed) Full-round Yes
+Grapple foe (grab, grapple, damage, or pin) Varies Varies
+Light a torch with flint and steel Full-round Yes
+Light a torch with a tindertwig Standard Yes
+Load light or hand crossbow Move Yes
+Load a heavy or repeating crossbow Full-round Yes
+Lock or unlock a weapon in a locked gauntlet —Full-round Yes
+Lower spell resistance Standard No
+Mount a creature or dismount Move No
+Move a heavy object Move Yes
+Move more than 5 feet Move Yes
+Open or close a door Move No
+Overrun Standard No
+Pick up an item Move Yes
+Prepare material components to spell Free No
+Prepare oil for throwing Full-round Yes
+Quick draw weapon (with Quick Draw feat) Free No
+Quick draw hidden weapon (with Quick Draw
+feat and Sleight of Hand) Move No
+Read a scroll Standard Yes
+Ready a standard action Standard No
+All trademarks, Including character names and their distinctive likenesses, are properties of Wizards of
+
+the Coast, Inc. (C) 2003, Wizards.
+
+HALF-ORC ASSASSIN 65 OF 80
+
+ORC WARRIOR 75 OF 80
+
+Action
+
+Ready or loose a shield
+
+Retrieve a stowed
+Run
+
+Sheathe a weapon
+Speak
+
+Stabilize a dying c
+
+Stand up from prone
+
+Stow item
+
+Sunder a weapon
+Sunder and object
+Total defense
+
+Trip opponent
+
+Turn or rebuke undead
+
+Use extraordinary
+Use feat
+
+Use spell-like ability
+Use supernatural ability
+Use touch spell on up to six allies
+
+Withdraw
+
+Provokes
+Type Atk. of Opp.
+Move No
+item Move Yes
+Full-round Yes
+Move Yes
+Free No
+reature (using Heal skill) Standard Yes
+Move Yes
+Move Yes
+(attack) Standard Yes
+(attack) Standard Maybe
+Standard No
+Varies No
+Standard No
+ability Varies No
+Varies Varies
+
+Standard Yes
+Standard No
+Full-round Yes
+Full-round No
+
+SURVIVAL (PH PAGE 83)
+
+DC Task
+10 Get along in the wild, Move up to one-half your overland speed while
+hunting and foraging (no food or water supplies needed).
+Gain a +2 bonus on all Fortitude saves against severe weather while
+moving up to one-half your overland speed, or gain a +4 bonus if you
+15 :
+remain stationary. You may grant the same bonus to one other charac-
+ter for every 1 point by which your Survival check result exceeds 15,
+15 Keep from getting lost or avoid natural hazards, such as quicksand.
+Predict the weather up to 24 hours in advance. For every 5 points by
+15 which your Survival check result exceeds 15, you can predict the
+weather for one additional day in advance.
+Varies Follow tracks (see the Track feat, PH page 101).
+
+TUMBLE (PH PAGE 84)
+
+DC
+15
+
+DC Modifier
+
+DROW CLERIC OF LOLTH 61 OF 80
+
+Task
+
+Treat a fall as if it were 10 feet shorter than it really is when
+determining damage.
+
+Tumble at one-half speed as part of normal movement, pro-
+voking no attacks of opportunity while doing so. Failure
+means you provoke attacks of opportunity normally. Check
+separately for each opponent you move past, in the order in
+which you pass them (player's choice in case of a tie), Each
+additional enemy after the first adds +2 to the Tumble DC.
+Tumble at one-half speed through an area occupied by an
+enemy (over, under, or around the opponent) as part of nor-
+mal movement, provoking no attacks of opportunity while
+doing so, Failure means you stop before entering the enemy-
+occupied area and provoke an attack of opportunity from that
+enemy. Check separately for each opponent. Each additional
+enemy after the first adds +2 to the Tumble DC,
+
+Surface Is...
+
+Lightly obstructed (scree, light rubble, undergrowth)
+Severely obstructed (cavern floor, rubble, thick undergrowth)
+Lightly slippery (wet floor)
+
+Severely slippery (ice sheet)
+
+Sloped or angled
+
+ACTUAL SIZES NOT SHOWN.
+
+DWARF AXEFIGHTER 3 OF 80
+
+
+
+
+

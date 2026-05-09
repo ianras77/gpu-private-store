@@ -1,0 +1,15 @@
+<svg width="540" height="120" viewBox="0 0 540 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="540" height="120" rx="28" fill="#0B0B0D"/>
+  <g transform="translate(24 18)">
+    <rect width="84" height="84" rx="22" fill="#0F141C"/>
+    <path d="M18 20L42 42L18 64H34L56 42L34 20H18Z" fill="#00F5D4"/>
+    <path d="M66 20L42 42L66 64H50L28 42L50 20H66Z" fill="#FF8A00"/>
+    <circle cx="42" cy="42" r="8" fill="#101722" stroke="#00F5D4" stroke-width="2"/>
+  </g>
+  <g fill="#F5F5F7">
+    <text x="140" y="72" font-family="Space Grotesk, Arial" font-size="44" font-weight="600" letter-spacing="6">XLCRACK</text>
+  </g>
+  <g fill="#A8B0C2">
+    <text x="144" y="94" font-family="Space Mono, Arial" font-size="14" letter-spacing="3">DATA RESCUE STUDIO</text>
+  </g>
+</svg>

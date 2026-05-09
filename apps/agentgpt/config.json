@@ -1,0 +1,78 @@
+{
+  "name": "AgentGPT",
+  "available": true,
+  "port": 3000,
+  "exposable": false,
+  "dynamic_config": true,
+  "id": "agentgpt",
+  "description": "RunTipi-native AgentGPT with local MySQL, same-origin backend proxying, passworded local sign-in, and a bundled files tool for reading the mounted RunTipi environment.",
+  "tipi_version": 1,
+  "version": "2025.04.29-18b073a",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "AgentGPT with local MySQL, local sign-in, and RunTipi filesystem access.",
+  "author": "reworkd / RunTipi native packaging",
+  "source": "https://github.com/reworkd/AgentGPT",
+  "form_fields": [
+    {
+      "type": "random",
+      "label": "MySQL Password",
+      "min": 32,
+      "env_variable": "MYSQL_PASSWORD"
+    },
+    {
+      "type": "random",
+      "label": "NextAuth Secret",
+      "min": 48,
+      "env_variable": "NEXTAUTH_SECRET"
+    },
+    {
+      "type": "random",
+      "label": "Local Sign-In Password",
+      "min": 32,
+      "env_variable": "LOCAL_SIGNIN_PASSWORD"
+    },
+    {
+      "type": "random",
+      "label": "Platform Secret Seed",
+      "min": 64,
+      "env_variable": "PLATFORM_SECRET_SEED"
+    },
+    {
+      "type": "text",
+      "label": "OpenAI API Base",
+      "required": false,
+      "default": "https://api.openai.com/v1",
+      "env_variable": "OPENAI_API_BASE"
+    },
+    {
+      "type": "password",
+      "label": "OpenAI API Key",
+      "required": false,
+      "default": "",
+      "env_variable": "OPENAI_API_KEY"
+    },
+    {
+      "type": "password",
+      "label": "Serper API Key",
+      "required": false,
+      "default": "",
+      "env_variable": "SERP_API_KEY"
+    },
+    {
+      "type": "password",
+      "label": "Replicate API Key",
+      "required": false,
+      "default": "",
+      "env_variable": "REPLICATE_API_KEY"
+    }
+  ],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1777158069994,
+  "updated_at": 1777158069994
+}

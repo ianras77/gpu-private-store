@@ -1,0 +1,156 @@
+{
+  "generatedAt": "2026-02-26T01:22:05.950Z",
+  "systems": [
+    {
+      "id": "alternity",
+      "name": "Alternity",
+      "manualCount": 17,
+      "categories": {
+        "core": 8,
+        "gm": 1,
+        "player": 2,
+        "equipment": 2,
+        "reference": 4
+      },
+      "sampleTitles": [
+        "Alternity - Core - Beyond Science - A Guide To FX",
+        "Alternity - Core - Dataware",
+        "Alternity - Core - Game Master's Guide",
+        "Alternity - Core - Mindwalking - A Guide To Psionics"
+      ]
+    },
+    {
+      "id": "ars-magica",
+      "name": "Ars Magica",
+      "manualCount": 7,
+      "categories": {
+        "core": 5,
+        "monsters": 1,
+        "spells": 1
+      },
+      "sampleTitles": [
+        "Ars Magica - Core",
+        "Ars Magica - CORE Formulae - 5th ed",
+        "Ars Magica - CORE Rulebook - 3rd ed",
+        "Ars Magica - CORE Rulebook - 4th ed"
+      ]
+    },
+    {
+      "id": "call-of-cthulhu",
+      "name": "Call of Cthulhu",
+      "manualCount": 7,
+      "categories": {
+        "equipment": 3,
+        "core": 2,
+        "monsters": 1,
+        "reference": 1
+      },
+      "sampleTitles": [
+        "0319 - The Gaslight Equipment Catalogue",
+        "2301 - 2nd Edition Rulebook (Boxed Set)",
+        "Bestiary v1.71",
+        "Cthulhu Weaponry 1"
+      ]
+    },
+    {
+      "id": "dnd-35e",
+      "name": "D&D 3.5e",
+      "manualCount": 45,
+      "categories": {
+        "monsters": 7,
+        "reference": 11,
+        "player": 14,
+        "gm": 3,
+        "equipment": 7,
+        "core": 1,
+        "spells": 2
+      },
+      "sampleTitles": [
+        "Advanced Bestiary v3.5",
+        "Advanced Race Codex (Drow) v3.5",
+        "Advanced Race Codex (Dwarves) v3.5",
+        "Advanced Race Codex (Elves) v3.5"
+      ]
+    },
+    {
+      "id": "dnd-4e",
+      "name": "D&D 4e",
+      "manualCount": 42,
+      "categories": {
+        "monsters": 5,
+        "reference": 2,
+        "equipment": 1,
+        "core": 14,
+        "gm": 8,
+        "player": 12
+      },
+      "sampleTitles": [
+        "Alea Publishing Group - Medieval Bestiary - Anthropophagi",
+        "D20 DND Dragon Magazine Forgotten Realms Compendium v1 (3.x 274-353)",
+        "Deluxe Power Cards - Blank Powers and Items(v1.0)[OEF]",
+        "Deluxe Power Cards - Core - Cleric Pack(v1.1)[OEF]"
+      ]
+    },
+    {
+      "id": "gamma-world",
+      "name": "Gamma World",
+      "manualCount": 2,
+      "categories": {
+        "core": 1,
+        "reference": 1
+      },
+      "sampleTitles": [
+        "Gamma World (original Rules)",
+        "Gamma World 5th Edition"
+      ]
+    },
+    {
+      "id": "hackmaster",
+      "name": "Hackmaster",
+      "manualCount": 2,
+      "categories": {
+        "core": 1,
+        "player": 1
+      },
+      "sampleTitles": [
+        "Core - GameMaster's Guide",
+        "Core - Player's Handbook"
+      ]
+    },
+    {
+      "id": "merp",
+      "name": "MERP",
+      "manualCount": 4,
+      "categories": {
+        "core": 2,
+        "equipment": 2
+      },
+      "sampleTitles": [
+        "MERP 2000 Rulebook 2nd Edition",
+        "MERP 8000 Rulebook 1st Edition",
+        "MERP Armor and Weapon Design",
+        "Merp Rules - Armor And Weapon Design Ocr"
+      ]
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "manualCount": 47,
+      "categories": {
+        "core": 4,
+        "monsters": 9,
+        "spells": 10,
+        "equipment": 11,
+        "reference": 3,
+        "player": 8,
+        "gm": 2
+      },
+      "sampleTitles": [
+        "2900 - Elric Core Book",
+        "Advanced Bestiary WE1 - Avian Creature",
+        "Advanced Bestiary WE2 - Chaosborne",
+        "Advanced Bestiary WE3 - Drider"
+      ]
+    }
+  ]
+}

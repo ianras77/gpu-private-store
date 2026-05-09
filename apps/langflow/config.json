@@ -1,0 +1,25 @@
+{
+  "name": "Langflow",
+  "available": true,
+  "port": 7860,
+  "exposable": false,
+  "dynamic_config": true,
+  "id": "langflow",
+  "description": "Langflow exposes a primary web interface. with persistent supporting data services.",
+  "tipi_version": 1,
+  "version": "latest",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Langflow exposes a primary web interface. with persistent supporting data services.",
+  "author": "https://github.com/ianras77/langflow.git",
+  "source": "https://github.com/ianras77/langflow",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1774316487166,
+  "updated_at": 1774316487166
+}

@@ -1,0 +1,9 @@
+# Generated build/runtime artifacts
+docker-compose.generated.yml
+apps/web/.next/
+apps/web/.next-usr-a/
+apps/web/node_modules/
+services/*/dist/
+services/*/node_modules/
+.venv/
+__pycache__/

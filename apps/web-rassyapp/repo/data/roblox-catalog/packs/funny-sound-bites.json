@@ -1,0 +1,35 @@
+{
+  "slug": "funny-sound-bites",
+  "version": 1,
+  "reviewMode": "Kid-safe shelf",
+  "items": [
+    {
+      "slug": "sound-button-pop",
+      "localBundleKey": "sound/button-pop",
+      "kind": "audio",
+      "storageMode": "launchpad-local",
+      "targetPath": "SoundService/UI"
+    },
+    {
+      "slug": "sound-coin-ping",
+      "localBundleKey": "sound/coin-ping",
+      "kind": "audio",
+      "storageMode": "launchpad-local",
+      "targetPath": "SoundService/Rewards"
+    },
+    {
+      "slug": "sound-quest-chime",
+      "localBundleKey": "sound/quest-chime",
+      "kind": "audio",
+      "storageMode": "launchpad-local",
+      "targetPath": "SoundService/Rewards"
+    },
+    {
+      "slug": "sound-success-honk",
+      "localBundleKey": "sound/success-honk",
+      "kind": "audio",
+      "storageMode": "launchpad-local",
+      "targetPath": "SoundService/Celebration"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+services:
+  rasies-portal:
+    image: runtipi-local-web-rasies-rasies-portal:latest
+    pull_policy: never
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rasies
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - PUBLIC_BASE_URL=https://www.rasies.com
+      - PUBLIC_PROBE_URL=http://127.0.0.1:3000
+      - PERSONAL_SITE_URL=https://rassys.com
+      - MC_TROUP_SERVER_HOST=crafty.rasies.com:25565
+      - MC_TROUP_BLUEMAP_URL=https://crafty.rasies.com/mc-troup-map
+      - MC_TROUP_BLUEMAP_PROXY_PATH=/mc-troup-map
+      - SEARXNG_BASE_URL=https://search.rasies.com
+      - SEARXNG_PATH=/search
+      - SEARXNG_TIMEOUT_MS=9000
+      - CAT_BASE_URL=${RASIES_CAT_BASE_URL:-http://rasies-cheshire-cat:80}
+      - CAT_CHAT_PATH=/message
+      - CAT_MODEL=${RASIES_CAT_MODEL:-gpt-oss:20b}
+      - CAT_TIMEOUT_MS=60000
+      - HEIMDALL_URL=https://apps.rasies.com
+      - GLANCE_URL=https://glance.rasies.com
+      - GAMES_URL=https://gba.rasies.com
+      - AUTHENTIK_URL=https://auth.rasies.com/
+      - SIGNUP_URL=https://signup.rasies.com
+      - PLEX_URL=https://plex.rasies.com
+      - WIZARR_BASE_URL=${RASIES_WIZARR_BASE_URL:-https://signup.rasies.com}
+      - WIZARR_API_KEY=${RASIES_WIZARR_API_KEY:-}
+      - WIZARR_PLEX_SERVER_IDS=${RASIES_WIZARR_PLEX_SERVER_IDS:-}
+      - WIZARR_INVITE_EXPIRES_DAYS=${RASIES_WIZARR_INVITE_EXPIRES_DAYS:-30}
+      - WIZARR_INVITE_DURATION=${RASIES_WIZARR_INVITE_DURATION:-unlimited}
+      - WIZARR_TIMEOUT_MS=${RASIES_WIZARR_TIMEOUT_MS:-10000}
+      - DATA_URL=https://data.rasies.com
+      - PHOTOS_URL=https://photos.rasies.com
+      - SEND_URL=https://send.rasies.com
+      - GRIST_URL=https://grist.rasies.com
+      - DRAW_URL=https://draw.rasies.com
+      - AFFINE_URL=https://affine.rasies.com
+      - BEDTIME_STORIES_ROOT=/stories
+      - BEDTIME_STORIES_SHOW_TITLE=${BEDTIME_STORIES_SHOW_TITLE:-Real Life Bedtime Stories}
+      - BEDTIME_STORIES_SHOW_SUBTITLE=${BEDTIME_STORIES_SHOW_SUBTITLE:-Books I recorded for my daughter, one cozy chapter at a time.}
+      - BEDTIME_STORIES_SHOW_DESCRIPTION=${BEDTIME_STORIES_SHOW_DESCRIPTION:-A family podcast shelf of bedtime stories read by Rassy, with each book arranged as its own cozy season.}
+      - BEDTIME_STORIES_SHOW_AUTHOR=${BEDTIME_STORIES_SHOW_AUTHOR:-Rassy}
+      - BEDTIME_STORIES_SHOW_LANGUAGE=${BEDTIME_STORIES_SHOW_LANGUAGE:-en-US}
+      - BEDTIME_STORIES_OWNER_NAME=${BEDTIME_STORIES_OWNER_NAME:-Rassy}
+      - BEDTIME_STORIES_OWNER_EMAIL=${BEDTIME_STORIES_OWNER_EMAIL:-}
+      - BEDTIME_STORIES_AMAZON_TAG=${BEDTIME_STORIES_AMAZON_TAG:-}
+      - THOUGHTS_ROOT=/thoughts
+      - MR_RASSY_SOUNDS_ROOT=/mr-rassy-sounds
+      - MUSIC_LIBRARY_ROOT=/music-library
+      - ALLOWED_ORIGINS=https://www.rasies.com,https://rassys.com,https://www.rassys.com,http://${APP_HOST}:${APP_PORT},http://localhost:5173,http://127.0.0.1:5173
+    depends_on:
+      rasies-cheshire-cat:
+        condition: service_healthy
+    volumes:
+      - ${ROOT_FOLDER_HOST}/media/data/podcasts:/stories:ro
+      - ${ROOT_FOLDER_HOST}/media/data/web-rasies:/thoughts:ro
+      - ${ROOT_FOLDER_HOST}/media/data/dj:/mr-rassy-sounds:ro
+      - ${ROOT_FOLDER_HOST}/media/data/music:/music-library:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:3000/healthz >/dev/null 2>&1 || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+
+  rasies-cheshire-cat:
+    image: ghcr.io/cheshire-cat-ai/core:latest
+    restart: unless-stopped
+    environment:
+      - CCAT_DEBUG=false
+      - CAT_METADATA_PATH=/data/metadata.json
+      - CCAT_METADATA_FILE=/data/metadata.json
+      - OLLAMA_GENERAL_BASE_URL=${RASIES_OLLAMA_GENERAL_BASE_URL:-http://ollama-proxy:8080}
+      - OLLAMA_EMBED_BASE_URL=${RASIES_OLLAMA_EMBED_BASE_URL:-http://ollama-embed:11434}
+      - OLLAMA_GENERAL_MODEL=${RASIES_OLLAMA_GENERAL_MODEL:-qwen2.5-coder:7b}
+      - OLLAMA_EMBED_MODEL=${RASIES_OLLAMA_EMBED_MODEL:-nomic-embed-text}
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-rasies/named/rasies-cat-data:/data
+      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rasies/bootstrap_cat_ollama.py:/app/cat/bootstrap/bootstrap_cat_ollama.py:ro
+    command:
+      - /bin/sh
+      - -lc
+      - python3 /app/cat/bootstrap/bootstrap_cat_ollama.py || true; exec python3 -m cat.main
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1', timeout=5)
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 40s
+    x-runtipi:
+      add_to_main_network: true
+
+x-runtipi:
+  schema_version: 2

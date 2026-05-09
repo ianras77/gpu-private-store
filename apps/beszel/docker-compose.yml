@@ -1,0 +1,29 @@
+services:
+  beszel-agent:
+    image: henrygd/beszel-agent:alpine
+    restart: unless-stopped
+    cap_add:
+    - SYS_RAWIO
+    devices:
+    - /dev/sda:/dev/sda
+    - /dev/sdb:/dev/sdb
+    - /dev/sdc:/dev/sdc
+    - /dev/sdd:/dev/sdd
+    - /dev/sde:/dev/sde
+    - /dev/sdf:/dev/sdf
+    - /dev/sdg:/dev/sdg
+    - /dev/sdh:/dev/sdh
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ${APP_DATA_DIR}/app-data/beszel/named/beszel-agent:/var/lib/beszel-agent
+    - /dev/dri:/dev/dri:ro
+    - /:/host:ro
+    - /proc:/host/proc:ro
+    environment:
+      LISTEN: ${BESZEL_LISTEN:-45876}
+      KEY: ${BESZEL_KEY:-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/AjramldH8szPTXSbodEZjkN5tLPRMsqzZobygYmKE}
+    x-runtipi:
+      is_main: true
+      internal_port: 45876
+x-runtipi:
+  schema_version: 2

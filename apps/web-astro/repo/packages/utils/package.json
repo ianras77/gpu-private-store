@@ -1,0 +1,17 @@
+{
+  "name": "@astro/utils",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "echo 'lint not configured'",
+    "test": "vitest --run --config ../../vitest.config.ts"
+  },
+  "dependencies": {
+    "ioredis": "^5.3.2",
+    "luxon": "^3.5.0",
+    "tz-lookup": "^6.1.25"
+  }
+}

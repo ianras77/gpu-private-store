@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "description": "Reviewed biome-oriented packs for kid-first Roblox world generation.",
+  "packs": [
+    "sky-island-terrain",
+    "candy-kingdom-scenery",
+    "underwater-reef-decor"
+  ],
+  "bundleFamilies": [
+    "sky/*",
+    "candy/*",
+    "reef/*"
+  ],
+  "notes": [
+    "Use these packs to establish the first strong visual read of the world.",
+    "Prefer one dominant biome family per district so the map does not become noisy."
+  ]
+}

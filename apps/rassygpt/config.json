@@ -1,0 +1,144 @@
+{
+  "id": "rassygpt",
+  "name": "RassyGPT",
+  "available": true,
+  "short_desc": "Hardware-aware OpenAI-compatible AI gateway for Ian's multi-GPU Runtipi stack.",
+  "author": "Ian Rasmussen + GPT-5.5 Pro",
+  "port": 8844,
+  "categories": [
+    "ai",
+    "automation",
+    "developer-tools"
+  ],
+  "description": "RassyGPT is a Runtipi-native OpenAI-compatible AI gateway and model stack designed for Ian Rasmussen's V100/P100/P40/M40/2080 Ti hardware. It exposes one clean /v1 endpoint while routing to specialized local backends for chat, coding, embeddings, reranking, image, speech, and future GPU experiments.",
+  "tipi_version": 42,
+  "version": "0.1.0",
+  "source": "https://github.com/ianras/rassygpt",
+  "website": "https://github.com/ianras/rassygpt",
+  "exposable": true,
+  "supported_architectures": [
+    "amd64"
+  ],
+  "created_at": 1778284800000,
+  "updated_at": 1778284800000,
+  "dynamic_config": true,
+  "form_fields": [
+    {
+      "type": "random",
+      "label": "RassyGPT API key",
+      "min": 32,
+      "env_variable": "RASSYGPT_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "Hugging Face token (optional)",
+      "env_variable": "HF_TOKEN",
+      "required": false
+    },
+    {
+      "type": "text",
+      "label": "llama.cpp CUDA image",
+      "env_variable": "RASSYGPT_LLAMA_IMAGE",
+      "default": "ghcr.io/ggml-org/llama.cpp:server-cuda",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "General model (-hf value)",
+      "env_variable": "RASSYGPT_GENERAL_MODEL",
+      "default": "unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:UD-Q4_K_XL",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Coder model (-hf value)",
+      "env_variable": "RASSYGPT_CODER_MODEL",
+      "default": "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:UD-Q4_K_XL",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Fast model (-hf value)",
+      "env_variable": "RASSYGPT_FAST_MODEL",
+      "default": "unsloth/Qwen3-8B-GGUF:Qwen3-8B-Q4_K_M.gguf",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Embedding model (-hf value)",
+      "env_variable": "RASSYGPT_EMBED_MODEL",
+      "default": "nomic-ai/nomic-embed-text-v1.5-GGUF:nomic-embed-text-v1.5.Q8_0.gguf",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Reranker model (-hf value)",
+      "env_variable": "RASSYGPT_RERANK_MODEL",
+      "default": "klnstpr/bge-reranker-v2-m3-Q8_0-GGUF:bge-reranker-v2-m3-q8_0.gguf",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Qdrant image",
+      "env_variable": "RASSYGPT_QDRANT_IMAGE",
+      "default": "qdrant/qdrant:v1.17.1",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "General GPU UUID",
+      "env_variable": "RASSYGPT_GPU_GENERAL",
+      "default": "GPU-da459626-429e-72e2-1fe9-b08d791ff949",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Coder GPU UUIDs",
+      "env_variable": "RASSYGPT_GPU_CODER",
+      "default": "GPU-c7937378-74e4-b9ab-1953-342773d4e962,GPU-d48ccf91-1518-72fa-b13a-73cb480788e2",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Fast GPU UUID",
+      "env_variable": "RASSYGPT_GPU_FAST",
+      "default": "GPU-c83f333f-e104-7d4c-b1c1-e0d2e8818053",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Retrieval GPU UUID",
+      "env_variable": "RASSYGPT_GPU_RETRIEVAL",
+      "default": "GPU-e1d104e4-bdf8-8558-a863-fa50b1168122",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Image backend URL (optional OpenAI-compatible)",
+      "env_variable": "RASSYGPT_IMAGE_BACKEND_URL",
+      "default": "",
+      "required": false
+    },
+    {
+      "type": "text",
+      "label": "Audio backend URL (optional Speaches/OpenAI-compatible)",
+      "env_variable": "RASSYGPT_AUDIO_BACKEND_URL",
+      "default": "",
+      "required": false
+    },
+    {
+      "type": "text",
+      "label": "External Qdrant URL override",
+      "env_variable": "RASSYGPT_QDRANT_URL",
+      "default": "http://rassygpt-qdrant:6333",
+      "required": true
+    },
+    {
+      "type": "boolean",
+      "label": "Require API key on /v1 endpoints",
+      "env_variable": "RASSYGPT_REQUIRE_AUTH",
+      "default": true,
+      "required": true
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Open Brain</title>
+  <desc id="desc">A warm orange and slate badge with the letters OB1.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f2937" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="orb" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="44" fill="url(#bg)" />
+  <circle cx="82" cy="128" r="50" fill="url(#orb)" opacity="0.95" />
+  <circle cx="82" cy="128" r="24" fill="#fff7ed" opacity="0.9" />
+  <path d="M144 72h34c20 0 34 13 34 31 0 11-6 20-16 25 12 4 20 14 20 28 0 20-15 36-38 36h-34V72Zm28 47h6c8 0 13-5 13-11 0-7-5-11-13-11h-6v22Zm0 48h11c9 0 15-6 15-14 0-8-6-14-15-14h-11v28Z" fill="#f8fafc" />
+  <rect x="124" y="184" width="96" height="12" rx="6" fill="#fb923c" opacity="0.95" />
+  <text x="144" y="188" fill="#0f172a" font-size="68" font-weight="700" font-family="Georgia, 'Times New Roman', serif">1</text>
+</svg>

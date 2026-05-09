@@ -1,0 +1,19 @@
+services:
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    ports:
+      - 3225:9000
+      - 3224:9001
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-minio/named/data:/data
+    environment:
+      MINIO_ROOT_USER: ${LEARNING_MINIO_ROOT_USER:-learning}
+      MINIO_ROOT_PASSWORD: ${LEARNING_MINIO_ROOT_PASSWORD:-Mycobacteri@98}
+    command: server /data --console-address ":9001"
+    x-runtipi:
+      is_main: true
+      internal_port: 9001
+
+x-runtipi:
+  schema_version: 2

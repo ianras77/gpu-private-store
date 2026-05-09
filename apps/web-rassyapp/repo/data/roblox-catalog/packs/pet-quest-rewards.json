@@ -1,0 +1,35 @@
+{
+  "slug": "pet-quest-rewards",
+  "version": 1,
+  "reviewMode": "Kid-safe shelf",
+  "items": [
+    {
+      "slug": "pet-treat-chest",
+      "localBundleKey": "pet/treat-chest",
+      "kind": "model",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/Rewards"
+    },
+    {
+      "slug": "pet-quest-star-marker",
+      "localBundleKey": "pet/quest-star-marker",
+      "kind": "ui",
+      "storageMode": "launchpad-local",
+      "targetPath": "Workspace/Map/QuestMarkers"
+    },
+    {
+      "slug": "pet-bed-prop",
+      "localBundleKey": "pet/pet-bed",
+      "kind": "model",
+      "storageMode": "roblox-reference",
+      "targetPath": "Workspace/Map/PetZone"
+    },
+    {
+      "slug": "pet-reward-badge",
+      "localBundleKey": "pet/reward-badge",
+      "kind": "ui",
+      "storageMode": "launchpad-local",
+      "targetPath": "StarterGui/RewardHud"
+    }
+  ]
+}

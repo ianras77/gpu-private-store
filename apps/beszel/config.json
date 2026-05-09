@@ -1,0 +1,24 @@
+{
+  "name": "Beszel",
+  "available": true,
+  "port": 45876,
+  "exposable": false,
+  "dynamic_config": true,
+  "id": "beszel",
+  "description": "Beszel runs the node agent for server, disk, GPU, and Docker status reporting on this secondary host.",
+  "tipi_version": 1,
+  "version": "alpine",
+  "categories": [
+    "utilities"
+  ],
+  "short_desc": "Beszel node agent for server and Docker status reporting.",
+  "author": "https://github.com/ianras77/beszel.git",
+  "source": "https://github.com/ianras77/beszel",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": true,
+  "created_at": 1774316487138,
+  "updated_at": 1774316487138
+}

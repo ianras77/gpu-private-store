@@ -1,0 +1,24 @@
+{
+  "name": "Learning Airflow",
+  "available": true,
+  "port": 3220,
+  "exposable": false,
+  "dynamic_config": true,
+  "id": "learning-airflow",
+  "description": "Apache Airflow workbench from the learning stack, split into its own Runtipi app with dedicated metadata storage.",
+  "tipi_version": 1,
+  "version": "2.7.1-python3.10",
+  "categories": [
+    "utilities"
+  ],
+  "short_desc": "Split-out Airflow workbench from the learning stack.",
+  "author": "https://github.com/ianras77/learning.git",
+  "source": "https://github.com/ianras77/learning",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1774649000000,
+  "updated_at": 1774649000000
+}

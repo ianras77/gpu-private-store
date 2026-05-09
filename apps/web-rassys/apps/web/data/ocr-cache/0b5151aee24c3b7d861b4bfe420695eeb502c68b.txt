@@ -1,0 +1,740 @@
+AGE 12+ _
+
+—
+DUNGEONS
+
+Cea egal
+
+DUNGEON MASTER'S SCREEN
+<—l
+
+x. }
+x
+\ 4
+J
+oy ,
+¥
+3 A
+a t-.
+¢
+o € ya
+Di g
+iy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EXPERIENCE POINT REWARDS
+
+FOOD, DRINK, AND LODGING PH 222
+Monster Standard Monster Standard
+
+Level Monster* Minion Elite Solo Level Monster* Minion Elite Food
+
+1 100 25 200 500 21 3,200 800 6,400 16,000 Meal, common 2 sp
+2 125 31 250 625 22 4,150 1,038 8,300 20,750 Meal, feast 5 gp
+3 150 38 300 750 23 5,100 1,275 10,200 25,500 Drink
+4 175 44 350 875 24 6,050 1,513 12,100 30,250 Ale, pitcher 2 sp
+5 200 50 400 1,000 25 7,000 1,750 14,000 35,000 Wine, bottle 5 gp
+6 250 63 500 1,250 26 9,000 2,250 18,000 45,000 Inn stay (per day)
+7 300 75 600 1,500 27 11,000 2,750 22,000 55,000 Typical room 5 sp
+8 350 88 700 1,750 28 13,000 3,250 26,000 65,000 Luxury room 2 gp
+9 400 100 800 2,000 29 15,000 3,750 30,000 75,000
+10 500 125 1,000 2,500 30 19,000 4,750 38,000 95,000 LIGHT SOURCES DMG 66
+11 600 150 1,200 3,000 31 23,000 5,750 46,000 115,000 Source Radius _ Brightness Duration
+12 700 175 1,400 3,500 32 27,000 6,750 54,000 135,000 Candle 2 dim Thode
+13 800 200 1,600 4,000 33 31,000 7,750 62,000 155,000 Torch in wall sconce 5 bright 1 hour
+14 1,000 250 2,000 5,000 34 39,000 9,750 78,000 195,000 Lantern 10 bright 8 hours/pint
+15 1,200 300 2,400 6,000 35 47,000 ~—=—: 11,750 94,000 235,000 Campfire 10 bright 8 hours
+16 1,400 350 2,800 7,000 36 55,000 13,750 110,000 275,000 Sunrod 20 bright @hours
+17 1,600 400 3,200 8,000 37 63,000 15,750 126,000 315,000 Phosphorescent fungi 10 dim ongoing
+18 2,000 500 4,000 10,000 38 79,000 19,750 158,000 395,000 Tiny fire creature 2 bright ongoing
+19 2,400 600 4,800 12,000 39 95,000 23,750 190,000 475,000 Small fire creature [= bright ongoing
+20 2,800 700 5,600 14,000 40 111,000 27,750 222,000 555,000 Medium fire creature 10 bright ongoing
+*To calculate the target XP for an encounter of the PCs’ level or to calculate the appropriate quest XP for a party of the PCs’ level, multiply REnQEURS ‘Grestire mG bright angoing
+the Standard Monster value by the number of PCs in the party. For minor quests, the XP award is equal to the Standard Monster reward. Huge or Gargantuan
+fire creature 40 bright ongoing
+CHARACTER
+
+DAMAGE BY LEVEL
+
+ADVANCEMENT PH 29
+(0) 1st 69,000 16th
+
+Normal Damage Expressions Limited Damage Expressions
+Low Medium High Low Medium High
+
+1st-3rd 1d6+3 1d10+3 2d6+3 3d6+3 2d10 +3 3d8 +3 1,000 2nd 83,000 17th
+4th-6th 1d6+4 1d10+4 2d8+4 3d6+4 3d8 +4 3d10+4 2,250 3rd 99,000 18th
+7th-9th 1d8+5 2d6+5 2d8+5 3d8 +5 3d10+5 4d8 +5 3,750 4th 119,000 19th
+10th-12th 1d8+5 2d6+5 3d6+5 3d8+5 4d8+5 4d10+5 5,500 5th 143,000 20th
+13th-15th 1d10+6 2d8 +6 3d6+6 3d10+6 4d8+6 4d10+6 7,500 6th 175,000 21st
+16th-18th 1d10+7 2d8+7 3d8+7 3d10+6 4d10+7 4d12+7 10,000 7th 210,000 22nd
+19th-21st 2d6+7 3d6+8 3d8+7 4d8 +7 4d10+7 4d12+7 13,000 8th 255,000 23rd
+22nd-24th 2d6+8 3d6+8 4d6+8 4d8 +8 4d12+8 5d10+8 16,500 9th 310,000 24th
+25th-27th 2d8+9 3d8+9 4d6+9 4d10+9 5d10+9 5d12+9 20,500 10th 375,000 25th
+28th-30th 2d8 +10 3d8+10 4d8 + 10 4d10+9 5d10+9 5d12+9 26,000 11th 450,000 26th
+32,000 12th 550,000 27th
+
+39,000 ? 13th 675,000 28th
+
+Dunceons & Dracons and its logo are trademarks of Wizards of the Coast, Inc, in the U.S.A. and other countries. 47,000 14th 825,000 29th
+
+©2008 Wizards of the Coast, Inc. 66021830740001EN
+Screen illustrated by Francis Tsai 57,000 15th 1,000,000 30th
+
+
+
+
+ACTIONS IN COMBAT
+
+Standard Actions
+Administer a potion
+Aid another
+
+Basic attack
+Bull rush
+
+Charge
+
+Coup de grace
+Grab
+Ready an action
+
+Second wind
+
+Total defense
+
+Move Actions
+Crawl
+
+Escape
+
+Run
+
+Stand up
+Shift
+
+Squeeze
+
+Walk
+
+Minor Actions
+
+Draw or sheathe a weapon
+Drink a potion
+
+Drop prone
+
+Load a crossbow
+
+Open or close a door
+
+Pick up an item
+
+Ready or stow a shield
+Retrieve or stow an item
+
+Immediate Actions
+Readied action
+
+(PH 286
+
+Description
+Help an unconscious creature consume a potion
+Improve an ally’s attack roll, defense,
+
+skill check, or ability check
+
+Make a basic attack
+
+Push a target 1 square and shift
+
+into the vacated space
+
+Move and then make a melee basic
+
+attack or a bull rush
+
+Make a critical hit against a helpless enemy
+Grab an enemy
+
+Ready an action to perform when a
+
+specified trigger occurs
+
+Spend a healing surge and gain a +2
+
+bonus to defenses (once per encounter)
+
+Gain a +2 bonus to all your defenses
+
+until the start of your next turn
+
+Description
+
+While prone, move up to half your speed
+
+Escape a grab and shift
+
+Move up to your speed +2; grant combat advantage
+and take a -5 penalty to attacks until next turn
+
+Stand up from prone
+
+Move 1 square without provoking opportunity attacks
+Reduce your space by 1, move up to half
+
+your speed, and grant combat advantage
+
+Move up to your speed
+
+Description
+
+You can draw or sheathe a weapon
+Consume a potion
+
+Drop down so that you are lying on the ground
+Load a crossbow so that you can fire it
+Open or close a door or container
+
+that isn’t locked or stuck
+
+Pick up an object in your space
+
+or an unoccupied space
+
+Use a shield or put it away
+
+Retrieve or stow an item on your person
+
+Description
+Take your readied action when its trigger occurs
+
+Page
+255
+287
+
+287
+287
+
+287
+288
+290
+291
+291
+
+292
+
+Page
+288
+288
+291
+292
+292
+
+292
+
+255
+277
+219
+267
+
+Page
+291
+
+Opportunity Actions Description Page
+Opportunity attack Make a melee basic attack against an 290
+enemy that provokes an opportunity attack
+Free Actions Description Page
+Drop held items Drop any items you currently hold 267
+End a grab Let go of an enemy 290
+Spend an action point Spend an action point to take an 286
+extra action (once per encounter)
+Talk Speak a few sentences 267
+No Action Description Page
+Delay Put off your turn until later in the initiative order 288
+Combat Advantage (PH 279)
+
+You gain combat advantage when a defender is ...
+
++ Balancing (page 180) + Running (page 291)
+
++ Blinded (page 277) + Squeezing (page 292)
+
++ Climbing (page 182) + Stunned (page 277)
+
++ Dazed (page 277) + Surprised (page 277)
+
++ Flanked by the attacker (page 285) + Unable to see the attacker (page 281)
+
++ Helpless (page 277) + Unaware of you (page 188)
+
++ Prone (melee attacks only) (page 277) + Unconscious (page 277)
+
++ Restrained (page 277)
+ATTACK MODIFIERS PH 279
+Circumstance Modifier
+Combat advantage against target as
+Attacker is prone 2
+Attacker is restrained -2
+Target has cover -2
+Target has superior cover -5
+Target has concealment (melee and ranged only) -2
+Target has total concealment (melee and ranged only) -5
+Long range (weapon attacks only) -2
+Charge attack (melee only) a8)
+
+
+
+
+
+DCS TO BREAK OR
+
+BURST COMMON ITEMS PH 262)
+Strength Check to: Break DC
+Break down wooden door 16
+Break down barred door 20
+Break down iron door 25
+Break down adamantine door 29
+Break through force portal 38
+Force open wooden portcullis 23
+Force open iron portcullis 28
+Force open adamantine portcullis 33
+Burst rope bonds 26
+Burst iron chains 30
+Burst adamantine chains 34
+Smash wooden chest 19
+Smash iron box 26
+Smash adamantine box 32
+
+Break through wooden wall (6 in. thick) 26
+Break through masonry wall (1 ft. thick) 35
+Break through hewn stone wall (3 ft. thick) 43
+
+TARGET DCS DMG 42)
+Level EasyDC Moderate DC Hard DC
+1st-3rd 5 10 15
+4th-6th 7 2 ie
+7th-9th 8 14 US)
+10th-12th 10 16 21
+13th-15th 11 18 23
+16th-18th 13 20 25
+19th-21st 14 22 PAT)
+22nd-24th 16 24 29
+25th-27th 7 26 31
+28th-30th 19 28 33
+FALL SEVERITY BY
+CHARACTER LEVEL DMG 44.
+Level Painful Perilous Deadly
+1st-5th 20 ft. 30 ft. 40 ft.
+6th-10th 30 ft. 50 ft. 70 ft.
+11th-15th 40 ft. 70 ft. 110 ft.
+16th-20th 60 ft. 90 ft. 140 ft.
+21st-25th 80 ft. 110 ft. 170 ft.
+26th-30th 90 ft. 130 ft. 200 ft.
+
+DCS FOR COMMONLY USED SKILLS
+
+Climb
+Climbing a ladder Athletics DC 5
+Climbing a rope Athletics DC 10
+Climbing an uneven surface (dungeon wall) Athletics DC 15
+Climbing a rough surface (brick wall) Athletics DC 20
+Surface is unusually smooth Athletics DC +5
+Surface is slippery Athletics DC +5
+Use climber’s kit +2 on check
+Climbing where you can brace yourself +5 on check
+Accelerated climb (climb at full speed) -5 on check
+
+Escape from a Grab Acrobatics check vs. Reflex
+Athletics check vs. Fortitude
+Escape from Restraints Acrobatics DC 20
+Attempt to escape as a standard action DC +10
+Find Tracks
+Soft ground (snow, loose dirt, mud) Perception DC 15
+Hard ground (wood or stone) Perception DC 25
+Huge of larger creature, or group of 10+ +5 to check
+
+Rain or snow since tracks were made
+
+Each day since tracks were made
+
+Quarry takes steps to cover tracks
+Detect Magic
+
+Identify a conjuration or summoning effect Arcana DC 15 + spell level
+
+Identify magical effect already in place Arcana DC 20 + spell level
+
+Perception DC +10
+Perception DC +2
+Perception DC +5
+
+Detect magic in an area Arcana DC 20 + spell level
+Heal
+Let a character use a healing surge Heal DC 10
+Stabilize a dying character Heal DC 15
+Help a dying character recover Heal DC 15
+Let a character make a saving throw Heal DC 15
+Listen
+Battle Perception DC 0
+Normal conversation Perception DC 5
+Whispers Perception DC 15
+Through a door Perception DC +5
+Through a wall Perception DC +10
+Far away Perception DC +1 per 2 squares
+
+Rolling Attacks and Checks
+
++ Attacks: 1d20 + one-half level + ability modifier (+ proficiency bonus, if
+a weapon attack) + other modifiers
+
++ Checks: 1d20 + one-half level + ability modifier (+5 if a trained skill) +
+other modifiers
+
+Cover (PH 280)
+
++ Cover (-2 Penalty to Attack Rolls): The target is around a
+corner or protected by terrain. For example, the target might
+be in the same square as a small tree, obscured by a small
+pillar or a large piece of furniture, or behind a low wall.
+
++ Superior Cover (-5 Penalty to Attack Rolls): The target
+is protected by a significant terrain advantage, such as
+when fighting from behind a window, a portcullis, a grate,
+or an arrow slit.
+
++ Area Attacks and Close Attacks: When you make an
+area attack or a close attack, a target has cover if there is an
+obstruction between the origin square and the target, not
+between you and the target.
+
+* Reach: If a creature that has reach attacks through terrain
+that would grant cover if the target were in it, the target
+has cover. For example, even if you're not in the same
+square as a small pillar, it gives you cover from the attack of
+an ogre on the other side of the pillar.
+
++ Creatures and Cover: When you make a ranged attack
+against an enemy and other enemies are in the way, your
+target has cover. Your allies never grant cover to your
+enemies, and neither allies nor enemies give cover against
+melee, close, or area attacks.
+
++ Determining Cover: To determine if a target has cover,
+choose a corner of a square you occupy (or a corner of your
+attack’s origin square) and trace imaginary lines from that
+corner to every corner of any one square the target occu-
+pies. If one or two of those lines are blocked by an obstacle
+or an enemy, the target has cover. (A line isn’t blocked if it
+runs along the edge of an obstacle’s or an enemy’s square.)
+If three or four of those lines are blocked but you have line
+of effect, the target has superior cover.
+
+(PH 281)
+
++ Concealment (-2 Penalty to Attack Rolls): The target is
+in a lightly obscured square or in a heavily obscured square
+but adjacent to you.
+
++ Total Concealment (-5 Penalty to Attack Rolls): You
+can't see the target. The target is invisible, in a totally
+obscured square, or in a heavily obscured square and not
+adjacent to you.
+
++ Melee Attacks and Ranged Attacks Only: Attack penal-
+ties from concealment apply only to the targets of melee
+or ranged attacks.
+
+Concealment
+
+
+
+
+Conditions (PH 277)
+
+BLINDED
++ You grant combat advantage.
++ You can’t see any target (your targets
+have total concealment).
++ You take a -10 penalty to Perception
+checks.
++ You can’t flank an enemy.
+
+DAZED
++ You grant combat advantage.
++ You can take either a standard action, a
+move action, or a minor action on your
+turn (you can also take free actions). You
+
+can’t take immediate actions or opportu-
+
+nity actions.
++ You can’t flank an enemy.
+
+DEAFENED
++ You can't hear anything.
++ You take a -10 penalty to Perception
+checks.
+
+DOMINATED
++ You're dazed.
++ The dominating creature chooses your
+action. The only powers it can make you
+use are at-will powers.
+
+Healing a Dying Character
+
++ Regain Hit Points: When you are dying and receive healing, you go to 0
+hit points and then regain hit points from the healing effect. If a healing
+effect requires you to spend a healing surge but you have none left, your .
+condition doesn’t change, but you regain hit points after an extended rest if
+
+DYING
++ You're unconscious.
++ You're at 0 or negative hit points.
++ You make a death saving throw every
+round.
+
+HELPLESS
+
++ You grant combat advantage.
+
++ You can be the target of a coup de grace.
+
+Note: Usually you’re helpless because you're
+unconscious.
+
+IMMOBILIZED
++ You can’t move from your space,
+although you can teleport and can be
+forced to move by a pull, a push, or a
+slide.
+
+MARKED
++ You take a -2 penalty to attack rolls if
+your attack doesn’t include the creature
+that marked you.
+
+PETRIFIED
+
+You have been turned to stone.
+
+You can’t take actions.
+
+You gain resist 20 to all damage.
+
+You are unaware of your surroundings.
+You don't age.
+
++++ 2 %
+
+(PH 295)
+
+PRONE
+
++ You grant combat advantage to enemies
+making melee attacks against you.
+
++ You get a+2 bonus to all defenses
+against ranged attacks from nonadjacent
+enemies.
+
++ You're lying on the ground. (If you're fly-
+ing, you safely descend a distance equal
+to your fly speed. If you don’t reach the
+ground, you fall.)
+
++ You take a -2 penalty to attack rolls.
+
+RESTRAINED
++ You grant combat advantage.
+# You're immobilized.
++ You can’t be forced to move by a pull, a
+push, or a slide.
++ You take a -2 penalty to attack rolls.
+
+SLOWED
++ Your speed becomes 2. This speed
+
+applies to all your movement modes,
+but it does not apply to teleportation
+or to a pull, a push, or a slide. You can’t
+increase your speed above 2, and your
+speed doesn't increase if it was lower
+than 2. If you're slowed while moving,
+stop moving if you have already moved
+2 or more squares.
+
+Death and Dying
+
+STUNNED
++ You grant combat advantage.
+# You can’t take actions.
++ You can’t flank an enemy.
+
+SURPRISED
+* You grant combat advantage.
+* You can’t take actions, other than free
+actions.
++ You can’t flank an enemy.
+
+UNCONSCIOUS
+
+You're helpless.
+
+You take a -5 penalty to all defenses.
+You can’t take actions.
+
+You fall prone, if possible.
+
+You can't flank an enemy.
+
+WEAKENED
++ Your attacks deal half damage. Ongoing
+damage you deal is not affected.
+
++++ + +
+
+(PH 295)
+
++ Dying: When your hit points drop to 0 or fewer, you fall unconscious and are dying. Any additional damage
+you take continues to reduce your current hit point total until your character dies.
+
+Death Saving Throw: When you are dying, you need to make a saving throw at the end of your turn each
+round. The result of your saving throw determines how close you are to death.
+
+someone has stabilized you using the Heal skill.
+
+Become Conscious: As soon as you have a current hit point total that’s
+higher than 0, you become conscious and are no longer dying. (You are still
+prone until you take an action to stand up.)
+
+Lower than 10: You slip one step closer to death. If you get this result three times before you take a rest,
+you die.
+
+10-19: No change.
+
+20 or higher: Spend a healing surge. When you do so, you are considered to have 0 hit points, and then
+your healing surge restores hit points as normal. You are no longer dying, and you are conscious but still
+prone. If you roll 20 or higher but have no healing surges left, your condition doesn’t change.
+
++ Death: When you take damage that reduces your current hit points to your bloodied value expressed as a
+negative number, your character dies.
+
+
+
+
+4
+
+1
+J
+
+a
+
+MU
+
+we
+
+“KEEP
+
+\THEACTION
+
+MOVING
+
+This Dunczons & Dracons® Roleplaying Gan
+
+accessory provides the Dungeon Master with
+
+collection of tables and lists useful during game
+play. By reducing the page-flipping necessary
+during the game, this screen speeds play and keeps
+the action on track.
+
+The heavy cardstock, four-panel Dungeon
+Master's Screen also keeps players from seeing what's
+coming up in the adventure-use it to hide }
+
+encounters, maps, miniatures, and even dice rolls
+
+from prying eyes!
+
+For use with these 4th Edition Dunceons & Dracons® core products:
+
+Player’s Handbook®
+
+a
+
+U.S., Canada, Asia Pacific & Latin America
+
+www.wizards.com/customerservice
+
+Wizards of the Coast, Inc.
+
+P.O. Box 707, Renton WA 98057-0707, U.S.A.
+
+Tel: 1-800-324-6496 (within the U.S.)
+1-206-624-0933 (outside the U.S.)
+
+Dungeon Master’s Guide®
+Monster Manual® D&D® Miniatures
+D&D™ Dungeon Tiles
+
+A) L
+
+INSIDER”
+
+www.dndinsider.com °
+
+CEM @
+
+ISBN: 978-0-7869-4927-4
+
+| | 510,995
+
+Zz,
+
+~e
+
+LU
+9"7 80786949274
+
+Sug. Retail: U.S.$9.95 CAN $11.95
+Printed in China 218307400
+
+U.K., Eire & South Africa
+
+Hasbro UK Ltd.
+
+PO. Box 43, Newport NP19 4YD
+
+Tel: +800 22 427276
+
+Email: wizards@hasbro.co.uk
+
+Please retain this package for future referenc
+MADE IN CHINA
+
+C-267A
+
+
+
+

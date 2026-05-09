@@ -1,0 +1,109 @@
+services:
+  api:
+    image: python:3.12-slim
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${JOGMANIA_APP_ENV:-dev}
+      DATABASE_URL: postgresql+psycopg2://jogmania:jogmania@postgres:5432/jogmania
+      JWT_SECRET: ${JOGMANIA_JWT_SECRET:-change-me}
+      REDIS_URL: redis://redis:6379/0
+      AUTH_COOKIE_SECURE: ${JOGMANIA_AUTH_COOKIE_SECURE:-false}
+      AUTH_COOKIE_SAMESITE: ${JOGMANIA_AUTH_COOKIE_SAMESITE:-lax}
+      AUTH_COOKIE_DOMAIN: ${JOGMANIA_AUTH_COOKIE_DOMAIN:-}
+      AUTH_REQUIRE_EMAIL_VERIFICATION: ${JOGMANIA_AUTH_REQUIRE_EMAIL_VERIFICATION:-false}
+      CORS_ORIGINS: ${JOGMANIA_CORS_ORIGINS:-["http://192.168.1.162:3177","http://localhost:19006"]}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${JOGMANIA_MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${JOGMANIA_MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_BUCKET: ${JOGMANIA_MINIO_BUCKET:-jogmania-exports}
+      MINIO_REGION: ${JOGMANIA_MINIO_REGION:-us-east-1}
+      MINIO_PUBLIC_URL: ${JOGMANIA_MINIO_PUBLIC_URL:-http://192.168.1.162:3181}
+      MINIO_ENABLED: ${JOGMANIA_MINIO_ENABLED:-true}
+      ADVENTURE_LLM_URL: ${JOGMANIA_ADVENTURE_LLM_URL:-}
+      ADVENTURE_LLM_API_KEY: ${JOGMANIA_ADVENTURE_LLM_API_KEY:-}
+      ADVENTURE_LLM_MODEL: ${JOGMANIA_ADVENTURE_LLM_MODEL:-}
+      PYTHONPATH: /app
+    volumes:
+    - /data/repos/apps/web-jogmania/repo/api:/app
+    command:
+    - sh
+    - /app/runtipi-start.sh
+    extra_hosts:
+    - host.docker.internal:host-gateway
+    ports:
+    - ${JOGMANIA_API_PORT:-3178}:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz',
+        timeout=10)" || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${JOGMANIA_MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${JOGMANIA_MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-jogmania/named/jogmania-minio:/data
+    ports:
+    - ${JOGMANIA_MINIO_PORT:-3181}:9000
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jogmania
+      POSTGRES_PASSWORD: jogmania
+      POSTGRES_DB: jogmania
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-jogmania/named/jogmania-pg:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U jogmania -d jogmania || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+  redis:
+    image: redis:7
+    restart: unless-stopped
+  web:
+    image: node:20-alpine
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${JOGMANIA_PUBLIC_API_BASE_URL:-http://192.168.1.162:3178}
+      EXPO_PUBLIC_API_BASE_URL: ${JOGMANIA_EXPO_PUBLIC_API_BASE_URL:-http://192.168.1.162:3178}
+      PORT: '3000'
+    volumes:
+    - /data/repos/apps/web-jogmania/repo:/repo
+    command:
+    - sh
+    - /repo/apps/web/runtipi-start.sh
+    depends_on:
+      api:
+        condition: service_started
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -qO- http://127.0.0.1:3000 >/dev/null 2>&1 || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+x-runtipi:
+  schema_version: 2

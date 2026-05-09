@@ -1,0 +1,26 @@
+{
+  "name": "DeerFlow",
+  "available": true,
+  "port": 2026,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "deer-flow",
+  "description": "ByteDance DeerFlow packaged as a native Runtipi app with persistent runtime data and a seeded first-boot config wired to the local Ollama stack.",
+  "tipi_version": 1,
+  "version": "latest",
+  "min_tipi_version": "v4.0.0",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Native Runtipi DeerFlow package wired to the local Ollama stack with persistent state.",
+  "author": "ByteDance",
+  "source": "https://github.com/bytedance/deer-flow",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1777156988000,
+  "updated_at": 1777156988000
+}

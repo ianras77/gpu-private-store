@@ -1,0 +1,59 @@
+services:
+  crewai:
+    build:
+      context: /app-repos/crewai/crewai
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+    - crewai-qdrant
+    environment:
+      LOCALAI_API_BASE: ${CREWAI_LOCALAI_API_BASE:-http://host.docker.internal:8111/v1}
+      LOCALAI_API_KEY: ${CREWAI_LOCALAI_API_KEY:-Mycobacteri@98}
+      LOCALAI_LLM_MODEL: ${CREWAI_LOCALAI_LLM_MODEL:-chat-smart}
+      LOCALAI_EMBED_MODEL: ${CREWAI_LOCALAI_EMBED_MODEL:-embed-nomic-text}
+      LOCALAI_RERANK_MODEL: ${CREWAI_LOCALAI_RERANK_MODEL:-rerank-bge-m3}
+      LOCALAI_IMAGE_MODEL: ${CREWAI_LOCALAI_IMAGE_MODEL:-image-dreamshaper}
+      QDRANT_URL: ${CREWAI_QDRANT_URL:-http://crewai-qdrant:6333}
+      QDRANT_COLLECTION: ${CREWAI_QDRANT_COLLECTION:-qdrant_docs}
+      JUPYTERHUB_USERS: ${CREWAI_JUPYTERHUB_USERS:-ian:Mycobacteri@98}
+      JUPYTERHUB_ADMIN_USERS: ${CREWAI_JUPYTERHUB_ADMIN_USERS:-ian}
+      PYTHONUNBUFFERED: '1'
+      CREWAI_TELEMETRY_ENABLED: 'false'
+      OLLAMA_BASE_URL: ${CREWAI_OLLAMA_BASE_URL:-http://ollama-proxy:8080/v1}
+      OLLAMA_MODEL: ${CREWAI_OLLAMA_MODEL:-gpt-oss:20b}
+    volumes:
+    - ${APP_DATA_DIR}/app-data/crewai/named/workspace:/workspace
+    - ${APP_DATA_DIR}/app-data/crewai/named/audio-library:/workspace/audio_library
+    - ${APP_DATA_DIR}/app-data/crewai/named/outputs:/workspace/outputs
+    - ${APP_DATA_DIR}/app-data/crewai/named/jupyterhub:/data/jupyterhub
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /data/repos/apps/crewai/jupyterhub/jupyterhub_config.py:/etc/jupyterhub/jupyterhub_config.py:ro
+    - /data/repos/apps/crewai/start-jupyterhub.sh:/usr/local/bin/start-jupyterhub.sh:ro
+    working_dir: /workspace
+    extra_hosts:
+    - host.docker.internal:host-gateway
+    expose:
+    - '8888'
+    command:
+    - /usr/local/bin/start-jupyterhub.sh
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8888/hub/login', timeout=5)
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    image: runtipi-local-crewai-crewai:latest
+    x-runtipi:
+      is_main: true
+      internal_port: 8888
+  crewai-qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    volumes:
+    - ${APP_DATA_DIR}/app-data/crewai/named/qdrant:/qdrant/storage
+x-runtipi:
+  schema_version: 2

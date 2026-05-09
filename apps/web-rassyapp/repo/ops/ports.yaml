@@ -1,0 +1,17 @@
+app:
+  name: web-rassy.app
+  type: web
+  runtime: node
+services:
+  - name: web
+    port: 3189
+    protocol: http
+    purpose: "Primary web UI"
+    health: "/api/healthz"
+notes:
+  - "Single-port app block: 3189."
+env:
+  required:
+    - HOST_PORT
+  optional:
+    - PORT

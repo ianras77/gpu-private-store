@@ -1,0 +1,26 @@
+{
+  "name": "Crackstack",
+  "available": true,
+  "port": 3212,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "web-crackstack",
+  "description": "Agentic data workbench with XLCRACK and TAPECRACK fronts on one backend with Postgres, Redis, MinIO, and Temporal.",
+  "tipi_version": 1,
+  "version": "1.0.0",
+  "min_tipi_version": "v4.0.0",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Agentic data workbench with two branded fronts and one shared backend.",
+  "author": "Ian Rasmussen",
+  "source": "https://github.com/ianras77/web-crack",
+  "form_fields": [],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1776589448000,
+  "updated_at": 1776589448000
+}

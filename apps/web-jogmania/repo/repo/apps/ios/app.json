@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Jogmania",
+    "slug": "jogmania",
+    "scheme": "jogmania",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jogmania.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Jogmania uses your location to record run routes and build adventure replays.",
+        "NSHealthShareUsageDescription": "Jogmania reads workout metrics to turn your runs into adventure replays.",
+        "NSHealthUpdateUsageDescription": "Jogmania stores workout sessions so your Apple Watch runs can progress your adventure world."
+      }
+    },
+    "plugins": ["expo-router"]
+  }
+}

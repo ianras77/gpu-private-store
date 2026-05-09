@@ -1,0 +1,11 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+sqlalchemy==2.0.37
+psycopg[binary]==3.2.3
+pydantic-settings==2.7.1
+httpx==0.28.1
+beautifulsoup4==4.12.3
+python-slugify==8.0.4
+python-dateutil==2.9.0.post0
+orjson==3.10.15
+redis==5.2.1

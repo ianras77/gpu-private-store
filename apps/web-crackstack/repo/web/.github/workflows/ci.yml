@@ -1,0 +1,51 @@
+name: web-crack-ci
+
+on:
+  push:
+    paths:
+      - "web-crack/web/**"
+  pull_request:
+    paths:
+      - "web-crack/web/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            web-crack/web/package-lock.json
+            web-crack/web/apps/xlcrack/package-lock.json
+            web-crack/web/apps/tapecrack/package-lock.json
+      - name: Install root deps
+        run: npm ci
+        working-directory: web-crack/web
+      - name: Install xlcrack deps
+        run: npm ci
+        working-directory: web-crack/web/apps/xlcrack
+      - name: Install tapecrack deps
+        run: npm ci
+        working-directory: web-crack/web/apps/tapecrack
+      - name: Lint xlcrack
+        run: npm run lint --workspace apps/xlcrack
+        working-directory: web-crack/web
+      - name: Lint tapecrack
+        run: npm run lint --workspace apps/tapecrack
+        working-directory: web-crack/web
+      - name: Test xlcrack
+        run: npm run test:ci
+        working-directory: web-crack/web/apps/xlcrack
+      - name: Test tapecrack
+        run: npm run test:ci
+        working-directory: web-crack/web/apps/tapecrack
+      - name: Build xlcrack
+        run: npm run build --workspace apps/xlcrack
+        working-directory: web-crack/web
+      - name: Build tapecrack
+        run: npm run build --workspace apps/tapecrack
+        working-directory: web-crack/web
