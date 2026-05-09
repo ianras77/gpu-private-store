@@ -15,6 +15,7 @@ This file tracks the live state of the current custom Runtipi appstore in this f
 - `learning-wandb`
 - `ollama`
 - `openclaw-bridge`
+- `rassygpt`
 - `tika`
 - `web-astro`
 - `web-bat`
@@ -29,7 +30,7 @@ This file tracks the live state of the current custom Runtipi appstore in this f
 
 ## Current package status
 
-- Self-contained and Runtipi-aligned in this repo: `crewai`, `langflow`, `learning-label-studio`, `learning-mlflow`, `learning-wandb`, `ollama`, `openclaw-bridge`, `tika`, `web-jogmania`, `web-rasies`, `web-rassyapp`, `web-totallyrighteoustales`, `web-usmender`
+- Self-contained and Runtipi-aligned in this repo: `crewai`, `langflow`, `learning-label-studio`, `learning-mlflow`, `learning-wandb`, `ollama`, `openclaw-bridge`, `rassygpt`, `tika`, `web-jogmania`, `web-rasies`, `web-rassyapp`, `web-totallyrighteoustales`, `web-usmender`
 - Already current and left in place after audit: `beszel`, `learning-airflow`, `learning-minio`, `learning-qdrant`, `web-astro`, `web-bat`, `web-crackstack`, `web-lickingvape`
 - Current package with an external legacy dependency that still exists outside the appstore: `web-rassys`
 

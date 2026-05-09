@@ -5,8 +5,8 @@
 services:
   rassygpt-tabby-exl3:
     image: ghcr.io/theroyallab/tabbyapi:latest
-    container_name: ${APP_ID}-tabby-exl3
     restart: unless-stopped
+    runtime: nvidia
     environment:
       TZ: ${TZ}
       NVIDIA_VISIBLE_DEVICES: GPU-b9b6fa94-347e-3b4d-d920-8627b0ef5897

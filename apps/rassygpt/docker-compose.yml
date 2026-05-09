@@ -1,16 +1,12 @@
 x-runtipi:
   schema_version: 2
-  app_id: rassygpt
-  app_name: RassyGPT
-  version: "0.1.0"
 
 services:
   rassygpt-gateway:
     build:
       context: ./gateway
       dockerfile: Dockerfile
-    image: rassygpt/gateway:0.1.0
-    container_name: ${APP_ID}-gateway
+    image: runtipi-local-rassygpt-gateway:0.1.1
     restart: unless-stopped
     environment:
       TZ: ${TZ}
@@ -49,8 +45,8 @@ services:
 
   rassygpt-general:
     image: ${RASSYGPT_LLAMA_IMAGE}
-    container_name: ${APP_ID}-general
     restart: unless-stopped
+    runtime: nvidia
     environment:
       TZ: ${TZ}
       HF_TOKEN: ${HF_TOKEN}
@@ -91,8 +87,8 @@ services:
 
   rassygpt-coder:
     image: ${RASSYGPT_LLAMA_IMAGE}
-    container_name: ${APP_ID}-coder
     restart: unless-stopped
+    runtime: nvidia
     environment:
       TZ: ${TZ}
       HF_TOKEN: ${HF_TOKEN}
@@ -137,8 +133,8 @@ services:
 
   rassygpt-fast:
     image: ${RASSYGPT_LLAMA_IMAGE}
-    container_name: ${APP_ID}-fast
     restart: unless-stopped
+    runtime: nvidia
     environment:
       TZ: ${TZ}
       HF_TOKEN: ${HF_TOKEN}
@@ -179,8 +175,8 @@ services:
 
   rassygpt-embed:
     image: ${RASSYGPT_LLAMA_IMAGE}
-    container_name: ${APP_ID}-embed
     restart: unless-stopped
+    runtime: nvidia
     environment:
       TZ: ${TZ}
       HF_TOKEN: ${HF_TOKEN}
@@ -222,8 +218,8 @@ services:
 
   rassygpt-rerank:
     image: ${RASSYGPT_LLAMA_IMAGE}
-    container_name: ${APP_ID}-rerank
     restart: unless-stopped
+    runtime: nvidia
     environment:
       TZ: ${TZ}
       HF_TOKEN: ${HF_TOKEN}
@@ -260,7 +256,6 @@ services:
 
   rassygpt-qdrant:
     image: ${RASSYGPT_QDRANT_IMAGE}
-    container_name: ${APP_ID}-qdrant
     restart: unless-stopped
     environment:
       TZ: ${TZ}

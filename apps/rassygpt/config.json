@@ -10,9 +10,9 @@
     "automation",
     "developer-tools"
   ],
-  "description": "RassyGPT is a Runtipi-native OpenAI-compatible AI gateway and model stack designed for Ian Rasmussen's V100/P100/P40/M40/2080 Ti hardware. It exposes one clean /v1 endpoint while routing to specialized local backends for chat, coding, embeddings, reranking, image, speech, and future GPU experiments.",
-  "tipi_version": 42,
-  "version": "0.1.0",
+  "description": "RassyGPT is a Runtipi-native OpenAI-compatible AI gateway and model stack designed for Ian Rasmussen's V100/P100/P40 hardware while reserving the M40 outside the default LLM lanes. It exposes one clean /v1 endpoint while routing to specialized local backends for chat, coding, embeddings, reranking, image, speech, and future GPU experiments.",
+  "tipi_version": 1,
+  "version": "0.1.1",
   "source": "https://github.com/ianras/rassygpt",
   "website": "https://github.com/ianras/rassygpt",
   "exposable": true,
@@ -111,6 +111,13 @@
       "env_variable": "RASSYGPT_GPU_RETRIEVAL",
       "default": "GPU-e1d104e4-bdf8-8558-a863-fa50b1168122",
       "required": true
+    },
+    {
+      "type": "text",
+      "label": "Reserved M40 GPU UUID",
+      "env_variable": "RASSYGPT_GPU_M40_RESERVED",
+      "default": "GPU-787cf3b9-e1d7-1712-bd12-60cf740bade8",
+      "required": false
     },
     {
       "type": "text",

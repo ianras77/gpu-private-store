@@ -5,8 +5,8 @@
 services:
   rassygpt-speaches:
     image: ghcr.io/speaches-ai/speaches:latest-cuda
-    container_name: ${APP_ID}-speaches
     restart: unless-stopped
+    runtime: nvidia
     environment:
       TZ: ${TZ}
       NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_FAST}

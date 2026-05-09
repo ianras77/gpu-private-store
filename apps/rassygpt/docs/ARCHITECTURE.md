@@ -16,7 +16,7 @@ Qdrant, optional image/audio/exl3 services
 
 ## Why llama.cpp/GGUF is the default core
 
-This hardware has four V100s plus P100/P40/M40-era cards. The stable path is a runtime with broad CUDA support and strong GGUF coverage. vLLM and ExLlamaV3 are powerful, but are kept as optional extension lanes because Volta/Pascal cards are more likely to hit unsupported quantization kernels or build-specific CUDA issues.
+This hardware has four V100s plus P100/P40-era cards for the default lanes, with the M40 retained as a reserved card outside the main LLM stack. The stable path is a runtime with broad CUDA support and strong GGUF coverage. vLLM and ExLlamaV3 are powerful, but are kept as optional extension lanes because Volta/Pascal cards are more likely to hit unsupported quantization kernels or build-specific CUDA issues.
 
 ## Public model names
 
@@ -29,6 +29,8 @@ This hardware has four V100s plus P100/P40/M40-era cards. The stable path is a r
 | `rassy-rerank` | reranking | GPU 5, P100 16GB |
 | `rassy-image` | optional image connector | external or extension |
 | `rassy-audio` | optional TTS/STT connector | external or extension |
+
+The M40 UUID is preserved in install-time configuration as `RASSYGPT_GPU_M40_RESERVED`, but no service consumes it by default.
 
 ## Security boundary
 

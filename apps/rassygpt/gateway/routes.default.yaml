@@ -1,6 +1,6 @@
 server:
   name: RassyGPT
-  version: "0.1.0"
+  version: "0.1.1"
   require_auth: ${RASSYGPT_REQUIRE_AUTH:-true}
   qdrant_url: ${RASSYGPT_QDRANT_URL:-http://rassygpt-qdrant:6333}
 
