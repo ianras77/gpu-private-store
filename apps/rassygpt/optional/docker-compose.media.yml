@@ -12,13 +12,7 @@ services:
       NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_FAST}
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
     volumes:
-      - ${APP_DATA_DIR}/models/speaches:/home/ubuntu/.cache/huggingface/hub
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
+      - ${RASSYGPT_FAST_STORAGE_DIR}/speaches/huggingface:/home/ubuntu/.cache/huggingface/hub
     x-runtipi:
       add_to_main_network: true
       internal_port: 8000

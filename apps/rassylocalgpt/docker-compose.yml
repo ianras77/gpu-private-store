@@ -1,0 +1,74 @@
+x-runtipi:
+  schema_version: 2
+
+services:
+  rassylocalgpt:
+    image: ${LOCALAI_IMAGE}
+    restart: unless-stopped
+    network_mode: host
+    runtime: nvidia
+    init: true
+    shm_size: ${LOCALAI_SHM_SIZE:-8g}
+    pids_limit: ${LOCALAI_PIDS_LIMIT:-1024}
+    stop_grace_period: ${LOCALAI_STOP_GRACE_PERIOD:-90s}
+    security_opt:
+      - no-new-privileges:true
+    ulimits:
+      nofile:
+        soft: ${LOCALAI_NOFILE_SOFT:-65536}
+        hard: ${LOCALAI_NOFILE_HARD:-65536}
+    environment:
+      TZ: ${TZ}
+      DEBUG: ${LOCALAI_DEBUG}
+      LOCALAI_ADDRESS: 0.0.0.0:3216
+      MODELS_PATH: ${LOCALAI_MODELS_PATH}
+      LOCALAI_MODELS_PATH: ${LOCALAI_MODELS_PATH}
+      LOCALAI_API_KEY: ${LOCALAI_API_KEY}
+      LOCALAI_FORCE_META_BACKEND_CAPABILITY: nvidia
+      LOCALAI_P2P: "true"
+      P2P: "true"
+      LOCALAI_P2P_TOKEN: ${LOCALAI_P2P_TOKEN}
+      P2P_TOKEN: ${LOCALAI_P2P_TOKEN}
+      TOKEN: ${LOCALAI_P2P_TOKEN}
+      LOCALAI_P2P_NETWORK_ID: ${LOCALAI_P2P_NETWORK_ID}
+      P2P_NETWORK_ID: ${LOCALAI_P2P_NETWORK_ID}
+      LOCALAI_FEDERATED: ${LOCALAI_FEDERATED}
+      FEDERATED: ${LOCALAI_FEDERATED}
+      FEDERATED_SERVER: ${LOCALAI_FEDERATED_SERVER}
+      LOCALAI_P2P_ENABLE_LIMITS: ${LOCALAI_P2P_ENABLE_LIMITS}
+      LOCALAI_P2P_DISABLE_DHT: ${LOCALAI_P2P_DISABLE_DHT}
+      LOCALAI_P2P_LOGLEVEL: ${LOCALAI_P2P_LOGLEVEL:-info}
+      LOCALAI_P2P_LIB_LOGLEVEL: ${LOCALAI_P2P_LIB_LOGLEVEL:-fatal}
+      NVIDIA_VISIBLE_DEVICES: ${LOCALAI_M40_GPU_UUID}
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    volumes:
+      - ${APP_DATA_DIR}/models:/models
+      - ${APP_DATA_DIR}/config:/config
+      - ${APP_DATA_DIR}/cache:/tmp/localai
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fsS http://127.0.0.1:3216/readyz >/dev/null || curl -fsS http://127.0.0.1:3216/ >/dev/null
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 3m
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids:
+                - ${LOCALAI_M40_GPU_UUID}
+              capabilities:
+                - gpu
+    x-runtipi:
+      is_main: true
+      internal_port: 3216
+      add_to_main_network: false
+    labels:
+      traefik.http.middlewares.rassylocalgpt-compress.compress: "true"
+      traefik.http.middlewares.rassylocalgpt-secure-headers.headers.stsSeconds: "31536000"
+      traefik.http.middlewares.rassylocalgpt-secure-headers.headers.browserXssFilter: "true"
+      traefik.http.middlewares.rassylocalgpt-secure-headers.headers.contentTypeNosniff: "true"
+      traefik.http.routers.rassylocalgpt.middlewares: "rassylocalgpt-compress,rassylocalgpt-secure-headers"

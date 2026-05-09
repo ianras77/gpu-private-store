@@ -22,4 +22,4 @@ RUN useradd -r -u 10001 -g users rassygpt \
 USER rassygpt
 
 EXPOSE 8080
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers"]
+CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port 8080 --proxy-headers --workers ${RASSYGPT_GATEWAY_WORKERS:-4} --limit-concurrency ${RASSYGPT_GATEWAY_LIMIT_CONCURRENCY:-256} --backlog 2048"]

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Rassy LocalAI</title>
+  <desc id="desc">A LocalAI mark with an M40 GPU badge.</desc>
+  <rect width="256" height="256" rx="48" fill="#111827"/>
+  <path d="M72 76h112c8.8 0 16 7.2 16 16v72c0 8.8-7.2 16-16 16H72c-8.8 0-16-7.2-16-16V92c0-8.8 7.2-16 16-16Z" fill="#f8fafc"/>
+  <path d="M84 100h88v56H84z" fill="#0f172a"/>
+  <path d="M104 122h48v12h-48z" fill="#22c55e"/>
+  <path d="M104 140h32v8h-32z" fill="#38bdf8"/>
+  <path d="M44 104h12v16H44zm0 32h12v16H44zm156-32h12v16h-12zm0 32h12v16h-12z" fill="#94a3b8"/>
+  <circle cx="190" cy="190" r="34" fill="#22c55e"/>
+  <text x="190" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#052e16">M40</text>
+</svg>

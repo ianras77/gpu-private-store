@@ -6,18 +6,21 @@ services:
     build:
       context: ./gateway
       dockerfile: Dockerfile
-    image: runtipi-local-rassygpt-gateway:0.1.1
+    image: runtipi-local-rassygpt-gateway:0.2.0
     restart: unless-stopped
     environment:
       TZ: ${TZ}
       RASSYGPT_API_KEY: ${RASSYGPT_API_KEY}
       RASSYGPT_REQUIRE_AUTH: ${RASSYGPT_REQUIRE_AUTH}
+      RASSYGPT_GATEWAY_WORKERS: ${RASSYGPT_GATEWAY_WORKERS}
+      RASSYGPT_GATEWAY_LIMIT_CONCURRENCY: ${RASSYGPT_GATEWAY_LIMIT_CONCURRENCY}
       RASSYGPT_CONFIG_FILE: /data/config/routes.yaml
       RASSYGPT_QDRANT_URL: ${RASSYGPT_QDRANT_URL}
       RASSYGPT_IMAGE_BACKEND_URL: ${RASSYGPT_IMAGE_BACKEND_URL}
       RASSYGPT_AUDIO_BACKEND_URL: ${RASSYGPT_AUDIO_BACKEND_URL}
       RASSYGPT_GENERAL_URL: http://rassygpt-general:8080
       RASSYGPT_CODER_URL: http://rassygpt-coder:8080
+      RASSYGPT_CODER_SECONDARY_URL: http://rassygpt-coder-secondary:8000
       RASSYGPT_FAST_URL: http://rassygpt-fast:8080
       RASSYGPT_EMBED_URL: http://rassygpt-embed:8080
       RASSYGPT_RERANK_URL: http://rassygpt-rerank:8080
@@ -49,19 +52,21 @@ services:
     runtime: nvidia
     environment:
       TZ: ${TZ}
-      HF_TOKEN: ${HF_TOKEN}
+      HF_TOKEN: ${HF_TOKEN:-}
       NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_GENERAL}
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
     volumes:
-      - ${APP_DATA_DIR}/models/llama-cache:/root/.cache
-      - ${APP_DATA_DIR}/models/general:/models
+      - ${RASSYGPT_FAST_STORAGE_DIR}/llama-cache:/root/.cache
+      - ${RASSYGPT_FAST_STORAGE_DIR}/general:/models
     command:
       - --host
       - 0.0.0.0
       - --port
       - "8080"
-      - -hf
-      - ${RASSYGPT_GENERAL_MODEL}
+      - --hf-repo
+      - ${RASSYGPT_GENERAL_REPO}
+      - --hf-file
+      - ${RASSYGPT_GENERAL_FILE}
       - -c
       - "32768"
       - -np
@@ -72,12 +77,6 @@ services:
       - q8_0
       - --cache-type-v
       - q8_0
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
     healthcheck:
       test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
       interval: 45s
@@ -91,19 +90,21 @@ services:
     runtime: nvidia
     environment:
       TZ: ${TZ}
-      HF_TOKEN: ${HF_TOKEN}
+      HF_TOKEN: ${HF_TOKEN:-}
       NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_CODER}
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
     volumes:
-      - ${APP_DATA_DIR}/models/llama-cache:/root/.cache
-      - ${APP_DATA_DIR}/models/coder:/models
+      - ${RASSYGPT_FAST_STORAGE_DIR}/llama-cache:/root/.cache
+      - ${RASSYGPT_FAST_STORAGE_DIR}/coder:/models
     command:
       - --host
       - 0.0.0.0
       - --port
       - "8080"
-      - -hf
-      - ${RASSYGPT_CODER_MODEL}
+      - --hf-repo
+      - ${RASSYGPT_CODER_REPO}
+      - --hf-file
+      - ${RASSYGPT_CODER_FILE}
       - -c
       - "32768"
       - -np
@@ -118,12 +119,6 @@ services:
       - q8_0
       - --cache-type-v
       - q8_0
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
     healthcheck:
       test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
       interval: 45s
@@ -137,19 +132,21 @@ services:
     runtime: nvidia
     environment:
       TZ: ${TZ}
-      HF_TOKEN: ${HF_TOKEN}
+      HF_TOKEN: ${HF_TOKEN:-}
       NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_FAST}
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
     volumes:
-      - ${APP_DATA_DIR}/models/llama-cache:/root/.cache
-      - ${APP_DATA_DIR}/models/fast:/models
+      - ${RASSYGPT_FAST_STORAGE_DIR}/llama-cache:/root/.cache
+      - ${RASSYGPT_FAST_STORAGE_DIR}/fast:/models
     command:
       - --host
       - 0.0.0.0
       - --port
       - "8080"
-      - -hf
-      - ${RASSYGPT_FAST_MODEL}
+      - --hf-repo
+      - ${RASSYGPT_FAST_REPO}
+      - --hf-file
+      - ${RASSYGPT_FAST_FILE}
       - -c
       - "16384"
       - -np
@@ -160,12 +157,6 @@ services:
       - q8_0
       - --cache-type-v
       - q8_0
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
     healthcheck:
       test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
       interval: 45s
@@ -173,25 +164,74 @@ services:
       retries: 20
       start_period: 5m
 
+  rassygpt-coder-secondary:
+    image: ${RASSYGPT_VLLM_IMAGE}
+    restart: unless-stopped
+    runtime: nvidia
+    ipc: host
+    environment:
+      TZ: ${TZ}
+      HF_TOKEN: ${HF_TOKEN:-}
+      HF_HOME: /root/.cache/huggingface
+      HF_HUB_DISABLE_XET: "true"
+      NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_CODER_SECONDARY}
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    volumes:
+      - ${RASSYGPT_FAST_STORAGE_DIR}/vllm-cache:/root/.cache/huggingface
+    command:
+      - --model
+      - ${RASSYGPT_CODER_SECONDARY_MODEL}
+      - --served-model-name
+      - rassy-coder-secondary
+      - --trust-remote-code
+      - --quantization
+      - bitsandbytes
+      - --load-format
+      - bitsandbytes
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --dtype
+      - half
+      - --max-model-len
+      - "8192"
+      - --gpu-memory-utilization
+      - "0.86"
+      - --max-num-seqs
+      - "1"
+      - --download-dir
+      - /root/.cache/huggingface
+      - --enable-prefix-caching
+      - --disable-log-requests
+    healthcheck:
+      test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8000'"]
+      interval: 45s
+      timeout: 10s
+      retries: 20
+      start_period: 15m
+
   rassygpt-embed:
     image: ${RASSYGPT_LLAMA_IMAGE}
     restart: unless-stopped
     runtime: nvidia
     environment:
       TZ: ${TZ}
-      HF_TOKEN: ${HF_TOKEN}
+      HF_TOKEN: ${HF_TOKEN:-}
       NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_RETRIEVAL}
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
     volumes:
-      - ${APP_DATA_DIR}/models/llama-cache:/root/.cache
-      - ${APP_DATA_DIR}/models/embed:/models
+      - ${RASSYGPT_FAST_STORAGE_DIR}/llama-cache:/root/.cache
+      - ${RASSYGPT_FAST_STORAGE_DIR}/embed:/models
     command:
       - --host
       - 0.0.0.0
       - --port
       - "8080"
-      - -hf
-      - ${RASSYGPT_EMBED_MODEL}
+      - --hf-repo
+      - ${RASSYGPT_EMBED_REPO}
+      - --hf-file
+      - ${RASSYGPT_EMBED_FILE}
       - -c
       - "8192"
       - -b
@@ -203,12 +243,6 @@ services:
       - --embeddings
       - --pooling
       - mean
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
     healthcheck:
       test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
       interval: 45s
@@ -222,31 +256,27 @@ services:
     runtime: nvidia
     environment:
       TZ: ${TZ}
-      HF_TOKEN: ${HF_TOKEN}
+      HF_TOKEN: ${HF_TOKEN:-}
       NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_RETRIEVAL}
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
     volumes:
-      - ${APP_DATA_DIR}/models/llama-cache:/root/.cache
-      - ${APP_DATA_DIR}/models/rerank:/models
+      - ${RASSYGPT_FAST_STORAGE_DIR}/llama-cache:/root/.cache
+      - ${RASSYGPT_FAST_STORAGE_DIR}/rerank:/models
     command:
       - --host
       - 0.0.0.0
       - --port
       - "8080"
-      - -hf
-      - ${RASSYGPT_RERANK_MODEL}
+      - --hf-repo
+      - ${RASSYGPT_RERANK_REPO}
+      - --hf-file
+      - ${RASSYGPT_RERANK_FILE}
       - -c
       - "2048"
       - -np
       - "2"
       - -ngl
       - "999"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
     healthcheck:
       test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
       interval: 45s
@@ -262,7 +292,7 @@ services:
       QDRANT__SERVICE__HTTP_PORT: 6333
       QDRANT__SERVICE__GRPC_PORT: 6334
     volumes:
-      - ${APP_DATA_DIR}/qdrant/storage:/qdrant/storage
+      - ${RASSYGPT_FAST_STORAGE_DIR}/qdrant/storage:/qdrant/storage
     healthcheck:
       test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/6333'"]
       interval: 30s
@@ -272,3 +302,41 @@ services:
     x-runtipi:
       add_to_main_network: true
       internal_port: 6333
+
+  rassygpt-localai-media:
+    image: ${RASSYGPT_LOCALAI_IMAGE}
+    restart: unless-stopped
+    runtime: nvidia
+    environment:
+      TZ: ${TZ}
+      NVIDIA_VISIBLE_DEVICES: ${RASSYGPT_GPU_MEDIA}
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      LOCALAI_MODELS_PATH: /models
+      LOCALAI_GENERATED_CONTENT_PATH: /generated
+      LOCALAI_UPLOAD_PATH: /uploads
+      LOCALAI_DISABLE_WEBUI: "true"
+      LOCALAI_LOG_LEVEL: info
+    volumes:
+      - ${RASSYGPT_FAST_STORAGE_DIR}/localai/models:/models
+      - ${RASSYGPT_FAST_STORAGE_DIR}/localai/generated:/generated
+      - ${RASSYGPT_FAST_STORAGE_DIR}/localai/uploads:/uploads
+      - ${RASSYGPT_FAST_STORAGE_DIR}/localai/data:/data
+    command:
+      - run
+      - localai@${RASSYGPT_IMAGE_MODEL}
+      - localai@${RASSYGPT_STT_MODEL}
+      - localai@${RASSYGPT_TTS_MODEL}
+      - --address
+      - :8080
+      - --models-path
+      - /models
+      - --generated-content-path
+      - /generated
+      - --data-path
+      - /data
+    healthcheck:
+      test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
+      interval: 45s
+      timeout: 10s
+      retries: 40
+      start_period: 30m

@@ -22,15 +22,16 @@ Expected default map:
 |---|---|
 | general | `GPU-da459626-429e-72e2-1fe9-b08d791ff949` |
 | coder | `GPU-c7937378-74e4-b9ab-1953-342773d4e962,GPU-d48ccf91-1518-72fa-b13a-73cb480788e2` |
-| fast | `GPU-c83f333f-e104-7d4c-b1c1-e0d2e8818053` |
+| fast | `GPU-aa4fe9a9-bc80-df98-ea0f-0d152446d84c` |
+| secondary coder | `GPU-c83f333f-e104-7d4c-b1c1-e0d2e8818053` |
 | retrieval | `GPU-e1d104e4-bdf8-8558-a863-fa50b1168122` |
-| reserved M40 | `GPU-787cf3b9-e1d7-1712-bd12-60cf740bade8` |
+| media/image | `GPU-b9b6fa94-347e-3b4d-d920-8627b0ef5897` |
 
-The M40 is intentionally retained in the configuration but is not assigned to any default RassyGPT LLM lane.
+The M40 is intentionally excluded from the RassyGPT stack. Do not assign `GPU-787cf3b9-e1d7-1712-bd12-60cf740bade8` to any RassyGPT lane.
 
 ## 3. First boot
 
-The first boot downloads several GGUF models from Hugging Face. This can take a long time and a lot of disk. The Runtipi health check only requires the gateway to be alive, so model downloads should not mark the whole app as failed.
+The first boot downloads several GGUF models from Hugging Face. This can take a long time and a lot of disk. RassyGPT stores the llama.cpp cache, lane model directories, and Qdrant vector storage under `RASSYGPT_FAST_STORAGE_DIR`, which defaults to `/models-fast/rassygpt`. RassyGPT uses explicit Hugging Face repo and GGUF file settings for llama.cpp so model selection is stable across llama.cpp image updates. The Runtipi health check only requires the gateway to be alive, so model downloads should not mark the whole app as failed.
 
 ## 4. Test
 

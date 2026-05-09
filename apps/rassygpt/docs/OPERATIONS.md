@@ -23,16 +23,15 @@ docker logs -f rassygpt-embed
 watch -n 2 nvidia-smi
 ```
 
-## Model cache
+## Fast model and vector storage
 
-Persistent model/cache data lands under the app data directory:
+Persistent model/cache and vector data lands under `RASSYGPT_FAST_STORAGE_DIR`, which defaults to:
 
 ```text
-${APP_DATA_DIR}/models/llama-cache
-${APP_DATA_DIR}/models/general
-${APP_DATA_DIR}/models/coder
-${APP_DATA_DIR}/qdrant/storage
+/models-fast/rassygpt
 ```
+
+That directory holds llama.cpp caches, per-lane model directories, optional media/model caches, and Qdrant storage.
 
 ## Change routes without rebuilding
 

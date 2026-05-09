@@ -8,6 +8,6 @@ RassyGPT is a Runtipi-native, hardware-aware OpenAI-compatible AI gateway for Ia
 - `rassy-embed` and `rassy-rerank` on the P100 for retrieval
 - optional image and audio connectors for ComfyUI, Speaches, LocalAI, or other OpenAI-compatible services
 - integrated internal Qdrant storage with an external connector mode
-- the M40 is retained as a reserved GPU and is not part of the default LLM lanes
+- the M40 is excluded from the RassyGPT stack and is not assigned to any lane
 
 This is designed to be the single AI front door for Open WebUI, Cheshire Cat, coding agents, RAG workflows, custom apps, and future Runtipi services.

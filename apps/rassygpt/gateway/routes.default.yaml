@@ -1,11 +1,11 @@
 server:
   name: RassyGPT
-  version: "0.1.1"
+  version: "0.2.0"
   require_auth: ${RASSYGPT_REQUIRE_AUTH:-true}
   qdrant_url: ${RASSYGPT_QDRANT_URL:-http://rassygpt-qdrant:6333}
 
 defaults:
-  chat: rassy-general
+  chat: rassy-smart
   completions: rassy-general
   embeddings: rassy-embed
   rerank: rassy-rerank
@@ -20,6 +20,10 @@ backends:
   coder:
     type: openai
     base_url: ${RASSYGPT_CODER_URL:-http://rassygpt-coder:8080}
+    health_path: /health
+  coder_secondary:
+    type: openai
+    base_url: ${RASSYGPT_CODER_SECONDARY_URL:-http://rassygpt-coder-secondary:8000}
     health_path: /health
   fast:
     type: openai
@@ -44,6 +48,11 @@ backends:
     health_path: /health
 
 models:
+  rassy-smart:
+    kind: chat
+    backend: smart
+    upstream_model: rassy-smart
+    description: Smart default router that chooses chat, coder, secondary coder, or fast utility lanes.
   rassy-general:
     kind: chat
     backend: general
@@ -54,11 +63,16 @@ models:
     backend: coder
     upstream_model: rassy-coder
     description: Coding specialist on GPUs 0 and 2, dual V100 16GB.
+  rassy-coder-secondary:
+    kind: chat
+    backend: coder_secondary
+    upstream_model: rassy-coder-secondary
+    description: Secondary coder worker on the V100 12GB lane.
   rassy-fast:
     kind: chat
     backend: fast
     upstream_model: rassy-fast
-    description: Fast utility model on GPU 6, V100 12GB.
+    description: Fast utility model on the P40 24GB lane.
   rassy-embed:
     kind: embeddings
     backend: embed
@@ -72,19 +86,22 @@ models:
   rassy-image:
     kind: images
     backend: image
-    upstream_model: rassy-image
-    description: Optional image backend connector. Set RASSYGPT_IMAGE_BACKEND_URL.
+    upstream_model: ${RASSYGPT_IMAGE_MODEL:-flux.2-klein-4b}
+    description: LocalAI image lane on the RTX 2080 Ti.
   rassy-audio:
     kind: audio
     backend: audio
-    upstream_model: rassy-audio
-    description: Optional audio backend connector. Set RASSYGPT_AUDIO_BACKEND_URL.
+    upstream_model: ${RASSYGPT_STT_MODEL:-whisper-large-turbo-q8_0}
+    tts_model: ${RASSYGPT_TTS_MODEL:-voice-en_US-lessac-medium}
+    description: LocalAI STT/TTS lane on the RTX 2080 Ti.
 
 aliases:
   gpt-4o-mini: rassy-fast
-  gpt-4o: rassy-general
-  o4-mini: rassy-general
+  gpt-4o: rassy-smart
+  o4-mini: rassy-smart
   coder: rassy-coder
+  coder-secondary: rassy-coder-secondary
+  rassy-worker: rassy-coder-secondary
   embedding: rassy-embed
   text-embedding-3-small: rassy-embed
   text-embedding-3-large: rassy-embed

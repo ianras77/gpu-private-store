@@ -12,14 +12,8 @@ services:
       NVIDIA_VISIBLE_DEVICES: GPU-b9b6fa94-347e-3b4d-d920-8627b0ef5897
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
     volumes:
-      - ${APP_DATA_DIR}/tabby/models:/models
+      - ${RASSYGPT_FAST_STORAGE_DIR}/tabby/models:/models
       - ${APP_DATA_DIR}/tabby/config:/app/config
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
     x-runtipi:
       add_to_main_network: false
       internal_port: 5000

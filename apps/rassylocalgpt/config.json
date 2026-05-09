@@ -1,0 +1,102 @@
+{
+  "name": "Rassy LocalAI",
+  "available": true,
+  "port": 3216,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "rassylocalgpt",
+  "description": "Current LocalAI GPU app pinned to the host Tesla M40 for a private OpenAI-compatible API and built-in model management UI.",
+  "tipi_version": 1,
+  "version": "4.1.3",
+  "categories": [
+    "ai",
+    "development"
+  ],
+  "short_desc": "LocalAI v4.1.3 bound to the Tesla M40 GPU.",
+  "author": "Ian Rasmussen + GPT-5.5",
+  "source": "https://github.com/mudler/LocalAI",
+  "website": "https://localai.io",
+  "form_fields": [
+    {
+      "type": "random",
+      "label": "LocalAI API key",
+      "min": 32,
+      "env_variable": "LOCALAI_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "LocalAI image",
+      "env_variable": "LOCALAI_IMAGE",
+      "default": "localai/localai:v4.1.3-gpu-nvidia-cuda-12",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Tesla M40 GPU UUID",
+      "env_variable": "LOCALAI_M40_GPU_UUID",
+      "default": "GPU-787cf3b9-e1d7-1712-bd12-60cf740bade8",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Models directory",
+      "env_variable": "LOCALAI_MODELS_PATH",
+      "default": "/models",
+      "required": true
+    },
+    {
+      "type": "boolean",
+      "label": "Enable LocalAI debug logs",
+      "env_variable": "LOCALAI_DEBUG",
+      "default": false,
+      "required": true
+    },
+    {
+      "type": "random",
+      "label": "LocalAI P2P swarm token",
+      "min": 48,
+      "env_variable": "LOCALAI_P2P_TOKEN"
+    },
+    {
+      "type": "text",
+      "label": "LocalAI P2P network ID",
+      "env_variable": "LOCALAI_P2P_NETWORK_ID",
+      "default": "rassylocalgpt-m40-master",
+      "required": true
+    },
+    {
+      "type": "boolean",
+      "label": "Enable federated swarm mode",
+      "env_variable": "LOCALAI_FEDERATED",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "boolean",
+      "label": "Run as federated swarm entrypoint",
+      "env_variable": "LOCALAI_FEDERATED_SERVER",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "boolean",
+      "label": "Limit P2P resource use",
+      "env_variable": "LOCALAI_P2P_ENABLE_LIMITS",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "boolean",
+      "label": "LAN-only P2P discovery",
+      "env_variable": "LOCALAI_P2P_DISABLE_DHT",
+      "default": false,
+      "required": true
+    }
+  ],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1778284800000,
+  "updated_at": 1778284800000
+}

@@ -15,14 +15,31 @@ import yaml
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
-APP_VERSION = "0.1.1"
+APP_VERSION = "0.2.0"
 CONFIG_PATH = Path(os.getenv("RASSYGPT_CONFIG_FILE", "/data/config/routes.yaml"))
 DEFAULT_CONFIG_PATH = Path(os.getenv("RASSYGPT_DEFAULT_CONFIG_FILE", "/app/routes.default.yaml"))
 if not DEFAULT_CONFIG_PATH.exists():
     DEFAULT_CONFIG_PATH = Path(__file__).with_name("routes.default.yaml")
-REQUEST_TIMEOUT = httpx.Timeout(connect=10.0, read=900.0, write=60.0, pool=10.0)
+REQUEST_TIMEOUT = httpx.Timeout(connect=10.0, read=900.0, write=60.0, pool=30.0)
+CLIENT_LIMITS = httpx.Limits(max_connections=512, max_keepalive_connections=128, keepalive_expiry=30.0)
 
 app = FastAPI(title="RassyGPT", version=APP_VERSION)
+
+
+@app.on_event("startup")
+async def startup() -> None:
+    app.state.http = httpx.AsyncClient(timeout=REQUEST_TIMEOUT, limits=CLIENT_LIMITS)
+
+
+@app.on_event("shutdown")
+async def shutdown() -> None:
+    client = getattr(app.state, "http", None)
+    if client:
+        await client.aclose()
+
+
+def _http() -> httpx.AsyncClient:
+    return app.state.http
 
 
 def _env_expand(text: str) -> str:
@@ -59,6 +76,12 @@ def _load_config() -> dict[str, Any]:
 
 def _truthy(value: Any) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _base_url(value: Any) -> str:
+    if value is None:
+        return ""
+    return str(value).strip().rstrip("/")
 
 
 def _auth_required(path: str) -> bool:
@@ -117,8 +140,48 @@ def _resolve_model(model_name: str | None, kind: str) -> tuple[str, dict[str, An
     return canonical, model_cfg, backend_cfg
 
 
+def _canonical_model_name(model_name: str | None, kind: str) -> str:
+    cfg = _load_config()
+    requested = model_name or cfg.get("defaults", {}).get(kind)
+    return cfg.get("aliases", {}).get(requested, requested)
+
+
+def _message_text(payload: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for message in payload.get("messages", []):
+        content = message.get("content") if isinstance(message, dict) else None
+        if isinstance(content, str):
+            parts.append(content)
+        elif isinstance(content, list):
+            for item in content:
+                if isinstance(item, dict) and isinstance(item.get("text"), str):
+                    parts.append(item["text"])
+    prompt = payload.get("prompt")
+    if isinstance(prompt, str):
+        parts.append(prompt)
+    return "\n".join(parts)
+
+
+def _smart_chat_target(payload: dict[str, Any]) -> str:
+    text = _message_text(payload).lower()
+    max_tokens = int(payload.get("max_tokens") or 0)
+    code_markers = {
+        "code", "repo", "repository", "bug", "debug", "traceback", "stack trace", "function",
+        "class ", "typescript", "javascript", "python", "rust", "golang", "docker", "compose",
+        "sql", "api", "test", "pytest", "refactor", "implement", "compile", "lint", "codex",
+    }
+    quick_markers = {"summarize", "summary", "classify", "route", "rewrite briefly", "one sentence"}
+    if any(marker in text for marker in code_markers):
+        if len(text) < 1800 and max_tokens and max_tokens <= 512:
+            return "rassy-coder-secondary"
+        return "rassy-coder"
+    if any(marker in text for marker in quick_markers) and len(text) < 2200:
+        return "rassy-fast"
+    return "rassy-general"
+
+
 def _backend_url(backend: dict[str, Any], path: str) -> str:
-    base = str(backend.get("base_url", "")).rstrip("/")
+    base = _base_url(backend.get("base_url"))
     if not base:
         raise HTTPException(status_code=503, detail="Backend URL is not configured for this route.")
     return f"{base}/{path.lstrip('/')}"
@@ -132,8 +195,7 @@ def _forward_headers(request: Request) -> dict[str, str]:
 
 
 async def _post_json(url: str, payload: dict[str, Any], request: Request) -> Response:
-    async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
-        upstream = await client.post(url, json=payload, headers=_forward_headers(request))
+    upstream = await _http().post(url, json=payload, headers=_forward_headers(request))
     return Response(
         content=upstream.content,
         status_code=upstream.status_code,
@@ -143,10 +205,9 @@ async def _post_json(url: str, payload: dict[str, Any], request: Request) -> Res
 
 async def _stream_json(url: str, payload: dict[str, Any], request: Request) -> StreamingResponse:
     async def generator() -> AsyncGenerator[bytes, None]:
-        async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
-            async with client.stream("POST", url, json=payload, headers=_forward_headers(request)) as upstream:
-                async for chunk in upstream.aiter_bytes():
-                    yield chunk
+        async with _http().stream("POST", url, json=payload, headers=_forward_headers(request)) as upstream:
+            async for chunk in upstream.aiter_bytes():
+                yield chunk
 
     return StreamingResponse(generator(), media_type="text/event-stream")
 
@@ -156,6 +217,8 @@ async def _proxy_openai_json(request: Request, kind: str, upstream_path: str) ->
         payload = await request.json()
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Request body must be JSON.")
+    if kind in {"chat", "completions"} and _canonical_model_name(payload.get("model"), kind) == "rassy-smart":
+        payload["model"] = _smart_chat_target(payload)
     canonical, model_cfg, backend = _resolve_model(payload.get("model"), kind)
     payload = dict(payload)
     payload["model"] = model_cfg.get("upstream_model", canonical)
@@ -266,10 +329,9 @@ async def _embedding_vectors(texts: list[str], request: Request) -> list[list[fl
     _, model_cfg, backend = _resolve_model(model_name, "embeddings")
     payload = {"model": model_cfg.get("upstream_model", model_name), "input": texts}
     url = _backend_url(backend, "/v1/embeddings")
-    async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
-        resp = await client.post(url, json=payload, headers=_forward_headers(request))
-        resp.raise_for_status()
-        data = resp.json()
+    resp = await _http().post(url, json=payload, headers=_forward_headers(request))
+    resp.raise_for_status()
+    data = resp.json()
     return [item["embedding"] for item in data.get("data", [])]
 
 
@@ -299,13 +361,12 @@ async def rerank(request: Request) -> Response:
     # Prefer a true reranker backend if configured and responsive.
     try:
         _, model_cfg, backend = _resolve_model(payload.get("model") or "rassy-rerank", "rerank")
-        base = str(backend.get("base_url", "")).rstrip("/")
+        base = _base_url(backend.get("base_url"))
         if base:
             path = backend.get("path", "/v1/rerank")
             forward_payload = dict(payload)
             forward_payload["model"] = model_cfg.get("upstream_model", "rassy-rerank")
-            async with httpx.AsyncClient(timeout=httpx.Timeout(10.0, read=120.0)) as client:
-                upstream = await client.post(f"{base}/{str(path).lstrip('/')}", json=forward_payload, headers=_forward_headers(request))
+            upstream = await _http().post(f"{base}/{str(path).lstrip('/')}", json=forward_payload, headers=_forward_headers(request), timeout=httpx.Timeout(10.0, read=120.0, write=60.0, pool=30.0))
             if upstream.status_code < 500:
                 return Response(content=upstream.content, status_code=upstream.status_code, media_type=upstream.headers.get("content-type", "application/json"))
     except Exception:
@@ -335,12 +396,22 @@ async def rerank(request: Request) -> Response:
 async def _forward_raw(request: Request, backend_kind: str, path: str) -> Response:
     cfg = _load_config()
     model = cfg.get("defaults", {}).get(backend_kind)
-    _, _, backend = _resolve_model(model, backend_kind)
+    canonical, model_cfg, backend = _resolve_model(model, backend_kind)
     url = _backend_url(backend, path)
     body = await request.body()
     headers = _forward_headers(request)
-    async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
-        upstream = await client.request(request.method, url, content=body, headers=headers)
+    if headers.get("content-type", "").startswith("application/json"):
+        try:
+            payload = json.loads(body or b"{}")
+            if isinstance(payload, dict):
+                if backend_kind == "audio" and path.endswith("/speech"):
+                    payload["model"] = payload.get("model") or model_cfg.get("tts_model") or model_cfg.get("upstream_model", canonical)
+                else:
+                    payload["model"] = payload.get("model") or model_cfg.get("upstream_model", canonical)
+                body = json.dumps(payload).encode("utf-8")
+        except Exception:
+            pass
+    upstream = await _http().request(request.method, url, content=body, headers=headers)
     return Response(content=upstream.content, status_code=upstream.status_code, media_type=upstream.headers.get("content-type", "application/json"))
 
 
@@ -365,7 +436,7 @@ async def audio_speech(request: Request) -> Response:
 
 
 async def _check_backend(name: str, backend: dict[str, Any]) -> dict[str, Any]:
-    base = str(backend.get("base_url", "")).rstrip("/")
+    base = _base_url(backend.get("base_url"))
     if not base:
         return {"healthy": False, "configured": False, "message": "no base_url"}
     path = backend.get("health_path", "/health")
