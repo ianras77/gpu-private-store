@@ -3,12 +3,16 @@ import {
   BookOpen,
   Compass,
   ExternalLink,
+  FileText,
+  Gamepad2,
   Headphones,
   LayoutGrid,
   LockKeyhole,
   Map,
   MessageSquare,
+  PenTool,
   Search,
+  Send,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -550,31 +554,13 @@ export default function App() {
   }, []);
 
   const authentikEntryUrl = ensureTrailingSlash(config.authentikUrl);
-  const accountRequestUrl = resolveChildUrl(authentikEntryUrl, "sign-up");
+  const accountRequestUrl = resolveChildUrl(authentikEntryUrl, "signup");
   const familyPortalUrl = ensureTrailingSlash(config.heimdallUrl);
   const searchUrl = ensureTrailingSlash(config.searchUrl);
   const photosUrl = ensureTrailingSlash(config.photosUrl);
   const signupUrl = config.signupUrl.trim() || defaultConfig.signupUrl;
   const publicBaseLabel = config.publicBaseUrl.replace(/^https?:\/\//, "");
   const appsGuideUrl = "/#/apps";
-
-  const heroStats = [
-    {
-      title: "Media account",
-      description:
-        "I made signup.rasies.com the easy Wizarr lane for media only.",
-    },
-    {
-      title: "Family account",
-      description:
-        "I use auth.rasies.com/sign-up for the broader family account request.",
-    },
-    {
-      title: "Already approved",
-      description:
-        "I put the approved family apps at apps.rasies.com after sign-in.",
-    },
-  ];
 
   const mediaSetupSteps = [
     "Go to signup.rasies.com when you only need Plex, books, audiobooks, or music.",
@@ -583,7 +569,7 @@ export default function App() {
   ];
 
   const fullSetupSteps = [
-    "Go to auth.rasies.com/sign-up when you want the broader family suite.",
+    "Go to auth.rasies.com/signup when you want the broader family suite.",
     "I review those requests first, so this is not an instant account button.",
     "After I approve you, sign in at auth.rasies.com and open apps.rasies.com.",
   ];
@@ -608,7 +594,7 @@ export default function App() {
         icon: <LockKeyhole className="h-4 w-4" />,
         badge: "Review first",
         tone: "live",
-        note: "auth.rasies.com/sign-up",
+        note: "auth.rasies.com/signup",
       },
       {
         title: "Open family apps",
@@ -629,6 +615,47 @@ export default function App() {
       },
     ],
     [accountRequestUrl, familyPortalUrl, signupUrl],
+  );
+
+  const helpfulServiceLinks = useMemo<ServiceLink[]>(
+    () => [
+      {
+        title: "PDF",
+        description: "Fix, split, merge, and clean up PDFs.",
+        href: "https://pdf.rasies.com",
+        icon: <FileText className="h-4 w-4" />,
+        note: "pdf.rasies.com",
+      },
+      {
+        title: "Send",
+        description: "Quick temporary file sharing.",
+        href: config.sendUrl,
+        icon: <Send className="h-4 w-4" />,
+        note: "send.rasies.com",
+      },
+      {
+        title: "Diagram",
+        description: "Make clean diagrams and flowcharts.",
+        href: "https://diagram.rasies.com",
+        icon: <Map className="h-4 w-4" />,
+        note: "diagram.rasies.com",
+      },
+      {
+        title: "Draw",
+        description: "Sketch ideas on a simple whiteboard.",
+        href: config.drawUrl,
+        icon: <PenTool className="h-4 w-4" />,
+        note: "draw.rasies.com",
+      },
+      {
+        title: "Games",
+        description: "A little fun when the useful stuff can wait.",
+        href: "https://games.rasies.com",
+        icon: <Gamepad2 className="h-4 w-4" />,
+        note: "games.rasies.com",
+      },
+    ],
+    [config.drawUrl, config.sendUrl],
   );
 
   const signInAppGroups = useMemo<AppCatalogGroup[]>(
@@ -969,7 +996,7 @@ export default function App() {
         href: accountRequestUrl,
         icon: <LockKeyhole className="h-4 w-4" />,
         badge: "Ask for access",
-        note: "auth.rasies.com/sign-up",
+        note: "auth.rasies.com/signup",
       },
       {
         title: "Open family apps",
@@ -1069,7 +1096,7 @@ export default function App() {
                 <p className="hero-eyebrow">Rasies apps guide</p>
                 <h1>I split the apps so the right door is obvious.</h1>
                 <p className="hero-copy">
-                  I use auth.rasies.com/sign-up for full family account
+                  I use auth.rasies.com/signup for full family account
                   requests, and apps.rasies.com becomes the dashboard after I
                   approve access. Some apps use true Authentik sign-in. Others
                   are useful direct links in the same dashboard.
@@ -1231,6 +1258,7 @@ export default function App() {
         />
         <nav className="quick-nav reveal reveal-1" aria-label="Page sections">
           <a href="#start">Start</a>
+          <a href="#helpful-services">Tools</a>
           <a href="#notes">Notes</a>
           <a href="#chat">Chat</a>
           <a href="#search">Search</a>
@@ -1248,87 +1276,83 @@ export default function App() {
             <div className="hero-copy-stack">
               <p className="hero-eyebrow">Rasies family site</p>
               <h1>
-                Welcome, Rasies. I made the big science-crazy house, and you are
-                welcome.
+                Family, start here. I made this simple on purpose.
               </h1>
               <p className="hero-copy">
-                I have things pretty stable now, and most of this is genuinely
-                useful: media, photos, files, notes, planning, search, chat, and
-                the family app board.
+                Welcome to the Rasies family site. Pick the button that matches
+                what you need, and you are off. No guessing, no hunting around.
               </p>
               <p className="hero-copy hero-copy-secondary">
-                I am keeping the two account lanes separate: signup.rasies.com
-                is for media only, while auth.rasies.com/sign-up is where you
-                ask me for broader family access.
+                If you just want media, use the easy Wizarr signup. If you want
+                the full family set of services, use the Authentik signup and I
+                will review it.
               </p>
 
-              <div className="hero-actions">
+              <div className="home-signup-grid" aria-label="Signup choices">
                 <a
                   href={signupUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="btn btn-primary"
+                  className="home-signup-card home-signup-card-media"
                 >
-                  <Headphones className="h-4 w-4" />
-                  Go to easy media signup
+                  <span className="home-signup-icon">
+                    <Headphones className="h-6 w-6" aria-hidden />
+                  </span>
+                  <span className="home-signup-copy">
+                    <strong>Easy media signup</strong>
+                    <small>signup.rasies.com</small>
+                    <em>Wizarr for Plex, books, audiobooks, and music.</em>
+                  </span>
+                  <ExternalLink className="home-signup-arrow h-5 w-5" />
                 </a>
                 <a
                   href={accountRequestUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="btn btn-ghost"
+                  className="home-signup-card home-signup-card-family"
                 >
-                  <LockKeyhole className="h-4 w-4" />
-                  Ask for family account
-                </a>
-                <a href={appsGuideUrl} className="btn btn-ghost">
-                  <Compass className="h-4 w-4" />
-                  See all apps
-                </a>
-              </div>
-
-              <div className="hero-stats" aria-label="What this site offers">
-                {heroStats.map((item) => (
-                  <div key={item.title} className="hero-stat">
-                    <strong>{item.title}</strong>
-                    <span>{item.description}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="hero-account-grid" aria-label="Account lanes">
-                <a
-                  href={signupUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hero-account-card hero-account-media"
-                >
-                  <span>1</span>
-                  <strong>Media account</strong>
-                  <p>
-                    I made this the easy signup for Plex, books, audiobooks, and
-                    music.
-                  </p>
-                  <small>signup.rasies.com</small>
-                </a>
-                <a
-                  href={accountRequestUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hero-account-card hero-account-family"
-                >
-                  <span>2</span>
-                  <strong>Broader family suite</strong>
-                  <p>
-                    Ask me for access to photos, files, notes, planning, and
-                    family apps.
-                  </p>
-                  <small>auth.rasies.com/sign-up</small>
+                  <span className="home-signup-icon">
+                    <LockKeyhole className="h-6 w-6" aria-hidden />
+                  </span>
+                  <span className="home-signup-copy">
+                    <strong>Full family services</strong>
+                    <small>auth.rasies.com/signup</small>
+                    <em>Authentik signup for photos, files, notes, apps, and more.</em>
+                  </span>
+                  <ExternalLink className="home-signup-arrow h-5 w-5" />
                 </a>
               </div>
             </div>
           </div>
         </header>
+
+        <section
+          id="helpful-services"
+          className="helpful-service-bar reveal reveal-2"
+          aria-labelledby="helpful-services-heading"
+        >
+          <div className="helpful-service-bar-head">
+            <Sparkles className="h-4 w-4" aria-hidden />
+            <h2 id="helpful-services-heading">
+              Easy access to helpful services
+            </h2>
+          </div>
+          <div className="helpful-service-links">
+            {helpfulServiceLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                className="helpful-service-link"
+              >
+                <span>{link.icon}</span>
+                <strong>{link.title}</strong>
+                <small>{link.note}</small>
+              </a>
+            ))}
+          </div>
+        </section>
 
         {configError && <div className="inline-notice">{configError}</div>}
 
@@ -1549,7 +1573,7 @@ export default function App() {
           <ServiceLaunchpad links={photoCtaLinks} />
           <p className="manifesto-note">
             If Immich does not open for you yet, ask me for the full family
-            account at auth.rasies.com/sign-up.
+            account at auth.rasies.com/signup.
           </p>
         </section>
 
@@ -1591,7 +1615,7 @@ export default function App() {
           <div className="site-footer">
             <span>{publicBaseLabel}</span>
             <span>
-              I made signup.rasies.com for media, auth.rasies.com/sign-up for
+              I made signup.rasies.com for media, auth.rasies.com/signup for
               family account requests, and this site for the rest laid out
               cleanly.
             </span>
