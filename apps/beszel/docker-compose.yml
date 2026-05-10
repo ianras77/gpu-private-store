@@ -22,7 +22,6 @@ services:
     environment:
       LISTEN: 45876
       KEY: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/AjramldH8szPTXSbodEZjkN5tLPRMsqzZobygYmKE'
-      TOKEN:
       HUB_URL: https://monitor.rasies.com
     x-runtipi:
       is_main: true

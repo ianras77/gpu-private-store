@@ -6,7 +6,7 @@
   "dynamic_config": true,
   "id": "beszel",
   "description": "Beszel runs the node agent for server, disk, GPU, and Docker status reporting on this secondary host.",
-  "tipi_version": 3,
+  "tipi_version": 4,
   "version": "0.8.17",
   "categories": [
     "utilities"
@@ -20,5 +20,5 @@
   ],
   "no_gui": true,
   "created_at": 1774316487138,
-  "updated_at": 1774316487140
+  "updated_at": 1774316487141
 }
