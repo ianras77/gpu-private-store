@@ -4,6 +4,7 @@ services:
     restart: unless-stopped
     cap_add:
     - SYS_RAWIO
+    - SYS_ADMIN
     devices:
     - /dev/sda:/dev/sda
     - /dev/sdb:/dev/sdb
@@ -23,6 +24,7 @@ services:
       LISTEN: 45876
       KEY: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/AjramldH8szPTXSbodEZjkN5tLPRMsqzZobygYmKE'
       HUB_URL: https://monitor.rasies.com
+      TOKEN: '90eb6b35-3111-46d7-b1c6-815e07b44ebc'
     x-runtipi:
       is_main: true
       internal_port: 45876
