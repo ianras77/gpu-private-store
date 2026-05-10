@@ -20,10 +20,13 @@ services:
     - /:/host:ro
     - /proc:/host/proc:ro
     environment:
-      LISTEN: ${BESZEL_LISTEN:-45876}
-      KEY: ${BESZEL_KEY:-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/AjramldH8szPTXSbodEZjkN5tLPRMsqzZobygYmKE}
+      LISTEN: 45876
+      KEY: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/AjramldH8szPTXSbodEZjkN5tLPRMsqzZobygYmKE'
+      TOKEN:
+      HUB_URL: https://monitor.rasies.com
     x-runtipi:
       is_main: true
       internal_port: 45876
 x-runtipi:
   schema_version: 2
+
