@@ -108,10 +108,15 @@ const defaultAbout: AboutConfig = {
   ],
 };
 
+const FAMILY_ACCOUNT_REQUEST_URL =
+  "https://auth.rasies.com/if/flow/runtipi-waitlist-enrollment/";
+const FAMILY_APP_LIBRARY_URL = "https://auth.rasies.com/if/user/#/library";
+const MEDIA_SIGNUP_DIRECT_URL = "https://signup.rasies.com/j/RASIES";
+
 const defaultConfig: Config = {
   publicBaseUrl: "https://www.rasies.com",
   personalSiteUrl: "https://rassys.com",
-  heimdallUrl: "https://apps.rasies.com",
+  heimdallUrl: FAMILY_APP_LIBRARY_URL,
   searchUrl: "https://search.rasies.com",
   glanceUrl: "https://glance.rasies.com",
   gamesUrl: "https://gba.rasies.com",
@@ -226,17 +231,6 @@ function normalizePathname(pathname: string) {
 
 function ensureTrailingSlash(url: string) {
   return url.endsWith("/") ? url : `${url}/`;
-}
-
-function resolveChildUrl(baseUrl: string, childPath: string) {
-  try {
-    return new URL(
-      childPath.replace(/^\//, ""),
-      ensureTrailingSlash(baseUrl),
-    ).toString();
-  } catch {
-    return `${ensureTrailingSlash(baseUrl)}${childPath.replace(/^\//, "")}`;
-  }
 }
 
 function decodePathSegment(value: string) {
@@ -377,7 +371,7 @@ function AppDashboard({
           className="app-dashboard-portal"
         >
           <LayoutGrid className="h-4 w-4" />
-          <span>Open family apps</span>
+          <span>Open app library</span>
           <ExternalLink className="h-3.5 w-3.5" aria-hidden />
         </a>
       </div>
@@ -395,66 +389,6 @@ function AppDashboard({
         )}
       </div>
     </div>
-  );
-}
-
-function FloatingAppSpotlight({
-  apps,
-  portalUrl,
-}: {
-  apps: AppCatalogItem[];
-  portalUrl: string;
-}) {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    if (apps.length === 0) return () => undefined;
-    const intervalId = window.setInterval(() => {
-      setIndex((current) => (current + 1) % apps.length);
-    }, 5200);
-    return () => window.clearInterval(intervalId);
-  }, [apps.length]);
-
-  if (apps.length === 0) return null;
-
-  const app = apps[index % apps.length];
-
-  return (
-    <aside className="app-float" aria-label="Family app spotlight">
-      <div className="app-float-copy">
-        <span>
-          Family app {index + 1}/{apps.length}
-        </span>
-        <strong>{app.title}</strong>
-        <p>{app.note}</p>
-      </div>
-      <div className="app-float-actions">
-        <a
-          href={app.href}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Open ${app.title}`}
-        >
-          {app.icon}
-        </a>
-        <button
-          type="button"
-          onClick={() => setIndex((current) => (current + 1) % apps.length)}
-          aria-label="Show next family app"
-          title="Next app"
-        >
-          <Compass className="h-4 w-4" />
-        </button>
-        <a
-          href={portalUrl}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Open family apps portal"
-        >
-          <LayoutGrid className="h-4 w-4" />
-        </a>
-      </div>
-    </aside>
   );
 }
 
@@ -554,24 +488,27 @@ export default function App() {
   }, []);
 
   const authentikEntryUrl = ensureTrailingSlash(config.authentikUrl);
-  const accountRequestUrl = resolveChildUrl(authentikEntryUrl, "signup");
-  const familyPortalUrl = ensureTrailingSlash(config.heimdallUrl);
+  const accountRequestUrl = FAMILY_ACCOUNT_REQUEST_URL;
+  const familyPortalUrl = FAMILY_APP_LIBRARY_URL;
   const searchUrl = ensureTrailingSlash(config.searchUrl);
   const photosUrl = ensureTrailingSlash(config.photosUrl);
-  const signupUrl = config.signupUrl.trim() || defaultConfig.signupUrl;
+  const mediaSignupHomeUrl = ensureTrailingSlash(
+    config.signupUrl.trim() || defaultConfig.signupUrl,
+  );
+  const signupUrl = MEDIA_SIGNUP_DIRECT_URL;
   const publicBaseLabel = config.publicBaseUrl.replace(/^https?:\/\//, "");
   const appsGuideUrl = "/#/apps";
 
   const mediaSetupSteps = [
-    "Go to signup.rasies.com for Plex, books, audiobooks, or music.",
-    "That media signup is intentionally separate from the full family account.",
+    "Use signup.rasies.com/j/RASIES for Plex, books, audiobooks, or music.",
+    "That media invite is intentionally separate from the full family account.",
     "Need photos, files, notes, or planning too? Use the family request lane.",
   ];
 
   const fullSetupSteps = [
-    "Go to auth.rasies.com/signup for the broader family suite.",
+    "Use the Rasies waitlist flow when you want the broader family suite.",
     "I review those requests first, so access is not instant.",
-    "Once approved, sign in at auth.rasies.com and open apps.rasies.com.",
+    "Once approved, open the Authentik app library.",
   ];
 
   const startHereLinks = useMemo<ServiceLink[]>(
@@ -579,30 +516,30 @@ export default function App() {
       {
         title: "Media signup",
         description:
-          "Use Wizarr for Plex, books, audiobooks, and music. Media only.",
+          "Use the Rasies media invite for Plex, books, audiobooks, and music.",
         href: signupUrl,
         icon: <Headphones className="h-4 w-4" />,
         badge: "Media only",
         tone: "live",
-        note: "signup.rasies.com",
+        note: "signup.rasies.com/j/RASIES",
       },
       {
         title: "Request family account",
         description:
-          "Ask for the full family account for photos, files, notes, planning, and apps.",
+          "Join the waitlist for photos, files, notes, planning, and apps.",
         href: accountRequestUrl,
         icon: <LockKeyhole className="h-4 w-4" />,
-        badge: "Review first",
+        badge: "Waitlist",
         tone: "live",
-        note: "auth.rasies.com/signup",
+        note: "auth.rasies.com waitlist",
       },
       {
         title: "Open family apps",
-        description: "Open the app dashboard after your access is approved.",
+        description: "Open the approved Authentik app library.",
         href: familyPortalUrl,
         icon: <LayoutGrid className="h-4 w-4" />,
         badge: "Approved",
-        note: "apps.rasies.com",
+        note: "auth.rasies.com library",
       },
       {
         title: "All apps guide",
@@ -937,12 +874,6 @@ export default function App() {
     ],
   );
 
-  const allAuthentikApps = useMemo(
-    () =>
-      [...signInAppGroups, ...directLinkGroups].flatMap((group) => group.items),
-    [directLinkGroups, signInAppGroups],
-  );
-
   const builtInLinks = useMemo<ServiceLink[]>(
     () => [
       {
@@ -994,14 +925,14 @@ export default function App() {
         href: accountRequestUrl,
         icon: <LockKeyhole className="h-4 w-4" />,
         badge: "Ask for access",
-        note: "auth.rasies.com/signup",
+        note: "auth.rasies.com waitlist",
       },
       {
-        title: "Open family apps",
-        description: "Jump to the app board after your sign-in is approved.",
+        title: "Open app library",
+        description: "Jump to the Authentik app library after approval.",
         href: familyPortalUrl,
         icon: <LayoutGrid className="h-4 w-4" />,
-        note: "apps.rasies.com",
+        note: "auth.rasies.com library",
       },
     ],
     [accountRequestUrl, familyPortalUrl, photosUrl],
@@ -1075,10 +1006,6 @@ export default function App() {
           data-build={buildTag ?? undefined}
         >
           <AppsPageMeta />
-          <FloatingAppSpotlight
-            apps={allAuthentikApps}
-            portalUrl={familyPortalUrl}
-          />
           <nav className="quick-nav reveal reveal-1" aria-label="Page sections">
             <a href="/">Home</a>
             <a href="#doors">Start</a>
@@ -1093,8 +1020,8 @@ export default function App() {
                 <p className="hero-eyebrow">Rasies apps guide</p>
                 <h1>The app map, without the guessing.</h1>
                 <p className="hero-copy">
-                  Use auth.rasies.com/signup when you need the full family
-                  account. Once I approve it, apps.rasies.com is the dashboard.
+                  Use the waitlist when you need the full family account. Once
+                  I approve it, the Authentik app library is the dashboard.
                   Some things use the family sign-in, and some are just useful
                   links gathered in one place.
                 </p>
@@ -1129,7 +1056,7 @@ export default function App() {
                     className="btn btn-ghost"
                   >
                     <LayoutGrid className="h-4 w-4" />
-                    Open apps.rasies.com
+                    Open app library
                   </a>
                   <a href="/" className="btn btn-ghost">
                     <Compass className="h-4 w-4" />
@@ -1168,7 +1095,7 @@ export default function App() {
             <div className="section-head">
               <LayoutGrid className="h-5 w-5" aria-hidden />
               <div>
-                <h2 id="auth-apps-heading">Family app dashboard</h2>
+                <h2 id="auth-apps-heading">Family app library</h2>
                 <p>
                   Sign-in apps and direct links are grouped separately so the
                   dashboard stays easy to scan.
@@ -1192,7 +1119,8 @@ export default function App() {
               <div>
                 <h2 id="built-in-heading">On this site</h2>
                 <p>
-                  These live directly on rasies.com, outside the app dashboard.
+                  These live directly on rasies.com, outside the approved app
+                  library.
                 </p>
               </div>
             </div>
@@ -1225,7 +1153,7 @@ export default function App() {
             <div className="site-footer">
               <span>{publicBaseLabel}</span>
               <span>
-                Media signup, family access, and the app map all live here.
+                Media signup, family access, and the app library all live here.
               </span>
             </div>
           </footer>
@@ -1246,10 +1174,6 @@ export default function App() {
         data-build={buildTag ?? undefined}
       >
         <HomePageMeta />
-        <FloatingAppSpotlight
-          apps={allAuthentikApps}
-          portalUrl={familyPortalUrl}
-        />
         <nav className="quick-nav reveal reveal-1" aria-label="Page sections">
           <a href="#start">Start</a>
           <a href="#helpful-services">Tools</a>
@@ -1273,7 +1197,7 @@ export default function App() {
               </p>
               <p className="hero-copy hero-copy-secondary">
                 Media access is quick and separate. Full family access covers
-                the bigger set of tools, so I review those requests first.
+                the bigger set of tools, so it starts with the waitlist.
               </p>
 
               <div className="home-signup-grid" aria-label="Signup choices">
@@ -1288,7 +1212,7 @@ export default function App() {
                   </span>
                   <span className="home-signup-copy">
                     <strong>Media signup</strong>
-                    <small>signup.rasies.com</small>
+                    <small>signup.rasies.com/j/RASIES</small>
                     <em>Plex, books, audiobooks, and music.</em>
                   </span>
                   <ExternalLink className="home-signup-arrow h-5 w-5" />
@@ -1304,8 +1228,8 @@ export default function App() {
                   </span>
                   <span className="home-signup-copy">
                     <strong>Full family access</strong>
-                    <small>auth.rasies.com/signup</small>
-                    <em>Photos, files, notes, planning, apps, and more.</em>
+                    <small>auth.rasies.com waitlist</small>
+                    <em>Photos, files, notes, planning, and approved apps.</em>
                   </span>
                   <ExternalLink className="home-signup-arrow h-5 w-5" />
                 </a>
@@ -1387,10 +1311,10 @@ export default function App() {
           <div className="section-head">
             <Headphones className="h-5 w-5" aria-hidden />
             <div>
-              <h2 id="media-signup-heading">Wizarr media signup</h2>
+              <h2 id="media-signup-heading">Media services signup</h2>
               <p>
-                If you only want movies, books, audiobooks, or music, this is
-                the right path.
+                If you only want movies, books, audiobooks, or music, use the
+                Rasies media invite.
               </p>
             </div>
           </div>
@@ -1399,8 +1323,8 @@ export default function App() {
               <p className="card-kicker">Media signup</p>
               <h3>Choose this if you only want media.</h3>
               <p>
-                Click Media signup and follow the Wizarr steps. This does not
-                create the full family account.
+                Click Media signup and follow the invite steps. This does not
+                create the full family account or app-library access.
               </p>
               <div className="manifesto-actions">
                 <a
@@ -1413,11 +1337,13 @@ export default function App() {
                   Media signup
                 </a>
                 <a
-                  href={`${config.publicBaseUrl}/join`}
+                  href={mediaSignupHomeUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="btn btn-ghost"
                 >
                   <Compass className="h-4 w-4" />
-                  www.rasies.com/join
+                  signup.rasies.com
                 </a>
               </div>
             </article>
@@ -1443,7 +1369,7 @@ export default function App() {
               <h2 id="family-request-heading">Family access request</h2>
               <p>
                 If you want photos, files, notes, planning, and family apps,
-                request access here.
+                start with the waitlist.
               </p>
             </div>
           </div>
@@ -1452,8 +1378,9 @@ export default function App() {
               <p className="card-kicker">Full family account request</p>
               <h3>Choose this if you want the full family account.</h3>
               <p>
-                Click Request family account. I will review it, and once it is
-                approved you can sign in and open the family app dashboard.
+                Click Request family account to open the waitlist. Once I
+                approve it, use the app library button to get into the family
+                apps.
               </p>
               <div className="manifesto-actions">
                 <a
@@ -1472,7 +1399,7 @@ export default function App() {
                   className="btn btn-ghost"
                 >
                   <LayoutGrid className="h-4 w-4" />
-                  Open family apps
+                  Open app library
                 </a>
                 <a
                   href={authentikEntryUrl}
@@ -1481,12 +1408,12 @@ export default function App() {
                   className="btn btn-ghost"
                 >
                   <LockKeyhole className="h-4 w-4" />
-                  Sign in
+                  Sign in / library
                 </a>
               </div>
               <div className="card-footer-note">
-                auth.rasies.com/signup and auth.rasies.com/join also route to
-                the same request page.
+                Family requests use the Runtipi waitlist flow. Approved users
+                land in the Authentik app library.
               </div>
             </article>
             <article className="account-hero-steps">
@@ -1536,7 +1463,7 @@ export default function App() {
               className="btn btn-ghost"
             >
               <LayoutGrid className="h-4 w-4" />
-              Open apps.rasies.com
+              Open app library
             </a>
           </div>
         </section>
@@ -1559,7 +1486,7 @@ export default function App() {
           <ServiceLaunchpad links={photoCtaLinks} />
           <p className="manifesto-note">
             If Immich does not open for you yet, ask me for the full family
-            account at auth.rasies.com/signup.
+            account through the Rasies waitlist.
           </p>
         </section>
 
@@ -1601,8 +1528,8 @@ export default function App() {
           <div className="site-footer">
             <span>{publicBaseLabel}</span>
             <span>
-              Built for our family: media at signup.rasies.com, full access at
-              auth.rasies.com/signup, and the rest right here.
+              Built for our family: media at signup.rasies.com/j/RASIES, full
+              access through the waitlist, and approved apps in Authentik.
             </span>
           </div>
         </footer>

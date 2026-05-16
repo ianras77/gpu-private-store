@@ -1453,9 +1453,8 @@ export function FamilyAccessPanel({
             Create the media invite here, then finish at signup.rasies.com.
           </h3>
           <p>
-            I use this page to make the Wizarr invite. signup.rasies.com is for
-            Plex, books, audiobooks, and music. auth.rasies.com/sign-up is where
-            you ask me for the full family apps.
+            Use the media invite for Plex, books, audiobooks, and music. Use
+            the Rasies waitlist when you need the full family apps.
           </p>
         </div>
 
@@ -1471,18 +1470,16 @@ export function FamilyAccessPanel({
             </span>
           </div>
           <div className="family-access-step">
-            <strong>2. Finish media signup at signup.rasies.com</strong>
+            <strong>2. Finish media signup at signup.rasies.com/j/RASIES</strong>
             <span>
               The invite takes them into the final media account step.
             </span>
           </div>
           <div className="family-access-step">
-            <strong>
-              3. Ask for family app access at auth.rasies.com/sign-up
-            </strong>
+            <strong>3. Ask for family app access through the waitlist</strong>
             <span>
-              That is the easy Authentik signup page for photos, files,
-              planning, and the rest of the family apps.
+              That is the request flow for photos, files, planning, and the
+              rest of the family apps.
             </span>
           </div>
         </div>
@@ -1517,7 +1514,7 @@ export function FamilyAccessPanel({
               onClick={() => trackUsage("signup.auth.request.open")}
             >
               <ExternalLink className="h-4 w-4" />
-              Open Authentik signup
+              Open family waitlist
             </a>
           )}
 
@@ -1529,7 +1526,7 @@ export function FamilyAccessPanel({
             onClick={() => trackUsage("signup.auth.request.open")}
           >
             <ExternalLink className="h-4 w-4" />
-            Open Authentik signup
+            Open family waitlist
           </a>
 
           <a
@@ -1540,7 +1537,7 @@ export function FamilyAccessPanel({
             onClick={() => trackUsage("signup.auth.open")}
           >
             <ExternalLink className="h-4 w-4" />
-            Sign in at auth.rasies.com
+            Sign in / app library
           </a>
 
           <a
@@ -1557,8 +1554,8 @@ export function FamilyAccessPanel({
 
         <p className="family-access-footnote">
           If you already used your media invite, you usually do not need a new
-          one. Go to auth.rasies.com/sign-up when you need access to the rest of
-          the house.
+          one. Use the Rasies waitlist when you need access to the rest of the
+          house.
         </p>
 
         {error && <div className="status-line status-error">{error}</div>}
@@ -1578,9 +1575,9 @@ export function FamilyAccessPanel({
                   : `Your invite is ready for ${activeInviteLabel}.`}
               </strong>
               <p>
-                This link takes you to signup.rasies.com for the media signup
-                for {activeInviteLabel}. auth.rasies.com/sign-up is separate and
-                only for asking permission to use the full family apps.
+                This link takes you to the media signup for {activeInviteLabel}.
+                The Rasies waitlist is separate and only for asking permission
+                to use the full family apps.
               </p>
               <div
                 className="family-access-chip-row"
@@ -1772,12 +1769,12 @@ export function FamilyAccessPanel({
         <div className="family-access-side-card">
           <div className="family-access-stage-copy">
             <span className="family-access-result-kicker">Step 2</span>
-            <strong>Easy Authentik signup at auth.rasies.com/sign-up</strong>
+            <strong>Family access waitlist</strong>
             <p>
               Once the media signup is done, this is where someone asks for
               permission to use photos, files, planning, and the rest of the
-              family tools I host. Existing accounts still sign in at
-              auth.rasies.com.
+              family tools I host. Approved accounts open the Authentik app
+              library.
             </p>
           </div>
           <ServiceLaunchpad links={links} />
