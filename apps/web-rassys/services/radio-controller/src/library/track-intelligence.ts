@@ -1297,6 +1297,90 @@ const fetchEmbeddings = async (input: string[]) => {
   }
 };
 
+const buildRerankDocument = (track: TrackReference, insight: PromptTrackInsight) =>
+  uniqueStrings(
+    [
+      track.title,
+      track.artist,
+      track.album,
+      track.year ? String(track.year) : "",
+      ...(track.genres ?? []),
+      ...(track.moodTags ?? []),
+      insight.summary,
+      insight.artistContext,
+      insight.trackContext,
+      insight.setHook,
+      insight.listenFor,
+      ...(insight.requestTags ?? []),
+      ...(insight.sonicSignatures ?? []),
+      ...(insight.funFacts ?? [])
+    ],
+    18
+  ).join("\n");
+
+const fetchRerankScores = async (
+  query: string,
+  documents: Array<{ trackId: string; text: string }>
+) => {
+  if (!config.RADIO_RERANK_ENABLED || !config.CHESHIRE_BASE_URL || documents.length === 0) {
+    return null;
+  }
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 9_000);
+  try {
+    const response = await fetch(`${config.CHESHIRE_BASE_URL.replace(/\/$/, "")}/v1/rerank`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-cheshire-client": "radio-controller",
+        "x-cheshire-purpose": "track-intelligence-rerank",
+        "x-cheshire-lane": "embeddings",
+        "x-cheshire-priority": "normal",
+        "x-cheshire-queue-wait-ms": "4500",
+        "x-cheshire-timeout-ms": "8500",
+        ...(config.CHESHIRE_API_KEY ? { Authorization: `Bearer ${config.CHESHIRE_API_KEY}` } : {})
+      },
+      body: JSON.stringify({
+        model: config.RADIO_RERANK_MODEL,
+        query,
+        documents: documents.map((document) => document.text),
+        top_n: documents.length
+      }),
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      logger.warn({ status: response.status }, "Track-intelligence rerank request failed");
+      return null;
+    }
+    const payload = (await response.json()) as {
+      results?: Array<{
+        index?: number;
+        relevance_score?: number;
+        score?: number;
+      }>;
+    };
+    const scores = new Map<string, number>();
+    for (const result of payload.results ?? []) {
+      const index = typeof result.index === "number" ? result.index : -1;
+      const document = documents[index];
+      const score =
+        typeof result.relevance_score === "number"
+          ? result.relevance_score
+          : typeof result.score === "number"
+            ? result.score
+            : null;
+      if (!document || score === null || !Number.isFinite(score)) continue;
+      scores.set(document.trackId, clamp(score, -1, 1));
+    }
+    return scores.size > 0 ? scores : null;
+  } catch (error) {
+    logger.warn({ error }, "Failed to rerank track-intelligence candidates");
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
 const cosineSimilarity = (left: number[], right: number[]) => {
   const size = Math.min(left.length, right.length);
   if (size === 0) return 0;
@@ -1952,6 +2036,13 @@ export const rankTracksForRequestLine = async (
   }
 
   const insights = await getTrackInsightMap(shortlist);
+  const rerankScores = await fetchRerankScores(
+    profile.normalized,
+    shortlist.map((track) => ({
+      trackId: track.id,
+      text: buildRerankDocument(track, insights.get(track.id) ?? buildTrackInsightScaffold(track))
+    }))
+  );
   const vectorsByTrackId = new Map<string, number[] | null>();
   const rows = await prisma.libraryTrackInsight.findMany({
     where: {
@@ -1978,9 +2069,10 @@ export const rankTracksForRequestLine = async (
     .map((entry) => {
       const insight = insights.get(entry.track.id) ?? buildTrackInsightScaffold(entry.track);
       const vector = vectorsByTrackId.get(entry.track.id) ?? null;
+      const rerankBoost = (rerankScores?.get(entry.track.id) ?? 0) * 5.5;
       return {
         track: entry.track,
-        score: entry.score + scoreInsightMatch(insight, profile, queryEmbedding, vector)
+        score: entry.score + scoreInsightMatch(insight, profile, queryEmbedding, vector) + rerankBoost
       };
     })
     .filter((entry) => entry.score >= (profile.broadLane ? 2.4 : 4))
