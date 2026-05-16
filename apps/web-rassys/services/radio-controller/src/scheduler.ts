@@ -16,6 +16,7 @@ import { logger } from "./logger";
 import { createStationChatMessage, pushStationChatMessage } from "./station-chat";
 import { buildNoteCurrentTrack, buildNoteSetlist } from "./notes";
 import { buildBoothSignature, buildFallbackBoothDossier } from "./booth-dossier";
+import { hasRecentChatActivity } from "./booth-refresh";
 import { buildTrackTurnIntelligence, learnTrackInsightsFromBoothDossier, recordTrackPlayInsight, syncTrackInsights } from "./library/track-intelligence";
 import { alignQueueEntriesToStartedTrack } from "./queue-align";
 import { consumeMarkedSkip, consumeTrackRequest, countStationRequests, listPendingTrackRequests, readStationRequestSummaries } from "./station-requests";
@@ -2344,9 +2345,13 @@ const refreshLibrary = async () => {
     const scannedAt = Date.now().toString();
     await redis.set(LIBRARY_LAST_SCAN_KEY, scannedAt);
     await persistCurrentLibrary("full");
+    const chatIsActive = await hasRecentChatActivity().catch(() => false);
+    if (chatIsActive) {
+        logger.info("Recent listener chat detected; deferring LLM-backed library enrichment");
+    }
     void syncTrackInsights(library.getTracks(), {
-        embed: Boolean(config.CHESHIRE_BASE_URL),
-        analyze: Boolean(config.CHESHIRE_BASE_URL),
+        embed: Boolean(config.CHESHIRE_BASE_URL) && !chatIsActive,
+        analyze: Boolean(config.CHESHIRE_BASE_URL) && !chatIsActive,
         limit: Math.max(0, config.RADIO_KNOWLEDGE_BOOTSTRAP_LIMIT),
         analysisLimit: Math.max(0, config.RADIO_KNOWLEDGE_ANALYSIS_LIMIT)
     }).catch((error) => {

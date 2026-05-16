@@ -9,6 +9,8 @@ export type StationChatMessage = {
   kind: "welcome" | "station-update" | "chat";
   text: string;
   createdAt: number;
+  replyToMessageId?: string | null;
+  replySource?: "llm" | "fallback" | "error" | null;
   mood?: string | null;
   recommendationStatus?: RecommendationStatus;
   recommendationSummary?: string | null;
@@ -40,6 +42,8 @@ export const createStationChatMessage = (
 ): StationChatMessage => ({
   id: message.id ?? randomUUID(),
   createdAt: message.createdAt ?? Date.now(),
+  replyToMessageId: message.replyToMessageId ?? null,
+  replySource: message.replySource ?? null,
   recommendationStatus: message.recommendationStatus ?? "none",
   recommendationSummary: message.recommendationSummary ?? null,
   matchedTrackId: message.matchedTrackId ?? null,

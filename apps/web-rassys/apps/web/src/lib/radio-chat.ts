@@ -15,6 +15,8 @@ export type RadioChatMessage = {
   kind?: "welcome" | "station-update" | "chat";
   text: string;
   createdAt: number;
+  replyToMessageId?: string | null;
+  replySource?: "llm" | "fallback" | "error" | null;
   recommendationStatus?: RadioChatRecommendationStatus;
   recommendationSummary?: string | null;
   matchedTrackId?: string | null;

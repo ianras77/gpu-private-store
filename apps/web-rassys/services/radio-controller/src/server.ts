@@ -2478,16 +2478,18 @@ export const buildServer = () => {
         const skipIntent = looksLikeSkipRequest(safeMessage);
         const skipTarget = skipIntent ? findSkipTarget(context, safeMessage) : null;
         const strongSkipReason = skipIntent ? hasStrongSkipReason(safeMessage) : false;
+        const llmReply = defaultDJ.replyToListener
+          ? await defaultDJ.replyToListener(context, {
+              message: safeMessage,
+              recentChat,
+              requestMatches,
+              requestCandidates,
+              liveSnapshot
+            })
+          : null;
+        let replySource: "llm" | "fallback" = llmReply ? "llm" : "fallback";
         let generatedReply =
-          (defaultDJ.replyToListener
-            ? await defaultDJ.replyToListener(context, {
-                message: safeMessage,
-                recentChat,
-                requestMatches,
-                requestCandidates,
-                liveSnapshot
-              })
-            : null) ??
+          llmReply ??
           (await buildFallbackListenerReply(
             context,
             safeMessage,
@@ -2501,6 +2503,7 @@ export const buildServer = () => {
           generatedReply.matchedTrackId &&
           !requestCandidateIds.has(generatedReply.matchedTrackId)
         ) {
+          replySource = "fallback";
           generatedReply = await buildFallbackListenerReply(
             context,
             safeMessage,
@@ -2510,12 +2513,15 @@ export const buildServer = () => {
           );
         }
         if (skipIntent && (!skipTarget || !strongSkipReason)) {
+          replySource = "fallback";
           generatedReply = buildFallbackSkipReply(context, safeMessage);
         }
         if (skipIntent && !generatedReply.skipDecision) {
+          replySource = "fallback";
           generatedReply = buildFallbackSkipReply(context, safeMessage);
         }
         if (!skipIntent && soundsLikeSkipReply(generatedReply.reply)) {
+          replySource = "fallback";
           generatedReply = await buildFallbackListenerReply(
             context,
             safeMessage,
@@ -2618,12 +2624,26 @@ export const buildServer = () => {
           role: "dj",
           kind: "chat",
           text: generatedReply.reply,
+          createdAt: listenerMessage.createdAt + 1,
+          replyToMessageId: listenerMessage.id,
+          replySource,
           mood: generatedReply.mood ?? context.mood,
           recommendationStatus,
           recommendationSummary,
           matchedTrackId,
           trackIds
         });
+        if (replySource === "fallback") {
+          logger.warn(
+            {
+              clientId,
+              requestId,
+              listenerMessageId: listenerMessage.id,
+              reason: generatedReply.reason ?? null
+            },
+            "Built station chat reply with local fallback"
+          );
+        }
         await pushStationChatMessage(djMessage);
         if (clientId) {
           await pushStationChatSessionMessage(clientId, djMessage);
@@ -2646,6 +2666,9 @@ export const buildServer = () => {
           role: "dj",
           kind: "chat",
           text: "Give me one more second on that. The signal slipped, but I’m still right here.",
+          createdAt: listenerMessage.createdAt + 1,
+          replyToMessageId: listenerMessage.id,
+          replySource: "error",
           mood: config.RADIO_MOOD
         });
         await pushStationChatMessage(djMessage);

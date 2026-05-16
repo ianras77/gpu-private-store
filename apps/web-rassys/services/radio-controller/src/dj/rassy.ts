@@ -2127,6 +2127,20 @@ const readStructuredAssistantFallback = (message) => {
     }
     return extracted;
 };
+const recoverPlainListenerReply = (content) => {
+    const rawReply = typeof content === "string" ? content.replace(/\s+/g, " ").trim() : "";
+    const metadataIndex = rawReply.search(/\s+\*\*(?:status|summary|track ids?|recommendation|matched track)\s*:/i);
+    const reply = (metadataIndex >= 0 ? rawReply.slice(0, metadataIndex) : rawReply).trim();
+    if (!reply || reply.startsWith("{") || reply.startsWith("[")) {
+        return null;
+    }
+    return {
+        reply: reply.slice(0, 900),
+        recommendationStatus: "none",
+        reason: "Recovered plain-text listener LLM reply.",
+        trackIds: []
+    };
+};
 const sleep = async (ms) => new Promise((resolve) => {
     setTimeout(resolve, ms);
 });
@@ -2322,6 +2336,14 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
                 break;
             }
             catch (error) {
+                if (label === "listener-reply") {
+                    const recovered = recoverPlainListenerReply(content);
+                    if (recovered) {
+                        llmCircuit.noteSuccess(label);
+                        logger.info({ label }, "Recovered plain-text listener LLM reply");
+                        return recovered;
+                    }
+                }
                 lastFailure = {
                     contentPreview: content.slice(0, 240),
                     error,
@@ -2620,7 +2642,8 @@ const callCheshireListenerReply = async (context, input) => {
         priority: "high",
         queueWaitMs: 30000,
         lane: "listener",
-        model: MR_RASSY_MODEL
+        model: MR_RASSY_MODEL,
+        jsonMode: "json_object"
     });
 };
 const callCheshireLongFormPlans = async (context, tracks) => {

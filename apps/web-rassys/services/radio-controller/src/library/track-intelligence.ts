@@ -2,6 +2,7 @@ import { Prisma, type LibraryTrackInsight as LibraryTrackInsightRow } from "@pri
 import { createHash } from "crypto";
 import { z } from "zod";
 import type { BoothDossierSnapshot, BoothDossierSessionTrack } from "../booth-dossier";
+import { hasRecentChatActivity } from "../booth-refresh";
 import { config } from "../config";
 import { prisma } from "../db";
 import type { DJContext } from "../dj/interface";
@@ -1644,9 +1645,18 @@ export const syncTrackInsights = async (
     track,
     scaffold: buildTrackInsightScaffold(track)
   }));
+  let remainingAnalysis =
+    typeof options.analysisLimit === "number" ? Math.max(0, options.analysisLimit) : 2;
+  let loggedChatDeferral = false;
 
   for (let index = 0; index < scaffolds.length; index += 80) {
     const chunk = scaffolds.slice(index, index + 80);
+    const chatActive = await hasRecentChatActivity().catch(() => false);
+    const allowLlmBackfill = !chatActive;
+    if (chatActive && !loggedChatDeferral) {
+      loggedChatDeferral = true;
+      logger.info("Recent listener chat detected; pausing LLM-backed track intelligence sync");
+    }
     const existingRows = await prisma.libraryTrackInsight.findMany({
       where: {
         canonicalKey: {
@@ -1698,16 +1708,17 @@ export const syncTrackInsights = async (
       }
     );
 
-    if (options.analyze) {
+    if (options.analyze && allowLlmBackfill && remainingAnalysis > 0) {
       const analysisCandidates = chunk
         .map((item) => ({
           ...item,
           existing: existingByKey.get(item.scaffold.canonicalKey) ?? null
         }))
         .filter((item) => shouldRefreshTrackAnalysis(item.existing))
-        .slice(0, typeof options.analysisLimit === "number" ? options.analysisLimit : 2);
+        .slice(0, remainingAnalysis);
+      remainingAnalysis -= analysisCandidates.length;
 
-      await mapWithConcurrency(analysisCandidates, 2, async ({ track, scaffold, existing }) => {
+      await mapWithConcurrency(analysisCandidates, 1, async ({ track, scaffold, existing }) => {
         if (inFlightTrackInsightAnalyses.has(scaffold.canonicalKey)) return;
         inFlightTrackInsightAnalyses.add(scaffold.canonicalKey);
         try {
@@ -1732,7 +1743,7 @@ export const syncTrackInsights = async (
       });
     }
 
-    if (!options.embed) {
+    if (!options.embed || !allowLlmBackfill) {
       continue;
     }
 
