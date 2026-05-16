@@ -98,13 +98,13 @@ type AppCatalogGroup = {
 const defaultAbout: AboutConfig = {
   name: "Rassy",
   tagline:
-    "Husband, dad, gardener, and the one happily keeping the family site easy to use.",
-  bio: "I built this place so the Rasies would have one friendly home online for the things we actually reach for, from photos and notes to planning tools and a few fun extras.",
+    "Husband, dad, gardener, and the person keeping this little family web house running.",
+  bio: "I built this so our family has one familiar place for the stuff we actually use: photos, notes, planning, media, and a few fun extras.",
   highlights: [
-    "Built for the Rasies",
-    "Family memories first",
-    "Easy to open",
-    "Gardener energy",
+    "For our family",
+    "Memories first",
+    "Simple links",
+    "Kept by Ian",
   ],
 };
 
@@ -285,7 +285,7 @@ function resolveRoute(pathname: string, hash = ""): AppRoute {
 function HomePageMeta() {
   usePageMeta(
     "Rasies | Family signup, apps, photos, search, chat, and Minecraft",
-    "I made one friendly Rasies map for media signup, family account requests, apps, photos, search, chat, and Minecraft.",
+    "One Rasies family starting point for media signup, family account requests, apps, photos, search, chat, and Minecraft.",
   );
   return null;
 }
@@ -293,7 +293,7 @@ function HomePageMeta() {
 function AppsPageMeta() {
   usePageMeta(
     "Rasies Apps | Ian's family app guide",
-    "I split the Rasies apps into sign-in apps and direct links so my family can find the right door quickly.",
+    "A clear Rasies app guide with sign-in apps, direct links, and the right place to start.",
   );
   return null;
 }
@@ -363,12 +363,12 @@ function AppDashboard({
         <div className="app-dashboard-meter app-dashboard-meter-live">
           <span>Sign-in apps</span>
           <strong>{signInCount}</strong>
-          <p>I connected these to the family account system.</p>
+          <p>These use the family account system.</p>
         </div>
         <div className="app-dashboard-meter">
           <span>Direct links</span>
           <strong>{directCount}</strong>
-          <p>I keep these bookmarks separate on purpose.</p>
+          <p>Useful bookmarks that open on their own.</p>
         </div>
         <a
           href={portalUrl}
@@ -385,12 +385,12 @@ function AppDashboard({
       <div className="app-dashboard-columns">
         {renderLane(
           "Sign-in Apps",
-          "I set these up with Authentik/OIDC sign-in.",
+          "Use your Rasies family account for these.",
           signInGroups,
         )}
         {renderLane(
           "Direct Links",
-          "I added these as useful bookmarks or direct links.",
+          "Quick links that do not need the same sign-in flow.",
           directLinkGroups,
         )}
       </div>
@@ -563,23 +563,23 @@ export default function App() {
   const appsGuideUrl = "/#/apps";
 
   const mediaSetupSteps = [
-    "Go to signup.rasies.com when you only need Plex, books, audiobooks, or music.",
-    "I made this Wizarr lane separate from the full family account on purpose.",
-    "If you later want photos, files, notes, or planning, ask me through the family request lane.",
+    "Go to signup.rasies.com for Plex, books, audiobooks, or music.",
+    "That media signup is intentionally separate from the full family account.",
+    "Need photos, files, notes, or planning too? Use the family request lane.",
   ];
 
   const fullSetupSteps = [
-    "Go to auth.rasies.com/signup when you want the broader family suite.",
-    "I review those requests first, so this is not an instant account button.",
-    "After I approve you, sign in at auth.rasies.com and open apps.rasies.com.",
+    "Go to auth.rasies.com/signup for the broader family suite.",
+    "I review those requests first, so access is not instant.",
+    "Once approved, sign in at auth.rasies.com and open apps.rasies.com.",
   ];
 
   const startHereLinks = useMemo<ServiceLink[]>(
     () => [
       {
-        title: "Easy media signup",
+        title: "Media signup",
         description:
-          "I made this Wizarr lane for Plex, books, audiobooks, and music. Media only.",
+          "Use Wizarr for Plex, books, audiobooks, and music. Media only.",
         href: signupUrl,
         icon: <Headphones className="h-4 w-4" />,
         badge: "Media only",
@@ -589,7 +589,7 @@ export default function App() {
       {
         title: "Request family account",
         description:
-          "Ask me for the full family account for photos, files, notes, planning, and apps.",
+          "Ask for the full family account for photos, files, notes, planning, and apps.",
         href: accountRequestUrl,
         icon: <LockKeyhole className="h-4 w-4" />,
         badge: "Review first",
@@ -598,8 +598,7 @@ export default function App() {
       },
       {
         title: "Open family apps",
-        description:
-          "Open my Authentik library/dashboard once I have approved your access.",
+        description: "Open the app dashboard after your access is approved.",
         href: familyPortalUrl,
         icon: <LayoutGrid className="h-4 w-4" />,
         badge: "Approved",
@@ -608,7 +607,7 @@ export default function App() {
       {
         title: "All apps guide",
         description:
-          "See how I split sign-in apps and direct links into clear groups.",
+          "See the family apps grouped by sign-in apps and direct links.",
         href: appsGuideUrl,
         icon: <Compass className="h-4 w-4" />,
         note: "This site",
@@ -649,7 +648,7 @@ export default function App() {
       },
       {
         title: "Games",
-        description: "A little fun when the useful stuff can wait.",
+        description: "A little fun after the useful stuff.",
         href: "https://games.rasies.com",
         icon: <Gamepad2 className="h-4 w-4" />,
         note: "games.rasies.com",
@@ -670,7 +669,7 @@ export default function App() {
             title: "Immich",
             href: photosUrl,
             icon: <Compass className="h-4 w-4" />,
-            note: "My Immich photos and videos",
+            note: "Family photos and videos",
           },
           {
             title: "Gramps Web",
@@ -948,7 +947,7 @@ export default function App() {
     () => [
       {
         title: "Notes",
-        description: "Longer posts and house notes.",
+        description: "Longer notes, updates, and things I want to keep handy.",
         href: "/thoughts",
         icon: <MessageSquare className="h-4 w-4" />,
         note: "On this site",
@@ -962,14 +961,14 @@ export default function App() {
       },
       {
         title: "Listening room",
-        description: "The local music shelf that lives right on this site.",
+        description: "The music shelf that lives right on this site.",
         href: "/music-library",
         icon: <Headphones className="h-4 w-4" />,
         note: "On this site",
       },
       {
         title: "Game room",
-        description: "The playful little retro corner.",
+        description: "The retro corner.",
         href: config.gamesUrl,
         icon: <Sparkles className="h-4 w-4" />,
         note: "gba.rasies.com",
@@ -981,8 +980,8 @@ export default function App() {
   const photoCtaLinks = useMemo<ServiceLink[]>(
     () => [
       {
-        title: "Open my Immich library",
-        description: "Go to the photos I have in Immich.",
+        title: "Open Immich",
+        description: "Go to the family photos and videos.",
         href: photosUrl,
         icon: <Compass className="h-4 w-4" />,
         badge: "My photos",
@@ -991,8 +990,7 @@ export default function App() {
       },
       {
         title: "Request family account",
-        description:
-          "Ask me for access first if my Immich library is not open for you yet.",
+        description: "Ask for access if Immich does not open for you yet.",
         href: accountRequestUrl,
         icon: <LockKeyhole className="h-4 w-4" />,
         badge: "Ask for access",
@@ -1000,8 +998,7 @@ export default function App() {
       },
       {
         title: "Open family apps",
-        description:
-          "Jump to the app board after I have approved your sign-in.",
+        description: "Jump to the app board after your sign-in is approved.",
         href: familyPortalUrl,
         icon: <LayoutGrid className="h-4 w-4" />,
         note: "apps.rasies.com",
@@ -1087,24 +1084,23 @@ export default function App() {
             <a href="#doors">Start</a>
             <a href="#auth-apps">Auth apps</a>
             <a href="#built-in">On this site</a>
-            <a href="#house-notes">Status</a>
+            <a href="#house-notes">House note</a>
           </nav>
 
           <header className="hero hero-workshop reveal reveal-1">
             <div className="hero-grid">
               <div className="hero-copy-stack">
                 <p className="hero-eyebrow">Rasies apps guide</p>
-                <h1>I split the apps so the right door is obvious.</h1>
+                <h1>The app map, without the guessing.</h1>
                 <p className="hero-copy">
-                  I use auth.rasies.com/signup for full family account
-                  requests, and apps.rasies.com becomes the dashboard after I
-                  approve access. Some apps use true Authentik sign-in. Others
-                  are useful direct links in the same dashboard.
+                  Use auth.rasies.com/signup when you need the full family
+                  account. Once I approve it, apps.rasies.com is the dashboard.
+                  Some things use the family sign-in, and some are just useful
+                  links gathered in one place.
                 </p>
                 <p className="hero-copy hero-copy-secondary">
-                  I keep the separation clear: media-only signup is Wizarr at
-                  signup.rasies.com, while this page is the broader family
-                  suite.
+                  Media-only signup stays separate at signup.rasies.com. This
+                  page is for the broader family suite.
                 </p>
 
                 <div className="hero-actions">
@@ -1115,7 +1111,7 @@ export default function App() {
                     className="btn btn-primary"
                   >
                     <Headphones className="h-4 w-4" />
-                    Go to easy media signup
+                    Media signup
                   </a>
                   <a
                     href={accountRequestUrl}
@@ -1156,8 +1152,8 @@ export default function App() {
               <div>
                 <h2 id="doors-heading">Start with the right door</h2>
                 <p>
-                  I keep media-only signup and full family account requests
-                  separate on purpose.
+                  Media signup and full family access are two different paths.
+                  Pick the one that fits what you need.
                 </p>
               </div>
             </div>
@@ -1174,8 +1170,8 @@ export default function App() {
               <div>
                 <h2 id="auth-apps-heading">Family app dashboard</h2>
                 <p>
-                  I grouped this tightly so sign-in apps and direct links do not
-                  blur together.
+                  Sign-in apps and direct links are grouped separately so the
+                  dashboard stays easy to scan.
                 </p>
               </div>
             </div>
@@ -1196,8 +1192,7 @@ export default function App() {
               <div>
                 <h2 id="built-in-heading">On this site</h2>
                 <p>
-                  I keep these local pages here instead of inside the Authentik
-                  app library.
+                  These live directly on rasies.com, outside the app dashboard.
                 </p>
               </div>
             </div>
@@ -1214,9 +1209,9 @@ export default function App() {
               <div>
                 <h2 id="apps-house-notes-heading">A note from this house</h2>
                 <p>
-                  I do not want anyone memorizing software names. I want the
-                  right thing to be easy to find, and I want the family stuff to
-                  feel like ours.
+                  Nobody should have to remember software names to use this. The
+                  goal is simple: open the page, find the right door, and get on
+                  with the family stuff.
                 </p>
               </div>
             </div>
@@ -1230,8 +1225,7 @@ export default function App() {
             <div className="site-footer">
               <span>{publicBaseLabel}</span>
               <span>
-                I made the short lane for media, the full lane for everything
-                else, and this page for the whole map in one pass.
+                Media signup, family access, and the app map all live here.
               </span>
             </div>
           </footer>
@@ -1261,31 +1255,25 @@ export default function App() {
           <a href="#helpful-services">Tools</a>
           <a href="#notes">Notes</a>
           <a href="#chat">Chat</a>
-          <a href="#search">Search</a>
           <a href="#media-signup">Media</a>
           <a href="#family-request">Family</a>
-          <a href="#birthday-challenge">Birthday</a>
           <a href="#self-hosted-apps">Apps</a>
-          <a href="#photos">Photos</a>
           <a href="#minecraft">Minecraft</a>
-          <a href="#podcasts">Podcasts</a>
         </nav>
 
         <header id="start" className="hero hero-workshop reveal reveal-1">
           <div className="hero-grid">
             <div className="hero-copy-stack">
               <p className="hero-eyebrow">Rasies family site</p>
-              <h1>
-                Family, start here. I made this simple on purpose.
-              </h1>
+              <h1>Family, start here.</h1>
               <p className="hero-copy">
-                Welcome to the Rasies family site. Pick the button that matches
-                what you need, and you are off. No guessing, no hunting around.
+                This is the front door for our family apps, media, photos,
+                notes, chat, search, and the Minecraft world. Pick the button
+                that matches what you need and you should be in the right place.
               </p>
               <p className="hero-copy hero-copy-secondary">
-                If you just want media, use the easy Wizarr signup. If you want
-                the full family set of services, use the Authentik signup and I
-                will review it.
+                Media access is quick and separate. Full family access covers
+                the bigger set of tools, so I review those requests first.
               </p>
 
               <div className="home-signup-grid" aria-label="Signup choices">
@@ -1299,9 +1287,9 @@ export default function App() {
                     <Headphones className="h-6 w-6" aria-hidden />
                   </span>
                   <span className="home-signup-copy">
-                    <strong>Easy media signup</strong>
+                    <strong>Media signup</strong>
                     <small>signup.rasies.com</small>
-                    <em>Wizarr for Plex, books, audiobooks, and music.</em>
+                    <em>Plex, books, audiobooks, and music.</em>
                   </span>
                   <ExternalLink className="home-signup-arrow h-5 w-5" />
                 </a>
@@ -1315,9 +1303,9 @@ export default function App() {
                     <LockKeyhole className="h-6 w-6" aria-hidden />
                   </span>
                   <span className="home-signup-copy">
-                    <strong>Full family services</strong>
+                    <strong>Full family access</strong>
                     <small>auth.rasies.com/signup</small>
-                    <em>Authentik signup for photos, files, notes, apps, and more.</em>
+                    <em>Photos, files, notes, planning, apps, and more.</em>
                   </span>
                   <ExternalLink className="home-signup-arrow h-5 w-5" />
                 </a>
@@ -1333,9 +1321,7 @@ export default function App() {
         >
           <div className="helpful-service-bar-head">
             <Sparkles className="h-4 w-4" aria-hidden />
-            <h2 id="helpful-services-heading">
-              Easy access to helpful services
-            </h2>
+            <h2 id="helpful-services-heading">Helpful quick links</h2>
           </div>
           <div className="helpful-service-links">
             {helpfulServiceLinks.map((link) => (
@@ -1363,7 +1349,7 @@ export default function App() {
         >
           <div className="home-band-head">
             <p className="card-kicker">Notes</p>
-            <h2 id="notes-heading">I put my notes right up front</h2>
+            <h2 id="notes-heading">Notes I want easy to find</h2>
           </div>
           <ThoughtsHighlight />
         </section>
@@ -1385,7 +1371,9 @@ export default function App() {
             <Search className="h-5 w-5" aria-hidden />
             <div>
               <h2 id="search-heading">Search</h2>
-              <p>I kept this as one clean box for looking things up.</p>
+              <p>
+                A clean search box for looking things up without leaving home.
+              </p>
             </div>
           </div>
           <SearchPanel />
@@ -1401,18 +1389,18 @@ export default function App() {
             <div>
               <h2 id="media-signup-heading">Wizarr media signup</h2>
               <p>
-                If you only want movies, books, audiobooks, or music, start
-                here.
+                If you only want movies, books, audiobooks, or music, this is
+                the right path.
               </p>
             </div>
           </div>
           <div className="account-hero-grid">
             <article className="account-hero-copy">
-              <p className="card-kicker">Easy media signup</p>
+              <p className="card-kicker">Media signup</p>
               <h3>Choose this if you only want media.</h3>
               <p>
-                Click Easy media signup. Follow the Wizarr steps. This does not
-                make the full family account.
+                Click Media signup and follow the Wizarr steps. This does not
+                create the full family account.
               </p>
               <div className="manifesto-actions">
                 <a
@@ -1422,7 +1410,7 @@ export default function App() {
                   className="btn btn-primary"
                 >
                   <Headphones className="h-4 w-4" />
-                  Easy media signup
+                  Media signup
                 </a>
                 <a
                   href={`${config.publicBaseUrl}/join`}
@@ -1452,12 +1440,10 @@ export default function App() {
           <div className="section-head">
             <LockKeyhole className="h-5 w-5" aria-hidden />
             <div>
-              <h2 id="family-request-heading">
-                Authentik family access request
-              </h2>
+              <h2 id="family-request-heading">Family access request</h2>
               <p>
-                If you want photos, files, notes, planning, and family apps, ask
-                me here.
+                If you want photos, files, notes, planning, and family apps,
+                request access here.
               </p>
             </div>
           </div>
@@ -1466,8 +1452,8 @@ export default function App() {
               <p className="card-kicker">Full family account request</p>
               <h3>Choose this if you want the full family account.</h3>
               <p>
-                Click Request family account. I will review it. After I approve
-                you, click Open family apps to sign in.
+                Click Request family account. I will review it, and once it is
+                approved you can sign in and open the family app dashboard.
               </p>
               <div className="manifesto-actions">
                 <a
@@ -1500,7 +1486,7 @@ export default function App() {
               </div>
               <div className="card-footer-note">
                 auth.rasies.com/signup and auth.rasies.com/join also route to
-                the same request flow.
+                the same request page.
               </div>
             </article>
             <article className="account-hero-steps">
@@ -1528,8 +1514,8 @@ export default function App() {
             <div>
               <h2 id="self-hosted-apps-heading">Self-hosted apps</h2>
               <p>
-                I made one tight springboard and split sign-in apps from direct
-                links.
+                One springboard for the family apps, with sign-in apps kept
+                separate from direct links.
               </p>
             </div>
           </div>
@@ -1565,8 +1551,8 @@ export default function App() {
             <div>
               <h2 id="photos-heading">My Immich photo library</h2>
               <p>
-                I keep my photos in Immich. Use this link when you want to see
-                the photos I have.
+                Family photos and videos live in Immich. Use this when you want
+                to get to them quickly.
               </p>
             </div>
           </div>
@@ -1587,8 +1573,8 @@ export default function App() {
             <div>
               <h2 id="minecraft-heading">Come and play Minecraft anytime</h2>
               <p>
-                I put the live map, the server address, and the build bot here
-                so you can jump into Big Momma Ras Land whenever you want.
+                The live map, server address, and build bot are here so you can
+                jump into Big Momma Ras Land whenever you want.
               </p>
             </div>
           </div>
@@ -1606,7 +1592,7 @@ export default function App() {
         >
           <div className="home-band-head">
             <p className="card-kicker">Podcasts</p>
-            <h2 id="podcasts-heading">I kept the listening shelf here too</h2>
+            <h2 id="podcasts-heading">The listening shelf is here too</h2>
           </div>
           <BedtimeStoriesHighlight />
         </section>
@@ -1615,9 +1601,8 @@ export default function App() {
           <div className="site-footer">
             <span>{publicBaseLabel}</span>
             <span>
-              I made signup.rasies.com for media, auth.rasies.com/signup for
-              family account requests, and this site for the rest laid out
-              cleanly.
+              Built for our family: media at signup.rasies.com, full access at
+              auth.rasies.com/signup, and the rest right here.
             </span>
           </div>
         </footer>
