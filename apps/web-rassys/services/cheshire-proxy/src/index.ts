@@ -27,6 +27,9 @@ const config = {
     EMBED_MODE: normalizeMode(process.env.EMBED_MODE),
     EMBED_MODEL: process.env.EMBED_MODEL ?? "nomic-embed-text",
     EMBED_API_KEY: process.env.EMBED_API_KEY ?? "",
+    RERANK_BASE_URL: process.env.RERANK_BASE_URL ?? process.env.LLM_BASE_URL ?? "http://ollama-proxy:8080",
+    RERANK_MODEL: process.env.RERANK_MODEL ?? "rassy-rerank",
+    RERANK_API_KEY: process.env.RERANK_API_KEY ?? process.env.LLM_API_KEY ?? "",
     REQUEST_TIMEOUT_MS: toNumber(process.env.REQUEST_TIMEOUT_MS, 30000),
     REQUEST_RETRIES: toNumber(process.env.REQUEST_RETRIES, 1),
     RETRY_DELAY_MS: toNumber(process.env.RETRY_DELAY_MS, 300),
@@ -658,6 +661,14 @@ const forwardOpenAIEmbeddings = async (body, options) => {
     const parsed = await parseJsonResponse(res, "openai_embed_invalid_json");
     return { status: 200, body: parsed };
 };
+const forwardOpenAIRerank = async (body, options) => {
+    const model = body?.model ?? config.RERANK_MODEL;
+    const endpoint = buildOpenAIEndpoint(config.RERANK_BASE_URL, "rerank");
+    const payload = { ...body, model };
+    const res = await postJsonUpstream("embeddings", endpoint, payload, config.RERANK_API_KEY, options);
+    const parsed = await parseJsonResponse(res, "openai_rerank_invalid_json");
+    return { status: 200, body: parsed };
+};
 const resolveChat = async (body, options) => {
     if (config.LLM_MODE === "ollama")
         return mapOllamaChat(body, options);
@@ -697,6 +708,11 @@ const isEmbeddingPayloadValid = (body) => {
         return input.trim().length > 0;
     return Array.isArray(input) && input.length > 0;
 };
+const isRerankPayloadValid = (body) => {
+    const query = body?.query ?? body?.text;
+    const documents = body?.documents ?? body?.docs;
+    return typeof query === "string" && query.trim().length > 0 && Array.isArray(documents) && documents.length > 0;
+};
 const buildModelsPayload = () => ({
     object: "list",
     data: [
@@ -707,6 +723,11 @@ const buildModelsPayload = () => ({
         },
         {
             id: config.EMBED_MODEL,
+            object: "model",
+            owned_by: "cheshire-proxy"
+        },
+        {
+            id: config.RERANK_MODEL,
             object: "model",
             owned_by: "cheshire-proxy"
         }
@@ -850,6 +871,40 @@ const start = async () => {
         }
         catch (error) {
             request.log.warn({ client: requestClient, error: serializeError(error), lane: requestLane }, "Cheshire embeddings upstream failed");
+            const payload = toErrorPayload(error);
+            return reply.code(payload.status).send(payload.body);
+        }
+        finally {
+            queueRelease();
+            clientAbort.cleanup();
+        }
+    });
+    app.post("/v1/rerank", async (request, reply) => {
+        const body = request.body;
+        if (!isRerankPayloadValid(body)) {
+            return reply.code(400).send({ error: "invalid_rerank_payload" });
+        }
+        const clientAbort = createClientAbort(request);
+        const requestOptions = buildRequestOptions(request.headers, clientAbort.signal);
+        const requestClient = readHeaderValue(request.headers["x-cheshire-client"]);
+        const requestLane = normalizeQueueLane(request.headers["x-cheshire-lane"], "embeddings");
+        const requestPriority = normalizeQueuePriority(request.headers["x-cheshire-priority"], "normal");
+        const queueWaitMs = readQueueWaitMs(request.headers["x-cheshire-queue-wait-ms"], defaultQueueWaitMs(requestLane));
+        const queueRelease = await acquireQueueSlot(requestLane, requestPriority, queueWaitMs);
+        if (!queueRelease) {
+            clientAbort.cleanup();
+            return reply.code(503).send({
+                error: "cheshire_queue_busy",
+                lane: requestLane,
+                queue: snapshotCheshireQueue()
+            });
+        }
+        try {
+            const result = await forwardOpenAIRerank(body, requestOptions);
+            return reply.code(result.status).send(result.body);
+        }
+        catch (error) {
+            request.log.warn({ client: requestClient, error: serializeError(error), lane: requestLane }, "Cheshire rerank upstream failed");
             const payload = toErrorPayload(error);
             return reply.code(payload.status).send(payload.body);
         }

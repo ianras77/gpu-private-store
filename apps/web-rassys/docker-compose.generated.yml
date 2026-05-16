@@ -269,9 +269,9 @@ services:
       dockerfile: services/cheshire-proxy/Dockerfile
     environment:
       PORT: 1865
-      LLM_BASE_URL: ${CHESHIRE_LLM_BASE_URL:-http://ollama-proxy:8080}
-      LLM_MODE: ${CHESHIRE_LLM_MODE:-ollama}
-      LLM_MODEL: ${CHESHIRE_MODEL:-gpt-oss:20b}
+      LLM_BASE_URL: ${CHESHIRE_LLM_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      LLM_MODE: ${CHESHIRE_LLM_MODE:-openai}
+      LLM_MODEL: ${CHESHIRE_MODEL:-rassy-smart}
       LLM_API_KEY: ${CHESHIRE_LLM_API_KEY}
       REQUEST_TIMEOUT_MS: ${CHESHIRE_REQUEST_TIMEOUT_MS:-120000}
       REQUEST_RETRIES: ${CHESHIRE_REQUEST_RETRIES:-${CHESHIRE_PROXY_REQUEST_RETRIES:-1}}
@@ -279,10 +279,13 @@ services:
       LLM_KEEP_ALIVE: ${CHESHIRE_LLM_KEEP_ALIVE:-15m}
       QUEUE_MAX_ACTIVE_REQUESTS: ${CHESHIRE_QUEUE_MAX_ACTIVE_REQUESTS:-3}
       QUEUE_MAX_WAIT_MS: ${CHESHIRE_QUEUE_MAX_WAIT_MS:-90000}
-      EMBED_BASE_URL: ${CHESHIRE_EMBED_BASE_URL:-http://ollama-proxy:8080}
-      EMBED_MODE: ${CHESHIRE_EMBED_MODE:-ollama}
-      EMBED_MODEL: ${CHESHIRE_EMBED_MODEL:-nomic-embed-text}
+      EMBED_BASE_URL: ${CHESHIRE_EMBED_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      EMBED_MODE: ${CHESHIRE_EMBED_MODE:-openai}
+      EMBED_MODEL: ${CHESHIRE_EMBED_MODEL:-rassy-embed}
       EMBED_API_KEY: ${CHESHIRE_EMBED_API_KEY}
+      RERANK_BASE_URL: ${CHESHIRE_RERANK_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      RERANK_MODEL: ${CHESHIRE_RERANK_MODEL:-rassy-rerank}
+      RERANK_API_KEY: ${CHESHIRE_RERANK_API_KEY:-${CHESHIRE_LLM_API_KEY}}
     networks:
       internal: {}
       web-rassys_gpu-private-store_network:

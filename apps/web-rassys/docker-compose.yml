@@ -257,6 +257,9 @@ services:
       EMBED_MODE: ${CHESHIRE_EMBED_MODE:-openai}
       EMBED_MODEL: ${CHESHIRE_EMBED_MODEL:-rassy-embed}
       EMBED_API_KEY: ${CHESHIRE_EMBED_API_KEY}
+      RERANK_BASE_URL: ${CHESHIRE_RERANK_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      RERANK_MODEL: ${CHESHIRE_RERANK_MODEL:-rassy-rerank}
+      RERANK_API_KEY: ${CHESHIRE_RERANK_API_KEY:-${CHESHIRE_LLM_API_KEY}}
     networks:
       - internal
     restart: unless-stopped
