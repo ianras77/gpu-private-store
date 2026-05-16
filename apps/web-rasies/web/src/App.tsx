@@ -984,7 +984,7 @@ export default function App() {
         description: "Go to the family photos and videos.",
         href: photosUrl,
         icon: <Compass className="h-4 w-4" />,
-        badge: "My photos",
+        badge: "Photos",
         tone: "live",
         note: "photos.rasies.com",
       },
@@ -1549,7 +1549,7 @@ export default function App() {
           <div className="section-head">
             <Compass className="h-5 w-5" aria-hidden />
             <div>
-              <h2 id="photos-heading">My Immich photo library</h2>
+              <h2 id="photos-heading">Immich photo library</h2>
               <p>
                 Family photos and videos live in Immich. Use this when you want
                 to get to them quickly.

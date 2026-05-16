@@ -952,9 +952,9 @@ export function SmartQuickChat() {
       </div>
 
       <p className="dj-copy">
-        I keep the chat right near the top because this site is supposed to help
-        with real life, not send you digging. Bring a plan, a note, a question,
-        or the kind of half-formed thought that just needs a calm next step.
+        House Chat stays near the top because this site is supposed to help with
+        real life, not send you digging. Bring a plan, a note, a question, or
+        the kind of half-formed thought that just needs a calm next step.
       </p>
 
       <div className="dj-spotlight-grid" aria-label="Live House Chat spotlight">
@@ -1945,7 +1945,7 @@ export function AboutPanel({ about }: { about: AboutConfig }) {
   return (
     <section className="info-card" aria-labelledby="about-heading">
       <div className="card-kicker">From Rassy</div>
-      <h2 id="about-heading">I am {about.name}</h2>
+      <h2 id="about-heading">{about.name}</h2>
       <p className="info-emphasis">{about.tagline}</p>
       <p>{about.bio}</p>
       <div className="highlight-row" aria-label="Rassy highlights">
@@ -1956,8 +1956,7 @@ export function AboutPanel({ about }: { about: AboutConfig }) {
         ))}
       </div>
       <div className="card-footer-note">
-        I built this place so useful things could still feel warm and
-        unmistakably ours.
+        Built so useful things can still feel warm and unmistakably ours.
       </div>
     </section>
   );
@@ -2086,7 +2085,7 @@ export function StatusPanel({ compact = false }: { compact?: boolean }) {
     if (loading) {
       return compact
         ? "Checking services..."
-        : "I am checking the main services right now.";
+        : "Checking the main services right now.";
     }
 
     if (error) {
@@ -2304,12 +2303,10 @@ export function MinecraftPanel({
               Come and play Minecraft anytime. Big Momma Ras Land is open.
             </strong>
           </div>
-          <h3>
-            I made this easy: copy the address, peek at the map, then jump in.
-          </h3>
+          <h3>Copy the address, peek at the map, then jump in.</h3>
           <p>
-            I put the map and the helper bots right here so you can wander in,
-            find the server, and start building without hunting for the details.
+            The map and helper bots are here so you can wander in, find the
+            server, and start building without hunting for the details.
           </p>
 
           <div
@@ -2331,8 +2328,7 @@ export function MinecraftPanel({
               <span>Map bot</span>
               <strong>Scout first</strong>
               <p>
-                I keep the live map close so you can see where everybody has
-                been.
+                The live map is close so you can see where everybody has been.
               </p>
             </div>
             <div className="minecraft-bot-card">
@@ -2620,7 +2616,7 @@ export function BirthdayEasterEgg({ gameUrl }: { gameUrl: string }) {
               aria-label="Birthday mode notes"
             >
               <span className="birthday-egg-note">
-                I put the magic behind START.
+                The magic is behind START.
               </span>
               <span className="birthday-egg-note">
                 Press `Esc` to vanish back into the site.
@@ -3289,8 +3285,8 @@ export function ChatPanel({
                 <p className="card-kicker">House Chat</p>
                 <h3>Ask me for the thing rattling around in your head.</h3>
                 <p>
-                  I made this little window for plans, family notes, odd ideas,
-                  and the moment where you know there is a next step but do not
+                  Use this little window for plans, family notes, odd ideas, or
+                  that moment where you know there is a next step but do not
                   want to wrestle it alone.
                 </p>
                 <div
