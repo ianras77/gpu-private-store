@@ -73,6 +73,33 @@ describe("pickTrack", () => {
 
     expect(picked?.id).toBe("night");
   });
+
+  it("treats alternate versions of the same title and artist as recent", () => {
+    const tracks = [
+      {
+        ...makeTrack("heart-remaster", "Neil Young", 0.44),
+        title: "Heart of Gold (2009 Remaster)"
+      },
+      {
+        ...makeTrack("fresh", "The Signals", 0.5),
+        title: "Fresh Turn"
+      }
+    ];
+
+    const picked = pickTrack(tracks, {
+      mood: "late morning / steady shine",
+      dayPart: "late morning",
+      dayOfWeek: "Saturday",
+      emotionalWeather: "steady shine",
+      bannedTrackIds: new Set(),
+      bannedArtists: new Set(),
+      recentTrackIds: new Set(),
+      recentTrackSignatures: new Set(["neil young::heart of gold"]),
+      recentArtists: new Set()
+    });
+
+    expect(picked?.id).toBe("fresh");
+  });
 });
 
 describe("sanitizeRequest", () => {

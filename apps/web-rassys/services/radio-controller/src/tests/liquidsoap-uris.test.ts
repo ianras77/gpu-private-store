@@ -57,6 +57,36 @@ describe("buildTrackQueueUri", () => {
     expect(uri).toContain('liq_fade_out="4"');
     expect(uri).toContain('rassy_playback_mode="clip"');
   });
+
+  it("adds produced transition metadata when Mr Rassy marks a handoff", () => {
+    const uri = buildTrackQueueUri(
+      {
+        id: "track-transition",
+        path: "/music/transition.flac",
+        title: "Signal One",
+        artist: "The Signals",
+        duration: 240
+      },
+      {
+        playbackPlan: {
+          trackId: "track-transition",
+          mode: "full",
+          transitionAfter: true,
+          transitionStyle: "bloom",
+          transitionFeel: "warm lift",
+          transitionDurationSeconds: 6.5,
+          transitionReason: "Let the next record rise slowly.",
+          transitionNextTrackId: "track-next"
+        }
+      }
+    );
+
+    expect(uri).toContain('rassy_transition="true"');
+    expect(uri).toContain('rassy_transition_style="bloom"');
+    expect(uri).toContain('rassy_transition_feel="warm lift"');
+    expect(uri).toContain('rassy_transition_seconds="6.5"');
+    expect(uri).toContain('rassy_transition_next_track_id="track-next"');
+  });
 });
 
 describe("planSnippetPlayback", () => {

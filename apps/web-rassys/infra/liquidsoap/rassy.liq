@@ -23,6 +23,9 @@ lossless_mount = env("STREAM_LOSSLESS_MOUNT", "/live-lossless.ogg")
 station_name = env("STATION_NAME", "Mr Rassy Radio")
 station_desc = env("STATION_DESCRIPTION", "Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.")
 station_genre = env("STATION_GENRE", "eclectic")
+transition_default_seconds = float_of_string(env("RADIO_TRANSITION_DEFAULT_SECONDS", "0.0"))
+transition_fade_in_seconds = float_of_string(env("RADIO_TRANSITION_FADE_IN_SECONDS", "3.0"))
+transition_fade_out_seconds = float_of_string(env("RADIO_TRANSITION_FADE_OUT_SECONDS", "3.0"))
 
 # Queue for controller-driven selections
 queue = request.queue(id="queue")
@@ -41,9 +44,33 @@ mplayer_stream =
 # snippets = playlist(mode="random", reload_mode="watch", snippets_dir)
 
 core_radio = fallback(id="radio", track_sensitive=false, [queue, mplayer_stream, blank()])
-radio = mksafe(core_radio)
-lossless_radio = mksafe(core_radio)
-# radio = crossfade(radio)
+
+def log_transition(m) =
+  enabled = list.assoc(default="false", "rassy_transition", m)
+  if enabled == "true" then
+    style = list.assoc(default="blend", "rassy_transition_style", m)
+    feel = list.assoc(default="human handoff", "rassy_transition_feel", m)
+    seconds = list.assoc(default="0", "rassy_transition_seconds", m)
+    log.important("Mr Rassy transition armed: #{style} / #{feel} / #{seconds}s")
+  end
+end
+
+core_radio.on_track(log_transition)
+
+produced_radio = crossfade(
+  id="rassy-produced-transitions",
+  duration=transition_default_seconds,
+  override_duration="rassy_transition_seconds",
+  persist_override=false,
+  fade_in=transition_fade_in_seconds,
+  fade_out=transition_fade_out_seconds,
+  smart=true,
+  minimum=30.0,
+  core_radio
+)
+
+radio = mksafe(produced_radio)
+lossless_radio = mksafe(produced_radio)
 
 # Register a skip command for telnet
 

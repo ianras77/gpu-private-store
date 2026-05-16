@@ -35,7 +35,7 @@ import {
   normalizePodcastSeriesDescription,
   normalizePodcastSeriesTitle
 } from "./library";
-import { sanitizeRequest } from "./utils/selection";
+import { rankTracks, sanitizeRequest } from "./utils/selection";
 import { isLiquidsoapReady, pushToQueue, readQueuedRequests, skipCurrent } from "./liquidsoap/client";
 import { buildSnippetQueueUri } from "./liquidsoap/uris";
 import {
@@ -2698,10 +2698,39 @@ export const buildServer = () => {
       }
     }
 
-    const fallback = library
-      .getTracks()
-      .slice(0, 8)
-      .map((track) => toPublicTrack(track));
+    const tracks = library.getTracks();
+    let fallback: ReturnType<typeof toPublicTrack>[] = [];
+    try {
+      const context = await buildContext();
+      fallback = rankTracks(tracks, {
+        mood: context.mood,
+        dayPart: context.dayPart,
+        dayOfWeek: context.dayOfWeek,
+        emotionalWeather: context.emotionalWeather,
+        bannedTrackIds: new Set(context.bans.trackIds),
+        bannedArtists: new Set(context.bans.artists.map((artist) => artist.toLowerCase())),
+        recentTrackIds: new Set([
+          ...(context.nowPlaying?.id ? [context.nowPlaying.id] : []),
+          ...context.queuePreview.map((track: Track) => track.id),
+          ...context.recentTrackCooldownIds
+        ]),
+        recentTrackSignatures: new Set(context.recentTrackCooldownSignatures ?? []),
+        recentArtists: new Set(context.recentArtistCooldownSet ?? []),
+        feedbackScores: context.feedbackScoreMap,
+        feedbackWeight: config.RADIO_FEEDBACK_WEIGHT
+      })
+        .slice(0, 8)
+        .map(({ track }: { track: Track }) => toPublicTrack(track));
+    } catch (error) {
+      logger.warn({ error }, "Featured fallback could not use live context");
+    }
+    if (fallback.length === 0) {
+      fallback = tracks
+        .map((track: Track) => ({ track, sort: hashText(`${track.id}:${Math.floor(Date.now() / (60 * 60 * 1000))}`) }))
+        .sort((left, right) => left.sort - right.sort)
+        .slice(0, 8)
+        .map(({ track }) => toPublicTrack(track));
+    }
     const payload = { items: fallback };
     featuredCache = { data: payload, ts: Date.now() };
     return payload;

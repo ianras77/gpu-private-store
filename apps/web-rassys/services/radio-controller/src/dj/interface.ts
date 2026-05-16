@@ -22,6 +22,7 @@ export type DJProgrammingInfo = {
 
 export type DJTrackPlaybackMode = "full" | "clip";
 export type DJTrackPlaybackSegment = "opening" | "middle" | "late";
+export type DJTransitionStyle = "tight-cut" | "blend" | "bloom" | "long-blend" | "lift" | "drop";
 
 export type DJTrackPlaybackPlan = {
   trackId: string;
@@ -32,9 +33,22 @@ export type DJTrackPlaybackPlan = {
   fadeInSeconds?: number;
   fadeOutSeconds?: number;
   reason?: string;
+  transitionAfter?: boolean;
+  transitionStyle?: DJTransitionStyle;
+  transitionFeel?: string;
+  transitionDurationSeconds?: number;
+  transitionReason?: string;
+  transitionNextTrackId?: string;
   title?: string;
   artist?: string;
   duration?: number;
+};
+
+export type DJTransitionOpportunity = {
+  trackId: string;
+  trackSlot: number;
+  nextTrackId?: string;
+  nextTrackSlot?: number;
 };
 
 export type DJContext = {
@@ -88,6 +102,7 @@ export type DJContext = {
     artists: string[];
   };
   programming?: DJProgrammingInfo | null;
+  transitionOpportunities?: DJTransitionOpportunity[];
 };
 
 export type DJChatMessage = {

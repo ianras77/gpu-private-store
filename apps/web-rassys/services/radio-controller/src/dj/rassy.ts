@@ -90,9 +90,14 @@ const longFormPlanSchema = z.object({
         .array(z.object({
         trackId: z.string().optional(),
         trackSlot: z.coerce.number().int().optional(),
-        mode: z.enum(["full", "clip"]),
+        mode: z.enum(["full", "clip"]).optional(),
         segment: z.enum(["opening", "middle", "late"]).optional(),
-        reason: z.string().optional()
+        reason: z.string().optional(),
+        transitionAfter: z.boolean().optional(),
+        transitionStyle: z.enum(["tight-cut", "blend", "bloom", "long-blend", "lift", "drop"]).optional(),
+        transitionFeel: z.string().optional(),
+        transitionDurationSeconds: z.coerce.number().positive().optional(),
+        transitionReason: z.string().optional()
     }))
         .max(8)
 });
@@ -186,6 +191,7 @@ const boothDossierSystemPrompt = `Write "What Mr Rassy Hears" for Ian Rasmussen'
     `Use trackProfiles, turnWindow, setDesign, and libraryDNA to understand the turn more deeply, but keep boothDraft as the entity spine.\n` +
     `trackKnowledge objects contain the best saved reasons, context, history anchors, and listen-for angles Mr Rassy has already built around these records. Prefer them over generic filler.\n` +
     `turnWindow tells you what the current handoff is trying to do and where the request line is pushing. Use it so the note feels live, not archival.\n` +
+    `If longFormPlayback includes transitionAfter, transitionStyle, transitionFeel, or transitionReason, treat that as part of the live DJ decision and explain the human feel of the handoff when relevant.\n` +
     `Write with depth. The best notes explain the emotional purpose of the turn, then earn that confidence with history, band context, scene lineage, recording detail, catalog placement, or arrangement detail.\n` +
     `Use high-confidence music knowledge when you have it. If not, get specific about sound, arrangement, production texture, lineage, and sequencing.\n` +
     `Lineup = why the record belongs now. Context = useful historical, recording, scene, catalog, or structural insight. Listen-for = what the listener should catch in the music with real record-lover detail.\n` +
@@ -215,8 +221,13 @@ const longFormSystemPrompt = `You are Mr Rassy deciding how long-form records sh
     `Choose clip when a passage gives the listener the right hit without swallowing the set.\n` +
     `If you choose clip, return a segment of opening, middle, or late.\n` +
     `Think like a real radio editor with taste, not a timid playlist bot.\n` +
+    `You also get occasional transition opportunities that the station spaces randomly every 3 to 10 songs.\n` +
+    `When a transition opportunity is present, decide the human feel of that handoff and choose one transition style: tight-cut, blend, bloom, long-blend, lift, or drop.\n` +
+    `Only mark transitionAfter true for provided transitionOpportunity slots. Do not force transitions on every song.\n` +
+    `transitionFeel should be a short human phrase, not a technical label: warm lift, smoky drop, clean left turn, slow bloom, etc.\n` +
+    `transitionReason should explain the emotional/music reason for this handoff like a DJ hearing two records touch.\n` +
     `Never mention AI, prompts, tools, or systems.\n` +
-    `Return ONLY strict JSON: {"plans":[{"trackSlot":1,"mode":"full|clip","segment":"opening|middle|late","reason":"brief explanation"}]}.`;
+    `Return ONLY strict JSON: {"plans":[{"trackSlot":1,"mode":"full|clip","segment":"opening|middle|late","reason":"brief explanation","transitionAfter":true,"transitionStyle":"blend","transitionFeel":"warm lift","transitionDurationSeconds":4.5,"transitionReason":"brief transition logic"}]}.`;
 const buildTrackPayload = (track) => ({
     title: track.title,
     artist: track.artist,
@@ -1895,7 +1906,12 @@ const buildBoothDossierPrompt = async (context, input) => {
             artist: plan.artist,
             mode: plan.mode,
             segment: plan.segment,
-            reason: plan.reason
+            reason: plan.reason,
+            transitionAfter: plan.transitionAfter,
+            transitionStyle: plan.transitionStyle,
+            transitionFeel: plan.transitionFeel,
+            transitionDurationSeconds: plan.transitionDurationSeconds,
+            transitionReason: plan.transitionReason
         })),
         liveTurn: [
             context.nowPlaying
@@ -1975,7 +1991,12 @@ const buildBoothDossierRecoveryPrompt = async (context, input) => {
             artist: plan.artist,
             mode: plan.mode,
             segment: plan.segment,
-            reason: plan.reason
+            reason: plan.reason,
+            transitionAfter: plan.transitionAfter,
+            transitionStyle: plan.transitionStyle,
+            transitionFeel: plan.transitionFeel,
+            transitionDurationSeconds: plan.transitionDurationSeconds,
+            transitionReason: plan.transitionReason
         })),
         liveTurn: [
             context.nowPlaying
@@ -2023,9 +2044,28 @@ const buildLongFormPrompt = (context, tracks) => JSON.stringify({
     emotionalWeather: context.emotionalWeather,
     programming: buildProgrammingPayload(context.programming),
     nowPlaying: context.nowPlaying,
+    transitionSystem: {
+        spacing: "The station creates transition opportunities randomly every 3 to 10 songs.",
+        instruction: "Use these as human DJ levers. Pick the feel and style only when the opportunity is listed."
+    },
+    transitionOpportunities: (context.transitionOpportunities ?? []).map((opportunity) => {
+        const track = tracks[opportunity.trackSlot - 1] ?? tracks.find((item) => item.id === opportunity.trackId);
+        const nextTrack = opportunity.nextTrackSlot
+            ? tracks[opportunity.nextTrackSlot - 1]
+            : tracks.find((item) => item.id === opportunity.nextTrackId);
+        return {
+            trackSlot: opportunity.trackSlot,
+            trackId: opportunity.trackId,
+            track: track ? buildTrackPayload(track) : null,
+            nextTrackSlot: opportunity.nextTrackSlot,
+            nextTrackId: opportunity.nextTrackId,
+            nextTrack: nextTrack ? buildTrackPayload(nextTrack) : null
+        };
+    }),
     longTracks: tracks.map((track, index) => ({
         trackSlot: index + 1,
         id: track.id,
+        isLongForm: typeof track.duration === "number" && track.duration > config.RADIO_LONG_TRACK_THRESHOLD_SECONDS,
         ...buildTrackPayload(track)
     }))
 });
@@ -2584,16 +2624,15 @@ const callCheshireListenerReply = async (context, input) => {
     });
 };
 const callCheshireLongFormPlans = async (context, tracks) => {
-    const longTracks = tracks
-        .filter((track) => typeof track.duration === "number" &&
-        track.duration > config.RADIO_LONG_TRACK_THRESHOLD_SECONDS)
-        .slice(0, 6);
-    if (longTracks.length === 0)
+    const hasLongTracks = tracks.some((track) => typeof track.duration === "number" &&
+        track.duration > config.RADIO_LONG_TRACK_THRESHOLD_SECONDS);
+    const hasTransitionOpportunities = Array.isArray(context.transitionOpportunities) && context.transitionOpportunities.length > 0;
+    if (!hasLongTracks && !hasTransitionOpportunities)
         return [];
-    const rawPlans = await callCheshireJson(longFormSystemPrompt, buildLongFormPrompt(context, longTracks), longFormPlanSchema, 0.42, {
-        maxTokens: 220,
+    const rawPlans = await callCheshireJson(longFormSystemPrompt, buildLongFormPrompt(context, tracks), longFormPlanSchema, 0.48, {
+        maxTokens: 360,
         timeoutMs: 35000,
-        label: "long-form",
+        label: "playback-transition-plan",
         retries: 0,
         priority: "low",
         queueWaitMs: 8000,
@@ -2603,23 +2642,37 @@ const callCheshireLongFormPlans = async (context, tracks) => {
     if (!rawPlans)
         return [];
     const resolvedPlans = [];
+    const transitionOpportunityTrackIds = new Set((context.transitionOpportunities ?? []).map((opportunity) => opportunity.trackId));
     for (const plan of rawPlans.plans) {
         const trackId = typeof plan.trackSlot === "number"
-            ? longTracks[plan.trackSlot - 1]?.id
+            ? tracks[plan.trackSlot - 1]?.id
             : typeof plan.trackId === "string"
-                ? longTracks.find((track) => track.id === plan.trackId)?.id
+                ? tracks.find((track) => track.id === plan.trackId)?.id
                 : undefined;
         if (!trackId)
             continue;
-        const track = longTracks.find((item) => item.id === trackId);
+        const track = tracks.find((item) => item.id === trackId);
+        const isLongTrack = typeof track?.duration === "number" && track.duration > config.RADIO_LONG_TRACK_THRESHOLD_SECONDS;
+        const transitionAfter = Boolean(plan.transitionAfter && transitionOpportunityTrackIds.has(trackId));
+        if (!isLongTrack && !transitionAfter)
+            continue;
+        const nextOpportunity = (context.transitionOpportunities ?? []).find((opportunity) => opportunity.trackId === trackId);
         resolvedPlans.push({
             trackId,
             ...(track?.title ? { title: track.title } : {}),
             ...(track?.artist ? { artist: track.artist } : {}),
             ...(typeof track?.duration === "number" ? { duration: track.duration } : {}),
-            mode: plan.mode,
+            mode: plan.mode ?? "full",
             ...(plan.segment ? { segment: plan.segment } : {}),
-            ...(plan.reason ? { reason: plan.reason } : {})
+            ...(plan.reason ? { reason: plan.reason } : {}),
+            ...(transitionAfter ? { transitionAfter: true } : {}),
+            ...(transitionAfter && plan.transitionStyle ? { transitionStyle: plan.transitionStyle } : {}),
+            ...(transitionAfter && plan.transitionFeel ? { transitionFeel: plan.transitionFeel } : {}),
+            ...(transitionAfter && typeof plan.transitionDurationSeconds === "number"
+                ? { transitionDurationSeconds: plan.transitionDurationSeconds }
+                : {}),
+            ...(transitionAfter && plan.transitionReason ? { transitionReason: plan.transitionReason } : {}),
+            ...(transitionAfter && nextOpportunity?.nextTrackId ? { transitionNextTrackId: nextOpportunity.nextTrackId } : {})
         });
     }
     return resolvedPlans;

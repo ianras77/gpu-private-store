@@ -35,6 +35,11 @@ export type BoothDossierProgrammingPlayback = {
   cueOutSeconds?: number;
   fadeInSeconds?: number;
   fadeOutSeconds?: number;
+  transitionAfter?: boolean;
+  transitionStyle?: string;
+  transitionFeel?: string;
+  transitionDurationSeconds?: number;
+  transitionReason?: string;
   reason?: string;
 };
 
@@ -250,6 +255,19 @@ const toProgrammingPlayback = (value: unknown): BoothDossierProgrammingPlayback 
     ...(typeof asFiniteNumber(raw.cueOutSeconds) === "number" ? { cueOutSeconds: asFiniteNumber(raw.cueOutSeconds) } : {}),
     ...(typeof asFiniteNumber(raw.fadeInSeconds) === "number" ? { fadeInSeconds: asFiniteNumber(raw.fadeInSeconds) } : {}),
     ...(typeof asFiniteNumber(raw.fadeOutSeconds) === "number" ? { fadeOutSeconds: asFiniteNumber(raw.fadeOutSeconds) } : {}),
+    ...(raw.transitionAfter === true ? { transitionAfter: true } : {}),
+    ...(nonEmptyText(typeof raw.transitionStyle === "string" ? raw.transitionStyle : null)
+      ? { transitionStyle: nonEmptyText(typeof raw.transitionStyle === "string" ? raw.transitionStyle : null)! }
+      : {}),
+    ...(nonEmptyText(typeof raw.transitionFeel === "string" ? raw.transitionFeel : null)
+      ? { transitionFeel: nonEmptyText(typeof raw.transitionFeel === "string" ? raw.transitionFeel : null)! }
+      : {}),
+    ...(typeof asFiniteNumber(raw.transitionDurationSeconds) === "number"
+      ? { transitionDurationSeconds: asFiniteNumber(raw.transitionDurationSeconds) }
+      : {}),
+    ...(nonEmptyText(typeof raw.transitionReason === "string" ? raw.transitionReason : null)
+      ? { transitionReason: nonEmptyText(typeof raw.transitionReason === "string" ? raw.transitionReason : null)! }
+      : {}),
     ...(reason ? { reason } : {})
   };
 };
@@ -368,7 +386,7 @@ export const buildBoothSignature = (
     djScript: input.djScript ?? "",
     programming: input.programming?.label ?? context.programming?.label ?? "",
     playback: (input.playbackPlans ?? [])
-      .map((plan) => `${plan.trackId}:${plan.mode}:${plan.segment ?? "full"}`)
+      .map((plan) => `${plan.trackId}:${plan.mode}:${plan.segment ?? "full"}:${plan.transitionStyle ?? "no-transition"}:${plan.transitionFeel ?? ""}`)
       .join("|")
   });
 
@@ -449,6 +467,11 @@ const buildProgrammingSnapshot = (
     ...(typeof plan.cueOutSeconds === "number" ? { cueOutSeconds: plan.cueOutSeconds } : {}),
     ...(typeof plan.fadeInSeconds === "number" ? { fadeInSeconds: plan.fadeInSeconds } : {}),
     ...(typeof plan.fadeOutSeconds === "number" ? { fadeOutSeconds: plan.fadeOutSeconds } : {}),
+    ...(plan.transitionAfter ? { transitionAfter: true } : {}),
+    ...(plan.transitionStyle ? { transitionStyle: plan.transitionStyle } : {}),
+    ...(plan.transitionFeel ? { transitionFeel: plan.transitionFeel } : {}),
+    ...(typeof plan.transitionDurationSeconds === "number" ? { transitionDurationSeconds: plan.transitionDurationSeconds } : {}),
+    ...(plan.transitionReason ? { transitionReason: plan.transitionReason } : {}),
     ...(plan.reason ? { reason: plan.reason } : {})
   }));
 

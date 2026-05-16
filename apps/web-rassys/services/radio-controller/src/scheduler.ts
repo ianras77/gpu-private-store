@@ -40,6 +40,7 @@ const LIBRARY_LAST_SCAN_KEY = "station:library:last_scan_at";
 const RECENT_SNIPPETS_KEY = "station:recent_snippets";
 const LAST_SNIPPET_AT_KEY = "station:last_snippet_at";
 const LAST_SPECIAL_AT_KEY = "station:last_special_at";
+const TRANSITION_COUNTDOWN_KEY = "station:transition:countdown";
 const DJ_SCRIPT_TTL_SECONDS = 3 * 60 * 60;
 const FEEDBACK_PERSISTENCE_LOOKBACK_DAYS = 180;
 const FEEDBACK_PERSISTENCE_CACHE_MS = 5 * 60 * 1000;
@@ -459,6 +460,54 @@ const hashSeed = (value) => {
     }
     return hash;
 };
+const buildStationClock = (now, timeZone) => {
+    const fallback = {
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+        day: now.getDate(),
+        hour: now.getHours(),
+        dayOfWeek: now.toLocaleDateString("en-US", {
+            weekday: "long"
+        }),
+        timeOfDay: now.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true
+        })
+    };
+    try {
+        const parts = new Intl.DateTimeFormat("en-US", {
+            timeZone,
+            weekday: "long",
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: false
+        }).formatToParts(now);
+        const getPart = (type) => parts.find((part) => part.type === type)?.value;
+        const parsedHour = Number(getPart("hour"));
+        const hour = Number.isFinite(parsedHour) ? parsedHour % 24 : fallback.hour;
+        return {
+            year: Number(getPart("year")) || fallback.year,
+            month: Number(getPart("month")) || fallback.month,
+            day: Number(getPart("day")) || fallback.day,
+            hour,
+            dayOfWeek: getPart("weekday") || fallback.dayOfWeek,
+            timeOfDay: new Intl.DateTimeFormat("en-US", {
+                timeZone,
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true
+            }).format(now)
+        };
+    }
+    catch (error) {
+        logger.warn({ error, timeZone }, "Invalid station time zone; falling back to server clock");
+        return fallback;
+    }
+};
 const getDayPart = (hour) => {
     if (hour < 4)
         return "deep night";
@@ -554,11 +603,12 @@ const buildEmotionalWeather = (args) => {
     const dayPartPool = emotionalWeatherByDayPart[args.dayPart] ?? emotionalWeatherByDayPart["after-hours"];
     const isWeekend = ["friday", "saturday"].includes(args.dayOfWeek.toLowerCase());
     const pool = isWeekend ? [...dayPartPool, ...weekendWeather] : dayPartPool;
+    const clock = args.clock ?? buildStationClock(args.now, config.STATION_TIME_ZONE);
     const seed = [
-        args.now.getFullYear(),
-        args.now.getMonth() + 1,
-        args.now.getDate(),
-        args.now.getHours(),
+        clock.year,
+        clock.month,
+        clock.day,
+        clock.hour,
         args.dayPart,
         args.dayOfWeek,
         args.queueDepth,
@@ -581,6 +631,22 @@ const weakMoodTokens = new Set([
     "silly",
     "vibe"
 ]);
+const daytimeDayParts = new Set(["daybreak", "late morning", "midday", "golden afternoon"]);
+const nightMoodPattern = /\b(?:late\s*night|deep\s*night|midnight|night|after\s*hours|after-hours|nocturnal|candlelit)\b/i;
+const morningMoodPattern = /\b(?:morning|daybreak|sunrise|dawn|breakfast|coffee)\b/i;
+const afternoonMoodPattern = /\b(?:midday|afternoon|high\s*noon|sunlit|sunny)\b/i;
+const moodConflictsWithDayPart = (cleaned, dayPart) => {
+    const normalizedDayPart = dayPart.toLowerCase();
+    if (daytimeDayParts.has(normalizedDayPart) && nightMoodPattern.test(cleaned))
+        return true;
+    if (["deep night", "blue hour", "after-hours"].includes(normalizedDayPart) &&
+        (morningMoodPattern.test(cleaned) || afternoonMoodPattern.test(cleaned))) {
+        return true;
+    }
+    if (["sunset", "after-hours"].includes(normalizedDayPart) && morningMoodPattern.test(cleaned))
+        return true;
+    return false;
+};
 export const normalizeStationMood = (value, context) => {
     const raw = (value ?? "")
         .trim()
@@ -612,13 +678,16 @@ export const normalizeStationMood = (value, context) => {
     if (cleaned.split(" ").length === 1 && weakMoodTokens.has(cleaned)) {
         return `${context.dayPart} / ${context.emotionalWeather}`.trim();
     }
+    if (moodConflictsWithDayPart(cleaned, context.dayPart)) {
+        return `${context.dayPart} / ${context.emotionalWeather}`.trim();
+    }
     if (cleaned.includes(context.emotionalWeather.toLowerCase()) ||
         cleaned.includes(context.dayPart.toLowerCase())) {
         return cleaned;
     }
     return `${cleaned} / ${context.emotionalWeather}`.trim();
 };
-const getTrackCooldownMs = () => Math.max(1, config.RADIO_TRACK_COOLDOWN_HOURS) * 60 * 60 * 1000;
+const getTrackCooldownMs = () => Math.max(Math.max(1, config.RADIO_TRACK_COOLDOWN_HOURS) * 60 * 60 * 1000, Math.max(0, config.RADIO_TRACK_COOLDOWN_DAYS) * 24 * 60 * 60 * 1000);
 const getLockedQueueTrackCount = () => Math.max(1, config.RADIO_LOCKED_QUEUE_TRACKS);
 const getMinimumSetSize = () => Math.max(getLockedQueueTrackCount(), config.RADIO_SET_MIN_SIZE);
 const getSetTargetTrackCount = () => Math.max(getMinimumSetSize(), config.RADIO_SET_TARGET_SIZE);
@@ -681,17 +750,13 @@ const readStoredSetPlan = async () => {
 export const buildCurrentMoodFrame = (args) => {
     const now = args.now ?? new Date();
     const rawMood = args.rawMood ?? config.RADIO_MOOD;
-    const dayOfWeek = now.toLocaleDateString("en-US", {
-        weekday: "long"
-    });
-    const dayPart = getDayPart(now.getHours());
-    const timeOfDay = now.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true
-    });
+    const clock = buildStationClock(now, config.STATION_TIME_ZONE);
+    const dayOfWeek = clock.dayOfWeek;
+    const dayPart = getDayPart(clock.hour);
+    const timeOfDay = clock.timeOfDay;
     const emotionalWeather = buildEmotionalWeather({
         now,
+        clock,
         mood: rawMood,
         dayPart,
         dayOfWeek,
@@ -1410,6 +1475,124 @@ const materializePlaybackPlans = (tracks, rawPlans = []) => {
         return normalizedPlan;
     });
 };
+const clampTransitionValue = (value, min, max) => Math.max(min, Math.min(max, value));
+const getTransitionSongWindow = () => {
+    const minSongs = Math.max(1, Math.floor(config.RADIO_TRANSITION_MIN_SONGS));
+    const maxSongs = Math.max(minSongs, Math.floor(config.RADIO_TRANSITION_MAX_SONGS));
+    return { minSongs, maxSongs };
+};
+const randomTransitionCountdown = () => {
+    const { minSongs, maxSongs } = getTransitionSongWindow();
+    return minSongs + Math.floor(Math.random() * (maxSongs - minSongs + 1));
+};
+const pickTransitionStyle = (track, nextTrack, context) => {
+    const energyDelta = (nextTrack?.energy ?? track?.energy ?? 0.5) - (track?.energy ?? 0.5);
+    const dayPart = context.dayPart?.toLowerCase() ?? "";
+    const mood = context.mood?.toLowerCase() ?? "";
+    if (energyDelta >= 0.18)
+        return "lift";
+    if (energyDelta <= -0.18)
+        return "drop";
+    if (/deep night|blue hour|after-hours|velvet|drift|hush|tender/.test(`${dayPart} ${mood}`))
+        return "bloom";
+    if (Math.abs(energyDelta) <= 0.05)
+        return "long-blend";
+    if (Math.abs(energyDelta) >= 0.12)
+        return "tight-cut";
+    return "blend";
+};
+const transitionDurationForStyle = (style) => {
+    const minSeconds = Math.max(0.5, config.RADIO_TRANSITION_MIN_SECONDS);
+    const maxSeconds = Math.max(minSeconds, config.RADIO_TRANSITION_MAX_SECONDS);
+    const base = {
+        "tight-cut": 3,
+        blend: 4.5,
+        bloom: 6.5,
+        "long-blend": 8,
+        lift: 4,
+        drop: 5.5
+    }[style] ?? 4.5;
+    const jitter = (Math.random() - 0.5) * 0.8;
+    return Number(clampTransitionValue(base + jitter, minSeconds, maxSeconds).toFixed(1));
+};
+const buildTransitionReason = (track, nextTrack, style, context) => {
+    const currentLabel = track?.title && track?.artist ? `${track.title} by ${track.artist}` : "this record";
+    const nextLabel = nextTrack?.title && nextTrack?.artist ? `${nextTrack.title} by ${nextTrack.artist}` : "the next record";
+    const styleLine = {
+        "tight-cut": "a tight fader move keeps the contrast clean",
+        blend: "a clean blend lets the handoff breathe",
+        bloom: "a slow bloom gives the next record room to rise",
+        "long-blend": "a longer blend turns the two records into one passing weather system",
+        lift: "a lift brings the energy up without snapping the room awake",
+        drop: "a drop cools the floor without making the landing feel dead"
+    }[style] ?? "a produced handoff keeps the station feeling alive";
+    return `${currentLabel} into ${nextLabel}: ${styleLine} inside ${context.dayPart}.`;
+};
+const planTransitionOpportunities = async (tracks) => {
+    if (!config.RADIO_TRANSITIONS_ENABLED || tracks.length < 2)
+        return [];
+    const readCountdown = async () => {
+        const raw = await redis.get(TRANSITION_COUNTDOWN_KEY);
+        const parsed = raw ? Number(raw) : Number.NaN;
+        return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : randomTransitionCountdown();
+    };
+    const opportunities = [];
+    let countdown = await readCountdown();
+    for (let index = 0; index < tracks.length - 1; index += 1) {
+        countdown -= 1;
+        if (countdown > 0)
+            continue;
+        opportunities.push({
+            trackId: tracks[index].id,
+            trackSlot: index + 1,
+            nextTrackId: tracks[index + 1].id,
+            nextTrackSlot: index + 2
+        });
+        countdown = randomTransitionCountdown();
+    }
+    await redis.set(TRANSITION_COUNTDOWN_KEY, Math.max(1, countdown).toString());
+    return opportunities;
+};
+const applyTransitionPlans = (tracks, context, playbackPlans, transitionOpportunities = []) => {
+    if (!config.RADIO_TRANSITIONS_ENABLED || tracks.length < 2 || transitionOpportunities.length === 0)
+        return playbackPlans;
+    const plansByTrackId = new Map(playbackPlans.map((plan) => [plan.trackId, { ...plan }]));
+    const trackById = new Map(tracks.map((track) => [track.id, track]));
+    const nextTrackForOpportunity = (opportunity) => {
+        if (opportunity.nextTrackId) {
+            const byId = trackById.get(opportunity.nextTrackId);
+            if (byId)
+                return byId;
+        }
+        return tracks[opportunity.trackSlot] ?? null;
+    };
+    for (const opportunity of transitionOpportunities) {
+        const track = trackById.get(opportunity.trackId) ?? tracks[opportunity.trackSlot - 1];
+        if (!track)
+            continue;
+        const nextTrack = nextTrackForOpportunity(opportunity);
+        if (!nextTrack)
+            continue;
+        const style = pickTransitionStyle(track, nextTrack, context);
+        const existing = plansByTrackId.get(track.id) ?? {
+            trackId: track.id,
+            title: track.title,
+            artist: track.artist,
+            duration: track.duration,
+            mode: "full"
+        };
+        plansByTrackId.set(track.id, {
+            ...existing,
+            transitionAfter: existing.transitionAfter ?? true,
+            transitionStyle: existing.transitionStyle ?? style,
+            transitionFeel: existing.transitionFeel ?? `${style} handoff`,
+            transitionDurationSeconds: existing.transitionDurationSeconds ?? transitionDurationForStyle(style),
+            transitionNextTrackId: existing.transitionNextTrackId ?? nextTrack.id,
+            transitionReason: existing.transitionReason ?? buildTransitionReason(track, nextTrack, style, context)
+        });
+    }
+    return Array.from(plansByTrackId.values());
+};
 const buildSnapshotContext = (context, setlistTracks) => {
     if (!context)
         return null;
@@ -1798,9 +1981,9 @@ const selectNextTracks = async (count, options = {}) => {
             (!repeatedArtistKey || artistKey === repeatedArtistKey);
         if (bans.artists.has(artistKey))
             return false;
-        if (!requested && recentTrackIds.has(track.id))
+        if (recentTrackIds.has(track.id))
             return false;
-        if (!requested && trackSignature && recentTrackSignatures.has(trackSignature))
+        if (trackSignature && recentTrackSignatures.has(trackSignature))
             return false;
         if (!requested && !repeatedArtistAllowed && recentArtists.has(artistKey))
             return false;
@@ -1886,10 +2069,17 @@ const selectNextTracks = async (count, options = {}) => {
         : baseSelectionSource;
     const selectionSource = programmingSource;
     await redis.set(DJ_MODE_KEY, selectionSource);
+    const transitionOpportunities = await planTransitionOpportunities(pickedTracks);
+    const playbackPlanningContext = transitionOpportunities.length > 0
+        ? {
+            ...planningContext,
+            transitionOpportunities
+        }
+        : planningContext;
     const rawPlaybackPlans = defaultDJ.planTrackPlayback
-        ? ((await defaultDJ.planTrackPlayback(planningContext, pickedTracks)) ?? [])
+        ? ((await defaultDJ.planTrackPlayback(playbackPlanningContext, pickedTracks)) ?? [])
         : [];
-    const playbackPlans = materializePlaybackPlans(pickedTracks, rawPlaybackPlans);
+    const playbackPlans = applyTransitionPlans(pickedTracks, planningContext, materializePlaybackPlans(pickedTracks, rawPlaybackPlans), transitionOpportunities);
     const playlistScript = choosePlaylistCommentary(planningContext, pickedTracks, decision ?? null, {
         allowCaptainScript: hasCaptainTrackControl
     });
@@ -2154,7 +2344,12 @@ const refreshLibrary = async () => {
     const scannedAt = Date.now().toString();
     await redis.set(LIBRARY_LAST_SCAN_KEY, scannedAt);
     await persistCurrentLibrary("full");
-    void syncTrackInsights(library.getTracks()).catch((error) => {
+    void syncTrackInsights(library.getTracks(), {
+        embed: Boolean(config.CHESHIRE_BASE_URL),
+        analyze: Boolean(config.CHESHIRE_BASE_URL),
+        limit: Math.max(0, config.RADIO_KNOWLEDGE_BOOTSTRAP_LIMIT),
+        analysisLimit: Math.max(0, config.RADIO_KNOWLEDGE_ANALYSIS_LIMIT)
+    }).catch((error) => {
         logger.error({ error }, "Failed to sync track intelligence after full library scan");
     });
     logger.info({

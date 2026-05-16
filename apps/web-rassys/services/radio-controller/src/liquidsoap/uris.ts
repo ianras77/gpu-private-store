@@ -55,7 +55,18 @@ export const planTrackPlayback = (
   options: {
     playbackPlan?: Pick<
       DJTrackPlaybackPlan,
-      "mode" | "segment" | "cueInSeconds" | "cueOutSeconds" | "fadeInSeconds" | "fadeOutSeconds"
+      | "mode"
+      | "segment"
+      | "cueInSeconds"
+      | "cueOutSeconds"
+      | "fadeInSeconds"
+      | "fadeOutSeconds"
+      | "transitionAfter"
+      | "transitionStyle"
+      | "transitionFeel"
+      | "transitionDurationSeconds"
+      | "transitionReason"
+      | "transitionNextTrackId"
     > | null;
     thresholdSeconds?: number;
     clipWindowSeconds?: number;
@@ -169,6 +180,22 @@ export const buildTrackQueueUri = (
     pushMetadata(metadata, "rassy_playback_mode", "clip");
   } else if (options.playbackPlan?.mode === "full") {
     pushMetadata(metadata, "rassy_playback_mode", "full");
+  }
+  if (options.playbackPlan?.transitionAfter) {
+    pushMetadata(metadata, "rassy_transition", "true");
+    pushMetadata(metadata, "rassy_transition_style", options.playbackPlan.transitionStyle ?? "blend");
+    pushMetadata(metadata, "rassy_transition_feel", options.playbackPlan.transitionFeel ?? "human handoff");
+    pushMetadata(
+      metadata,
+      "rassy_transition_reason",
+      options.playbackPlan.transitionReason ?? "Mr Rassy marked this handoff for a produced station transition."
+    );
+    pushMetadata(metadata, "rassy_transition_next_track_id", options.playbackPlan.transitionNextTrackId);
+    pushMetadata(
+      metadata,
+      "rassy_transition_seconds",
+      formatCueValue(Math.max(0.5, options.playbackPlan.transitionDurationSeconds ?? 4))
+    );
   }
   return metadata.length > 0 ? `annotate:${metadata.join(",")}:${track.path}` : track.path;
 };
