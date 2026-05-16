@@ -106,10 +106,21 @@ const normalizeTrackIdentityText = (value) => (value ?? "")
     .replace(/\s+/g, " ")
     .trim();
 const buildTrackCooldownSignature = (track) => {
-    const normalizedTitle = normalizeTrackIdentityText((track?.title ?? "")
+    const rawTitle = (track?.title ?? "")
         .replace(TRACK_TITLE_DECORATION_PATTERN, " ")
-        .replace(TRACK_TITLE_TAIL_PATTERN, " "));
-    const normalizedArtist = normalizeTrackIdentityText(track?.artist ?? "");
+        .replace(TRACK_TITLE_TAIL_PATTERN, " ");
+    const rawArtist = track?.artist ?? "";
+    const titleParts = rawTitle
+        .split(/\s+-\s+/)
+        .map((part) => part.trim())
+        .filter(Boolean);
+    const artistLooksLikeTrackNumber = /^\s*(?:disc\s*)?\d+[.)]?\s*$/i.test(rawArtist);
+    const normalizedTitle = normalizeTrackIdentityText(
+        artistLooksLikeTrackNumber && titleParts.length >= 2 ? titleParts[titleParts.length - 1] : rawTitle
+    );
+    const normalizedArtist = normalizeTrackIdentityText(
+        artistLooksLikeTrackNumber && titleParts.length >= 2 ? titleParts[0] : rawArtist
+    );
     if (!normalizedTitle || !normalizedArtist)
         return "";
     return `${normalizedArtist}::${normalizedTitle}`;
