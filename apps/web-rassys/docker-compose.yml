@@ -1,7 +1,7 @@
 services:
   web:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-rassys
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_STREAM_URL: ${NEXT_PUBLIC_STREAM_URL:-}
@@ -109,7 +109,7 @@ services:
 
   radio-controller:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-rassys
       dockerfile: services/radio-controller/Dockerfile
     environment:
       NODE_ENV: production
@@ -221,7 +221,7 @@ services:
 
   minecraft-bridge:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-rassys
       dockerfile: services/minecraft-bridge/Dockerfile
     environment:
       PORT: 4100
@@ -247,7 +247,7 @@ services:
 
   cheshire:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-rassys
       dockerfile: services/cheshire-proxy/Dockerfile
     environment:
       PORT: 1865
@@ -326,7 +326,7 @@ services:
 
   icecast:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys/infra/icecast
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-rassys/infra/icecast
     environment:
       ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-change-me-rassys-icecast-source}
       ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD:-change-me-rassys-icecast-admin}

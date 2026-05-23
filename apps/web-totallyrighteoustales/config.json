@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-totallyrighteoustales",
   "description": "A whimsical long-form storytelling commons with moderation, voting, and a leaderboard. - Web: Next.js App Router + Tailwind CSS - API: Fastify + Prisma + Postgres + Redis/BullMQ - iOS: Expo (React Native) - Auth: Supabase magic links (JWT verified by API) - Storage: S3-compatible (presigned upload) make up Canonical st.",
-  "tipi_version": 3,
-  "version": "1.0.2",
+  "tipi_version": 4,
+  "version": "1.0.3",
   "categories": [
     "ai",
     "utilities"

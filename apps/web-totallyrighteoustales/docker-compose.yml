@@ -1,7 +1,7 @@
 services:
   trt-api:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-totallyrighteoustales/repo
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-totallyrighteoustales/repo
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
@@ -118,7 +118,7 @@ services:
 
   trt-web:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-totallyrighteoustales/repo
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-totallyrighteoustales/repo
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
@@ -147,7 +147,7 @@ services:
 
   trt-worker:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-totallyrighteoustales/repo
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-totallyrighteoustales/repo
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}

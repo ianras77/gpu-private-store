@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassyapp/repo
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-rassyapp/repo
       dockerfile: Dockerfile
     pull_policy: build
     environment:
@@ -32,7 +32,7 @@ services:
       internal_port: 3000
   cheshire-cat-core:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassyapp/repo
+      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-rassyapp/repo
       dockerfile: docker/cat-core.Dockerfile
     pull_policy: build
     environment:

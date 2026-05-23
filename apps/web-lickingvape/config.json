@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-lickingvape",
   "description": "Editorial community stack with Next.js, FastAPI, background jobs, Postgres, and a Cheshire Cat sidecar.",
-  "tipi_version": 3,
-  "version": "1.0.2",
+  "tipi_version": 4,
+  "version": "1.0.3",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",

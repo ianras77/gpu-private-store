@@ -1,6 +1,6 @@
 services:
   lickingvape-api:
-    build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/api
+    build: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-lickingvape/repo/apps/api
     restart: unless-stopped
     pull_policy: build
     environment:
@@ -86,7 +86,7 @@ services:
       retries: 10
 
   lickingvape-web:
-    build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/web
+    build: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-lickingvape/repo/apps/web
     restart: unless-stopped
     pull_policy: build
     environment:
@@ -109,7 +109,7 @@ services:
       internal_port: 3000
 
   lickingvape-worker:
-    build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/worker
+    build: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-lickingvape/repo/apps/worker
     restart: unless-stopped
     pull_policy: build
     environment:

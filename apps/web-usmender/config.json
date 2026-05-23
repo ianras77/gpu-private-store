@@ -5,14 +5,14 @@
   "exposable": true,
   "dynamic_config": true,
   "id": "web-usmender",
-  "description": "This app was brought to minimum compliance baselines for Dockerized operations. | Service | Port | Purpose | Health | |---|---:|---|---| | web | 3294 | Primary web UI | / | | api | 3295 | Backend API | /healthz | | db | 3297 | Postgres | - | npm install npm run dev docker compose up -d --build The default stack is self.",
-  "tipi_version": 3,
-  "version": "18",
+  "description": "USMender is a mobile-first repair messenger built around a local Matrix core. Users see USMender rooms, private drafts, mediator approvals, trust controls, and mobile clients while Matrix/Synapse stays local underneath as the durable room/event substrate.",
+  "tipi_version": 4,
+  "version": "19",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "This app was brought to minimum compliance baselines for Dockerized operations. | Service | Port | Purpose | Health | |-",
+  "short_desc": "Mobile-first repair messenger wrapped around a local Matrix core with LLM/RAG mediation in the send path.",
   "author": "https://github.com/ianras77/web-usmender.git",
   "source": "https://github.com/ianras77/web-usmender",
   "form_fields": [],
