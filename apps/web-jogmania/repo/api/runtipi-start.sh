@@ -11,7 +11,8 @@ else
 fi
 
 pip install -r requirements.txt
-if ! alembic upgrade head 2>&1 | tee /tmp/jogmania-alembic.log; then
+if ! alembic upgrade head > /tmp/jogmania-alembic.log 2>&1; then
+  cat /tmp/jogmania-alembic.log >&2
   if grep -q "Can't locate revision" /tmp/jogmania-alembic.log; then
     echo "Legacy Alembic revision not present in this package; bridging from packaged base." >&2
     alembic stamp 20260226_000002
