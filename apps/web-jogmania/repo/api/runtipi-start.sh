@@ -15,7 +15,7 @@ if ! alembic upgrade head > /tmp/jogmania-alembic.log 2>&1; then
   cat /tmp/jogmania-alembic.log >&2
   if grep -q "Can't locate revision" /tmp/jogmania-alembic.log; then
     echo "Legacy Alembic revision not present in this package; bridging from packaged base." >&2
-    alembic stamp 20260226_000002
+    alembic stamp --purge 20260226_000002
     alembic upgrade head
   else
     exit 1
