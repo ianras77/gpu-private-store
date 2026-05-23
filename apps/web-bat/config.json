@@ -6,8 +6,8 @@
   "dynamic_config": false,
   "id": "web-bat",
   "description": "Editorial platform with Next.js, FastAPI, worker automation, Qdrant retrieval, and a Cheshire Cat sidecar.",
-  "tipi_version": 2,
-  "version": "1.0.1",
+  "tipi_version": 3,
+  "version": "1.0.2",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",

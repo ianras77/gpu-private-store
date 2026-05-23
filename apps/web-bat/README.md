@@ -86,7 +86,7 @@ Key publish-first endpoints:
 
 ## Worker cadence and role stages
 
-- Worker loop interval defaults to `WORKER_CYCLE_MINUTES=30`.
+- Worker loop interval defaults to `WORKER_CYCLE_MINUTES=30`; worker and manual admin runs share a Redis lock so only one editorial cycle runs at a time.
 - `Researcher` ingests search results, embeds chunks, and refreshes themes.
 - `Researcher` follows a directed query plan (runtime directive + active themes + default pack) and can ingest X results.
 - `Analyst` turns live source signal into persisted analysis briefs, tone lanes, story targets, and link-role guidance.

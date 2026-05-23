@@ -36,6 +36,23 @@ def _serialize_revision(row: RevisionHistory) -> dict:
     }
 
 
+def _pipeline_event_age_seconds(value: object) -> float | None:
+    if not isinstance(value, datetime):
+        return None
+    event_at = value.replace(tzinfo=None) if value.tzinfo else value
+    return (datetime.utcnow() - event_at).total_seconds()
+
+
+def _finalize_pipeline_cycle_status(cycle: dict) -> dict:
+    if cycle.get("status") == "running":
+        age_seconds = _pipeline_event_age_seconds(cycle.get("last_event_at"))
+        if age_seconds is not None and age_seconds > int(settings.pipeline_stale_after_seconds):
+            cycle["status"] = "interrupted"
+            cycle["interrupted"] = True
+            cycle["stale_after_seconds"] = int(settings.pipeline_stale_after_seconds)
+    return cycle
+
+
 def _serialize_editorial_card(row: EditorialObject) -> dict:
     metadata = row.meta or {}
     launch_packet = metadata.get("launch_packet", {}) if isinstance(metadata, dict) else {}
@@ -181,6 +198,11 @@ async def admin_pipeline(limit: int = 80, db: AsyncSession = Depends(get_db)) ->
             cycle["status"] = "failed"
             cycle["completed_at"] = snapshot.get("failed_at") or row.created_at
             cycle["error"] = snapshot.get("error")
+        elif row.action == "cycle_skipped":
+            cycle["status"] = "skipped"
+            cycle["started_at"] = snapshot.get("started_at") or cycle.get("started_at") or row.created_at
+            cycle["completed_at"] = snapshot.get("completed_at") or row.created_at
+            cycle["reason"] = snapshot.get("reason")
         elif row.action in ("stage_started", "stage_completed", "stage_failed", "stage_skipped"):
             cycle["stages"].append(
                 {
@@ -192,6 +214,9 @@ async def admin_pipeline(limit: int = 80, db: AsyncSession = Depends(get_db)) ->
                     "error": snapshot.get("error"),
                 }
             )
+
+    for cycle in cycle_events.values():
+        _finalize_pipeline_cycle_status(cycle)
 
     cycle_list = sorted(cycle_events.values(), key=lambda item: item.get("last_event_at"), reverse=True)
     latest_cycle = cycle_list[0] if cycle_list else None
@@ -206,7 +231,7 @@ async def admin_pipeline(limit: int = 80, db: AsyncSession = Depends(get_db)) ->
 
 @router.post("/pipeline/run-now")
 async def run_pipeline_now(db: AsyncSession = Depends(get_db)) -> dict:
-    return await run_pipeline_cycle(db)
+    return await run_pipeline_cycle(db, actor="admin")
 
 
 @router.get("/analysis")

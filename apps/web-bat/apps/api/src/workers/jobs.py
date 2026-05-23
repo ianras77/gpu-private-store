@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
+import redis.asyncio as redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,6 +32,7 @@ from services.structured_logging import get_logger, log_event
 from services.trend_engine import rebuild_themes
 
 logger = get_logger("bat.pipeline")
+PIPELINE_LOCK_KEY = "bat:pipeline:cycle-lock"
 ROLE_BY_NAME = {role["role"]: role for role in CAT_ROLE_PIPELINE}
 OUTLET_SUFFIX_RE = re.compile(
     r"\s*(?:\||-|:)\s*(AP News|Associated Press|Reuters|The New York Times|The Washington Post|POLITICO|"
@@ -620,6 +622,39 @@ async def _log_pipeline_event(
     )
 
 
+async def _acquire_pipeline_lock(cycle_id: uuid.UUID, actor: str) -> tuple[bool, redis.Redis | None, str]:
+    token = f"{cycle_id}:{actor}"
+    client = redis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
+    try:
+        acquired = await client.set(
+            PIPELINE_LOCK_KEY,
+            token,
+            nx=True,
+            ex=max(60, int(settings.pipeline_lock_ttl_seconds)),
+        )
+        if acquired:
+            return True, client, token
+        await client.aclose()
+        return False, None, token
+    except Exception as exc:  # noqa: BLE001
+        await client.aclose()
+        log_event(logger, "pipeline.lock_unavailable", level=40, error=str(exc))
+        return True, None, token
+
+
+async def _release_pipeline_lock(client: redis.Redis | None, token: str) -> None:
+    if client is None:
+        return
+    try:
+        current = await client.get(PIPELINE_LOCK_KEY)
+        if current == token:
+            await client.delete(PIPELINE_LOCK_KEY)
+    except Exception as exc:  # noqa: BLE001
+        log_event(logger, "pipeline.lock_release_failed", level=40, error=str(exc))
+    finally:
+        await client.aclose()
+
+
 async def run_researcher_cycle(db: AsyncSession) -> dict:
     controls = await get_runtime_controls(db)
     query_plan = await _build_research_query_plan(db, controls)
@@ -1168,9 +1203,35 @@ async def run_queen_cycle(db: AsyncSession, *, writer_summary: dict) -> dict:
     }
 
 
-async def run_pipeline_cycle(db: AsyncSession) -> dict:
+async def run_pipeline_cycle(db: AsyncSession, *, actor: str = "worker") -> dict:
     cycle_id = uuid.uuid4()
     cycle_started_at = datetime.utcnow()
+    lock_acquired, lock_client, lock_token = await _acquire_pipeline_lock(cycle_id, actor)
+    if not lock_acquired:
+        completed_at = datetime.utcnow()
+        await _log_pipeline_event(
+            db,
+            cycle_id=cycle_id,
+            action="cycle_skipped",
+            actor=actor,
+            snapshot={
+                "cycle_id": str(cycle_id),
+                "started_at": cycle_started_at,
+                "completed_at": completed_at,
+                "reason": "pipeline_already_running",
+                "lock_ttl_seconds": int(settings.pipeline_lock_ttl_seconds),
+            },
+        )
+        return {
+            "cycle_id": str(cycle_id),
+            "status": "skipped",
+            "reason": "pipeline_already_running",
+            "started_at": cycle_started_at.isoformat(),
+            "completed_at": completed_at.isoformat(),
+            "duration_seconds": round((completed_at - cycle_started_at).total_seconds(), 2),
+            "roles": [role["role"] for role in CAT_ROLE_PIPELINE],
+        }
+
     stage_results: dict[str, dict] = {}
     stage_functions = {
         "researcher": run_researcher_cycle,
@@ -1179,115 +1240,118 @@ async def run_pipeline_cycle(db: AsyncSession) -> dict:
         "queen": run_queen_cycle,
     }
 
-    await _log_pipeline_event(
-        db,
-        cycle_id=cycle_id,
-        action="cycle_started",
-        actor="worker",
-        snapshot={"cycle_id": str(cycle_id), "started_at": cycle_started_at},
-    )
-
-    for role in CAT_ROLE_PIPELINE:
-        stage = role["role"]
-        stage_started_at = datetime.utcnow()
+    try:
         await _log_pipeline_event(
             db,
             cycle_id=cycle_id,
-            action="stage_started",
-            actor=stage,
-            snapshot={"stage": stage, "started_at": stage_started_at, "plugins": role["plugins"]},
+            action="cycle_started",
+            actor=actor,
+            snapshot={"cycle_id": str(cycle_id), "started_at": cycle_started_at},
         )
-        try:
-            if stage == "writer":
-                researcher = stage_results.get("researcher", {})
-                analyst = stage_results.get("analyst", {})
-                should_run_writer, skip_reason = _writer_should_run(researcher, analyst)
-                if not should_run_writer:
-                    result = {
-                        "role": "writer",
-                        "skipped": True,
-                        "reason": skip_reason,
-                        "writer_material": researcher.get("writer_material") or {},
-                    }
-                    stage_results[stage] = result
-                    await _log_pipeline_event(
-                        db,
-                        cycle_id=cycle_id,
-                        action="stage_skipped",
-                        actor=stage,
-                        snapshot={"stage": stage, "reason": result["reason"]},
-                    )
-                    continue
 
-            if stage == "queen":
-                result = await stage_functions[stage](db, writer_summary=stage_results.get("writer", {}))
-            else:
-                result = await stage_functions[stage](db)
-            result["duration_seconds"] = round((datetime.utcnow() - stage_started_at).total_seconds(), 2)
-            stage_results[stage] = result
+        for role in CAT_ROLE_PIPELINE:
+            stage = role["role"]
+            stage_started_at = datetime.utcnow()
             await _log_pipeline_event(
                 db,
                 cycle_id=cycle_id,
-                action="stage_completed",
+                action="stage_started",
                 actor=stage,
-                snapshot={
-                    "stage": stage,
-                    "started_at": stage_started_at,
-                    "completed_at": datetime.utcnow(),
-                    "result": result,
-                },
+                snapshot={"stage": stage, "started_at": stage_started_at, "plugins": role["plugins"]},
             )
-        except Exception as exc:
-            log_event(
-                logger,
-                "pipeline.stage_failed",
-                level=40,
-                cycle_id=str(cycle_id),
-                stage=stage,
-                error=str(exc),
-            )
-            await _log_pipeline_event(
-                db,
-                cycle_id=cycle_id,
-                action="stage_failed",
-                actor=stage,
-                snapshot={
-                    "stage": stage,
-                    "started_at": stage_started_at,
-                    "failed_at": datetime.utcnow(),
-                    "error": str(exc),
-                },
-            )
-            await _log_pipeline_event(
-                db,
-                cycle_id=cycle_id,
-                action="cycle_failed",
-                actor="worker",
-                snapshot={"failed_stage": stage, "error": str(exc), "started_at": cycle_started_at},
-            )
-            raise
+            try:
+                if stage == "writer":
+                    researcher = stage_results.get("researcher", {})
+                    analyst = stage_results.get("analyst", {})
+                    should_run_writer, skip_reason = _writer_should_run(researcher, analyst)
+                    if not should_run_writer:
+                        result = {
+                            "role": "writer",
+                            "skipped": True,
+                            "reason": skip_reason,
+                            "writer_material": researcher.get("writer_material") or {},
+                        }
+                        stage_results[stage] = result
+                        await _log_pipeline_event(
+                            db,
+                            cycle_id=cycle_id,
+                            action="stage_skipped",
+                            actor=stage,
+                            snapshot={"stage": stage, "reason": result["reason"]},
+                        )
+                        continue
 
-    cycle_completed_at = datetime.utcnow()
-    await _log_pipeline_event(
-        db,
-        cycle_id=cycle_id,
-        action="cycle_completed",
-        actor="worker",
-        snapshot={
+                if stage == "queen":
+                    result = await stage_functions[stage](db, writer_summary=stage_results.get("writer", {}))
+                else:
+                    result = await stage_functions[stage](db)
+                result["duration_seconds"] = round((datetime.utcnow() - stage_started_at).total_seconds(), 2)
+                stage_results[stage] = result
+                await _log_pipeline_event(
+                    db,
+                    cycle_id=cycle_id,
+                    action="stage_completed",
+                    actor=stage,
+                    snapshot={
+                        "stage": stage,
+                        "started_at": stage_started_at,
+                        "completed_at": datetime.utcnow(),
+                        "result": result,
+                    },
+                )
+            except Exception as exc:
+                log_event(
+                    logger,
+                    "pipeline.stage_failed",
+                    level=40,
+                    cycle_id=str(cycle_id),
+                    stage=stage,
+                    error=str(exc),
+                )
+                await _log_pipeline_event(
+                    db,
+                    cycle_id=cycle_id,
+                    action="stage_failed",
+                    actor=stage,
+                    snapshot={
+                        "stage": stage,
+                        "started_at": stage_started_at,
+                        "failed_at": datetime.utcnow(),
+                        "error": str(exc),
+                    },
+                )
+                await _log_pipeline_event(
+                    db,
+                    cycle_id=cycle_id,
+                    action="cycle_failed",
+                    actor=actor,
+                    snapshot={"failed_stage": stage, "error": str(exc), "started_at": cycle_started_at},
+                )
+                raise
+
+        cycle_completed_at = datetime.utcnow()
+        await _log_pipeline_event(
+            db,
+            cycle_id=cycle_id,
+            action="cycle_completed",
+            actor=actor,
+            snapshot={
+                "cycle_id": str(cycle_id),
+                "started_at": cycle_started_at,
+                "completed_at": cycle_completed_at,
+                "stage_results": stage_results,
+            },
+        )
+        summary = {
             "cycle_id": str(cycle_id),
-            "started_at": cycle_started_at,
-            "completed_at": cycle_completed_at,
+            "started_at": cycle_started_at.isoformat(),
+            "completed_at": cycle_completed_at.isoformat(),
+            "duration_seconds": round((cycle_completed_at - cycle_started_at).total_seconds(), 2),
+            "roles": [role["role"] for role in CAT_ROLE_PIPELINE],
             "stage_results": stage_results,
-        },
-    )
-    summary = {
-        "cycle_id": str(cycle_id),
-        "started_at": cycle_started_at.isoformat(),
-        "completed_at": cycle_completed_at.isoformat(),
-        "duration_seconds": round((cycle_completed_at - cycle_started_at).total_seconds(), 2),
-        "roles": [role["role"] for role in CAT_ROLE_PIPELINE],
-        "stage_results": stage_results,
-    }
-    summary.update(stage_results)
-    log_event(logger, "pipeline.cycle_completed", **summary)
-    return summary
+        }
+        summary.update(stage_results)
+        log_event(logger, "pipeline.cycle_completed", **summary)
+        return summary
+    finally:
+        await _release_pipeline_lock(lock_client, lock_token)

@@ -1,5 +1,7 @@
 import unittest
+from datetime import datetime, timedelta
 
+from routes.admin import _finalize_pipeline_cycle_status
 from routes.health import (
     _build_cat_memory_probe_payload,
     _build_cat_message_probe_payload,
@@ -70,3 +72,14 @@ class HealthRouteTests(unittest.TestCase):
         vector = _extract_embedding_vector({"embeddings": [[1.0, 2.0, 3.0]]})
 
         self.assertEqual(vector, [1.0, 2.0, 3.0])
+
+    def test_pipeline_admin_marks_old_running_cycle_interrupted(self) -> None:
+        cycle = {
+            "status": "running",
+            "last_event_at": datetime.utcnow() - timedelta(seconds=7200),
+        }
+
+        finalized = _finalize_pipeline_cycle_status(cycle)
+
+        self.assertEqual(finalized["status"], "interrupted")
+        self.assertTrue(finalized["interrupted"])

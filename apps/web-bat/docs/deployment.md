@@ -20,4 +20,4 @@ docker compose up -d --build
 - Local compose defaults now assume the RassyGPT Ollama-compatible gateway is reachable from containers at `http://rassygpt-gateway:8080`.
 - Cheshire Cat stays live in the local stack, using `rassy-smart` for chat and `rassy-embed` for Qdrant-backed memory.
 - If generation is degraded, direct homepage publication is held until the story slate has at least one publish-ready story.
-- Worker defaults now run at `WORKER_CYCLE_MINUTES=30`.
+- Worker defaults now run at `WORKER_CYCLE_MINUTES=30`, with `PIPELINE_LOCK_TTL_SECONDS=3600` preventing overlapping worker/manual runs and `PIPELINE_STALE_AFTER_SECONDS=1800` keeping interrupted cycles from looking active forever.

@@ -404,6 +404,8 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with (
+            patch("workers.jobs._acquire_pipeline_lock", new=AsyncMock(return_value=(True, None, "token"))),
+            patch("workers.jobs._release_pipeline_lock", new=AsyncMock()),
             patch("workers.jobs.record_revision", new=AsyncMock()),
             patch("workers.jobs.run_researcher_cycle", new=AsyncMock(return_value={"writer_material": {}})),
             patch("workers.jobs.run_analyst_cycle", new=AsyncMock(return_value={})),
@@ -416,6 +418,22 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
         queen_mock.assert_awaited_once()
         self.assertEqual(summary["writer"]["reason"], "cached_current_sources")
         self.assertEqual(summary["queen"]["backlog"]["publish"]["published_editorial_count"], 1)
+
+    async def test_run_pipeline_cycle_skips_when_another_cycle_has_lock(self) -> None:
+        db = _FakeDB([])
+        record_mock = AsyncMock()
+
+        with (
+            patch("workers.jobs._acquire_pipeline_lock", new=AsyncMock(return_value=(False, None, "token"))),
+            patch("workers.jobs.record_revision", new=record_mock),
+            patch("workers.jobs.run_researcher_cycle", new=AsyncMock()) as researcher_mock,
+        ):
+            summary = await run_pipeline_cycle(db, actor="admin")
+
+        researcher_mock.assert_not_awaited()
+        record_mock.assert_awaited_once()
+        self.assertEqual(summary["status"], "skipped")
+        self.assertEqual(summary["reason"], "pipeline_already_running")
 
 
 if __name__ == "__main__":

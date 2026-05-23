@@ -124,6 +124,8 @@ class Settings(BaseSettings):
     auto_publish_social: bool = False
     worker_cycle_minutes: int = 2
     worker_min_cycle_seconds: int = 30
+    pipeline_lock_ttl_seconds: int = 3600
+    pipeline_stale_after_seconds: int = 1800
     research_query_concurrency: int = 6
     research_x_query_concurrency: int = 4
     analysis_theme_concurrency: int = 4
