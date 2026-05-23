@@ -4745,26 +4745,62 @@ select:focus-visible {
 .chat-panel-minimal .chat-main {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(280px, 0.72fr) minmax(360px, 1.28fr);
+  grid-template-columns: minmax(280px, 0.62fr) minmax(420px, 1.38fr);
   gap: 0.8rem;
   align-items: stretch;
 }
 
+.chat-mini-status {
+  grid-column: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.9rem;
+  align-items: flex-start;
+  min-width: 0;
+  border: 1px solid rgba(224, 191, 114, 0.14);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 100%),
+    rgba(9, 18, 28, 0.76);
+  padding: 0.9rem;
+}
+
+.chat-mini-status > div:first-child {
+  display: grid;
+  gap: 0.22rem;
+  min-width: 0;
+}
+
+.chat-mini-status h2 {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  line-height: 1;
+}
+
+.chat-mini-status p:last-child {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .chat-panel-minimal .chat-health,
 .chat-panel-minimal .icon-button {
-  width: 2.15rem;
+  width: auto;
   height: 2.15rem;
   border-radius: 999px;
-  padding: 0;
+  padding: 0 0.68rem;
   justify-content: center;
   background: rgba(8, 15, 24, 0.7);
+  white-space: nowrap;
 }
 
 .chat-panel-minimal .chat-log {
   grid-column: 2;
   grid-row: 1 / span 3;
-  min-height: 320px;
-  max-height: 440px;
+  min-height: 280px;
+  max-height: 390px;
   border-radius: 22px;
   padding: 1rem;
 }
@@ -4781,7 +4817,7 @@ select:focus-visible {
 }
 
 .chat-panel-minimal .chat-compose textarea {
-  min-height: 260px;
+  min-height: 178px;
   resize: vertical;
   border-radius: 22px;
 }
@@ -4803,16 +4839,16 @@ select:focus-visible {
 .chat-empty-minimal {
   height: 100%;
   display: grid;
-  gap: 0.85rem;
-  align-content: center;
+  gap: 0.7rem;
+  align-content: start;
 }
 
 .chat-empty-minimal h3 {
   margin: 0;
   color: var(--ink);
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: clamp(1.9rem, 3vw, 3rem);
-  line-height: 1;
+  font-size: clamp(1.45rem, 2.4vw, 2.15rem);
+  line-height: 1.04;
 }
 
 .chat-empty-minimal p {
@@ -6116,19 +6152,28 @@ select:focus-visible {
     grid-template-columns: 1fr;
   }
 
+  .chat-mini-status,
   .chat-panel-minimal .chat-log,
   .chat-panel-minimal .chat-compose,
   .chat-panel-minimal .status-line {
     grid-column: 1;
   }
 
+  .chat-mini-status {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.62rem;
+    padding: 0.85rem;
+  }
+
   .chat-panel-minimal .chat-log {
     grid-row: auto;
-    min-height: 270px;
+    min-height: 220px;
+    max-height: 320px;
   }
 
   .chat-panel-minimal .chat-compose textarea {
-    min-height: 140px;
+    min-height: 128px;
   }
 
   .chat-mini-prompt-grid {

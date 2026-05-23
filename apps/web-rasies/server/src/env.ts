@@ -20,6 +20,7 @@ const EnvSchema = z.object({
   CAT_CHAT_PATH: z.string().default('/message'),
   CAT_TIMEOUT_MS: z.coerce.number().default(60000),
   CAT_MODEL: z.string().default('gpt-oss:20b'),
+  CAT_API_KEY: z.string().default(''),
 
   STATUS_TIMEOUT_MS: z.coerce.number().default(4000),
 

@@ -3258,6 +3258,23 @@ export function ChatPanel({
         )}
 
         <div className="chat-main">
+          {isMinimal && (
+            <div className="chat-mini-status" aria-label="House Chat status">
+              <div>
+                <p className="card-kicker">House Chat</p>
+                <h2>Ask House Chat</h2>
+                <p>
+                  Plans, notes, questions, and half-formed ideas can start
+                  right here.
+                </p>
+              </div>
+              <div className="chat-health">
+                <span className={`dot dot-${health}`} aria-hidden />
+                <span>{healthLabel(health)}</span>
+              </div>
+            </div>
+          )}
+
           {!isMinimal && (
             <div className="chat-meta" aria-label="Chat workspace status">
               <span>{totalTurns} messages exchanged</span>

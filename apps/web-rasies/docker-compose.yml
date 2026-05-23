@@ -17,8 +17,8 @@ services:
       - SEARXNG_BASE_URL=https://search.rasies.com
       - SEARXNG_PATH=/search
       - SEARXNG_TIMEOUT_MS=9000
-      - CAT_BASE_URL=${RASIES_CAT_BASE_URL:-http://rasies-cheshire-cat:80}
-      - CAT_CHAT_PATH=/message
+      - CAT_BASE_URL=${RASIES_CAT_BASE_URL:-http://rassygpt-gateway:8080}
+      - CAT_CHAT_PATH=${RASIES_CAT_CHAT_PATH:-/api/chat}
       - CAT_MODEL=${RASIES_CAT_MODEL:-rassy-smart}
       - CAT_TIMEOUT_MS=60000
       - HEIMDALL_URL=https://apps.rasies.com
@@ -52,9 +52,6 @@ services:
       - MR_RASSY_SOUNDS_ROOT=/mr-rassy-sounds
       - MUSIC_LIBRARY_ROOT=/music-library
       - ALLOWED_ORIGINS=https://www.rasies.com,https://rassys.com,https://www.rassys.com,http://${APP_HOST}:${APP_PORT},http://localhost:5173,http://127.0.0.1:5173
-    depends_on:
-      rasies-cheshire-cat:
-        condition: service_healthy
     volumes:
       - ${ROOT_FOLDER_HOST}/media/data/podcasts:/stories:ro
       - ${ROOT_FOLDER_HOST}/media/data/web-rasies:/thoughts:ro

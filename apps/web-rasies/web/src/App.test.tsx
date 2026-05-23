@@ -510,13 +510,13 @@ describe("App", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /Welcome, Rasies\. I made the big science-crazy house, and you are welcome\./i,
+        name: /Family, start here\./i,
       }),
     ).toBeInTheDocument();
 
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: /I put my notes right up front/i }),
+        screen.getByRole("heading", { name: /Notes I want easy to find/i }),
       ).toBeInTheDocument();
       expect(
         screen.getByRole("textbox", { name: /Ask Ian's House Chat/i }),
@@ -525,11 +525,11 @@ describe("App", () => {
         screen.getByRole("heading", { name: /^Search$/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { name: /^Wizarr media signup$/i }),
+        screen.getByRole("heading", { name: /^Media services signup$/i }),
       ).toBeInTheDocument();
       expect(
         screen.getByRole("heading", {
-          name: /^Authentik family access request$/i,
+          name: /^Family access request$/i,
         }),
       ).toBeInTheDocument();
       expect(
@@ -539,7 +539,7 @@ describe("App", () => {
         screen.getByRole("heading", { name: /^Self-hosted apps$/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { name: /My Immich photo library/i }),
+        screen.getByRole("heading", { name: /Immich photo library/i }),
       ).toBeInTheDocument();
       expect(
         screen.getByRole("heading", {
@@ -548,23 +548,21 @@ describe("App", () => {
       ).toBeInTheDocument();
       expect(
         screen.getByRole("heading", {
-          name: /I kept the listening shelf here too/i,
+          name: /The listening shelf is here too/i,
         }),
       ).toBeInTheDocument();
       expect(
-        screen.getAllByRole("link", { name: /^Go to easy media signup$/i })
-          .length,
-      ).toBeGreaterThan(0);
-      expect(
-        screen.getAllByRole("link", { name: /^Ask for family account$/i })
-          .length,
+        screen.getAllByRole("link", { name: /^Media signup$/i }).length,
       ).toBeGreaterThan(0);
       expect(
         screen.getAllByRole("link", { name: /^Request family account$/i })
           .length,
       ).toBeGreaterThan(0);
       expect(
-        screen.getByRole("link", { name: /^See all apps$/i }),
+        screen.getAllByRole("link", { name: /^Open app library$/i }).length,
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getByRole("link", { name: /^Open full apps guide$/i }),
       ).toBeInTheDocument();
       expect(screen.getAllByText(/Immich/i).length).toBeGreaterThan(0);
       expect(screen.getAllByText(/Nextcloud/i).length).toBeGreaterThan(0);
@@ -573,17 +571,17 @@ describe("App", () => {
     });
 
     expect(
-      screen.getAllByRole("link", { name: /^Go to easy media signup$/i })[0],
-    ).toHaveAttribute("href", "https://signup.rasies.com");
+      screen.getAllByRole("link", { name: /^Media signup$/i })[0],
+    ).toHaveAttribute("href", "https://signup.rasies.com/j/RASIES");
     expect(
-      screen.getAllByRole("link", { name: /^Ask for family account$/i })[0],
-    ).toHaveAttribute("href", "https://auth.rasies.com/sign-up");
+      screen.getAllByRole("link", { name: /^Request family account$/i })[0],
+    ).toHaveAttribute(
+      "href",
+      "https://auth.rasies.com/if/flow/runtipi-waitlist-enrollment/",
+    );
     expect(
-      screen.getAllByRole("link", { name: /^Sign in$/i })[0],
+      screen.getAllByRole("link", { name: /^Sign in \/ library$/i })[0],
     ).toHaveAttribute("href", "https://auth.rasies.com/");
-    expect(
-      screen.getByRole("link", { name: /^See all apps$/i }),
-    ).toHaveAttribute("href", "/#/apps");
     expect(
       screen.getByRole("link", { name: /^Open full apps guide$/i }),
     ).toHaveAttribute("href", "/#/apps");
@@ -595,7 +593,7 @@ describe("App", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("heading", {
-          name: /Welcome, Rasies\. I made the big science-crazy house/i,
+          name: /Family, start here\./i,
         }),
       ).toBeInTheDocument();
     });
@@ -604,7 +602,7 @@ describe("App", () => {
       screen.getByText(/Choose this if you only want media\./i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/This does not make the full family account\./i),
+      screen.getByText(/This does not create the full family account/i),
     ).toBeInTheDocument();
     expect(
       screen.getAllByText(/Choose this if you want the full family account\./i)
@@ -612,7 +610,7 @@ describe("App", () => {
     ).toBeGreaterThan(0);
     expect(
       screen.getByText(
-        /I will review it\. After I approve you, click Open family apps/i,
+        /Once I approve it, use the app library button/i,
       ),
     ).toBeInTheDocument();
     expect(
@@ -622,7 +620,7 @@ describe("App", () => {
     ).toBeGreaterThan(0);
     expect(
       screen.getAllByRole("link", {
-        name: /Go to easy media signup|Easy media signup/i,
+        name: /^Media signup$/i,
       }).length,
     ).toBeGreaterThan(0);
     expect(
@@ -639,14 +637,14 @@ describe("App", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("heading", {
-          name: /I split the apps so the right door is obvious\./i,
+          name: /The app map, without the guessing\./i,
         }),
       ).toBeInTheDocument();
       expect(
         screen.getByRole("heading", { name: /Start with the right door/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { name: /Family app dashboard/i }),
+        screen.getByRole("heading", { name: /Family app library/i }),
       ).toBeInTheDocument();
       expect(
         screen.getAllByRole("heading", { name: /^Sign-in Apps$/i }).length,
@@ -663,8 +661,8 @@ describe("App", () => {
       screen.getByRole("link", { name: /^Back to home$/i }),
     ).toHaveAttribute("href", "/");
     expect(
-      screen.getAllByRole("link", { name: /^Go to easy media signup$/i })[0],
-    ).toHaveAttribute("href", "https://signup.rasies.com");
+      screen.getAllByRole("link", { name: /^Media signup$/i })[0],
+    ).toHaveAttribute("href", "https://signup.rasies.com/j/RASIES");
   });
 
   it("renders the bedtime stories library route", async () => {

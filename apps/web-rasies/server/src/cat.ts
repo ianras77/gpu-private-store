@@ -43,6 +43,27 @@ function errorMessage(err: unknown) {
   return err instanceof Error ? err.message : 'Unknown error';
 }
 
+function jsonHeaders(env: Env) {
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    accept: 'application/json'
+  };
+  const apiKey = env.CAT_API_KEY.trim();
+  if (apiKey) {
+    headers.authorization = `Bearer ${apiKey}`;
+  }
+  return headers;
+}
+
+function acceptHeaders(env: Env) {
+  const headers: Record<string, string> = { accept: 'application/json' };
+  const apiKey = env.CAT_API_KEY.trim();
+  if (apiKey) {
+    headers.authorization = `Bearer ${apiKey}`;
+  }
+  return headers;
+}
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
 
 function toHttpMethod(value: string) {
@@ -130,7 +151,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
 
       const res = await request(endpoint, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        headers: jsonHeaders(env),
         body: JSON.stringify(payload),
         headersTimeout: env.CAT_TIMEOUT_MS,
         bodyTimeout: env.CAT_TIMEOUT_MS
@@ -219,10 +240,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
         try {
           res = await request(target, {
             method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              accept: 'application/json'
-            },
+            headers: jsonHeaders(env),
             body: JSON.stringify(payload),
             headersTimeout: attempt === 1 ? timeoutMs : retryTimeoutMs,
             bodyTimeout: attempt === 1 ? timeoutMs : retryTimeoutMs
@@ -253,7 +271,15 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
         });
       }
 
-      return { reply: replyText };
+      if (!replyText.trim()) {
+        req.log.warn({ target, statusCode: res.statusCode }, 'cat upstream returned an empty reply');
+        return reply.code(502).send({
+          error: 'Cat upstream returned an empty reply',
+          detail: 'The assistant service responded without usable text.'
+        });
+      }
+
+      return { reply: replyText.trim() };
     } catch (err: unknown) {
       req.log.error({ err }, 'cat upstream failed');
       return reply
@@ -272,6 +298,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
     try {
       const res = await request(target, {
         method: 'GET',
+        headers: acceptHeaders(env),
         headersTimeout: env.CAT_TIMEOUT_MS,
         bodyTimeout: env.CAT_TIMEOUT_MS
       });

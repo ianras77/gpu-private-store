@@ -29,6 +29,7 @@ function buildEnv(overrides: Partial<Env> = {}): Env {
     CAT_CHAT_PATH: '/message',
     CAT_TIMEOUT_MS: 60000,
     CAT_MODEL: 'gpt-oss:20b',
+    CAT_API_KEY: '',
     STATUS_TIMEOUT_MS: 4000,
     ALLOWED_ORIGINS: 'https://www.rasies.com',
     HEIMDALL_URL: 'https://apps.rasies.com',
