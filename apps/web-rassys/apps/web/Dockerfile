@@ -25,7 +25,7 @@ ENV NEXT_PUBLIC_MINECRAFT_API_URL=${NEXT_PUBLIC_MINECRAFT_API_URL}
 ENV DATABASE_URL=${DATABASE_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/web/ ./
-RUN npm run build
+RUN mkdir -p public && npm run build
 
 FROM node:20-bullseye-slim AS runner
 WORKDIR /app

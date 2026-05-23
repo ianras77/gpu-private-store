@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-jogmania",
   "description": "Jogmania is an exercise platform powered by iOS + Apple Watch capture and a FastAPI gamification engine. The web app is a user portal for runs, routes, and adventure replays (not a game). - `repo/apps/web` \u2014 Next.js + Tailwind web portal - `repo/apps/ios` \u2014 Expo React Native iOS app - `repo/api` \u2014 FastAPI backend + Ale.",
-  "tipi_version": 3,
-  "version": "1.0.2",
+  "tipi_version": 4,
+  "version": "1.0.3",
   "categories": [
     "ai",
     "utilities"

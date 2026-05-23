@@ -12,7 +12,10 @@ RUN npm ci --legacy-peer-deps
 
 COPY . .
 RUN npm run prisma:generate
-RUN NEXT_DISABLE_ESLINT=1 npm run build
+RUN CAT_HTTP_BASE=http://cheshire-cat-core:80 \
+  CAT_WS_BASE=ws://cheshire-cat-core:80 \
+  APP_SESSION_SECRET=build-time-secret \
+  NEXT_DISABLE_ESLINT=1 npm run build
 
 FROM base AS runner
 
