@@ -60,6 +60,7 @@ services:
       context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-crackstack/repo/backend
       dockerfile: Dockerfile
     image: runtipi-local-web-crackstack-backend:latest
+    pull_policy: build
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${CRACKSTACK_POSTGRES_USER:-crackstack}:${CRACKSTACK_POSTGRES_PASSWORD:-crackstack}@crackstack-postgres:5432/${CRACKSTACK_POSTGRES_DB:-crackstack}
@@ -102,6 +103,7 @@ services:
       args:
         APP_NAME: xlcrack
     image: runtipi-local-web-crackstack-xlcrack:latest
+    pull_policy: build
     restart: unless-stopped
     environment:
       CRACKSTACK_API_BASE_URL: ${CRACKSTACK_API_BASE_URL:-http://crackstack-backend:8000}
@@ -135,6 +137,7 @@ services:
       args:
         APP_NAME: tapecrack
     image: runtipi-local-web-crackstack-tapecrack:latest
+    pull_policy: build
     restart: unless-stopped
     environment:
       CRACKSTACK_API_BASE_URL: ${CRACKSTACK_API_BASE_URL:-http://crackstack-backend:8000}

@@ -2,6 +2,7 @@ services:
   lickingvape-api:
     build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/api
     restart: unless-stopped
+    pull_policy: build
     environment:
       DATABASE_URL: ${LICKINGVAPE_DATABASE_URL:-postgresql://lickingvape:lickingvape@lickingvape-postgres:5432/lickingvape}
       INTERNAL_TOOL_TOKEN: ${LICKINGVAPE_INTERNAL_TOOL_TOKEN:-change-me}
@@ -87,6 +88,7 @@ services:
   lickingvape-web:
     build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/web
     restart: unless-stopped
+    pull_policy: build
     environment:
       API_PROXY_TARGET: http://lickingvape-api:8000
       NEXT_PUBLIC_API_BASE: ${LICKINGVAPE_PUBLIC_API_BASE:-/api}
@@ -109,6 +111,7 @@ services:
   lickingvape-worker:
     build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/worker
     restart: unless-stopped
+    pull_policy: build
     environment:
       DATABASE_URL: ${LICKINGVAPE_DATABASE_URL:-postgresql://lickingvape:lickingvape@lickingvape-postgres:5432/lickingvape}
       CAT_REVIEW_ENDPOINT: ${LICKINGVAPE_CAT_REVIEW_ENDPOINT:-http://lickingvape-cat:80/custom/editor/review}

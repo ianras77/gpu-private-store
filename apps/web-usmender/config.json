@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-usmender",
   "description": "This app was brought to minimum compliance baselines for Dockerized operations. | Service | Port | Purpose | Health | |---|---:|---|---| | web | 3294 | Primary web UI | / | | api | 3295 | Backend API | /healthz | | db | 3297 | Postgres | - | npm install npm run dev docker compose up -d --build The default stack is self.",
-  "tipi_version": 2,
-  "version": "17",
+  "tipi_version": 3,
+  "version": "18",
   "categories": [
     "ai",
     "utilities"

@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-rasies",
   "description": "A welcoming self-hosted family site with stories, thoughts, music, search, chat, status checks, and a Minecraft map, all gathered into one warm home-on-the-web.",
-  "tipi_version": 2,
-  "version": "1.0.1",
+  "tipi_version": 3,
+  "version": "1.0.2",
   "categories": [
     "ai",
     "utilities"

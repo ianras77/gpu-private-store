@@ -7,7 +7,7 @@ const apiKey = process.env.LOCALAI_API_KEY;
 const chatModel = process.env.LOCALAI_CHAT_MODEL || "rassy-smart";
 const moderationModel = process.env.LOCALAI_MODERATION_MODEL || "rassy-fast";
 const embeddingModel = process.env.LOCALAI_EMBED_MODEL || "rassy-embed";
-const transcribeModel = process.env.LOCALAI_TRANSCRIBE_MODEL || "rassy-audio";
+const transcribeModel = process.env.LOCALAI_TRANSCRIBE_MODEL || "rassy-fast";
 
 function authHeaders(): Record<string, string> {
   return apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
@@ -113,9 +113,7 @@ export async function transcribeAudio(buffer: Buffer, filename: string, contentT
     body: form
   });
 
-  if (!res.ok) {
-    throw new Error(`LocalAI transcription error: ${res.status}`);
-  }
+  if (!res.ok) return undefined;
 
   const data = await res.json();
   return data.text as string | undefined;

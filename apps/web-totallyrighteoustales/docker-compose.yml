@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
+    pull_policy: build
     command: sh -lc "pnpm -C apps/api exec prisma migrate deploy && pnpm -C apps/api start"
     environment:
       PORT: "3191"
@@ -20,7 +21,7 @@ services:
       LOCALAI_CHAT_MODEL: ${TRT_LOCALAI_CHAT_MODEL:-rassy-smart}
       LOCALAI_MODERATION_MODEL: ${TRT_LOCALAI_MODERATION_MODEL:-rassy-fast}
       LOCALAI_EMBED_MODEL: ${TRT_LOCALAI_EMBED_MODEL:-rassy-embed}
-      LOCALAI_TRANSCRIBE_MODEL: ${TRT_LOCALAI_TRANSCRIBE_MODEL:-rassy-audio}
+      LOCALAI_TRANSCRIBE_MODEL: ${TRT_LOCALAI_TRANSCRIBE_MODEL:-rassy-fast}
       CHESHIRE_CAT_URL: http://trt-cheshire-cat:80
       CHESHIRE_CAT_API_KEY: ${TRT_CHESHIRE_CAT_API_KEY:-change_me}
       SUPABASE_URL: ${TRT_SUPABASE_URL:-}
@@ -121,6 +122,7 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
+    pull_policy: build
     command: sh -lc "pnpm -C apps/web start"
     environment:
       NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
@@ -149,6 +151,7 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
+    pull_policy: build
     command: sh -lc "pnpm -C apps/api start:worker"
     environment:
       DATABASE_URL: ${TRT_DATABASE_URL:-postgresql://trt:trt@trt-postgres:5432/trt?schema=public}
@@ -162,7 +165,7 @@ services:
       LOCALAI_CHAT_MODEL: ${TRT_LOCALAI_CHAT_MODEL:-rassy-smart}
       LOCALAI_MODERATION_MODEL: ${TRT_LOCALAI_MODERATION_MODEL:-rassy-fast}
       LOCALAI_EMBED_MODEL: ${TRT_LOCALAI_EMBED_MODEL:-rassy-embed}
-      LOCALAI_TRANSCRIBE_MODEL: ${TRT_LOCALAI_TRANSCRIBE_MODEL:-rassy-audio}
+      LOCALAI_TRANSCRIBE_MODEL: ${TRT_LOCALAI_TRANSCRIBE_MODEL:-rassy-fast}
       CHESHIRE_CAT_URL: http://trt-cheshire-cat:80
       CHESHIRE_CAT_API_KEY: ${TRT_CHESHIRE_CAT_API_KEY:-change_me}
       S3_ENDPOINT: ${TRT_S3_ENDPOINT:-}

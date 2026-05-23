@@ -102,6 +102,7 @@ services:
       retries: 10
       start_period: 30s
     image: runtipi-local-web-rassys-web:latest
+    pull_policy: build
     x-runtipi:
       is_main: true
       internal_port: 3000
@@ -214,6 +215,7 @@ services:
       retries: 10
       start_period: 90s
     image: runtipi-local-web-rassys-radio-controller:latest
+    pull_policy: build
     x-runtipi:
       add_to_main_network: true
 
@@ -241,6 +243,7 @@ services:
       retries: 10
       start_period: 20s
     image: runtipi-local-web-rassys-minecraft-bridge:latest
+    pull_policy: build
 
   cheshire:
     build:
@@ -272,6 +275,7 @@ services:
       retries: 10
       start_period: 20s
     image: runtipi-local-web-rassys-cheshire:latest
+    pull_policy: build
     x-runtipi:
       add_to_main_network: true
 
@@ -347,6 +351,7 @@ services:
       retries: 10
       start_period: 20s
     image: runtipi-local-web-rassys-icecast:latest
+    pull_policy: build
 
   redis:
     image: redis:7.4-alpine

@@ -69,6 +69,7 @@ services:
     build:
       context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo
       dockerfile: apps/api/Dockerfile
+    pull_policy: build
     restart: unless-stopped
     environment:
       PORT: 3001
@@ -124,6 +125,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
         API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:3001}
+    pull_policy: build
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}

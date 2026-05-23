@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     environment:
       APP_ENV: ${JOGMANIA_APP_ENV:-dev}
-      DATABASE_URL: postgresql+psycopg2://jogmania:jogmania@postgres:5432/jogmania
+      DATABASE_URL: postgresql+psycopg://jogmania:jogmania@postgres:5432/jogmania
       JWT_SECRET: ${JOGMANIA_JWT_SECRET:-change-me}
       REDIS_URL: redis://redis:6379/0
       AUTH_COOKIE_SECURE: ${JOGMANIA_AUTH_COOKIE_SECURE:-false}
