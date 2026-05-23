@@ -11,6 +11,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --legacy-peer-deps
 
 COPY . .
+RUN mkdir -p public
 RUN npm run prisma:generate
 RUN CAT_HTTP_BASE=http://cheshire-cat-core:80 \
   CAT_WS_BASE=ws://cheshire-cat-core:80 \
