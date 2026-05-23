@@ -175,6 +175,63 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(summary["effective_theme_branch_limit"], 2)
         self.assertEqual(summary["theme_priority_board"][0]["slug"], "lane-b")
 
+    async def test_run_writer_cycle_prefers_distinct_theme_angles(self) -> None:
+        lead_id = uuid.uuid4()
+        theme_a_id = uuid.uuid4()
+        theme_c_id = uuid.uuid4()
+        homepage_id = uuid.uuid4()
+        call_order: list[str] = []
+        db = _FakeDB(
+            [
+                _FakeResult(
+                    all_values=[
+                        SimpleNamespace(slug="lane-a", name="Lane A", active_score=1.0),
+                        SimpleNamespace(slug="lane-b", name="Lane B", active_score=0.9),
+                        SimpleNamespace(slug="lane-c", name="Lane C", active_score=0.8),
+                    ]
+                )
+            ]
+        )
+
+        async def _fake_generate(*_args, object_type: str, theme_slug=None, publish_now=False, **_kwargs):
+            if object_type == "lead_story":
+                call_order.append("lead")
+                return SimpleNamespace(id=lead_id, status="draft")
+            call_order.append(str(theme_slug))
+            if theme_slug == "lane-a":
+                return SimpleNamespace(id=theme_a_id, status="draft")
+            return SimpleNamespace(id=theme_c_id, status="draft")
+
+        with (
+            patch("workers.jobs.get_runtime_controls", new=AsyncMock(return_value={"direct_publish": False})),
+            patch("workers.jobs.generate_editorial_object", new=_fake_generate),
+            patch(
+                "workers.jobs.generate_homepage_snapshot",
+                new=AsyncMock(return_value=SimpleNamespace(id=homepage_id, status="draft", layout_json={"lead_angle": "Angle"})),
+            ),
+            patch("workers.jobs.update_voice_memory", new=AsyncMock()),
+            patch("workers.jobs._writer_branch_limit", return_value=(2, 0)),
+            patch(
+                "workers.jobs._writer_theme_priority_board",
+                new=AsyncMock(
+                    return_value=[
+                        {"slug": "lane-a", "writer_score": 5.0, "gold_ready": False, "selected_angle": "Same AP war powers story"},
+                        {"slug": "lane-b", "writer_score": 4.9, "gold_ready": False, "selected_angle": "Same AP war powers story"},
+                        {"slug": "lane-c", "writer_score": 4.1, "gold_ready": False, "selected_angle": "Fresh court filing story"},
+                    ]
+                ),
+            ),
+            patch(
+                "workers.jobs._story_card",
+                side_effect=lambda obj: {"id": str(obj.id), "title": "Story", "selected_angle": "Angle", "why_now": "Now"} if obj else None,
+            ),
+        ):
+            summary = await run_writer_cycle(db)
+
+        self.assertEqual(call_order[1:], ["lane-a", "lane-c"])
+        self.assertEqual(summary["theme_duplicate_signal_count"], 1)
+        self.assertEqual([item["theme"] for item in summary["theme_take_ids"]], ["lane-a", "lane-c"])
+
     async def test_run_queen_cycle_survives_social_failure(self) -> None:
         lead_id = uuid.uuid4()
         homepage_id = uuid.uuid4()

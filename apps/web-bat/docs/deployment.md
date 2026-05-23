@@ -17,6 +17,7 @@ docker compose up -d --build
 
 - Keep `ENABLE_MANUAL_REVIEW=true` in non-dev environments.
 - Keep `X_DRY_RUN=true` until production adapter hardening is complete.
-- Local compose defaults now assume the shared Ollama proxy is reachable from containers at `http://ollama-proxy:8080`.
-- Cheshire Cat stays live in the local stack, using `qwen3.6:27b` for chat and `qwen3-embedding:8b` for Qdrant-backed memory.
+- Local compose defaults now assume the RassyGPT Ollama-compatible gateway is reachable from containers at `http://rassygpt-gateway:8080`.
+- Cheshire Cat stays live in the local stack, using `rassy-smart` for chat and `rassy-embed` for Qdrant-backed memory.
+- If generation is degraded, direct homepage publication is held until the story slate has at least one publish-ready story.
 - Worker defaults now run at `WORKER_CYCLE_MINUTES=30`.

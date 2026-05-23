@@ -5811,50 +5811,115 @@ async def rework_editorial_backlog(
     }
 
 
+HOMEPAGE_BUCKET_PRIORITY = {
+    "degraded": 0,
+    "fallback": 1,
+    "recommended": 2,
+    "published": 2,
+}
+
+
+def _homepage_story_fingerprint(obj: EditorialObject, title: str) -> str:
+    metadata = obj.meta or {}
+    launch_packet = metadata.get("launch_packet", {}) if isinstance(metadata, dict) else {}
+    story_brief = metadata.get("story_brief", {}) if isinstance(metadata, dict) else {}
+    candidates = [
+        title,
+        launch_packet.get("selected_angle") if isinstance(launch_packet, dict) else "",
+        story_brief.get("selected_angle") if isinstance(story_brief, dict) else "",
+        obj.slug,
+    ]
+    for candidate in candidates:
+        fingerprint = _text_fingerprint(str(candidate or ""))
+        if fingerprint and fingerprint not in {"lead story draft", "theme take draft"}:
+            return fingerprint
+    return str(obj.id)
+
+
+def _homepage_candidate_bucket(obj: EditorialObject, title: str) -> str | None:
+    metadata = obj.meta or {}
+    launch_packet = metadata.get("launch_packet", {}) if isinstance(metadata, dict) else {}
+    selected_angle = (
+        launch_packet.get("selected_angle")
+        if isinstance(launch_packet, dict)
+        else metadata.get("selected_angle") if isinstance(metadata, dict) else ""
+    )
+    if editorial_looks_placeholder(title, obj.body_md) or contains_prompt_leak(title, obj.body_md):
+        return None
+    if not has_trump_focus(title, obj.body_md or "", str(selected_angle or "")):
+        return "degraded"
+
+    style_gate = metadata.get("style_gate") if isinstance(metadata.get("style_gate"), dict) else {}
+    if not style_gate:
+        style_gate = evaluate_style_gate(obj.body_md or "", lane="editorial")
+    publish_recommendation = (
+        metadata.get("publish_recommendation", {}) if isinstance(metadata.get("publish_recommendation"), dict) else {}
+    )
+    if obj.status == "published":
+        return "published"
+    if bool(publish_recommendation.get("recommended")) and bool(style_gate.get("passes")):
+        return "recommended"
+    if bool(style_gate.get("passes")) and int(style_gate.get("score") or 0) >= 72:
+        return "fallback"
+    return "degraded"
+
+
+def _homepage_entry_sort_key(entry: tuple[EditorialObject, str, str]) -> tuple[int, datetime]:
+    obj, _title, bucket = entry
+    created_at = obj.created_at or datetime.min.replace(tzinfo=timezone.utc)
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    return (HOMEPAGE_BUCKET_PRIORITY.get(bucket, 0), created_at)
+
+
 async def generate_homepage_snapshot(db: AsyncSession, *, publish_now: bool = False) -> HomepageSnapshot:
     controls = await get_runtime_controls(db)
-    should_publish = bool(publish_now or controls["direct_publish"])
+    requested_publish = bool(publish_now or controls["direct_publish"])
     drafts = (
         await db.execute(
             select(EditorialObject)
             .where(EditorialObject.status.in_(["draft", "approved", "published"]))
             .order_by(EditorialObject.created_at.desc())
-            .limit(12)
+            .limit(36)
         )
     ).scalars().all()
 
+    by_signal: dict[str, tuple[EditorialObject, str, str]] = {}
+    for draft in drafts:
+        normalized_title = derive_editorial_title(draft.title, draft.body_md, draft.object_type)
+        bucket = _homepage_candidate_bucket(draft, normalized_title)
+        if not bucket:
+            continue
+        key = _homepage_story_fingerprint(draft, normalized_title)
+        candidate = (draft, normalized_title, bucket)
+        existing = by_signal.get(key)
+        if not existing or _homepage_entry_sort_key(candidate) > _homepage_entry_sort_key(existing):
+            by_signal[key] = candidate
+
+    candidate_entries = sorted(by_signal.values(), key=_homepage_entry_sort_key, reverse=True)
     published_primary: list[tuple[EditorialObject, str]] = []
     recommended_primary: list[tuple[EditorialObject, str]] = []
     fallback: list[tuple[EditorialObject, str]] = []
     degraded_fallback: list[tuple[EditorialObject, str]] = []
-    seen: set[str] = set()
-    for draft in drafts:
-        normalized_title = derive_editorial_title(draft.title, draft.body_md, draft.object_type)
-        key = draft.slug or normalized_title.lower()
-        if key in seen:
-            continue
-        seen.add(key)
-        metadata = draft.meta or {}
-        publish_recommendation = metadata.get("publish_recommendation", {}) if isinstance(metadata, dict) else {}
-        style_gate = metadata.get("style_gate") or evaluate_style_gate(draft.body_md or "", lane="editorial")
-        if editorial_looks_placeholder(normalized_title, draft.body_md) or contains_prompt_leak(normalized_title, draft.body_md):
-            continue
-        if not has_trump_focus(normalized_title, draft.body_md or "", str(metadata.get("selected_angle") or "")):
-            degraded_fallback.append((draft, normalized_title))
-            continue
-        if draft.status == "published":
+    for draft, normalized_title, bucket in candidate_entries:
+        if bucket == "published":
             published_primary.append((draft, normalized_title))
             continue
-        if bool((publish_recommendation or {}).get("recommended")) and bool(style_gate.get("passes")):
+        if bucket == "recommended":
             recommended_primary.append((draft, normalized_title))
             continue
-        fallback.append((draft, normalized_title))
+        if bucket == "fallback":
+            fallback.append((draft, normalized_title))
+            continue
+        degraded_fallback.append((draft, normalized_title))
 
     top_themes = (await db.execute(select(Theme).order_by(Theme.active_score.desc()).limit(5))).scalars().all()
     recent_social = (await db.execute(select(SocialPost).order_by(SocialPost.created_at.desc()).limit(12))).scalars().all()
     recent_sources = (await db.execute(select(Source).order_by(Source.fetched_at.desc()).limit(30))).scalars().all()
 
-    deduped = published_primary + recommended_primary + fallback + degraded_fallback
+    publishable = published_primary + recommended_primary
+    should_publish = requested_publish and bool(publishable)
+    deduped = publishable if should_publish else publishable + fallback + degraded_fallback
     lead = deduped[0] if deduped else None
     center = deduped[1:4]
     left = deduped[4:8]
@@ -5972,6 +6037,14 @@ async def generate_homepage_snapshot(db: AsyncSession, *, publish_now: bool = Fa
         "queen_links": curated_links,
         "queen_label": "What I'm Keeping Open",
         "queen_note": queen_note or "If a link makes the front table, it earned the seat.",
+        "publication_gate": {
+            "requested_publish": requested_publish,
+            "published": should_publish,
+            "publishable_story_count": len(publishable),
+            "held_story_count": len(fallback) + len(degraded_fallback),
+            "filtered_or_duplicate_story_count": max(0, len(drafts) - len(candidate_entries)),
+            "reason": "publishable_frontpage" if should_publish else "holding_for_publish_ready_story",
+        },
     }
 
     snapshot = HomepageSnapshot(

@@ -46,13 +46,13 @@ docker compose up -d --build
 - Qdrant: `http://localhost:6337`
 - Cheshire Cat: `http://localhost:1866`
 
-Cheshire Cat now auto-selects a dedicated Ollama path on startup:
-- chat/general: `qwen3.6:27b` via `http://ollama-proxy:8080`
-- embeddings: `qwen3-embedding:8b` via `http://ollama-proxy:8080`
+Cheshire Cat now auto-selects the internal RassyGPT Ollama-compatible gateway on startup:
+- chat/general: `rassy-smart` via `http://rassygpt-gateway:8080`
+- embeddings: `rassy-embed` via `http://rassygpt-gateway:8080`
 
-The local compose stack is wired around the shared Ollama proxy and Qdrant-backed Cheshire Cat memory:
-- the direct writer path uses `qwen3.6:27b`
-- embeddings and Cat memory use `qwen3-embedding:8b`
+The local compose stack is wired around RassyGPT and Qdrant-backed Cheshire Cat memory:
+- the direct writer path uses `rassy-smart` at `/api/chat`
+- embeddings and Cat memory use `rassy-embed` at `/api/embeddings`
 
 `CAT_PRIMARY_ENABLED=false` remains the default so long-form publication quality continues to come from the stronger direct writer stack, while Cheshire Cat stays live and testable as an integrated sidecar.
 
@@ -86,7 +86,7 @@ Key publish-first endpoints:
 
 ## Worker cadence and role stages
 
-- Worker loop interval defaults to `WORKER_CYCLE_MINUTES=60`.
+- Worker loop interval defaults to `WORKER_CYCLE_MINUTES=30`.
 - `Researcher` ingests search results, embeds chunks, and refreshes themes.
 - `Researcher` follows a directed query plan (runtime directive + active themes + default pack) and can ingest X results.
 - `Analyst` turns live source signal into persisted analysis briefs, tone lanes, story targets, and link-role guidance.
@@ -97,8 +97,8 @@ Key publish-first endpoints:
 
 ## Notes
 
-- If Cheshire Cat, LLM, embedding API, or SearXNG are unavailable, the system falls back to deterministic mock generation so local development still works.
-- The stack now expects a reachable model host at `LLM_API_URL` / `EMBEDDING_API_URL`. If you want a different or larger model, point those env vars at the target host before boot.
+- If Cheshire Cat, LLM, embedding API, or SearXNG are unavailable, the system keeps deterministic fallback output in draft/preview lanes and holds direct homepage publication until a publish-ready story exists.
+- The stack expects a reachable model host through `LLM_API_URL_CONTAINER` / `EMBEDDING_API_URL_CONTAINER` in Docker; the defaults use the internal RassyGPT gateway.
 - X publishing is adapter-driven and defaults to dry-run mode unless `x_live_posting` runtime control is enabled and X credentials are valid.
 - Cheshire Cat is included in the local stack now so its health and Ollama wiring can be observed continuously even when it is not the primary generation path.
 

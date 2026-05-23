@@ -97,17 +97,17 @@ class Settings(BaseSettings):
     cat_secondary_memory_recall_limit: int = 8
     cat_secondary_memory_max_chars: int = 1800
 
-    llm_api_url: str = "http://ollama-proxy:8080/api/chat"
-    llm_api_key: str = "change_me"
-    llm_model: str = "qwen3.6:27b"
+    llm_api_url: str = "http://rassygpt-gateway:8080/api/chat"
+    llm_api_key: str = ""
+    llm_model: str = "rassy-smart"
     llm_request_timeout_seconds: float = 90.0
     ollama_num_ctx: int = 8192
     ollama_repeat_last_n: int = 96
     ollama_repeat_penalty: float = 1.12
     ollama_keep_alive: str = "15m"
 
-    embedding_api_url: str = "http://ollama-proxy:8080/api/embeddings"
-    embedding_model: str = "qwen3-embedding:8b"
+    embedding_api_url: str = "http://rassygpt-gateway:8080/api/embeddings"
+    embedding_model: str = "rassy-embed"
     embedding_allow_fallback: bool = False
     embedding_request_timeout_seconds: float = 12.0
     embedding_request_retries: int = 1

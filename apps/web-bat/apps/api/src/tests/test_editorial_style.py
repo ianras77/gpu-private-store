@@ -14,6 +14,8 @@ from services.editorial_service import (
     _build_editorial_revision_prompt,
     _catastrophic_editorial_underfill,
     _grounding_report,
+    _homepage_candidate_bucket,
+    _homepage_story_fingerprint,
     _editorial_query_sets,
     _build_grounded_editorial_fallback,
     _build_launch_packet,
@@ -36,6 +38,53 @@ from services.trend_engine import _change_type
 
 
 class EditorialStyleTests(unittest.TestCase):
+    def test_homepage_story_fingerprint_dedupes_timestamped_slugs_by_title(self) -> None:
+        first = SimpleNamespace(
+            id=uuid.uuid4(),
+            slug="trump-war-powers-120000-aaa",
+            meta={"launch_packet": {"selected_angle": "Trump war powers fight"}},
+        )
+        second = SimpleNamespace(
+            id=uuid.uuid4(),
+            slug="trump-war-powers-121500-bbb",
+            meta={"launch_packet": {"selected_angle": "Trump war powers fight"}},
+        )
+
+        self.assertEqual(
+            _homepage_story_fingerprint(first, "Trump says deadline for Congress does not apply"),
+            _homepage_story_fingerprint(second, "Trump says deadline for Congress does not apply"),
+        )
+
+    def test_homepage_candidate_bucket_holds_style_gate_failures(self) -> None:
+        draft = SimpleNamespace(
+            status="draft",
+            body_md="The Trump administration filing is thin. The White House spin is louder.",
+            meta={
+                "style_gate": {"passes": False, "score": 12},
+                "publish_recommendation": {"recommended": False},
+                "launch_packet": {"selected_angle": "Trump administration filing is thin"},
+            },
+        )
+
+        self.assertEqual(_homepage_candidate_bucket(draft, "Trump administration filing is thin"), "degraded")
+
+    def test_homepage_candidate_bucket_allows_publish_ready_draft(self) -> None:
+        draft = SimpleNamespace(
+            status="draft",
+            body_md=(
+                "The Trump administration tried to sell the order as clean power while the court filing narrowed the claim. "
+                "The White House line matters because congressional Republicans now have to defend a record that is smaller than the slogan. "
+                "That gap is the story: the paperwork says the move is constrained, and the podium keeps pretending it is not."
+            ),
+            meta={
+                "style_gate": {"passes": True, "score": 84},
+                "publish_recommendation": {"recommended": True},
+                "launch_packet": {"selected_angle": "Court filing narrows the Trump administration line"},
+            },
+        )
+
+        self.assertEqual(_homepage_candidate_bucket(draft, "Court filing narrows the Trump administration line"), "recommended")
+
     def test_social_candidate_dedupes_repetitive_lines(self) -> None:
         deduped = _dedupe_social_candidates(
             [

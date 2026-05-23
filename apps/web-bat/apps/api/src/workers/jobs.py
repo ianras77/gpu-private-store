@@ -347,6 +347,51 @@ def _writer_priority_score(theme: Theme, brief: dict[str, object] | None) -> flo
     return round(score, 3)
 
 
+def _writer_priority_fingerprint(item: dict[str, object]) -> str:
+    for key in ("selected_angle", "gold_thread", "theme"):
+        raw = str(item.get(key) or "").strip()
+        if not raw:
+            continue
+        quoted = re.search(r"['\"]([^'\"]{20,180})['\"]", raw)
+        candidate = quoted.group(1) if quoted else raw
+        fingerprint = re.sub(r"[^a-z0-9]+", " ", candidate.lower()).strip()
+        if fingerprint:
+            return fingerprint
+    return ""
+
+
+def _select_distinct_priority_items(
+    priority_board: list[dict[str, object]],
+    *,
+    theme_by_slug: dict[str, Theme],
+    limit: int,
+) -> tuple[list[dict[str, object]], int]:
+    selected: list[dict[str, object]] = []
+    deferred: list[dict[str, object]] = []
+    seen_signals: set[str] = set()
+
+    for item in priority_board:
+        slug = str(item.get("slug") or "")
+        if slug not in theme_by_slug:
+            continue
+        signal = _writer_priority_fingerprint(item)
+        if signal and signal in seen_signals:
+            deferred.append(item)
+            continue
+        if signal:
+            seen_signals.add(signal)
+        selected.append(item)
+        if len(selected) >= limit:
+            return selected, len(deferred)
+
+    for item in deferred:
+        selected.append(item)
+        if len(selected) >= limit:
+            break
+
+    return selected, len(deferred)
+
+
 async def _writer_theme_priority_board(db: AsyncSession, theme_pool: list[Theme]) -> list[dict[str, object]]:
     session_isolation = _supports_isolated_sessions(db)
     board: list[dict[str, object]] = []
@@ -823,13 +868,15 @@ async def run_writer_cycle(db: AsyncSession) -> dict:
     gold_theme_count = sum(1 for item in priority_board if bool(item.get("gold_ready")))
     effective_branch_limit = min(8, branch_limit + min(2, gold_theme_count))
     theme_by_slug = {str(theme.slug): theme for theme in theme_pool}
-    top_themes = [
-        theme_by_slug[str(item.get("slug"))]
-        for item in priority_board[:effective_branch_limit]
-        if str(item.get("slug")) in theme_by_slug
-    ]
+    selected_priority_items, duplicate_signal_count = _select_distinct_priority_items(
+        priority_board,
+        theme_by_slug=theme_by_slug,
+        limit=effective_branch_limit,
+    )
+    top_themes = [theme_by_slug[str(item.get("slug"))] for item in selected_priority_items]
     if not top_themes:
         top_themes = theme_pool[:branch_limit]
+        duplicate_signal_count = 0
     theme_drafts: list[dict[str, object]] = []
     theme_failures: list[dict[str, str]] = []
     theme_story_cards: list[dict[str, object]] = []
@@ -914,6 +961,7 @@ async def run_writer_cycle(db: AsyncSession) -> dict:
         "gold_theme_count": gold_theme_count,
         "theme_candidates": len(theme_pool),
         "theme_priority_board": priority_board[:6],
+        "theme_duplicate_signal_count": duplicate_signal_count,
         "lead_story_id": str(lead.id) if lead else None,
         "lead_story_status": lead.status if lead else "failed",
         "lead_story_error": lead_failure,
