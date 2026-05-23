@@ -11,20 +11,20 @@ services:
       AUTH_COOKIE_SAMESITE: ${JOGMANIA_AUTH_COOKIE_SAMESITE:-lax}
       AUTH_COOKIE_DOMAIN: ${JOGMANIA_AUTH_COOKIE_DOMAIN:-}
       AUTH_REQUIRE_EMAIL_VERIFICATION: ${JOGMANIA_AUTH_REQUIRE_EMAIL_VERIFICATION:-false}
-      CORS_ORIGINS: ${JOGMANIA_CORS_ORIGINS:-["http://192.168.1.162:3177","http://localhost:19006"]}
+      CORS_ORIGINS: ${JOGMANIA_CORS_ORIGINS:-["http://${APP_HOST}:${APP_PORT:-3177}","http://localhost:19006"]}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${JOGMANIA_MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${JOGMANIA_MINIO_ROOT_PASSWORD:-minioadmin}
       MINIO_BUCKET: ${JOGMANIA_MINIO_BUCKET:-jogmania-exports}
       MINIO_REGION: ${JOGMANIA_MINIO_REGION:-us-east-1}
-      MINIO_PUBLIC_URL: ${JOGMANIA_MINIO_PUBLIC_URL:-http://192.168.1.162:3181}
+      MINIO_PUBLIC_URL: ${JOGMANIA_MINIO_PUBLIC_URL:-http://${APP_HOST}:${JOGMANIA_MINIO_PORT:-3181}}
       MINIO_ENABLED: ${JOGMANIA_MINIO_ENABLED:-true}
       ADVENTURE_LLM_URL: ${JOGMANIA_ADVENTURE_LLM_URL:-http://rassygpt-gateway:8080/v1/chat/completions}
       ADVENTURE_LLM_API_KEY: ${JOGMANIA_ADVENTURE_LLM_API_KEY:-}
       ADVENTURE_LLM_MODEL: ${JOGMANIA_ADVENTURE_LLM_MODEL:-rassy-fast}
       PYTHONPATH: /app
     volumes:
-    - /data/repos/apps/web-jogmania/repo/api:/app
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-jogmania/repo/api:/app
     command:
     - sh
     - /app/runtipi-start.sh
@@ -48,6 +48,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 20s
+    x-runtipi:
+      add_to_main_network: true
   minio:
     image: minio/minio:latest
     restart: unless-stopped
@@ -83,17 +85,17 @@ services:
     image: node:20-alpine
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_BASE_URL: ${JOGMANIA_PUBLIC_API_BASE_URL:-http://192.168.1.162:3178}
-      EXPO_PUBLIC_API_BASE_URL: ${JOGMANIA_EXPO_PUBLIC_API_BASE_URL:-http://192.168.1.162:3178}
+      NEXT_PUBLIC_API_BASE_URL: ${JOGMANIA_PUBLIC_API_BASE_URL:-http://${APP_HOST}:${JOGMANIA_API_PORT:-3178}}
+      EXPO_PUBLIC_API_BASE_URL: ${JOGMANIA_EXPO_PUBLIC_API_BASE_URL:-http://${APP_HOST}:${JOGMANIA_API_PORT:-3178}}
       PORT: '3000'
     volumes:
-    - /data/repos/apps/web-jogmania/repo:/repo
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-jogmania/repo:/repo
     command:
     - sh
-    - /repo/apps/web/runtipi-start.sh
+    - /repo/web/runtipi-start.sh
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test:
       - CMD-SHELL

@@ -1,13 +1,13 @@
 import { autoModerateText, type AutoModerationOutcome } from "./moderation";
 
-const rawBaseUrl = process.env.LOCALAI_BASE_URL || "http://localhost:8111/v1";
+const rawBaseUrl = process.env.LOCALAI_BASE_URL || "http://rassygpt-gateway:8080/v1";
 const baseUrl = rawBaseUrl.endsWith("/v1") ? rawBaseUrl : `${rawBaseUrl.replace(/\/$/, "")}/v1`;
 const apiKey = process.env.LOCALAI_API_KEY;
 
-const chatModel = process.env.LOCALAI_CHAT_MODEL || "qwen3-1.7b";
-const moderationModel = process.env.LOCALAI_MODERATION_MODEL || "ibm-granite.granite-4.0-1b";
-const embeddingModel = process.env.LOCALAI_EMBED_MODEL || "granite-embedding-125m-english";
-const transcribeModel = process.env.LOCALAI_TRANSCRIBE_MODEL || "whisper-1";
+const chatModel = process.env.LOCALAI_CHAT_MODEL || "rassy-smart";
+const moderationModel = process.env.LOCALAI_MODERATION_MODEL || "rassy-fast";
+const embeddingModel = process.env.LOCALAI_EMBED_MODEL || "rassy-embed";
+const transcribeModel = process.env.LOCALAI_TRANSCRIBE_MODEL || "rassy-audio";
 
 function authHeaders(): Record<string, string> {
   return apiKey ? { Authorization: `Bearer ${apiKey}` } : {};

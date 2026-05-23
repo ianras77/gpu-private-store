@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      context: /app-repos/web-rassyapp
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassyapp/repo
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: ${RASSY_DATABASE_URL:-file:/data/dev.db}
@@ -14,15 +14,24 @@ services:
     volumes:
     - ${APP_DATA_DIR}/app-data/web-rassyapp/named/prisma-data:/data
     depends_on:
-    - cheshire-cat-core
+      cheshire-cat-core:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - node -e "fetch('http://127.0.0.1:3000/api/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 20s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
     image: runtipi-local-web-rassyapp-app:latest
     x-runtipi:
       is_main: true
       internal_port: 3000
   cheshire-cat-core:
     build:
-      context: /app-repos/web-rassyapp
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassyapp/repo
       dockerfile: docker/cat-core.Dockerfile
     environment:
       CCAT_QDRANT_HOST: cheshire-cat-vector-memory
@@ -41,10 +50,21 @@ services:
     - ${APP_DATA_DIR}/app-data/web-rassyapp/named/cat-plugins:/app/cat/plugins
     - ${APP_DATA_DIR}/app-data/web-rassyapp/named/cat-data:/app/cat/data
     depends_on:
-    - cheshire-cat-vector-memory
+      cheshire-cat-vector-memory:
+        condition: service_started
     extra_hosts:
     - host.docker.internal:host-gateway
     restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - python3
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1', timeout=5)
+      interval: 20s
+      timeout: 10s
+      retries: 18
+      start_period: 60s
     image: runtipi-local-web-rassyapp-cheshire-cat-core:latest
     x-runtipi:
       add_to_main_network: true

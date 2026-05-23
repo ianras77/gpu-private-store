@@ -5,8 +5,8 @@ from typing import Any
 
 import httpx
 
-LOCALAI_BASE_URL = os.getenv("LOCALAI_BASE_URL", "http://127.0.0.1:8112")
-LOCALAI_MODEL = os.getenv("LOCALAI_MODEL", "qwen3-1.7b")
+LOCALAI_BASE_URL = os.getenv("LOCALAI_BASE_URL", "http://rassygpt-gateway:8080")
+LOCALAI_MODEL = os.getenv("LOCALAI_MODEL", "rassy-smart")
 LOCALAI_API_KEY = os.getenv("LOCALAI_API_KEY", "")
 
 

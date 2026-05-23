@@ -48,7 +48,7 @@ services:
       MINIO_ENABLED: "true"
       CORS_ORIGINS: '["http://localhost:${JOGMANIA_WEB_PORT:-3000}","http://localhost:19006"]'
       ADVENTURE_LLM_URL: http://localai-lb:8080/v1/chat/completions
-      ADVENTURE_LLM_MODEL: qwen3-1.7b
+      ADVENTURE_LLM_MODEL: rassy-fast
       AUTH_COOKIE_SECURE: "false"
       PYTHONPATH: /app
     volumes:

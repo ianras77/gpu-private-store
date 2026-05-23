@@ -1,20 +1,93 @@
 services:
+  cat:
+    image: ghcr.io/cheshire-cat-ai/core:latest
+    restart: unless-stopped
+    environment:
+      CCAT_METADATA_FILE: /app/cat/data/metadata.json
+      CAT_METADATA_PATH: /app/cat/data/metadata.json
+      OLLAMA_GENERAL_BASE_URL: ${USMENDER_OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_EMBED_BASE_URL: ${USMENDER_OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_MODEL: ${USMENDER_OLLAMA_GENERAL_MODEL:-rassy-smart}
+      OLLAMA_EMBED_MODEL: ${USMENDER_OLLAMA_EMBED_MODEL:-rassy-embed}
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-usmender/named/cat-primary-data:/app/cat/data
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/data:/app/cat/seed-data:ro
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/plugins:/app/cat/plugins:ro
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/static:/app/cat/static:ro
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/bootstrap:/app/cat/bootstrap:ro
+    command:
+    - /bin/sh
+    - -lc
+    - test -f /app/cat/data/metadata.json || cp /app/cat/seed-data/metadata.json /app/cat/data/metadata.json; python3 /app/cat/bootstrap/auto_configure_ollama.py || true; exec python3 -m cat.main
+    healthcheck:
+      test:
+      - CMD
+      - python3
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1', timeout=5)
+      interval: 20s
+      timeout: 10s
+      retries: 18
+      start_period: 60s
+    x-runtipi:
+      add_to_main_network: true
+  cat-support:
+    image: ghcr.io/cheshire-cat-ai/core:latest
+    restart: unless-stopped
+    environment:
+      CCAT_METADATA_FILE: /app/cat/data/metadata.json
+      CAT_METADATA_PATH: /app/cat/data/metadata.json
+      OLLAMA_GENERAL_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_EMBED_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_MODEL: ${USMENDER_SUPPORT_OLLAMA_GENERAL_MODEL:-rassy-coder}
+      OLLAMA_EMBED_MODEL: ${USMENDER_SUPPORT_OLLAMA_EMBED_MODEL:-rassy-embed}
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-usmender/named/cat-support-data:/app/cat/data
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/data:/app/cat/seed-data:ro
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/plugins:/app/cat/plugins:ro
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/static:/app/cat/static:ro
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/bootstrap:/app/cat/bootstrap:ro
+    command:
+    - /bin/sh
+    - -lc
+    - test -f /app/cat/data/metadata.json || cp /app/cat/seed-data/metadata.json /app/cat/data/metadata.json; python3 /app/cat/bootstrap/auto_configure_ollama.py || true; exec python3 -m cat.main
+    healthcheck:
+      test:
+      - CMD
+      - python3
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1', timeout=5)
+      interval: 20s
+      timeout: 10s
+      retries: 18
+      start_period: 60s
+    x-runtipi:
+      add_to_main_network: true
   api:
     build:
-      context: /app-repos/web-usmender
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo
       dockerfile: apps/api/Dockerfile
     restart: unless-stopped
     environment:
       PORT: 3001
       DATABASE_URL: postgres://usmender:usmender@postgres:5432/usmender
-      CAT_BASE_URL: ${CAT_BASE_URL:-http://127.0.0.1:9}
-      CAT_TIMEOUT_MS: ${CAT_TIMEOUT_MS:-1200}
+      CAT_BASE_URL: ${CAT_BASE_URL:-http://cat:80}
+      CAT_TIMEOUT_MS: ${CAT_TIMEOUT_MS:-12000}
+      CAT_SUPPORT_BASE_URL: ${CAT_SUPPORT_BASE_URL:-http://cat-support:80}
+      CAT_SUPPORT_TIMEOUT_MS: ${CAT_SUPPORT_TIMEOUT_MS:-12000}
+      CAT_SUPPORT_SCOPE: ${CAT_SUPPORT_SCOPE:-proposal,refinement,closeout}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       USMENDER_DEMO_SEED: ${USMENDER_DEMO_SEED:-true}
     ports:
     - ${USMENDER_API_PORT:-3295}:3001
     depends_on:
       postgres:
+        condition: service_healthy
+      cat:
+        condition: service_healthy
+      cat-support:
         condition: service_healthy
     healthcheck:
       test:
@@ -46,11 +119,15 @@ services:
       start_period: 5s
   web:
     build:
-      context: /app-repos/web-usmender
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo
       dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+        API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:3001}
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3295}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:3001}
     depends_on:
       api:
         condition: service_healthy

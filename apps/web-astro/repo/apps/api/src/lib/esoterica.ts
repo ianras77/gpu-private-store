@@ -107,11 +107,11 @@ const loadIndex = async (): Promise<EsotericaIndex | null> => {
 };
 
 const embedQuery = async (query: string): Promise<number[] | null> => {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
   const baseURL = process.env.ESOTERICA_EMBED_BASE_URL || process.env.OPENAI_BASE_URL;
+  const apiKey = process.env.OPENAI_API_KEY || (baseURL ? "rassygpt-internal" : undefined);
+  if (!apiKey) return null;
   const client = new OpenAI({ apiKey, baseURL });
-  const model = process.env.ESOTERICA_EMBED_MODEL ?? "text-embedding-3-large";
+  const model = process.env.ESOTERICA_EMBED_MODEL ?? "rassy-embed";
   const response = await client.embeddings.create({
     model,
     input: query

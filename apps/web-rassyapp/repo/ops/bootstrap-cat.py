@@ -130,14 +130,14 @@ def _pick_model(base_url: str, configured: str) -> str:
 
 def main() -> int:
     metadata_path = Path(_env("CAT_METADATA_PATH", "/cat-data/metadata.json"))
-    llm_base = _env("OLLAMA_BASE_URL", "http://ollama-proxy:8080")
-    embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://ollama-proxy:8080")
+    llm_base = _env("OLLAMA_BASE_URL", "http://rassygpt-gateway:8080")
+    embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://rassygpt-gateway:8080")
     apply_embedder = _env_flag("OLLAMA_APPLY_EMBEDDER", True)
-    llm_model = _pick_model(llm_base, _env("OLLAMA_LLM_MODEL", "gpt-oss:20b"))
+    llm_model = _pick_model(llm_base, _env("OLLAMA_LLM_MODEL", "rassy-smart"))
     embed_model = (
-        _pick_model(embed_base, _env("OLLAMA_EMBED_MODEL", "nomic-embed-text"))
+        _pick_model(embed_base, _env("OLLAMA_EMBED_MODEL", "rassy-embed"))
         if apply_embedder
-        else _env("OLLAMA_EMBED_MODEL", "nomic-embed-text")
+        else _env("OLLAMA_EMBED_MODEL", "rassy-embed")
     )
     admin_username = _env("CAT_ADMIN_USERNAME", "admin")
     admin_password = _env("CAT_ADMIN_PASSWORD", "admin")

@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-crackstack",
   "description": "Agentic data workbench with XLCRACK and TAPECRACK fronts on one backend with Postgres, Redis, MinIO, and Temporal.",
-  "tipi_version": 1,
-  "version": "1.0.0",
+  "tipi_version": 2,
+  "version": "1.0.1",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -22,5 +22,5 @@
   ],
   "no_gui": false,
   "created_at": 1776589448000,
-  "updated_at": 1776589448000
+  "updated_at": 1779494400000
 }

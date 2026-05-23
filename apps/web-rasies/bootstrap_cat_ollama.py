@@ -63,10 +63,10 @@ def main() -> int:
     metadata_path = Path(_env("CAT_METADATA_PATH", "/data/metadata.json"))
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
 
-    llm_base = _env("OLLAMA_GENERAL_BASE_URL", "http://ollama-proxy:8080")
-    embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://ollama-embed:11434")
-    llm_model = _env("OLLAMA_GENERAL_MODEL", "qwen2.5-coder:7b")
-    embed_model = _env("OLLAMA_EMBED_MODEL", "nomic-embed-text")
+    llm_base = _env("OLLAMA_GENERAL_BASE_URL", "http://rassygpt-gateway:8080")
+    embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://rassygpt-gateway:8080")
+    llm_model = _env("OLLAMA_GENERAL_MODEL", "rassy-smart")
+    embed_model = _env("OLLAMA_EMBED_MODEL", "rassy-embed")
 
     payload = _load_payload(metadata_path)
     items = payload.setdefault("_default", {})

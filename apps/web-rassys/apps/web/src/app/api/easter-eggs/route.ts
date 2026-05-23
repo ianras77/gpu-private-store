@@ -533,7 +533,7 @@ const requestCheshireCurio = async (input: {
   try {
     const response = await requestCheshireJson(
       {
-        model: process.env.CHESHIRE_MODEL ?? "gpt-oss:20b",
+        model: process.env.CHESHIRE_MODEL ?? "rassy-smart",
         temperature: 1,
         maxTokens: 120,
         messages: [

@@ -54,6 +54,16 @@ services:
       - /bin/sh
       - -lc
       - python3 /app/cat/bootstrap/auto_configure_ollama.py || true; exec python3 -m cat.main
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1', timeout=5)
+      interval: 20s
+      timeout: 10s
+      retries: 18
+      start_period: 60s
     x-runtipi:
       add_to_main_network: true
 
@@ -131,7 +141,7 @@ services:
       lickingvape-api:
         condition: service_healthy
       lickingvape-cat:
-        condition: service_started
+        condition: service_healthy
     image: runtipi-local-web-lickingvape-worker:latest
 
 x-runtipi:

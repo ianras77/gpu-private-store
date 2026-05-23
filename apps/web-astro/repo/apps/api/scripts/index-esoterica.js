@@ -139,13 +139,13 @@ const main = async () => {
     if (!sourceDir) {
         throw new Error("Missing ESOTERICA_SOURCE_DIR env var.");
     }
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-        throw new Error("Missing OPENAI_API_KEY env var.");
-    }
     const baseURL = process.env.ESOTERICA_EMBED_BASE_URL || process.env.OPENAI_BASE_URL;
+    const apiKey = process.env.OPENAI_API_KEY || (baseURL ? "rassygpt-internal" : undefined);
+    if (!apiKey) {
+        throw new Error("Missing OPENAI_API_KEY or ESOTERICA_EMBED_BASE_URL/OPENAI_BASE_URL env var.");
+    }
     const client = new openai_1.default({ apiKey, baseURL });
-    const embedModel = process.env.ESOTERICA_EMBED_MODEL ?? "text-embedding-3-large";
+    const embedModel = process.env.ESOTERICA_EMBED_MODEL ?? "rassy-embed";
     const outPath = resolveIndexPath(process.env.ESOTERICA_INDEX_PATH);
     const outDir = node_path_1.default.dirname(outPath);
     const writeJsonl = process.env.ESOTERICA_WRITE_JSONL === "1";

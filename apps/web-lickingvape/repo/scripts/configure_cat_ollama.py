@@ -15,10 +15,10 @@ def main() -> int:
     metadata_path = Path(
         os.getenv("CAT_METADATA_PATH", "/data/metadata.json")
     )
-    llm_base = os.getenv("OLLAMA_GENERAL_BASE_URL", "http://ollama-proxy:8080")
-    embed_base = os.getenv("OLLAMA_EMBED_BASE_URL", "http://ollama-proxy:8080")
-    llm_model = os.getenv("OLLAMA_GENERAL_MODEL", "gpt-oss:20b")
-    embed_model = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
+    llm_base = os.getenv("OLLAMA_GENERAL_BASE_URL", "http://rassygpt-gateway:8080")
+    embed_base = os.getenv("OLLAMA_EMBED_BASE_URL", "http://rassygpt-gateway:8080")
+    llm_model = os.getenv("OLLAMA_GENERAL_MODEL", "rassy-smart")
+    embed_model = os.getenv("OLLAMA_EMBED_MODEL", "rassy-embed")
 
     if not metadata_path.exists():
         print(f"metadata file not found: {metadata_path}", file=sys.stderr)

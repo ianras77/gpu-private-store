@@ -1398,7 +1398,7 @@ const buildLibraryDna = (context) => ({
     topGenres: context.libraryProfile?.topGenres?.slice(0, 6) ?? [],
     topDecades: context.libraryProfile?.topDecades?.slice(0, 5) ?? []
 });
-const MR_RASSY_MODEL = config.CHESHIRE_MODEL || "gpt-oss:20b";
+const MR_RASSY_MODEL = config.CHESHIRE_MODEL || "rassy-smart";
 const GENERIC_BOOTH_MEMORY_PATTERN = /\b(lands here|nice flow|good vibe|works because it fits|keeps the (?:room|hour|energy) moving|without flattening|real decision|real choice)\b/i;
 const SPECIFIC_BOOTH_MEMORY_PATTERN = /\b(19|20)\d{2}\b|\b(album|catalog|label|scene|groove|pocket|bass|drums?|vocal|harmony|arrangement|mix|reverb|echo|transition|handoff|request line|listen|hear|notice|catch|wait for)\b/i;
 const pickPromptBoothMemories = (values = []) => Array.from(new Set((values ?? [])

@@ -151,7 +151,7 @@ function isSupportScope(value: string): value is SupportScope {
 
 const primaryCat: CatClientConfig = {
   label: 'primary',
-  baseUrl: normalizeBaseUrl(process.env.CAT_BASE_URL, 'http://localhost:1865'),
+  baseUrl: normalizeBaseUrl(process.env.CAT_BASE_URL, 'http://cat:80'),
   apiKey: process.env.CAT_API_KEY,
   timeoutMs: parseTimeout(process.env.CAT_TIMEOUT_MS, 12000)
 };

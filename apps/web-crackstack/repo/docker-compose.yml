@@ -73,7 +73,7 @@ services:
       CRACKSTACK_AUTO_MIGRATE_ON_STARTUP: "1"
       CRACKSTACK_DATA_DIR: /app/data
       LOCALAI_BASE_URL: ${LOCALAI_BASE_URL:-}
-      LOCALAI_MODEL: ${LOCALAI_MODEL:-qwen3-1.7b}
+      LOCALAI_MODEL: ${LOCALAI_MODEL:-rassy-smart}
     depends_on:
       postgres:
         condition: service_healthy

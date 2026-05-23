@@ -318,7 +318,7 @@ const talesRoutes: FastifyPluginAsync = async (app) => {
         data: {
           taleId: tale.id,
           model:
-            process.env.LOCALAI_EMBED_MODEL || "granite-embedding-125m-english",
+            process.env.LOCALAI_EMBED_MODEL || "rassy-embed",
           embedding,
         },
       });
@@ -449,12 +449,12 @@ const talesRoutes: FastifyPluginAsync = async (app) => {
         update: {
           embedding,
           model:
-            process.env.LOCALAI_EMBED_MODEL || "granite-embedding-125m-english",
+            process.env.LOCALAI_EMBED_MODEL || "rassy-embed",
         },
         create: {
           taleId: id,
           model:
-            process.env.LOCALAI_EMBED_MODEL || "granite-embedding-125m-english",
+            process.env.LOCALAI_EMBED_MODEL || "rassy-embed",
           embedding,
         },
       });

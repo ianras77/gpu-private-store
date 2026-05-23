@@ -135,7 +135,7 @@ export const requestCheshireChat = async (
     throw new Error("cheshire_unconfigured");
   }
 
-  const model = input.model ?? process.env.CHESHIRE_MODEL ?? "gpt-oss:20b";
+  const model = input.model ?? process.env.CHESHIRE_MODEL ?? "rassy-smart";
   const payload: Record<string, unknown> = {
     model,
     messages: input.messages,
@@ -212,7 +212,7 @@ export const requestCheshireJson = async <T>(
 
 export const requestCheshireEmbedding = async (
   text: string,
-  model = process.env.CHESHIRE_EMBED_MODEL ?? "nomic-embed-text",
+  model = process.env.CHESHIRE_EMBED_MODEL ?? "rassy-embed",
   control?: CheshireRequestControl,
 ) => {
   const base = getBaseUrl();
