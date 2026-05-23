@@ -15,8 +15,9 @@ def seed_demo_data(db: Session):
     if not user:
         user = crud.create_user(db, DEMO_EMAIL, hash_password(DEMO_PASSWORD))
 
-    courses = ensure_default_courses(db, user.id)
-    existing_runs = db.query(models.Run).filter(models.Run.user_id == user.id).count()
+    user_id = str(user.id)
+    courses = ensure_default_courses(db, user_id)
+    existing_runs = db.query(models.Run).filter(models.Run.user_id == user_id).count()
     if existing_runs > 0:
         return user
 
@@ -36,6 +37,6 @@ def seed_demo_data(db: Session):
             session_points=random.randint(30, 120),
             events=[schemas.RunEventIn(type="relic", ts_s=i * 30, data={"combo": i + 1}) for i in range(5)]
         )
-        crud.create_run(db, user.id, payload)
+        crud.create_run(db, user_id, payload)
 
     return user

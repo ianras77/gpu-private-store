@@ -25,6 +25,7 @@ DEFAULT_COURSES = [
 
 
 def ensure_default_courses(db: Session, user_id: str):
+    user_id = str(user_id)
     courses = (
         db.query(models.Course)
         .filter(models.Course.user_id == user_id)

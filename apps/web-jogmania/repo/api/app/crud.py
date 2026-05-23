@@ -3,6 +3,10 @@ from sqlalchemy.orm import Session
 from app import models
 
 
+def _normalize_user_id(user_id) -> str:
+    return str(user_id)
+
+
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
@@ -16,6 +20,7 @@ def create_user(db: Session, email: str, hashed_password: str):
 
 
 def list_courses(db: Session, user_id: str):
+    user_id = _normalize_user_id(user_id)
     return (
         db.query(models.Course)
         .filter(models.Course.user_id == user_id)
@@ -25,6 +30,7 @@ def list_courses(db: Session, user_id: str):
 
 
 def get_course(db: Session, user_id: str, course_id: str):
+    user_id = _normalize_user_id(user_id)
     return (
         db.query(models.Course)
         .filter(models.Course.user_id == user_id, models.Course.id == course_id)
@@ -33,6 +39,7 @@ def get_course(db: Session, user_id: str, course_id: str):
 
 
 def create_run(db: Session, user_id: str, run_in):
+    user_id = _normalize_user_id(user_id)
     course = get_course(db, user_id, run_in.course_id)
     if not course:
         raise ValueError("Course not found")
@@ -75,6 +82,7 @@ def create_run(db: Session, user_id: str, run_in):
 
 
 def list_runs(db: Session, user_id: str, course_id: str | None = None):
+    user_id = _normalize_user_id(user_id)
     query = db.query(models.Run).filter(models.Run.user_id == user_id)
     if course_id:
         query = query.filter(models.Run.course_id == course_id)
@@ -82,6 +90,7 @@ def list_runs(db: Session, user_id: str, course_id: str | None = None):
 
 
 def get_run(db: Session, run_id: str, user_id: str):
+    user_id = _normalize_user_id(user_id)
     return (
         db.query(models.Run)
         .filter(models.Run.id == run_id, models.Run.user_id == user_id)
@@ -90,6 +99,7 @@ def get_run(db: Session, run_id: str, user_id: str):
 
 
 def create_loot_items(db: Session, user_id: str, run_id: str | None, items: list[dict]):
+    user_id = _normalize_user_id(user_id)
     loot_records = []
     for item in items:
         loot = models.LootItem(
