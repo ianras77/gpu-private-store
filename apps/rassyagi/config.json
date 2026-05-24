@@ -1,0 +1,151 @@
+{
+  "id": "rassyagi",
+  "name": "RassyAGI",
+  "available": true,
+  "short_desc": "Adjunct memory and agent gateway for RassyGPT.",
+  "author": "Ian Rasmussen + GPT-5.5",
+  "port": 9115,
+  "categories": [
+    "ai",
+    "automation",
+    "development"
+  ],
+  "description": "RassyAGI packages LocalRecall, LocalAGI v2.8.1, and a small OpenAI-compatible gateway as an adjunct layer for the RassyGPT stack. It keeps RassyGPT as the model backend while adding scoped semantic memory and controlled agent/tool orchestration for trusted local workflows.",
+  "tipi_version": 2,
+  "version": "1.0.1",
+  "source": "https://github.com/mudler/LocalAGI",
+  "website": "https://github.com/mudler/LocalAGI",
+  "exposable": false,
+  "supported_architectures": [
+    "amd64"
+  ],
+  "created_at": 1778284800000,
+  "updated_at": 1778284800000,
+  "dynamic_config": true,
+  "no_gui": true,
+  "form_fields": [
+    {
+      "type": "text",
+      "label": "RassyGPT base URL",
+      "env_variable": "RASSYAGI_RASSYGPT_BASE_URL",
+      "default": "http://rassygpt-gateway:8080",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "RassyGPT OpenAI base URL",
+      "env_variable": "RASSYAGI_RASSYGPT_OPENAI_BASE_URL",
+      "default": "http://rassygpt-gateway:8080/v1",
+      "required": true
+    },
+    {
+      "type": "password",
+      "label": "RassyGPT API key",
+      "env_variable": "RASSYAGI_RASSYGPT_API_KEY",
+      "required": true
+    },
+    {
+      "type": "random",
+      "label": "RassyAGI gateway API key",
+      "min": 32,
+      "env_variable": "RASSYAGI_GATEWAY_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "LocalRecall image",
+      "env_variable": "RASSYAGI_LOCALRECALL_IMAGE",
+      "default": "quay.io/mudler/localrecall:latest",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "LocalAGI image (v2.8.1 latest)",
+      "env_variable": "RASSYAGI_LOCALAGI_IMAGE",
+      "default": "quay.io/mudler/localagi:latest",
+      "required": true
+    },
+    {
+      "type": "number",
+      "label": "LocalRecall side port",
+      "env_variable": "RASSYAGI_LOCALRECALL_PORT",
+      "default": 9113,
+      "min": 1,
+      "max": 65535,
+      "required": true
+    },
+    {
+      "type": "number",
+      "label": "LocalAGI side port",
+      "env_variable": "RASSYAGI_LOCALAGI_PORT",
+      "default": 9114,
+      "min": 1,
+      "max": 65535,
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Fast chat model",
+      "env_variable": "RASSYAGI_MODEL",
+      "default": "rassy-fast",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Multimodal model",
+      "env_variable": "RASSYAGI_MULTIMODAL_MODEL",
+      "default": "rassy-smart",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Image model",
+      "env_variable": "RASSYAGI_IMAGE_MODEL",
+      "default": "rassy-image",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Embedding model",
+      "env_variable": "RASSYAGI_EMBEDDING_MODEL",
+      "default": "rassy-embed",
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "Rerank model",
+      "env_variable": "RASSYAGI_RERANK_MODEL",
+      "default": "rassy-rerank",
+      "required": true
+    },
+    {
+      "type": "boolean",
+      "label": "Enable memory injection",
+      "env_variable": "RASSYAGI_MEMORY_ENABLED",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "number",
+      "label": "Memory search top K",
+      "env_variable": "RASSYAGI_MEMORY_TOP_K",
+      "default": 1,
+      "min": 1,
+      "max": 20,
+      "required": true
+    },
+    {
+      "type": "boolean",
+      "label": "Enable trusted LocalAGI call_agents",
+      "env_variable": "RASSYAGI_CALL_AGENTS_ENABLED",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "boolean",
+      "label": "Expose all backend models in gateway catalog",
+      "env_variable": "RASSYAGI_INCLUDE_BACKEND_MODELS",
+      "default": false,
+      "required": true
+    }
+  ]
+}

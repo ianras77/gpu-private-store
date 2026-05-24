@@ -1,0 +1,148 @@
+x-runtipi:
+  schema_version: 2
+
+services:
+  rassyagi-localrecall:
+    image: ${RASSYAGI_LOCALRECALL_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${RASSYAGI_LOCALRECALL_PORT:-9113}:8080"
+    environment:
+      COLLECTION_DB_PATH: /db
+      FILE_ASSETS: /assets
+      LISTENING_ADDRESS: 0.0.0.0:8080
+      EMBEDDING_MODEL: ${RASSYAGI_EMBEDDING_MODEL:-rassy-embed}
+      OPENAI_BASE_URL: ${RASSYAGI_RASSYGPT_OPENAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      OPENAI_API_KEY: ${RASSYAGI_RASSYGPT_API_KEY}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - ${APP_DATA_DIR}/localrecall/db:/db
+      - ${APP_DATA_DIR}/localrecall/assets:/assets
+    x-runtipi:
+      add_to_main_network: true
+
+  rassyagi-localagi:
+    image: ${RASSYAGI_LOCALAGI_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${RASSYAGI_LOCALAGI_PORT:-9114}:3000"
+    depends_on:
+      rassyagi-localrecall:
+        condition: service_started
+    environment:
+      LOCALAGI_MODEL: ${RASSYAGI_MODEL:-rassy-fast}
+      LOCALAGI_MULTIMODAL_MODEL: ${RASSYAGI_MULTIMODAL_MODEL:-rassy-smart}
+      LOCALAGI_IMAGE_MODEL: ${RASSYAGI_IMAGE_MODEL:-rassy-image}
+      LOCALAGI_LLM_API_URL: ${RASSYAGI_RASSYGPT_OPENAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      LOCALAGI_LLM_API_KEY: ${RASSYAGI_RASSYGPT_API_KEY}
+      LOCALAGI_LOCALRAG_URL: ${RASSYAGI_LOCALAGI_LOCAL_RAG_URL:-http://rassyagi-localrecall:8080}
+      LOCALAGI_STATE_DIR: /pool
+      LOCALAGI_TIMEOUT: 5m
+      LOCALAGI_ENABLE_CONVERSATIONS_LOGGING: "false"
+      LOCALAGI_CUSTOM_ACTIONS_DIR: /pool/custom-actions
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - ${APP_DATA_DIR}/localagi/pool:/pool
+    x-runtipi:
+      add_to_main_network: true
+
+  rassyagi-gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    image: runtipi-local-rassyagi-gateway:1.0.0
+    restart: unless-stopped
+    depends_on:
+      rassyagi-localrecall:
+        condition: service_started
+      rassyagi-localagi:
+        condition: service_started
+    environment:
+      LOCALAI_BASE_URL: ${RASSYAGI_RASSYGPT_BASE_URL:-http://rassygpt-gateway:8080}
+      LOCALAI_TEXT_BASE_URL: ${RASSYAGI_RASSYGPT_BASE_URL:-http://rassygpt-gateway:8080}
+      LOCALAI_IMAGE_BASE_URL: ${RASSYAGI_RASSYGPT_BASE_URL:-http://rassygpt-gateway:8080}
+      LOCALAI_WHISPER_BASE_URL: ${RASSYAGI_RASSYGPT_BASE_URL:-http://rassygpt-gateway:8080}
+      LOCALAI_TTS_BASE_URL: ${RASSYAGI_RASSYGPT_BASE_URL:-http://rassygpt-gateway:8080}
+      LOCALAI_RERANK_BASE_URL: ${RASSYAGI_RASSYGPT_BASE_URL:-http://rassygpt-gateway:8080}
+      LOCALAI_MUSIC_BASE_URL: ${RASSYAGI_RASSYGPT_BASE_URL:-http://rassygpt-gateway:8080}
+      LOCALAI_MODELS_INCLUDE_BACKENDS: ${RASSYAGI_INCLUDE_BACKEND_MODELS:-false}
+      LOCALAI_REQUIRE_RAG: "false"
+      LOCALAI_REQUIRE_IMAGE: "false"
+      LOCALAI_REQUIRE_AUDIO: "false"
+      MUSIC_ENABLED: "false"
+      LOCALAI_API_KEY: ${RASSYAGI_RASSYGPT_API_KEY}
+      LOCALAGI_BASE_URL: http://rassyagi-localagi:3000
+      TOTALRECALL_BASE_URL: http://rassyagi-localrecall:8080
+      TOTALRECALL_COLLECTION: ${RASSYAGI_TOTALRECALL_COLLECTION:-rassyagi-memory}
+      MEMORY_ENABLED: ${RASSYAGI_MEMORY_ENABLED:-true}
+      MEMORY_TOP_K: ${RASSYAGI_MEMORY_TOP_K:-1}
+      MEMORY_MAX_CHARS: ${RASSYAGI_MEMORY_MAX_CHARS:-1500}
+      MEMORY_SEARCH_TIMEOUT: ${RASSYAGI_MEMORY_SEARCH_TIMEOUT:-2.5}
+      LOCALAGI_TOOL_MODE: ${RASSYAGI_LOCALAGI_TOOL_MODE:-off}
+      TRUSTED_LOCALAGI_TOOL_MODE: ${RASSYAGI_TRUSTED_LOCALAGI_TOOL_MODE:-auto}
+      LOCALAGI_TOOL_NAME: ${RASSYAGI_LOCALAGI_TOOL_NAME:-localagi_action}
+      LOCALAGI_ALLOWED_ACTIONS: ${RASSYAGI_ALLOWED_ACTIONS:-search,scraper,browse,wikipedia,generate_image,counter,call_agents,github-issue-searcher,github-issue-reader,github-readme,github-repository-get-content}
+      LOCALAGI_BLOCKED_ACTIONS: ${RASSYAGI_BLOCKED_ACTIONS:-shell-command,send-mail,twitter-post,custom,github-repository-create-or-update-content,github-issue-opener,github-issue-closer,github-issue-commenter,github-issue-labeler}
+      MAX_TOOL_ROUNDS: ${RASSYAGI_MAX_TOOL_ROUNDS:-3}
+      GATEWAY_API_KEY: ${RASSYAGI_GATEWAY_API_KEY}
+      LOCALAGI_AUTO_CREATE_AGENT: "true"
+      LOCALAGI_DEFAULT_AGENT: ${RASSYAGI_DEFAULT_AGENT:-orchestrator}
+      LOCALAGI_AGENT_MODEL: ${RASSYAGI_MODEL:-rassy-fast}
+      LOCALAGI_AGENT_API_URL: ${RASSYAGI_RASSYGPT_OPENAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
+      LOCALAGI_AGENT_API_KEY: ${RASSYAGI_RASSYGPT_API_KEY}
+      LOCALAGI_AGENT_LOCAL_RAG_URL: ${RASSYAGI_LOCALAGI_AGENT_LOCAL_RAG_URL:-http://rassyagi-localrecall:8080}
+      LOCALAGI_AGENT_SYSTEM_PROMPT: ${RASSYAGI_AGENT_SYSTEM_PROMPT:-You are an orchestration agent that can use configured actions/tools when needed. Keep replies concise.}
+      LOCALAGI_TOUCH_TIMEOUT: ${RASSYAGI_LOCALAGI_TOUCH_TIMEOUT:-8}
+      LOCALAGI_CALL_AGENTS_ENABLED: ${RASSYAGI_CALL_AGENTS_ENABLED:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOCALAI_TIMEOUT: ${RASSYAGI_LOCALAI_TIMEOUT:-120}
+      GATEWAY_STARTUP_WAIT_SECONDS: ${RASSYAGI_GATEWAY_STARTUP_WAIT_SECONDS:-60}
+      GATEWAY_STARTUP_INTERVAL_SECONDS: ${RASSYAGI_GATEWAY_STARTUP_INTERVAL_SECONDS:-2}
+      GATEWAY_HEALTHCHECK_TIMEOUT: ${RASSYAGI_GATEWAY_HEALTHCHECK_TIMEOUT:-8}
+      GATEWAY_DEPENDENCY_TIMEOUT: ${RASSYAGI_GATEWAY_DEPENDENCY_TIMEOUT:-8}
+      GATEWAY_HEALTH_CACHE_SECONDS: ${RASSYAGI_GATEWAY_HEALTH_CACHE_SECONDS:-2}
+      TRINITY_ENFORCE_MEMORY: "true"
+      TRINITY_ENFORCE_LOCALAGI: "true"
+      TRINITY_LOCALAGI_INCLUDE_HINT: "false"
+      TRUST_PROXY_HEADERS: ${RASSYAGI_TRUST_PROXY_HEADERS:-false}
+      MULTIUSER_TRUSTED_IPS: ${RASSYAGI_MULTIUSER_TRUSTED_IPS:-}
+      MULTIUSER_USER_HEADERS: ${RASSYAGI_MULTIUSER_USER_HEADERS:-user_id,x-user-id}
+      MULTIUSER_TENANT_HEADERS: ${RASSYAGI_MULTIUSER_TENANT_HEADERS:-x-console-workspace-id,x-tenant-id}
+      MULTIUSER_REQUIRE_TRUSTED_USER: ${RASSYAGI_MULTIUSER_REQUIRE_TRUSTED_USER:-true}
+      ALLOW_UNTRUSTED_USER_HEADERS: "false"
+      ALLOW_CLIENT_PROVIDED_USER_ID: "false"
+      ALLOW_CLIENT_PROVIDED_WORKSPACE: "false"
+      NEXTCLOUD_TRUSTED_IPS: ${RASSYAGI_NEXTCLOUD_TRUSTED_IPS:-}
+      NEXTCLOUD_USER_HEADER: ${RASSYAGI_NEXTCLOUD_USER_HEADER:-x-oc-userid}
+      NEXTCLOUD_COLLECTION: ${RASSYAGI_NEXTCLOUD_COLLECTION:-nextcloud-memory}
+      NEXTCLOUD_TOOL_MODE: ${RASSYAGI_NEXTCLOUD_TOOL_MODE:-off}
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - |
+          import sys, urllib.request
+          try:
+              with urllib.request.urlopen("http://127.0.0.1:8000/readyz", timeout=5) as resp:
+                  sys.exit(0 if resp.getcode() == 200 else 1)
+          except Exception:
+              sys.exit(1)
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    x-runtipi:
+      is_main: true
+      internal_port: 8000
+      add_to_main_network: true
+    labels:
+      traefik.http.middlewares.rassyagi-compress.compress: "true"
+      traefik.http.middlewares.rassyagi-secure-headers.headers.stsSeconds: "31536000"
+      traefik.http.middlewares.rassyagi-secure-headers.headers.browserXssFilter: "true"
+      traefik.http.middlewares.rassyagi-secure-headers.headers.contentTypeNosniff: "true"
+      traefik.http.routers.rassyagi.middlewares: rassyagi-compress,rassyagi-secure-headers
