@@ -1,4 +1,5 @@
 import json
+import logging
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
@@ -6,6 +7,7 @@ from botocore.exceptions import ClientError
 from app.settings import get_settings
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 
 def get_s3_client(endpoint_url: str | None = None):
@@ -24,9 +26,13 @@ def ensure_bucket():
     try:
         client.head_bucket(Bucket=settings.S3_BUCKET)
     except ClientError:
-        client.create_bucket(Bucket=settings.S3_BUCKET)
-    except Exception:
-        # In tests or offline mode, MinIO might be unavailable.
+        try:
+            client.create_bucket(Bucket=settings.S3_BUCKET)
+        except Exception as exc:
+            logger.warning("Skipping S3 bucket provisioning: %s", exc)
+            return
+    except Exception as exc:
+        logger.warning("Skipping S3 bucket check: %s", exc)
         return
 
 

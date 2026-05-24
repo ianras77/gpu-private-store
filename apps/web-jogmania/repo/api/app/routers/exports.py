@@ -17,6 +17,9 @@ def export_run(run_id: str, db: Session = Depends(get_db), user=Depends(get_curr
         raise HTTPException(status_code=404, detail="Run not found")
     payload = build_export(run)
     key = f"exports/run_{run.id}.json"
-    upload_json(key, payload)
-    url = presign_url(key)
+    try:
+        upload_json(key, payload)
+        url = presign_url(key)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Export storage is unavailable") from exc
     return {"run_id": run.id, "url": url}
