@@ -1,6 +1,6 @@
-# Web Usmender
+# Web USMender
 
-This app was brought to minimum compliance baselines for Dockerized operations. | Service | Port | Purpose | Health | |---|---:|---|---| | web | 3294 | Primary web UI | / | | api | 3295 | Backend API | /healthz | | db | 3297 | Postgres | - | npm install npm run dev docker compose up -d --build The default stack is self.
+USMender is a mobile-first repair messenger built around a local Matrix core. Users see USMender rooms, private drafts, mediator approvals, trust controls, and mobile clients. Matrix/Synapse stays local underneath as the durable room/event substrate.
 
 ## Deployment stance
 
@@ -8,25 +8,24 @@ This app was brought to minimum compliance baselines for Dockerized operations. 
 - Primary edge remains `192.168.1.57` (`runtipi.rasies.com`).
 - Recommended exposure: eligible for selective edge proxying later.
 
-## Migration notes
+## Architecture direction
 
-- Source tree today: `/data/apps/web-usmender`
-- Recommended source repo target: `/data/repos/apps/web-usmender`
-- Conversion strategy: `auto`
-- Migration complexity: `medium`
+- Phase 0 uses the bundled local Postgres/SSE bridge while the Matrix provider boundary is built.
+- Target core: local Synapse plus a USMender Matrix appservice.
+- Raw drafts stay private to USMender; only approved mediated messages enter the Matrix room.
+- RAG/LLM mediation stays behind provider interfaces so local RassyGPT/Cheshire Cat lanes can evolve.
 
 ## Data notes
 
-- Runtipi app-data convention: migrate app-owned state into `${APP_DATA_DIR}/app-data/web-usmender/...`.
+- Runtipi app-data convention: keep app-owned state under `${APP_DATA_DIR}/app-data/web-usmender/...`.
 - Keep source code in the app repo and keep external shared media/model libraries on explicit host paths when needed.
 
 ## Port notes
 
 - Reserve `80` and `443` on this node for Runtipi itself.
-- Main web UIs should be reached through the Runtipi local domain rather than a copied legacy host port.
-- Database, cache, and vector-store helper services are intentionally de-published by default in generated packages to reduce collisions.
-
-- Named volume `postgres_data` mounted to `/var/lib/postgresql/data`
+- Web UI: 3294.
+- API: 3295.
+- Database, Matrix, cache, and vector helper services should remain internal unless a specific operational need says otherwise.
 
 ## Edge-routing notes
 

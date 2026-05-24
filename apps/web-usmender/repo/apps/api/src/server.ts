@@ -42,11 +42,13 @@ import {
   verifySessionStreamToken
 } from './auth.js';
 import { buildInviteUrl, sendInviteLink, sendMessageNudge } from './deliveryService.js';
+import { getMessagingProvider, getMessagingProviderStatus } from './messagingProvider.js';
 import { publishSessionUpdate, subscribeSessionUpdate } from './realtime.js';
 import { randomUUID } from 'node:crypto';
 
 export function buildServer() {
   const server = Fastify({ logger: true });
+  const messagingProvider = getMessagingProvider();
 
   server.register(cors, { origin: true });
   const deliveryChannelSchema = z.enum(['IN_APP', 'SMS_LINK', 'EMAIL_LINK', 'IMESSAGE_HANDOFF']);
@@ -136,6 +138,108 @@ export function buildServer() {
       .slice(-3)
       .map((message, index) => `${index + 1}. ${message.content}`)
       .join('\n');
+  }
+
+  async function ensureProviderUser(user: { id: string; displayName: string }) {
+    try {
+      await messagingProvider.ensureUser({ userId: user.id, displayName: user.displayName });
+    } catch (error) {
+      server.log.warn(
+        {
+          provider: messagingProvider.name,
+          userId: user.id,
+          error: error instanceof Error ? error.message : String(error)
+        },
+        'Messaging provider user ensure failed'
+      );
+    }
+  }
+
+  async function createProviderRoom(input: {
+    conversationId: string;
+    topic: string;
+    memberUserIds: string[];
+  }) {
+    try {
+      await messagingProvider.createRoom(input);
+    } catch (error) {
+      server.log.warn(
+        {
+          provider: messagingProvider.name,
+          conversationId: input.conversationId,
+          error: error instanceof Error ? error.message : String(error)
+        },
+        'Messaging provider room creation failed'
+      );
+    }
+  }
+
+  async function dispatchApprovedProviderMessage(input: {
+    sessionId: string;
+    authorUserId: string;
+    moderatedMessageId: string;
+    mediatedTurnId: string;
+    approvedText: string;
+    approvalPreviewId: string;
+    sessionRevision: number;
+  }) {
+    try {
+      const result = await messagingProvider.sendApprovedMessage({
+        conversationId: input.sessionId,
+        authorUserId: input.authorUserId,
+        approvedText: input.approvedText,
+        localEventId: input.moderatedMessageId,
+        metadata: {
+          messageKind: 'USER_APPROVED',
+          mediationTurnId: input.mediatedTurnId,
+          approvalPreviewId: input.approvalPreviewId,
+          sessionRevision: input.sessionRevision
+        }
+      });
+
+      await createDeliveryAttempt(prisma, {
+        sessionId: input.sessionId,
+        mediatedTurnId: input.mediatedTurnId,
+        kind: 'MESSAGE_EVENT',
+        channel: 'IN_APP',
+        provider: messagingProvider.name,
+        recipient: result.providerRoomId,
+        status: 'SENT',
+        providerMessageId: result.providerEventId,
+        sentAt: new Date(),
+        deliveredAt: new Date(),
+        payload: {
+          localEventId: result.localEventId,
+          providerRoomId: result.providerRoomId,
+          providerEventId: result.providerEventId
+        }
+      });
+    } catch (error) {
+      await createDeliveryAttempt(prisma, {
+        sessionId: input.sessionId,
+        mediatedTurnId: input.mediatedTurnId,
+        kind: 'MESSAGE_EVENT',
+        channel: 'IN_APP',
+        provider: messagingProvider.name,
+        recipient: input.sessionId,
+        status: 'FAILED',
+        errorMessage: error instanceof Error ? error.message : String(error),
+        payload: {
+          localEventId: input.moderatedMessageId,
+          approvalPreviewId: input.approvalPreviewId
+        }
+      });
+
+      server.log.warn(
+        {
+          provider: messagingProvider.name,
+          sessionId: input.sessionId,
+          moderatedMessageId: input.moderatedMessageId,
+          error: error instanceof Error ? error.message : String(error)
+        },
+        'Messaging provider approved-message dispatch failed'
+      );
+    }
   }
 
   function isUniqueConstraintError(error: unknown, targetFields?: string[]) {
@@ -396,6 +500,7 @@ export function buildServer() {
     const followUpQuestion = input.preview.followUpQuestion?.trim() || null;
 
     let turnId: string | null = null;
+    let moderatedMessageId: string | null = null;
     try {
       await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         await touchParticipant(tx, session.id, input.userId);
@@ -414,6 +519,7 @@ export function buildServer() {
           kind: 'CAT_REPHRASE',
           content: input.preview.moderatedText
         });
+        moderatedMessageId = moderatedMessage.id;
         const turn = await createMediatedTurn(tx, {
           sessionId: session.id,
           authorUserId: input.userId,
@@ -488,6 +594,18 @@ export function buildServer() {
       return {
         room: buildRoomPayload(refreshed.session, input.userId)
       };
+    }
+
+    if (turnId && moderatedMessageId) {
+      await dispatchApprovedProviderMessage({
+        sessionId: session.id,
+        authorUserId: input.userId,
+        moderatedMessageId,
+        mediatedTurnId: turnId,
+        approvedText: input.preview.moderatedText,
+        approvalPreviewId: input.preview.previewId,
+        sessionRevision: session.revision + 1
+      });
     }
 
     if (
@@ -699,8 +817,8 @@ export function buildServer() {
     reply.code(500).send({ error: 'Unexpected server error' });
   });
 
-  server.get('/health', async () => ({ ok: true }));
-  server.get('/healthz', async () => ({ ok: true }));
+  server.get('/health', async () => ({ ok: true, messaging: getMessagingProviderStatus() }));
+  server.get('/healthz', async () => ({ ok: true, messaging: getMessagingProviderStatus() }));
 
   server.post('/auth/signup', async (request, reply) => {
     if (!allowAuthAttempt(request.ip)) {
@@ -736,6 +854,8 @@ export function buildServer() {
         plan: 'FREE'
       }
     });
+
+    await ensureProviderUser(user);
 
     reply.code(201).send({
       token: signToken(user.id),
@@ -958,6 +1078,13 @@ export function buildServer() {
           topic: body.topic
         }
       });
+    });
+
+    await ensureProviderUser(user);
+    await createProviderRoom({
+      conversationId: session.id,
+      topic: session.topic,
+      memberUserIds: [user.id]
     });
 
     reply.code(201).send(session);
@@ -2323,6 +2450,24 @@ export function buildServer() {
         }
       });
     });
+
+    await ensureProviderUser(user);
+    try {
+      await messagingProvider.inviteMember({
+        conversationId: invite.sessionId,
+        userId: user.id
+      });
+    } catch (error) {
+      server.log.warn(
+        {
+          provider: messagingProvider.name,
+          sessionId: invite.sessionId,
+          userId: user.id,
+          error: error instanceof Error ? error.message : String(error)
+        },
+        'Messaging provider invite-member failed'
+      );
+    }
 
     publishSessionUpdate(invite.sessionId, 'invite_accepted');
 

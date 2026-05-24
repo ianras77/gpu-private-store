@@ -13,15 +13,38 @@ services:
     protocol: http
     purpose: "Backend API"
     health: "/healthz"
+  - name: matrix-appservice
+    port: 3002
+    protocol: http
+    purpose: "Internal USMender Matrix appservice"
+    health: "/healthz"
+    exposure: internal
+  - name: worker
+    port: 3003
+    protocol: http
+    purpose: "Internal mediation/RAG worker"
+    health: "/healthz"
+    exposure: internal
+  - name: matrix
+    port: 8008
+    protocol: http
+    purpose: "Internal local Synapse homeserver"
+    health: "/_matrix/client/versions"
+    exposure: internal
   - name: db
     port: 3297
     protocol: tcp
     purpose: "Postgres"
 notes:
-  - "Contiguous app block: 3294-3297."
-  - "Cheshire Cat is optional and lives in docker-compose.ai.yml."
+  - "Host-published app block remains 3294-3297."
+  - "Matrix, matrix-appservice, and worker are internal services in the v0.5 stack."
+  - "Cheshire Cat is bundled for the mediation/RAG lanes."
 env:
   required:
     - PORT
   optional:
     - NEXT_PUBLIC_API_URL
+    - USMENDER_MESSAGING_PROVIDER
+    - MATRIX_APPSERVICE_URL
+    - MATRIX_APPSERVICE_TOKEN
+    - MATRIX_SERVER_NAME

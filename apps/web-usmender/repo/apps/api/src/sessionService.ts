@@ -32,7 +32,7 @@ type ConsentStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
 type InviteStatus = 'SENT' | 'OPENED' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED';
 type DeliveryChannel = 'IN_APP' | 'SMS_LINK' | 'EMAIL_LINK' | 'IMESSAGE_HANDOFF';
 type DeliveryAttemptStatus = 'PENDING' | 'SIMULATED' | 'SENT' | 'DELIVERED' | 'FAILED';
-type DeliveryKind = 'INVITE_LINK' | 'MESSAGE_NUDGE';
+type DeliveryKind = 'INVITE_LINK' | 'MESSAGE_NUDGE' | 'MESSAGE_EVENT';
 type MediatedTurnSource = 'INTAKE' | 'MESSAGE';
 
 type SessionParticipantRecord = {

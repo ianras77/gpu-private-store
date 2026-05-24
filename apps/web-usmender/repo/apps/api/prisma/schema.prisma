@@ -91,6 +91,7 @@ enum DeliveryAttemptStatus {
 enum DeliveryKind {
   INVITE_LINK
   MESSAGE_NUDGE
+  MESSAGE_EVENT
 }
 
 enum MediatedTurnSource {

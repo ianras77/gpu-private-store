@@ -7,13 +7,16 @@ RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json* ./
 COPY tsconfig.base.json ./
 COPY apps/api/package.json ./apps/api/
+COPY packages/messaging-core/package.json ./packages/messaging-core/
 COPY packages/shared/package.json ./packages/shared/
 
 RUN npm install --workspaces
 
 COPY apps/api ./apps/api
+COPY packages/messaging-core ./packages/messaging-core
 COPY packages/shared ./packages/shared
 
+RUN npm --workspace packages/messaging-core run build
 RUN npm --workspace packages/shared run build
 RUN npm --workspace apps/api run prisma:generate
 RUN npm --workspace apps/api run build

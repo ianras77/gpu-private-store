@@ -1,106 +1,121 @@
 import Link from 'next/link';
 
+const rooms = [
+  {
+    title: 'Apartment repair',
+    meta: '2 people - Matrix room local',
+    state: 'Rewrite ready',
+    unread: '2'
+  },
+  {
+    title: 'Weekend planning',
+    meta: 'Invite accepted',
+    state: 'Needs first reply',
+    unread: ''
+  },
+  {
+    title: 'Check-in habit',
+    meta: 'Follow-up tomorrow',
+    state: 'Agreement live',
+    unread: ''
+  }
+];
+
+const pipeline = [
+  ['Private draft', 'Raw text stays in USMender, outside the Matrix room.'],
+  ['Safety and retrieval', 'Room history, agreements, and boundaries shape the rewrite.'],
+  ['Approval preview', 'The sender approves the exact shared wording.'],
+  ['Matrix event', 'Only the approved message enters the local room.']
+];
+
+const buildTracks = [
+  ['Local Matrix core', 'Synapse is the durable room engine. USMender owns the flow users actually touch.'],
+  ['USMender clients', 'The mobile-first web app and iOS client show USMender, not a generic Matrix interface.'],
+  ['RAG in the send path', 'Retrieval, safety, mediator rewrite, proposals, and memory run as message jobs.']
+];
+
 export default function Page() {
   return (
-    <main>
-      <section className="hero-surface">
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <div className="hero-kicker">Love-led conflict repair</div>
-            <h1 className="display">A mediation inbox that helps people hear each other again.</h1>
-            <p>
-              USMender feels like a messaging app, but every message passes through a kind,
-              structured LLM mediator first. You write privately, approve the rewrite, and
-              send something safer, clearer, and more human.
-            </p>
-            <div className="cta-row">
-              <Link className="button primary" href="/login">
-                Create account
-              </Link>
-              <Link className="button secondary" href="/dashboard">
-                Open the inbox
-              </Link>
-              <Link className="button secondary" href="/sessions/new">
-                Start a new room
-              </Link>
-            </div>
-            <div className="stat-grid">
-              <div className="stat-card">
-                <strong>Private first</strong>
-                <div className="microcopy">Raw feelings stay between you and the mediator.</div>
-              </div>
-              <div className="stat-card">
-                <strong>Mutual clarity</strong>
-                <div className="microcopy">The other person only sees respectful, approved language.</div>
-              </div>
-              <div className="stat-card">
-                <strong>Real steps</strong>
-                <div className="microcopy">Every room moves toward understanding and a fair plan.</div>
-              </div>
+    <main className="messenger-home">
+      <section className="messenger-shell">
+        <div className="messenger-copy">
+          <div className="hero-kicker">Matrix-core repair messenger</div>
+          <h1 className="display">USMender starts with the message.</h1>
+          <p>
+            Matrix becomes the local room engine. USMender becomes the client, the workflow, and
+            the safety layer around it: private drafts, mediated previews, approved shared
+            messages, and mobile-first rooms.
+          </p>
+          <div className="cta-row">
+            <Link className="button primary" href="/dashboard">
+              Open inbox
+            </Link>
+            <Link className="button secondary" href="/sessions/new">
+              Start room
+            </Link>
+            <Link className="button secondary" href="/login">
+              Sign in
+            </Link>
+          </div>
+        </div>
+
+        <div className="messenger-workspace" aria-label="USMender messenger preview">
+          <div className="workspace-sidebar">
+            <div className="workspace-label">Inbox</div>
+            <div className="conversation-list">
+              {rooms.map((room, index) => (
+                <div
+                  className={index === 0 ? 'conversation-card active' : 'conversation-card'}
+                  key={room.title}
+                >
+                  <div>
+                    <strong>{room.title}</strong>
+                    <span>{room.meta}</span>
+                  </div>
+                  <div className="conversation-card-foot">
+                    <span>{room.state}</span>
+                    {room.unread ? <b>{room.unread}</b> : null}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="phone-frame">
-            <div className="phone-screen">
-              <div className="phone-status">
-                <span>Live room</span>
-                <span>Mediator on</span>
+          <div className="workspace-thread">
+            <div className="thread-topbar">
+              <div>
+                <strong>Apartment repair</strong>
+                <span>Shared Matrix room - private drafts on</span>
               </div>
+              <span className="signal-pill">Mediator online</span>
+            </div>
 
-              <div className="phone-group">
-                <div className="phone-row">
-                  <strong>Kitchen tension</strong>
-                  <div className="microcopy">Shared apartment • waiting on one reply</div>
-                </div>
-                <div className="badge-row">
-                  <span className="signal-pill">Safety filters active</span>
-                  <span className="signal-pill">Reply coaching on</span>
-                </div>
+            <div className="chat-stack">
+              <div className="phone-bubble other">
+                I can talk tonight. I want this to feel fair, not like we are keeping score.
               </div>
+              <div className="phone-bubble self">Raw draft saved privately in USMender.</div>
+              <div className="phone-bubble mediator">
+                Rewrite ready: I need more notice before plans change, and I want us to choose a
+                simple way to check in before decisions are final.
+              </div>
+            </div>
 
-              <div className="phone-group">
-                <div className="phone-bubble self">
-                  I feel ignored when plans change without me knowing first.
-                </div>
-                <div className="phone-bubble mediator">
-                  I can help phrase that as a request for more notice and shared decision-making.
-                </div>
-                <div className="phone-bubble other">
-                  Shared summary: They want a quick heads-up before decisions are finalized.
-                </div>
-                <div className="phone-bubble mediator">
-                  Next step: invite the other person to share what makes timing hard on their side.
-                </div>
+            <div className="draft-panel">
+              <div>
+                <span>Approval preview</span>
+                <strong>Send the mediated version to Matrix</strong>
               </div>
-
-              <div className="phone-group">
-                <div className="phone-row">
-                  <strong>Resolution draft</strong>
-                  <div className="microcopy">
-                    Weekly 15-minute check-in, same-day updates for major decisions.
-                  </div>
-                </div>
-              </div>
+              <Link className="button primary compact" href="/dashboard">
+                Review
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="feature-grid">
-        {[
-          [
-            'Sign up and start fast',
-            'Create an account, find people, and open a mediation room in under two minutes.'
-          ],
-          [
-            'Invite by search or email',
-            'Look up existing users or invite someone new with a warm, neutral message.'
-          ],
-          [
-            'Approve every rewrite',
-            'The LLM never forwards your raw message directly. You stay in control of what is sent.'
-          ]
-        ].map(([title, detail]) => (
+      <section className="message-plan-grid">
+        {buildTracks.map(([title, detail]) => (
           <div className="feature-card" key={title}>
             <strong>{title}</strong>
             <div className="microcopy">{detail}</div>
@@ -108,15 +123,33 @@ export default function Page() {
         ))}
       </section>
 
+      <section className="pipeline-band">
+        <div>
+          <div className="section-label">Message pipeline</div>
+          <h2>Every shared message is a deliberate local Matrix event.</h2>
+        </div>
+        <div className="pipeline-list">
+          {pipeline.map(([title, detail], index) => (
+            <div className="pipeline-item" key={title}>
+              <span>{index + 1}</span>
+              <div>
+                <strong>{title}</strong>
+                <div className="microcopy">{detail}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="journey">
-        <div className="section-label">How mediation moves</div>
-        <h2>Built for real relationships, not debate club.</h2>
+        <div className="section-label">Rebuilt app plan</div>
+        <h2>Matrix stays updateable. USMender stays the experience.</h2>
         <div className="journey-grid">
           {[
-            ['1. Private draft', 'Say the hard thing honestly in your own words.'],
-            ['2. Gentle rewrite', 'The mediator removes heat, blame, and escalation.'],
-            ['3. Perspective coaching', 'Each person gets help seeing the need behind the issue.'],
-            ['4. Shared proposal', 'The room ends with concrete next steps both people can vote on.']
+            ['Phase 0', 'Harden the current local bridge: inbox, thread, drafts, approvals, and event ledger.'],
+            ['Phase 1', 'Move posting, reads, delivery, and presence behind a Matrix-ready provider interface.'],
+            ['Phase 2', 'Add local Synapse and a USMender appservice as the core messaging engine.'],
+            ['Phase 3', 'Polish the PWA and native mobile clients around the thread-first workflow.']
           ].map(([title, detail]) => (
             <div className="journey-card" key={title}>
               <strong>{title}</strong>
@@ -126,42 +159,19 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="story-grid">
-        <div className="story-card">
-          <strong>Feels like chat</strong>
-          <div className="microcopy">
-            The interface is familiar: inboxes, message bubbles, invitations, status updates,
-            and live conversation rooms.
-          </div>
-        </div>
-        <div className="story-card">
-          <strong>Acts like care</strong>
-          <div className="microcopy">
-            The mediator slows things down, protects dignity, and nudges both people toward
-            understanding before solutions.
-          </div>
-        </div>
-        <div className="story-card">
-          <strong>Designed for mobile</strong>
-          <div className="microcopy">
-            Every screen is mobile-first so it can translate cleanly into a polished iOS app.
-          </div>
-        </div>
-      </section>
-
       <section className="card">
         <div className="lane-header">
           <div>
-            <div className="pill">Safety matters</div>
-            <h2>Human, helpful, and calm on purpose.</h2>
+            <div className="pill">Safety contract</div>
+            <h2>Raw drafts stay private. Matrix rooms stay intentional.</h2>
           </div>
           <Link className="button secondary" href="/settings">
-            See trust settings
+            Trust settings
           </Link>
         </div>
         <p className="microcopy">
-          If the system detects coercion, threats, or unsafe language, it pauses the room instead
-          of sending the message. Repair should never come at the cost of safety.
+          USMender owns the composer so the mediator can pause unsafe drafts, retrieve the right
+          context, and ask for approval before anything reaches the local Matrix room.
         </p>
       </section>
     </main>

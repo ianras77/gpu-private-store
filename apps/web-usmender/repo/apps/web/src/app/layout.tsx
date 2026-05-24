@@ -3,7 +3,8 @@ import AppChrome from '../components/AppChrome';
 
 export const metadata = {
   title: 'USMender',
-  description: 'A warm, mobile-first mediation inbox where an LLM helps two people repair conflict.'
+  description:
+    'A mobile-first repair messenger around a local Matrix core with approved, mediated shared messages.'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

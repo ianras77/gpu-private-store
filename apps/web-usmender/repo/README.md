@@ -1,12 +1,17 @@
 # web-usmender
 
-This app was brought to minimum compliance baselines for Dockerized operations.
+USMender is being rebuilt as a mobile-first repair messenger around a local Matrix core. Users see USMender rooms, private drafts, mediator approvals, trust controls, and mobile clients; Matrix/Synapse stays local underneath as the durable room/event substrate.
+
+The current v0.5 implementation runs the app through the Matrix provider boundary by default while preserving the local bridge as a development fallback. See `ops/PLAN.md` for the rebuilt product plan and `ops/MATRIX_CORE_DESIGN.md` for the implementation boundary.
 
 ## Ports
 | Service | Port | Purpose | Health |
 |---|---:|---|---|
 | web | 3294 | Primary web UI | / |
 | api | 3295 | Backend API | /healthz |
+| matrix-appservice | 3002 internal | USMender Matrix bridge | /healthz |
+| worker | 3003 internal | Mediation/RAG job worker | /healthz |
+| matrix | 8008 internal | Local Synapse homeserver | /_matrix/client/versions |
 | db | 3297 | Postgres | - |
 
 ## Local Run
@@ -25,6 +30,9 @@ The default stack now includes the mediator service too:
 - `web`
 - `api`
 - `postgres`
+- `matrix`
+- `matrix-appservice`
+- `worker`
 - `cat`
 - `cat-support`
 
@@ -37,6 +45,15 @@ Current backbone highlights:
 - same-origin `/api` proxying in the Next app, so published deployments do not depend on browser-side `localhost` calls
 - durable delivery records for invites and message nudges
 - SMS-friendly invite delivery scaffolding with a console fallback and optional Twilio wiring
+- local Synapse plus a USMender Matrix appservice selected as the v0.5 messaging backbone
+
+v0.5 Matrix-core pieces:
+- `@usmender/messaging-core` provider interface with local and Matrix appservice providers
+- API dispatch of approved mediated messages through the messaging provider
+- local Matrix appservice with health, user mapping, room creation, approved-message, and timeline endpoints
+- worker service deployed and health-checkable while mediation remains inline in the API
+- Synapse service in compose with local appservice registration
+- compose defaults select `USMENDER_MESSAGING_PROVIDER=matrix`, with local-provider fallback still available for development
 
 It also seeds a demo account on first boot:
 - email: `initiator@usmender.dev`

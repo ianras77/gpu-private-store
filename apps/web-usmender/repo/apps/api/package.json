@@ -5,9 +5,9 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "predev": "npm --workspace @usmender/shared run build && prisma generate",
+    "predev": "npm --workspace @usmender/messaging-core run build && npm --workspace @usmender/shared run build && prisma generate",
     "dev": "tsx watch src/index.ts",
-    "prebuild": "npm --workspace @usmender/shared run build && prisma generate",
+    "prebuild": "npm --workspace @usmender/messaging-core run build && npm --workspace @usmender/shared run build && prisma generate",
     "start": "node dist/index.js",
     "build": "tsc -p tsconfig.json",
     "db:migrate": "prisma migrate dev --name init",
@@ -15,11 +15,12 @@
     "db:seed": "prisma db seed",
     "prisma:generate": "prisma generate",
     "lint": "echo 'no lint yet'",
-    "pretypecheck": "npm --workspace @usmender/shared run build && prisma generate",
+    "pretypecheck": "npm --workspace @usmender/messaging-core run build && npm --workspace @usmender/shared run build && prisma generate",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@prisma/client": "^5.18.0",
+    "@usmender/messaging-core": "*",
     "@usmender/shared": "*",
     "@fastify/cors": "^8.4.2",
     "bcryptjs": "^2.4.3",

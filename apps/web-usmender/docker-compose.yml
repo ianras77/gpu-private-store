@@ -65,6 +65,80 @@ services:
       start_period: 60s
     x-runtipi:
       add_to_main_network: true
+  matrix:
+    image: matrixdotorg/synapse:v1.129.0
+    restart: unless-stopped
+    environment:
+      SYNAPSE_SERVER_NAME: ${MATRIX_SERVER_NAME:-usmender.local}
+      SYNAPSE_REPORT_STATS: "no"
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-usmender/named/matrix-data:/data
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/matrix/appservice:/data/appservice:ro
+    entrypoint:
+    - /bin/sh
+    - -lc
+    command:
+    - test -f /data/homeserver.yaml || /start.py generate; grep -q '^app_service_config_files:' /data/homeserver.yaml || printf '\napp_service_config_files:\n  - /data/appservice/registration.yaml\n' >> /data/homeserver.yaml; exec /start.py
+    healthcheck:
+      test:
+      - CMD
+      - python3
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8008/_matrix/client/versions', timeout=5)
+      interval: 15s
+      timeout: 8s
+      retries: 30
+      start_period: 60s
+  matrix-appservice:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo
+      dockerfile: apps/matrix-appservice/Dockerfile
+    pull_policy: build
+    restart: unless-stopped
+    environment:
+      PORT: 3002
+      MATRIX_SERVER_NAME: ${MATRIX_SERVER_NAME:-usmender.local}
+      MATRIX_APPSERVICE_TOKEN: ${MATRIX_APPSERVICE_TOKEN:-usmender-appservice-token}
+      MATRIX_HOMESERVER_URL: ${MATRIX_HOMESERVER_URL:-http://matrix:8008}
+      MATRIX_ACCESS_TOKEN: ${MATRIX_ACCESS_TOKEN:-usmender-appservice-token}
+      MATRIX_APPSERVICE_STATE_PATH: /data/state.json
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-usmender/named/matrix-appservice-data:/data
+    depends_on:
+      matrix:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - node
+      - -e
+      - fetch('http://127.0.0.1:3002/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    image: runtipi-local-web-usmender-matrix-appservice:latest
+  worker:
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo
+      dockerfile: apps/worker/Dockerfile
+    pull_policy: build
+    restart: unless-stopped
+    environment:
+      PORT: 3003
+      USMENDER_MESSAGING_PROVIDER: ${USMENDER_MESSAGING_PROVIDER:-matrix}
+      USMENDER_WORKER_MODE: ${USMENDER_WORKER_MODE:-inline-ready}
+    healthcheck:
+      test:
+      - CMD
+      - node
+      - -e
+      - fetch('http://127.0.0.1:3003/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    image: runtipi-local-web-usmender-worker:latest
   api:
     build:
       context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-usmender/repo
@@ -79,6 +153,10 @@ services:
       CAT_SUPPORT_BASE_URL: ${CAT_SUPPORT_BASE_URL:-http://cat-support:80}
       CAT_SUPPORT_TIMEOUT_MS: ${CAT_SUPPORT_TIMEOUT_MS:-12000}
       CAT_SUPPORT_SCOPE: ${CAT_SUPPORT_SCOPE:-proposal,refinement,closeout}
+      USMENDER_MESSAGING_PROVIDER: ${USMENDER_MESSAGING_PROVIDER:-matrix}
+      MATRIX_APPSERVICE_URL: ${MATRIX_APPSERVICE_URL:-http://matrix-appservice:3002}
+      MATRIX_APPSERVICE_TOKEN: ${MATRIX_APPSERVICE_TOKEN:-usmender-appservice-token}
+      MATRIX_APPSERVICE_TIMEOUT_MS: ${MATRIX_APPSERVICE_TIMEOUT_MS:-8000}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       USMENDER_DEMO_SEED: ${USMENDER_DEMO_SEED:-true}
     ports:
@@ -89,6 +167,10 @@ services:
       cat:
         condition: service_healthy
       cat-support:
+        condition: service_healthy
+      matrix-appservice:
+        condition: service_healthy
+      worker:
         condition: service_healthy
     healthcheck:
       test:

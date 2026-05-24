@@ -1,0 +1,14 @@
+id: usmender
+url: http://matrix-appservice:3002
+as_token: usmender-appservice-token
+hs_token: usmender-homeserver-token
+sender_localpart: usmender-mediator
+namespaces:
+  users:
+    - exclusive: true
+      regex: '@usmender_.*'
+  aliases:
+    - exclusive: true
+      regex: '#usmender_.*'
+  rooms: []
+rate_limited: false
