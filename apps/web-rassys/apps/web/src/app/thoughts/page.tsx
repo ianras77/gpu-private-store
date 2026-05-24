@@ -177,7 +177,7 @@ export default async function ThoughtsPage() {
                   <th className="px-3 py-2 font-semibold text-white">{children}</th>
                 ),
                 td: ({ children }) => <td className="px-3 py-2">{children}</td>,
-                img: ({ node: _node, src, alt = "", ...props }) => {
+                img: ({ node: _node, src, alt = "" }) => {
                   const resolvedSrc = resolveThoughtAssetUrl(
                     thought.assetBasePath,
                     typeof src === "string" ? src : undefined,
@@ -187,13 +187,14 @@ export default async function ThoughtsPage() {
 
                   return (
                     <figure className="overflow-hidden rounded-3xl border border-white/10 bg-black/30">
-                      <img
-                        {...props}
-                        src={resolvedSrc}
-                        alt={alt}
-                        loading="lazy"
-                        className="h-auto w-full object-cover"
-                      />
+                      <div className="relative aspect-[16/10] overflow-hidden">
+                        <ThoughtImageSurface
+                          src={resolvedSrc}
+                          alt={alt}
+                          sizes="(max-width: 768px) 100vw, 768px"
+                          className="object-cover"
+                        />
+                      </div>
                       {alt ? (
                         <figcaption className="px-4 py-3 text-xs text-cloud/60">
                           {alt}

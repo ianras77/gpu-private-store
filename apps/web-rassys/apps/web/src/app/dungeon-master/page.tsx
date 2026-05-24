@@ -119,6 +119,26 @@ type DmSystemOption = LibrarySystemSummary & {
   rulesPrimer: string;
 };
 
+type DmContextPreview = {
+  compendiumContext?: Array<{
+    id?: string;
+    entryType?: string;
+    name?: string;
+    summary?: string;
+  }>;
+  pinnedFacts?: Array<{ id?: string; kind?: string; factText?: string; confidence?: number }>;
+  recentTurns?: Array<{ id?: string; turnIndex?: number; actionText?: string; narration?: string; status?: string }>;
+  semanticMemory?: Array<{ sourceType?: string; sourceId?: string; text?: string; score?: number }>;
+  rollingSummaries?: Array<{ id?: string; summary?: string }>;
+  contextMeta?: {
+    generatedAt?: string;
+    totalCompendiumHits?: number;
+    totalFacts?: number;
+    totalRecentTurns?: number;
+    totalSemanticHits?: number;
+  };
+};
+
 const dice = ["d4", "d6", "d8", "d10", "d12", "d20", "d100"];
 const quickActions = [
   "Roll initiative for the next encounter.",
@@ -246,6 +266,10 @@ export default function DungeonMasterPage() {
   const [promptText, setPromptText] = useState("");
   const [promptPending, setPromptPending] = useState(false);
   const [promptError, setPromptError] = useState<string | null>(null);
+  const [selectedActorId, setSelectedActorId] = useState("");
+  const [contextPreview, setContextPreview] = useState<DmContextPreview | null>(null);
+  const [contextPreviewLoading, setContextPreviewLoading] = useState(false);
+  const [contextPreviewError, setContextPreviewError] = useState<string | null>(null);
 
   const [rollingDie, setRollingDie] = useState<string | null>(null);
   const [lastRoll, setLastRoll] = useState({ die: "d20", value: 17, verdict: "success", id: 0 });
@@ -301,6 +325,40 @@ export default function DungeonMasterPage() {
     }
     return [...map.values()].sort((left, right) => right.qty - left.qty).slice(0, 12);
   }, [snapshot]);
+
+  const terminalEntries = useMemo(
+    () => [...logEntries].sort((left, right) => left.createdAt - right.createdAt).slice(-18),
+    [logEntries]
+  );
+
+  const primaryObjective = objectiveRows[0]?.text ?? "Awaiting the next party decision.";
+
+  const contextStats = useMemo(() => {
+    const meta = contextPreview?.contextMeta;
+    return [
+      {
+        label: "Compendium",
+        value: meta?.totalCompendiumHits ?? contextPreview?.compendiumContext?.length ?? 0
+      },
+      {
+        label: "Facts",
+        value: meta?.totalFacts ?? contextPreview?.pinnedFacts?.length ?? 0
+      },
+      {
+        label: "Turns",
+        value: meta?.totalRecentTurns ?? contextPreview?.recentTurns?.length ?? 0
+      },
+      {
+        label: "Memory",
+        value: meta?.totalSemanticHits ?? contextPreview?.semanticMemory?.length ?? 0
+      }
+    ];
+  }, [contextPreview]);
+
+  const topCompendiumItems = useMemo(
+    () => (contextPreview?.compendiumContext ?? []).slice(0, 4),
+    [contextPreview]
+  );
 
   const logContainerVariants = useMemo(
     () => ({
@@ -513,6 +571,55 @@ export default function DungeonMasterPage() {
       return next;
     });
   }, [snapshot]);
+
+  useEffect(() => {
+    if (!snapshot?.characters.some((character) => character.id === selectedActorId)) {
+      setSelectedActorId("");
+    }
+  }, [selectedActorId, snapshot]);
+
+  useEffect(() => {
+    if (!viewer || !activeCampaignId || !snapshot) {
+      setContextPreview(null);
+      setContextPreviewError(null);
+      setContextPreviewLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setContextPreviewLoading(true);
+      setContextPreviewError(null);
+      try {
+        const params = new URLSearchParams({
+          actionText: promptText.trim() || primaryObjective
+        });
+        if (selectedActorId) params.set("actorCharacterId", selectedActorId);
+        const response = await fetch("/api/dm/campaigns/" + activeCampaignId + "/context?" + params.toString(), {
+          cache: "no-store",
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          throw new Error("context_preview_failed");
+        }
+        const payload = (await response.json()) as { context?: DmContextPreview };
+        setContextPreview(payload.context ?? null);
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setContextPreviewError("Context packet offline.");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setContextPreviewLoading(false);
+        }
+      }
+    }, 450);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [activeCampaignId, primaryObjective, promptText, selectedActorId, snapshot, viewer]);
 
   useEffect(() => {
     if (!viewer || !activeCampaignId) {
@@ -859,7 +966,10 @@ export default function DungeonMasterPage() {
           "Content-Type": "application/json",
           "Idempotency-Key": makeIdempotencyKey()
         },
-        body: JSON.stringify({ actionText: text })
+        body: JSON.stringify({
+          actionText: text,
+          actorCharacterId: selectedActorId || undefined
+        })
       });
 
       const payload = (await response.json()) as {
@@ -1192,6 +1302,152 @@ export default function DungeonMasterPage() {
           </Card>
         ) : (
           <div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+            <div className="dm-handheld xl:col-span-2" data-testid="gamma-terminal-screen">
+              <div className="dm-handheld-topbar">
+                <div>
+                  <div className="dm-handheld-kicker">Gamma Terminal</div>
+                  <h2 className="dm-handheld-title">{snapshot.campaign.name}</h2>
+                </div>
+                <div
+                  className={cn(
+                    "dm-status-light",
+                    streamStatus === "live" && "is-live",
+                    streamStatus === "error" && "is-error"
+                  )}
+                >
+                  {streamStatus}
+                </div>
+              </div>
+
+              <div className="dm-lcd">
+                <div className="dm-lcd-hud">
+                  {[
+                    { label: "SYS", value: sessionSystem?.name ?? snapshot.campaign.systemId },
+                    { label: "LOC", value: snapshot.campaign.worldState.location },
+                    { label: "TIME", value: snapshot.campaign.worldState.worldTime },
+                    { label: "WX", value: snapshot.campaign.worldState.weather }
+                  ].map((item) => (
+                    <div key={item.label} className="dm-hud-cell">
+                      <span>{item.label}</span>
+                      <strong>{item.value}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="dm-world-readout">
+                  <div>
+                    <span className="dm-readout-label">Threats</span>
+                    <p>{snapshot.campaign.worldState.activeThreats.join(" / ") || "None tracked"}</p>
+                  </div>
+                  <div>
+                    <span className="dm-readout-label">Beat</span>
+                    <p>{snapshot.campaign.worldState.storyBeat}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="dm-readout-label">Objective</span>
+                    <p>{primaryObjective}</p>
+                  </div>
+                </div>
+
+                <div className="dm-terminal-layout">
+                  <div className="dm-terminal-feed" aria-live="polite">
+                    {terminalEntries.length ? (
+                      terminalEntries.map((entry) => (
+                        <div
+                          key={entry.id}
+                          className={cn(
+                            "dm-terminal-line",
+                            entry.tone === "roll" && "is-roll",
+                            entry.tone === "system" && "is-system",
+                            entry.tone === "story" && "is-story"
+                          )}
+                        >
+                          <span className="dm-terminal-time">
+                            {new Date(entry.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                          <span className="dm-terminal-prompt">{entry.tone === "story" ? "DM" : entry.tone.toUpperCase()}</span>
+                          <span>{entry.text}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="dm-terminal-empty">Awaiting first command.</div>
+                    )}
+                  </div>
+
+                  <div className="dm-context-panel" data-testid="dm-context-display">
+                    <div className="dm-context-header">
+                      <span>DM Packet</span>
+                      <span>{contextPreviewLoading ? "SYNC" : contextPreview ? "READY" : "IDLE"}</span>
+                    </div>
+                    <div className="dm-context-grid">
+                      {contextStats.map((stat) => (
+                        <div key={stat.label}>
+                          <span>{stat.label}</span>
+                          <strong>{stat.value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="dm-context-list">
+                      {topCompendiumItems.length ? (
+                        topCompendiumItems.map((item) => (
+                          <div key={item.id ?? item.name}>
+                            <span>{item.entryType ?? "ref"}</span>
+                            <strong>{item.name}</strong>
+                          </div>
+                        ))
+                      ) : (
+                        <div>
+                          <span>ref</span>
+                          <strong>No compendium hits for this command.</strong>
+                        </div>
+                      )}
+                    </div>
+                    {contextPreviewError && <div className="dm-context-error">{contextPreviewError}</div>}
+                  </div>
+                </div>
+
+                <div className="dm-command-line" data-testid="dm-command-line">
+                  <select
+                    className="dm-command-actor"
+                    value={selectedActorId}
+                    onChange={(event) => setSelectedActorId(event.target.value)}
+                  >
+                    <option value="">Narrator</option>
+                    {snapshot.characters.map((character) => (
+                      <option key={character.id} value={character.id}>
+                        {character.name}
+                      </option>
+                    ))}
+                  </select>
+                  <textarea
+                    className="dm-command-input"
+                    value={promptText}
+                    onChange={(event) => setPromptText(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        void sendPrompt();
+                      }
+                    }}
+                    placeholder="Command the DM..."
+                    rows={2}
+                  />
+                  <Button variant="primary" onClick={sendPrompt} disabled={promptPending || !promptText.trim()}>
+                    {promptPending ? "Sending" : "Send"}
+                  </Button>
+                </div>
+
+                <div className="dm-quick-row">
+                  {quickActions.map((action) => (
+                    <button key={action} type="button" onClick={() => setPromptText(action)}>
+                      {action}
+                    </button>
+                  ))}
+                </div>
+                {promptError && <div className="dm-context-error">{promptError}</div>}
+              </div>
+            </div>
+
             <div className="glass-panel rounded-3xl p-6 md:p-8">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -1392,36 +1648,32 @@ export default function DungeonMasterPage() {
                 </div>
 
                 <div className="rave-panel rounded-3xl p-5">
-                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Dungeon Master Console</div>
-                  <div className="mt-4 grid gap-3">
-                    <div className="rave-chip rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.3em] text-cloud/60">
-                      Prompt the world
-                    </div>
-                    <textarea
-                      className="rave-input h-28 w-full resize-none rounded-2xl p-4 text-sm"
-                      value={promptText}
-                      onChange={(event) => setPromptText(event.target.value)}
-                      placeholder="Describe the next scene, move quests, or apply consequences..."
-                    />
-                    <div className="flex flex-wrap gap-2">
-                      {quickActions.map((action) => (
-                        <button
-                          key={action}
-                          className="rave-chip rounded-full px-3 py-2 text-[11px] uppercase tracking-[0.3em] text-cloud/70 transition hover:text-white"
-                          type="button"
-                          onClick={() => setPromptText(action)}
-                        >
-                          {action.slice(0, 26)}
-                        </button>
+                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Context Relay</div>
+                  <div className="mt-4 grid gap-3 text-sm text-cloud/80">
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {contextStats.map((stat) => (
+                        <div key={stat.label} className="rave-chip rounded-2xl px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.25em] text-cloud/60">{stat.label}</div>
+                          <div className="mt-2 text-2xl font-semibold text-white">{stat.value}</div>
+                        </div>
                       ))}
                     </div>
-                    {promptError && <div className="text-xs text-rose-300">{promptError}</div>}
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="text-xs text-cloud/60">The DM stays context-aware and stateful.</div>
-                      <Button variant="primary" onClick={sendPrompt} disabled={promptPending || !promptText.trim()}>
-                        {promptPending ? "Sending..." : "Send Prompt"}
-                      </Button>
+                    <div className="rave-chip rounded-2xl px-4 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.25em] text-cloud/60">Top References</div>
+                      <div className="mt-3 grid gap-2">
+                        {topCompendiumItems.length ? (
+                          topCompendiumItems.map((item) => (
+                            <div key={item.id ?? item.name} className="flex items-start justify-between gap-3">
+                              <span className="text-white">{item.name}</span>
+                              <span className="text-[10px] uppercase tracking-[0.2em] text-cloud/50">{item.entryType ?? "ref"}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-cloud/60">No references matched yet.</div>
+                        )}
+                      </div>
                     </div>
+                    {contextPreviewError && <div className="text-xs text-amber-200">{contextPreviewError}</div>}
                   </div>
                 </div>
               </div>

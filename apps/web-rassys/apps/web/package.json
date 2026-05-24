@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
     "lint": "eslint src scripts --ext .js,.jsx,.ts,.tsx,.mjs --no-cache",
-    "test": "node scripts/smoke.mjs",
+    "test": "node scripts/smoke.mjs && node scripts/dm-console-smoke.mjs",
     "format": "prettier --check ."
   },
   "dependencies": {

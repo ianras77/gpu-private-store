@@ -132,10 +132,17 @@ export function MinecraftHomeCallout() {
     },
   );
 
-  const bots = Array.isArray(troupeData?.bots)
-    ? troupeData.bots.filter((bot) => bot.reachable)
-    : [];
-  const players = Array.isArray(playersData?.players) ? playersData.players : [];
+  const bots = useMemo(
+    () =>
+      Array.isArray(troupeData?.bots)
+        ? troupeData.bots.filter((bot) => bot.reachable)
+        : [],
+    [troupeData?.bots],
+  );
+  const players = useMemo(
+    () => (Array.isArray(playersData?.players) ? playersData.players : []),
+    [playersData?.players],
+  );
   const latestEvent = Array.isArray(events) ? events[0] : null;
   const leadBot = bots[0] ?? null;
   const latestLine = latestEvent

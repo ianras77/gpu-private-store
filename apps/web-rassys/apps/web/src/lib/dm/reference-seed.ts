@@ -81,6 +81,14 @@ const idFrom = (prefix: string, value: string) => {
   return `${prefix}_${digest}`;
 };
 
+export const shouldRefreshGammaCompendium = ({
+  existingCount,
+  expectedCount
+}: {
+  existingCount: number;
+  expectedCount: number;
+}) => expectedCount > existingCount;
+
 const categoryToEntryType: Record<string, string> = {
   weapons: "weapon",
   events: "event",
@@ -493,20 +501,19 @@ export const seedDmReferenceData = async (client: PoolClient) => {
        updated_at = now()`
   );
 
-  const existing = await client.query<{ exists: number }>(
-    `SELECT 1::int as exists
+  const parsed = await loadGammaWorldData();
+  const rows = parsed ? buildGammaCompendiumRows(parsed) : gammaTemplateEntries();
+  const existing = await client.query<{ count: number }>(
+    `SELECT count(*)::int as count
      FROM dm_compendium_entries
-     WHERE system_id = 'gamma-world'
-     LIMIT 1`
+     WHERE system_id = 'gamma-world'`
   );
+  const existingCount = Number(existing.rows[0]?.count ?? 0);
 
-  if (existing.rows[0]?.exists) {
+  if (!shouldRefreshGammaCompendium({ existingCount, expectedCount: rows.length })) {
     seedDone = true;
     return;
   }
-
-  const parsed = await loadGammaWorldData();
-  const rows = parsed ? buildGammaCompendiumRows(parsed) : gammaTemplateEntries();
 
   for (const row of rows) {
     const rowId = idFrom("entry", `gamma-world:${row.sourceRef}`);
