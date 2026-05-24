@@ -12,9 +12,9 @@ Jogmania now includes a real native Apple project in the monorepo at `apps/ios/i
 - Loads the user’s parties and adventure courses from the existing FastAPI backend.
 - Lets the runner switch the active course from Apple Watch.
 - Starts a real `HKWorkoutSession` for outdoor runs.
-- Captures GPS points and live metrics on watch.
+- Captures GPS points, HealthKit distance, active energy, heart-rate samples, and a HealthKit workout route on watch.
 - Registers the watch as a paired backend device.
-- Uploads the workout to `/workouts` with reward and world-event payloads.
+- Uploads the workout to `/workouts` with nested sensor metadata so the backend can derive climbs, turns, pulse gates, sprint gates, rewards, and world events.
 
 ## Monorepo commands
 
@@ -56,6 +56,8 @@ The watch companion depends on the Expo iPhone app having already stored:
 - `jm-phone-device-id`
 
 Those values are read natively from Expo Secure Store on iPhone and then handed to the watch via `WCSession`.
+
+The Expo iPhone app stores `jm-token` and `jm-phone-device-id` with `keychainService: "app"` so the native iPhone bridge can read the same keychain items and push them to the watch through WatchConnectivity.
 
 ## QA fallback
 

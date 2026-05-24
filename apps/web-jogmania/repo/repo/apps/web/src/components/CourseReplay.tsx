@@ -140,6 +140,16 @@ export function CourseReplay({
   const flowBonus = flowScore >= 85 ? 120 : flowScore >= 70 ? 60 : 0;
   const sprints = Math.max(0, Math.round(sprintCount(speedSeries) / 3));
   const totalPoints = basePoints + speedPoints + hazardBonus + streakBonus + hrBonus + flowBonus;
+  const featureNumber = (key: string) => {
+    const value = adventure?.route_features?.[key];
+    return typeof value === "number" && Number.isFinite(value) ? value : 0;
+  };
+  const detectedFeatures = [
+    { label: "Climbs", value: featureNumber("climb_count") },
+    { label: "Turns", value: featureNumber("turn_count") },
+    { label: "Pulse Gates", value: featureNumber("high_hr_moments") },
+    { label: "Sprint Gates", value: featureNumber("pace_surge_count") }
+  ].filter((feature) => feature.value > 0);
   const rank =
     totalPoints >= 700 ? "S" : totalPoints >= 550 ? "A" : totalPoints >= 400 ? "B" : "C";
   const momentum = segments.length
@@ -230,6 +240,11 @@ export function CourseReplay({
         <span className="jm-chip text-jm-muted">HR Bonus +{hrBonus}</span>
         <span className="jm-chip text-jm-cyan">Base {basePoints}</span>
         <span className="jm-chip text-jm-acid">Speed +{speedPoints}</span>
+        {detectedFeatures.map((feature) => (
+          <span key={feature.label} className="jm-chip text-jm-magenta">
+            {feature.label} {feature.value}
+          </span>
+        ))}
       </div>
 
       {adventure?.collectibles?.length ? (

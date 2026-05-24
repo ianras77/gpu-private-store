@@ -171,13 +171,16 @@ async def create_workout(payload: WorkoutCreate, db: Session = Depends(get_db), 
         points=[{
             "lat": p.lat,
             "lon": p.lon,
-            "timestamp": p.timestamp
+            "altitude_m": p.altitude_m,
+            "timestamp": p.timestamp,
+            "accuracy_m": p.accuracy_m,
         } for p in gps_points],
         workout={
             "distance_m": workout.distance_m,
             "avg_hr": workout.avg_hr,
             "calories_kcal": workout.calories_kcal,
-            "elevation_gain_m": workout.elevation_gain_m
+            "elevation_gain_m": workout.elevation_gain_m,
+            "raw_payload_json": workout.raw_payload_json,
         },
         seed=seed
     )

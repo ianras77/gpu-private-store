@@ -5,14 +5,14 @@
   "exposable": true,
   "dynamic_config": true,
   "id": "web-jogmania",
-  "description": "Jogmania is an exercise platform powered by iOS + Apple Watch capture and a FastAPI gamification engine. The web app is a user portal for runs, routes, and adventure replays (not a game). - `repo/apps/web` \u2014 Next.js + Tailwind web portal - `repo/apps/ios` \u2014 Expo React Native iOS app - `repo/api` \u2014 FastAPI backend + Ale.",
-  "tipi_version": 9,
-  "version": "1.0.8",
+  "description": "Jogmania turns Apple Watch and iPhone walk/run workouts into replayable adventure courses with route-derived hazards, rewards, and map overlays.",
+  "tipi_version": 10,
+  "version": "1.1.0",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "Jogmania is an exercise platform powered by iOS + Apple Watch capture and a FastAPI gamification engine. The web app is ",
+  "short_desc": "Apple Watch run capture becomes replayable adventure courses with route-derived hazards and rewards.",
   "author": "https://github.com/ianras77/web-jogmania.git",
   "source": "https://github.com/ianras77/web-jogmania",
   "form_fields": [],

@@ -110,6 +110,26 @@ export default function RunDetailPage() {
   const markers = useMemo(() => {
     if (!adventure || !points.length) return [];
     const tones: Array<"cyan" | "magenta" | "acid"> = ["cyan", "magenta", "acid"];
+    const normalizeTone = (tone: string | undefined, index: number): "cyan" | "magenta" | "acid" => {
+      if (tone === "cyan" || tone === "magenta" || tone === "acid") return tone;
+      return tones[index % tones.length];
+    };
+
+    const layerMarkers = (adventure.map_layers ?? [])
+      .map((layer, idx) => {
+        const pos = pointAtDistance(points, layer.distance_m);
+        if (!pos) return null;
+        return {
+          lat: pos.lat,
+          lon: pos.lon,
+          label: layer.label,
+          tone: normalizeTone(layer.tone, idx)
+        };
+      })
+      .filter(Boolean) as Array<{ lat: number; lon: number; label: string; tone: "cyan" | "magenta" | "acid" }>;
+
+    if (layerMarkers.length) return layerMarkers;
+
     return adventure.segments
       .map((segment, idx) => {
         const mid = (segment.distance_start_m + segment.distance_end_m) / 2;

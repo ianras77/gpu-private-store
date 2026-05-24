@@ -197,6 +197,9 @@ class AdventureSummary(BaseModel):
     collectibles: List[str]
     scenes: List[str]
     segments: List[Dict[str, Any]]
+    route_features: Dict[str, Any] = Field(default_factory=dict)
+    encounters: List[Dict[str, Any]] = Field(default_factory=list)
+    map_layers: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class AdventureOut(BaseModel):

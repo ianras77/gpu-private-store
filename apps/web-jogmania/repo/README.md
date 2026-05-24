@@ -3,11 +3,11 @@
 Jogmania is an exercise platform powered by iOS + Apple Watch capture and a FastAPI gamification engine. The web app is a user portal for runs, routes, and adventure replays (not a game).
 
 ## Repo Layout
-- `repo/apps/web` — Next.js + Tailwind web portal
-- `repo/apps/ios` — Expo React Native iOS app
-- `repo/api` — FastAPI backend + Alembic
-- `repo/packages/api-client` — shared TypeScript API client
-- `repo/packages/shared` — shared types + Zod
+- `repo/repo/apps/web` — Next.js + Tailwind web portal
+- `repo/repo/apps/ios` — Expo React Native iOS app with native watchOS target
+- `repo/repo/api` — FastAPI backend + Alembic
+- `repo/repo/packages/api-client` — shared TypeScript API client
+- `repo/repo/packages/shared` — shared types + Zod
 
 ## One‑Command Dev (Docker)
 ```bash
@@ -23,7 +23,7 @@ Services
 ## Local Dev (Non‑Docker)
 ```bash
 # Terminal 1 (API)
-cd repo/api
+cd repo/repo/api
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
@@ -32,7 +32,7 @@ python -m app.scripts.seed
 uvicorn app.main:app --reload
 
 # Terminal 2 (Monorepo)
-cd repo
+cd repo/repo
 corepack enable
 pnpm install
 pnpm dev
@@ -40,7 +40,7 @@ pnpm dev
 
 ## Generate TS API Client
 ```bash
-cd repo
+cd repo/repo
 pnpm gen:client
 ```
 
@@ -53,9 +53,9 @@ pnpm gen:client
 - `/me` session endpoint
 - Runs: list + detail + map
 - iOS run capture: live GPS via Expo Location (or mock mode)
-- Watch pipeline: iOS Watch Sync tab can upload a simulated watch run (source=watch)
+- Watch pipeline: native watchOS target captures HealthKit workout metrics, GPS route data, heart-rate samples, and uploads source=watch workouts; the iOS Watch Sync tab remains a QA fallback
 - Levels (routes): list + detail + instances + stats
-- Adventure replays (deterministic summaries)
+- Adventure replays with deterministic route-derived climbs, turns, pulse gates, sprint gates, rewards, and map overlays
 - Exports to MinIO with graceful fallback
 - Dashboard + marketing site polish
 
@@ -78,7 +78,7 @@ Copy `.env.example` to `.env` and adjust:
 
 ## Testing & Linting
 ```bash
-cd repo
+cd repo/repo
 pnpm lint
 pnpm test
 ```
@@ -86,24 +86,25 @@ pnpm test
 ## Runtipi (Dynamic Compose v2)
 Mount host paths and run from the monorepo.
 
-- Web container: mount host `APP_DATA_DIR` to `/repo` and run from `/repo/repo/apps/web`
-- API container: mount host `APP_DATA_DIR/repo` to `/app` and run from `/app/api/app`
+- Web container: mount host `repo/repo` to `/repo` and run from `/repo/apps/web`
+- API container: mount host `repo/repo/api` to `/app` and run from `/app/app`
 
 ### Copy Into APP_DATA_DIR
 ```text
 APP_DATA_DIR/
   repo/
-    apps/
-    api/
-    packages/
-    pnpm-workspace.yaml
-    package.json
-    tsconfig.base.json
+    repo/
+      apps/
+      api/
+      packages/
+      pnpm-workspace.yaml
+      package.json
+      tsconfig.base.json
 ```
 
 ### Runtipi Start Commands
-- Web: `cd /repo/repo && corepack enable && pnpm install && pnpm --filter @jogmania/web dev -p 3000`
-- API: `cd /app/api && pip install -r requirements.txt && pip install -r requirements-dev.txt && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000`
+- Web: `cd /repo && corepack enable && pnpm install && pnpm --filter @jogmania/web dev -p 3000`
+- API: `cd /app && pip install -r requirements.txt && pip install -r requirements-dev.txt && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000`
 
 ## Troubleshooting
 - Auth succeeds but UI is logged out: verify cookies are enabled and API base URL matches web origin.
@@ -112,6 +113,7 @@ APP_DATA_DIR/
 - iOS device cannot reach API: set `EXPO_PUBLIC_API_BASE_URL` to your machine IP (not `localhost`).
 
 ## Notes
+- The older flat `repo/api` and `repo/web` channel is archived under `repo/archive/legacy-flat`; active development and Runtipi runtime use `repo/repo`.
 - No secrets are hardcoded. Copy `.env.example` to `.env` to customize.
 - CORS defaults to `http://localhost:3000` and `http://localhost:19006`.
 - Redis rate limits login/register.

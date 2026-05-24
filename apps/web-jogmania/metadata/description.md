@@ -1,6 +1,6 @@
 # Web Jogmania
 
-Jogmania is an exercise platform powered by iOS + Apple Watch capture and a FastAPI gamification engine. The web app is a user portal for runs, routes, and adventure replays.
+Jogmania turns iPhone and Apple Watch walk/run workouts into replayable adventure courses. HealthKit metrics, GPS shape, climbs, turns, pace changes, and heart-rate pressure become map overlays, hazards, rewards, and world events.
 
 ## Deployment stance
 
@@ -10,16 +10,16 @@ Jogmania is an exercise platform powered by iOS + Apple Watch capture and a Fast
 
 ## Migration notes
 
-- Source tree today: `/data/apps/web-jogmania`
-- Recommended source repo target: `/data/repos/apps/web-jogmania`
+- Source tree today: `/data/runtipi/runtipi-appstore/gpu-private-store/apps/web-jogmania`
+- Installed runtime copy: `/data/runtipi/apps/gpu-private-store/web-jogmania`
 - Conversion strategy: `auto-with-manual-review`
 - Migration complexity: `high`
 - Current source-of-truth layout on this node is the newer `repo/` monorepo:
-  - `repo/api`
-  - `repo/apps/web`
-  - `repo/apps/ios`
-  - `repo/packages/*`
-- This app now intentionally prefers the monorepo structure over the older flat runtime because the preserved legacy data was only disposable seed data.
+  - `repo/repo/api`
+  - `repo/repo/apps/web`
+  - `repo/repo/apps/ios`
+  - `repo/repo/packages/*`
+- This app now uses the richer monorepo structure for Runtipi runtime and native app development; the older flat runtime is archived under `repo/archive/legacy-flat`.
 - Keep the product repo whole for iOS and shared-package development, but package only the Linux-hosted web, API, Postgres, Redis, and MinIO services into Runtipi.
 - Treat the iOS client as product-adjacent source that can live in the same repo when present, but package only the Linux-hosted services into Runtipi.
 
@@ -39,8 +39,8 @@ Jogmania is an exercise platform powered by iOS + Apple Watch capture and a Fast
 
 - Named volume `jogmania_pg` mounted to `/var/lib/postgresql/data`
 - Named volume `jogmania_minio` mounted to `/data`
-- Bind mount `/data/repos/apps/web-jogmania/repo/api` -> `/app`
-- Bind mount `/data/repos/apps/web-jogmania/repo` -> `/repo`
+- Bind mount `/data/runtipi/apps/gpu-private-store/web-jogmania/repo/repo/api` -> `/app`
+- Bind mount `/data/runtipi/apps/gpu-private-store/web-jogmania/repo/repo` -> `/repo`
 
 ## Edge-routing notes
 

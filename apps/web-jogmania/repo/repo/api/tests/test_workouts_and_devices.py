@@ -157,6 +157,67 @@ def test_watch_workout_awards_watch_link_and_inventory(client):
     assert inventory_items["chrono-spark"] == 1
 
 
+def test_watch_workout_adventure_uses_altitude_and_hr_samples(client):
+    headers = register_and_auth(client, "watch-signals@jogmania.com")
+    started_at = datetime(2026, 3, 20, 10, 0, tzinfo=timezone.utc)
+    payload = workout_payload(
+        started_at=started_at,
+        duration_s=600,
+        distance_m=1100,
+        source="watch",
+        device_id="watch-signals",
+        companion_device_id="ios-signals",
+    )
+    track = [
+        (37.7800, -122.4200, 10, 0),
+        (37.7810, -122.4200, 18, 60),
+        (37.7810, -122.4184, 44, 120),
+        (37.7822, -122.4184, 50, 195),
+        (37.7830, -122.4171, 52, 240),
+    ]
+    payload["gps_points"] = [
+        {
+            "lat": lat,
+            "lon": lon,
+            "altitude_m": altitude,
+            "timestamp": (started_at + timedelta(seconds=offset)).isoformat(),
+            "accuracy_m": 5,
+        }
+        for lat, lon, altitude, offset in track
+    ]
+    payload["raw_payload_json"]["heart_rate_samples"] = [
+        {
+            "bpm": 138,
+            "timestamp": (started_at + timedelta(seconds=45)).isoformat(),
+            "distance_m": 110,
+        },
+        {
+            "bpm": 181,
+            "timestamp": (started_at + timedelta(seconds=145)).isoformat(),
+            "distance_m": 310,
+        },
+    ]
+
+    response = client.post("/workouts", json=payload, headers=headers)
+    assert response.status_code == 200
+
+    adventure = client.get(
+        f"/adventures/by-workout/{response.json()['id']}",
+        headers=headers,
+    )
+    assert adventure.status_code == 200
+    summary = adventure.json()
+    features = summary["route_features"]
+    assert features["climb_count"] >= 1
+    assert features["turn_count"] >= 1
+    assert features["high_hr_moments"] >= 1
+    assert {layer["kind"] for layer in summary["map_layers"]} >= {
+        "climb",
+        "turn",
+        "heart_rate",
+    }
+
+
 def test_device_registration_is_idempotent(client, db_session):
     headers = register_and_auth(client, "devices@jogmania.com")
     payload = {

@@ -1,4 +1,5 @@
 import * as SecureStore from "expo-secure-store";
+import { SECURE_STORE_OPTIONS } from "./auth";
 import type { DeviceRegisterPayload } from "@jogmania/api-client";
 
 const PHONE_DEVICE_ID_KEY = "jm-phone-device-id";
@@ -9,10 +10,10 @@ function buildId(prefix: string) {
 }
 
 async function getOrCreateValue(key: string, prefix: string) {
-  const existing = await SecureStore.getItemAsync(key);
+  const existing = await SecureStore.getItemAsync(key, SECURE_STORE_OPTIONS);
   if (existing) return existing;
   const created = buildId(prefix);
-  await SecureStore.setItemAsync(key, created);
+  await SecureStore.setItemAsync(key, created, SECURE_STORE_OPTIONS);
   return created;
 }
 

@@ -4,7 +4,8 @@ services:
     restart: unless-stopped
     environment:
       APP_ENV: ${JOGMANIA_APP_ENV:-dev}
-      DATABASE_URL: postgresql+psycopg://jogmania:jogmania@postgres:5432/jogmania
+      ENV: ${JOGMANIA_APP_ENV:-dev}
+      DATABASE_URL: postgresql+psycopg2://jogmania:jogmania@postgres:5432/jogmania
       JWT_SECRET: ${JOGMANIA_JWT_SECRET:-change-me}
       REDIS_URL: redis://redis:6379/0
       AUTH_COOKIE_SECURE: ${JOGMANIA_AUTH_COOKIE_SECURE:-false}
@@ -12,14 +13,14 @@ services:
       AUTH_COOKIE_DOMAIN: ${JOGMANIA_AUTH_COOKIE_DOMAIN:-}
       AUTH_REQUIRE_EMAIL_VERIFICATION: ${JOGMANIA_AUTH_REQUIRE_EMAIL_VERIFICATION:-false}
       CORS_ORIGINS: ${JOGMANIA_CORS_ORIGINS:-["http://${APP_HOST}:${APP_PORT:-3177}","http://localhost:19006"]}
-      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ENDPOINT: http://jogmania-minio:9000
       MINIO_ACCESS_KEY: ${JOGMANIA_MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${JOGMANIA_MINIO_ROOT_PASSWORD:-minioadmin}
       MINIO_BUCKET: ${JOGMANIA_MINIO_BUCKET:-jogmania-exports}
       MINIO_REGION: ${JOGMANIA_MINIO_REGION:-us-east-1}
       MINIO_PUBLIC_URL: ${JOGMANIA_MINIO_PUBLIC_URL:-http://${APP_HOST}:${JOGMANIA_MINIO_PORT:-3181}}
       MINIO_ENABLED: ${JOGMANIA_MINIO_ENABLED:-true}
-      S3_ENDPOINT_URL: http://minio:9000
+      S3_ENDPOINT_URL: http://jogmania-minio:9000
       S3_ACCESS_KEY: ${JOGMANIA_MINIO_ROOT_USER:-minioadmin}
       S3_SECRET_KEY: ${JOGMANIA_MINIO_ROOT_PASSWORD:-minioadmin}
       S3_BUCKET: ${JOGMANIA_MINIO_BUCKET:-jogmania-exports}
@@ -30,7 +31,7 @@ services:
       ADVENTURE_LLM_MODEL: ${JOGMANIA_ADVENTURE_LLM_MODEL:-rassy-fast}
       PYTHONPATH: /app
     volumes:
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-jogmania/repo/api:/app
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-jogmania/repo/repo/api:/app
     command:
     - sh
     - /app/runtipi-start.sh
@@ -67,6 +68,10 @@ services:
     - ${APP_DATA_DIR}/app-data/web-jogmania/named/jogmania-minio:/data
     ports:
     - ${JOGMANIA_MINIO_PORT:-3181}:9000
+    networks:
+      default:
+        aliases:
+        - jogmania-minio
   postgres:
     image: postgres:15
     restart: unless-stopped
@@ -95,10 +100,10 @@ services:
       EXPO_PUBLIC_API_BASE_URL: ${JOGMANIA_EXPO_PUBLIC_API_BASE_URL:-http://${APP_HOST}:${JOGMANIA_API_PORT:-3178}}
       PORT: '3000'
     volumes:
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-jogmania/repo:/repo
+    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-jogmania/repo/repo:/repo
     command:
     - sh
-    - /repo/web/runtipi-start.sh
+    - /repo/apps/web/runtipi-start.sh
     depends_on:
       api:
         condition: service_healthy

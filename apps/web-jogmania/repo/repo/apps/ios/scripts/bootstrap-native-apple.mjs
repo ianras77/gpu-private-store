@@ -58,6 +58,15 @@ function writeFile(filePath, contents) {
   fs.writeFileSync(filePath, contents);
 }
 
+function writeGeneratedOrTemplate(filePath, templateRelativePath, generatedContents) {
+  const templatePath = path.join(APP_ROOT, "native-templates", templateRelativePath);
+  if (fs.existsSync(templatePath)) {
+    writeFile(filePath, fs.readFileSync(templatePath, "utf8"));
+    return;
+  }
+  writeFile(filePath, generatedContents);
+}
+
 function renameIfExists(fromPath, toPath) {
   if (fs.existsSync(fromPath)) {
     fs.renameSync(fromPath, toPath);
@@ -1909,7 +1918,7 @@ function createProjectScaffold() {
   writeFile(path.join(IOS_ROOT, PROJECT_NAME, "AppDelegate.h"), appDelegateHeader());
   writeFile(path.join(IOS_ROOT, PROJECT_NAME, "AppDelegate.mm"), appDelegateImplementation());
   writeFile(path.join(IOS_ROOT, PROJECT_NAME, "JMKeychainReader.h"), keychainReaderHeader());
-  writeFile(path.join(IOS_ROOT, PROJECT_NAME, "JMKeychainReader.m"), keychainReaderImplementation());
+  writeGeneratedOrTemplate(path.join(IOS_ROOT, PROJECT_NAME, "JMKeychainReader.m"), "Jogmania/JMKeychainReader.m", keychainReaderImplementation());
   writeFile(path.join(IOS_ROOT, PROJECT_NAME, "JMWatchSessionBridge.h"), watchSessionBridgeHeader());
   writeFile(path.join(IOS_ROOT, PROJECT_NAME, "JMWatchSessionBridge.m"), watchSessionBridgeImplementation());
 
@@ -1926,10 +1935,10 @@ function createProjectScaffold() {
     watchEntitlements()
   );
   writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "JogmaniaWatchApp.swift"), watchAppSwift());
-  writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "Models.swift"), modelsSwift());
+  writeGeneratedOrTemplate(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "Models.swift"), "JogmaniaWatchExtension/Models.swift", modelsSwift());
   writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "CompanionBridge.swift"), companionBridgeSwift());
   writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "JogmaniaAPIClient.swift"), apiClientSwift());
-  writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "RunSessionStore.swift"), runSessionStoreSwift());
+  writeGeneratedOrTemplate(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "RunSessionStore.swift"), "JogmaniaWatchExtension/RunSessionStore.swift", runSessionStoreSwift());
   writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "ContentView.swift"), contentViewSwift());
   writeFile(path.join(IOS_ROOT, TEST_TARGET, `${TEST_TARGET}.m`), iosTestsSource());
 

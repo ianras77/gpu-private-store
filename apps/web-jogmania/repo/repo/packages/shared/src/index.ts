@@ -43,6 +43,22 @@ export const AdventureSegmentSchema = z.object({
   loot: z.array(z.string())
 });
 
+export const AdventureEncounterSchema = z.object({
+  kind: z.string(),
+  title: z.string(),
+  distance_m: z.number(),
+  intensity: z.number(),
+  description: z.string()
+});
+
+export const AdventureMapLayerSchema = z.object({
+  kind: z.string(),
+  label: z.string(),
+  distance_m: z.number(),
+  intensity: z.number(),
+  tone: z.string()
+});
+
 export const AdventureSummarySchema = z.object({
   title: z.string(),
   seed: z.number(),
@@ -50,7 +66,10 @@ export const AdventureSummarySchema = z.object({
   obstacle_density: z.number(),
   collectibles: z.array(z.string()),
   scenes: z.array(z.string()),
-  segments: z.array(AdventureSegmentSchema)
+  segments: z.array(AdventureSegmentSchema),
+  route_features: z.record(z.unknown()).optional().default({}),
+  encounters: z.array(AdventureEncounterSchema).optional().default([]),
+  map_layers: z.array(AdventureMapLayerSchema).optional().default([])
 });
 
 export type GpsPoint = z.infer<typeof GpsPointSchema>;
