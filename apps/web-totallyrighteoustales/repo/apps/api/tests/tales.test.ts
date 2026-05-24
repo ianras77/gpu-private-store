@@ -1,14 +1,22 @@
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
-import { buildApp } from "../src/app";
-import { prisma } from "../src/lib/prisma";
 
-const story = "Once upon a totally righteous time, " + "magic ".repeat(80);
+const story = "Once upon a totally righteous time, " + "magic ".repeat(140);
+const hasIntegrationEnv = Boolean(
+  process.env.DATABASE_URL && process.env.REDIS_URL,
+);
+const describeIntegration = hasIntegrationEnv ? describe : describe.skip;
 
-describe("tales", () => {
-  const app = buildApp();
+describeIntegration("tales", () => {
+  let app: Awaited<ReturnType<typeof import("../src/app").buildApp>>;
+  let prisma: typeof import("../src/lib/prisma").prisma;
 
   beforeAll(async () => {
     process.env.DEV_AUTH_BYPASS = "true";
+    const appModule = await import("../src/app");
+    const prismaModule = await import("../src/lib/prisma");
+    app = appModule.buildApp();
+    prisma = prismaModule.prisma;
+
     await prisma.creditLedger.deleteMany();
     await prisma.moderationEvent.deleteMany();
     await prisma.taleEmbedding.deleteMany();
@@ -30,8 +38,8 @@ describe("tales", () => {
       headers: { "x-dev-user": "named-author@test.local" },
       payload: {
         title: "Needs a profile",
-        body: story
-      }
+        body: story,
+      },
     });
 
     expect(create.statusCode).toBe(409);
@@ -45,8 +53,8 @@ describe("tales", () => {
       payload: {
         title: "Righteous Test Tale",
         body: story,
-        isAnonymous: true
-      }
+        isAnonymous: true,
+      },
     });
 
     expect(create.statusCode).toBe(200);
@@ -54,26 +62,28 @@ describe("tales", () => {
 
     await prisma.user.update({
       where: { email: "author@test.local" },
-      data: { role: "MOD" }
+      data: { role: "MOD" },
     });
 
     const approve = await app.inject({
       method: "POST",
       url: `/moderation/tales/${tale.id}/approve`,
-      headers: { "x-dev-user": "author@test.local" }
+      headers: { "x-dev-user": "author@test.local" },
     });
 
     expect(approve.statusCode).toBe(200);
   });
 
   it("allows hearting", async () => {
-    const tale = await prisma.tale.findFirst({ where: { title: "Righteous Test Tale" } });
+    const tale = await prisma.tale.findFirst({
+      where: { title: "Righteous Test Tale" },
+    });
     expect(tale).toBeTruthy();
 
     const vote = await app.inject({
       method: "POST",
       url: `/tales/${tale?.id}/heart`,
-      headers: { "x-dev-user": "voter@test.local" }
+      headers: { "x-dev-user": "voter@test.local" },
     });
 
     expect(vote.statusCode).toBe(200);

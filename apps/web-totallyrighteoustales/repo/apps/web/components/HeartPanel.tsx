@@ -14,16 +14,16 @@ export default function HeartPanel({
   anonymous?: boolean;
 }) {
   return (
-    <div className="ink-panel rounded-[2rem] p-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="press-hero p-5">
+      <div className="space-y-4">
         <div>
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.34em] text-parchment/55">
-            Story love
+          <p className="font-mono text-[0.68rem] font-bold uppercase tracking-[0.16em] text-press-paper/52">
+            Heart the sheet
           </p>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-parchment/72">
+          <p className="mt-3 text-sm leading-7 text-press-paper/72">
             {anonymous
-              ? "Hearts lift the story and still build hidden storyteller cred behind the curtain."
-              : `Hearts lift the story and build storyteller cred for ${storytellerName}.`}
+              ? "Hearts lift the story while the author stays masked."
+              : `Hearts lift the story and build cred for ${storytellerName}.`}
           </p>
         </div>
         <HeartButton id={id} initialCount={initialHearts} />

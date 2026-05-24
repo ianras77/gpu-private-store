@@ -45,6 +45,9 @@ function serializeTale(
     assistMode: tale.assistMode,
     storyPrompt: tale.storyPrompt,
     isAnonymous: tale.isAnonymous,
+    personaName: tale.personaName,
+    personaVoice: tale.personaVoice,
+    personaSignature: tale.personaSignature,
     hotScore: tale.hotScore,
     topScore: tale.topScore,
     imageUrl: tale.image?.url ?? null,
@@ -310,6 +313,9 @@ const talesRoutes: FastifyPluginAsync = async (app) => {
         assistMode,
         isAnonymous: payload.data.isAnonymous ?? false,
         storyPrompt: payload.data.storyPrompt ?? null,
+        personaName: payload.data.personaName ?? null,
+        personaVoice: payload.data.personaVoice ?? null,
+        personaSignature: payload.data.personaSignature ?? null,
       },
     });
 
@@ -317,8 +323,7 @@ const talesRoutes: FastifyPluginAsync = async (app) => {
       await prisma.taleEmbedding.create({
         data: {
           taleId: tale.id,
-          model:
-            process.env.LOCALAI_EMBED_MODEL || "rassy-embed",
+          model: process.env.LOCALAI_EMBED_MODEL || "rassy-embed",
           embedding,
         },
       });
@@ -437,6 +442,15 @@ const talesRoutes: FastifyPluginAsync = async (app) => {
     if (payload.data.storyPrompt !== undefined) {
       updateData.storyPrompt = payload.data.storyPrompt ?? null;
     }
+    if (payload.data.personaName !== undefined) {
+      updateData.personaName = payload.data.personaName ?? null;
+    }
+    if (payload.data.personaVoice !== undefined) {
+      updateData.personaVoice = payload.data.personaVoice ?? null;
+    }
+    if (payload.data.personaSignature !== undefined) {
+      updateData.personaSignature = payload.data.personaSignature ?? null;
+    }
 
     const updated = await prisma.tale.update({
       where: { id },
@@ -448,13 +462,11 @@ const talesRoutes: FastifyPluginAsync = async (app) => {
         where: { taleId: id },
         update: {
           embedding,
-          model:
-            process.env.LOCALAI_EMBED_MODEL || "rassy-embed",
+          model: process.env.LOCALAI_EMBED_MODEL || "rassy-embed",
         },
         create: {
           taleId: id,
-          model:
-            process.env.LOCALAI_EMBED_MODEL || "rassy-embed",
+          model: process.env.LOCALAI_EMBED_MODEL || "rassy-embed",
           embedding,
         },
       });

@@ -40,7 +40,7 @@ export default function StoryAvatar({
     return (
       <div
         className={clsx(
-          "overflow-hidden rounded-[1.4rem] border border-ink/10 bg-cream shadow-soft ring-4 ring-[#f5e5cf] dark:border-white/15 dark:bg-white/10 dark:ring-white/5",
+          "overflow-hidden rounded-lg border border-press-ink/10 bg-press-paper shadow-soft ring-2 ring-press-gold/20 dark:border-white/15 dark:bg-white/10 dark:ring-white/5",
           sizeClasses[size],
           className,
         )}
@@ -61,9 +61,8 @@ export default function StoryAvatar({
     <div
       aria-label={label}
       className={clsx(
-        "flex items-center justify-center rounded-[1.4rem] border border-ink/10 bg-story text-ink shadow-soft ring-4 ring-[#f5e5cf] dark:border-white/15 dark:ring-white/5",
-        anonymous &&
-          "bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.96),_rgba(255,255,255,0.56)),linear-gradient(135deg,_rgba(255,214,165,0.98),_rgba(243,139,92,0.92)_42%,_rgba(132,215,214,0.9))]",
+        "flex items-center justify-center rounded-lg border border-press-ink/10 bg-[linear-gradient(135deg,#f8f1df,#d8a23f,#2f7d73)] text-press-ink shadow-soft ring-2 ring-press-gold/20 dark:border-white/15 dark:ring-white/5",
+        anonymous && "bg-[linear-gradient(135deg,#f8f1df,#d8a23f,#315f8d)]",
         sizeClasses[size],
         className,
       )}

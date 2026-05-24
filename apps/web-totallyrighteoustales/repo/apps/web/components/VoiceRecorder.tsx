@@ -73,7 +73,7 @@ export default function VoiceRecorder({
     <div className="flex flex-col gap-2">
       <button
         type="button"
-        className="button-secondary min-w-[11rem] justify-center"
+        className="button-secondary min-w-[11rem] justify-center border-white/20 bg-white/10 text-press-paper hover:text-press-paper"
         onClick={recording ? stopRecording : startRecording}
         disabled={busy}
       >
@@ -84,7 +84,7 @@ export default function VoiceRecorder({
             : "Record a line"}
       </button>
       {message && (
-        <p className="text-xs leading-6 text-ink/60 dark:text-parchment/60">
+        <p className="text-xs leading-6 text-press-paper/62">
           {message}
         </p>
       )}

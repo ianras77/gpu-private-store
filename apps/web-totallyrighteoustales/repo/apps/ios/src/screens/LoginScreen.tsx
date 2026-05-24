@@ -12,7 +12,7 @@ export default function LoginScreen() {
     if (!email) return;
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: "totallyrighteoustales://" }
+      options: { emailRedirectTo: "totallyrighteoustales://" },
     });
     if (error) {
       setError(error.message);
@@ -22,48 +22,60 @@ export default function LoginScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Enter the Commons</Text>
-      <Text style={styles.subtitle}>We send a magic link to your email.</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="you@legendary.world"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <Pressable style={styles.button} onPress={handleSignIn}>
-        <Text style={styles.buttonText}>Send magic link</Text>
-      </Pressable>
-      {sent && <Text style={styles.notice}>Check your inbox.</Text>}
-      {error && <Text style={styles.error}>{error}</Text>}
+    <View style={styles.screen}>
+      <View style={styles.panel}>
+        <Text style={styles.kicker}>Studio key</Text>
+        <Text style={styles.title}>Open the press room</Text>
+        <Text style={styles.copy}>
+          We send one magic link. No password ceremony, just a door into your
+          story studio.
+        </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="you@legendary.world"
+          placeholderTextColor="#766856"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+        <Pressable style={styles.button} onPress={handleSignIn}>
+          <Text style={styles.buttonText}>Send magic link</Text>
+        </Pressable>
+        {sent && <Text style={styles.notice}>Check your inbox.</Text>}
+        {error && <Text style={styles.error}>{error}</Text>}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    gap: 12,
-    backgroundColor: "#fffaf2",
-    borderRadius: 20,
-    padding: 20
+  screen: {
+    flex: 1,
+    backgroundColor: "#f8f1df",
+    padding: 18,
+    justifyContent: "center",
   },
-  title: { fontSize: 22, fontWeight: "700", color: "#2c1f1a" },
-  subtitle: { fontSize: 14, color: "#5d4d45" },
+  panel: { gap: 12, backgroundColor: "#15120f", borderRadius: 8, padding: 20 },
+  kicker: {
+    color: "#d8a23f",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+  },
+  title: { fontSize: 32, lineHeight: 34, fontWeight: "900", color: "#f8f1df" },
+  copy: { color: "rgba(248,241,223,0.68)", lineHeight: 22 },
   input: {
     borderWidth: 1,
-    borderColor: "#d8c5b1",
-    borderRadius: 12,
-    padding: 10,
-    backgroundColor: "#fff"
-  },
-  button: {
-    backgroundColor: "#d96b3f",
+    borderColor: "rgba(248,241,223,0.2)",
+    borderRadius: 8,
     padding: 12,
-    borderRadius: 999
+    backgroundColor: "rgba(248,241,223,0.08)",
+    color: "#f8f1df",
   },
-  buttonText: { color: "white", fontWeight: "600", textAlign: "center" },
-  notice: { color: "#2f5d50" },
-  error: { color: "#b4533c" }
+  button: { backgroundColor: "#c7472b", padding: 13, borderRadius: 8 },
+  buttonText: { color: "#fffaf0", fontWeight: "900", textAlign: "center" },
+  notice: { color: "#8ccdc5" },
+  error: { color: "#ff9a81" },
 });

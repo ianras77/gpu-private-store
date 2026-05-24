@@ -1,8 +1,8 @@
 import Link from "next/link";
+import { BookMarked, Feather, Flame, Search, Trophy } from "lucide-react";
 import FeedTabs from "../components/FeedTabs";
 import FeedList from "../components/FeedList";
 import SearchBar from "../components/SearchBar";
-import StoryAvatar from "../components/StoryAvatar";
 import StoryImage from "../components/StoryImage";
 import {
   fetchFeatured,
@@ -45,9 +45,23 @@ type HomeLeaderboardData = {
 
 type SearchResultTale = HomeTale & { similarity?: number };
 
-function formatMarqueeValue(value: number | string) {
-  return typeof value === "number" ? value.toString().padStart(2, "0") : value;
-}
+const pressSteps = [
+  {
+    icon: Feather,
+    title: "Draft the spine",
+    copy: "Premise, character, stakes, turn, and voice come before polish.",
+  },
+  {
+    icon: BookMarked,
+    title: "Set the pages",
+    copy: "Write in scenes, revise with craft notes, then attach art if it serves the tale.",
+  },
+  {
+    icon: Flame,
+    title: "Publish with heat",
+    copy: "Send it to moderation as a named storyteller or a masked legend.",
+  },
+];
 
 export default async function Home({
   searchParams,
@@ -66,339 +80,168 @@ export default async function Home({
     fetchLeaderboard(),
   ]);
 
-  const featuredMain = featured[0] || leaderboard.stories[0];
+  const spotlight = featured[0] || leaderboard.stories[0] || tales[0];
   const champion = leaderboard.storytellers[0];
-  const storytellerConstellation = leaderboard.storytellers.slice(0, 6);
-  const marqueeStats = [
-    {
-      label: query ? "Search hits" : "Stories in view",
-      value: tales.length,
-      note: query ? "matching your current search" : "ready to read right now",
-    },
-    {
-      label: "Top story hearts",
-      value: featuredMain?.upvotes ?? 0,
-      note: featuredMain
-        ? "on the spotlight tale"
-        : "waiting for the first legend",
-    },
-    {
-      label: "Named storytellers",
-      value: leaderboard.storytellers.length,
-      note: champion
-        ? `${champion.displayName} currently holds the crown`
-        : "waiting for the first crown",
-    },
-  ];
 
   return (
-    <div className="space-y-10">
-      <section className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
-        <div className="ink-panel story-arch relative overflow-hidden rounded-[3rem] px-8 py-9 md:px-12 md:py-12">
-          <div className="fairy-dust absolute inset-0" />
-          <div className="pointer-events-none absolute -left-16 top-10 h-64 w-64 rounded-full bg-ember/30 blur-3xl" />
-          <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-gold/18 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-sky/12 blur-3xl" />
+    <div className="space-y-8">
+      <section className="press-hero overflow-hidden p-5 sm:p-7 lg:p-9">
+        <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch">
+          <div className="flex min-h-[520px] flex-col justify-between border border-white/12 p-5 sm:p-7">
+            <div>
+              <p className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-press-gold">
+                Totally Righteous Tales 0.5
+              </p>
+              <h1 className="mt-5 max-w-4xl font-display text-5xl leading-[0.92] text-press-paper sm:text-7xl lg:text-[5.8rem]">
+                The modern Gutenberg app for tall tales with a pulse.
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-press-paper/76 sm:text-lg">
+                Build medium-to-long stories like a living print shop: set the
+                spine, draft by hand, invite careful notes, and publish when the
+                pages have earned their ink.
+              </p>
+            </div>
 
-          <div className="relative">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.38em] text-parchment/58">
-              Big stories deserve a lantern-lit room
-            </p>
-            <h1 className="mt-5 max-w-5xl font-display text-6xl leading-none text-parchment md:text-7xl xl:text-[5.6rem]">
-              Stories should arrive like a fairy-tale door just swung open.
-            </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-parchment/78">
-              Totally Righteous Tales is for strange premises, bold openings,
-              moonlit images, named storytellers, anonymous legends, and the
-              kind of public hearting that makes good work impossible to miss.
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
               <Link href="/compose" className="button-primary">
-                Start a story
+                Start setting type
+              </Link>
+              <Link
+                href="#press-feed"
+                className="button-secondary border-white/20 bg-white/10 text-press-paper hover:text-press-paper"
+              >
+                Read the feed
               </Link>
               <Link
                 href="/profile"
-                className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-parchment/86 transition hover:border-white/22 hover:text-parchment"
+                className="button-secondary border-white/20 bg-white/10 text-press-paper hover:text-press-paper"
               >
-                Claim your storyteller name
-              </Link>
-              <Link
-                href="/leaderboard"
-                className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-parchment/86 transition hover:border-white/22 hover:text-parchment"
-              >
-                Enter the hall of wonder
+                Open studio
               </Link>
             </div>
+          </div>
 
-            <div className="mt-8 flex flex-wrap gap-2">
-              <span className="story-pill border-white/10 bg-white/5 text-parchment/82">
-                Write by hand
-              </span>
-              <span className="story-pill border-white/10 bg-white/5 text-parchment/82">
-                Spin a prompt
-              </span>
-              <span className="story-pill border-white/10 bg-white/5 text-parchment/82">
-                Publish named or masked
-              </span>
-              <span className="story-pill border-white/10 bg-white/5 text-parchment/82">
-                Hearts build cred
-              </span>
-            </div>
-
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
-              {marqueeStats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-[1.9rem] border border-white/10 bg-white/5 p-5 shadow-soft"
+          <div className="grid gap-4">
+            <div className="border border-white/12 bg-white/[0.06] p-5">
+              <div className="flex items-center justify-between gap-4">
+                <p className="font-mono text-[0.68rem] font-bold uppercase tracking-[0.18em] text-press-paper/54">
+                  Live broadside
+                </p>
+                <span className="type-tile border-white/15 bg-white/10 text-press-paper/72">
+                  {tales.length} tales
+                </span>
+              </div>
+              <h2 className="mt-4 font-display text-4xl leading-tight text-press-paper">
+                {spotlight?.title ?? "The first tale is waiting for the press."}
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-press-paper/68">
+                {spotlight
+                  ? `${spotlight.excerpt}...`
+                  : "Once the first approved story arrives, it becomes the front sheet of the room."}
+              </p>
+              {spotlight && (
+                <Link
+                  href={`/tales/${spotlight.id}`}
+                  className="mt-5 inline-flex font-mono text-xs font-bold uppercase tracking-[0.18em] text-press-gold"
                 >
-                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-parchment/54">
-                    {stat.label}
-                  </p>
-                  <p className="mt-3 font-display text-5xl text-parchment">
-                    {formatMarqueeValue(stat.value)}
-                  </p>
-                  <p className="mt-3 text-sm leading-7 text-parchment/68">
-                    {stat.note}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <section className="card rounded-[2.6rem] p-7 md:p-8">
-            <p className="eyebrow">Find the exact kind of weird you want</p>
-            <h2 className="mt-3 font-display text-4xl text-ink dark:text-parchment">
-              Search by mood, image, setting, or the impossible detail.
-            </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-ink/72 dark:text-parchment/72">
-              Dig for moonlit porches, lighthouse ghosts, woodland spells, cozy
-              dread, tiny miracles, or anything else your reading brain wants
-              next.
-            </p>
-            <div className="mt-6">
-              <SearchBar initialQuery={query} />
-            </div>
-            {query && (
-              <p className="mt-4 text-sm text-ink/60 dark:text-parchment/60">
-                Showing {tales.length} stories for &quot;{query}&quot;.
-              </p>
-            )}
-          </section>
-
-          <section className="card overflow-hidden rounded-[2.6rem]">
-            <div className="relative h-56 bg-[linear-gradient(135deg,_rgba(28,16,20,0.98),_rgba(84,38,34,0.95))]">
-              {featuredMain?.imageUrl ? (
-                <>
-                  <StoryImage
-                    src={featuredMain.imageUrl}
-                    alt={featuredMain.title}
-                    fill
-                    priority
-                    sizes="(min-width: 1280px) 36vw, 100vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-                </>
-              ) : (
-                <div className="flex h-full items-center justify-center bg-story text-ink">
-                  <span className="font-display text-7xl">
-                    {featuredMain?.title?.slice(0, 1) ?? "T"}
-                  </span>
-                </div>
+                  Read the spotlight
+                </Link>
               )}
-              <div className="absolute inset-x-0 bottom-0 p-6">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-parchment/55">
-                  Spotlight tale
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="border border-white/12 bg-white/[0.06] p-5">
+                <Trophy className="text-press-gold" size={22} />
+                <p className="mt-4 font-display text-3xl text-press-paper">
+                  {champion?.displayName ?? "No crown yet"}
                 </p>
-                <h2 className="mt-2 font-display text-4xl leading-tight text-parchment">
-                  {featuredMain?.title ??
-                    "The spotlight is waiting for its first legend."}
-                </h2>
+                <p className="mt-2 text-sm leading-6 text-press-paper/64">
+                  {champion
+                    ? `${champion.creditsTotal} cred and ${champion.totalHearts} hearts.`
+                    : "The first crafted story can take the hall."}
+                </p>
+              </div>
+              <div className="border border-white/12 bg-white/[0.06] p-5">
+                <Search className="text-press-green" size={22} />
+                <p className="mt-4 font-display text-3xl text-press-paper">
+                  Search by image
+                </p>
+                <p className="mt-2 text-sm leading-6 text-press-paper/64">
+                  Find lighthouse grief, carnival miracles, iron moons, or one
+                  impossible detail.
+                </p>
               </div>
             </div>
 
-            <div className="space-y-4 p-7 md:p-8">
-              {featuredMain ? (
-                <>
-                  <p className="text-sm uppercase tracking-[0.22em] text-ink/52 dark:text-parchment/52">
-                    By {featuredMain.authorPseudonym} with{" "}
-                    {featuredMain.upvotes} hearts
-                  </p>
-                  <p className="text-sm leading-7 text-ink/76 dark:text-parchment/76">
-                    {featuredMain.excerpt}...
-                  </p>
-                  <Link
-                    href={`/tales/${featuredMain.id}`}
-                    className="text-sm font-semibold uppercase tracking-[0.18em] text-ember"
-                  >
-                    Read the spotlight
-                  </Link>
-                </>
-              ) : (
-                <p className="text-sm leading-7 text-ink/72 dark:text-parchment/72">
-                  The homepage marquee is ready. It just needs the first story
-                  that makes people stop.
-                </p>
-              )}
-            </div>
-          </section>
-        </div>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-        <div className="card rounded-[2.6rem] p-8">
-          <p className="eyebrow">Current crown</p>
-          <h2 className="mt-3 font-display text-4xl text-ink dark:text-parchment">
-            The storyteller everyone is watching.
-          </h2>
-          {champion ? (
-            <div className="mt-6 space-y-6">
-              <div className="flex items-center gap-4">
-                <StoryAvatar
-                  name={champion.displayName}
-                  src={champion.avatarUrl}
-                  size="lg"
+            {spotlight?.imageUrl ? (
+              <div className="relative min-h-[230px] overflow-hidden border border-white/12">
+                <StoryImage
+                  src={spotlight.imageUrl}
+                  alt={spotlight.title}
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 42vw, 100vw"
+                  className="object-cover"
                 />
-                <div>
-                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-ink/48 dark:text-parchment/50">
-                    Leading the board
-                  </p>
-                  <h3 className="mt-2 font-display text-4xl text-ink dark:text-parchment">
-                    {champion.displayName}
-                  </h3>
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="stat-panel rounded-[1.8rem] p-5">
-                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-ink/48 dark:text-parchment/50">
-                    Storyteller cred
-                  </p>
-                  <p className="mt-3 font-display text-5xl text-ink dark:text-parchment">
-                    {champion.creditsTotal}
-                  </p>
-                </div>
-                <div className="stat-panel rounded-[1.8rem] p-5">
-                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-ink/48 dark:text-parchment/50">
-                    Hearts gathered
-                  </p>
-                  <p className="mt-3 font-display text-5xl text-ink dark:text-parchment">
-                    {champion.totalHearts}
-                  </p>
-                </div>
-              </div>
-              <Link href="/leaderboard" className="button-secondary">
-                See the full ranking
-              </Link>
-            </div>
-          ) : (
-            <div className="story-note mt-6 rounded-[1.8rem] p-5 text-sm leading-7 text-ink/72 dark:text-parchment/72">
-              Nobody has claimed the storyteller crown yet. The first complete
-              profile with a story people love could take the room.
-            </div>
-          )}
-        </div>
-
-        <div className="card rounded-[2.6rem] p-8">
-          <p className="eyebrow">How the room works</p>
-          <h2 className="mt-3 max-w-3xl font-display text-4xl text-ink dark:text-parchment">
-            Write loud. Choose your mask. Let hearts keep score.
-          </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="stat-panel rounded-[1.8rem] p-5">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-ink/48 dark:text-parchment/50">
-                1. Dream it
-              </p>
-              <p className="mt-3 text-sm leading-7 text-ink/76 dark:text-parchment/76">
-                Draft the whole thing yourself or feed the studio a premise,
-                mood, setting, and one impossible detail.
-              </p>
-            </div>
-            <div className="stat-panel rounded-[1.8rem] p-5">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-ink/48 dark:text-parchment/50">
-                2. Stage it
-              </p>
-              <p className="mt-3 text-sm leading-7 text-ink/76 dark:text-parchment/76">
-                Publish under your storyteller profile when you want the public
-                credit, or keep the tale masked and let the work speak first.
-              </p>
-            </div>
-            <div className="stat-panel rounded-[1.8rem] p-5">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-ink/48 dark:text-parchment/50">
-                3. Watch it travel
-              </p>
-              <p className="mt-3 text-sm leading-7 text-ink/76 dark:text-parchment/76">
-                Hearts raise the story itself and build storyteller cred behind
-                the scenes, whether the author name is visible or not.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 border-t border-ink/10 pt-6 dark:border-white/10">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="eyebrow">Storyteller constellation</p>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-ink/72 dark:text-parchment/72">
-                  Real profiles show up here. Anonymous stories can still win
-                  the room, but named storytellers get their own visible climb.
-                </p>
-              </div>
-              <Link href="/profile" className="button-secondary">
-                Build your profile
-              </Link>
-            </div>
-
-            {storytellerConstellation.length === 0 ? (
-              <div className="story-note mt-5 rounded-[1.8rem] p-5 text-sm leading-7 text-ink/72 dark:text-parchment/72">
-                The constellation is empty right now. The next storyteller
-                profile will become the first bright point.
               </div>
             ) : (
-              <div className="mt-6 flex flex-wrap gap-4">
-                {storytellerConstellation.map((storyteller: HomeStoryteller) => (
-                  <div
-                    key={storyteller.userId}
-                    className="flex flex-col items-center gap-3"
-                  >
-                    <StoryAvatar
-                      name={storyteller.displayName}
-                      src={storyteller.avatarUrl}
-                      size="md"
-                    />
-                    <p className="max-w-[104px] truncate text-center text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ink/60 dark:text-parchment/60">
-                      {storyteller.displayName}
-                    </p>
-                  </div>
-                ))}
+              <div className="grid min-h-[230px] place-items-center border border-white/12 bg-[linear-gradient(135deg,rgba(216,162,63,0.20),rgba(49,95,141,0.18))] p-8">
+                <div className="grid h-36 w-36 place-items-center border border-press-paper/30 font-display text-7xl text-press-paper">
+                  TRT
+                </div>
               </div>
             )}
           </div>
         </div>
       </section>
 
-      <section className="space-y-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div className="space-y-2">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.36em] text-parchment/58">
-              Story feed
-            </p>
-            <h2 className="font-display text-5xl text-parchment">
-              {query ? `Results for "${query}"` : "Freshly unfurled tales"}
+      <section className="grid gap-4 lg:grid-cols-3">
+        {pressSteps.map((step, index) => {
+          const Icon = step.icon;
+          return (
+            <div key={step.title} className="press-panel p-5">
+              <div className="flex items-center justify-between gap-4">
+                <Icon className="text-press-copper" size={22} />
+                <span className="type-tile">0{index + 1}</span>
+              </div>
+              <h2 className="mt-5 font-display text-3xl text-press-ink dark:text-press-paper">
+                {step.title}
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-press-ink/68 dark:text-press-paper/68">
+                {step.copy}
+              </p>
+            </div>
+          );
+        })}
+      </section>
+
+      <section className="press-panel p-5 sm:p-6">
+        <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+          <div>
+            <p className="press-label">Search the stacks</p>
+            <h2 className="mt-2 font-display text-4xl text-press-ink dark:text-press-paper">
+              Search by mood, setting, object, or impossible claim.
             </h2>
-            <p className="max-w-3xl text-sm leading-7 text-parchment/70">
-              {query
-                ? `${tales.length} stories match your search right now.`
-                : "Browse what is hot, new, and collecting real hearts. The cards are louder now on purpose."}
-            </p>
+          </div>
+          <SearchBar initialQuery={query} />
+        </div>
+      </section>
+
+      <section id="press-feed" className="space-y-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="press-label">Public sheets</p>
+            <h2 className="mt-2 font-display text-5xl text-press-ink dark:text-press-paper">
+              {query ? `Results for "${query}"` : "Fresh from the press"}
+            </h2>
           </div>
           {!query && <FeedTabs current={sort} />}
         </div>
 
         {tales.length === 0 ? (
-          <div className="card rounded-[2rem] p-8 text-sm leading-7 text-ink/72 dark:text-parchment/72">
-            No stories yet. The stage is lit; it just needs the first tale.
+          <div className="press-panel p-8 text-sm leading-7 text-press-ink/70 dark:text-press-paper/70">
+            No stories yet. The forme is locked, the ink is ready, and the first
+            page is waiting.
           </div>
         ) : (
           <FeedList initialTales={tales} sort={sort} query={query} />

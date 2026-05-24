@@ -1,7 +1,10 @@
 import { autoModerateText, type AutoModerationOutcome } from "./moderation";
 
-const rawBaseUrl = process.env.LOCALAI_BASE_URL || "http://rassygpt-gateway:8080/v1";
-const baseUrl = rawBaseUrl.endsWith("/v1") ? rawBaseUrl : `${rawBaseUrl.replace(/\/$/, "")}/v1`;
+const rawBaseUrl =
+  process.env.LOCALAI_BASE_URL || "http://rassygpt-gateway:8080/v1";
+const baseUrl = rawBaseUrl.endsWith("/v1")
+  ? rawBaseUrl
+  : `${rawBaseUrl.replace(/\/$/, "")}/v1`;
 const apiKey = process.env.LOCALAI_API_KEY;
 
 const chatModel = process.env.LOCALAI_CHAT_MODEL || "rassy-smart";
@@ -17,18 +20,21 @@ export function aiEnabled() {
   return process.env.OPENAI_ENABLED === "true";
 }
 
-export async function chatCompletion(messages: { role: string; content: string }[], temperature = 0.2) {
+export async function chatCompletion(
+  messages: { role: string; content: string }[],
+  temperature = 0.2,
+) {
   const res = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...authHeaders()
+      ...authHeaders(),
     },
     body: JSON.stringify({
       model: chatModel,
       temperature,
-      messages
-    })
+      messages,
+    }),
   });
 
   if (!res.ok) {
@@ -44,21 +50,23 @@ export async function polishStory(text: string) {
     {
       role: "system",
       content:
-        "You are a whimsical but precise story editor. Improve clarity, rhythm, and imagery without changing the plot. Return ONLY the polished story text."
+        "You are a precise story proofreader for a modern Gutenberg writing studio. Improve clarity, rhythm, and imagery without changing plot, authorship, or scene intent. Return ONLY the polished story text.",
     },
-    { role: "user", content: text }
+    { role: "user", content: text },
   ]);
 
   return content?.trim() ?? text;
 }
 
-export async function moderateText(text: string): Promise<AutoModerationOutcome> {
+export async function moderateText(
+  text: string,
+): Promise<AutoModerationOutcome> {
   try {
     const res = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...authHeaders()
+        ...authHeaders(),
       },
       body: JSON.stringify({
         model: moderationModel,
@@ -67,14 +75,14 @@ export async function moderateText(text: string): Promise<AutoModerationOutcome>
           {
             role: "system",
             content:
-              "Classify content for a PG-13 storytelling community. Respond ONLY with valid JSON: {\"result\":\"PASS|FLAG|BLOCK\",\"categories\":{\"spam\":bool,\"pii\":bool,\"violence\":bool},\"scores\":{\"risk\":number},\"notes\":string}."
+              'Classify content for a PG-13 storytelling community. Respond ONLY with valid JSON: {"result":"PASS|FLAG|BLOCK","categories":{"spam":bool,"pii":bool,"violence":bool},"scores":{"risk":number},"notes":string}.',
           },
           {
             role: "user",
-            content: text
-          }
-        ]
-      })
+            content: text,
+          },
+        ],
+      }),
     });
 
     if (!res.ok) {
@@ -92,14 +100,18 @@ export async function moderateText(text: string): Promise<AutoModerationOutcome>
       result: parsed.result,
       categories: parsed.categories,
       scores: parsed.scores ?? { risk: 0 },
-      notes: parsed.notes
+      notes: parsed.notes,
     } as AutoModerationOutcome;
   } catch (_err) {
     return autoModerateText(text);
   }
 }
 
-export async function transcribeAudio(buffer: Buffer, filename: string, contentType: string) {
+export async function transcribeAudio(
+  buffer: Buffer,
+  filename: string,
+  contentType: string,
+) {
   const form = new FormData();
   form.append("model", transcribeModel);
   const fileBlob = new Blob([new Uint8Array(buffer)], { type: contentType });
@@ -108,9 +120,9 @@ export async function transcribeAudio(buffer: Buffer, filename: string, contentT
   const res = await fetch(`${baseUrl}/audio/transcriptions`, {
     method: "POST",
     headers: {
-      ...authHeaders()
+      ...authHeaders(),
     },
-    body: form
+    body: form,
   });
 
   if (!res.ok) return undefined;
@@ -124,12 +136,12 @@ export async function embedText(input: string) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...authHeaders()
+      ...authHeaders(),
     },
     body: JSON.stringify({
       model: embeddingModel,
-      input
-    })
+      input,
+    }),
   });
 
   if (!res.ok) {

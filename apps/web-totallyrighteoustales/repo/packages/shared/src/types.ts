@@ -15,6 +15,9 @@ export interface TaleSummary {
   assistMode: TaleAssistMode;
   storyPrompt?: string | null;
   isAnonymous: boolean;
+  personaName?: string | null;
+  personaVoice?: string | null;
+  personaSignature?: string | null;
   hotScore: number;
   topScore: number;
   imageUrl?: string | null;
@@ -25,6 +28,11 @@ export interface TaleSummary {
 export interface TaleDetail extends TaleSummary {
   body: string;
   rejectionReason?: string | null;
+}
+
+export interface CraftNotesResponse {
+  notes: string[];
+  focus: "structure" | "voice" | "stakes" | "line-edit";
 }
 
 export interface StorytellerProfile {

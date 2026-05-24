@@ -20,10 +20,14 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session ?? null));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => setSession(data.session ?? null));
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        setSession(newSession);
+      },
+    );
     return () => {
       listener.subscription.unsubscribe();
     };
@@ -39,9 +43,9 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
-            headerStyle: { backgroundColor: "#f8f1e7" },
-            headerTintColor: "#2c1f1a",
-            headerShadowVisible: false
+            headerStyle: { backgroundColor: "#f8f1df" },
+            headerTintColor: "#15120f",
+            headerShadowVisible: false,
           }}
         >
           <Stack.Screen name="Feed" component={FeedScreen} />

@@ -5,7 +5,7 @@ import Shell from "../components/Shell";
 export const metadata: Metadata = {
   title: "Totally Righteous Tales",
   description:
-    "A whimsical storytelling commons for named storytellers, anonymous tales, and heart-powered story cred.",
+    "A modern Gutenberg storytelling studio for crafted tall tales, story-spine drafting, editorial notes, and heart-powered publication.",
   applicationName: "Totally Righteous Tales",
   manifest: "/manifest.webmanifest",
   icons: {

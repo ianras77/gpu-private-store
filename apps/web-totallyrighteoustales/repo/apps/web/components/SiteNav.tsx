@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { BookOpenText, Feather, Trophy, UserRound } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
 const navItems = [
-  { href: "/", label: "Explore" },
-  { href: "/compose", label: "Compose" },
-  { href: "/leaderboard", label: "Hall of Wonder" },
-  { href: "/profile", label: "Storyteller" },
+  { href: "/", label: "Read", icon: BookOpenText },
+  { href: "/compose", label: "Set Type", icon: Feather },
+  { href: "/leaderboard", label: "Hall", icon: Trophy },
+  { href: "/profile", label: "Studio", icon: UserRound },
 ] as const;
 
 function isCurrentPath(pathname: string, href: string) {
@@ -22,9 +23,10 @@ export default function SiteNav() {
   const pathname = usePathname() || "/";
 
   return (
-    <nav className="flex flex-wrap items-center gap-2.5 text-sm">
+    <nav className="flex flex-wrap items-center gap-2 text-sm">
       {navItems.map((item) => {
         const active = isCurrentPath(pathname, item.href);
+        const Icon = item.icon;
 
         return (
           <Link
@@ -32,22 +34,17 @@ export default function SiteNav() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={clsx(
-              "inline-flex items-center rounded-full border px-4 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.24em] transition duration-200 hover:-translate-y-0.5",
+              "inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 py-2 font-mono text-[0.68rem] font-bold uppercase tracking-[0.12em] transition duration-200 hover:-translate-y-0.5",
               active
-                ? "border-gold/40 bg-gold text-ink shadow-soft"
-                : "border-white/10 bg-white/5 text-parchment/72 hover:border-white/20 hover:text-parchment",
+                ? "border-press-copper bg-press-copper text-white shadow-soft"
+                : "border-press-ink/15 bg-white/35 text-press-ink/72 hover:border-press-copper/45 dark:border-white/10 dark:bg-white/5 dark:text-press-paper/72",
             )}
           >
+            <Icon size={15} />
             {item.label}
           </Link>
         );
       })}
-      <Link
-        href="/compose"
-        className="button-primary px-5 py-2.5 text-[0.72rem] uppercase tracking-[0.22em]"
-      >
-        Tell a story
-      </Link>
       <ThemeToggle />
     </nav>
   );

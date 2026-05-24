@@ -1,13 +1,35 @@
 import { useContext, useState } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { Audio } from "expo-av";
-import { createTale, polishStory, transcribeAudio } from "../lib/api";
+import {
+  createTale,
+  craftNotes,
+  polishStory,
+  transcribeAudio,
+} from "../lib/api";
 import { AuthContext } from "../lib/auth";
 
-export default function ComposeScreen() {
+function words(text: string) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+export default function ComposeScreen({ navigation }: { navigation: any }) {
   const { session } = useContext(AuthContext);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [premise, setPremise] = useState("");
+  const [character, setCharacter] = useState("");
+  const [stakes, setStakes] = useState("");
+  const [turn, setTurn] = useState("");
+  const [voice, setVoice] = useState("");
+  const [notes, setNotes] = useState<string[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [polishing, setPolishing] = useState(false);
@@ -17,16 +39,32 @@ export default function ComposeScreen() {
   async function handleSubmit() {
     if (!session) {
       setMessage("Sign in to submit a tale.");
+      navigation.navigate("Login");
       return;
     }
-    if (!title || !body) return;
+    if (!title.trim() || body.trim().length < 600) {
+      setMessage(
+        "Set a title and draft at least 600 characters before publishing.",
+      );
+      return;
+    }
     setLoading(true);
     setMessage(null);
     try {
-      await createTale({ title, body, token: session.access_token });
+      await createTale({
+        title,
+        body,
+        token: session.access_token,
+        isAnonymous: true,
+        assistMode: notes.length > 0 ? "STUDIO" : "HANDMADE",
+        storyPrompt: premise || null,
+        personaVoice: voice || null,
+        personaSignature: premise || null,
+      });
       setTitle("");
       setBody("");
-      setMessage("Submitted for moderation.");
+      setNotes([]);
+      setMessage("Submitted to the moderation desk.");
     } catch (_err) {
       setMessage("Unable to submit tale.");
     } finally {
@@ -34,18 +72,39 @@ export default function ComposeScreen() {
     }
   }
 
+  async function handleNotes() {
+    setMessage(null);
+    try {
+      const res = await craftNotes({
+        title,
+        body,
+        premise,
+        character,
+        stakes,
+        turn,
+        voice,
+      });
+      setNotes(res.notes);
+    } catch (_err) {
+      setMessage("Craft notes are unavailable.");
+    }
+  }
+
   async function handlePolish() {
     if (!session) {
-      setMessage("Sign in to polish a tale.");
+      setMessage("Sign in for a proof pass.");
       return;
     }
-    if (!body) return;
+    if (!body.trim()) return;
     setPolishing(true);
     try {
-      const res = await polishStory({ text: body, token: session.access_token });
+      const res = await polishStory({
+        text: body,
+        token: session.access_token,
+      });
       setBody(res.text ?? body);
     } catch (_err) {
-      setMessage("Polish unavailable.");
+      setMessage("Proof pass unavailable.");
     } finally {
       setPolishing(false);
     }
@@ -64,9 +123,11 @@ export default function ComposeScreen() {
       }
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
-        playsInSilentModeIOS: true
+        playsInSilentModeIOS: true,
       });
-      const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY,
+      );
       setRecording(recording);
       setMessage("Recording...");
     } catch (_err) {
@@ -83,10 +144,8 @@ export default function ComposeScreen() {
       setRecording(null);
       if (!uri) throw new Error("Missing recording");
       const res = await transcribeAudio({ uri, token: session.access_token });
-      const text = res.text ?? "";
-      if (text.length > 0) {
-        setBody((prev) => (prev ? `${prev}\n\n${text}` : text));
-      }
+      if (res.text)
+        setBody((prev) => (prev ? `${prev}\n\n${res.text}` : res.text));
       setMessage("Transcription added.");
     } catch (_err) {
       setMessage("Transcription failed.");
@@ -96,64 +155,189 @@ export default function ComposeScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 32 }}>
-      <Text style={styles.title}>Compose a Tale</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Title"
-        value={title}
-        onChangeText={setTitle}
-      />
-      <TextInput
-        style={[styles.input, styles.textarea]}
-        placeholder="400–2,500 words of righteous storytelling."
-        value={body}
-        onChangeText={setBody}
-        multiline
-      />
-      <View style={styles.actions}>
-        <Pressable style={styles.ghost} onPress={handlePolish}>
-          <Text style={styles.ghostText}>{polishing ? "Polishing..." : "Polish with Magic"}</Text>
-        </Pressable>
-        <Pressable
-          style={styles.ghost}
-          onPress={recording ? stopRecording : startRecording}
-          disabled={transcribing}
-        >
-          <Text style={styles.ghostText}>
-            {recording ? "Stop Recording" : transcribing ? "Transcribing..." : "Speak"}
-          </Text>
-        </Pressable>
-        <Pressable style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>{loading ? "Submitting..." : "Submit"}</Text>
-        </Pressable>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 34 }}
+    >
+      <Text style={styles.kicker}>Compose desk</Text>
+      <Text style={styles.title}>Set a tale in type</Text>
+      <Text style={styles.copy}>
+        Build the spine before chasing sparkle. Notes help; you still own every
+        line.
+      </Text>
+
+      <View style={styles.panel}>
+        <Text style={styles.panelTitle}>Story spine</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Premise"
+          placeholderTextColor="#766856"
+          value={premise}
+          onChangeText={setPremise}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Character"
+          placeholderTextColor="#766856"
+          value={character}
+          onChangeText={setCharacter}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Stakes"
+          placeholderTextColor="#766856"
+          value={stakes}
+          onChangeText={setStakes}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Turn"
+          placeholderTextColor="#766856"
+          value={turn}
+          onChangeText={setTurn}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Voice"
+          placeholderTextColor="#766856"
+          value={voice}
+          onChangeText={setVoice}
+        />
       </View>
+
+      <View style={styles.panelDark}>
+        <Text style={styles.panelTitleDark}>Draft table</Text>
+        <TextInput
+          style={styles.inputDark}
+          placeholder="Title"
+          placeholderTextColor="#b9aa8b"
+          value={title}
+          onChangeText={setTitle}
+        />
+        <TextInput
+          style={[styles.inputDark, styles.textarea]}
+          placeholder="Draft in scenes. Aim for medium-to-long form."
+          placeholderTextColor="#b9aa8b"
+          value={body}
+          onChangeText={setBody}
+          multiline
+        />
+        <Text style={styles.counter}>
+          {words(body)} words / {body.length} characters
+        </Text>
+        <View style={styles.actions}>
+          <Pressable style={styles.ghostDark} onPress={handleNotes}>
+            <Text style={styles.ghostDarkText}>Craft notes</Text>
+          </Pressable>
+          <Pressable
+            style={styles.ghostDark}
+            onPress={recording ? stopRecording : startRecording}
+            disabled={transcribing}
+          >
+            <Text style={styles.ghostDarkText}>
+              {recording ? "Stop" : transcribing ? "Transcribing" : "Speak"}
+            </Text>
+          </Pressable>
+          <Pressable style={styles.ghostDark} onPress={handlePolish}>
+            <Text style={styles.ghostDarkText}>
+              {polishing ? "Proofing" : "Proof pass"}
+            </Text>
+          </Pressable>
+          <Pressable style={styles.primaryDark} onPress={handleSubmit}>
+            <Text style={styles.primaryDarkText}>
+              {loading ? "Submitting" : "Submit"}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {notes.map((note) => (
+        <View key={note} style={styles.note}>
+          <Text style={styles.noteText}>{note}</Text>
+        </View>
+      ))}
       {message && <Text style={styles.notice}>{message}</Text>}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8f1e7", padding: 20 },
-  title: { fontSize: 24, fontWeight: "700", color: "#2c1f1a", marginBottom: 12 },
+  container: { flex: 1, backgroundColor: "#f8f1df", padding: 18 },
+  kicker: {
+    color: "#c7472b",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+  },
+  title: {
+    fontSize: 34,
+    lineHeight: 36,
+    fontWeight: "900",
+    color: "#15120f",
+    marginTop: 4,
+  },
+  copy: { color: "#5f5344", lineHeight: 22, marginTop: 8, marginBottom: 14 },
+  panel: {
+    backgroundColor: "#fffaf0",
+    borderWidth: 1,
+    borderColor: "#d2c09b",
+    borderRadius: 8,
+    padding: 14,
+    gap: 10,
+    marginBottom: 14,
+  },
+  panelTitle: { color: "#15120f", fontSize: 18, fontWeight: "900" },
+  panelDark: {
+    backgroundColor: "#15120f",
+    borderRadius: 8,
+    padding: 14,
+    gap: 10,
+    marginBottom: 14,
+  },
+  panelTitleDark: { color: "#f8f1df", fontSize: 20, fontWeight: "900" },
   input: {
     borderWidth: 1,
-    borderColor: "#d8c5b1",
-    borderRadius: 14,
-    padding: 12,
-    backgroundColor: "#fff",
-    marginBottom: 12
+    borderColor: "#d2c09b",
+    borderRadius: 8,
+    padding: 11,
+    backgroundColor: "#f8f1df",
+    color: "#15120f",
   },
-  textarea: { minHeight: 180, textAlignVertical: "top" },
-  actions: { flexDirection: "row", gap: 12, alignItems: "center" },
-  button: { backgroundColor: "#d96b3f", padding: 12, borderRadius: 999 },
-  buttonText: { color: "white", fontWeight: "600" },
-  ghost: {
+  inputDark: {
     borderWidth: 1,
-    borderColor: "#d8c5b1",
-    padding: 12,
-    borderRadius: 999
+    borderColor: "rgba(248,241,223,0.18)",
+    borderRadius: 8,
+    padding: 11,
+    backgroundColor: "rgba(248,241,223,0.08)",
+    color: "#f8f1df",
   },
-  ghostText: { color: "#5d4d45", fontSize: 12 },
-  notice: { marginTop: 12, color: "#2f5d50" }
+  textarea: { minHeight: 240, textAlignVertical: "top" },
+  counter: { color: "rgba(248,241,223,0.58)", fontSize: 12, fontWeight: "700" },
+  actions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  ghostDark: {
+    borderWidth: 1,
+    borderColor: "rgba(248,241,223,0.2)",
+    paddingHorizontal: 11,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  ghostDarkText: { color: "#f8f1df", fontSize: 12, fontWeight: "800" },
+  primaryDark: {
+    backgroundColor: "#c7472b",
+    paddingHorizontal: 13,
+    paddingVertical: 11,
+    borderRadius: 8,
+  },
+  primaryDarkText: { color: "#fffaf0", fontSize: 12, fontWeight: "900" },
+  note: {
+    backgroundColor: "#fffaf0",
+    borderWidth: 1,
+    borderColor: "#d2c09b",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  noteText: { color: "#5f5344", lineHeight: 20 },
+  notice: { color: "#2f7d73", lineHeight: 20, marginTop: 4 },
 });

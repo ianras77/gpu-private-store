@@ -1,6 +1,10 @@
 # Totally Righteous Tales
 
-A whimsical long-form storytelling commons with moderation, voting, and a leaderboard.
+A modern Gutenberg storytelling studio for crafted medium-to-long tall tales, with moderation, hearts, profiles, iOS, and an anti-slop writing process.
+
+## Version 0.5 Product Direction
+
+Version 0.5 reframes the app as a modern Gutenberg press room instead of a generic whimsical feed. The composer starts with a story spine, asks for human craft choices before studio help, and treats AI as sparks, craft notes, or proofing rather than full-story generation. Web and iOS now share the same press-room visual language: ink, paper, copper, gold, editorial panels, and movable-type controls.
 
 ## Stack
 

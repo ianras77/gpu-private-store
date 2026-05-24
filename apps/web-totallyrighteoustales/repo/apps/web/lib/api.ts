@@ -4,6 +4,7 @@ import type {
   LeaderboardData,
   StorytellerProfile,
   ImagePurpose,
+  CraftNotesResponse,
 } from "@trt/shared";
 
 const apiUrl =
@@ -138,6 +139,9 @@ export async function createTale(payload: {
   assistMode?: "HANDMADE" | "STUDIO";
   isAnonymous?: boolean;
   storyPrompt?: string | null;
+  personaName?: string | null;
+  personaVoice?: string | null;
+  personaSignature?: string | null;
   token: string;
 }) {
   return authedJson(
@@ -155,6 +159,9 @@ export async function createTale(payload: {
         assistMode: payload.assistMode,
         isAnonymous: payload.isAnonymous ?? false,
         storyPrompt: payload.storyPrompt ?? null,
+        personaName: payload.personaName ?? null,
+        personaVoice: payload.personaVoice ?? null,
+        personaSignature: payload.personaSignature ?? null,
       }),
     },
     "Failed to create tale",
@@ -169,6 +176,9 @@ export async function updateTale(payload: {
   assistMode?: "HANDMADE" | "STUDIO";
   isAnonymous?: boolean;
   storyPrompt?: string | null;
+  personaName?: string | null;
+  personaVoice?: string | null;
+  personaSignature?: string | null;
   token: string;
 }) {
   return authedJson(
@@ -186,6 +196,9 @@ export async function updateTale(payload: {
         assistMode: payload.assistMode,
         isAnonymous: payload.isAnonymous ?? false,
         storyPrompt: payload.storyPrompt ?? null,
+        personaName: payload.personaName ?? null,
+        personaVoice: payload.personaVoice ?? null,
+        personaSignature: payload.personaSignature ?? null,
       }),
     },
     "Failed to update tale",
@@ -324,6 +337,10 @@ export async function generateStorySpark(payload: {
   mood?: string | null;
   setting?: string | null;
   wonder?: string | null;
+  character?: string | null;
+  stakes?: string | null;
+  turn?: string | null;
+  voice?: string | null;
 }) {
   return apiJson<{
     titleSuggestion: string;
@@ -336,6 +353,28 @@ export async function generateStorySpark(payload: {
     },
     body: JSON.stringify(payload),
   });
+}
+
+export async function fetchCraftNotes(payload: {
+  title?: string;
+  body?: string;
+  premise?: string | null;
+  character?: string | null;
+  stakes?: string | null;
+  turn?: string | null;
+  voice?: string | null;
+}) {
+  return apiJson<CraftNotesResponse>(
+    "/craft-notes",
+    "Failed to gather craft notes",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+  );
 }
 
 export async function polishDraft(text: string, token: string) {

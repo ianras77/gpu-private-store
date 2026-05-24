@@ -3,7 +3,7 @@
     "name": "Totally Righteous Tales",
     "slug": "totallyrighteoustales",
     "scheme": "totallyrighteoustales",
-    "version": "0.1.0",
+    "version": "0.5.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -11,8 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#f8f1e7"
     },
-    "assetBundlePatterns": ["**/*"]
-    ,
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "infoPlist": {
         "NSMicrophoneUsageDescription": "We use the microphone to transcribe your tale.",
@@ -21,7 +20,11 @@
       }
     },
     "android": {
-      "permissions": ["RECORD_AUDIO", "READ_MEDIA_IMAGES", "READ_EXTERNAL_STORAGE"]
+      "permissions": [
+        "RECORD_AUDIO",
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE"
+      ]
     }
   }
 }

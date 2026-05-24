@@ -1,12 +1,17 @@
 import { FastifyPluginAsync } from "fastify";
 import { prisma } from "../lib/prisma";
-import { StorySparkSchema, StorytellerProfileUpdateSchema } from "@trt/shared";
+import {
+  CraftNotesSchema,
+  StorySparkSchema,
+  StorytellerProfileUpdateSchema,
+} from "@trt/shared";
 import {
   aiEnabled,
   chatCompletion,
   polishStory,
   transcribeAudio,
 } from "../lib/ai";
+import { buildCraftNotesFallback, chooseCraftFocus } from "../lib/craft";
 
 function serializeUser(user: {
   id: string;
@@ -38,19 +43,28 @@ function fallbackStorySpark(input: {
   mood?: string | null;
   setting?: string | null;
   wonder?: string | null;
+  character?: string | null;
+  stakes?: string | null;
+  turn?: string | null;
+  voice?: string | null;
 }) {
   const mood = input.mood?.trim() || "warm, whimsical";
   const setting =
     input.setting?.trim() ||
     "a place that feels one breath away from impossible";
   const wonder = input.wonder?.trim() || "one delightful impossibility";
+  const character = input.character?.trim() || "someone with a private want";
+  const stakes = input.stakes?.trim() || "a cost that cannot be shrugged off";
+  const turn = input.turn?.trim() || "one choice that changes the bargain";
+  const voice = input.voice?.trim() || "clear, vivid, and hand-led";
   const titleSuggestion = `${input.premise.split(" ").slice(0, 4).join(" ")} and the ${wonder}`;
   const prompt =
-    `Write a ${mood} short story set in ${setting}. Start with ${input.premise}. ` +
-    `Let the tale revolve around ${wonder}, use vivid sensory detail, and end with a note of wonder instead of a full explanation.`;
+    `Story spine: premise=${input.premise}; character=${character}; stakes=${stakes}; turn=${turn}; ` +
+    `voice=${voice}; setting=${setting}; wonder=${wonder}. Draft slowly in scenes, keep cause and effect clear, ` +
+    `and leave room for the human author to make final language choices.`;
   const opening =
     `${input.premise} began in ${setting}, where ${wonder.toLowerCase()} felt as ordinary as weather and just as moody. ` +
-    `Give the narrator one tiny ritual, one surprising image, and a reason to keep moving.`;
+    `Put ${character} in motion, hint at ${stakes.toLowerCase()}, and end the opening on ${turn.toLowerCase()}.`;
 
   return { titleSuggestion, prompt, opening };
 }
@@ -60,6 +74,10 @@ async function conjureStorySpark(input: {
   mood?: string | null;
   setting?: string | null;
   wonder?: string | null;
+  character?: string | null;
+  stakes?: string | null;
+  turn?: string | null;
+  voice?: string | null;
 }) {
   if (!aiEnabled()) {
     return fallbackStorySpark(input);
@@ -71,7 +89,7 @@ async function conjureStorySpark(input: {
         {
           role: "system",
           content:
-            'You craft irresistible whimsical story prompts for LLM-assisted storytelling. Respond ONLY with valid JSON using this shape: {"titleSuggestion":"string","prompt":"string","opening":"string"}. The opening should be 2-4 sentences long and should invite expansion, not finish the story.',
+            'You are a story atelier assistant for an anti-slop long-form writing app. Craft a scene-first story spine and opening, not a finished story. Respond ONLY with valid JSON using this shape: {"titleSuggestion":"string","prompt":"string","opening":"string"}. The opening should be 2-4 sentences long, specific, and unfinished. Never produce a complete tale.',
         },
         {
           role: "user",
@@ -103,6 +121,60 @@ async function conjureStorySpark(input: {
     };
   } catch (_err) {
     return fallbackStorySpark(input);
+  }
+}
+
+async function buildCraftNotes(input: {
+  title?: string | null;
+  body?: string | null;
+  premise?: string | null;
+  character?: string | null;
+  stakes?: string | null;
+  turn?: string | null;
+  voice?: string | null;
+}) {
+  const fallback = buildCraftNotesFallback(input);
+  const focus = chooseCraftFocus(input);
+
+  if (!aiEnabled() || !(input.body || input.title)) {
+    return { notes: fallback, focus };
+  }
+
+  try {
+    const content = await chatCompletion(
+      [
+        {
+          role: "system",
+          content:
+            'You are a rigorous story editor for a modern Gutenberg writing studio. Give craft notes only. Do not rewrite the story. Respond ONLY with valid JSON: {"notes":["string","string","string","string"],"focus":"structure|voice|stakes|line-edit"}. Each note must be specific, humane, and action-oriented.',
+        },
+        {
+          role: "user",
+          content: JSON.stringify({ ...input, fallbackFocus: focus }),
+        },
+      ],
+      0.45,
+    );
+
+    if (!content) return { notes: fallback, focus };
+    const parsed = JSON.parse(content.replace(/```json|```/g, "").trim()) as {
+      notes?: string[];
+      focus?: "structure" | "voice" | "stakes" | "line-edit";
+    };
+
+    if (!Array.isArray(parsed.notes) || parsed.notes.length === 0) {
+      return { notes: fallback, focus };
+    }
+
+    return {
+      notes: parsed.notes
+        .slice(0, 4)
+        .map((note) => note.trim())
+        .filter(Boolean),
+      focus: parsed.focus ?? focus,
+    };
+  } catch (_err) {
+    return { notes: fallback, focus };
   }
 }
 
@@ -181,6 +253,16 @@ const miscRoutes: FastifyPluginAsync = async (app) => {
     }
 
     return conjureStorySpark(payload.data);
+  });
+
+  app.post("/craft-notes", async (req, reply) => {
+    const payload = CraftNotesSchema.safeParse(req.body);
+    if (!payload.success) {
+      reply.status(400);
+      return { error: "Invalid craft notes payload" };
+    }
+
+    return buildCraftNotes(payload.data);
   });
 
   app.post("/transcribe", async (req, reply) => {

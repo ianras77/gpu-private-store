@@ -49,13 +49,13 @@ export default function HeartButton({
       disabled={loading}
       aria-pressed={hearted}
       className={clsx(
-        "inline-flex items-center gap-2 rounded-full border px-4 py-2.5 font-semibold transition disabled:cursor-not-allowed disabled:opacity-70",
+        "inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 font-semibold transition disabled:cursor-not-allowed disabled:opacity-70",
         compact
           ? "text-xs uppercase tracking-[0.18em]"
           : "text-sm uppercase tracking-[0.18em]",
         hearted
-          ? "border-berry/40 bg-berry text-white shadow-soft"
-          : "border-ink/12 bg-cream/80 text-ink/78 hover:border-berry/35 hover:text-berry dark:border-parchment/14 dark:bg-white/5 dark:text-parchment/78",
+          ? "border-press-copper/40 bg-press-copper text-white shadow-soft"
+          : "border-press-ink/15 bg-white/45 text-press-ink/78 hover:border-press-copper/45 hover:text-press-copper dark:border-white/10 dark:bg-white/5 dark:text-press-paper/78",
       )}
       aria-label={hearted ? "Remove heart" : "Heart this story"}
     >
