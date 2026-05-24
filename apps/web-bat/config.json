@@ -5,15 +5,15 @@
   "exposable": true,
   "dynamic_config": false,
   "id": "web-bat",
-  "description": "Editorial platform with Next.js, FastAPI, worker automation, Qdrant retrieval, and a Cheshire Cat sidecar.",
-  "tipi_version": 4,
-  "version": "1.0.3",
+  "description": "Cowgirl-sharp anti-Trump editorial blog with Next.js, FastAPI automation, channel heat, linked receipts, and live research workflows.",
+  "tipi_version": 5,
+  "version": "1.0.4",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "Editorial workflow stack with FastAPI, worker automation, and Cheshire Cat.",
+  "short_desc": "Cowgirl-sharp anti-Trump blog with live channels, heat, and receipts.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-bat",
   "form_fields": [],
@@ -22,5 +22,5 @@
   ],
   "no_gui": false,
   "created_at": 1776589448000,
-  "updated_at": 1779494400000
+  "updated_at": 1779580800000
 }

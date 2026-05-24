@@ -1,10 +1,14 @@
 import Link from "next/link";
 
 import { safeDate } from "@/lib/api";
-import { cleanCopy, getPublicSiteData, storySummary, themeName } from "@/lib/public-site";
+import { cleanCopy, getPublicSiteData, storySummary, themeName, type PublicSiteData } from "@/lib/public-site";
 
-export async function PublicHeader() {
-  const { leadStory, activeThemes, latestCycle, publishedStories, queryPlan, snapshot } = await getPublicSiteData();
+type PublicHeaderProps = {
+  data?: PublicSiteData;
+};
+
+export async function PublicHeader({ data }: PublicHeaderProps = {}) {
+  const { leadStory, activeThemes, latestCycle, publishedStories, queryPlan, snapshot, curatedLinks } = data ?? (await getPublicSiteData());
   const editionStamp = new Intl.DateTimeFormat("en-US", {
     month: "long",
     day: "numeric",
@@ -26,77 +30,66 @@ export async function PublicHeader() {
   const freshnessLine = latestCycle?.completed_at
     ? `Latest research sweep closed ${safeDate(latestCycle.completed_at)} and the shelf is holding ${publishedStories.length} published pieces.`
     : "The page is live now, with the archive, notebook, and reading table all updating against the same cycle.";
+  const channelLine = activeThemes
+    .slice(0, 3)
+    .map((theme) => themeName(theme))
+    .filter(Boolean)
+    .join(" / ");
+  const receiptCount = curatedLinks.length;
 
   return (
     <header className="shell public-header">
-      <div className="masthead">
-        <div className="masthead-topline">
-          <div className="brand-lockup">
-            <div className="brand-seal" aria-hidden="true">
-              <span>BAT</span>
-            </div>
-            <div className="brand-copy">
-              <p className="kicker">A source-backed Trump research and commentary blog</p>
-              <p className="brand-slogan">long-form pieces, short-form dispatches, and a public notebook built from linked reporting</p>
-            </div>
-          </div>
-          <p className="edition-stamp">Updated {editionStamp}</p>
-        </div>
-        <h1>Blondes Against Trump</h1>
-        <p className="subhed">
-          This is a Trump research blog with a point of view. I track the filings, the spin, the linked reporting, and the recurring
-          patterns, then file the sharpest read in public.
-        </p>
-        <div className="brand-flags">
-          <span>Linked reporting</span>
-          <span>Long-form and short-form</span>
-          <span>Public notebook</span>
-        </div>
-        <p className="masthead-note">Specific, witty, source-led, and only cruel when the receipts make it unavoidable.</p>
-        <div className="masthead-deskline">
-          <article className="desk-note-panel">
-            <p className="section-kicker">Research note</p>
-            <h2>{leadTitle}</h2>
-            <p>{deskNote}</p>
-            <div className="desk-note-links">
-              <Link href={leadHref}>Read the lead</Link>
-              <Link href={themeHref}>{hottestTheme ? themeName(hottestTheme) : "Browse the lanes"}</Link>
-            </div>
-          </article>
-
-          <div className="header-entry-grid">
-            <Link href={leadHref} className="entry-card">
-              <span>Start here</span>
-              <strong>{leadTitle}</strong>
-              <p>The cleanest way into whatever I think matters most right now.</p>
-            </Link>
-            <Link href={themeHref} className="entry-card">
-              <span>Lane I keep circling</span>
-              <strong>{hottestTheme ? themeName(hottestTheme) : "The pattern board"}</strong>
-              <p>The recurring logic under the headline noise.</p>
-            </Link>
-            <Link href="/workflow" className="entry-card">
-              <span>Notebook tab</span>
-              <strong>{notebookPrompt}</strong>
-              <p>The exact string or angle still snagging my attention.</p>
-            </Link>
-          </div>
-        </div>
-      </div>
-      <nav className="utility">
-        <Link href="/">Desk</Link>
-        <Link href="/archive">Shelf</Link>
-        <Link href="/themes">Lanes</Link>
-        <Link href="/workflow">Notebook</Link>
-        <Link href="/about">Why BAT</Link>
-        <Link href="/the-cat">Taste</Link>
-        <Link href="/admin" className="utility-admin-link">
-          Studio
+      <div className="site-topbar">
+        <Link href="/" className="brand-mini" aria-label="Blondes Against Trump home">
+          <span className="brand-mini-seal">BAT</span>
+          <span>Blondes Against Trump</span>
         </Link>
-      </nav>
-      <div className="banner">
-        <span className="banner-pill">Edition note</span>
-        {freshnessLine} Every story on this site is supposed to show its receipts, not just its vibe.
+        <nav className="utility" aria-label="Primary navigation">
+          <Link href="/">Latest</Link>
+          <Link href="/archive">Archive</Link>
+          <Link href="/themes">Channels</Link>
+          <Link href="/workflow">Notebook</Link>
+          <Link href="/about">About</Link>
+          <Link href="/the-cat">Taste</Link>
+          <Link href="/admin" className="utility-admin-link">
+            Studio
+          </Link>
+        </nav>
+      </div>
+
+      <div className="masthead">
+        <div className="masthead-art" aria-hidden="true">
+          <img src="/bat-logo.jpg" alt="" />
+        </div>
+
+        <div className="masthead-copy">
+          <p className="kicker">Updated {editionStamp}</p>
+          <p className="masthead-title">Big hair. Bigger receipts.</p>
+          <p className="subhed">
+            A cowgirl-sharp anti-Trump blog for linked reporting, political heat, and the kind of feminine authority that
+            walks in with boots on and receipts ready.
+          </p>
+          <div className="brand-flags">
+            <span>Cowgirl editorial</span>
+            <span>Receipts first</span>
+            <span>{channelLine || "Live channels"}</span>
+          </div>
+        </div>
+
+        <aside className="masthead-latest">
+          <p className="section-kicker">Start here</p>
+          <Link href={leadHref}>{leadTitle}</Link>
+          <p>{deskNote}</p>
+          <div className="masthead-latest-links">
+            <Link href={themeHref}>{hottestTheme ? themeName(hottestTheme) : "Browse channels"}</Link>
+            <Link href="/workflow">{notebookPrompt ? "Open notebook" : "See the tabs"}</Link>
+          </div>
+        </aside>
+      </div>
+
+      <div className="banner header-ticker">
+        <span className="banner-pill">Live desk</span>
+        {freshnessLine} {receiptCount ? `${receiptCount} outside receipts are on the reading table.` : "The reading table is warming up."}
       </div>
     </header>
   );

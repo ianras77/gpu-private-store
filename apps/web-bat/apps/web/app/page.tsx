@@ -30,6 +30,7 @@ function storyTypeLabel(objectType?: string): string {
 }
 
 export default async function HomePage() {
+  const siteData = await getPublicSiteData();
   const {
     snapshot,
     publishedStories,
@@ -43,495 +44,270 @@ export default async function HomePage() {
     curatedLinks,
     queenLinks,
     liveSocialLines,
-  } = await getPublicSiteData();
+  } = siteData;
 
   const leadHref = leadStory ? `/story/${leadStory.slug}` : "/archive";
   const leadTitle = leadStory ? cleanCopy(leadStory.title) : "The next clean contradiction";
   const leadSummary = leadStory
     ? storySummary(leadStory)
-    : "When the automation hesitates, I still want the page to feel lived in, current, and impossible to mistake for filler.";
+    : "The next finished piece will land here with a point of view, a source trail, and enough snap to deserve the front page.";
   const leadQuote =
     storyQuote(leadStory) ||
-    "I built BAT for the hour when the headlines are still moving but I already know which parts deserve memory.";
+    "The work is serious. The delivery is allowed to have perfume, boots, and a little edge.";
+  const latestDate = leadStory?.published_at || leadStory?.created_at;
+  const latestStoryType = storyTypeLabel(leadStory?.object_type);
 
-  const supportingStories = publishedStories.filter((story) => story.slug !== leadStory?.slug);
-  const topShelf = supportingStories.slice(0, 4);
-  const recentShelf = publishedStories.slice(0, 5);
-  const liveWatch = watchlist.slice(0, 5);
-  const liveThemes = activeThemes.slice(0, 4);
-  const visibleQueries = queryPlan.slice(0, 6);
+  const latestPosts = publishedStories.slice(0, 6);
+  const channelCards = activeThemes.slice(0, 6);
+  const heatMap = (watchlist.length ? watchlist : activeThemes).slice(0, 6);
+  const visibleQueries = queryPlan.slice(0, 5);
   const visibleOpportunities = opportunityBoard.slice(0, 4);
-  const featuredSignal = curatedLinks[0];
-  const extraSignals = curatedLinks.slice(1, 5);
-  const featuredQueen = queenLinks[0];
-  const extraQueen = queenLinks.slice(featuredQueen ? 1 : 0, 5);
-  const lineShelf = liveSocialLines.slice(0, 4);
-  const freshestSources = researcherResult?.source_quality_mix?.fresh_sources ?? 0;
-  const highQualityKept = researcherResult?.source_quality_mix?.high_quality_kept ?? 0;
+  const receiptLinks = (curatedLinks.length ? curatedLinks : queenLinks).slice(0, 5);
+  const socialLines = liveSocialLines.slice(0, 4);
+  const topChannel = channelCards[0];
+  const topQuery = cleanCopy(visibleQueries[0]);
   const storyCount = publishedStories.length;
   const leadStoryCount = publishedStories.filter((story) => story.object_type === "lead_story").length;
   const themeTakeCount = publishedStories.filter((story) => story.object_type === "theme_take").length;
+  const freshestSources = researcherResult?.source_quality_mix?.fresh_sources ?? 0;
+  const highQualityKept = researcherResult?.source_quality_mix?.high_quality_kept ?? 0;
   const editionLabel =
     cleanCopy(snapshot?.layout_json?.edition) ||
-    (latestCycle?.completed_at ? `Edition ${safeDate(latestCycle.completed_at)}` : "Fresh desk notes");
-  const liveCycleLine = latestCycle?.completed_at
-    ? `Latest research sweep closed ${safeDate(latestCycle.completed_at)}.`
-    : "This page stays wired to the live cycle instead of posing as a static homepage.";
-  const deskLane = liveThemes[0];
-  const topQuery = cleanCopy(visibleQueries[0]);
-  const topOpportunity = visibleOpportunities[0];
-  const heroObjects = [
+    (latestCycle?.completed_at ? `Edition ${safeDate(latestCycle.completed_at)}` : "Live edition");
+  const heroLine =
+    cleanCopy(snapshot?.layout_json?.tagline) ||
+    "A cowgirl-sharp anti-Trump blog with Texas gloss, feminine nerve, and receipts close enough to slap on the table.";
+
+  const dataCards = [
     {
-      eyebrow: "The shelf",
-      title: `${storyCount} pieces on the shelf`,
-      copy: `${leadStoryCount} lead stories and ${themeTakeCount} theme takes are already filed, so the place remembers where it has been.`,
+      label: "Dispatches",
+      value: storyCount.toString(),
+      copy: `${leadStoryCount} lead stories and ${themeTakeCount} channel takes are live on the shelf.`,
     },
     {
-      eyebrow: topQuery ? "The question" : "The obsession",
-      title: topQuery || (deskLane ? themeName(deskLane) : `${activeThemes.length} running obsessions`),
-      copy: topQuery
-        ? "I leave the search string visible because the questions matter as much as the finished take."
-        : deskLane
-          ? themeNarrative(deskLane)
-          : `The hottest lanes right now are ${liveThemes.map((theme) => themeName(theme)).join(", ") || "still taking shape"}.`,
+      label: "Channels",
+      value: activeThemes.length.toString(),
+      copy: topChannel ? `${themeName(topChannel)} is setting the room temperature.` : "The channel board is warming up.",
     },
     {
-      eyebrow: featuredSignal ? "The tab" : "The receipts",
-      title: cleanCopy(featuredSignal?.source_name) || `${freshestSources} fresh links`,
-      copy: featuredSignal
-        ? `${cleanCopy(featuredSignal.title) || "Untitled reporting pick"} is the outside piece I keep within reach because it sharpens the whole room.`
-        : `${highQualityKept || freshestSources} reporting picks survived the latest sweep, which lets the page feel dressed without faking the homework.`,
-    },
-  ];
-  const leadWhyNow =
-    cleanCopy(snapshot?.layout_json?.lead?.why_now) ||
-    cleanCopy(topOpportunity?.angle) ||
-    leadSummary;
-  const visitModes = [
-    {
-      href: leadHref,
-      label: "If you want the fastest answer",
-      title: leadTitle,
-      copy: leadSummary,
+      label: "Receipts",
+      value: (receiptLinks.length || highQualityKept || freshestSources).toString(),
+      copy: receiptLinks.length ? "Outside links are dressed and on the reading table." : "Fresh links will surface after the next sweep.",
     },
     {
-      href: deskLane ? `/themes/${deskLane.slug}` : "/themes",
-      label: "If you want the pattern underneath it",
-      title: deskLane ? themeName(deskLane) : "The live lanes",
-      copy: deskLane
-        ? themeNarrative(deskLane)
-        : "The lanes are where I sort the mess into recurring habits instead of treating every headline like it was born alone.",
-    },
-    {
-      href: "/workflow",
-      label: "If you want to see my tabs",
-      title: topQuery || "The public notebook",
-      copy: topQuery
-        ? "I leave the search strings visible because I like readers knowing what I was pulling on before the prose showed up."
-        : "The notebook keeps the research questions, the misses, and the almost-posts in public view.",
-    },
-  ];
-  const deskHabits = [
-    {
-      title: "I keep the shelf warm",
-      copy: `${storyCount} published pieces are already live, so landing here should feel like arriving mid-thought, not before the room is set.`,
-    },
-    {
-      title: "I show the tabs",
-      copy: topQuery
-        ? `The first string still open tonight is “${topQuery},” because the questions matter as much as the finished take.`
-        : "When the next sweep closes, the notebook will tell you exactly what I was searching for.",
-    },
-    {
-      title: "I file by pattern",
-      copy: deskLane
-        ? `${themeName(deskLane)} is still staining the page, which tells you where I think the bigger story actually lives.`
-        : "The lanes exist so the archive can hold more than one day at a time.",
+      label: "Notebook",
+      value: (researcherResult?.query_count ?? visibleQueries.length).toString(),
+      copy: topQuery ? `First tab open: ${topQuery}` : "Queries will appear when the next research pass closes.",
     },
   ];
 
   return (
     <>
-      <PublicHeader />
-      <main className="shell home-shell">
-        <section className="home-ribbon">
-          <span className="banner-pill">{editionLabel}</span>
-          <p>
-            {cleanCopy(snapshot?.layout_json?.tagline) ||
-              "An anti-Trump front page kept like a real room: shelf stocked, tabs open, memory intact."}
-          </p>
-        </section>
-
-        <section className="edition-hero home-hero">
-          <div className="edition-copy home-hero-copy">
-            <div className="hero-brandline">
-              <div className="brand-seal large" aria-hidden="true">
-                <span>BAT</span>
-              </div>
-              <div>
-                <p className="hero-brandnote">
-                  BAT is the room I wanted whenever Trump-world started acting like everybody else had amnesia.
-                </p>
-                <div className="hero-brandchips">
-                  <span>My front page</span>
-                  <span>Reading table</span>
-                  <span>Open notebook</span>
-                </div>
-              </div>
-            </div>
-
-            <p className="hero-kicker">{cleanCopy(snapshot?.layout_json?.edition_theme) || "A dressed-up desk with sharp elbows"}</p>
-            <h2>I keep this place like a desk, a shelf, and a running text thread.</h2>
-            <p className="hero-dek">
-              When Trump, his people, his policy machinery, or the war around his power starts moving too fast, I want one room where the
-              live story, the older memory, and the lines worth keeping can sit beside each other without turning into sludge.
-            </p>
+      <PublicHeader data={siteData} />
+      <main className="shell home-shell redesigned-home">
+        <section className="hero-board">
+          <article className="home-hero-primary">
+            <p className="hero-kicker">{editionLabel}</p>
+            <h1>Cowgirl politics with lipstick on the glass and receipts on the table.</h1>
+            <p className="hero-dek">{heroLine}</p>
             <p className="hero-note">
-              {liveCycleLine} The latest piece on the shelf is <strong>{leadTitle}</strong>, and the reason it is here is simple:
-              {` ${leadWhyNow}`} I want the room to feel inhabited even when you arrive in the middle of the mess.
+              BAT is personal, source-backed, anti-Trump, and built to feel like a real cowgirl blog instead of a dashboard wearing a wig.
+              The writing leads. The data earns its seat by making the channels, heat, and receipts easy to read.
             </p>
             <div className="hero-actions">
               <Link href={leadHref} className="button-link">
-                Read the lead
+                Read the latest
               </Link>
-              <Link href="/about" className="button-link muted">
-                Meet the room
+              <Link href="/themes" className="button-link muted">
+                Browse channels
               </Link>
             </div>
-            <ul className="signal-chip-list">
-              {liveThemes.map((theme) => (
-                <li key={theme.slug}>{themeName(theme)}</li>
-              ))}
-            </ul>
-            <p className="feature-footnote">If you walked in after I had already been reading for an hour, this is the version of the room I want you to find.</p>
-          </div>
+          </article>
 
-          <aside className="hero-sidebar home-hero-stack">
-            <article className="metric-card home-callout">
-              <span>On the desk right now</span>
-              <strong>{leadTitle}</strong>
-              <p>{leadSummary}</p>
-            </article>
-
-            <div className="hero-ornament-row">
-              {heroObjects.map((item) => (
-                <article key={item.title} className="hero-ornament-card">
-                  <span>{item.eyebrow}</span>
-                  <strong>{item.title}</strong>
-                  <p>{item.copy}</p>
-                </article>
-              ))}
+          <aside className="lead-ticket">
+            <p className="section-kicker">Latest dispatch</p>
+            <h2>
+              <Link href={leadHref}>{leadTitle}</Link>
+            </h2>
+            <p>{leadSummary}</p>
+            <blockquote>{leadQuote}</blockquote>
+            <div className="lead-ticket-meta">
+              <span>{latestStoryType}</span>
+              <span>{latestDate ? safeDate(latestDate) : "Ready for the next file"}</span>
             </div>
           </aside>
         </section>
 
-        <section className="home-welcome-grid">
-          <article className="story-panel note-card">
-            <p className="section-kicker">A note from me</p>
-            <h3>I built BAT because I wanted somewhere to put the receipts and the mood in the same room.</h3>
-            <p>
-              Too much political writing acts like a person choosing what matters is somehow embarrassing. I like the opposite. I want you
-              to feel the reading habit, the filing instinct, and the fact that I am making decisions about what deserves the front table.
-            </p>
-            <p>
-              Tonight that means keeping <strong>{leadTitle}</strong> close, watching {deskLane ? themeName(deskLane) : "the live lanes"},
-              and leaving enough of the notebook visible that you can see how I got here.
-            </p>
-          </article>
-
-          <article className="story-panel">
-            <p className="section-kicker">Pick your way in</p>
-            <h3>Three good doors into the room</h3>
-            <div className="stack-list compact">
-              {visitModes.map((mode) => (
-                <Link key={mode.label} href={mode.href} className="stack-item">
-                  <span className="signal-rank">{mode.label}</span>
-                  <strong>{mode.title}</strong>
-                  <span>{mode.copy}</span>
-                </Link>
-              ))}
-            </div>
-          </article>
-        </section>
-
-        <section className="home-promise-grid">
-          {deskHabits.map((card) => (
-            <article key={card.title} className="promise-card">
-              <p className="section-kicker">House rule</p>
-              <h3>{card.title}</h3>
+        <section className="data-strip" aria-label="Live site data">
+          {dataCards.map((card) => (
+            <article key={card.label} className="data-card">
+              <span>{card.label}</span>
+              <strong>{card.value}</strong>
               <p>{card.copy}</p>
             </article>
           ))}
         </section>
 
-        <section className="frontline-grid home-frontline-grid">
-          <article className="story-panel story-panel-feature">
-            <p className="section-kicker">The story I would hand you first</p>
-            <h3>
-              <Link href={leadHref}>{leadTitle}</Link>
-            </h3>
-            <p>{leadSummary}</p>
-            <blockquote className="story-quote">“{leadQuote}”</blockquote>
-            <p className="story-hook">
-              {leadStory
-                ? `${storyTypeLabel(leadStory.object_type)} | ${leadStory.published_at ? safeDate(leadStory.published_at) : "Freshly filed"}`
-                : "The shelf is ready for the next clean hit."}
-            </p>
-            <div className="hero-actions">
-              <Link href={leadHref} className="button-link muted small">
-                Read the piece
-              </Link>
-              <Link href="/archive" className="button-link muted small">
-                Open the shelf
-              </Link>
+        <section className="blog-and-heat">
+          <article className="story-panel latest-blog-list">
+            <div className="section-heading">
+              <p className="section-kicker">Fresh writing</p>
+              <h2>The latest posts</h2>
+              <p>Newest first, voice intact, with the strongest read close enough to grab.</p>
             </div>
-          </article>
-
-          <article className="story-panel">
-            <p className="section-kicker">Fresh on the shelf</p>
-            <h3>The recent stack</h3>
-            <p>I want a visitor to land here and immediately feel the site has already been busy without them.</p>
-            <div className="stack-list">
-              {topShelf.length ? (
-                topShelf.map((story) => (
-                  <Link key={story.id} href={`/story/${story.slug}`} className="stack-item">
+            <div className="post-list">
+              {latestPosts.length ? (
+                latestPosts.map((story) => (
+                  <Link key={story.id} href={`/story/${story.slug}`} className="post-row">
+                    <span>{storyTypeLabel(story.object_type)}</span>
                     <strong>{cleanCopy(story.title)}</strong>
-                    <span>{storySummary(story)}</span>
+                    <p>{storySummary(story)}</p>
                   </Link>
                 ))
               ) : (
-                <p className="stack-empty">The next good pieces will land here as soon as the cycle gives me something worth keeping.</p>
+                <p className="stack-empty">The shelf is built. The next post will land here when it has earned the front page.</p>
               )}
             </div>
           </article>
 
-          <article className="story-panel signal-salon-main">
-            <p className="section-kicker">{cleanCopy(snapshot?.layout_json?.signal_links_label) || "Worth keeping open"}</p>
-            <h3>The reading room</h3>
-            {featuredSignal ? (
-              <a href={featuredSignal.url ?? "#"} target="_blank" rel="noreferrer" className="stack-item signal-salon-lead">
-                <span className="signal-rank">Front table pick</span>
-                <strong>{cleanCopy(featuredSignal.title) || "Untitled reporting pick"}</strong>
-                <span>
-                  {cleanCopy(featuredSignal.source_name) || "news desk"} | quality {(featuredSignal.quality_score ?? 0).toFixed(1)}
-                </span>
-              </a>
-            ) : (
-              <div className="stack-empty">When a link truly earns its place, this is where it gets displayed like jewelry.</div>
-            )}
-            <div className="stack-list compact signal-salon-list">
-              {extraSignals.map((link) => (
-                <a key={`${link.url}-${link.title}`} href={link.url ?? "#"} target="_blank" rel="noreferrer" className="stack-item">
-                  <strong>{cleanCopy(link.title) || "Untitled link"}</strong>
-                  <span>{cleanCopy(link.source_name) || "news desk"}</span>
-                </a>
-              ))}
+          <aside className="story-panel heat-map-panel">
+            <div className="section-heading">
+              <p className="section-kicker">Channel heat</p>
+              <h2>What is hot right now</h2>
+              <p>Heat is the shortcut: which recurring Trump-world patterns are loudest in the current read.</p>
             </div>
-          </article>
-        </section>
-
-        <section className="info-grid">
-          <article className="story-panel">
-            <p className="section-kicker">Why this room feels human</p>
-            <h3>I wanted habits, not widgets.</h3>
-            <p>
-              Politics sites often pretend objectivity means sanding off every sign of authorship. I wanted the opposite: a page where the
-              sourcing is serious, but the reader can still feel a person deciding what belongs where.
-            </p>
-            <p>
-              That is why the archive matters, the notebook is public, the taste page exists, and the latest links are curated like a real
-              reading table. The point is not just to publish. It is to build a place.
-            </p>
-            <div className="hero-actions">
-              <Link href="/workflow" className="button-link muted small">
-                See the notebook
-              </Link>
-              <Link href="/the-cat" className="button-link muted small">
-                See the taste
-              </Link>
-            </div>
-          </article>
-
-          <article className="story-panel">
-            <p className="section-kicker">What is shaping the page tonight</p>
-            <h3>The live lanes</h3>
             <div className="heat-list">
-              {liveWatch.length ? (
-                liveWatch.map((theme) => (
+              {heatMap.length ? (
+                heatMap.map((theme) => (
                   <Link key={theme.slug ?? theme.name} href={theme.slug ? `/themes/${theme.slug}` : "/themes"} className="heat-row">
                     <div className="heat-copy">
-                      <strong>{cleanCopy(theme.name) || "Untitled lane"}</strong>
-                      <span>{cleanCopy(theme.description) || "A recurring BAT lane that keeps proving it is not done with us yet."}</span>
+                      <strong>{cleanCopy(theme.name) || "Untitled channel"}</strong>
+                      <span>{cleanCopy(theme.description) || "A BAT channel still warm enough to keep watching."}</span>
                     </div>
                     <div className="heat-meter" aria-hidden="true">
                       <div className="heat-bar" style={{ width: heatWidth(theme.active_score) }} />
                     </div>
                     <span className="signal-rank">
-                      {heatLabel(theme.active_score)} | {(theme.active_score ?? 0).toFixed(2)}
+                      {heatLabel(theme.active_score)} / {(theme.active_score ?? 0).toFixed(2)}
                     </span>
                   </Link>
                 ))
               ) : (
-                <p className="stack-empty">The next active patterns will gather here once the live cycle starts staining the page.</p>
+                <p className="stack-empty">The heat map will fill in once the live channel board has fresh signal.</p>
               )}
             </div>
-          </article>
+          </aside>
         </section>
 
-        <section className="column-band home-columns">
-          <article className="story-panel">
-            <p className="column-eyebrow">Freshly filed</p>
-            <h3>What went up lately</h3>
-            <p className="column-note">A personal site should have a visible pulse. These are the posts proving the lights are on.</p>
-            <div className="stack-list compact">
-              {recentShelf.length ? (
-                recentShelf.map((story) => (
-                  <Link key={story.id} href={`/story/${story.slug}`} className="stack-item">
-                    <strong>{cleanCopy(story.title)}</strong>
-                    <span>{storySummary(story)}</span>
-                  </Link>
-                ))
-              ) : (
-                <p className="stack-empty">The shelf is ready. I am waiting on the next clean post.</p>
-              )}
-            </div>
-          </article>
-
-          <article className="story-panel">
-            <p className="column-eyebrow">Lanes I cannot quit</p>
-            <h3>The patterns under the headlines</h3>
-            <p className="column-note">The theme index is the best shortcut to how my brain is organizing the mess.</p>
-            <div className="stack-list compact">
-              {liveThemes.length ? (
-                liveThemes.map((theme) => (
-                  <Link key={theme.slug} href={`/themes/${theme.slug}`} className="stack-item">
-                    <strong>{themeName(theme)}</strong>
-                    <span>{themeNarrative(theme)}</span>
-                  </Link>
-                ))
-              ) : (
-                <p className="stack-empty">The active lanes will collect here as soon as the site has a pattern worth naming.</p>
-              )}
-            </div>
-          </article>
-
-          <article className="story-panel">
-            <p className="column-eyebrow">Queries from tonight</p>
-            <h3>What I am still pulling on</h3>
-            <p className="column-note">The notebook stays visible because I like readers seeing the questions before the finished prose arrives.</p>
-            <div className="stack-list compact">
-              {visibleQueries.length ? (
-                visibleQueries.map((query) => (
-                  <div key={query} className="stack-item static">
-                    <strong>{cleanCopy(query)}</strong>
-                    <span>The search string tells you exactly where my attention keeps snagging.</span>
-                  </div>
-                ))
-              ) : (
-                <p className="stack-empty">Fresh queries from the latest sweep will show up here once the next cycle closes.</p>
-              )}
-            </div>
-          </article>
-        </section>
-
-        <section className="info-grid">
-          <article className="story-panel">
-            <p className="section-kicker">What I was working through tonight</p>
-            <h3>The notebook stays open on purpose</h3>
-            <div className="stack-list compact">
-              <div className="stack-item static">
-                <strong>Searches I sent out</strong>
-                <span>
-                  {researcherResult?.query_count ?? visibleQueries.length} queries across {researcherResult?.themes_active ?? activeThemes.length}{" "}
-                  active lanes{topQuery ? `, starting with ${topQuery}.` : "."}
-                </span>
-              </div>
-              <div className="stack-item static">
-                <strong>Receipts I kept</strong>
-                <span>
-                  {freshestSources} fresh sources kept, with {highQualityKept} high-quality links still standing after the pass.
-                </span>
-              </div>
-              {visibleOpportunities.map((item) => (
-                <div key={`${item.slug}-${item.query_hint}`} className="stack-item static">
-                  <strong>{cleanCopy(item.theme) || humanizeSlug(item.slug) || "Angle still bugging me"}</strong>
-                  <span>{cleanCopy(item.angle || item.query_hint) || "Still hot enough that I have not closed the tab."}</span>
-                </div>
-              ))}
-            </div>
-          </article>
-
-          <article className="story-panel">
-            <p className="section-kicker">What I would text first</p>
-            <h3>The line shelf</h3>
-            <div className="social-cards">
-              {lineShelf.length ? (
-                lineShelf.map((line, index) => (
-                  <article key={`${index}-${line}`} className="social-card">
-                    <span>line {index + 1}</span>
-                    <p>{line}</p>
-                  </article>
-                ))
-              ) : (
-                <p className="stack-empty">The fastest lines collect here once the latest cycle produces something worth stealing.</p>
-              )}
-            </div>
-          </article>
-        </section>
-
-        <section className="queen-band queen-band-magical">
-          <div className="queen-copy">
-            <p className="section-kicker">{cleanCopy(snapshot?.layout_json?.queen_label) || "Tabs I refuse to close"}</p>
-            <h3>{cleanCopy(snapshot?.layout_json?.queen_note) || "The side table matters too."}</h3>
-            <p className="queen-subcopy">
-              The extra links stay secondary, but they matter. I like a homepage where the main story, the archive, and the outside
-              reporting can all sit near one another like parts of the same conversation.
-            </p>
-            <div className="hero-actions">
-              <Link href="/themes" className="button-link muted small">
-                Browse the lanes
-              </Link>
-              <Link href="/archive" className="button-link muted small">
-                Read the archive
-              </Link>
-            </div>
+        <section className="channel-showcase">
+          <div className="section-heading section-heading-wide">
+            <p className="section-kicker">Channels</p>
+            <h2>The beats I keep circling</h2>
+            <p>Not categories for decoration. Channels are how the blog remembers what Trump-world keeps trying to rebrand.</p>
           </div>
+          <div className="channel-grid">
+            {channelCards.length ? (
+              channelCards.map((theme) => (
+                <Link key={theme.slug} href={`/themes/${theme.slug}`} className="channel-card">
+                  <span>Heat {(theme.active_score ?? 0).toFixed(2)}</span>
+                  <strong>{themeName(theme)}</strong>
+                  <p>{themeNarrative(theme)}</p>
+                </Link>
+              ))
+            ) : (
+              <article className="channel-card static">
+                <span>Channels warming</span>
+                <strong>The next pass will name the patterns.</strong>
+                <p>Once the theme board updates, this section becomes the living channel guide.</p>
+              </article>
+            )}
+          </div>
+        </section>
 
-          <div className="queen-links queen-links-magical">
-            {featuredQueen ? (
-              <a href={featuredQueen.url ?? "#"} target="_blank" rel="noreferrer" className="queen-link queen-link-feature">
-                <strong>{cleanCopy(featuredQueen.title) || "Featured BAT pick"}</strong>
-                <span>{cleanCopy(featuredQueen.source_name) || "news desk"}</span>
-              </a>
-            ) : null}
-
-            <div className="queen-link-stack">
-              {(extraQueen.length ? extraQueen : queenLinks).length ? (
-                (extraQueen.length ? extraQueen : queenLinks).map((item) => (
-                  <a key={`${item.url}-${item.title}`} href={item.url ?? "#"} target="_blank" rel="noreferrer" className="queen-link">
-                    <strong>{cleanCopy(item.title) || "Untitled source"}</strong>
-                    <span>{cleanCopy(item.source_name) || "news desk"}</span>
+        <section className="reading-room-grid">
+          <article className="story-panel receipts-panel">
+            <div className="section-heading">
+              <p className="section-kicker">Reading table</p>
+              <h2>Receipts worth keeping open</h2>
+              <p>Outside reporting stays visible because attitude without receipts is just perfume in a press room.</p>
+            </div>
+            <div className="receipt-list">
+              {receiptLinks.length ? (
+                receiptLinks.map((link) => (
+                  <a key={`${link.url}-${link.title}`} href={link.url ?? "#"} target="_blank" rel="noreferrer" className="receipt-row">
+                    <strong>{cleanCopy(link.title) || "Untitled reporting pick"}</strong>
+                    <span>
+                      {cleanCopy(link.source_name) || "news desk"}
+                      {link.quality_score ? ` / quality ${link.quality_score.toFixed(1)}` : ""}
+                    </span>
                   </a>
                 ))
               ) : (
-                <p className="stack-empty">The extra tabs fill in once the cycle offers something too useful or too delicious to close.</p>
+                <p className="stack-empty">Links from the next curation pass will land here when they are worth the table space.</p>
               )}
             </div>
+          </article>
+
+          <article className="story-panel line-shelf-panel">
+            <div className="section-heading">
+              <p className="section-kicker">Group chat shelf</p>
+              <h2>Lines with legs</h2>
+              <p>Short, portable, a little wicked, and useful when somebody needs the point fast.</p>
+            </div>
+            <div className="line-shelf">
+              {socialLines.length ? (
+                socialLines.map((line, index) => (
+                  <p key={`${index}-${line}`}>
+                    <span>Line {index + 1}</span>
+                    {line}
+                  </p>
+                ))
+              ) : (
+                <p className="stack-empty">The fastest lines collect here once the latest cycle has something worth stealing.</p>
+              )}
+            </div>
+          </article>
+        </section>
+
+        <section className="notebook-proof">
+          <div className="section-heading section-heading-wide">
+            <p className="section-kicker">Open notebook</p>
+            <h2>The tabs behind the latest take</h2>
+            <p>The process is no longer the sales pitch. It is the proof layer: queries, opportunities, and receipts when you want to look closer.</p>
+          </div>
+          <div className="notebook-grid">
+            <article>
+              <span>First search string</span>
+              <strong>{topQuery || "Waiting on the next live sweep"}</strong>
+              <p>{topQuery ? "The question tells you where the writing started pulling." : "New query language appears here after a research pass closes."}</p>
+            </article>
+            <article>
+              <span>Sources kept</span>
+              <strong>{freshestSources} fresh / {highQualityKept} high quality</strong>
+              <p>The data stays readable, but the writing stays in charge.</p>
+            </article>
+            {visibleOpportunities.slice(0, 2).map((item) => (
+              <article key={`${item.slug}-${item.query_hint}`}>
+                <span>{cleanCopy(item.theme) || humanizeSlug(item.slug) || "Opportunity"}</span>
+                <strong>{cleanCopy(item.angle || item.query_hint) || "Angle still hot"}</strong>
+                <p>This one is still tugging on the sleeve.</p>
+              </article>
+            ))}
           </div>
         </section>
 
         <section className="home-closing-note">
           <p>
-            BAT is the version of political coverage I actually want to visit: current enough to keep up, personal enough to remember, and
-            alive enough that there is always another shelf, tab, or line worth opening.
+            BAT should feel like a sharp personal blog first: current enough to keep up, stylish enough to remember, and grounded enough
+            that every opinion has somewhere to point.
           </p>
-          <p className="closing-signoff">Come for the latest post, stay for the shelf and the tabs.</p>
+          <p className="closing-signoff">Boots on. Woman-led. Receipts in reach.</p>
           <div className="hero-actions">
             <Link href="/archive" className="button-link">
-              Read more posts
+              Read the archive
             </Link>
             <Link href="/about" className="button-link muted">
-              Why I make this
+              Why BAT exists
             </Link>
           </div>
         </section>
