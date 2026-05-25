@@ -11,6 +11,7 @@ import { BrandMark } from "@/components/brand/mark";
 import { ChatTab } from "@/components/playground/chat-tab";
 import { TemplatesTab } from "@/components/playground/templates-tab";
 import { WorldForgeTab } from "@/components/playground/world-forge-tab";
+import { StudioHandoffTab } from "@/components/playground/studio-handoff-tab";
 import { MemoryTab } from "@/components/playground/memory-tab";
 import { AssetShelfTab } from "@/components/playground/asset-shelf-tab";
 import { SkillsTab } from "@/components/playground/personas-tab";
@@ -31,6 +32,7 @@ type TabId =
   | "templates"
   | "worlds"
   | "assets"
+  | "handoff"
   | "plugins"
   | "memory"
   | "status"
@@ -69,13 +71,21 @@ const tabs: TabMeta[] = [
   {
     id: "worlds",
     label: "Map Forge",
-    description: "Choose a world vibe, a route shape, and the world-building crew recipe before the agents fan out.",
+    description:
+      "Choose a world vibe, a route shape, and the world-building crew recipe before the agents fan out.",
     group: "core"
   },
   {
     id: "assets",
     label: "Asset Shelf",
     description: "Decorate with approved art packs, props, sounds, and simple inspiration uploads.",
+    group: "core"
+  },
+  {
+    id: "handoff",
+    label: "Studio Handoff",
+    description:
+      "Download the Rojo package and let Roblox Studio handle account login and publish.",
     group: "core"
   },
   {
@@ -191,6 +201,11 @@ function metricForTab(tabId: TabId, features: FeatureSnapshot, summary: Workspac
   if (tabId === "assets") {
     return `${CURATED_ASSET_PACKS.length} approved shelves`;
   }
+  if (tabId === "handoff") {
+    return summary?.studioProject?.publishReadiness === "Studio-ready"
+      ? "Rojo package ready"
+      : "Rojo package draft";
+  }
   if (tabId === "worlds") {
     const headline = summary?.studioProject?.worldRecipe?.headline;
     return headline ? headline : "World recipe loading";
@@ -199,7 +214,9 @@ function metricForTab(tabId: TabId, features: FeatureSnapshot, summary: Workspac
     return features.userCount == null ? "Vault syncing" : `${features.userCount} creator profiles`;
   }
   if (tabId === "plugins") {
-    return features.pluginCount == null ? "Kit inventory pending" : `${features.pluginCount} build kits`;
+    return features.pluginCount == null
+      ? "Kit inventory pending"
+      : `${features.pluginCount} build kits`;
   }
   if (tabId === "status") {
     return features.llmCount == null ? "Engine scan pending" : `${features.llmCount} engine tools`;
@@ -211,7 +228,7 @@ function metricTone(tabId: TabId, features: FeatureSnapshot) {
   if (tabId === "chat" && features.catOnline) {
     return "text-glow-300";
   }
-  if (tabId === "templates" || tabId === "worlds" || tabId === "assets") {
+  if (tabId === "templates" || tabId === "worlds" || tabId === "assets" || tabId === "handoff") {
     return "text-glow-300";
   }
   if (tabId === "status" && features.catOnline === false) {
@@ -264,15 +281,14 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
   }, [fetchWithAuth]);
 
   const refreshFeatures = React.useCallback(async () => {
-    const [statusResult, pluginResult, userResult, mimeResult, llmResult] = await Promise.allSettled(
-      [
+    const [statusResult, pluginResult, userResult, mimeResult, llmResult] =
+      await Promise.allSettled([
         fetchWithAuth("/api/cat/status"),
         fetchWithAuth("/api/cat/plugins"),
         fetchWithAuth("/api/cat/users"),
         fetchWithAuth("/api/cat/rabbithole/allowed-mimetypes"),
         fetchWithAuth("/api/cat/llm")
-      ]
-    );
+      ]);
 
     const snapshot: FeatureSnapshot = {
       catOnline: null,
@@ -282,11 +298,7 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
       llmCount: null
     };
 
-    if (
-      statusResult.status === "fulfilled" &&
-      statusResult.value &&
-      statusResult.value.ok
-    ) {
+    if (statusResult.status === "fulfilled" && statusResult.value && statusResult.value.ok) {
       snapshot.catOnline = true;
     } else if (
       statusResult.status === "fulfilled" &&
@@ -296,29 +308,17 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
       snapshot.catOnline = false;
     }
 
-    if (
-      pluginResult.status === "fulfilled" &&
-      pluginResult.value &&
-      pluginResult.value.ok
-    ) {
+    if (pluginResult.status === "fulfilled" && pluginResult.value && pluginResult.value.ok) {
       const payload = await pluginResult.value.json().catch(() => null);
       snapshot.pluginCount = pickPluginCount(payload);
     }
 
-    if (
-      userResult.status === "fulfilled" &&
-      userResult.value &&
-      userResult.value.ok
-    ) {
+    if (userResult.status === "fulfilled" && userResult.value && userResult.value.ok) {
       const payload = await userResult.value.json().catch(() => null);
       snapshot.userCount = pickUserCount(payload);
     }
 
-    if (
-      mimeResult.status === "fulfilled" &&
-      mimeResult.value &&
-      mimeResult.value.ok
-    ) {
+    if (mimeResult.status === "fulfilled" && mimeResult.value && mimeResult.value.ok) {
       const payload = await mimeResult.value.json().catch(() => null);
       snapshot.mimeCount = pickMimetypeCount(payload);
     }
@@ -397,11 +397,12 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
                     Kid-First Game Studio
                   </div>
                   <h1 className="mt-2 text-2xl font-semibold text-ink-50 sm:text-3xl">
-                    One playful surface for starter worlds, safe shelves, build kits, and studio control.
+                    One playful surface for starter worlds, safe shelves, build kits, and studio
+                    control.
                   </h1>
                   <p className="mt-3 max-w-3xl text-sm text-ink-300">
-                    Launchpad wraps Cheshire Cat as a family-friendly game studio. Keep the coach
-                    in the center, start from kid-friendly templates, decorate with approved asset
+                    Launchpad wraps Cheshire Cat as a family-friendly game studio. Keep the coach in
+                    the center, start from kid-friendly templates, decorate with approved asset
                     shelves, and turn strong patterns into reusable build kits that make the next
                     project easier.
                   </p>
@@ -445,15 +446,15 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
                     <div className="text-[10px] uppercase tracking-[0.24em] text-ink-500">
                       Asset shelves
                     </div>
-                    <div className="mt-1 text-lg font-semibold text-ink-100">
-                      {assetShelfCount}
-                    </div>
+                    <div className="mt-1 text-lg font-semibold text-ink-100">{assetShelfCount}</div>
                   </div>
                   <div className="rounded-2xl border border-ink-800 bg-ink-900/70 px-4 py-3">
                     <div className="text-[10px] uppercase tracking-[0.24em] text-ink-500">
                       Publish status
                     </div>
-                    <div className="mt-1 text-lg font-semibold text-ink-100">{publishReadiness}</div>
+                    <div className="mt-1 text-lg font-semibold text-ink-100">
+                      {publishReadiness}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -464,14 +465,18 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
                 </div>
                 <div className="mt-3 text-lg font-semibold text-ink-100">{user.username}</div>
                 <div className="mt-2 text-xs text-ink-400">
-                  {user.engineUserId ? `Engine user ${user.engineUserId}` : "No bound engine user id"}
+                  {user.engineUserId
+                    ? `Engine user ${user.engineUserId}`
+                    : "No bound engine user id"}
                 </div>
                 <div className="mt-4 rounded-2xl border border-ink-800 bg-ink-900/70 px-3 py-3 text-xs text-ink-300">
-                  Current lane: <span className="font-semibold text-ink-100">{activeMeta.label}</span>
+                  Current lane:{" "}
+                  <span className="font-semibold text-ink-100">{activeMeta.label}</span>
                 </div>
                 <div className="mt-3 grid gap-2 text-xs">
                   <div className="rounded-2xl border border-ink-800 bg-ink-900/70 px-3 py-2 text-ink-300">
-                    Connection: <span className="font-semibold text-ink-100">{connectionStatus}</span>
+                    Connection:{" "}
+                    <span className="font-semibold text-ink-100">{connectionStatus}</span>
                   </div>
                   <div className="rounded-2xl border border-ink-800 bg-ink-900/70 px-3 py-2 text-ink-300">
                     Parent mode: <span className="font-semibold text-ink-100">{parentMode}</span>
@@ -487,9 +492,7 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
           <div className="mt-6 grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
             <aside className="space-y-4">
               <Card className="p-5">
-                <div className="text-xs uppercase tracking-[0.3em] text-ink-400">
-                  Build Rail
-                </div>
+                <div className="text-xs uppercase tracking-[0.3em] text-ink-400">Build Rail</div>
                 <h2 className="mt-3 text-xl font-semibold text-ink-50">
                   What do you want to build next?
                 </h2>
@@ -507,7 +510,7 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
                     className={cn(
                       "w-full rounded-3xl border px-4 py-4 text-left transition",
                       activeTab === tab.id
-                        ? "border-glow-500/40 bg-glow-500/12 shadow-glow"
+                        ? "bg-glow-500/12 border-glow-500/40 shadow-glow"
                         : "border-ink-800 bg-ink-900/70 hover:border-ink-600"
                     )}
                   >
@@ -539,7 +542,7 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
                       className={cn(
                         "w-full rounded-2xl border px-4 py-3 text-left transition",
                         activeTab === tab.id
-                          ? "border-glow-500/40 bg-glow-500/12"
+                          ? "bg-glow-500/12 border-glow-500/40"
                           : "border-ink-800 bg-ink-950/70 hover:border-ink-600"
                       )}
                     >
@@ -605,13 +608,18 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
                   </div>
                   <div className="mt-3 space-y-2 text-sm">
                     <div className="rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-2 text-ink-300">
-                      Engine: <span className="font-semibold text-ink-100">{readiness(features.catOnline)}</span>
+                      Engine:{" "}
+                      <span className="font-semibold text-ink-100">
+                        {readiness(features.catOnline)}
+                      </span>
                     </div>
                     <div className="rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-2 text-ink-300">
-                      Template: <span className="font-semibold text-ink-100">{projectTemplate}</span>
+                      Template:{" "}
+                      <span className="font-semibold text-ink-100">{projectTemplate}</span>
                     </div>
                     <div className="rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-2 text-ink-300">
-                      Publish: <span className="font-semibold text-ink-100">{publishReadiness}</span>
+                      Publish:{" "}
+                      <span className="font-semibold text-ink-100">{publishReadiness}</span>
                     </div>
                   </div>
                 </Card>
@@ -649,6 +657,7 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
                   onRefreshSummary={refreshSummary}
                 />
               ) : null}
+              {activeTab === "handoff" ? <StudioHandoffTab summary={summary} /> : null}
               {activeTab === "plugins" ? <SkillsTab /> : null}
               {activeTab === "memory" ? <MemoryTab /> : null}
               {activeTab === "status" ? <StatusTab /> : null}
