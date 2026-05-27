@@ -20,6 +20,7 @@ import {
   AboutPanel,
   BirthdayEasterEgg,
   ChatPanel,
+  FamilyAccessPanel,
   MinecraftPanel,
   SearchPanel,
   ServiceLaunchpad,
@@ -492,24 +493,9 @@ export default function App() {
   const familyPortalUrl = FAMILY_APP_LIBRARY_URL;
   const searchUrl = ensureTrailingSlash(config.searchUrl);
   const photosUrl = ensureTrailingSlash(config.photosUrl);
-  const mediaSignupHomeUrl = ensureTrailingSlash(
-    config.signupUrl.trim() || defaultConfig.signupUrl,
-  );
   const signupUrl = MEDIA_SIGNUP_DIRECT_URL;
   const publicBaseLabel = config.publicBaseUrl.replace(/^https?:\/\//, "");
   const appsGuideUrl = "/#/apps";
-
-  const mediaSetupSteps = [
-    "Use signup.rasies.com/j/RASIES for Plex, books, audiobooks, or music.",
-    "That media invite is intentionally separate from the full family account.",
-    "Need photos, files, notes, or planning too? Use the family request lane.",
-  ];
-
-  const fullSetupSteps = [
-    "Use the Rasies waitlist flow when you want the broader family suite.",
-    "I review those requests first, so access is not instant.",
-    "Once approved, open the Authentik app library.",
-  ];
 
   const startHereLinks = useMemo<ServiceLink[]>(
     () => [
@@ -551,6 +537,11 @@ export default function App() {
       },
     ],
     [accountRequestUrl, familyPortalUrl, signupUrl],
+  );
+
+  const familyAccessLinks = useMemo<ServiceLink[]>(
+    () => startHereLinks.filter((link) => link.title !== "Media signup"),
+    [startHereLinks],
   );
 
   const helpfulServiceLinks = useMemo<ServiceLink[]>(
@@ -1020,10 +1011,10 @@ export default function App() {
                 <p className="hero-eyebrow">Rasies apps guide</p>
                 <h1>The app map, without the guessing.</h1>
                 <p className="hero-copy">
-                  Use the waitlist when you need the full family account. Once
-                  I approve it, the Authentik app library is the dashboard.
-                  Some things use the family sign-in, and some are just useful
-                  links gathered in one place.
+                  Use the waitlist when you need the full family account. Once I
+                  approve it, the Authentik app library is the dashboard. Some
+                  things use the family sign-in, and some are just useful links
+                  gathered in one place.
                 </p>
                 <p className="hero-copy hero-copy-secondary">
                   Media-only signup stays separate at signup.rasies.com. This
@@ -1313,120 +1304,19 @@ export default function App() {
             <div>
               <h2 id="media-signup-heading">Media services signup</h2>
               <p>
-                If you only want movies, books, audiobooks, or music, use the
-                Rasies media invite.
+                If you only want movies, books, audiobooks, or music, create a
+                live Rasies media invite here. Family app access stays in the
+                waitlist lane.
               </p>
             </div>
           </div>
-          <div className="account-hero-grid">
-            <article className="account-hero-copy">
-              <p className="card-kicker">Media signup</p>
-              <h3>Choose this if you only want media.</h3>
-              <p>
-                Click Media signup and follow the invite steps. This does not
-                create the full family account or app-library access.
-              </p>
-              <div className="manifesto-actions">
-                <a
-                  href={signupUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-primary"
-                >
-                  <Headphones className="h-4 w-4" />
-                  Media signup
-                </a>
-                <a
-                  href={mediaSignupHomeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-ghost"
-                >
-                  <Compass className="h-4 w-4" />
-                  signup.rasies.com
-                </a>
-              </div>
-            </article>
-            <ol className="path-list account-path-list">
-              {mediaSetupSteps.map((step, index) => (
-                <li key={step} className="path-step">
-                  <span>{index + 1}</span>
-                  <p>{step}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        <section
-          id="family-request"
-          className="account-hero account-hero-family reveal reveal-6"
-          aria-labelledby="family-request-heading"
-        >
-          <div className="section-head">
-            <LockKeyhole className="h-5 w-5" aria-hidden />
-            <div>
-              <h2 id="family-request-heading">Family access request</h2>
-              <p>
-                If you want photos, files, notes, planning, and family apps,
-                start with the waitlist.
-              </p>
-            </div>
-          </div>
-          <div className="account-hero-grid">
-            <article className="account-hero-copy">
-              <p className="card-kicker">Full family account request</p>
-              <h3>Choose this if you want the full family account.</h3>
-              <p>
-                Click Request family account to open the waitlist. Once I
-                approve it, use the app library button to get into the family
-                apps.
-              </p>
-              <div className="manifesto-actions">
-                <a
-                  href={accountRequestUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-primary"
-                >
-                  <LockKeyhole className="h-4 w-4" />
-                  Request family account
-                </a>
-                <a
-                  href={familyPortalUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-ghost"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                  Open app library
-                </a>
-                <a
-                  href={authentikEntryUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-ghost"
-                >
-                  <LockKeyhole className="h-4 w-4" />
-                  Sign in / library
-                </a>
-              </div>
-              <div className="card-footer-note">
-                Family requests use the Runtipi waitlist flow. Approved users
-                land in the Authentik app library.
-              </div>
-            </article>
-            <article className="account-hero-steps">
-              <ol className="path-list">
-                {fullSetupSteps.map((step, index) => (
-                  <li key={step} className="path-step">
-                    <span>{index + 1}</span>
-                    <p>{step}</p>
-                  </li>
-                ))}
-              </ol>
-            </article>
-          </div>
+          <FamilyAccessPanel
+            signupUrl={signupUrl}
+            authentikUrl={authentikEntryUrl}
+            accountRequestUrl={accountRequestUrl}
+            signupEnabled={config.signupEnabled}
+            links={familyAccessLinks}
+          />
         </section>
 
         <BirthdayEasterEgg gameUrl={config.gamesUrl} />

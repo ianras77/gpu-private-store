@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import App from "./App";
 
@@ -552,11 +553,12 @@ describe("App", () => {
         }),
       ).toBeInTheDocument();
       expect(
-        screen.getAllByRole("link", { name: /^Media signup$/i }).length,
+        screen.getAllByRole("link", { name: /Media signup/i }).length,
       ).toBeGreaterThan(0);
       expect(
-        screen.getAllByRole("link", { name: /^Request family account$/i })
-          .length,
+        screen.getAllByRole("link", {
+          name: /Request family account|Open family waitlist|Full family access/i,
+        }).length,
       ).toBeGreaterThan(0);
       expect(
         screen.getAllByRole("link", { name: /^Open app library$/i }).length,
@@ -571,16 +573,18 @@ describe("App", () => {
     });
 
     expect(
-      screen.getAllByRole("link", { name: /^Media signup$/i })[0],
+      screen.getAllByRole("link", { name: /Media signup/i })[0],
     ).toHaveAttribute("href", "https://signup.rasies.com/j/RASIES");
     expect(
-      screen.getAllByRole("link", { name: /^Request family account$/i })[0],
+      screen.getAllByRole("link", {
+        name: /Request family account|Open family waitlist|Full family access/i,
+      })[0],
     ).toHaveAttribute(
       "href",
       "https://auth.rasies.com/if/flow/runtipi-waitlist-enrollment/",
     );
     expect(
-      screen.getAllByRole("link", { name: /^Sign in \/ library$/i })[0],
+      screen.getAllByRole("link", { name: /^Sign in \/ app library$/i })[0],
     ).toHaveAttribute("href", "https://auth.rasies.com/");
     expect(
       screen.getByRole("link", { name: /^Open full apps guide$/i }),
@@ -609,25 +613,51 @@ describe("App", () => {
         .length,
     ).toBeGreaterThan(0);
     expect(
-      screen.getByText(
-        /Once I approve it, use the app library button/i,
-      ),
+      screen.getByText(/Once I approve it, use the app library button/i),
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("link", {
-        name: /Ask for family account|Request family account/i,
+        name: /Ask for family account|Request family account|Open family waitlist|Full family access/i,
       }).length,
     ).toBeGreaterThan(0);
     expect(
       screen.getAllByRole("link", {
-        name: /^Media signup$/i,
+        name: /Media signup/i,
       }).length,
     ).toBeGreaterThan(0);
     expect(
       screen.getByRole("heading", {
-        name: /Choose this if you want the full family account\./i,
+        name: /Family access request/i,
       }),
     ).toBeInTheDocument();
+  });
+
+  it("creates a live media invite from the homepage signup panel", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const createInviteButton = await screen.findByRole("button", {
+      name: /Create media invite for Plex, Music, Audiobooks, and Books/i,
+    });
+
+    await user.click(createInviteButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", { name: /Open final signup step/i }),
+      ).toHaveAttribute("href", "https://signup.rasies.com/j/F4N5218DH1");
+    });
+
+    const inviteRequest = vi
+      .mocked(globalThis.fetch)
+      .mock.calls.find(([input]) =>
+        String(input).includes("/api/signup/invite"),
+      );
+
+    expect(inviteRequest?.[1]).toMatchObject({
+      method: "POST",
+      body: JSON.stringify({ serviceIds: [1, 4, 2, 3] }),
+    });
   });
 
   it("renders the full apps guide route", async () => {
@@ -661,7 +691,7 @@ describe("App", () => {
       screen.getByRole("link", { name: /^Back to home$/i }),
     ).toHaveAttribute("href", "/");
     expect(
-      screen.getAllByRole("link", { name: /^Media signup$/i })[0],
+      screen.getAllByRole("link", { name: /Media signup/i })[0],
     ).toHaveAttribute("href", "https://signup.rasies.com/j/RASIES");
   });
 

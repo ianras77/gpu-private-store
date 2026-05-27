@@ -1453,8 +1453,9 @@ export function FamilyAccessPanel({
             Create the media invite here, then finish at signup.rasies.com.
           </h3>
           <p>
-            Use the media invite for Plex, books, audiobooks, and music. Use
-            the Rasies waitlist when you need the full family apps.
+            Choose this if you only want media. This does not create the full
+            family account or app-library access; use the Rasies waitlist when
+            you need photos, files, planning, and the rest of the family apps.
           </p>
         </div>
 
@@ -1470,7 +1471,9 @@ export function FamilyAccessPanel({
             </span>
           </div>
           <div className="family-access-step">
-            <strong>2. Finish media signup at signup.rasies.com/j/RASIES</strong>
+            <strong>
+              2. Finish media signup at signup.rasies.com/j/RASIES
+            </strong>
             <span>
               The invite takes them into the final media account step.
             </span>
@@ -1478,8 +1481,8 @@ export function FamilyAccessPanel({
           <div className="family-access-step">
             <strong>3. Ask for family app access through the waitlist</strong>
             <span>
-              That is the request flow for photos, files, planning, and the
-              rest of the family apps.
+              That is the request flow for photos, files, planning, and the rest
+              of the family apps.
             </span>
           </div>
         </div>
@@ -1765,16 +1768,20 @@ export function FamilyAccessPanel({
         </div>
       </article>
 
-      <aside className="family-access-side">
+      <aside
+        id="family-request"
+        className="family-access-side"
+        aria-labelledby="family-request-heading"
+      >
         <div className="family-access-side-card">
           <div className="family-access-stage-copy">
             <span className="family-access-result-kicker">Step 2</span>
-            <strong>Family access waitlist</strong>
+            <h3 id="family-request-heading">Family access request</h3>
             <p>
-              Once the media signup is done, this is where someone asks for
-              permission to use photos, files, planning, and the rest of the
-              family tools I host. Approved accounts open the Authentik app
-              library.
+              Choose this if you want the full family account. Once the media
+              signup is done, ask for permission to use photos, files, planning,
+              and the rest of the family tools I host. Once I approve it, use
+              the app library button to get into the family apps.
             </p>
           </div>
           <ServiceLaunchpad links={links} />
@@ -3264,8 +3271,8 @@ export function ChatPanel({
                 <p className="card-kicker">House Chat</p>
                 <h2>Ask House Chat</h2>
                 <p>
-                  Plans, notes, questions, and half-formed ideas can start
-                  right here.
+                  Plans, notes, questions, and half-formed ideas can start right
+                  here.
                 </p>
               </div>
               <div className="chat-health">

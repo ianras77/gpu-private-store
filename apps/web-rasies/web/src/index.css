@@ -3402,8 +3402,16 @@ select:focus-visible {
   gap: 0.3rem;
 }
 
-.family-access-stage-copy strong {
+.family-access-stage-copy strong,
+.family-access-stage-copy h3 {
+  margin: 0;
   color: var(--ink);
+}
+
+.family-access-stage-copy h3 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(1.45rem, 2.2vw, 1.85rem);
+  line-height: 1.05;
 }
 
 .family-access-side {
@@ -4745,13 +4753,15 @@ select:focus-visible {
 .chat-panel-minimal .chat-main {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(280px, 0.62fr) minmax(420px, 1.38fr);
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
   gap: 0.8rem;
   align-items: stretch;
+  min-width: 0;
 }
 
 .chat-mini-status {
   grid-column: 1;
+  min-width: 0;
   display: flex;
   justify-content: space-between;
   gap: 0.9rem;
@@ -4799,8 +4809,9 @@ select:focus-visible {
 .chat-panel-minimal .chat-log {
   grid-column: 2;
   grid-row: 1 / span 3;
-  min-height: 280px;
-  max-height: 390px;
+  min-width: 0;
+  min-height: clamp(280px, 32vw, 360px);
+  max-height: clamp(360px, 42vw, 480px);
   border-radius: 22px;
   padding: 1rem;
 }
@@ -4811,13 +4822,14 @@ select:focus-visible {
 
 .chat-panel-minimal .chat-compose {
   grid-column: 1;
+  min-width: 0;
   align-self: stretch;
   display: grid;
   gap: 0.65rem;
 }
 
 .chat-panel-minimal .chat-compose textarea {
-  min-height: 178px;
+  min-height: clamp(140px, 16vw, 190px);
   resize: vertical;
   border-radius: 22px;
 }
@@ -5727,6 +5739,25 @@ select:focus-visible {
 @media (min-width: 1180px) {
   .circle-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .chat-panel-minimal .chat-main {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-mini-status,
+  .chat-panel-minimal .chat-log,
+  .chat-panel-minimal .chat-compose,
+  .chat-panel-minimal .status-line {
+    grid-column: 1;
+  }
+
+  .chat-panel-minimal .chat-log {
+    grid-row: auto;
+    min-height: 240px;
+    max-height: 360px;
   }
 }
 
