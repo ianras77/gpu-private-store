@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "tika",
   "description": "Tika is an internal service stack. with persistent supporting data services.",
-  "tipi_version": 1,
-  "version": "latest-full",
+  "tipi_version": 2,
+  "version": "latest-full-runtipi2",
   "categories": [
     "utilities"
   ],
@@ -20,5 +20,5 @@
   ],
   "no_gui": true,
   "created_at": 1774316487202,
-  "updated_at": 1774316487202
+  "updated_at": 1780059600000
 }

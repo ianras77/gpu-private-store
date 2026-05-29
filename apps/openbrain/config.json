@@ -1,13 +1,13 @@
 {
   "name": "Open Brain",
   "available": true,
-  "port": 3230,
+  "port": 3231,
   "exposable": false,
   "dynamic_config": true,
   "id": "openbrain",
   "description": "Self-hosted Open Brain starter for RunTipi with local PostgreSQL + pgvector, an MCP endpoint, and read-only mounts for shared media/data plus your Obsidian vault.",
-  "tipi_version": 1,
-  "version": "1.0.0-selfhost",
+  "tipi_version": 2,
+  "version": "1.0.1-selfhost",
   "categories": [
     "ai",
     "utilities"
@@ -90,5 +90,5 @@
   ],
   "no_gui": false,
   "created_at": 1777156674035,
-  "updated_at": 1777156674035
+  "updated_at": 1780059600000
 }

@@ -5,8 +5,6 @@ services:
     depends_on:
     - postgres
     - redis
-    env_file:
-    - /app-repos/langflow/.env
     environment:
       LANGFLOW_DATABASE_URL: postgresql://langflow:${POSTGRES_PASSWORD}@postgres:5432/langflow
       LANGFLOW_AUTO_LOGIN: 'False'
@@ -44,8 +42,6 @@ services:
   postgres:
     image: postgres:16
     restart: unless-stopped
-    env_file:
-    - /app-repos/langflow/.env
     environment:
       POSTGRES_USER: langflow
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

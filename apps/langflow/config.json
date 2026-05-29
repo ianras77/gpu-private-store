@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "langflow",
   "description": "Langflow exposes a primary web interface. with persistent supporting data services.",
-  "tipi_version": 1,
-  "version": "latest",
+  "tipi_version": 2,
+  "version": "latest-runtipi2",
   "categories": [
     "ai",
     "utilities"
@@ -15,11 +15,37 @@
   "short_desc": "Langflow exposes a primary web interface. with persistent supporting data services.",
   "author": "https://github.com/ianras77/langflow.git",
   "source": "https://github.com/ianras77/langflow",
-  "form_fields": [],
+  "form_fields": [
+    {
+      "type": "text",
+      "label": "Langflow admin username",
+      "default": "admin",
+      "required": true,
+      "env_variable": "LF_SUPERUSER"
+    },
+    {
+      "type": "random",
+      "label": "Langflow admin password",
+      "min": 32,
+      "env_variable": "LF_SUPERUSER_PASSWORD"
+    },
+    {
+      "type": "random",
+      "label": "Langflow secret key",
+      "min": 32,
+      "env_variable": "LF_SECRET_KEY"
+    },
+    {
+      "type": "password",
+      "label": "OpenAI-compatible API key",
+      "required": false,
+      "env_variable": "LANGFLOW_OPENAI_API_KEY"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1774316487166,
-  "updated_at": 1774316487166
+  "updated_at": 1780059600000
 }

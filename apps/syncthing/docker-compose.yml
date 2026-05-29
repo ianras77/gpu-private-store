@@ -1,0 +1,30 @@
+services:
+  syncthing:
+    image: syncthing/syncthing:2.0.15
+    stop_grace_period: 1m
+    hostname: ${SYNCTHING_HOSTNAME:-tipi}
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+    volumes:
+      - ${APP_DATA_DIR}/data:/var/syncthing
+      - ${ROOT_FOLDER_HOST}/media/data:/media/data
+    ports:
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fkLsS -m 2 127.0.0.1:8384/rest/noauth/health | grep -o --color=never OK || exit 1
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    x-runtipi:
+      is_main: true
+      internal_port: 8384
+
+x-runtipi:
+  schema_version: 2

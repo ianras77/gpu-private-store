@@ -9,7 +9,7 @@ services:
     volumes:
     - ${APP_DATA_DIR}/app-data/tika/named/ocr-data:/var/lib/postgresql/data
   ocr-ingester:
-    build: /app-repos/tika/ocr-ingester
+    build: ./ocr-ingester
     restart: unless-stopped
     environment:
     - DB_HOST=db

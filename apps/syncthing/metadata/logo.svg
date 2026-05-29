@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Syncthing">
+  <circle cx="64" cy="64" r="58" fill="#0891d1"/>
+  <path d="M42 34a34 34 0 0 1 43 11" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="10"/>
+  <path d="m89 43-2 17-15-8" fill="#fff"/>
+  <path d="M86 94a34 34 0 0 1-43-11" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="10"/>
+  <path d="m39 85 2-17 15 8" fill="#fff"/>
+</svg>

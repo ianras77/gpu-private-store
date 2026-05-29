@@ -1,0 +1,35 @@
+{
+  "name": "Syncthing",
+  "available": true,
+  "port": 3230,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "syncthing",
+  "description": "Peer-to-peer file synchronization between your devices. In this store it syncs directly into /media/data so companion apps can consume shared media and content.",
+  "tipi_version": 1,
+  "version": "2.0.15",
+  "categories": [
+    "data",
+    "utilities"
+  ],
+  "short_desc": "Sync directly into /media/data for shared app content.",
+  "author": "Syncthing",
+  "source": "https://github.com/syncthing/syncthing",
+  "form_fields": [
+    {
+      "type": "text",
+      "label": "Hostname",
+      "hint": "Set a hostname for the Syncthing instance.",
+      "placeholder": "tipi",
+      "required": false,
+      "env_variable": "SYNCTHING_HOSTNAME"
+    }
+  ],
+  "supported_architectures": [
+    "amd64",
+    "arm64"
+  ],
+  "no_gui": false,
+  "created_at": 1691943801422,
+  "updated_at": 1772688019542
+}

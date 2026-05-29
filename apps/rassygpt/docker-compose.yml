@@ -6,13 +6,13 @@ services:
     build:
       context: ./gateway
       dockerfile: Dockerfile
-    image: runtipi-local-rassygpt-gateway:1.0.1
+    image: runtipi-local-rassygpt-gateway:1.0.2
     restart: unless-stopped
     environment:
       TZ: ${TZ}
       RASSYGPT_API_KEY: ${RASSYGPT_API_KEY}
       RASSYGPT_REQUIRE_AUTH: ${RASSYGPT_REQUIRE_AUTH}
-      RASSYGPT_ALLOW_INTERNAL_OLLAMA_COMPAT: ${RASSYGPT_ALLOW_INTERNAL_OLLAMA_COMPAT:-false}
+      RASSYGPT_ALLOW_INTERNAL_OLLAMA_COMPAT: ${RASSYGPT_ALLOW_INTERNAL_OLLAMA_COMPAT:-true}
       RASSYGPT_INTERNAL_COMPAT_CIDRS: ${RASSYGPT_INTERNAL_COMPAT_CIDRS:-10.0.0.0/8,172.16.0.0/12}
       RASSYGPT_GATEWAY_WORKERS: ${RASSYGPT_GATEWAY_WORKERS}
       RASSYGPT_GATEWAY_LIMIT_CONCURRENCY: ${RASSYGPT_GATEWAY_LIMIT_CONCURRENCY}
