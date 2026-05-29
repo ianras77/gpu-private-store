@@ -1,6 +1,6 @@
 server:
   name: RassyGPT
-  version: "1.0.0"
+  version: "1.0.1"
   require_auth: ${RASSYGPT_REQUIRE_AUTH:-true}
   qdrant_url: ${RASSYGPT_QDRANT_URL:-http://rassygpt-qdrant:6333}
 
@@ -13,6 +13,10 @@ defaults:
   audio: rassy-audio
 
 backends:
+  smart:
+    type: openai
+    base_url: ${RASSYGPT_GENERAL_URL:-http://rassygpt-general:8080}
+    health_path: /health
   general:
     type: openai
     base_url: ${RASSYGPT_GENERAL_URL:-http://rassygpt-general:8080}

@@ -6,7 +6,7 @@ services:
     build:
       context: ./gateway
       dockerfile: Dockerfile
-    image: runtipi-local-rassygpt-gateway:1.0.0
+    image: runtipi-local-rassygpt-gateway:1.0.1
     restart: unless-stopped
     environment:
       TZ: ${TZ}
@@ -110,7 +110,7 @@ services:
       - -c
       - "32768"
       - -np
-      - "2"
+      - "1"
       - -ngl
       - "999"
       - --split-mode
@@ -150,9 +150,9 @@ services:
       - --hf-file
       - ${RASSYGPT_FAST_FILE}
       - -c
-      - "16384"
+      - "32768"
       - -np
-      - "4"
+      - "2"
       - -ngl
       - "999"
       - --cache-type-k
@@ -279,6 +279,9 @@ services:
       - "2"
       - -ngl
       - "999"
+      - --rerank
+      - --pooling
+      - rank
     healthcheck:
       test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
       interval: 45s

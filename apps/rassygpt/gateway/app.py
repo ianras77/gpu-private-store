@@ -16,7 +16,7 @@ import yaml
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 CONFIG_PATH = Path(os.getenv("RASSYGPT_CONFIG_FILE", "/data/config/routes.yaml"))
 DEFAULT_CONFIG_PATH = Path(os.getenv("RASSYGPT_DEFAULT_CONFIG_FILE", "/app/routes.default.yaml"))
 if not DEFAULT_CONFIG_PATH.exists():
@@ -193,9 +193,17 @@ def _message_text(payload: dict[str, Any]) -> str:
     return "\n".join(parts)
 
 
+def _estimated_prompt_tokens(text: str) -> int:
+    # A conservative routing estimate; exact tokenizer calls would add latency.
+    return max(1, math.ceil(len(text) / 4))
+
+
 def _smart_chat_target(payload: dict[str, Any]) -> str:
     text = _message_text(payload).lower()
     max_tokens = int(payload.get("max_tokens") or 0)
+    estimated_total_tokens = _estimated_prompt_tokens(text) + (max_tokens or 512)
+    if estimated_total_tokens > 14_000:
+        return "rassy-coder"
     code_markers = {
         "code", "repo", "repository", "bug", "debug", "traceback", "stack trace", "function",
         "class ", "typescript", "javascript", "python", "rust", "golang", "docker", "compose",
@@ -239,22 +247,79 @@ def _forward_headers(request: Request) -> dict[str, str]:
     return headers
 
 
-async def _post_json(url: str, payload: dict[str, Any], request: Request) -> Response:
-    upstream = await _http().post(url, json=payload, headers=_forward_headers(request))
-    return Response(
-        content=upstream.content,
-        status_code=upstream.status_code,
-        media_type=upstream.headers.get("content-type", "application/json"),
+def _upstream_unavailable_response(exc: Exception) -> JSONResponse:
+    return JSONResponse(
+        {
+            "error": "upstream_unavailable",
+            "detail": exc.__class__.__name__,
+        },
+        status_code=503,
     )
 
 
-async def _stream_json(url: str, payload: dict[str, Any], request: Request) -> StreamingResponse:
+async def _post_json(url: str, payload: dict[str, Any], request: Request, response_model: str | None = None) -> Response:
+    try:
+        upstream = await _http().post(url, json=payload, headers=_forward_headers(request))
+    except httpx.HTTPError as exc:
+        return _upstream_unavailable_response(exc)
+    content = upstream.content
+    media_type = upstream.headers.get("content-type", "application/json")
+    if response_model and "application/json" in media_type:
+        try:
+            data = upstream.json()
+            if isinstance(data, dict) and data.get("model"):
+                data["model"] = response_model
+                content = json.dumps(data).encode("utf-8")
+        except Exception:
+            pass
+    return Response(
+        content=content,
+        status_code=upstream.status_code,
+        media_type=media_type,
+    )
+
+
+async def _stream_json(url: str, payload: dict[str, Any], request: Request, response_model: str | None = None) -> StreamingResponse:
+    def normalize_line(line: str) -> bytes:
+        if not line.startswith("data: "):
+            return f"{line}\n".encode("utf-8")
+        data = line[6:].strip()
+        if data == "[DONE]":
+            return b"data: [DONE]\n"
+        try:
+            chunk = json.loads(data)
+        except json.JSONDecodeError:
+            return f"{line}\n".encode("utf-8")
+        if response_model and isinstance(chunk, dict) and chunk.get("model"):
+            chunk["model"] = response_model
+        for choice in chunk.get("choices", []):
+            if not isinstance(choice, dict):
+                continue
+            delta = choice.get("delta")
+            if isinstance(delta, dict) and delta.get("content") is None:
+                delta.pop("content", None)
+        return f"data: {json.dumps(chunk, separators=(',', ':'))}\n".encode("utf-8")
+
     async def generator() -> AsyncGenerator[bytes, None]:
         async with _http().stream("POST", url, json=payload, headers=_forward_headers(request)) as upstream:
-            async for chunk in upstream.aiter_bytes():
-                yield chunk
+            async for line in upstream.aiter_lines():
+                if line == "":
+                    yield b"\n"
+                else:
+                    yield normalize_line(line)
 
     return StreamingResponse(generator(), media_type="text/event-stream")
+
+
+def _apply_chat_compat_defaults(payload: dict[str, Any]) -> None:
+    """Prefer visible answer text for generic OpenAI-compatible clients."""
+    template_kwargs = payload.get("chat_template_kwargs")
+    if not isinstance(template_kwargs, dict):
+        template_kwargs = {}
+    else:
+        template_kwargs = dict(template_kwargs)
+    template_kwargs.setdefault("enable_thinking", False)
+    payload["chat_template_kwargs"] = template_kwargs
 
 
 async def _proxy_openai_json(request: Request, kind: str, upstream_path: str) -> Response:
@@ -262,15 +327,17 @@ async def _proxy_openai_json(request: Request, kind: str, upstream_path: str) ->
         payload = await request.json()
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Request body must be JSON.")
+    payload = dict(payload)
+    if kind in {"chat", "completions"}:
+        _apply_chat_compat_defaults(payload)
     if kind in {"chat", "completions"} and _canonical_model_name(payload.get("model"), kind) == "rassy-smart":
         payload["model"] = _smart_chat_target(payload)
     canonical, model_cfg, backend = _resolve_model(payload.get("model"), kind)
-    payload = dict(payload)
     payload["model"] = model_cfg.get("upstream_model", canonical)
     url = _backend_url(backend, upstream_path)
     if payload.get("stream") and kind in {"chat", "completions"}:
-        return await _stream_json(url, payload, request)
-    return await _post_json(url, payload, request)
+        return await _stream_json(url, payload, request, response_model=canonical)
+    return await _post_json(url, payload, request, response_model=canonical)
 
 
 @app.get("/health")

@@ -9,9 +9,13 @@ These defaults are chosen for Ian's hardware and for runtime compatibility over 
 | coder-secondary | `Qwen/Qwen2.5-Coder-7B-Instruct` via vLLM bitsandbytes | Fast worker coder on the V100 12GB lane. |
 | fast | `unsloth/Qwen3-8B-GGUF` / `Qwen3-8B-Q4_K_M.gguf` | Fast Qwen3 utility model for routing/summaries. |
 | embed | `nomic-ai/nomic-embed-text-v1.5-GGUF` / `nomic-embed-text-v1.5.Q8_0.gguf` | Compact embedding model with llama.cpp compatibility. |
-| rerank | `klnstpr/bge-reranker-v2-m3-Q8_0-GGUF` / `bge-reranker-v2-m3-q8_0.gguf` | GGUF reranker model; gateway falls back to embedding cosine if the backend endpoint is unavailable. |
+| rerank | `klnstpr/bge-reranker-v2-m3-Q8_0-GGUF` / `bge-reranker-v2-m3-q8_0.gguf` | GGUF reranker model with the llama.cpp reranking endpoint enabled; gateway falls back to embedding cosine if the endpoint is unavailable. |
 | image | `flux.2-klein-4b` via LocalAI | Image generation lane on the RTX 2080 Ti. |
 | audio | `whisper-large-turbo-q8_0` and `qwen3-tts-cpp` via LocalAI | STT and TTS on the RTX 2080 Ti. |
+
+## Runtime context policy
+
+llama.cpp splits the configured context across parallel slots. The default RassyGPT layout favors fewer, larger slots on lanes that receive long prompts: `rassy-coder` runs one 32k slot, `rassy-fast` runs two 16k slots on the P40, and `rassy-general` keeps two 16k slots on the V100 32GB lane. `rassy-smart` sends estimated long-context requests to `rassy-coder` to avoid avoidable 16k context rejections.
 
 ## Safer fallback models
 

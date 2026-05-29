@@ -33,6 +33,15 @@ Persistent model/cache and vector data lands under `RASSYGPT_FAST_STORAGE_DIR`, 
 
 That directory holds llama.cpp caches, per-lane model directories, optional media/model caches, and Qdrant storage.
 
+## Downstream app wiring
+
+Internal OpenAI-compatible `/v1` clients should still send the RassyGPT bearer key. For the currently connected Runtipi apps, that means setting the app-specific env hooks such as `JOGMANIA_ADVENTURE_LLM_API_KEY` and `TRT_LOCALAI_API_KEY` from the local RassyGPT key. Keep `RASSYGPT_ALLOW_INTERNAL_OLLAMA_COMPAT` for Ollama-style `/api/*` compatibility rather than opening all `/v1` traffic without auth.
+
+
+## Stability policy
+
+`rassy-smart` routes very large prompts to the 32k coder lane instead of the 16k general slot. Transient upstream transport failures return structured `503` responses so callers can retry cleanly without ASGI traceback noise.
+
 ## Change routes without rebuilding
 
 Edit:
