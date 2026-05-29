@@ -1585,6 +1585,51 @@ def _open_loops(
     return _dedupe_clean(loops, minimum_len=16, limit=4)
 
 
+def _content_branches(
+    *,
+    focus_label: str,
+    selected_angle: str,
+    query_variants: list[str],
+    recent_entries: list[dict[str, object]],
+    dialectic: dict[str, str],
+    source_roles: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    recent_title = _clean_line((recent_entries[0] or {}).get("title")) if recent_entries else ""
+    gold_thread = _clean_line(dialectic.get("gold_thread") or dialectic.get("writer_north_star") or dialectic.get("synthesis"))
+    counterforce = _clean_line(dialectic.get("counterforce"))
+    lead_role = source_roles[0] if source_roles else {}
+    lead_receipt = _clean_line(lead_role.get("title"))
+    if recent_title:
+        connection = f"Extend '{recent_title}' by asking what changed and which receipt now sharpens the lane."
+    else:
+        connection = f"Open {focus_label} through the freshest receipt, then leave a visible next question."
+    next_questions = _dedupe_clean(
+        [
+            *(query for query in query_variants[1:4]),
+            f"What challenges the strongest reading of {selected_angle}?",
+            counterforce,
+            gold_thread,
+            lead_receipt,
+        ],
+        minimum_len=18,
+        limit=4,
+    )
+    writer_handoff = (
+        f"Writer branch: connect {focus_label} to {recent_title or lead_receipt or selected_angle}; "
+        f"challenge the easy read with {counterforce or 'the strongest counterforce'}; "
+        f"land {gold_thread or selected_angle}."
+    )
+    return [
+        {
+            "label": focus_label,
+            "angle": selected_angle,
+            "connection": connection,
+            "next_questions": next_questions,
+            "writer_handoff": writer_handoff,
+        }
+    ]
+
+
 def _tone_topic_fit(
     *,
     focus_label: str,
@@ -1846,6 +1891,19 @@ def _brief_payload(
         dialectic=dialectic,
         analysis_flags=analysis_flags,
     )
+    query_variants = [
+        _clean_line(query)
+        for query in (retrieval_bundle.get("query_variants") or [])
+        if _clean_line(query)
+    ]
+    content_branches = _content_branches(
+        focus_label=focus_label,
+        selected_angle=selected_angle,
+        query_variants=query_variants,
+        recent_entries=recent_entries,
+        dialectic=dialectic,
+        source_roles=source_roles,
+    )
     source_kind_mix = Counter(_clean_line(source.get("source_kind")).lower() or "unknown" for source in raw_sources)
     credibility_mix = Counter(_clean_line(source.get("credibility_tier")).lower() or "unknown" for source in raw_sources)
     tone_fit = _tone_topic_fit(focus_label=focus_label, tone=tone, source_roles=source_roles)
@@ -1888,6 +1946,7 @@ def _brief_payload(
             "dialectic": dialectic,
             "analysis_flags": analysis_flags,
             "argument_spine": argument_spine,
+            "content_branches": content_branches,
             "topic_stats": {
                 "source_kind_mix": dict(source_kind_mix),
                 "credibility_mix": dict(credibility_mix),
@@ -1900,11 +1959,7 @@ def _brief_payload(
             "tone_topic_fit": tone_fit,
             "nearby_coverage": recent_entries[:4],
             "retrieval_query": _clean_line(retrieval_bundle.get("query_text")),
-            "query_variants": [
-                _clean_line(query)
-                for query in (retrieval_bundle.get("query_variants") or [])
-                if _clean_line(query)
-            ],
+            "query_variants": query_variants,
         },
     }
 
@@ -2439,6 +2494,15 @@ def format_analysis_brief(brief: dict[str, Any] | None) -> str:
         )
     for loop in (meta.get("open_loops") or [])[:3]:
         lines.append(f"- Open loop: {_clean_line(loop)}")
+    for branch in (meta.get("content_branches") or [])[:2]:
+        if not isinstance(branch, dict):
+            continue
+        next_questions = branch.get("next_questions") if isinstance(branch.get("next_questions"), list) else []
+        next_question = _clean_line(next_questions[0] if next_questions else "")
+        lines.append(
+            f"- Content branch: {_clean_line(branch.get('connection'))}"
+            + (f" Next: {next_question}" if next_question else "")
+        )
     for beat in (meta.get("argument_spine") or [])[:4]:
         lines.append(f"- Paragraph job: {_clean_line(beat)}")
     return "\n".join(lines)

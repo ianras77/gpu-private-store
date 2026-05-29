@@ -3,7 +3,15 @@ import uuid
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
-from workers.jobs import _search_safe_query, _theme_live_query, _writer_should_run, run_pipeline_cycle, run_queen_cycle, run_writer_cycle
+from workers.jobs import (
+    _research_content_branches,
+    _search_safe_query,
+    _theme_live_query,
+    _writer_should_run,
+    run_pipeline_cycle,
+    run_queen_cycle,
+    run_writer_cycle,
+)
 
 
 class _FakeResult:
@@ -46,6 +54,56 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertIn("Energy Shock Politics", query)
         self.assertIn("hormuz", query.lower())
+
+    def test_research_content_branches_connect_previous_research_to_next_paths(self) -> None:
+        branches = _research_content_branches(
+            query_plan=[
+                "Trump legal collision latest 2026",
+                "Trump legal collision court filing injunction 2026",
+                "Trump energy shock oil prices Hormuz 2026",
+            ],
+            themes=[
+                SimpleNamespace(name="Legal Collision", slug="legal-collision", active_score=9.2),
+                SimpleNamespace(name="Energy Shock Politics", slug="energy-shock-politics", active_score=7.4),
+            ],
+            opportunity_board=[
+                {
+                    "theme": "Legal Collision",
+                    "slug": "legal-collision",
+                    "angle": "Court filings keep narrowing the White House line",
+                    "query_hint": "Trump legal collision court filing injunction 2026",
+                }
+            ],
+            previous_briefs=[
+                {
+                    "label": "Legal Collision",
+                    "title": "Judge forces the administration onto paper",
+                    "meta": {
+                        "theme_slug": "legal-collision",
+                        "dialectic": {"gold_thread": "Follow the legal tell before the podium line mutates again."},
+                        "open_loops": ["Name what changed since the judge forced a clearer filing."],
+                    },
+                }
+            ],
+            recent_editorials=[
+                {
+                    "title": "The filing was already smaller than the speech",
+                    "theme_slug": "legal-collision",
+                    "selected_angle": "The filing was already smaller than the speech",
+                }
+            ],
+            limit=3,
+        )
+
+        self.assertGreaterEqual(len(branches), 2)
+        legal_branch = branches[0]
+        self.assertEqual(legal_branch["slug"], "legal-collision")
+        self.assertIn("Trump legal collision", legal_branch["seed_query"])
+        self.assertIn("Judge forces", legal_branch["previous_connection"])
+        self.assertTrue(legal_branch["next_research_queries"])
+        self.assertIn("challenge", " ".join(legal_branch["next_research_queries"]).lower())
+        self.assertIn("writer", legal_branch["writer_prompt"].lower())
+        self.assertTrue(all(branch.get("previous_connection") for branch in branches))
 
     def test_writer_should_run_on_cached_current_sources(self) -> None:
         should_run, reason = _writer_should_run(

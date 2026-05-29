@@ -7,6 +7,8 @@ type PublicHeaderProps = {
   data?: PublicSiteData;
 };
 
+const brandPuns = ["Blonde, not blind", "Bad at tyranny", "Receipts are my love language", "All are welcome. Bullshit is not."];
+
 export async function PublicHeader({ data }: PublicHeaderProps = {}) {
   const { leadStory, activeThemes, latestCycle, publishedStories, queryPlan, snapshot, curatedLinks } = data ?? (await getPublicSiteData());
   const editionStamp = new Intl.DateTimeFormat("en-US", {
@@ -42,7 +44,10 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
       <div className="site-topbar">
         <Link href="/" className="brand-mini" aria-label="Blondes Against Trump home">
           <span className="brand-mini-seal">BAT</span>
-          <span>Blondes Against Trump</span>
+          <span className="brand-mini-copy">
+            <span>Blondes Against Trump</span>
+            <span className="brand-mini-line">All are welcome. Receipts are not optional.</span>
+          </span>
         </Link>
         <nav className="utility" aria-label="Primary navigation">
           <Link href="/">Latest</Link>
@@ -69,6 +74,11 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
             A cowgirl-sharp anti-Trump blog for linked reporting, political heat, and the kind of feminine authority that
             walks in with boots on and receipts ready.
           </p>
+          <div className="masthead-merch-lines" aria-label="BAT printable lines">
+            <span>Smart mouth</span>
+            <span>Sharp politics</span>
+            <span>Good hair, better evidence</span>
+          </div>
           <div className="brand-flags">
             <span>Cowgirl editorial</span>
             <span>Receipts first</span>
@@ -90,6 +100,11 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
       <div className="banner header-ticker">
         <span className="banner-pill">Live desk</span>
         {freshnessLine} {receiptCount ? `${receiptCount} outside receipts are on the reading table.` : "The reading table is warming up."}
+      </div>
+      <div className="brand-pun-strip" aria-label="Blondes Against Trump slogans">
+        {brandPuns.map((line) => (
+          <span key={line}>{line}</span>
+        ))}
       </div>
     </header>
   );

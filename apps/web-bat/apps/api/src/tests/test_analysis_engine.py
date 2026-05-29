@@ -84,6 +84,64 @@ class AnalysisEngineTests(unittest.TestCase):
         self.assertIn("Follow the legal tell", meta["dialectic"]["gold_thread"])
         self.assertEqual(len(meta["query_variants"]), 2)
 
+    def test_brief_payload_emits_content_branches_for_written_research(self) -> None:
+        payload = _brief_payload(
+            {
+                "query_text": "Trump legal collision latest 2026",
+                "query_variants": [
+                    "Trump legal collision latest 2026",
+                    "Trump legal collision court filing injunction appellate friction 2026",
+                    "Trump legal collision backlash agency exposure legal cost 2026",
+                ],
+                "focus_theme": {"slug": "legal-collision", "name": "Legal Collision"},
+                "raw_sources": [
+                    {
+                        "title": "Judge orders Trump administration to defend the filing in court",
+                        "source_label": "Reuters",
+                        "source_name": "Reuters",
+                        "source_kind": "reporting",
+                        "quality_score": 8.8,
+                        "editorial_priority_score": 8.7,
+                        "retrieval_score": 8.9,
+                        "credibility_tier": "high",
+                        "age_days": 0,
+                    },
+                    {
+                        "title": "White House says the order will stand after court challenge",
+                        "source_label": "White House",
+                        "source_name": "White House",
+                        "source_kind": "institutional",
+                        "quality_score": 5.1,
+                        "editorial_priority_score": 5.2,
+                        "retrieval_score": 5.8,
+                        "credibility_tier": "high",
+                        "age_days": 0,
+                    },
+                ],
+                "trend_ledger": [{"title": "Courts keep forcing a clearer answer"}],
+            },
+            scope_type="theme",
+            scope_key="legal-collision",
+            focus_label="Legal Collision",
+            theme_slug="legal-collision",
+            recent_entries=[
+                {
+                    "title": "Earlier legal collision note",
+                    "selected_angle": "Earlier legal collision note",
+                    "time_label": "earlier today",
+                }
+            ],
+        )
+
+        branches = payload["meta"]["content_branches"]
+        self.assertTrue(branches)
+        self.assertIn("Earlier legal collision note", branches[0]["connection"])
+        self.assertTrue(branches[0]["next_questions"])
+        self.assertIn("writer", branches[0]["writer_handoff"].lower())
+        rendered = format_analysis_brief(payload)
+        self.assertIn("Content branch:", rendered)
+        self.assertIn("Earlier legal collision note", rendered)
+
     def test_brief_payload_uses_update_form_only_for_hot_lane(self) -> None:
         payload = _brief_payload(
             {

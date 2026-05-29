@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import Awaitable, Callable
+import json
 import re
 import uuid
 from datetime import datetime
@@ -11,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from db import run_with_new_session
-from models import EditorialObject, HomepageSnapshot, Source, Theme
+from models import AnalysisBrief, EditorialObject, HomepageSnapshot, Source, Theme
 from services.analysis_engine import refresh_analysis_briefs, select_analysis_brief
 from services.editorial_service import (
     _curate_source_links,
@@ -192,6 +193,124 @@ def _dedupe_keep_order(values: list[str], limit: int = 18) -> list[str]:
         if len(deduped) >= limit:
             break
     return deduped
+
+def _branch_clean_text(value: object, *, limit: int = 220) -> str:
+    cleaned = re.sub(r"\s+", " ", str(value or "").strip())
+    return cleaned[:limit].rstrip()
+
+
+def _branch_theme_match(slug: str, theme_name: str, item: dict[str, object]) -> bool:
+    meta = item.get("meta") if isinstance(item.get("meta"), dict) else {}
+    haystack = " ".join(
+        _branch_clean_text(value).lower()
+        for value in [
+            item.get("scope_key"),
+            item.get("theme_slug"),
+            item.get("label"),
+            item.get("title"),
+            meta.get("theme_slug"),
+            meta.get("focus_label"),
+        ]
+    )
+    slug_text = slug.replace("-", " ").lower()
+    name_text = theme_name.lower()
+    return bool(slug and (slug.lower() in haystack or slug_text in haystack)) or bool(theme_name and name_text in haystack)
+
+
+def _branch_seed_query(*, theme_name: str, slug: str, query_plan: list[str], opportunity: dict[str, object] | None) -> str:
+    hinted = _search_safe_query(str((opportunity or {}).get("query_hint") or ""))
+    if hinted:
+        return hinted
+    theme_terms = [term for term in re.findall(r"[a-z0-9]+", f"{theme_name} {slug}".lower()) if len(term) >= 4]
+    for query in query_plan:
+        lowered = query.lower()
+        if any(term in lowered for term in theme_terms):
+            return query
+    return query_plan[0] if query_plan else f"Trump {theme_name or slug.replace('-', ' ')} latest {settings.current_news_min_year}"
+
+
+def _branch_previous_connection(
+    *,
+    theme_name: str,
+    slug: str,
+    previous_briefs: list[dict[str, object]],
+    recent_editorials: list[dict[str, object]],
+) -> str:
+    for brief in previous_briefs:
+        if not _branch_theme_match(slug, theme_name, brief):
+            continue
+        meta = brief.get("meta") if isinstance(brief.get("meta"), dict) else {}
+        dialectic = meta.get("dialectic") if isinstance(meta.get("dialectic"), dict) else {}
+        open_loops = meta.get("open_loops") if isinstance(meta.get("open_loops"), list) else []
+        title = _branch_clean_text(brief.get("title") or brief.get("label") or theme_name)
+        next_thread = _branch_clean_text(dialectic.get("gold_thread") or (open_loops[0] if open_loops else ""))
+        if next_thread:
+            return f"Extend '{title}' by testing this unresolved thread: {next_thread}"
+        return f"Extend '{title}' instead of restarting the {theme_name} lane."
+
+    for editorial in recent_editorials:
+        if not _branch_theme_match(slug, theme_name, editorial):
+            continue
+        title = _branch_clean_text(editorial.get("selected_angle") or editorial.get("title") or theme_name)
+        return f"Connect back to the recent BAT piece '{title}' and move the lane one step forward."
+
+    return f"Treat {theme_name or slug.replace('-', ' ').title()} as a continuing research lane; connect fresh sources to the last known pattern before drafting."
+
+
+def _research_content_branches(
+    *,
+    query_plan: list[str],
+    themes: list[Theme],
+    opportunity_board: list[dict[str, object]],
+    previous_briefs: list[dict[str, object]],
+    recent_editorials: list[dict[str, object]],
+    limit: int = 6,
+) -> list[dict[str, object]]:
+    opportunity_by_slug = {str(item.get("slug") or ""): item for item in opportunity_board}
+    branches: list[dict[str, object]] = []
+    for theme in themes[: max(1, limit)]:
+        theme_name = _branch_clean_text(getattr(theme, "name", "")) or "Sitewide"
+        slug = _branch_clean_text(getattr(theme, "slug", "")) or slugify_theme_name(theme_name)
+        opportunity = opportunity_by_slug.get(slug) or {}
+        seed_query = _branch_seed_query(theme_name=theme_name, slug=slug, query_plan=query_plan, opportunity=opportunity)
+        angle = _branch_clean_text(opportunity.get("angle") or theme_name)
+        previous_connection = _branch_previous_connection(
+            theme_name=theme_name,
+            slug=slug,
+            previous_briefs=previous_briefs,
+            recent_editorials=recent_editorials,
+        )
+        next_queries = _dedupe_keep_order(
+            [
+                seed_query,
+                f"{seed_query} challenge official line contradiction",
+                f"{theme_name} who benefits who absorbs the cost {settings.current_news_min_year}",
+                f"{theme_name} consequence backlash receipts {settings.current_news_min_year}",
+            ],
+            limit=4,
+        )
+        branches.append(
+            {
+                "theme": theme_name,
+                "slug": slug,
+                "score": float(getattr(theme, "active_score", 0) or 0),
+                "seed_query": seed_query,
+                "previous_connection": previous_connection,
+                "angle": angle,
+                "next_research_queries": next_queries[1:] or next_queries,
+                "writer_prompt": (
+                    f"Writer branch for {theme_name}: {previous_connection} "
+                    f"Use the next research to challenge '{angle}' before landing the synthesis."
+                ),
+            }
+        )
+    return branches
+
+
+def slugify_theme_name(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", (value or "").lower()).strip("-")
+    return slug or "sitewide"
+
 
 
 def _story_card(obj: EditorialObject | None) -> dict[str, object] | None:
@@ -527,6 +646,48 @@ async def _writer_material_snapshot(db: AsyncSession, *, limit: int = 80) -> dic
 async def _load_top_themes(db: AsyncSession, *, limit: int) -> list[Theme]:
     return (await db.execute(select(Theme).order_by(Theme.active_score.desc()).limit(limit))).scalars().all()
 
+async def _research_branch_context(db: AsyncSession) -> dict[str, list[dict[str, object]]]:
+    brief_rows = (
+        await db.execute(
+            select(AnalysisBrief)
+            .where(AnalysisBrief.status == "active")
+            .order_by(AnalysisBrief.updated_at.desc())
+            .limit(12)
+        )
+    ).scalars().all()
+    editorial_rows = (
+        await db.execute(
+            select(EditorialObject)
+            .where(EditorialObject.status.in_(["draft", "approved", "published"]))
+            .order_by(EditorialObject.created_at.desc())
+            .limit(12)
+        )
+    ).scalars().all()
+    previous_briefs = [
+        {
+            "scope_key": row.scope_key,
+            "label": row.label,
+            "title": row.title,
+            "meta": row.meta or {},
+        }
+        for row in brief_rows
+    ]
+    recent_editorials = []
+    for row in editorial_rows:
+        meta = row.meta or {}
+        story_brief = meta.get("story_brief") if isinstance(meta.get("story_brief"), dict) else {}
+        launch_packet = meta.get("launch_packet") if isinstance(meta.get("launch_packet"), dict) else {}
+        recent_editorials.append(
+            {
+                "title": row.title,
+                "theme_slug": meta.get("theme_slug") or story_brief.get("theme_slug"),
+                "selected_angle": meta.get("selected_angle") or launch_packet.get("selected_angle"),
+                "story_form": meta.get("story_form") or story_brief.get("story_form"),
+            }
+        )
+    return {"previous_briefs": previous_briefs, "recent_editorials": recent_editorials}
+
+
 
 def _writer_should_run(researcher_summary: dict[str, object], analyst_summary: dict[str, object]) -> tuple[bool, str]:
     fresh_sources = int(researcher_summary.get("source_created", 0)) + int(researcher_summary.get("source_updated", 0))
@@ -749,6 +910,15 @@ async def run_researcher_cycle(db: AsyncSession) -> dict:
         }
         for theme in top_themes
     ]
+    branch_context = await _run_db_task(db, _research_branch_context, isolated=session_isolation)
+    content_branches = _research_content_branches(
+        query_plan=query_plan,
+        themes=top_themes,
+        opportunity_board=opportunity_board,
+        previous_briefs=list(branch_context.get("previous_briefs") or []),
+        recent_editorials=list(branch_context.get("recent_editorials") or []),
+        limit=max(4, len(top_themes)),
+    )
     source_created = sum(int(s.get("created", 0)) for s in summaries)
     source_updated = sum(int(s.get("updated", 0)) for s in summaries)
     high_quality_kept = sum(int(s.get("high_quality_kept", 0)) for s in summaries)
@@ -760,9 +930,16 @@ async def run_researcher_cycle(db: AsyncSession) -> dict:
         key="researcher_last_cycle",
         value=(
             f"Completed at {datetime.utcnow().isoformat()} UTC | queries={len(query_plan)} "
-            f"| x_enabled={controls['x_research_enabled']}"
+            f"| x_enabled={controls['x_research_enabled']} | branches={len(content_branches)}"
         ),
         weight=1.0,
+    )
+    await update_voice_memory(
+        db,
+        memory_type="pipeline",
+        key="research_content_paths",
+        value=json.dumps(content_branches[:6], ensure_ascii=True),
+        weight=1.12,
     )
     return {
         "role": "researcher",
@@ -785,6 +962,7 @@ async def run_researcher_cycle(db: AsyncSession) -> dict:
         "themes_active": int(trend_summary.get("themes", 0)),
         "theme_memberships": int(trend_summary.get("memberships", 0)),
         "opportunity_board": opportunity_board,
+        "content_branches": content_branches,
         "writer_material": writer_material,
         "source_quality_mix": {
             "fresh_sources": source_created + source_updated,

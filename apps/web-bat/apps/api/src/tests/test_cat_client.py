@@ -3,6 +3,7 @@ import unittest
 import httpx
 
 from services.cat_client import (
+    _build_request_headers,
     _build_llm_payload,
     _clamp_generation_tokens,
     _compose_prompt_payload,
@@ -69,6 +70,32 @@ class CatClientTests(unittest.TestCase):
         self.assertEqual(payload["temperature"], 0.52)
         self.assertNotIn("keep_alive", payload)
         self.assertNotIn("options", payload)
+
+    def test_llm_payload_accepts_model_override_for_challenger(self) -> None:
+        payload = _build_llm_payload(
+            url="http://localhost:11435/api/chat",
+            system_prompt="System",
+            prompt="User prompt",
+            temperature=0.21,
+            max_tokens=444,
+            model_override="rassy-general",
+        )
+
+        self.assertEqual(payload["model"], "rassy-general")
+        self.assertEqual(payload["options"]["num_predict"], 444)
+
+    def test_request_headers_omit_blank_bearer_token(self) -> None:
+        headers = _build_request_headers(api_key="  ", request_id="test-request")
+
+        self.assertEqual(headers, {"X-Request-ID": "test-request"})
+
+    def test_request_headers_include_nonblank_bearer_token(self) -> None:
+        headers = _build_request_headers(api_key="secret-token", request_id="test-request")
+
+        self.assertEqual(
+            headers,
+            {"X-Request-ID": "test-request", "Authorization": "Bearer secret-token"},
+        )
 
     def test_cat_not_configured_detector_matches_runtime_error(self) -> None:
         self.assertTrue(_looks_like_cat_not_configured("You did not configure a Language Model. Do it in the settings!"))

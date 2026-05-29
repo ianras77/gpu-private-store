@@ -100,6 +100,7 @@ class Settings(BaseSettings):
     llm_api_url: str = "http://rassygpt-gateway:8080/api/chat"
     llm_api_key: str = ""
     llm_model: str = "rassy-smart"
+    llm_challenger_model: str = "rassy-general"
     llm_request_timeout_seconds: float = 90.0
     ollama_num_ctx: int = 8192
     ollama_repeat_last_n: int = 96

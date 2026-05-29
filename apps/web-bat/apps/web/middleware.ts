@@ -2,7 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { ADMIN_SESSION_COOKIE, isValidAdminSession, normalizeNextPath } from "@/lib/admin-auth";
 
+const SERVER_ACTION_HEADER = "next-action";
+
+function isServerActionProbe(request: NextRequest) {
+  return request.method === "POST" && request.headers.has(SERVER_ACTION_HEADER);
+}
+
 export async function middleware(request: NextRequest) {
+  if (isServerActionProbe(request)) {
+    return new NextResponse("Server actions are not enabled for BAT.", { status: 410 });
+  }
+
+  if (!request.nextUrl.pathname.startsWith("/admin")) {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   if (await isValidAdminSession(token)) {
     return NextResponse.next();
@@ -15,5 +29,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

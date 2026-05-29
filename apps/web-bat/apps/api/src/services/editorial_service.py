@@ -4005,6 +4005,38 @@ def _build_grounding_repair_prompt(grounding_report: dict[str, object], story_br
     )
 
 
+def _build_dialectic_challenger_prompt(
+    *,
+    style_report: dict[str, object],
+    story_brief: dict[str, object],
+    analysis_brief: dict[str, object] | None,
+) -> str:
+    meta = analysis_brief.get("meta") if isinstance(analysis_brief, dict) and isinstance(analysis_brief.get("meta"), dict) else {}
+    dialectic = meta.get("dialectic") if isinstance(meta.get("dialectic"), dict) else {}
+    branches = meta.get("content_branches") if isinstance(meta.get("content_branches"), list) else []
+    branch_handoffs = [
+        _clean_line(branch.get("writer_handoff"))
+        for branch in branches
+        if isinstance(branch, dict) and _clean_line(branch.get("writer_handoff"))
+    ][:2]
+    reasons = [str(reason) for reason in (style_report.get("reasons") or [])[:4]] if isinstance(style_report, dict) else []
+    lines = [
+        "Champion/challenger pass: challenge the draft once, then return a full strengthened draft.",
+        "Act as the smaller RassyGPT challenger: skeptical, concise, and useful. Do not write notes about the critique; rewrite the piece.",
+        "Question the easiest reading, tighten the claim-versus-receipt gap, and improve the BAT voice without inventing facts.",
+        f"Thesis to test: {_clean_line(dialectic.get('thesis') or story_brief.get('selected_angle'))}",
+        f"Counterforce to take seriously: {_clean_line(dialectic.get('counterforce') or story_brief.get('counterforce'))}",
+        f"Synthesis to strengthen: {_clean_line(dialectic.get('synthesis') or story_brief.get('synthesis_to_land'))}",
+        f"Gold thread: {_clean_line(dialectic.get('gold_thread') or story_brief.get('gold_thread'))}",
+    ]
+    for handoff in branch_handoffs:
+        lines.append(f"Content branch to advance: {handoff}")
+    if reasons:
+        lines.append("Current draft pressure points: " + "; ".join(reasons))
+    lines.append("Return only the revised editorial markdown. Preserve grounded names, sources, and the core angle.")
+    return "\n".join(line for line in lines if _clean_line(line))
+
+
 def _build_editorial_task_prompt(
     base_prompt: str,
     story_brief: dict[str, object],
@@ -5025,6 +5057,11 @@ async def _run_editorial_generation_pass(
     body = fallback_body
     style_report = fallback_style_report
     generation_path = "fallback_grounded"
+    dialectic_review: dict[str, object] = {
+        "attempted": False,
+        "selected": False,
+        "model": settings.llm_challenger_model,
+    }
 
     if current_body:
         existing_body = _apply_voice_polish(current_body, lane="editorial")
@@ -5193,6 +5230,61 @@ async def _run_editorial_generation_pass(
                 style_report = grounding_style_report
                 generation_path = "model_grounding_repair"
 
+        if body and str(settings.llm_challenger_model or "").strip():
+            reroll_count = max(reroll_count, 1)
+            champion_style_report = style_report
+            challenger_raw_body = await generate_with_cat(
+                f"{editorial_task_prompt}\n\n{_build_dialectic_challenger_prompt(style_report=style_report, story_brief=story_brief, analysis_brief=analysis_brief)}",
+                "\n\n".join(
+                    [
+                        context,
+                        "Champion draft to challenge and strengthen:\n" + (body or "").strip(),
+                    ]
+                ).strip(),
+                system_prompt=constitution,
+                output_contract=_editorial_output_contract(object_type, story_brief),
+                correlation_id=f"{correlation_prefix}-challenger-{uuid.uuid4()}",
+                temperature=0.24,
+                max_tokens=editorial_max_tokens,
+                model_override=settings.llm_challenger_model,
+            )
+            challenger_body = _apply_voice_polish(challenger_raw_body, lane="editorial")
+            if challenger_body:
+                challenger_title = derive_editorial_title(None, challenger_body, object_type)
+                challenger_style_report = _assess_grounded_editorial_candidate(
+                    challenger_body,
+                    title=challenger_title,
+                    recent_coverage=recent_coverage,
+                    repetition_guard=repetition_guard if isinstance(repetition_guard, dict) else None,
+                    story_brief=story_brief,
+                    retrieval_bundle=retrieval_bundle,
+                    analysis_brief=analysis_brief,
+                )
+                selected_challenger = _style_rank(challenger_style_report) >= _style_rank(champion_style_report)
+                dialectic_review = {
+                    "attempted": True,
+                    "selected": selected_challenger,
+                    "model": settings.llm_challenger_model,
+                    "champion_score": int(champion_style_report.get("score") or 0),
+                    "challenger_score": int(challenger_style_report.get("score") or 0),
+                    "champion_path": generation_path,
+                    "pressure_points": list((champion_style_report.get("reasons") or [])[:4]),
+                }
+                if selected_challenger:
+                    body = challenger_body
+                    style_report = challenger_style_report
+                    generation_path = "model_challenger"
+            else:
+                dialectic_review = {
+                    "attempted": True,
+                    "selected": False,
+                    "model": settings.llm_challenger_model,
+                    "champion_score": int(champion_style_report.get("score") or 0),
+                    "challenger_score": 0,
+                    "champion_path": generation_path,
+                    "error": "empty_challenger_response",
+                }
+
         if _catastrophic_editorial_underfill(style_report, story_brief):
             fallback_body_words = int(fallback_style_report.get("body_word_count") or 0)
             fallback_grounding_passes = bool((fallback_style_report.get("grounding_report") or {}).get("passes", True))
@@ -5214,6 +5306,7 @@ async def _run_editorial_generation_pass(
         "requires_research": requires_research,
         "fallback_body": fallback_body,
         "fallback_style_report": fallback_style_report,
+        "dialectic_review": dialectic_review,
     }
 
 
@@ -5315,6 +5408,7 @@ async def generate_editorial_object(
     reroll_count = int(generation.get("reroll_count") or 0)
     grounded_sources = int(generation.get("grounded_sources") or 0)
     requires_research = bool(generation.get("requires_research"))
+    dialectic_review = generation.get("dialectic_review") or {}
 
     title = derive_editorial_title(None, body, object_type)
     dek = _extract_dek(body) or "Pattern-watch analysis from the Blonde Desk."
@@ -5382,6 +5476,7 @@ async def generate_editorial_object(
             "publish_recommendation": publish_recommendation,
             "reroll_count": reroll_count,
             "grounding_report": style_report.get("grounding_report"),
+            "dialectic_review": dialectic_review,
             "retrieval_bundle": retrieval_bundle,
             "prompt_layers": {
                 "constitution": "cat_editor_system",
@@ -5600,6 +5695,7 @@ async def rework_editorial_object(
     reroll_count = int(generation.get("reroll_count") or 0)
     grounded_sources = int(generation.get("grounded_sources") or metadata.get("grounded_source_count") or 0)
     requires_research = bool(generation.get("requires_research"))
+    dialectic_review = generation.get("dialectic_review") or {}
 
     title = derive_editorial_title(editorial.title, body, editorial.object_type)
     dek = _extract_dek(body) or editorial.dek or "Pattern-watch analysis from the Blonde Desk."
@@ -5684,6 +5780,7 @@ async def rework_editorial_object(
         "publish_recommendation": publish_recommendation,
         "reroll_count": reroll_count,
         "grounding_report": style_report.get("grounding_report"),
+        "dialectic_review": dialectic_review,
         "retrieval_bundle": retrieval_bundle,
         "rework": {
             **(metadata.get("rework") or {} if isinstance(metadata.get("rework"), dict) else {}),

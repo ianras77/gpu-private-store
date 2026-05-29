@@ -6,8 +6,8 @@
   "dynamic_config": false,
   "id": "web-bat",
   "description": "Cowgirl-sharp anti-Trump editorial blog with Next.js, FastAPI automation, channel heat, linked receipts, and live research workflows.",
-  "tipi_version": 5,
-  "version": "1.0.4",
+  "tipi_version": 9,
+  "version": "1.0.8",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",

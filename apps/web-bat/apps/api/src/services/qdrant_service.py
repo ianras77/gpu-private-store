@@ -27,6 +27,36 @@ def _invalidate_collection(collection: str) -> None:
     _collection_state.pop(collection, None)
 
 
+def _extract_vector_size(data: dict[str, Any]) -> int | None:
+    vectors_cfg = ((data.get("result") or {}).get("config") or {}).get("params", {}).get("vectors")
+    if not isinstance(vectors_cfg, dict):
+        return None
+
+    if isinstance(vectors_cfg.get("size"), int):
+        return vectors_cfg.get("size")
+
+    # Named-vectors mode.
+    for value in vectors_cfg.values():
+        if isinstance(value, dict) and isinstance(value.get("size"), int):
+            return value.get("size")
+
+    return None
+
+
+async def _get_existing_vector_size(client: Any, url: str) -> int | None:
+    response = await client.get(url, timeout=8)
+    if response.status_code == 404:
+        return None
+
+    response.raise_for_status()
+    data = response.json() if response.content else {}
+    return _extract_vector_size(data) if isinstance(data, dict) else None
+
+
+def _collection_is_compatible(existing_size: int | None, vector_size: int) -> bool:
+    return existing_size == vector_size
+
+
 async def ensure_collection(vector_size: int) -> bool:
     if _collection_is_cached(COLLECTION, vector_size=vector_size):
         return True
@@ -40,6 +70,29 @@ async def ensure_collection(vector_size: int) -> bool:
     }
     try:
         client = get_shared_async_client()
+        existing_size = await _get_existing_vector_size(client, url)
+        if _collection_is_compatible(existing_size, vector_size):
+            _remember_collection(COLLECTION, vector_size=vector_size)
+            log_event(
+                logger,
+                "qdrant.ensure_collection.exists_compatible",
+                collection=COLLECTION,
+                vector_size=vector_size,
+            )
+            return True
+
+        if existing_size is not None:
+            _invalidate_collection(COLLECTION)
+            log_event(
+                logger,
+                "qdrant.ensure_collection.incompatible",
+                level=40,
+                collection=COLLECTION,
+                expected_vector_size=vector_size,
+                existing_vector_size=existing_size,
+            )
+            return False
+
         response = await client.put(url, json=payload, timeout=8)
         if response.status_code in {200, 201}:
             _remember_collection(COLLECTION, vector_size=vector_size)
@@ -47,27 +100,8 @@ async def ensure_collection(vector_size: int) -> bool:
             return True
 
         if response.status_code == 409:
-            details = await client.get(url, timeout=8)
-            details.raise_for_status()
-            data = details.json() if details.content else {}
-            vectors_cfg = (
-                ((data.get("result") or {}).get("config") or {}).get("params", {}).get("vectors")
-                if isinstance(data, dict)
-                else {}
-            )
-
-            existing_size = None
-            if isinstance(vectors_cfg, dict):
-                if isinstance(vectors_cfg.get("size"), int):
-                    existing_size = vectors_cfg.get("size")
-                else:
-                    # Named-vectors mode.
-                    for value in vectors_cfg.values():
-                        if isinstance(value, dict) and isinstance(value.get("size"), int):
-                            existing_size = value.get("size")
-                            break
-
-            if existing_size == vector_size:
+            existing_size = await _get_existing_vector_size(client, url)
+            if _collection_is_compatible(existing_size, vector_size):
                 _remember_collection(COLLECTION, vector_size=vector_size)
                 log_event(
                     logger,

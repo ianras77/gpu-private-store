@@ -188,6 +188,13 @@ def _generation_timeout_seconds(*, requested_tokens: int, base_timeout_seconds: 
     return max(float(base_timeout_seconds or 0), dynamic_floor)
 
 
+def _build_request_headers(*, api_key: str | None, request_id: str) -> dict[str, str]:
+    headers = {"X-Request-ID": request_id}
+    safe_key = (api_key or "").strip()
+    if safe_key:
+        headers["Authorization"] = f"Bearer {safe_key}"
+    return headers
+
 def _build_llm_payload(
     *,
     url: str,
@@ -195,14 +202,16 @@ def _build_llm_payload(
     prompt: str,
     temperature: float,
     max_tokens: int,
+    model_override: str | None = None,
 ) -> dict[str, Any]:
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": prompt},
     ]
+    resolved_model = (model_override or settings.llm_model).strip() or settings.llm_model
     if _is_ollama_native_chat_url(url):
         return {
-            "model": settings.llm_model,
+            "model": resolved_model,
             "messages": messages,
             "stream": False,
             "keep_alive": settings.ollama_keep_alive,
@@ -215,7 +224,7 @@ def _build_llm_payload(
             },
         }
     return {
-        "model": settings.llm_model,
+        "model": resolved_model,
         "messages": messages,
         "temperature": temperature,
         "max_tokens": max_tokens,
@@ -248,6 +257,7 @@ async def generate_with_cat(
     correlation_id: str | None = None,
     temperature: float = 0.55,
     max_tokens: int = 260,
+    model_override: str | None = None,
 ) -> str:
     request_id = correlation_id or str(uuid.uuid4())
     resolved_system_prompt = system_prompt or load_prompt("cat_editor_system")
@@ -275,10 +285,7 @@ async def generate_with_cat(
             "text": cat_prompt,
             "user_id": request_id,
         }
-        headers = {
-            "Authorization": f"Bearer {settings.cheshire_cat_api_key}",
-            "X-Request-ID": request_id,
-        }
+        headers = _build_request_headers(api_key=settings.cheshire_cat_api_key, request_id=request_id)
 
         try:
             timeout_seconds = _generation_timeout_seconds(
@@ -330,6 +337,7 @@ async def generate_with_cat(
                         request_id=request_id,
                         latency_ms=int((time.perf_counter() - started) * 1000),
                         response_chars=len(message),
+                        model=model_override or settings.llm_model,
                     )
                     return message
             else:
@@ -346,7 +354,7 @@ async def generate_with_cat(
     else:
         log_event(logger, "cat.generate.primary_disabled", provider="cheshire_cat", request_id=request_id)
 
-    llm_headers = {"Authorization": f"Bearer {settings.llm_api_key}", "X-Request-ID": request_id}
+    llm_headers = _build_request_headers(api_key=settings.llm_api_key, request_id=request_id)
     llm_urls = [settings.llm_api_url]
     if settings.llm_api_url.endswith("/v1/chat/completions"):
         llm_urls.append(settings.llm_api_url.removesuffix("/v1/chat/completions") + "/api/chat")
@@ -361,6 +369,7 @@ async def generate_with_cat(
                     prompt=llm_prompt,
                     temperature=resolved_temperature,
                     max_tokens=resolved_max_tokens,
+                    model_override=model_override,
                 )
                 started = time.perf_counter()
                 client = get_shared_async_client()
@@ -387,6 +396,7 @@ async def generate_with_cat(
                         attempts=attempt + 1,
                         latency_ms=int((time.perf_counter() - started) * 1000),
                         response_chars=len(message),
+                        model=model_override or settings.llm_model,
                     )
                     return message
                 log_event(

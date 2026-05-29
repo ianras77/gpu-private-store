@@ -1,9 +1,11 @@
 from datetime import datetime, timezone
+import asyncio
 import uuid
 from types import SimpleNamespace
 import unittest
 from unittest.mock import AsyncMock, patch
 
+from config import settings
 from models import EditorialObject, Source
 from services.editorial_service import (
     _assess_style_candidate,
@@ -31,6 +33,7 @@ from services.editorial_service import (
     _source_receipt_sentence,
     _should_attempt_editorial_revision,
     _social_package_assessment,
+    _run_editorial_generation_pass,
     evaluate_style_gate,
     rework_editorial_object,
 )
@@ -38,6 +41,72 @@ from services.trend_engine import _change_type
 
 
 class EditorialStyleTests(unittest.TestCase):
+    def test_editorial_generation_runs_challenger_pass_with_smaller_model(self) -> None:
+        calls: list[dict[str, object]] = []
+
+        async def fake_generate(_task_prompt, _context, **kwargs):
+            calls.append(kwargs)
+            if kwargs.get("model_override") == settings.llm_challenger_model:
+                return "Challenger draft names the court filing, tests the official line, and lands the cleaner synthesis."
+            return "Champion draft names the court filing and the official line."
+
+        def fake_assess(text, **_kwargs):
+            if text.startswith("Challenger"):
+                return {"passes": True, "hard_fail": False, "score": 92, "body_word_count": 420}
+            if text.startswith("Champion"):
+                return {"passes": True, "hard_fail": False, "score": 78, "body_word_count": 360}
+            return {"passes": True, "hard_fail": False, "score": 64, "body_word_count": 300}
+
+        with (
+            patch("services.editorial_service.generate_with_cat", new=fake_generate),
+            patch("services.editorial_service._assess_grounded_editorial_candidate", side_effect=fake_assess),
+            patch("services.editorial_service.derive_editorial_title", side_effect=lambda _title, body, _object_type: body.split(".")[0]),
+        ):
+            result = asyncio.run(
+                _run_editorial_generation_pass(
+                    object_type="theme_take",
+                    story_brief={
+                        "story_form": "theme_update",
+                        "body_paragraphs": 2,
+                        "selected_angle": "Judge orders Trump administration to defend the filing in court",
+                        "why_now": "The filing just put the contradiction on paper.",
+                        "gold_thread": "Follow the legal tell.",
+                    },
+                    retrieval_bundle={
+                        "query_text": "Trump legal collision latest 2026",
+                        "raw_sources": [
+                            {"title": "Judge orders Trump administration to defend the filing in court", "quality_score": 8.8},
+                            {"title": "White House says the order will stand", "quality_score": 6.4},
+                            {"title": "Congress watches the legal fight widen", "quality_score": 6.1},
+                        ],
+                    },
+                    analysis_brief={
+                        "meta": {
+                            "dialectic": {
+                                "thesis": "The filing is narrower than the speech.",
+                                "counterforce": "The podium line wants to outrun it.",
+                                "synthesis": "The legal tell is the story.",
+                            },
+                            "content_branches": [
+                                {"writer_handoff": "Use the court filing as the next branch."}
+                            ],
+                        }
+                    },
+                    recent_coverage=[],
+                    repetition_guard=None,
+                    editorial_task_prompt="Write the filed piece.",
+                    context="Receipts and branch map.",
+                    constitution="Stay grounded.",
+                    correlation_prefix="test",
+                )
+            )
+
+        self.assertEqual(calls[1]["model_override"], settings.llm_challenger_model)
+        self.assertIn("Challenger draft", result["body"])
+        self.assertGreaterEqual(result["reroll_count"], 1)
+        self.assertTrue(result["dialectic_review"]["selected"])
+        self.assertEqual(result["dialectic_review"]["model"], settings.llm_challenger_model)
+
     def test_homepage_story_fingerprint_dedupes_timestamped_slugs_by_title(self) -> None:
         first = SimpleNamespace(
             id=uuid.uuid4(),
