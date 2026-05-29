@@ -23,3 +23,8 @@ describe('FeedClient', () => {
     expect(screen.getByText(/craving/)).toBeInTheDocument();
   });
 });
+
+it('labels web posts as anon wall notes', () => {
+  render(<FeedClient initialPosts={posts} />);
+  expect(screen.getByText(/wall note/i)).toBeInTheDocument();
+});

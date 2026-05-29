@@ -296,7 +296,7 @@ export default function AdminClient() {
                 </label>
               </div>
               <div>
-                <div className="card-eyebrow">Cat review</div>
+                <div className="card-eyebrow">LLM review</div>
                 <div className="small">
                   {(() => {
                     const notes = selected.moderation_notes || emptyNotes;
@@ -398,8 +398,14 @@ function EditorPanel({
 
       <div className="card">
         <div className="inline-actions">
-          <button onClick={() => setPreview((prev) => !prev)}>{preview ? 'Edit' : 'Preview'}</button>
-          <select value={status} onChange={(event) => setStatus(event.target.value)} style={{ maxWidth: 170 }}>
+          <button onClick={() => setPreview((prev) => !prev)}>
+            {preview ? 'Edit' : 'Preview'}
+          </button>
+          <select
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+            style={{ maxWidth: 170 }}
+          >
             <option value="draft">Draft</option>
             <option value="published">Publish now</option>
           </select>

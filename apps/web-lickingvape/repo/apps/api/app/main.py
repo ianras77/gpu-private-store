@@ -54,10 +54,11 @@ DEFAULT_CHAT_MEMORY = {
 }
 
 CAT_WELCOME_MESSAGE = (
-    "Lights low, notebook open. I'm Cheshire Cat. Bring me the craving, the slip, "
-    "the headline, or the life mess and I'll help you turn it into a next move or a post."
+    "Lights low, wall awake. I'm the Stripe Scribe. Pick a mode, bring the craving, the slip, "
+    "the headline, or the life mess, and I will help you make one concrete next move."
 )
 WORLD_SEARCH_QUERY = "latest headlines anxiety nicotine today"
+CHAT_MODES = {"craving", "post", "reset", "world"}
 
 app = FastAPI()
 
@@ -276,13 +277,35 @@ def _build_memory_thread(memory: Dict[str, Any]) -> str:
     return f"I still have your thread: {' | '.join(reminders)}." if reminders else ""
 
 
-def _build_cat_reply(text: str, memory: Dict[str, Any], world_context: str = "") -> str:
+def _build_cat_reply(text: str, memory: Dict[str, Any], world_context: str = "", mode: Optional[str] = None) -> str:
     lower = text.lower()
     name = memory.get("name", "").strip() or memory.get("display_name", "").strip() or "friend"
     thread = _build_memory_thread(memory)
     post_frame = "Three beats. Scene, ache, next move. Rough edges are welcome."
+    mode = mode if mode in CHAT_MODES else None
 
-    if _is_world_message(lower):
+    if mode == "craving":
+        return (
+            f"{name}, beat the first stripe before you debate the whole beast. {thread} "
+            "Move the vape or buying path farther away, name the stripe out loud, drink something cold, "
+            "and write one wall sentence: what happened, what it promised, what you are doing instead."
+        ).strip()
+
+    if mode == "post":
+        return (
+            f"{name}, Draft it like a wall post. {thread} "
+            "Scene / trigger / refusal. One paragraph, no apology tax. Start with: \"The stripe I am fighting is...\" "
+            "and end with the next move you can prove."
+        ).strip()
+
+    if mode == "reset":
+        return (
+            f"{name}, one slip does not get a crown. {thread} "
+            "Write the receipt while it is boring: what happened, what lit it, what changes before bed. "
+            "Then do one physical reset: route, drawer, app, card, or room."
+        ).strip()
+
+    if mode == "world" or _is_world_message(lower):
         world_line = f"Latest pulse on the wall: {world_context} " if world_context else ""
         return (
             f"{name}, the outside world is in the room with us. {thread} "
@@ -664,9 +687,11 @@ def chat_reply(
         "display_name": user.get("display_name") or user.get("handle") or "",
     }
     world_context = ""
-    if _is_world_message(message) or _is_content_message(message):
+    mode = str(payload.get("mode") or "").strip().lower()
+    mode = mode if mode in CHAT_MODES else None
+    if mode == "world" or _is_world_message(message) or _is_content_message(message):
         world_context = _load_world_context(limit_queries=2, limit_items=WORLD_CHAT_CONTEXT_ITEMS).get("summary", "")
-    reply = _build_cat_reply(message, reply_context, world_context=world_context)
+    reply = _build_cat_reply(message, reply_context, world_context=world_context, mode=mode)
 
     with pool.connection() as conn:
         recent_message_count = _first_col(
@@ -1216,7 +1241,7 @@ def tool_review_submission(
     payload: Dict[str, Any] = Body(...),
     _: Any = Depends(_require_internal_token),
 ) -> Dict[str, Any]:
-    """Lightweight policy check fallback when Cheshire Cat is unavailable."""
+    """Lightweight policy check fallback when the LLM sidecar is unavailable."""
     body = (payload.get("body_raw") or "").strip()
     if not body:
         raise HTTPException(status_code=400, detail="body_raw is required")

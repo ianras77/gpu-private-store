@@ -1,6 +1,6 @@
 # Beszel
 
-Beszel runs the node agent for server, disk, GPU, and Docker status reporting on this host.
+Beszel runs the NVIDIA-aware node agent for server, disk, GPU, and Docker status reporting on this host.
 
 ## Deployment stance
 
@@ -32,6 +32,8 @@ Beszel runs the node agent for server, disk, GPU, and Docker status reporting on
 - Bind mount `/dev/dri` -> `/dev/dri`
 - Bind mount `/` -> `/host`
 - Bind mount `/proc` -> `/host/proc`
+- NVIDIA runtime reservation exposes all host GPUs to the agent with the `utility` capability.
+- GPU telemetry is collected with `nvidia-smi` so Beszel can report GPU usage, memory, temperature, and power draw.
 
 ## Edge-routing notes
 

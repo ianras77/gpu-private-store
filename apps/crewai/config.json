@@ -6,7 +6,7 @@
   "dynamic_config": true,
   "id": "crewai",
   "description": "Internal JupyterHub-based Crewai workbench with Qdrant state, preserved Docker tooling, and model access via the existing host AI gateway.",
-  "tipi_version": 1,
+  "tipi_version": 2,
   "version": "latest",
   "categories": [
     "ai",
@@ -21,5 +21,5 @@
   ],
   "no_gui": false,
   "created_at": 1774316487140,
-  "updated_at": 1774316487140
+  "updated_at": 1780017759882
 }

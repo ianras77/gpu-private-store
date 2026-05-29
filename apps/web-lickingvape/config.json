@@ -5,15 +5,15 @@
   "exposable": true,
   "dynamic_config": true,
   "id": "web-lickingvape",
-  "description": "Editorial community stack with Next.js, FastAPI, background jobs, Postgres, and a Cheshire Cat sidecar.",
+  "description": "Dark anonymous quit-vaping wall with Next.js, FastAPI, LLM-assisted moderation, Postgres, and a mode-based Stripe Scribe.",
   "tipi_version": 4,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "Editorial community stack with FastAPI, worker jobs, and Cheshire Cat.",
+  "short_desc": "Dark anonymous quit-vaping wall with LLM-assisted moderation.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-lickingvape",
   "form_fields": [],
@@ -22,5 +22,5 @@
   ],
   "no_gui": false,
   "created_at": 1776589448000,
-  "updated_at": 1779494400000
+  "updated_at": 1780020471060
 }

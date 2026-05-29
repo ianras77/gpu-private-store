@@ -20,9 +20,7 @@ Crewai is packaged here as an internal JupyterHub workbench for agent, notebook,
 - Runtipi app-data convention: migrate app-owned state into `${APP_DATA_DIR}/app-data/crewai/...`.
 - Keep source code in the app repo and keep external shared media/model libraries on explicit host paths when needed.
 - The current package stores JupyterHub state, workspace content, outputs, and Qdrant data under app-data.
-- Source-controlled helper files stay mounted directly from the app repo:
-  - `/data/repos/apps/crewai/start-jupyterhub.sh`
-  - `/data/repos/apps/crewai/jupyterhub/jupyterhub_config.py`
+- Source-controlled JupyterHub helper files are mounted from this local app package at runtime.
 
 ## Port notes
 
@@ -40,8 +38,8 @@ Crewai is packaged here as an internal JupyterHub workbench for agent, notebook,
 ## Runtime notes
 
 - The Docker socket is intentionally preserved because Crewai/Jupyter workflows may use Docker-backed tools from inside the workbench.
-- The model layer currently targets the existing host AI gateway on `8111` using stable alias names:
-  - `chat-smart`
-  - `embed-nomic-text`
-  - `rerank-bge-m3`
-  - `image-dreamshaper`
+- The model layer currently targets the existing RassyGPT gateway using stable alias names:
+  - `rassy-smart`
+  - `rassy-embed`
+  - `rassy-rerank`
+  - `rassy-image`

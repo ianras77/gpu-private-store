@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { serverApiBase } from './lib/api';
 import FeedClient from './FeedClient';
@@ -13,7 +14,7 @@ import {
   starterPosts,
   tickerLines,
   toolkitQuickSteps,
-  worldPrompts
+  wallRituals
 } from './content';
 import type { Post } from './types';
 
@@ -55,14 +56,28 @@ export default async function Page() {
   const tickerLoop = [...tickerLines, ...tickerLines];
 
   return (
-    <div className="stack front-page">
-      <section className="hero hero-home">
-        <div className="hero-content">
-          <div className="eyebrow">Velvet-static quit blog</div>
-          <h2>Post the craving before it turns into a ghost story.</h2>
+    <div className="stack front-page wall-page">
+      <section className="wall-hero">
+        <div className="wall-hero-copy">
+          <div className="hero-brand-row">
+            <Image
+              src="/visuals/lickingvape-mark.jpg"
+              alt="Licking Vape striped storybook mark"
+              width={74}
+              height={74}
+              className="hero-mark"
+              priority
+            />
+            <div>
+              <div className="eyebrow">Anonymous quit wall</div>
+              <div className="hero-issue">night issue / stripe 30</div>
+            </div>
+          </div>
+          <h2>Thirty striped urges walked in. Post one down.</h2>
           <p className="lead">
-            Licking Vape is a dark, feed-first sideblog for quitting nicotine out loud while life,
-            headlines, and 2am feelings keep happening.
+            A dark, modern sideblog for quitting vaping in public-anonymous: craving reports, slip
+            receipts, tiny wins, world-noise spirals, and the weird little rituals that get your
+            mouth through the hour.
           </p>
           <div className="mood-stickers" aria-label="Site mood">
             {moodStickers.map((item) => (
@@ -71,46 +86,40 @@ export default async function Page() {
               </span>
             ))}
           </div>
-          <div className="inline-actions">
+          <div className="inline-actions hero-actions">
             <Link className="button" href="/submit">
-              Leave a note
+              Post to the wall
             </Link>
             <Link className="button ghost" href="#feed">
-              Read the night scroll
+              Read the wall
             </Link>
-            <Link className="button ghost" href="#cheshire">
-              Talk to Cheshire
+            <Link className="button ghost" href="#scribe">
+              Open the Scribe
             </Link>
-          </div>
-          <div className="stat-row">
-            <div className="stat">
-              <div className="stat-value">{stats ? stats.published_posts : '--'}</div>
-              <div className="stat-label">Published notes</div>
-            </div>
-            <div className="stat">
-              <div className="stat-value">{stats ? stats.queued_submissions : '--'}</div>
-              <div className="stat-label">Waiting at the desk</div>
-            </div>
-            <div className="stat">
-              <div className="stat-value">{stats ? stats.total_submissions : '--'}</div>
-              <div className="stat-label">Total entries</div>
-            </div>
           </div>
         </div>
 
-        <aside className="hero-card">
-          <div className="card-eyebrow">From the night desk</div>
-          <h3>Leave the mood in ink, not vapor.</h3>
-          <div className="card-list">
-            {seussNods.map((line) => (
-              <div key={line} className="card-list-item">
+        <aside className="wall-hero-panel">
+          <div className="wall-note-stack" aria-label="Wall ritual notes">
+            {seussNods.map((line, idx) => (
+              <div key={line} className={`paper-note paper-note-${idx + 1}`}>
                 {line}
               </div>
             ))}
           </div>
-          <div className="scribble-note">curated by the den, survived by the den</div>
-          <div className="card-footer">
-            <Link href="/submit">Leave tonight&apos;s note -&gt;</Link>
+          <div className="stat-row wall-stat-row">
+            <div className="stat">
+              <div className="stat-value">{stats ? stats.published_posts : '--'}</div>
+              <div className="stat-label">wall notes</div>
+            </div>
+            <div className="stat">
+              <div className="stat-value">{stats ? stats.queued_submissions : '--'}</div>
+              <div className="stat-label">at the desk</div>
+            </div>
+            <div className="stat">
+              <div className="stat-value">{stats ? stats.total_submissions : '--'}</div>
+              <div className="stat-label">sent in</div>
+            </div>
           </div>
         </aside>
       </section>
@@ -123,13 +132,62 @@ export default async function Page() {
         </div>
       </section>
 
+      <section className="wall-layout reveal" id="feed">
+        <aside className="wall-sidebar">
+          <div className="wall-sidebar-block">
+            <div className="card-eyebrow">Use the wall</div>
+            <div className="card-list">
+              {wallRituals.map((line) => (
+                <div key={line} className="card-list-item">
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="wall-sidebar-block">
+            <div className="card-eyebrow">What belongs</div>
+            <div className="mini-lane-list">
+              {editorialLanes.map((item) => (
+                <div key={item.title} className="mini-lane">
+                  <h4>{item.title}</h4>
+                  <p className="muted">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <div className="wall-feed-panel">
+          <div className="section-head wall-feed-head">
+            <div>
+              <h3>Anon Wall</h3>
+              <p className="muted">
+                Real notes from the queue, plus demo wall posts while the archive wakes up.
+              </p>
+            </div>
+            <Link className="button ghost" href="/submit">
+              Add yours
+            </Link>
+          </div>
+          <FeedClient initialPosts={feedPosts} demoMode={demoMode} />
+        </div>
+      </section>
+
+      <section className="section reveal" id="scribe">
+        <div className="section-head">
+          <h3>Stripe Scribe</h3>
+          <p className="muted">
+            Not a generic cheerleader. Pick a mode, bring the hour, and get a concrete next move or
+            a wall-post draft. Signed-in threads sync across devices; anonymous local mode still
+            works.
+          </p>
+        </div>
+        <CheshireChat />
+      </section>
+
       <section className="section reveal">
         <div className="section-head">
-          <h3>What belongs here</h3>
-          <p className="muted">
-            Nicotine is one chapter. Life, the internet, and the state of the world get to show up
-            too.
-          </p>
+          <h3>How the room stays useful</h3>
         </div>
         <div className="card-grid feature-grid">
           {homeHighlights.map((item) => (
@@ -143,34 +201,19 @@ export default async function Page() {
 
       <section className="section reveal">
         <div className="section-head">
-          <h3>Open tabs for the night desk</h3>
-          <p className="muted">
-            The curator voice here is broader on purpose. We are not pretending quitting nicotine
-            happens in a vacuum.
-          </p>
-        </div>
-        <div className="card-grid feature-grid">
-          {editorialLanes.map((item) => (
-            <div key={item.title} className="card">
-              <h4>{item.title}</h4>
-              <p className="muted">{item.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="section reveal">
-        <div className="section-head">
-          <h3>Little appy things, but cooler</h3>
-          <p className="muted">
-            Each tool is pointed at the same goal: interrupt the spiral, say the true thing, stay
-            in the room.
-          </p>
+          <h3>Side cabinets</h3>
+          <p className="muted">Small tools for the minutes when reading the wall is not enough.</p>
         </div>
         <div className="card-grid feature-grid">
           {retroApps.map((item) =>
             item.external ? (
-              <a key={item.title} className="card applet-card" href={item.href} target="_blank" rel="noreferrer">
+              <a
+                key={item.title}
+                className="card applet-card"
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <div className="card-eyebrow">{item.eyebrow}</div>
                 <h4>{item.title}</h4>
                 <p className="muted">{item.description}</p>
@@ -190,22 +233,21 @@ export default async function Page() {
 
       <section className="section reveal" id="world-pulse">
         <div className="section-head">
-          <h3>Current-world detour</h3>
+          <h3>World-noise shelf</h3>
           <p className="muted">
-            The den is already pulling a current-world pulse on a timer. When the headlines, the
-            timeline, or the general state of everything is part of the craving, do not pretend
-            otherwise.
+            When the outside world is part of the craving, use one tight search and come back to the
+            room before the scroll gets theatrical.
           </p>
         </div>
         <div className="world-grid">
           <WorldPulse />
           <div className="card">
-            <div className="card-eyebrow">How to use it</div>
-            <h4>Let the desk auto-listen. Step in when a thread needs you.</h4>
+            <div className="card-eyebrow">First ugly minutes</div>
+            <h4>Break the ritual before it becomes a plot.</h4>
             <div className="card-list">
-              {worldPrompts.map((line) => (
-                <div key={line} className="card-list-item">
-                  {line}
+              {toolkitQuickSteps.slice(0, 5).map((step) => (
+                <div key={step} className="card-list-item">
+                  {step}
                 </div>
               ))}
             </div>
@@ -215,7 +257,7 @@ export default async function Page() {
 
       <section className="section reveal">
         <div className="section-head">
-          <h3>How the night desk works</h3>
+          <h3>The queue contract</h3>
         </div>
         <div className="card-grid feature-grid">
           {howItWorks.map((item, idx) => (
@@ -226,50 +268,6 @@ export default async function Page() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="section reveal" id="cheshire">
-        <div className="section-head">
-          <h3>Cheshire Cat, in curator mode</h3>
-          <p className="muted">
-            Part quit companion, part moody blogger, part archive keeper. Cheshire can talk
-            nicotine, life, headlines, and whatever else is scratching at the window.
-          </p>
-        </div>
-        <CheshireChat />
-      </section>
-
-      <section className="section reveal">
-        <div className="section-head">
-          <h3>When the room goes theatrical</h3>
-          <p className="muted">Quick rituals for the first ugly minutes.</p>
-        </div>
-        <div className="card-list">
-          {toolkitQuickSteps.slice(0, 4).map((step) => (
-            <div key={step} className="card-list-item">
-              {step}
-            </div>
-          ))}
-        </div>
-        <div className="inline-actions">
-          <Link className="button ghost" href="/toolkit">
-            Open the full kit
-          </Link>
-          <Link className="button ghost" href="/timer">
-            Start a wave timer
-          </Link>
-        </div>
-      </section>
-
-      <section className="section reveal" id="feed">
-        <div className="section-head">
-          <h3>Night scroll</h3>
-          <p className="muted">
-            Curated notes, rough confessions, and live entries from people trying to leave nicotine
-            behind in real time.
-          </p>
-        </div>
-        <FeedClient initialPosts={feedPosts} demoMode={demoMode} />
       </section>
     </div>
   );

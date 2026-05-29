@@ -19,8 +19,8 @@ function formatTag(tag: string) {
 
 function formatSource(authorType: string) {
   if (authorType === 'admin') return 'night desk';
-  if (authorType === 'sms') return 'text-in note';
-  return 'community note';
+  if (authorType === 'sms') return 'text-in wall note';
+  return 'wall note';
 }
 
 function mergeUniquePosts(current: Post[], incoming: Post[]): Post[] {
@@ -72,19 +72,26 @@ export default function FeedClient({
   };
 
   return (
-    <div className="feed-shell">
-      {!posts.length ? <div className="small">No notes yet. Be the first one on the dashboard tonight.</div> : null}
+    <div className="feed-shell anon-wall">
+      {!posts.length ? (
+        <div className="small">No wall notes yet. Be the first stripe on the page tonight.</div>
+      ) : null}
       {demoMode ? (
-        <div className="callout small">Demo notes are showing while the real archive wakes up.</div>
+        <div className="callout small">
+          Demo wall notes are showing while the real archive wakes up.
+        </div>
       ) : null}
       {posts.map((post) => (
         <article key={post.id} className="post">
           <div className="post-meta">
             <span>{formatTimestamp(post.published_at || post.created_at)}</span>
             <span className="post-source">{formatSource(post.author_type)}</span>
-            <span className="post-byline">{post.display_name ? post.display_name : 'Anonymous'}</span>
+            <span className="post-byline">
+              {post.display_name ? post.display_name : 'Anonymous'}
+            </span>
           </div>
           <div className="post-body">{post.body}</div>
+          <div className="post-rip" aria-hidden="true" />
           {post.tags && post.tags.length > 0 ? (
             <div className="post-tags">
               {post.tags.map((tag) => (
@@ -98,7 +105,13 @@ export default function FeedClient({
       ))}
       <div style={{ marginTop: 24 }} className="inline-actions feed-actions">
         <button onClick={loadMore} disabled={loading || done || demoMode}>
-          {demoMode ? 'Connect The Archive' : done ? 'Archive End' : loading ? 'Turning Page...' : 'Turn The Page'}
+          {demoMode
+            ? 'Connect the wall'
+            : done
+              ? 'Wall end'
+              : loading
+                ? 'Pulling notes...'
+                : 'More notes'}
         </button>
         {error ? <span className="small status-error">{error}</span> : null}
       </div>

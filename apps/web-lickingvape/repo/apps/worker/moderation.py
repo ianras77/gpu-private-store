@@ -97,7 +97,7 @@ def parse_review_payload(payload: Any) -> Dict[str, Any]:
             return {"decision": "reject", "reasons": ["Invalid JSON from reviewer."], "cleaned_body": None, "tags": []}
 
     decision = str(payload.get("decision", "reject")).lower()
-    if decision not in {"approve", "reject"}:
+    if decision not in {"approve", "reject", "flagged"}:
         decision = "reject"
 
     reasons = payload.get("reasons") or []

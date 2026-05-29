@@ -1,6 +1,6 @@
 services:
   beszel-agent:
-    image: henrygd/beszel-agent:0.18.7
+    image: henrygd/beszel-agent-nvidia:0.18.7
     restart: unless-stopped
     cap_add:
     - SYS_RAWIO
@@ -22,12 +22,22 @@ services:
     - /proc:/host/proc:ro
     environment:
       LISTEN: 45876
+      GPU_COLLECTOR: nvidia-smi
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: utility
       KEY: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/AjramldH8szPTXSbodEZjkN5tLPRMsqzZobygYmKE'
       HUB_URL: https://monitor.rasies.com
       TOKEN: '90eb6b35-3111-46d7-b1c6-815e07b44ebc'
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities:
+            - utility
     x-runtipi:
       is_main: true
       internal_port: 45876
 x-runtipi:
   schema_version: 2
-

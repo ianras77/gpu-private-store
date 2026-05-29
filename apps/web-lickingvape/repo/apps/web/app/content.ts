@@ -23,123 +23,130 @@ export type EditorialPrompt = {
   seed: string;
 };
 
+export type ChatMode = {
+  id: 'craving' | 'post' | 'reset' | 'world';
+  label: string;
+  description: string;
+  prompt: string;
+};
+
 export const buildRasiesSearchHref = (query: string) =>
   `https://search.rasies.com/search?q=${encodeURIComponent(query)}&language=en-US&safesearch=0`;
 
 export const starterPosts: Post[] = [
   {
     id: -1,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: 'inkblot',
-    body: 'Breakfast headline spiral almost turned into a nicotine excuse. Posted here instead. Black coffee, cold sink water, open window. The craving went from feral to merely rude.',
+    body: 'I was not craving a vape. I was craving the little exit door it pretended to be. Posted here, drank cold water, let the exit door stay painted on the wall.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 24 * 5),
     published_at: isoMinutesAgo(60 * 24 * 5),
-    tags: ['doomscroll', 'morning', 'held-on']
+    tags: ['craving', 'exit-door', 'held-on']
   },
   {
     id: -2,
-    author_type: 'admin',
-    display_name: 'lamplight',
-    body: 'Roommate drama plus work email avalanche. I wanted the old hand ritual more than the nicotine itself. Walked the block, came back, wrote this instead.',
+    author_type: 'web',
+    display_name: null,
+    body: 'After dinner is my striped villain. Tonight I named it, washed one pan, folded one towel, and did not drive to the gas station. Boring magic counts.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 24 * 4 + 80),
     published_at: isoMinutesAgo(60 * 24 * 4 + 80),
-    tags: ['ritual', 'stress', 'check-in']
+    tags: ['after-dinner', 'hands-busy', 'boring-magic']
   },
   {
     id: -3,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: 'smokeghost',
-    body: 'Tonight I miss the pause button, not the vape. Tea in a chipped mug. Fan on. Phone face-down. My lungs feel less haunted than they did last month.',
+    body: 'Slip report with no funeral music: I hit one yesterday, hated the taste, told the wall, reset the route home. Shame did not get a throne.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 24 * 4 + 240),
     published_at: isoMinutesAgo(60 * 24 * 4 + 240),
-    tags: ['night', 'ritual-swap', 'body']
+    tags: ['slip', 'reset', 'no-throne']
   },
   {
     id: -4,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: 'J',
-    body: 'Slip report: bought one yesterday, told on myself today, threw it out tonight. No myth-making, no collapse. Just receipts and a smaller radius tomorrow.',
+    body: 'Thirty little tigers in my teeth today. I only had to outlast the first one. The rest got bored when I changed rooms.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 24 * 3 + 30),
     published_at: isoMinutesAgo(60 * 24 * 3 + 30),
-    tags: ['slip', 'receipts', 'reset']
+    tags: ['stripe-one', 'change-rooms', 'tiny-win']
   },
   {
     id: -5,
     author_type: 'admin',
-    display_name: 'ravenwire',
-    body: 'Rent is due, the news is weird, and every ad seems to know I am tired. Still did not buy pods. That is the whole poem tonight.',
+    display_name: 'night desk',
+    body: 'Wall prompt: write the exact sentence nicotine is whispering, then answer it like you are tired of its handwriting.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 24 * 2 + 210),
     published_at: isoMinutesAgo(60 * 24 * 2 + 210),
-    tags: ['money', 'world-notes', 'small-win']
+    tags: ['wall-prompt', 'reply-back']
   },
   {
     id: -6,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: 'thinmoon',
-    body: 'Driving used to be automatic vape territory. Tonight it was gum, cracked windows, and one dramatic song on repeat. Weirdly survivable.',
+    body: 'My mouth wanted a task. Mint, straw, terrible playlist. My brain complained in rhyme and then forgot what it wanted.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 24 * 2 + 480),
     published_at: isoMinutesAgo(60 * 24 * 2 + 480),
-    tags: ['driving', 'trigger-map', 'survived']
+    tags: ['mouth-habit', 'ritual-swap', 'playlist']
   },
   {
     id: -7,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: 'T',
-    body: 'Left the apartment without the device and did not do the little panic-turnaround. Felt gothic and brave and mildly ridiculous. I will take it.',
+    body: 'The group chat got loud. I wanted the old pocket lightning. Put the phone on the floor and stood outside until the want became weather.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 24 + 90),
     published_at: isoMinutesAgo(60 * 24 + 90),
-    tags: ['win', 'confidence', 'daylight']
+    tags: ['friends', 'weather', 'still-here']
   },
   {
     id: -8,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: null,
-    body: 'Morning one without nicotine before coffee. Turns out my brain is loud but not prophetic.',
+    body: 'Morning one before coffee. I did not become graceful. I did become nicotine-free for one more ugly hour.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 18),
     published_at: isoMinutesAgo(60 * 18),
-    tags: ['day-one', 'morning', 'rewiring']
+    tags: ['day-one', 'morning', 'ugly-hour']
   },
   {
     id: -9,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: 'L',
-    body: 'Grounding trick, revised for bad-news days: name the headline, name the feeling, name one thing in the room that is actually real. It helped.',
+    body: 'Grounding for bad-news days: headline, feeling, object. The headline is not in my kitchen. The feeling is not a command. The spoon is real.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 12),
     published_at: isoMinutesAgo(60 * 12),
-    tags: ['grounding', 'news', 'nervous-system']
+    tags: ['doomscroll', 'grounding', 'object-real']
   },
   {
     id: -10,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: 'A',
-    body: 'After dinner remains my villain origin story. Tonight I folded laundry and wrote a mean little list of reasons I do not want to start over.',
+    body: 'Deleted the delivery app because my willpower is a candle in a windy cartoon hallway. Architecture beats vibes tonight.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 8),
     published_at: isoMinutesAgo(60 * 8),
-    tags: ['after-dinner', 'hands-busy', 'resolve']
+    tags: ['friction', 'architecture', 'cartoon-hallway']
   },
   {
     id: -11,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: 'C',
-    body: 'Texted my friend: if I ask for a hit tonight, say no and remind me I am being dramatic. Outsourcing the spine a little.',
+    body: 'Texted a friend: if I ask for a hit, say no and remind me I am being theatrical. Outsourcing the spine a little.',
     status: 'published',
     created_at: isoMinutesAgo(60 * 5),
     published_at: isoMinutesAgo(60 * 5),
-    tags: ['boundary', 'support', 'humor']
+    tags: ['support', 'boundary', 'theatrical']
   },
   {
     id: -12,
-    author_type: 'admin',
+    author_type: 'web',
     display_name: null,
     body: 'Current plan: survive the night, keep the window open, let tomorrow arrive without nicotine on my tongue.',
     status: 'published',
@@ -151,96 +158,104 @@ export const starterPosts: Post[] = [
 
 export const homeHighlights = [
   {
-    title: 'Quit diary, not wellness theater.',
+    title: 'Anon wall first.',
     description:
-      'The feed wants the actual scene: craving, slip, weird thought, relapse math, tiny win, and whatever else the night did to you.'
+      'The feed is the product: cravings, slips, little wins, mouth-habit grief, and the odd sentence that gets you through the hour.'
   },
   {
-    title: 'Life notes and world notes count.',
+    title: 'Moderated, not polished flat.',
     description:
-      'Money stress, headlines, work rot, friend drama, boredom, grief. If it tangles with nicotine, it belongs in the room.'
+      'The LLM reviewer and the night desk catch spam, cruelty, PII, and crisis signals while leaving the honest voice intact.'
   },
   {
-    title: 'Cheshire holds the thread.',
+    title: 'Specific help when the wall is not enough.',
     description:
-      'The cat remembers your goal, mood, streak, and current mess so every conversation can start a little deeper.'
+      'The Stripe Scribe has modes for cravings, draft help, slip resets, and doomscroll grounding instead of a generic support chatbot.'
   }
 ];
 
 export const moodStickers = [
-  'doomscroll support club',
-  'crooked storybook energy',
-  'late-night archive keeper',
-  'nicotine funeral attire'
+  'anonymous wall',
+  'dark storybook nicotine exit',
+  'modern sideblog energy',
+  'one stripe at a time'
 ];
 
 export const tickerLines = [
-  'post before the craving writes fanfic',
-  'life notes and world notes still count',
-  'curated, not sanitized',
-  'one stripe at a time',
-  'the room is open and the feed is watching',
-  'dark little sideblog, soft little survival plan'
+  'post before the craving gets a costume',
+  'thirty striped urges, one tiny refusal',
+  'anonymous counts as honest',
+  'no shame throne tonight',
+  'the wall is awake',
+  'craving / trigger / next move'
 ];
 
 export const editorialLanes = [
   {
-    title: 'Quit notes',
-    description: 'Cravings, slips, rituals, mouth-habit grief, and the tiny mechanics of getting through the next hour.'
-  },
-  {
-    title: 'Life notes',
-    description: 'Sleep, money, work, family, roommates, heartbreak, boredom, and the parts of quitting that happen off the brochure.'
-  },
-  {
-    title: 'World notes',
+    title: 'Craving reports',
     description:
-      'The headline that got under your skin, the policy story that made you furious, the general feeling that the century is doing too much.'
+      'The body scene, the bargaining voice, the tiny interruption, the strange replacement ritual.'
+  },
+  {
+    title: 'Slip receipts',
+    description:
+      'What happened, what lit it, what changes next, without turning one hit into a whole identity.'
+  },
+  {
+    title: 'World noise',
+    description:
+      'Headlines, money stress, social pressure, boredom, grief, and the tab stack that makes nicotine look useful.'
   }
 ];
 
 export const howItWorks = [
   {
-    title: 'Drop the scene fast',
-    description: 'One clean paragraph is enough. What happened, what it made you want, what you did next.'
+    title: 'Write the scene',
+    description:
+      'One paragraph is enough: what happened, what the urge promised, what you did before it owned the room.'
   },
   {
-    title: 'Curated, not flattened',
-    description: 'Submissions are reviewed so the room can stay sharp, supportive, and free of spam or cruelty.'
+    title: 'The desk reviews it',
+    description:
+      'Automated policy checks and optional LLM review keep the wall anonymous, human, and safer to read.'
   },
   {
-    title: 'Use the side cabinets',
-    description: 'Timer, toolkit, Cheshire, and current-world prompts are there when the feed alone is not enough.'
+    title: 'The room answers by existing',
+    description:
+      'People see the note, recognize the hour, and get proof that the next stripe can be smaller.'
   }
 ];
 
 export const toolCabinet: ToolCard[] = [
   {
-    kicker: 'Little app',
-    title: 'Post to the den',
-    description: 'Fast lane for cravings, slips, weird victories, and the sentence you need to say before you backslide.',
+    kicker: 'Post box',
+    title: 'Leave a wall note',
+    description:
+      'Fast lane for cravings, slips, tiny victories, and the sentence you need to say before nicotine speaks for you.',
     href: '/submit',
     cta: 'Open the post box'
   },
   {
-    kicker: 'Little app',
-    title: 'Talk to Cheshire',
+    kicker: 'Scribe',
+    title: 'Talk to the Stripe Scribe',
     description:
-      'Late-night creator energy with memory. Bring your nicotine logic, life mess, or the headline that won’t leave your body alone.',
-    href: '/#cheshire',
-    cta: 'Open the cat thread'
+      'Mode-based chat for cravings, draft shaping, slip reset, and doomscroll grounding. It remembers your thread if you sign in.',
+    href: '/#scribe',
+    cta: 'Open the scribe'
   },
   {
-    kicker: 'Little app',
-    title: 'Run the wave timer',
-    description: 'A retro little interruption machine for the hand-to-mouth autopilot loop.',
+    kicker: 'Timer',
+    title: 'Run the wave breaker',
+    description:
+      'A small console for the hand-to-mouth autopilot loop: interrupt, move, name the stripe, come back.',
     href: '/timer',
     cta: 'Start the timer'
   },
   {
-    kicker: 'Little app',
+    kicker: 'Cabinet',
     title: 'Open the toolkit',
-    description: 'Grounding moves, reset rituals, and outside support when the room in your head gets too echoey.',
+    description:
+      'Official resources, grounding moves, reset rituals, and outside support when the wall needs backup.',
     href: '/toolkit',
     cta: 'Open the cabinet'
   }
@@ -260,28 +275,28 @@ export const searchSignals: SearchSignal[] = [
     kicker: 'Signal boost',
     title: 'Bad headlines, shaky hands',
     description:
-      'Use `search.rasies.com` when the news is making your nervous system weird and you want language before you want nicotine.',
+      'Use search.rasies.com when the news is making your nervous system loud and you want language before you want nicotine.',
     query: 'latest headlines anxiety nicotine today'
   },
   {
     kicker: 'Signal boost',
     title: 'Money stress and the urge',
     description:
-      'Good for rent panic, work dread, layoffs, inflation, and the very specific craving that arrives with financial doom.',
+      'For rent panic, layoffs, bills, inflation, and the craving that arrives wearing a practical little hat.',
     query: 'cost of living stress quitting nicotine'
   },
   {
     kicker: 'Signal boost',
-    title: 'What policy people are doing',
+    title: 'Quit science without the lecture',
     description:
-      'For anyone who wants to talk about vaping rules, public health news, or the part where systems affect cravings too.',
-    query: 'vape policy nicotine regulation today'
+      'Find practical nicotine, craving, and withdrawal language, then bring the part that actually helps back to the wall.',
+    query: 'vaping nicotine withdrawal cravings quit support'
   },
   {
     kicker: 'Signal boost',
     title: 'Your city, your weather, your mood',
     description:
-      'Swap in your city name and look at the local swirl when your personal trigger has a zip code attached to it.',
+      'Swap in your city name when your trigger has a route, a corner store, a commute, or a specific kind of rain attached.',
     query: 'your city nightlife stress quitting nicotine'
   }
 ];
@@ -291,110 +306,141 @@ export const worldPrompts = searchSignals.map(
 );
 
 export const toolkitQuickSteps = [
-  'Name the scene in one sentence: what happened, where you are, and what you want to do.',
-  'Put the device or buying method farther away than arm’s reach for the next three minutes.',
-  'Drink something cold, loosen your jaw, and give your hands a job.',
-  'Leave the doomscroll tab. Stand up. Change rooms. Change light.',
-  'Post before you decide. The feed exists so the craving is not the only witness.'
+  'Move the vape, card, app, or buying path farther away than the craving expects.',
+  'Name the stripe: mouth habit, panic, boredom, anger, sadness, party reflex, or phone spiral.',
+  'Give your hands a replacement job: ice water, gum, mint, towel, pen, dishes, keys, walk.',
+  'Change one physical thing: room, light, shoes, window, route, playlist, posture.',
+  'Post before you decide. The wall exists so the craving is not the only witness.'
 ];
 
 export const toolkitPlan = [
-  'Write the hour of day that most often takes you out, then build a replacement ritual for exactly that hour.',
-  'Keep one sensory fallback nearby: mint, gum, ice water, tea, cinnamon, playlist, sketchbook, whatever interrupts the loop.',
-  'Tell one person what support looks like in a sentence blunt enough to survive a hard night.',
-  'Make nicotine a hassle. Move devices, delete the easy order flow, change the route, change the drawer.',
-  'Decide what future-you gets to read after a win: a note, a screenshot, a post, a receipt.'
+  'Map the hour that usually gets you. Build one replacement ritual for exactly that hour.',
+  'Make nicotine annoying to reach: delete the easy order flow, move the card, change the route, empty the drawer.',
+  'Keep one sensory fallback close enough to win the first minute: mint, straw, tea, cold water, playlist, sketchbook.',
+  'Tell one person the exact sentence that helps: say no, distract me, remind me I hate starting over.',
+  'Save receipts for future-you: wall note, screenshot, tally mark, calendar dot, anything visible.'
 ];
 
 export const toolkitReset = [
-  'Do not build a myth around one slip. Write what happened while it is still boring and specific.',
-  'Mark the trigger: place, person, feeling, headline, or hour.',
-  'Choose one physical change for next time. Smaller radius, different route, phone in another room, cash not card.',
-  'Reset in public if you can. Shame loves private lighting.'
+  'Do not build a cathedral around one slip. Write the boring true version while it is still small.',
+  'Mark the trigger: place, person, feeling, headline, hour, hunger, drink, route, or silence.',
+  'Pick one environmental change before the day ends. Smaller radius beats louder shame.',
+  'Ask for backup sooner than feels stylish. Private lighting makes shame look bigger.'
 ];
 
 export const timerStages = [
   {
     seconds: 60,
     label: 'Minute 1',
-    description: 'Interrupt the ritual. Water, breath, open hands, feet on the floor.'
+    description: 'Move the buying path. Unclench your jaw. Put both feet on the floor.'
   },
   {
     seconds: 180,
     label: 'Minute 3',
-    description: 'The spike usually breaks here. Stay annoying about surviving it.'
+    description: 'Name the stripe and give your hands a task. You are not negotiating yet.'
   },
   {
     seconds: 420,
     label: 'Minute 7',
-    description: 'Enough time to move rooms, text someone, or turn this into a post with receipts.'
+    description: 'Change rooms, text someone, or turn the hour into a wall note with receipts.'
   }
 ];
 
 export const timerRitual = timerStages.map((stage) => `${stage.label}. ${stage.description}`);
 
 export const submitPrompts = [
-  'What happened in your body right before the craving showed up?',
-  'What did the headline, text, commute, or conversation make you want?',
-  'What tiny move kept tonight from getting worse?',
-  'If you slipped, what is the boring true version of what happened?',
-  'What do you want the feed to know about this exact hour?'
+  'The stripe I am fighting right now is ____.',
+  'The craving promised me ____, but the real scene is ____.',
+  'I almost vaped when ____. I did ____ instead.',
+  'Slip receipt: what happened, what lit it, what changes before tonight ends.',
+  'Tiny win, ugly lighting: ____.'
 ];
 
 export const submitNotes = [
-  'Raw is allowed. Performative is optional.',
-  'You can be anonymous and still be vivid.',
-  'If the world is part of the story, say that part too.'
+  'Anonymous is not less real.',
+  'One paragraph beats one secret spiral.',
+  'Dark is welcome. Cruel is not.',
+  'If it is an emergency, use live crisis support, not the wall.'
 ];
 
-export const chatStarterPrompts = [
-  'The news has me wanting nicotine again.',
-  'Help me turn tonight into a post.',
-  'I slipped and I do not want to disappear.',
-  'Make me a tiny plan for the next hour.'
+export const chatModes: ChatMode[] = [
+  {
+    id: 'craving',
+    label: 'Craving',
+    description: 'Triage the next ten minutes.',
+    prompt: 'I want a hit right now. Help me beat the first stripe.'
+  },
+  {
+    id: 'post',
+    label: 'Post',
+    description: 'Turn the hour into a wall note.',
+    prompt: 'Help me turn this ugly hour into a wall post.'
+  },
+  {
+    id: 'reset',
+    label: 'Slip',
+    description: 'Reset without shame theater.',
+    prompt: 'I slipped and I need a reset that does not make me disappear.'
+  },
+  {
+    id: 'world',
+    label: 'World',
+    description: 'Ground the doomscroll static.',
+    prompt: 'The world/news/internet has my nervous system loud and I want nicotine.'
+  }
 ];
+
+export const chatStarterPrompts = chatModes.map((mode) => mode.prompt);
 
 export const editorialPromptBank: EditorialPrompt[] = [
   {
-    label: 'News grief note',
-    seed: 'The headline under my skin tonight is ____. It made me want ____. What I am doing instead is ____.'
+    label: 'Craving wall prompt',
+    seed: 'Wall prompt: name the stripe nicotine is wearing tonight, then name the object in the room that proves you are still here.'
   },
   {
-    label: 'Craving scene',
-    seed: 'Scene report: where I am, what just happened, how loud the urge got, and what I reached for instead.'
+    label: 'Slip receipt',
+    seed: 'Slip receipt format: what happened, what lit it, what changes before the night ends. No funeral music.'
   },
   {
     label: 'Tiny win',
-    seed: 'Small ugly win with bad lighting: ____.'
+    seed: 'Tiny win, ugly lighting: ____. Future-me gets this receipt.'
   },
   {
-    label: 'Ask the room',
-    seed: 'Tell me your strangest trigger this week and the thing that kept you from letting it run the night.'
+    label: 'Doomscroll note',
+    seed: 'The headline under my skin tonight is ____. It made me want ____. What I am doing instead is ____.'
   }
 ];
 
 export const seussNods = [
-  'If the whole striped beast feels impossible, take one stripe and leave the legend for tomorrow.',
-  'Crooked courage still counts. Especially the kind that shows up in ugly lighting.',
-  'The mood can stay gothic. The next move still has to be real.'
+  'Thirty striped urges can arrive in a line. You only owe the first one an answer.',
+  'Bent little rhymes are allowed. The next move still has to be real.',
+  'If the beast is too big, take one stripe and leave the legend for tomorrow.'
+];
+
+export const wallRituals = [
+  'Read three notes before you bargain with the urge.',
+  'Post one sentence before you open a buying path.',
+  'Use the Scribe when the feeling needs a shape, not a lecture.',
+  'Use official backup when the wall is not enough.'
 ];
 
 export const supportResources = [
   {
     title: 'SmokefreeTXT',
-    description: 'Free text support from Smokefree.gov if you want official backup in your pocket.',
+    description: 'Free text-message support from Smokefree.gov for quitting tobacco or vaping.',
     href: 'https://smokefree.gov/tools-tips/text-programs',
-    meta: 'US text support'
+    meta: 'Text support'
   },
   {
     title: '1-800-QUIT-NOW',
-    description: 'Free quit coaching and nicotine-cessation resources from live humans.',
+    description:
+      'Free and confidential quit coaching from trained quitline coaches in the United States.',
     href: 'https://www.cdc.gov/quit-smoking/quitlines/index.html',
     meta: 'Quitline'
   },
   {
     title: 'This is Quitting',
-    description: 'Text DITCHVAPE to 88709 for youth and young-adult support.',
+    description: 'Free anonymous text support for teens and young adults quitting vaping.',
     href: 'https://truthinitiative.org/this-is-quitting',
     meta: 'Truth Initiative'
   },
@@ -407,25 +453,30 @@ export const supportResources = [
 ];
 
 export const aboutFallbackMd = `
-Licking Vape is a dimly lit feed for people quitting nicotine without pretending life is tidy.
+Licking Vape is an anonymous wall for people quitting nicotine without pretending the story is tidy.
 
 ### What this room is
-- A feed-first diary for cravings, slips, rituals, money stress, weird headlines, and tiny wins.
-- A place where moody posts are welcome as long as they stay human.
-- A corner with a memory-keeping Cheshire Cat, a timer, and a cabinet full of backup moves.
+- A modern dark sideblog for cravings, slips, mouth-habit grief, weird rituals, world noise, and tiny wins.
+- A place to post the hour before the hour becomes a purchase.
+- A wall with a timer, official support links, and a mode-based Stripe Scribe for concrete help.
 
 ### What the tone is
-- Less health-class flyer.
-- More late-night internet post with receipts.
-- Honest, curated, and built for people still in the middle of it.
+- Less public-health podium.
+- More crooked late-night storybook with receipts.
+- Funny when it can be, blunt when it has to be, never cruel.
+
+### How moderation works
+- Automated policy checks catch PII, hate, explicit sexual content, medical-claim weirdness, and crisis language.
+- The Stripe Scribe sidecar can review and draft with the local LLM stack when configured.
+- Human desk review stays available for the notes that need eyes.
 
 ### What the line is
-- We can be dark without being cruel.
-- We can talk about the world without doomscrolling each other into the floor.
-- We are not a replacement for professional care.
+- The wall is peer support, not professional care.
+- Vivid is good. Doxxing, cruelty, spam, and crisis dumping are not.
+- If you feel unsafe, contact emergency services or 988.
 
-The name winks at old impossible-animal bravado: striped chaos, bent logic, one hard thing at a time.
+The name points at impossible striped bravado: too many beasts, too much mouth, one real refusal at a time.
 `.trim();
 
 export const shoutoutFallback =
-  'Built on crooked-tiger bravado, nicotine-exit honesty, and late-night internet diary energy.';
+  'Built as an anonymous dark sideblog for quitting nicotine: thirty striped urges, one posted refusal.';

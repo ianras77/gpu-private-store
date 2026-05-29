@@ -50,69 +50,74 @@ MINIMAL_DEFAULT_THEME = {
 }
 
 DEFAULT_ABOUT = """
-Licking Vape is a dimly lit feed for people quitting nicotine without pretending life is tidy.
+Licking Vape is an anonymous wall for people quitting nicotine without pretending the story is tidy.
 
 ### What this room is
-- A feed-first diary for cravings, slips, rituals, money stress, weird headlines, and tiny wins.
-- A place where moody posts are welcome as long as they stay human.
-- A corner with a memory-keeping Cheshire Cat, a timer, and a cabinet full of backup moves.
+- A modern dark sideblog for cravings, slips, mouth-habit grief, weird rituals, world noise, and tiny wins.
+- A place to post the hour before the hour becomes a purchase.
+- A wall with a timer, official support links, and a mode-based Stripe Scribe for concrete help.
 
 ### What the tone is
-- Less health-class flyer.
-- More late-night internet post with receipts.
-- Honest, curated, and built for people still in the middle of it.
+- Less public-health podium.
+- More crooked late-night storybook with receipts.
+- Funny when it can be, blunt when it has to be, never cruel.
+
+### How moderation works
+- Automated policy checks catch PII, hate, explicit sexual content, medical-claim weirdness, and crisis language.
+- The Stripe Scribe sidecar can review and draft with the local LLM stack when configured.
+- Human desk review stays available for the notes that need eyes.
 
 ### What the line is
-- We can be dark without being cruel.
-- We can talk about the world without doomscrolling each other into the floor.
-- We are not a replacement for professional care.
+- The wall is peer support, not professional care.
+- Vivid is good. Doxxing, cruelty, spam, and crisis dumping are not.
+- If you feel unsafe, contact emergency services or 988.
 
-The name winks at old impossible-animal bravado: striped chaos, bent logic, one hard thing at a time.
+The name points at impossible striped bravado: too many beasts, too much mouth, one real refusal at a time.
 """.strip()
 
 DEFAULT_SHOUTOUT = (
-    "Built on crooked-tiger bravado, nicotine-exit honesty, and late-night internet diary energy."
+    "Built as an anonymous dark sideblog for quitting nicotine: thirty striped urges, one posted refusal."
 )
 
 SEED_POSTS = [
     {
         "display_name": "inkblot",
-        "body": "Breakfast headline spiral almost turned into a nicotine excuse. Posted here instead. Black coffee, cold sink water, open window. The craving went from feral to merely rude.",
+        "body": "I was not craving a vape. I was craving the little exit door it pretended to be. Posted here, drank cold water, let the exit door stay painted on the wall.",
         "tags": ["doomscroll", "morning", "held-on"],
         "days_ago": 5,
         "hours_ago": 2,
     },
     {
         "display_name": "lamplight",
-        "body": "Roommate drama plus work email avalanche. I wanted the old hand ritual more than the nicotine itself. Walked the block, came back, wrote this instead.",
+        "body": "After dinner is my striped villain. Tonight I named it, washed one pan, folded one towel, and did not drive to the gas station. Boring magic counts.",
         "tags": ["ritual", "stress", "check-in"],
         "days_ago": 4,
         "hours_ago": 5,
     },
     {
         "display_name": None,
-        "body": "Tonight I miss the pause button, not the vape. Tea in a chipped mug. Fan on. Phone face-down. My lungs feel less haunted than they did last month.",
+        "body": "Slip report with no funeral music: I hit one yesterday, hated the taste, told the wall, reset the route home. Shame did not get a throne.",
         "tags": ["night", "ritual-swap", "body"],
         "days_ago": 4,
         "hours_ago": 1,
     },
     {
         "display_name": "J",
-        "body": "Slip report: bought one yesterday, told on myself today, threw it out tonight. No myth-making, no collapse. Just receipts and a smaller radius tomorrow.",
+        "body": "Thirty little tigers in my teeth today. I only had to outlast the first one. The rest got bored when I changed rooms.",
         "tags": ["slip", "receipts", "reset"],
         "days_ago": 3,
         "hours_ago": 4,
     },
     {
         "display_name": "ravenwire",
-        "body": "Rent is due, the news is weird, and every ad seems to know I am tired. Still did not buy pods. That is the whole poem tonight.",
+        "body": "The group chat got loud. I wanted the old pocket lightning. Put the phone on the floor and stood outside until the want became weather.",
         "tags": ["money", "world-notes", "small-win"],
         "days_ago": 2,
         "hours_ago": 8,
     },
     {
         "display_name": "thinmoon",
-        "body": "Driving used to be automatic vape territory. Tonight it was gum, cracked windows, and one dramatic song on repeat. Weirdly survivable.",
+        "body": "My mouth wanted a task. Mint, straw, terrible playlist. My brain complained in rhyme and then forgot what it wanted.",
         "tags": ["driving", "trigger-map", "survived"],
         "days_ago": 2,
         "hours_ago": 2,

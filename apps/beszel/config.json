@@ -5,13 +5,13 @@
   "exposable": false,
   "dynamic_config": true,
   "id": "beszel",
-  "description": "Beszel runs the node agent for server, disk, GPU, and Docker status reporting on this secondary host.",
+  "description": "Beszel runs the NVIDIA-aware node agent for server, disk, GPU, and Docker status reporting on this secondary host.",
   "tipi_version": 5,
-  "version": "0.8.17",
+  "version": "0.18.7",
   "categories": [
     "utilities"
   ],
-  "short_desc": "Beszel node agent for server and Docker status reporting.",
+  "short_desc": "Beszel NVIDIA node agent for server, GPU, disk, and Docker status reporting.",
   "author": "https://github.com/ianras77/beszel.git",
   "source": "https://github.com/ianras77/beszel",
   "form_fields": [],
@@ -20,5 +20,5 @@
   ],
   "no_gui": true,
   "created_at": 1774316487138,
-  "updated_at": 1774316487142
+  "updated_at": 1779033600000
 }

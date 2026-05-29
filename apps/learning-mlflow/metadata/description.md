@@ -12,10 +12,10 @@ MLflow from the old `learning` bundle, split into its own Runtipi app.
 
 - Artifact root lives in `${APP_DATA_DIR}/app-data/learning-mlflow/named/mlflow`.
 - Metadata storage lives in `${APP_DATA_DIR}/app-data/learning-mlflow/named/postgres`.
-- This package mounts the tracked `learning/mlflow` build context and auth config from the source repo.
+- This package builds from its local `mlflow` directory and generates the MLflow auth config at container startup.
 
 ## Migration notes
 
-- Source repo: `/data/repos/apps/learning`
+- Original source repo: `/data/repos/apps/learning`
 - Original compose source: `/data/repos/apps/learning/docker-compose.yml`
 - The tracked `mlflow` build files were restored from the repo history so the split package can build faithfully.

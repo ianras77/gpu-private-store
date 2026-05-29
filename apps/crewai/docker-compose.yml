@@ -1,7 +1,7 @@
 services:
   crewai:
     build:
-      context: /app-repos/crewai/crewai
+      context: ./crewai
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
@@ -27,8 +27,8 @@ services:
     - ${APP_DATA_DIR}/app-data/crewai/named/outputs:/workspace/outputs
     - ${APP_DATA_DIR}/app-data/crewai/named/jupyterhub:/data/jupyterhub
     - /var/run/docker.sock:/var/run/docker.sock
-    - /data/repos/apps/crewai/jupyterhub/jupyterhub_config.py:/etc/jupyterhub/jupyterhub_config.py:ro
-    - /data/repos/apps/crewai/start-jupyterhub.sh:/usr/local/bin/start-jupyterhub.sh:ro
+    - ./jupyterhub/jupyterhub_config.py:/etc/jupyterhub/jupyterhub_config.py:ro
+    - ./start-jupyterhub.sh:/usr/local/bin/start-jupyterhub.sh:ro
     working_dir: /workspace
     extra_hosts:
     - host.docker.internal:host-gateway

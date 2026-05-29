@@ -11,7 +11,7 @@ const MAX_POST_CHARS = 1200;
 export default function SubmitPage() {
   const [body, setBody] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [anonymous, setAnonymous] = useState(false);
+  const [anonymous, setAnonymous] = useState(true);
   const [status, setStatus] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<'info' | 'error'>('info');
   const [loading, setLoading] = useState(false);
@@ -84,7 +84,7 @@ export default function SubmitPage() {
         if (anonymous || !token) {
           setDisplayName('');
         }
-        setAnonymous(false);
+        setAnonymous(true);
         setStatusTone('info');
         setStatus('Queued for the night desk. It will hit the scroll after review.');
       } else {
@@ -111,22 +111,29 @@ export default function SubmitPage() {
   return (
     <section className="stack">
       <div className="section-head">
-        <h2>Leave a note for the queue</h2>
+        <h2>Post to the wall</h2>
         <p className="muted">
-          Confession, craving log, headline aftermath, ugly win, one-line survival note. Raw is
-          welcome.
+          Craving report, slip receipt, headline aftermath, ugly win, one-line refusal. Anonymous is
+          the default; vivid is the point.
         </p>
       </div>
 
       <div className="split-layout">
         <form onSubmit={onSubmit} className="card form-panel">
-          <div className="callout">The night desk reviews every post before it lands in the scroll.</div>
+          <div className="callout">
+            The wall is anonymous by default. The desk reviews posts before they land in the scroll.
+          </div>
 
           <div>
             <div className="card-eyebrow">Prompt shelf</div>
             <div className="prompt-grid">
               {submitPrompts.map((prompt) => (
-                <button key={prompt} type="button" className="prompt-chip" onClick={() => seedPrompt(prompt)}>
+                <button
+                  key={prompt}
+                  type="button"
+                  className="prompt-chip"
+                  onClick={() => seedPrompt(prompt)}
+                >
                   {prompt}
                 </button>
               ))}
@@ -134,12 +141,12 @@ export default function SubmitPage() {
           </div>
 
           <div>
-            <label htmlFor="displayName">Name (optional)</label>
+            <label htmlFor="displayName">Name (optional, off by default)</label>
             <input
               id="displayName"
               value={displayName}
               onChange={(event) => setDisplayName(event.target.value)}
-              placeholder="Leave blank if you want the note unsigned"
+              placeholder="Uncheck anonymous if you want a byline"
               disabled={anonymous}
             />
           </div>
@@ -150,7 +157,7 @@ export default function SubmitPage() {
               id="body"
               value={body}
               onChange={(event) => setBody(event.target.value)}
-              placeholder="What happened, what hurt, what helped, what the world did to your head, what you need the room to know..."
+              placeholder="The stripe I am fighting is... What happened, what it promised, what I am doing instead..."
               maxLength={MAX_POST_CHARS}
               required
             />
@@ -167,24 +174,26 @@ export default function SubmitPage() {
               onChange={(event) => setAnonymous(event.target.checked)}
               style={{ width: 'auto' }}
             />
-            <span>Post as anonymous</span>
+            <span>Post anonymous</span>
           </label>
 
           <div className="inline-actions">
             <button type="submit" disabled={loading || !body.trim()}>
-              {loading ? 'Sending...' : 'Send to the desk'}
+              {loading ? 'Sending...' : 'Send to the wall'}
             </button>
             <Link className="button ghost" href="/timer">
               Need a minute first?
             </Link>
           </div>
-          {status ? <div className={`small ${statusTone === 'error' ? 'status-error' : ''}`}>{status}</div> : null}
+          {status ? (
+            <div className={`small ${statusTone === 'error' ? 'status-error' : ''}`}>{status}</div>
+          ) : null}
         </form>
 
         <aside className="stack">
           <div className="card">
             <div className="card-eyebrow">House style</div>
-            <h3>Leave the first-draft version.</h3>
+            <h3>Leave the wall version.</h3>
             <div className="card-list">
               {submitNotes.map((item) => (
                 <div key={item} className="card-list-item">
@@ -198,15 +207,15 @@ export default function SubmitPage() {
             <div className="card-eyebrow">If the words won&apos;t come</div>
             <h3>Use the smaller tools.</h3>
             <p className="muted">
-              Pause with the timer, bring the feeling to Cheshire, or pull a grounding move from the
-              toolkit before you come back to the page.
+              Pause with the timer, bring the feeling to the Scribe, or pull a grounding move from
+              the toolkit before you come back to the page.
             </p>
             <div className="inline-actions">
               <Link className="button ghost" href="/toolkit">
                 Open toolkit
               </Link>
-              <Link className="button ghost" href="/#cheshire">
-                Talk to Cheshire
+              <Link className="button ghost" href="/#scribe">
+                Talk to Scribe
               </Link>
             </div>
           </div>

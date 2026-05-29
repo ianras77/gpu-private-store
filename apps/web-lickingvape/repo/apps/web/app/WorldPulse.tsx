@@ -59,7 +59,7 @@ type WorldPulseProps = {
 export default function WorldPulse({
   eyebrow = 'World pulse',
   title = 'The den keeps one ear on the static for you.',
-  note = 'Automatic ingest keeps Cheshire and the night desk current. Use search.rasies.com when you want to chase a specific thread yourself.',
+  note = 'Automatic ingest keeps the Scribe and the night desk current. Use search.rasies.com when you want to chase a specific thread yourself.',
   suggestions = defaultSuggestions,
   compact = false
 }: WorldPulseProps) {
@@ -101,7 +101,11 @@ export default function WorldPulse({
         setPulse(data);
       } catch (loadError) {
         if (controller.signal.aborted) return;
-        setError(loadError instanceof Error ? loadError.message : 'Could not load the world pulse right now.');
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : 'Could not load the world pulse right now.'
+        );
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -207,13 +211,21 @@ export default function WorldPulse({
               <p className="muted pulse-query-angle">{lane.angle}</p>
               <div className="pulse-item-list">
                 {lane.items.slice(0, pulseItemsPerLane).map((item) => (
-                  <a key={`${lane.id}-${item.url}`} className="pulse-item" href={item.url} target="_blank" rel="noreferrer">
+                  <a
+                    key={`${lane.id}-${item.url}`}
+                    className="pulse-item"
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     <span className="pulse-item-title">{item.title}</span>
                     <span className="pulse-item-meta">
                       {item.source || item.engine || 'source'}
                       {item.published_at ? ` | ${formatTimestamp(item.published_at)}` : ''}
                     </span>
-                    {item.snippet ? <span className="small">{trimSnippet(item.snippet)}</span> : null}
+                    {item.snippet ? (
+                      <span className="small">{trimSnippet(item.snippet)}</span>
+                    ) : null}
                   </a>
                 ))}
               </div>

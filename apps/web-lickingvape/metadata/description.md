@@ -1,12 +1,12 @@
 # Lickingvape
 
-Lickingvape packages a Next.js community front end, FastAPI backend, background worker, Postgres, and Cheshire Cat into one editorial stack.
+Lickingvape packages a dark anonymous quit-vaping wall, Next.js front end, FastAPI backend, worker moderation, Postgres, and a Stripe Scribe LLM sidecar into one community stack.
 
 ## Included services
 
 - Main web UI on `3195`
 - API on `3196`
-- Internal Postgres and Cheshire Cat services
+- Internal Postgres and optional local LLM services
 - Background worker for automation and publishing workflows
 
 ## Notes

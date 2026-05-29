@@ -8,7 +8,8 @@ const DEFAULT_HEADING_FONT = '"Courier New", "Lucida Sans Typewriter", "Lucida C
 
 export const metadata = {
   title: 'Licking Vape',
-  description: 'A dark, feed-first nicotine quit den with a moody curator voice and retro sideblog energy.',
+  description:
+    'A dark anonymous wall for quitting vaping with moderated community notes and a mode-based Stripe Scribe.',
   manifest: '/manifest.webmanifest',
   icons: [
     { rel: 'icon', url: '/icons/icon-192.png', sizes: '192x192' },
@@ -70,15 +71,17 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body style={style}>
         <header className="site-header">
           <div className="masthead">
-            <div className="masthead-kicker">LickingVape.com | Night Desk For Nicotine Exit Notes</div>
+            <div className="masthead-kicker">
+              LickingVape.com | Anonymous Wall For Nicotine Exit Notes
+            </div>
             <h1>Licking Vape</h1>
-            <div className="header-tagline">Post honestly. Archive the weird hour. Quit together.</div>
+            <div className="header-tagline">Thirty striped urges. One wall note at a time.</div>
           </div>
-          <div className="site-ribbon">Curated static for striped days</div>
+          <div className="site-ribbon">Anon wall / moderated static</div>
           <nav>
             <Link href="/">Night Scroll</Link>
             <Link href="/submit">Confess</Link>
-            <Link href="/#cheshire">Cheshire</Link>
+            <Link href="/#scribe">Scribe</Link>
             <Link href="/toolkit">Toolkit</Link>
             <Link href="/timer">Timer</Link>
             <Link href="/about">Lore</Link>
@@ -88,8 +91,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <main>{children}</main>
         <footer>
           <div className="small">
-            Dark little quit-blog energy, stripe-by-stripe survival, and room for nicotine, life,
-            and the rest of the tab stack.
+            Anonymous wall notes, Stripe Scribe mode switches, and enough dark storybook static to
+            make the next refusal feel possible.
           </div>
         </footer>
       </body>

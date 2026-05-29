@@ -1,10 +1,11 @@
 'use client';
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { buildRasiesSearchHref, chatStarterPrompts } from './content';
+import { buildRasiesSearchHref, chatModes } from './content';
 import { publicApiBase } from './lib/api';
 
 type ChatRole = 'user' | 'cat';
+type ChatModeId = (typeof chatModes)[number]['id'];
 
 type ChatMessage = {
   id: string | number;
@@ -56,6 +57,7 @@ const API_TIMEOUT_MS = 15000;
 const HYDRATE_RETRIES = 2;
 const HYDRATE_RETRY_DELAY_MS = 350;
 const WORLD_SEARCH_QUERY = 'latest headlines anxiety nicotine today';
+const defaultChatMode: ChatModeId = 'craving';
 
 const emptyMemory: CatMemory = {
   name: '',
@@ -72,8 +74,7 @@ function firstCatMessage(): ChatMessage {
   return {
     id: 'cat-welcome',
     role: 'cat',
-    text:
-      "Lights low, notebook open. I'm Cheshire Cat. Bring me the craving, the slip, the headline, or the life mess and I'll help you turn it into a next move or a post.",
+    text: "Lights low, wall awake. I'm the Stripe Scribe. Pick a mode, bring the craving, the slip, the headline, or the life mess, and I will help you make one concrete next move.",
     at: new Date().toISOString()
   };
 }
@@ -134,7 +135,11 @@ function inferGoal(input: string): string | null {
 }
 
 function inferTabStack(input: string): string | null {
-  if (/(news|headline|world|politic|election|war|economy|layoff|rent|inflation|current events|search\.rasies|doomscroll|timeline|internet)/i.test(input)) {
+  if (
+    /(news|headline|world|politic|election|war|economy|layoff|rent|inflation|current events|search\.rasies|doomscroll|timeline|internet)/i.test(
+      input
+    )
+  ) {
     return input.slice(0, 220);
   }
   return null;
@@ -147,19 +152,37 @@ function buildThread(memory: CatMemory): string {
   if (memory.streakDays > 0) reminders.push(`streak: ${memory.streakDays} day(s)`);
   if (memory.mood.trim()) reminders.push(`room tone: ${memory.mood.trim()}`);
   if (memory.recentWin.trim()) reminders.push(`recent receipt: ${memory.recentWin.trim()}`);
-  if (memory.currentStruggle.trim()) reminders.push(`what feels loud: ${memory.currentStruggle.trim()}`);
+  if (memory.currentStruggle.trim())
+    reminders.push(`what feels loud: ${memory.currentStruggle.trim()}`);
   if (memory.tabStack.trim()) reminders.push(`tab stack: ${memory.tabStack.trim()}`);
 
   return reminders.length ? `I still have your thread: ${reminders.join(' | ')}.` : '';
 }
 
-function buildReply(input: string, memory: CatMemory): string {
+function buildReply(input: string, memory: CatMemory, mode?: ChatModeId): string {
   const lower = input.toLowerCase();
   const name = memory.name.trim() || 'friend';
   const thread = buildThread(memory);
   const postFrame = 'Three beats. Scene, ache, next move. Rough edges are welcome.';
 
-  if (/(news|headline|world|politic|election|war|economy|layoff|rent|inflation|current events|search\.rasies|doomscroll|timeline|internet)/.test(lower)) {
+  if (mode === 'craving') {
+    return `${name}, beat the first stripe before you debate the whole beast. ${thread} Move the vape or buying path farther away, name the stripe out loud, drink something cold, and write one wall sentence: what happened, what it promised, what you are doing instead.`.trim();
+  }
+
+  if (mode === 'post') {
+    return `${name}, Draft it like a wall post. ${thread} Scene / trigger / refusal. One paragraph, no apology tax. Start with: "The stripe I am fighting is..." and end with the next move you can prove.`.trim();
+  }
+
+  if (mode === 'reset') {
+    return `${name}, one slip does not get a crown. ${thread} Write the receipt while it is boring: what happened, what lit it, what changes before bed. Then do one physical reset: route, drawer, app, card, or room.`.trim();
+  }
+
+  if (
+    mode === 'world' ||
+    /(news|headline|world|politic|election|war|economy|layoff|rent|inflation|current events|search\.rasies|doomscroll|timeline|internet)/.test(
+      lower
+    )
+  ) {
     return `${name}, the outside world is in the room with us. ${thread} Run one tight search on search.rasies.com, not a doomscroll marathon. Try "${WORLD_SEARCH_QUERY}" or the exact headline plus "nicotine" or "stress". Then come back and give me ${postFrame.toLowerCase()}`.trim();
   }
 
@@ -260,6 +283,7 @@ export default function CheshireChat() {
   const [memory, setMemory] = useState<CatMemory>(emptyMemory);
   const [messages, setMessages] = useState<ChatMessage[]>([firstCatMessage()]);
   const [draft, setDraft] = useState('');
+  const [mode, setMode] = useState<ChatModeId>(defaultChatMode);
 
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -277,6 +301,7 @@ export default function CheshireChat() {
   const sendAbortRef = useRef<AbortController | null>(null);
 
   const useRemote = Boolean(token && user);
+  const activeMode = chatModes.find((item) => item.id === mode) || chatModes[0];
   const trimmedDraft = draft.trim();
   const draftLen = draft.length;
   const tooLong = draftLen > MAX_CHAT_MESSAGE_CHARS;
@@ -309,9 +334,12 @@ export default function CheshireChat() {
     for (let attempt = 0; attempt < HYDRATE_RETRIES; attempt += 1) {
       try {
         const me = await requestApi<{ user: AuthUser }>('/auth/me', { token: sessionToken });
-        const state = await requestApi<{ memory: CatMemory; messages: ChatMessage[] }>('/chat/state', {
-          token: sessionToken
-        });
+        const state = await requestApi<{ memory: CatMemory; messages: ChatMessage[] }>(
+          '/chat/state',
+          {
+            token: sessionToken
+          }
+        );
 
         setToken(sessionToken);
         setUser(me.user);
@@ -396,7 +424,8 @@ export default function CheshireChat() {
     if (memory.streakDays > 0) bits.push(`Streak: ${memory.streakDays} day(s)`);
     if (memory.mood.trim()) bits.push(`Room tone: ${memory.mood.trim()}`);
     if (memory.recentWin.trim()) bits.push(`Recent receipt: ${memory.recentWin.trim()}`);
-    if (memory.currentStruggle.trim()) bits.push(`What feels loud: ${memory.currentStruggle.trim()}`);
+    if (memory.currentStruggle.trim())
+      bits.push(`What feels loud: ${memory.currentStruggle.trim()}`);
     if (memory.tabStack.trim()) bits.push(`Tab stack: ${memory.tabStack.trim()}`);
     if (!bits.length) return 'No thread saved yet.';
     return bits.join(' | ');
@@ -432,7 +461,7 @@ export default function CheshireChat() {
       window.localStorage.setItem(authTokenStorageKey, response.token);
       await hydrateRemote(response.token);
       setPassword('');
-      setSuccess('Synced. Cheshire will keep your notebook across devices.');
+      setSuccess('Synced. The Scribe will keep your notebook across devices.');
     } catch (error) {
       setError(extractErrorMessage(error, 'Could not authenticate.'));
     } finally {
@@ -523,12 +552,15 @@ export default function CheshireChat() {
       sendAbortRef.current = controller;
 
       try {
-        const data = await requestApi<{ memory: CatMemory; messages: ChatMessage[] }>('/chat/reply', {
-          method: 'POST',
-          token,
-          body: { message: text },
-          signal: controller.signal
-        });
+        const data = await requestApi<{ memory: CatMemory; messages: ChatMessage[] }>(
+          '/chat/reply',
+          {
+            method: 'POST',
+            token,
+            body: { message: text, mode },
+            signal: controller.signal
+          }
+        );
 
         setMemory(data.memory || emptyMemory);
         setMessages(data.messages.length ? data.messages : [firstCatMessage()]);
@@ -575,7 +607,9 @@ export default function CheshireChat() {
       mood: inferredMood || memory.mood,
       goal: inferredGoal || memory.goal,
       lastCheckIn: new Date().toISOString(),
-      recentWin: /(win|proud|did it|made it|success)/i.test(text) ? text.slice(0, 220) : memory.recentWin,
+      recentWin: /(win|proud|did it|made it|success)/i.test(text)
+        ? text.slice(0, 220)
+        : memory.recentWin,
       currentStruggle: /(craving|urge|spiral|slip|hard|struggle)/i.test(text)
         ? text.slice(0, 220)
         : memory.currentStruggle,
@@ -585,7 +619,7 @@ export default function CheshireChat() {
     const catMessage: ChatMessage = {
       id: `${Date.now()}-cat`,
       role: 'cat',
-      text: buildReply(text, nextMemory),
+      text: buildReply(text, nextMemory, mode),
       at: new Date().toISOString()
     };
 
@@ -624,13 +658,13 @@ export default function CheshireChat() {
   };
 
   if (authBusy) {
-    return <div className="small">Loading Cheshire&apos;s notebook...</div>;
+    return <div className="small">Loading the Scribe&apos;s notebook...</div>;
   }
 
   return (
     <div className="chat-shell">
       <div className="chat-memory">
-        <div className="card-eyebrow">Profile + notebook sync</div>
+        <div className="card-eyebrow">Thread sync</div>
 
         {!user ? (
           <form onSubmit={onAuthSubmit} className="chat-auth-form">
@@ -686,7 +720,9 @@ export default function CheshireChat() {
               <button type="submit" disabled={authBusy}>
                 {authMode === 'register' ? 'Create + sync' : 'Log in + sync'}
               </button>
-              <span className="small">Optional. Sign in if you want Cheshire to remember the thread everywhere.</span>
+              <span className="small">
+                Optional. Sign in if you want the Scribe to remember the thread everywhere.
+              </span>
             </div>
           </form>
         ) : (
@@ -711,7 +747,7 @@ export default function CheshireChat() {
               id="cat-name"
               value={memory.name}
               onChange={(event) => setMemory((prev) => ({ ...prev, name: event.target.value }))}
-              placeholder="What should Cheshire call you?"
+              placeholder="What should the Scribe call you?"
             />
           </label>
           <label htmlFor="cat-goal">
@@ -752,7 +788,9 @@ export default function CheshireChat() {
             <input
               id="cat-win"
               value={memory.recentWin}
-              onChange={(event) => setMemory((prev) => ({ ...prev, recentWin: event.target.value }))}
+              onChange={(event) =>
+                setMemory((prev) => ({ ...prev, recentWin: event.target.value }))
+              }
               placeholder="Example: Survived the drive home"
             />
           </label>
@@ -779,11 +817,18 @@ export default function CheshireChat() {
         </div>
         <div className="inline-actions" style={{ marginTop: 10 }}>
           {useRemote ? (
-            <button type="button" className="button ghost" onClick={saveRemoteMemory} disabled={busy}>
+            <button
+              type="button"
+              className="button ghost"
+              onClick={saveRemoteMemory}
+              disabled={busy}
+            >
               Save notebook to profile
             </button>
           ) : (
-            <span className="small">Local thread mode. Sign in if you want this notebook on every device.</span>
+            <span className="small">
+              Local thread mode. Sign in if you want this notebook on every device.
+            </span>
           )}
         </div>
         <div className="chat-note">{memorySummary}</div>
@@ -791,16 +836,29 @@ export default function CheshireChat() {
 
       <div className="chat-thread" aria-live="polite" aria-busy={busy} ref={threadRef}>
         {messages.map((message) => (
-          <div key={String(message.id)} className={`chat-bubble ${message.role === 'user' ? 'user' : 'cat'}`}>
+          <div
+            key={String(message.id)}
+            className={`chat-bubble ${message.role === 'user' ? 'user' : 'cat'}`}
+          >
             {message.text}
           </div>
         ))}
       </div>
 
-      <div className="chat-actions">
-        {chatStarterPrompts.map((prompt) => (
-          <button key={prompt} type="button" className="button ghost" onClick={() => setDraft(prompt)} disabled={busy}>
-            {prompt}
+      <div className="chat-actions chat-mode-grid" aria-label="Scribe modes">
+        {chatModes.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            className={`mode-card ${mode === option.id ? 'active' : ''}`}
+            onClick={() => {
+              setMode(option.id);
+              setDraft(option.prompt);
+            }}
+            disabled={busy}
+          >
+            <span>{option.label}</span>
+            <small>{option.description}</small>
           </button>
         ))}
         <a
@@ -815,13 +873,13 @@ export default function CheshireChat() {
 
       <form onSubmit={onSend} className="chat-input-row">
         <label htmlFor="chat-message" className="sr-only">
-          Message Cheshire Cat
+          Message the Stripe Scribe
         </label>
         <input
           id="chat-message"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="Tell Cheshire what the hour feels like, or what the world dragged in..."
+          placeholder={activeMode.prompt}
           maxLength={MAX_CHAT_MESSAGE_CHARS}
           aria-invalid={tooLong}
         />
@@ -837,7 +895,7 @@ export default function CheshireChat() {
         <span className={`small ${draftLen > MAX_CHAT_MESSAGE_CHARS * 0.9 ? 'warn' : ''}`}>
           {draftLen}/{MAX_CHAT_MESSAGE_CHARS}
         </span>
-        {busy ? <span className="small">Cheshire is writing back...</span> : null}
+        {busy ? <span className="small">The Scribe is writing back...</span> : null}
       </div>
 
       {status ? <div className={`small chat-status ${status.tone}`}>{status.text}</div> : null}

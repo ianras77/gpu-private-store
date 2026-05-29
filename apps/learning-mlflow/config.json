@@ -6,7 +6,7 @@
   "dynamic_config": true,
   "id": "learning-mlflow",
   "description": "MLflow tracking server from the learning stack, split into its own Runtipi app with dedicated Postgres and artifact storage.",
-  "tipi_version": 1,
+  "tipi_version": 2,
   "version": "2.12.2",
   "categories": [
     "ai",
@@ -21,5 +21,5 @@
   ],
   "no_gui": false,
   "created_at": 1774649000000,
-  "updated_at": 1774649000000
+  "updated_at": 1780017759882
 }

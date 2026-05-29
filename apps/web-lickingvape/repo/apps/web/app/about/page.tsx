@@ -35,9 +35,9 @@ export default async function AboutPage() {
     <section className="stack page-shell">
       <div className="page-hero">
         <div className="eyebrow">Lore</div>
-        <h2>The moodboard behind the quit feed.</h2>
+        <h2>The wall behind the weird little quit story.</h2>
         <p className="muted">
-          This place is supposed to feel like an old sideblog that accidentally became useful.
+          A dark sideblog shape for the unglamorous work of leaving nicotine alone.
         </p>
       </div>
 

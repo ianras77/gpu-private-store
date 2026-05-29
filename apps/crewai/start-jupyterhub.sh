@@ -7,6 +7,14 @@ if [[ -z "${JUPYTERHUB_USERS:-}" ]]; then
 fi
 
 mkdir -p /workspace/users /data/jupyterhub
+chmod 700 /data/jupyterhub
+if [[ -f /data/jupyterhub/jupyterhub_cookie_secret ]]; then
+  chmod 600 /data/jupyterhub/jupyterhub_cookie_secret
+fi
+if [[ -f /data/jupyterhub/jupyterhub.sqlite ]]; then
+  chmod 600 /data/jupyterhub/jupyterhub.sqlite
+fi
+umask 077
 
 ALLOWED_USERS=()
 

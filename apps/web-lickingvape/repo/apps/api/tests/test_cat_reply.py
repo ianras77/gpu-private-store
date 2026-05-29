@@ -24,3 +24,25 @@ def test_build_cat_reply_invites_post_shape_for_drafts():
 
     assert "Scene, ache, next move." in reply
     assert "Start ugly." in reply
+
+
+def test_build_cat_reply_has_craving_mode():
+    reply = _build_cat_reply(
+        "I want a hit so badly right now.",
+        {"name": "M", "goal": "Make it to midnight"},
+        mode="craving",
+    )
+
+    assert "Move the vape or buying path" in reply
+    assert "name the stripe" in reply
+
+
+def test_build_cat_reply_has_post_mode():
+    reply = _build_cat_reply(
+        "Turn this ugly hour into something I can post.",
+        {"name": "M", "currentStruggle": "after dinner"},
+        mode="post",
+    )
+
+    assert "Draft it like a wall post" in reply
+    assert "Scene / trigger / refusal" in reply

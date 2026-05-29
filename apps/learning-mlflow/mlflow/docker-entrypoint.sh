@@ -12,7 +12,7 @@ mkdir -p "$(dirname "$MLFLOW_AUTH_CONFIG_PATH")"
 
 cat >"$MLFLOW_AUTH_CONFIG_PATH" <<EOF
 [mlflow]
-default_permission = READ
+default_permission = ${MLFLOW_DEFAULT_PERMISSION:-READ}
 database_uri = ${MLFLOW_AUTH_DATABASE_URI}
 admin_username = ${MLFLOW_ADMIN_USERNAME}
 admin_password = ${MLFLOW_ADMIN_PASSWORD}
