@@ -7,6 +7,7 @@ services:
       context: ./gateway
       dockerfile: Dockerfile
     image: runtipi-local-rassygpt-gateway:1.0.2
+    pull_policy: build
     restart: unless-stopped
     environment:
       TZ: ${TZ}

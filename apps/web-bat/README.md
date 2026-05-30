@@ -46,13 +46,13 @@ docker compose up -d --build
 - Qdrant: `http://localhost:6337`
 - Cheshire Cat: `http://localhost:1866`
 
-Cheshire Cat now auto-selects the internal RassyGPT Ollama-compatible gateway on startup:
-- chat/general: `rassy-smart` via `http://rassygpt-gateway:8080`
-- embeddings: `rassy-embed` via `http://rassygpt-gateway:8080`
+Cheshire Cat now auto-selects the host RassyGPT gateway through Docker host-gateway DNS on startup:
+- chat/general: `rassy-smart` via `http://host.docker.internal:8844`
+- embeddings: `rassy-embed` via `http://host.docker.internal:8844`
 
 The local compose stack is wired around RassyGPT and Qdrant-backed Cheshire Cat memory:
 - the direct writer path uses `rassy-smart` at `/api/chat`
-- embeddings and Cat memory use `rassy-embed` at `/api/embeddings`
+- embeddings and Cat memory use `rassy-embed` at `/api/embed` for batched vectors
 
 `CAT_PRIMARY_ENABLED=false` remains the default so long-form publication quality continues to come from the stronger direct writer stack, while Cheshire Cat stays live and testable as an integrated sidecar.
 
@@ -98,7 +98,7 @@ Key publish-first endpoints:
 ## Notes
 
 - If Cheshire Cat, LLM, embedding API, or SearXNG are unavailable, the system keeps deterministic fallback output in draft/preview lanes and holds direct homepage publication until a publish-ready story exists.
-- The stack expects a reachable model host through `LLM_API_URL_CONTAINER` / `EMBEDDING_API_URL_CONTAINER` in Docker; the defaults use the internal RassyGPT gateway.
+- The stack expects a reachable model host through `LLM_API_URL_CONTAINER` / `EMBEDDING_API_URL_CONTAINER` in Docker; the defaults use `host.docker.internal:8844`, mapped with Docker `host-gateway`, so Runtipi containers can reach the local RassyGPT service.
 - X publishing is adapter-driven and defaults to dry-run mode unless `x_live_posting` runtime control is enabled and X credentials are valid.
 - Cheshire Cat is included in the local stack now so its health and Ollama wiring can be observed continuously even when it is not the primary generation path.
 

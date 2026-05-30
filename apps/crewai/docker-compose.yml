@@ -47,6 +47,7 @@ services:
       retries: 10
       start_period: 30s
     image: runtipi-local-crewai-crewai:latest
+    pull_policy: build
     x-runtipi:
       is_main: true
       internal_port: 8888
