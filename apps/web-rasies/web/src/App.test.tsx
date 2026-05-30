@@ -494,6 +494,16 @@ describe("App", () => {
           );
         }
 
+        if (url.includes("/api/cat/chat")) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                reply: "I read the attachment and can help with it.",
+              }),
+            ),
+          );
+        }
+
         return Promise.resolve(
           new Response(JSON.stringify({}), { status: 200 }),
         );
@@ -523,6 +533,9 @@ describe("App", () => {
         screen.getByRole("textbox", { name: /Ask Ian's House Chat/i }),
       ).toBeInTheDocument();
       expect(
+        screen.getByText(/Chat with the whole page, not a tiny corner/i),
+      ).toBeInTheDocument();
+      expect(
         screen.getByRole("heading", { name: /^Search$/i }),
       ).toBeInTheDocument();
       expect(
@@ -530,7 +543,7 @@ describe("App", () => {
       ).toBeInTheDocument();
       expect(
         screen.getByRole("heading", {
-          name: /^Family access request$/i,
+          name: /^Family apps through Authentik$/i,
         }),
       ).toBeInTheDocument();
       expect(
@@ -584,14 +597,14 @@ describe("App", () => {
       "https://auth.rasies.com/if/flow/runtipi-waitlist-enrollment/",
     );
     expect(
-      screen.getAllByRole("link", { name: /^Sign in \/ app library$/i })[0],
+      screen.getAllByRole("link", { name: /^Sign in to Authentik$/i })[0],
     ).toHaveAttribute("href", "https://auth.rasies.com/");
     expect(
       screen.getByRole("link", { name: /^Open full apps guide$/i }),
     ).toHaveAttribute("href", "/#/apps");
   });
 
-  it("shows the easy signup handoff into the Authentik setup on the homepage", async () => {
+  it("keeps media libraries and Authentik accounts as separate clear lanes", async () => {
     render(<App />);
 
     await waitFor(() => {
@@ -603,21 +616,26 @@ describe("App", () => {
     });
 
     expect(
-      screen.getByText(/Choose this if you only want media\./i),
+      screen.getByRole("heading", {
+        name: /Media libraries through Wizarr/i,
+      }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/This does not create the full family account/i),
+      screen.getByText(
+        /One media invite can unlock every library Wizarr knows about/i,
+      ),
     ).toBeInTheDocument();
     expect(
-      screen.getAllByText(/Choose this if you want the full family account\./i)
-        .length,
-    ).toBeGreaterThan(0);
+      screen.getByRole("heading", {
+        name: /Family apps through Authentik/i,
+      }),
+    ).toBeInTheDocument();
     expect(
-      screen.getByText(/Once I approve it, use the app library button/i),
+      screen.getByText(/This is a separate account request/i),
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("link", {
-        name: /Ask for family account|Request family account|Open family waitlist|Full family access/i,
+        name: /Request family account|Full family access/i,
       }).length,
     ).toBeGreaterThan(0);
     expect(
@@ -627,9 +645,11 @@ describe("App", () => {
     ).toBeGreaterThan(0);
     expect(
       screen.getByRole("heading", {
-        name: /Family access request/i,
+        name: /Family apps through Authentik/i,
       }),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/Family access lane/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Step 2/i)).not.toBeInTheDocument();
   });
 
   it("creates a live media invite from the homepage signup panel", async () => {
@@ -637,14 +657,14 @@ describe("App", () => {
     render(<App />);
 
     const createInviteButton = await screen.findByRole("button", {
-      name: /Create media invite for Plex, Music, Audiobooks, and Books/i,
+      name: /Create one invite for every media library/i,
     });
 
     await user.click(createInviteButton);
 
     await waitFor(() => {
       expect(
-        screen.getByRole("link", { name: /Open final signup step/i }),
+        screen.getByRole("link", { name: /Open Wizarr signup/i }),
       ).toHaveAttribute("href", "https://signup.rasies.com/j/F4N5218DH1");
     });
 
@@ -657,6 +677,51 @@ describe("App", () => {
     expect(inviteRequest?.[1]).toMatchObject({
       method: "POST",
       body: JSON.stringify({ serviceIds: [1, 4, 2, 3] }),
+    });
+  });
+
+  it("sends chat uploads through the backend attachment contract", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const file = new File(["Please help me make this clearer."], "note.txt", {
+      type: "text/plain",
+    });
+
+    await user.upload(
+      await screen.findByLabelText(/Attach files for House Chat/i),
+      file,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("note.txt")).toBeInTheDocument();
+    });
+
+    await user.type(
+      screen.getByRole("textbox", { name: /Ask Ian's House Chat/i }),
+      "Can you read this?",
+    );
+    await user.click(screen.getByRole("button", { name: /^Send$/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/I read the attachment and can help with it/i),
+      ).toBeInTheDocument();
+    });
+
+    const chatRequest = vi
+      .mocked(globalThis.fetch)
+      .mock.calls.find(([input]) => String(input).includes("/api/cat/chat"));
+
+    expect(JSON.parse(String(chatRequest?.[1]?.body))).toMatchObject({
+      files: [
+        {
+          name: "note.txt",
+          type: "text/plain",
+          size: file.size,
+          content: "Please help me make this clearer.",
+        },
+      ],
     });
   });
 

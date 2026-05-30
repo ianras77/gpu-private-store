@@ -9,14 +9,17 @@ import {
   BookOpen,
   Copy,
   ExternalLink,
+  FileText,
   Headphones,
   Loader2,
+  Paperclip,
   RefreshCw,
   Search,
   Send,
   Sparkles,
   Trash2,
   WandSparkles,
+  X,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -63,10 +66,21 @@ type SearchQueryEventDetail = {
 
 type ChatRole = "user" | "assistant";
 
+type ChatAttachment = {
+  id: string;
+  name: string;
+  size: number;
+  type?: string;
+  content?: string;
+  truncated?: boolean;
+  previewable?: boolean;
+};
+
 type ChatMessage = {
   id: string;
   role: ChatRole;
   content: string;
+  attachments?: ChatAttachment[];
 };
 
 type HealthState = "checking" | "online" | "degraded" | "offline";
@@ -74,6 +88,13 @@ type HealthState = "checking" | "online" | "degraded" | "offline";
 type CatApiMessage = {
   role: "system" | "user" | "assistant";
   content: string;
+};
+
+type CatApiFile = {
+  name: string;
+  size: number;
+  type?: string;
+  content?: string;
 };
 
 type AboutConfig = {
@@ -182,6 +203,7 @@ const CHAT_SYSTEM_PROMPT =
 const CHAT_CAPABILITIES = [
   "Calm plans for family life, chores, trips, and all the other real stuff",
   "Warm writing help for notes, invites, updates, and everyday messages",
+  "Read small uploaded notes, lists, and text files right in the chat",
   "Friendly guidance for the Rasies house on the web and the tools that live here",
 ];
 
@@ -207,6 +229,24 @@ const QUICK_COMMAND = {
 
 const MAX_STORED_CHAT_MESSAGES = 24;
 const MAX_CHAT_CONTEXT_MESSAGES = 12;
+const MAX_CHAT_UPLOAD_FILES = 4;
+const MAX_CHAT_UPLOAD_CHARS = 8000;
+const READABLE_CHAT_FILE_EXTENSIONS = new Set([
+  ".txt",
+  ".md",
+  ".markdown",
+  ".csv",
+  ".json",
+  ".log",
+  ".yaml",
+  ".yml",
+  ".xml",
+  ".html",
+  ".css",
+  ".js",
+  ".ts",
+  ".tsx",
+]);
 const STATUS_POLL_INTERVAL_MS = 1000 * 60 * 2;
 const CHAT_HEALTH_POLL_INTERVAL_MS = 1000 * 60 * 2;
 const SPOTLIGHT_POLL_INTERVAL_MS = 1000 * 60 * 6;
@@ -506,8 +546,9 @@ function readStoredMessages(
             : null;
       const content = typeof item.content === "string" ? item.content : "";
       const id = typeof item.id === "string" ? item.id : createId("msg");
-      if (!role || !content.trim()) return null;
-      return { id, role, content };
+      const attachments = normalizeStoredChatAttachments(item.attachments);
+      if (!role || (!content.trim() && attachments.length === 0)) return null;
+      return { id, role, content, attachments };
     })
     .filter((item): item is ChatMessage => Boolean(item))
     .slice(-MAX_STORED_CHAT_MESSAGES);
@@ -521,6 +562,110 @@ function toApiMessages(messages: ChatMessage[]): CatApiMessage[] {
       content: message.content,
     })),
   ];
+}
+
+function normalizeStoredChatAttachments(value: unknown): ChatAttachment[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter(isRecord)
+    .map((item) => {
+      const name = typeof item.name === "string" ? item.name.trim() : "";
+      const size = typeof item.size === "number" ? item.size : 0;
+      const id = typeof item.id === "string" ? item.id : createId("file");
+      const type = typeof item.type === "string" ? item.type : undefined;
+      const truncated = item.truncated === true;
+      const previewable = item.previewable === true;
+      if (!name) return null;
+      return { id, name, size, type, truncated, previewable };
+    })
+    .filter((item): item is ChatAttachment => Boolean(item))
+    .slice(0, MAX_CHAT_UPLOAD_FILES);
+}
+
+function sanitizeChatAttachmentsForMessage(
+  attachments: ChatAttachment[],
+): ChatAttachment[] {
+  return attachments.map((attachment) => ({
+    id: attachment.id,
+    name: attachment.name,
+    size: attachment.size,
+    type: attachment.type,
+    truncated: attachment.truncated,
+    previewable: attachment.previewable,
+  }));
+}
+
+function attachmentToApiFile(attachment: ChatAttachment): CatApiFile {
+  return {
+    name: attachment.name,
+    size: attachment.size,
+    type: attachment.type,
+    content: attachment.content,
+  };
+}
+
+function formatChatFileSize(size: number) {
+  if (!Number.isFinite(size) || size <= 0) return "0 B";
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function isReadableChatFile(file: File) {
+  if (file.type.startsWith("text/")) return true;
+  if (
+    [
+      "application/json",
+      "application/xml",
+      "application/x-yaml",
+      "application/yaml",
+    ].includes(file.type)
+  ) {
+    return true;
+  }
+
+  const lowerName = file.name.toLowerCase();
+  return Array.from(READABLE_CHAT_FILE_EXTENSIONS).some((extension) =>
+    lowerName.endsWith(extension),
+  );
+}
+
+async function readChatFileText(file: File) {
+  if (typeof file.text === "function") {
+    return file.text();
+  }
+
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(String(reader.result ?? "")));
+    reader.addEventListener("error", () =>
+      reject(reader.error ?? new Error("Could not read file")),
+    );
+    reader.readAsText(file);
+  });
+}
+
+async function fileToChatAttachment(file: File): Promise<ChatAttachment> {
+  const readable = isReadableChatFile(file);
+  let content: string | undefined;
+  let truncated = false;
+
+  if (readable) {
+    const text = await readChatFileText(file);
+    content = text.slice(0, MAX_CHAT_UPLOAD_CHARS);
+    truncated = text.length > MAX_CHAT_UPLOAD_CHARS;
+  }
+
+  return {
+    id: createId("file"),
+    name: file.name,
+    size: file.size,
+    type: file.type || "application/octet-stream",
+    content,
+    truncated,
+    previewable: readable,
+  };
 }
 
 function healthLabel(state: HealthState) {
@@ -699,7 +844,7 @@ function formatNaturalList(items: string[]) {
 function getSignupServiceDescription(service: SignupService) {
   const key = getSignupServiceKey(service);
   if (key.includes("plex")) {
-    return "Movies, shows, and the family watchlist are already waiting there.";
+    return "Movies, shows, and the family watchlist through the media lane.";
   }
   if (
     key.includes("music") ||
@@ -715,7 +860,7 @@ function getSignupServiceDescription(service: SignupService) {
   if (key.includes("book")) {
     return "Books, comics, and reading shelves for the family.";
   }
-  return "Available through the media signup.";
+  return "Available through the Wizarr media signup.";
 }
 
 function getSignupServiceIcon(service: SignupService) {
@@ -756,11 +901,17 @@ async function copyText(text: string) {
   await navigator.clipboard.writeText(text);
 }
 
-async function requestCatReply(messages: ChatMessage[]) {
+async function requestCatReply(
+  messages: ChatMessage[],
+  files: CatApiFile[] = [],
+) {
   const res = await fetch("/api/cat/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages: toApiMessages(messages) }),
+    body: JSON.stringify({
+      messages: toApiMessages(messages),
+      ...(files.length > 0 ? { files } : {}),
+    }),
   });
 
   const raw = await res.text();
@@ -1250,8 +1401,8 @@ export function FamilyAccessPanel({
 
   const createInviteLabel =
     inviteUrl && inviteStatus !== "pending"
-      ? `Create a fresh media invite for ${familyInviteLabel}`
-      : `Create media invite for ${familyInviteLabel}`;
+      ? "Create a fresh invite for every media library"
+      : "Create one invite for every media library";
 
   const loadServices = useCallback(async () => {
     if (!signupEnabled) {
@@ -1296,7 +1447,7 @@ export function FamilyAccessPanel({
 
   async function requestInvite(
     serviceIds?: number[],
-    usageEvent = "signup.invite.family.create",
+    usageEvent = "signup.invite.media.create",
   ) {
     if (!signupEnabled) return;
 
@@ -1430,13 +1581,13 @@ export function FamilyAccessPanel({
   }
 
   return (
-    <div className="family-access-shell">
-      <article className="family-access-hero">
+    <div className="family-access-shell family-access-shell-clear">
+      <article className="family-access-hero media-access-lane">
         <div
           className="family-access-topline"
-          aria-label="Family access status"
+          aria-label="Wizarr media signup status"
         >
-          <span className="family-access-pill">Family access lane</span>
+          <span className="family-access-pill">Wizarr media lane</span>
           <span
             className={
               signupEnabled
@@ -1444,50 +1595,54 @@ export function FamilyAccessPanel({
                 : "family-access-pill"
             }
           >
-            {signupEnabled ? "Easy signup live" : "Sign-in lane"}
+            {signupEnabled ? "Live library list" : "Needs setup"}
           </span>
         </div>
 
         <div className="family-access-copy">
-          <h3>
-            Create the media invite here, then finish at signup.rasies.com.
-          </h3>
+          <h3>Media libraries through Wizarr</h3>
           <p>
-            Choose this if you only want media. This does not create the full
-            family account or app-library access; use the Rasies waitlist when
-            you need photos, files, planning, and the rest of the family apps.
+            One media invite can unlock every library Wizarr knows about:{" "}
+            <strong>{familyInviteLabel}</strong>. This lane is only for movies,
+            shows, books, audiobooks, and music. It does not create the
+            Authentik account for the rest of the family apps.
           </p>
         </div>
 
-        <div
-          className="family-access-step-grid"
-          aria-label="How family access works"
-        >
+        <div className="family-access-lane-grid" aria-label="Media signup path">
           <div className="family-access-step">
-            <strong>1. Create the media invite here</strong>
+            <span className="family-access-result-kicker">
+              Choose this lane
+            </span>
+            <strong>Media only</strong>
             <span>
-              Use the big button when someone only needs the media side of the
-              house.
+              Use this when someone wants the family media libraries and does
+              not need photos, files, planning, or the app library.
             </span>
           </div>
           <div className="family-access-step">
-            <strong>
-              2. Finish media signup at signup.rasies.com/j/RASIES
-            </strong>
+            <span className="family-access-result-kicker">
+              Create the invite
+            </span>
+            <strong>All libraries together</strong>
             <span>
-              The invite takes them into the final media account step.
+              The main button asks Wizarr for every available media service, so
+              it does not silently turn into a Plex-only signup.
             </span>
           </div>
           <div className="family-access-step">
-            <strong>3. Ask for family app access through the waitlist</strong>
+            <span className="family-access-result-kicker">
+              Finish in Wizarr
+            </span>
+            <strong>signup.rasies.com</strong>
             <span>
-              That is the request flow for photos, files, planning, and the rest
-              of the family apps.
+              Wizarr finishes the media account. Authentik stays separate for
+              the full family app account.
             </span>
           </div>
         </div>
 
-        <div className="family-access-actions">
+        <div className="family-access-actions family-access-actions-media">
           {signupEnabled ? (
             <button
               type="button"
@@ -1510,38 +1665,16 @@ export function FamilyAccessPanel({
             </button>
           ) : (
             <a
-              href={accountRequestUrl}
+              href={signupUrl}
               target="_blank"
               rel="noreferrer"
               className="btn btn-primary"
-              onClick={() => trackUsage("signup.auth.request.open")}
+              onClick={() => trackUsage("signup.signup.open")}
             >
               <ExternalLink className="h-4 w-4" />
-              Open family waitlist
+              Open Wizarr media signup
             </a>
           )}
-
-          <a
-            href={accountRequestUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-ghost"
-            onClick={() => trackUsage("signup.auth.request.open")}
-          >
-            <ExternalLink className="h-4 w-4" />
-            Open family waitlist
-          </a>
-
-          <a
-            href={authentikUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-ghost"
-            onClick={() => trackUsage("signup.auth.open")}
-          >
-            <ExternalLink className="h-4 w-4" />
-            Sign in / app library
-          </a>
 
           <a
             href={signupUrl}
@@ -1551,14 +1684,14 @@ export function FamilyAccessPanel({
             onClick={() => trackUsage("signup.signup.open")}
           >
             <ExternalLink className="h-4 w-4" />
-            Finish media signup
+            Open signup.rasies.com
           </a>
         </div>
 
         <p className="family-access-footnote">
-          If you already used your media invite, you usually do not need a new
-          one. Use the Rasies waitlist when you need access to the rest of the
-          house.
+          Already used a media invite? You usually do not need another one. Need
+          family photos, files, notes, planning, or the app dashboard? Use the
+          Authentik lane beside this one.
         </p>
 
         {error && <div className="status-line status-error">{error}</div>}
@@ -1570,7 +1703,7 @@ export function FamilyAccessPanel({
               <span className="family-access-result-kicker">
                 {reusedInvite
                   ? "Still ready from a moment ago"
-                  : "Invite ready"}
+                  : "Media invite ready"}
               </span>
               <strong>
                 {reusedInvite
@@ -1578,9 +1711,8 @@ export function FamilyAccessPanel({
                   : `Your invite is ready for ${activeInviteLabel}.`}
               </strong>
               <p>
-                This link takes you to the media signup for {activeInviteLabel}.
-                The Rasies waitlist is separate and only for asking permission
-                to use the full family apps.
+                This link opens the Wizarr media signup for {activeInviteLabel}.
+                It is separate from the Authentik family app account request.
               </p>
               <div
                 className="family-access-chip-row"
@@ -1620,7 +1752,7 @@ export function FamilyAccessPanel({
                     className="service-open"
                     onClick={() => trackUsage("signup.invite.open")}
                   >
-                    Open final signup step
+                    Open Wizarr signup
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                   </a>
                   <button
@@ -1662,14 +1794,11 @@ export function FamilyAccessPanel({
         <div className="family-access-service-stage">
           <div className="family-access-service-head">
             <div className="family-access-stage-copy">
-              <span className="family-access-result-kicker">Step 1</span>
-              <strong>
-                Easy access for movies, music, books and audiobooks
-              </strong>
+              <span className="family-access-result-kicker">Available now</span>
+              <strong>Libraries included in the Wizarr media lane</strong>
               <p>
-                The big button above creates the media-only invite for
-                signup.rasies.com. If somebody only needs one room, each card
-                below can make that smaller media invite right here too.
+                These cards come from the live Wizarr service list. If a library
+                appears here, the every-library invite includes it.
               </p>
             </div>
             {signupEnabled && (
@@ -1696,19 +1825,24 @@ export function FamilyAccessPanel({
           )}
 
           {servicesLoading ? (
-            <div className="empty-state">Loading the easy media rooms...</div>
+            <div className="empty-state">
+              Loading the Wizarr media libraries...
+            </div>
           ) : sortedSignupServices.length > 0 ? (
-            <div className="service-grid" aria-label="Easy signup rooms">
+            <div
+              className="service-grid service-grid-media"
+              aria-label="Wizarr media libraries"
+            >
               {sortedSignupServices.map((service) => {
                 const title = getSignupServiceTitle(service);
                 const note = service.verified
-                  ? `${formatHostLabel(service.url)} | media signup verified`
+                  ? `${formatHostLabel(service.url)} | included by Wizarr`
                   : formatHostLabel(service.url);
 
                 return (
                   <article
                     key={service.id}
-                    className="service-card service-card-live"
+                    className="service-card service-card-live service-card-media"
                   >
                     <div className="service-card-top">
                       <div className="service-title">
@@ -1718,27 +1852,12 @@ export function FamilyAccessPanel({
                         <span>{title}</span>
                       </div>
                       <span className="service-badge">
-                        {service.verified ? "Verified media" : "Media service"}
+                        {service.verified ? "Wizarr ready" : "Media library"}
                       </span>
                     </div>
                     <p>{getSignupServiceDescription(service)}</p>
                     <span className="service-meta">{note}</span>
                     <div className="service-actions">
-                      {signupEnabled && (
-                        <button
-                          type="button"
-                          className="service-open"
-                          onClick={() =>
-                            void requestInvite(
-                              [service.id],
-                              "signup.invite.single.create",
-                            )
-                          }
-                          disabled={busy}
-                        >
-                          Create invite just for {title}
-                        </button>
-                      )}
                       <a
                         href={service.url}
                         target="_blank"
@@ -1746,7 +1865,7 @@ export function FamilyAccessPanel({
                         className="service-helper"
                         onClick={() => trackUsage("signup.service.open")}
                       >
-                        Open {title}
+                        Open {title} after signup
                         <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                       </a>
                     </div>
@@ -1756,13 +1875,12 @@ export function FamilyAccessPanel({
             </div>
           ) : signupEnabled ? (
             <div className="empty-state">
-              The easy media lane is live, but no media services were reported
+              Wizarr is reachable, but it did not report any media libraries
               yet.
             </div>
           ) : (
             <div className="empty-state">
-              The easy media lane is not wired up on this copy yet, so for now
-              the Authentik signup page stays on the right.
+              The Wizarr media lane is not wired up on this copy yet.
             </div>
           )}
         </div>
@@ -1770,19 +1888,47 @@ export function FamilyAccessPanel({
 
       <aside
         id="family-request"
-        className="family-access-side"
+        className="family-access-side family-auth-lane"
         aria-labelledby="family-request-heading"
       >
         <div className="family-access-side-card">
+          <div className="family-access-topline">
+            <span className="family-access-pill family-access-pill-auth">
+              Authentik account lane
+            </span>
+          </div>
           <div className="family-access-stage-copy">
-            <span className="family-access-result-kicker">Step 2</span>
-            <h3 id="family-request-heading">Family access request</h3>
+            <span className="family-access-result-kicker">
+              Full family access
+            </span>
+            <h3 id="family-request-heading">Family apps through Authentik</h3>
             <p>
-              Choose this if you want the full family account. Once the media
-              signup is done, ask for permission to use photos, files, planning,
-              and the rest of the family tools I host. Once I approve it, use
-              the app library button to get into the family apps.
+              This is a separate account request for the family app library:
+              photos, files, notes, planning, dashboards, and the other tools I
+              host. After approval, Authentik is the front door.
             </p>
+          </div>
+          <div className="family-auth-action-row">
+            <a
+              href={accountRequestUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-primary"
+              onClick={() => trackUsage("signup.auth.request.open")}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Request family account
+            </a>
+            <a
+              href={authentikUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-ghost"
+              onClick={() => trackUsage("signup.auth.open")}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Sign in to Authentik
+            </a>
           </div>
           <ServiceLaunchpad links={links} />
         </div>
@@ -1824,7 +1970,7 @@ export function ServiceLaunchpad({ links }: { links: ServiceLink[] }) {
                 className="service-open"
                 onClick={() => trackUsage(`launch.${link.title}`)}
               >
-                Open
+                Open {link.title}
                 {external && (
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                 )}
@@ -3004,6 +3150,7 @@ export function ChatPanel({
   const draftKey = "rasies_family_chat_draft_v1";
   const logRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const isTest = import.meta.env.MODE === "test";
   const initialDraft = storage?.getItem(draftKey) ?? "";
 
@@ -3011,6 +3158,8 @@ export function ChatPanel({
     readStoredMessages(storage, threadKey),
   );
   const [input, setInput] = useState(initialDraft);
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
+  const [draggingUpload, setDraggingUpload] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthState>("checking");
@@ -3078,33 +3227,86 @@ export function ChatPanel({
     trackUsage("chat.mode");
     setInput((current) =>
       current.trim().length > 0
-        ? `${instruction}\n\n${current.trim()}`
-        : `${instruction}\n\n`,
+        ? `${instruction}
+
+${current.trim()}`
+        : `${instruction}
+
+`,
     );
     inputRef.current?.focus();
+  }
+
+  async function addAttachments(fileList: FileList | File[]) {
+    const incoming = Array.from(fileList);
+    if (incoming.length === 0) return;
+
+    const availableSlots = MAX_CHAT_UPLOAD_FILES - attachments.length;
+    if (availableSlots <= 0) {
+      setError(`House Chat can take ${MAX_CHAT_UPLOAD_FILES} files at once.`);
+      return;
+    }
+
+    const selected = incoming.slice(0, availableSlots);
+    if (incoming.length > availableSlots) {
+      setError(
+        `I attached the first ${availableSlots} files. Send those, then add more.`,
+      );
+    } else {
+      setError(null);
+    }
+
+    try {
+      const nextAttachments = await Promise.all(
+        selected.map((file) => fileToChatAttachment(file)),
+      );
+      setAttachments((current) =>
+        [...current, ...nextAttachments].slice(0, MAX_CHAT_UPLOAD_FILES),
+      );
+      trackUsage("chat.attach");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "File attachment failed";
+      setError(message);
+    }
+  }
+
+  function removeAttachment(id: string) {
+    setAttachments((current) => current.filter((item) => item.id !== id));
+    fileInputRef.current?.focus();
   }
 
   async function sendMessage(event?: React.FormEvent, forcedText?: string) {
     event?.preventDefault();
 
     const text = (forcedText ?? input).trim();
-    if (!text || busy) return;
+    const readyAttachments = attachments;
+    if ((!text && readyAttachments.length === 0) || busy) return;
+
+    const messageText =
+      text ||
+      `Please help with ${readyAttachments.length === 1 ? "this attachment" : "these attachments"}.`;
+    const displayAttachments =
+      sanitizeChatAttachmentsForMessage(readyAttachments);
+    const apiFiles = readyAttachments.map(attachmentToApiFile);
 
     const userMessage: ChatMessage = {
       id: createId("user"),
       role: "user",
-      content: text,
+      content: messageText,
+      attachments: displayAttachments,
     };
 
     const nextMessages = trimChatHistory([...messages, userMessage]);
     setMessages(nextMessages);
     setInput("");
+    setAttachments([]);
     setBusy(true);
     setError(null);
     trackUsage("chat.send");
 
     try {
-      const assistantReply = await requestCatReply(nextMessages);
+      const assistantReply = await requestCatReply(nextMessages, apiFiles);
       const assistantMessage: ChatMessage = {
         id: createId("assistant"),
         role: "assistant",
@@ -3135,6 +3337,7 @@ export function ChatPanel({
   function clearChat() {
     setMessages([]);
     setInput("");
+    setAttachments([]);
     setError(null);
     storage?.removeItem(threadKey);
     storage?.removeItem(draftKey);
@@ -3167,6 +3370,7 @@ export function ChatPanel({
     0,
   );
   const isMinimal = variant === "minimal";
+  const canSend = input.trim().length > 0 || attachments.length > 0;
 
   return (
     <div className={isMinimal ? "chat-panel chat-panel-minimal" : "chat-panel"}>
@@ -3266,20 +3470,63 @@ export function ChatPanel({
 
         <div className="chat-main">
           {isMinimal && (
-            <div className="chat-mini-status" aria-label="House Chat status">
-              <div>
-                <p className="card-kicker">House Chat</p>
-                <h2>Ask House Chat</h2>
-                <p>
-                  Plans, notes, questions, and half-formed ideas can start right
-                  here.
-                </p>
+            <>
+              <div className="chat-mini-status" aria-label="House Chat status">
+                <div>
+                  <p className="card-kicker">House Chat</p>
+                  <h2>Chat with the whole page, not a tiny corner.</h2>
+                  <p>
+                    A roomy spot for plans, notes, family messages, odd ideas,
+                    and anything that needs a calmer next step.
+                  </p>
+                </div>
+                <div className="chat-mini-status-stack">
+                  <div className="chat-health">
+                    <span className={`dot dot-${health}`} aria-hidden />
+                    <span>{healthLabel(health)}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="service-helper"
+                    onClick={refreshStarters}
+                  >
+                    <WandSparkles className="h-3.5 w-3.5" />
+                    New sparks
+                  </button>
+                </div>
               </div>
-              <div className="chat-health">
-                <span className={`dot dot-${health}`} aria-hidden />
-                <span>{healthLabel(health)}</span>
-              </div>
-            </div>
+
+              {messages.length === 0 && (
+                <div
+                  className="chat-mini-launchpad"
+                  aria-label="House Chat starting sparks"
+                >
+                  <div className="chat-mini-launchpad-copy">
+                    <span>Start with a spark</span>
+                    <strong>Pick one, then make it yours.</strong>
+                  </div>
+                  <div
+                    className="chat-mini-prompt-grid"
+                    aria-label="House Chat quick prompts"
+                  >
+                    {CHAT_MINIMAL_PROMPTS.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        className="chat-mini-prompt"
+                        onClick={() => {
+                          trackUsage("chat.minimal_prompt");
+                          setInput(prompt);
+                          inputRef.current?.focus();
+                        }}
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {!isMinimal && (
@@ -3303,32 +3550,13 @@ export function ChatPanel({
           <div className="chat-log" ref={logRef}>
             {isMinimal && messages.length === 0 && (
               <div className="chat-empty chat-empty-minimal">
-                <p className="card-kicker">House Chat</p>
-                <h3>Ask me for the thing rattling around in your head.</h3>
+                <p className="card-kicker">Ready when you are</p>
+                <h3>Ask the messy version.</h3>
                 <p>
-                  Use this little window for plans, family notes, odd ideas, or
-                  that moment where you know there is a next step but do not
-                  want to wrestle it alone.
+                  House Chat can turn a loose thought into a plan, a note, a
+                  search handoff, or a better question without making you leave
+                  the page.
                 </p>
-                <div
-                  className="chat-mini-prompt-grid"
-                  aria-label="House Chat quick prompts"
-                >
-                  {CHAT_MINIMAL_PROMPTS.map((prompt) => (
-                    <button
-                      key={prompt}
-                      type="button"
-                      className="chat-mini-prompt"
-                      onClick={() => {
-                        trackUsage("chat.minimal_prompt");
-                        setInput(prompt);
-                        inputRef.current?.focus();
-                      }}
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
               </div>
             )}
 
@@ -3350,7 +3578,25 @@ export function ChatPanel({
                     className={`chat-bubble ${isUser ? "chat-bubble-user" : "chat-bubble-assistant"}`}
                   >
                     {isUser ? (
-                      <p>{message.content}</p>
+                      <>
+                        <p>{message.content}</p>
+                        {message.attachments?.length ? (
+                          <div
+                            className="chat-attachment-list"
+                            aria-label="Files sent with this message"
+                          >
+                            {message.attachments.map((attachment) => (
+                              <span
+                                key={attachment.id}
+                                className="chat-attachment-chip"
+                              >
+                                <FileText className="h-3.5 w-3.5" aria-hidden />
+                                <span>{attachment.name}</span>
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                      </>
                     ) : (
                       <>
                         <MarkdownMessage
@@ -3396,7 +3642,20 @@ export function ChatPanel({
           {error && <div className="status-line status-error">{error}</div>}
           {copyNote && !error && <div className="status-line">{copyNote}</div>}
 
-          <form className="chat-compose" onSubmit={sendMessage}>
+          <form
+            className={`chat-compose ${draggingUpload ? "chat-compose-dragging" : ""}`}
+            onSubmit={sendMessage}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setDraggingUpload(true);
+            }}
+            onDragLeave={() => setDraggingUpload(false)}
+            onDrop={(event) => {
+              event.preventDefault();
+              setDraggingUpload(false);
+              void addAttachments(event.dataTransfer.files);
+            }}
+          >
             <label
               htmlFor="family-chat-input"
               className={isMinimal ? "sr-only" : "input-callout"}
@@ -3422,18 +3681,72 @@ export function ChatPanel({
                 }
               }}
             />
+            {attachments.length > 0 && (
+              <div
+                className="chat-attachment-tray"
+                aria-label="Files attached for House Chat"
+              >
+                {attachments.map((attachment) => (
+                  <div key={attachment.id} className="chat-attachment-pill">
+                    <FileText className="h-4 w-4" aria-hidden />
+                    <div>
+                      <strong>{attachment.name}</strong>
+                      <span>
+                        {formatChatFileSize(attachment.size)}
+                        {attachment.previewable
+                          ? attachment.truncated
+                            ? " - text preview clipped"
+                            : " - text preview ready"
+                          : " - file name only"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="chat-attachment-remove"
+                      onClick={() => removeAttachment(attachment.id)}
+                      aria-label={`Remove ${attachment.name}`}
+                      disabled={busy}
+                    >
+                      <X className="h-3.5 w-3.5" aria-hidden />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="chat-compose-actions">
-              {!isMinimal && (
-                <div className="chat-footnote">
-                  <RefreshCw className="h-3.5 w-3.5" aria-hidden />
-                  Your draft stays in this browser. Shift+Enter adds a new line
-                  when you need more room.
-                </div>
-              )}
+              <div className="chat-compose-left">
+                <input
+                  id="family-chat-files"
+                  ref={fileInputRef}
+                  className="sr-only"
+                  type="file"
+                  multiple
+                  aria-label="Attach files for House Chat"
+                  onChange={(event) => {
+                    const { files } = event.currentTarget;
+                    if (files) void addAttachments(files);
+                    event.currentTarget.value = "";
+                  }}
+                />
+                <label
+                  htmlFor="family-chat-files"
+                  className="chat-attach-button"
+                >
+                  <Paperclip className="h-4 w-4" aria-hidden />
+                  <span>Attach</span>
+                </label>
+                {!isMinimal && (
+                  <div className="chat-footnote">
+                    <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+                    Drafts stay here. Text files get a safe preview; images and
+                    PDFs go by name until the backend supports richer reads.
+                  </div>
+                )}
+              </div>
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={busy || input.trim().length === 0}
+                disabled={busy || !canSend}
               >
                 <Send className="h-4 w-4" />
                 Send
