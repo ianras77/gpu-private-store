@@ -1,8 +1,15 @@
 server:
   name: RassyGPT
-  version: "1.0.2"
+  version: "1.0.4"
   require_auth: ${RASSYGPT_REQUIRE_AUTH:-true}
   qdrant_url: ${RASSYGPT_QDRANT_URL:-http://rassygpt-qdrant:6333}
+  required_backends:
+    - general
+    - coder
+    - coder_secondary
+    - fast
+    - embed
+    - rerank
 
 defaults:
   chat: rassy-smart

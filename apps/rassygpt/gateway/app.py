@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from contextlib import asynccontextmanager
 import ipaddress
 import json
 import math
@@ -16,7 +17,7 @@ import yaml
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
-APP_VERSION = "1.0.2"
+APP_VERSION = "1.0.4"
 CONFIG_PATH = Path(os.getenv("RASSYGPT_CONFIG_FILE", "/data/config/routes.yaml"))
 DEFAULT_CONFIG_PATH = Path(os.getenv("RASSYGPT_DEFAULT_CONFIG_FILE", "/app/routes.default.yaml"))
 if not DEFAULT_CONFIG_PATH.exists():
@@ -24,19 +25,19 @@ if not DEFAULT_CONFIG_PATH.exists():
 REQUEST_TIMEOUT = httpx.Timeout(connect=10.0, read=900.0, write=60.0, pool=30.0)
 CLIENT_LIMITS = httpx.Limits(max_connections=512, max_keepalive_connections=128, keepalive_expiry=30.0)
 
-app = FastAPI(title="RassyGPT", version=APP_VERSION)
 
-
-@app.on_event("startup")
-async def startup() -> None:
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     app.state.http = httpx.AsyncClient(timeout=REQUEST_TIMEOUT, limits=CLIENT_LIMITS)
+    try:
+        yield
+    finally:
+        client = getattr(app.state, "http", None)
+        if client:
+            await client.aclose()
 
 
-@app.on_event("shutdown")
-async def shutdown() -> None:
-    client = getattr(app.state, "http", None)
-    if client:
-        await client.aclose()
+app = FastAPI(title="RassyGPT", version=APP_VERSION, lifespan=lifespan)
 
 
 def _http() -> httpx.AsyncClient:
@@ -219,6 +220,21 @@ def _smart_chat_target(payload: dict[str, Any]) -> str:
     return "rassy-general"
 
 
+def _smart_chat_fallbacks(primary: str) -> list[str]:
+    fallback_order = {
+        "rassy-coder-secondary": ["rassy-coder", "rassy-fast", "rassy-general"],
+        "rassy-coder": ["rassy-fast", "rassy-general"],
+        "rassy-fast": ["rassy-general"],
+        "rassy-general": ["rassy-fast"],
+    }
+    candidates = [primary, *fallback_order.get(primary, [])]
+    output: list[str] = []
+    for candidate in candidates:
+        if candidate not in output:
+            output.append(candidate)
+    return output
+
+
 def _compat_chat_model(model_name: str | None) -> str:
     canonical = _canonical_model_name(model_name, "chat")
     if canonical in {"rassy-general", "rassy-coder", "rassy-coder-secondary", "rassy-fast", "rassy-smart"}:
@@ -279,6 +295,21 @@ async def _post_json(url: str, payload: dict[str, Any], request: Request, respon
     )
 
 
+async def _post_openai_model(
+    request: Request,
+    kind: str,
+    upstream_path: str,
+    payload: dict[str, Any],
+    model_name: str,
+) -> tuple[str, Response]:
+    canonical, model_cfg, backend = _resolve_model(model_name, kind)
+    upstream_payload = dict(payload)
+    upstream_payload["model"] = model_cfg.get("upstream_model", canonical)
+    url = _backend_url(backend, upstream_path)
+    response = await _post_json(url, upstream_payload, request, response_model=canonical)
+    return canonical, response
+
+
 async def _stream_json(url: str, payload: dict[str, Any], request: Request, response_model: str | None = None) -> StreamingResponse:
     def normalize_line(line: str) -> bytes:
         if not line.startswith("data: "):
@@ -330,8 +361,17 @@ async def _proxy_openai_json(request: Request, kind: str, upstream_path: str) ->
     payload = dict(payload)
     if kind in {"chat", "completions"}:
         _apply_chat_compat_defaults(payload)
-    if kind in {"chat", "completions"} and _canonical_model_name(payload.get("model"), kind) == "rassy-smart":
+    smart_requested = kind in {"chat", "completions"} and _canonical_model_name(payload.get("model"), kind) == "rassy-smart"
+    if smart_requested:
         payload["model"] = _smart_chat_target(payload)
+    if smart_requested and not payload.get("stream"):
+        last_response: Response | None = None
+        for candidate in _smart_chat_fallbacks(payload["model"]):
+            canonical, response = await _post_openai_model(request, kind, upstream_path, payload, candidate)
+            last_response = response
+            if response.status_code < 500:
+                return response
+        return last_response or JSONResponse({"error": "upstream_unavailable"}, status_code=503)
     canonical, model_cfg, backend = _resolve_model(payload.get("model"), kind)
     payload["model"] = model_cfg.get("upstream_model", canonical)
     url = _backend_url(backend, upstream_path)
@@ -347,10 +387,20 @@ async def health() -> dict[str, Any]:
 
 @app.get("/ready")
 async def ready() -> dict[str, Any]:
+    cfg = _load_config()
     statuses = await _backend_statuses()
-    required = ["general", "coder", "coder_secondary", "fast", "embed", "rerank", "image", "audio"]
+    required = _required_backends(cfg)
     ok = all(statuses.get(name, {}).get("healthy") for name in required)
     return {"ready": ok, "required": required, "backends": statuses}
+
+
+def _required_backends(cfg: dict[str, Any]) -> list[str]:
+    configured = cfg.get("server", {}).get("required_backends")
+    if isinstance(configured, list):
+        return [str(item).strip() for item in configured if str(item).strip()]
+    if isinstance(configured, str):
+        return [item.strip() for item in configured.split(",") if item.strip()]
+    return ["general", "coder", "coder_secondary", "fast", "embed", "rerank"]
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -528,7 +578,10 @@ async def _run_ollama_chat(request: Request, payload: dict[str, Any]) -> tuple[s
     model, chat_payload = _ollama_chat_payload(payload)
     canonical, model_cfg, backend = _resolve_model(chat_payload["model"], "chat")
     chat_payload["model"] = model_cfg.get("upstream_model", canonical)
-    upstream = await _http().post(_backend_url(backend, "/v1/chat/completions"), json=chat_payload, headers=_forward_headers(request))
+    try:
+        upstream = await _http().post(_backend_url(backend, "/v1/chat/completions"), json=chat_payload, headers=_forward_headers(request))
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=503, detail=f"Chat backend unavailable: {exc.__class__.__name__}") from exc
     if upstream.status_code >= 400:
         raise HTTPException(status_code=upstream.status_code, detail=upstream.text)
     data = upstream.json()
@@ -592,7 +645,10 @@ async def _ollama_embedding_response(request: Request, *, multi_key: str) -> Res
     model = _compat_embed_model(payload.get("model"))
     _, model_cfg, backend = _resolve_model(model, "embeddings")
     upstream_payload = {"model": model_cfg.get("upstream_model", model), "input": inputs}
-    upstream = await _http().post(_backend_url(backend, "/v1/embeddings"), json=upstream_payload, headers=_forward_headers(request))
+    try:
+        upstream = await _http().post(_backend_url(backend, "/v1/embeddings"), json=upstream_payload, headers=_forward_headers(request))
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=503, detail=f"Embedding backend unavailable: {exc.__class__.__name__}") from exc
     if upstream.status_code >= 400:
         return Response(content=upstream.content, status_code=upstream.status_code, media_type=upstream.headers.get("content-type", "application/json"))
     data = upstream.json()
@@ -618,7 +674,10 @@ async def _embedding_vectors(texts: list[str], request: Request) -> list[list[fl
     _, model_cfg, backend = _resolve_model(model_name, "embeddings")
     payload = {"model": model_cfg.get("upstream_model", model_name), "input": texts}
     url = _backend_url(backend, "/v1/embeddings")
-    resp = await _http().post(url, json=payload, headers=_forward_headers(request))
+    try:
+        resp = await _http().post(url, json=payload, headers=_forward_headers(request))
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=503, detail=f"Embedding backend unavailable: {exc.__class__.__name__}") from exc
     resp.raise_for_status()
     data = resp.json()
     return [item["embedding"] for item in data.get("data", [])]
@@ -702,7 +761,10 @@ async def _forward_raw(request: Request, backend_kind: str, path: str) -> Respon
                 body = json.dumps(payload).encode("utf-8")
         except Exception:
             pass
-    upstream = await _http().request(request.method, url, content=body, headers=headers)
+    try:
+        upstream = await _http().request(request.method, url, content=body, headers=headers)
+    except httpx.HTTPError as exc:
+        return _upstream_unavailable_response(exc)
     content = upstream.content
     media_type = upstream.headers.get("content-type", "application/json")
     if backend_kind == "images" and upstream.status_code == 200 and "application/json" in media_type:
@@ -730,7 +792,10 @@ async def generated_image(asset_path: str) -> Response:
     cfg = _load_config()
     backend = cfg.get("backends", {}).get("image", {})
     url = f"{_base_url(backend.get('base_url'))}/generated-images/{asset_path}"
-    upstream = await _http().get(url)
+    try:
+        upstream = await _http().get(url)
+    except httpx.HTTPError as exc:
+        return _upstream_unavailable_response(exc)
     return Response(content=upstream.content, status_code=upstream.status_code, media_type=upstream.headers.get("content-type", "application/octet-stream"))
 
 
