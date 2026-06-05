@@ -34,6 +34,9 @@ x-bat-runtime-env: &bat-runtime-env
   DIRECT_PUBLISH_DEFAULT: ${DIRECT_PUBLISH_DEFAULT:-false}
   WORKER_CYCLE_MINUTES: ${WORKER_CYCLE_MINUTES:-30}
   WORKER_MIN_CYCLE_SECONDS: ${WORKER_MIN_CYCLE_SECONDS:-30}
+  WORKER_MAX_CYCLE_SECONDS: ${WORKER_MAX_CYCLE_SECONDS:-5400}
+  WORKER_HEARTBEAT_TTL_SECONDS: ${WORKER_HEARTBEAT_TTL_SECONDS:-7200}
+  WORKER_HEARTBEAT_KEY: ${WORKER_HEARTBEAT_KEY:-bat:worker:heartbeat}
   PIPELINE_LOCK_TTL_SECONDS: ${PIPELINE_LOCK_TTL_SECONDS:-3600}
   PIPELINE_STALE_AFTER_SECONDS: ${PIPELINE_STALE_AFTER_SECONDS:-1800}
   RESEARCH_QUERY_CONCURRENCY: ${RESEARCH_QUERY_CONCURRENCY:-6}
@@ -256,6 +259,14 @@ services:
         condition: service_healthy
       bat-qdrant:
         condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -m workers.healthcheck
+      interval: 30s
+      timeout: 10s
+      retries: 6
+      start_period: 90s
     restart: unless-stopped
     image: runtipi-local-web-bat-worker:latest
     networks:

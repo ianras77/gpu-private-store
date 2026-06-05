@@ -125,6 +125,10 @@ class Settings(BaseSettings):
     auto_publish_social: bool = False
     worker_cycle_minutes: int = 2
     worker_min_cycle_seconds: int = 30
+    worker_max_cycle_seconds: int = 5400
+    worker_heartbeat_ttl_seconds: int = 7200
+    worker_heartbeat_key: str = "bat:worker:heartbeat"
+    search_connector_required: bool = False
     pipeline_lock_ttl_seconds: int = 3600
     pipeline_stale_after_seconds: int = 1800
     research_query_concurrency: int = 6

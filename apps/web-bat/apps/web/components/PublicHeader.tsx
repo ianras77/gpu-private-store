@@ -56,7 +56,7 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
           <Link href="/workflow">Notebook</Link>
           <Link href="/about">About</Link>
           <Link href="/the-cat">Taste</Link>
-          <Link href="/admin" className="utility-admin-link">
+          <Link href="/admin" className="utility-admin-link" prefetch={false}>
             Studio
           </Link>
         </nav>
@@ -74,7 +74,7 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
             A cowgirl-sharp anti-Trump blog for linked reporting, political heat, and the kind of feminine authority that
             walks in with boots on and receipts ready.
           </p>
-          <div className="masthead-merch-lines" aria-label="BAT printable lines">
+          <div className="masthead-merch-lines" aria-label="BAT house lines">
             <span>Smart mouth</span>
             <span>Sharp politics</span>
             <span>Good hair, better evidence</span>

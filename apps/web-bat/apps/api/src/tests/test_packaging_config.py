@@ -15,6 +15,16 @@ def test_compose_defaults_use_reachable_rassygpt_host_gateway() -> None:
     assert compose_text.count("extra_hosts: *bat-host-gateway") >= 3
 
 
+def test_worker_service_has_healthcheck() -> None:
+    compose_text = (APP_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    start = compose_text.index("  bat-worker:")
+    end = compose_text.index("\n\nnetworks:", start)
+    worker_section = compose_text[start:end]
+
+    assert "healthcheck:" in worker_section
+    assert "python -m workers.healthcheck" in worker_section
+
+
 def test_app_versions_stay_in_sync() -> None:
     app_config = json.loads((APP_ROOT / "config.json").read_text(encoding="utf-8"))
     package_json = json.loads((APP_ROOT / "apps/web/package.json").read_text(encoding="utf-8"))

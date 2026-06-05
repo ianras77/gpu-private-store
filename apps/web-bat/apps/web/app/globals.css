@@ -2228,7 +2228,7 @@ button,
 
 .home-hero-primary h1 {
   margin: 0.65rem 0 0;
-  max-width: 12ch;
+  max-width: 15ch;
   font-size: 4.35rem;
   line-height: 0.92;
   text-transform: uppercase;
@@ -2835,7 +2835,7 @@ button,
 }
 
 
-/* v1.0.7 merchable BAT pass: sharper lockups, printable slogans, wearable attitude. */
+/* Public-home polish: finished editorial language, strong line cards, no process copy. */
 .brand-mini {
   align-items: center;
   min-width: 0;
@@ -2949,13 +2949,13 @@ button,
 
 .brand-shop-window {
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(420px, 1.18fr);
-  gap: 1rem;
+  grid-template-columns: minmax(0, 0.86fr) minmax(360px, 1.14fr);
+  gap: 1.1rem;
   align-items: stretch;
-  padding: 1rem;
+  padding: 1.1rem;
   background:
-    linear-gradient(90deg, rgba(33, 24, 38, 0.06) 0 1px, transparent 1px 34px),
-    linear-gradient(180deg, #fff 0%, #fff2f8 100%);
+    linear-gradient(90deg, rgba(33, 24, 38, 0.045) 0 1px, transparent 1px 34px),
+    linear-gradient(180deg, #fff 0%, #fff7ed 100%);
 }
 
 .brand-shop-window::before,
@@ -3005,7 +3005,7 @@ button,
   position: relative;
   display: grid;
   align-content: space-between;
-  min-height: 264px;
+  min-height: 228px;
   padding: 1rem;
   border: 2px solid var(--ink);
   border-radius: 6px;
@@ -3029,9 +3029,9 @@ button,
   align-self: center;
   color: currentColor;
   font-family: var(--sans);
-  font-size: clamp(1.85rem, 3.2vw, 3.2rem);
+  font-size: clamp(1.7rem, 2.4vw, 2.55rem);
   font-weight: 1000;
-  line-height: 0.9;
+  line-height: 0.96;
   text-transform: uppercase;
 }
 
@@ -3039,8 +3039,8 @@ button,
   margin: 0;
   color: currentColor;
   font-family: var(--sans);
-  font-size: 0.86rem;
-  line-height: 1.35;
+  font-size: 0.9rem;
+  line-height: 1.42;
   opacity: 0.82;
 }
 
@@ -3087,8 +3087,8 @@ button,
 .slogan-wall {
   padding: 1.2rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 244, 220, 0.86)),
-    repeating-linear-gradient(90deg, rgba(216, 34, 88, 0.06) 0 1px, transparent 1px 32px);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 248, 247, 0.86)),
+    repeating-linear-gradient(90deg, rgba(110, 158, 154, 0.08) 0 1px, transparent 1px 32px);
 }
 
 .slogan-grid {
@@ -3101,7 +3101,7 @@ button,
 .slogan-tile {
   display: grid;
   align-content: space-between;
-  min-height: 150px;
+  min-height: 132px;
   padding: 0.95rem;
   border: 1px solid var(--ink);
   border-radius: 6px;
@@ -3125,10 +3125,10 @@ button,
 
 .slogan-tile strong {
   display: block;
-  max-width: 12ch;
+  max-width: 15ch;
   color: currentColor;
   font-family: var(--serif);
-  font-size: clamp(1.55rem, 3vw, 2.3rem);
+  font-size: clamp(1.45rem, 2.4vw, 2.05rem);
   font-weight: 900;
   line-height: 0.98;
   text-transform: uppercase;

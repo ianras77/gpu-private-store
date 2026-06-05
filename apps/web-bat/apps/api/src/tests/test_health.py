@@ -10,6 +10,7 @@ from routes.health import (
     _build_llm_probe_payload,
     _normalize_model_name,
     _ollama_tags_url,
+    _readiness_critical_ok,
 )
 
 
@@ -73,6 +74,49 @@ class HealthRouteTests(unittest.TestCase):
 
         self.assertEqual(vector, [1.0, 2.0, 3.0])
 
+
+    def test_readiness_allows_optional_search_connector_failure(self) -> None:
+        checks = _healthy_readiness_checks()
+        checks["search_connector"] = {"ok": False}
+
+        self.assertTrue(
+            _readiness_critical_ok(
+                checks,
+                cat_required=False,
+                llm_required=True,
+                embedding_required=True,
+                search_required=False,
+            )
+        )
+
+    def test_readiness_can_require_search_connector_when_configured(self) -> None:
+        checks = _healthy_readiness_checks()
+        checks["search_connector"] = {"ok": False}
+
+        self.assertFalse(
+            _readiness_critical_ok(
+                checks,
+                cat_required=False,
+                llm_required=True,
+                embedding_required=True,
+                search_required=True,
+            )
+        )
+
+    def test_readiness_treats_redis_as_core_dependency(self) -> None:
+        checks = _healthy_readiness_checks()
+        checks["redis"] = {"ok": False}
+
+        self.assertFalse(
+            _readiness_critical_ok(
+                checks,
+                cat_required=False,
+                llm_required=True,
+                embedding_required=True,
+                search_required=False,
+            )
+        )
+
     def test_pipeline_admin_marks_old_running_cycle_interrupted(self) -> None:
         cycle = {
             "status": "running",
@@ -83,3 +127,15 @@ class HealthRouteTests(unittest.TestCase):
 
         self.assertEqual(finalized["status"], "interrupted")
         self.assertTrue(finalized["interrupted"])
+
+
+def _healthy_readiness_checks() -> dict[str, dict[str, bool]]:
+    return {
+        "database": {"ok": True},
+        "redis": {"ok": True},
+        "qdrant": {"ok": True},
+        "cheshire_cat": {"ok": True},
+        "search_connector": {"ok": True},
+        "embedding_api": {"ok": True},
+        "llm_api": {"ok": True},
+    }

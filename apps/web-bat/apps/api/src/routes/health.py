@@ -438,6 +438,25 @@ async def health_live_alias() -> dict[str, Any]:
     return await health_live()
 
 
+def _readiness_critical_ok(
+    checks: dict[str, Any],
+    *,
+    cat_required: bool,
+    llm_required: bool,
+    embedding_required: bool,
+    search_required: bool,
+) -> bool:
+    return bool(
+        checks["database"].get("ok")
+        and checks["redis"].get("ok")
+        and checks["qdrant"].get("ok")
+        and (checks["search_connector"].get("ok") or not search_required)
+        and (checks["cheshire_cat"].get("ok") or not cat_required)
+        and (checks["llm_api"].get("ok") or not llm_required)
+        and (checks["embedding_api"].get("ok") or not embedding_required)
+    )
+
+
 @router.get("/ready")
 async def health_ready(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     cat_required = bool(settings.cat_primary_enabled)
@@ -481,13 +500,13 @@ async def health_ready(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         "llm_api": llm_check,
     }
     embedding_required = not settings.embedding_allow_fallback
-    critical_ok = (
-        checks["database"].get("ok")
-        and checks["qdrant"].get("ok")
-        and checks["search_connector"].get("ok")
-        and (checks["cheshire_cat"].get("ok") or not cat_required)
-        and (checks["llm_api"].get("ok") or not llm_required)
-        and (checks["embedding_api"].get("ok") or not embedding_required)
+    search_required = bool(settings.search_connector_required)
+    critical_ok = _readiness_critical_ok(
+        checks,
+        cat_required=cat_required,
+        llm_required=llm_required,
+        embedding_required=embedding_required,
+        search_required=search_required,
     )
     status = "ready" if critical_ok else "degraded"
     return {
@@ -496,6 +515,7 @@ async def health_ready(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         "cat_required": cat_required,
         "llm_required": llm_required,
         "embedding_required": embedding_required,
+        "search_required": search_required,
     }
 
 

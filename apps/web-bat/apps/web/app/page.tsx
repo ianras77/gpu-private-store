@@ -29,7 +29,7 @@ function storyTypeLabel(objectType?: string): string {
   return humanizeSlug(objectType);
 }
 
-const merchLines = [
+const houseLines = [
   "Bad at tyranny",
   "Blonde, not blind",
   "Receipts are my love language",
@@ -41,23 +41,23 @@ const merchLines = [
   "Cute outfit. Clear threat model.",
 ];
 
-const merchPreviewCards = [
+const stanceCards = [
   {
-    label: "Shirt lockup",
-    title: "Blonde / Not / Blind",
-    copy: "Three words, high contrast, impossible to misread from across the room.",
+    label: "Evidence",
+    title: "Receipts first",
+    copy: "Every sharp line has to survive the source trail behind it.",
     tone: "tee",
   },
   {
-    label: "Poster line",
+    label: "Voice",
     title: "Bad at tyranny",
-    copy: "A BAT pun with bite: funny first, political second, printable always.",
+    copy: "Funny when it can be, precise when it has to be, never vague.",
     tone: "poster",
   },
   {
-    label: "Sticker hit",
+    label: "Memory",
     title: "Receipts are my love language",
-    copy: "Smart, flirtatious, and still centered on proof.",
+    copy: "The recurring tells stay visible, so the spin does not get a fresh disguise.",
     tone: "sticker",
   },
 ];
@@ -97,7 +97,7 @@ export default async function HomePage() {
   const visibleOpportunities = opportunityBoard.slice(0, 4);
   const receiptLinks = (curatedLinks.length ? curatedLinks : queenLinks).slice(0, 5);
   const socialLines = liveSocialLines.slice(0, 4);
-  const printableLines = merchLines;
+  const houseCopyLines = houseLines;
   const topChannel = channelCards[0];
   const topQuery = cleanCopy(visibleQueries[0]);
   const storyCount = publishedStories.length;
@@ -116,7 +116,7 @@ export default async function HomePage() {
     {
       label: "Dispatches",
       value: storyCount.toString(),
-      copy: `${leadStoryCount} lead stories and ${themeTakeCount} channel takes are live on the shelf.`,
+      copy: `${leadStoryCount} lead stories and ${themeTakeCount} channel takes are ready to read.`,
     },
     {
       label: "Channels",
@@ -145,8 +145,8 @@ export default async function HomePage() {
             <h1>Cowgirl politics with lipstick on the glass and receipts on the table.</h1>
             <p className="hero-dek">{heroLine}</p>
             <p className="hero-note">
-              BAT is personal, source-backed, anti-Trump, and built to feel like a real cowgirl blog with a house style people can wear.
-              The writing leads. The merch language follows: smart mouth, clean proof, sharp silhouette.
+              BAT is personal, source-backed, anti-Trump, and written like a woman is actually in the room.
+              The voice stays stylish, but the receipts stay close enough to check.
             </p>
             <div className="hero-actions">
               <Link href={leadHref} className="button-link">
@@ -183,23 +183,23 @@ export default async function HomePage() {
         </section>
 
 
-        <section className="brand-shop-window" aria-label="BAT merch direction">
+        <section className="brand-shop-window" aria-label="BAT editorial stance">
           <div className="brand-shop-copy">
-            <p className="section-kicker">Merchable by design</p>
-            <h2>The BAT signal is a look now.</h2>
+            <p className="section-kicker">Editorial stance</p>
+            <h2>Pretty does not mean soft.</h2>
             <p>
-              The public face needs to work as a blog, a sticker, a shirt, and a quote card. So the visual system now favors
-              loud little phrases, tighter lockups, and printable blocks that can move from front page to merch without losing the point.
+              The public face should feel polished, direct, and a little dangerous. The page keeps the writing in front, then lets
+              the best lines, source trails, and recurring tells give the whole thing a pulse.
             </p>
             <div className="brand-shop-tags">
-              <span>Smart</span>
-              <span>Fun</span>
-              <span>Sexy</span>
-              <span>Receipt-backed</span>
+              <span>Source-led</span>
+              <span>Specific</span>
+              <span>Sharp</span>
+              <span>Readable</span>
             </div>
           </div>
-          <div className="merch-preview-grid" aria-label="BAT printable concept cards">
-            {merchPreviewCards.map((card) => (
+          <div className="merch-preview-grid" aria-label="BAT editorial principle cards">
+            {stanceCards.map((card) => (
               <article key={card.title} className={`merch-preview-card ${card.tone}`}>
                 <span>{card.label}</span>
                 <strong>{card.title}</strong>
@@ -226,7 +226,7 @@ export default async function HomePage() {
                   </Link>
                 ))
               ) : (
-                <p className="stack-empty">The shelf is built. The next post will land here when it has earned the front page.</p>
+                <p className="stack-empty">The next post will land here when it has earned the front page.</p>
               )}
             </div>
           </article>
@@ -324,21 +324,21 @@ export default async function HomePage() {
                   </p>
                 ))
               ) : (
-                <p className="stack-empty">The fastest lines collect here once the latest cycle has something worth stealing.</p>
+                <p className="stack-empty">The fastest lines collect here once the latest cycle has something worth keeping.</p>
               )}
             </div>
           </article>
         </section>
 
 
-        <section className="slogan-wall" aria-label="BAT merch slogan wall">
+        <section className="slogan-wall" aria-label="BAT house lines">
           <div className="section-heading section-heading-wide">
-            <p className="section-kicker">Lines worth printing</p>
-            <h2>Portable, pithy, and a little dangerous.</h2>
-            <p>These are the fragments built for tees, captions, stickers, and future writing prompts.</p>
+            <p className="section-kicker">House lines</p>
+            <h2>Short enough to remember. Sharp enough to matter.</h2>
+            <p>These are the lines that carry the attitude without asking the reader to forget the evidence.</p>
           </div>
           <div className="slogan-grid">
-            {printableLines.map((line, index) => (
+            {houseCopyLines.map((line, index) => (
               <article key={`${index}-${line}`} className="slogan-tile">
                 <span>BAT {String(index + 1).padStart(2, "0")}</span>
                 <strong>{line}</strong>
@@ -351,7 +351,7 @@ export default async function HomePage() {
           <div className="section-heading section-heading-wide">
             <p className="section-kicker">Open notebook</p>
             <h2>The tabs behind the latest take</h2>
-            <p>The process is no longer the sales pitch. It is the proof layer: queries, opportunities, and receipts when you want to look closer.</p>
+            <p>The tabs stay available for anyone who wants the trail: queries, opportunities, and receipts when you want to look closer.</p>
           </div>
           <div className="notebook-grid">
             <article>
@@ -376,8 +376,8 @@ export default async function HomePage() {
 
         <section className="home-closing-note">
           <p>
-            BAT should feel like a sharp personal blog first: current enough to keep up, stylish enough to remember, and bold enough
-            to jump from headline to shirt without getting diluted.
+            BAT should feel like a sharp personal blog first: current enough to keep up, stylish enough to remember, and disciplined enough
+            to keep the receipts in reach.
           </p>
           <p className="closing-signoff">Boots on. Woman-led. Smart mouth. Receipts in reach.</p>
           <div className="hero-actions">

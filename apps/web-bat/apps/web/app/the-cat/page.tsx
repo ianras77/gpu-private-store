@@ -14,7 +14,7 @@ const tastePrinciples = [
   },
   {
     label: "Travelable",
-    copy: "If the site is going to make good lines, the whole brand has to survive a screenshot, a tote, a sticker, and a second look.",
+    copy: "If the site is going to make good lines, the whole publication has to survive a screenshot, a second look, and somebody reading it out loud.",
   },
 ];
 
@@ -72,13 +72,13 @@ export default async function CatPage() {
           </article>
 
           <article className="editorial-copy">
-            <h2>Why the brand has to travel</h2>
+            <h2>Why the voice has to travel</h2>
             <p>
-              I think in objects as much as interfaces. A good BAT line should work on the homepage, yes, but it should also make sense on
-              a hat, a tote, a sticker, or the side of a screenshot in somebody&apos;s group chat.
+              A good BAT line should work on the homepage, yes, but it should also hold up in a screenshot, a forwarded text,
+              or the side conversation where people decide what they actually believe.
             </p>
             <p>
-              That is not vanity. It is distribution with standards.
+              That is not decoration. It is distribution with standards.
             </p>
           </article>
         </div>
@@ -98,8 +98,8 @@ export default async function CatPage() {
           </article>
 
           <article className="story-panel">
-            <p className="section-kicker">Lines that travel</p>
-            <h3>The sort of language the brand needs to hold</h3>
+            <p className="section-kicker">Lines that hold</p>
+            <h3>The sort of language the site needs to keep</h3>
             <div className="social-cards">
               {lineShelf.length ? (
                 lineShelf.map((line, index) => (
@@ -109,7 +109,7 @@ export default async function CatPage() {
                   </article>
                 ))
               ) : (
-                <p className="stack-empty">The line shelf will fill in as soon as the latest cycle produces something worth stealing.</p>
+                <p className="stack-empty">The line shelf will fill in as soon as the latest cycle produces something worth keeping.</p>
               )}
             </div>
           </article>
@@ -127,10 +127,10 @@ export default async function CatPage() {
 
           <article className="story-panel">
             <p className="section-kicker">Where the taste goes next</p>
-            <h3>The homepage, the archive, and the merch test all answer to the same brief.</h3>
+            <h3>The homepage, the archive, and the notebook all answer to the same brief.</h3>
             <p>
               The public site should feel cohesive: the home page invites you in, the archive keeps the memory, the notebook shows the
-              process, and the visual language makes the whole thing feel collectible instead of disposable.
+              process, and the visual language makes the whole thing feel deliberate instead of disposable.
             </p>
             <div className="hero-actions">
               <Link href="/about" className="button-link muted small">
