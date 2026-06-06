@@ -2,7 +2,19 @@ import Link from "next/link";
 
 import { safeDate } from "@/lib/api";
 import { PublicHeader } from "@/components/PublicHeader";
-import { cleanCopy, getPublicSiteData, humanizeSlug, storyQuote, storySummary, themeName, themeNarrative } from "@/lib/public-site";
+import {
+  cleanCopy,
+  getPublicSiteData,
+  humanizeSlug,
+  storyQuote,
+  storySummary,
+  themeName,
+  themeNarrative,
+  type Editorial,
+  type Opportunity,
+  type PipelineCycle,
+  type PipelineStage,
+} from "@/lib/public-site";
 
 function heatWidth(score?: number): string {
   const scaled = Math.max(16, Math.min(100, Math.round((score ?? 0) * 0.4)));
@@ -29,48 +41,47 @@ function storyTypeLabel(objectType?: string): string {
   return humanizeSlug(objectType);
 }
 
-const houseLines = [
-  "Bad at tyranny",
-  "Blonde, not blind",
-  "Receipts are my love language",
-  "Big hair. Bigger receipts.",
-  "Good hair, better evidence",
-  "All are welcome. Bullshit is not.",
-  "Make lying embarrassing again",
-  "Bat signal for bad men",
-  "Cute outfit. Clear threat model.",
-];
+function cycleStage(cycle: PipelineCycle | null, stageName: string): PipelineStage | undefined {
+  return cycle?.stages?.find((stage) => stage.stage === stageName && stage.event === "stage_completed");
+}
 
-const stanceCards = [
-  {
-    label: "Evidence",
-    title: "Receipts first",
-    copy: "Every sharp line has to survive the source trail behind it.",
-    tone: "tee",
-  },
-  {
-    label: "Voice",
-    title: "Bad at tyranny",
-    copy: "Funny when it can be, precise when it has to be, never vague.",
-    tone: "poster",
-  },
-  {
-    label: "Memory",
-    title: "Receipts are my love language",
-    copy: "The recurring tells stay visible, so the spin does not get a fresh disguise.",
-    tone: "sticker",
-  },
-];
+function cycleStageStarted(cycle: PipelineCycle | null, stageName: string): boolean {
+  return Boolean(cycle?.stages?.some((stage) => stage.stage === stageName && stage.event === "stage_started"));
+}
+
+function cycleStatus(cycle: PipelineCycle | null, stageName: string): string {
+  if (cycleStage(cycle, stageName)) {
+    return "complete";
+  }
+  if (cycleStageStarted(cycle, stageName)) {
+    return "running";
+  }
+  return "queued";
+}
+
+function distributionRows(distribution?: Record<string, number>, limit = 4): Array<[string, number]> {
+  return Object.entries(distribution ?? {})
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, limit);
+}
+
+function storyHref(story: Pick<Editorial, "slug">): string {
+  return story.slug ? `/story/${story.slug}` : "/archive";
+}
 
 export default async function HomePage() {
   const siteData = await getPublicSiteData();
   const {
     snapshot,
     publishedStories,
+    draftStories,
     activeThemes,
     leadStory,
     latestCycle,
     researcherResult,
+    analystResult,
+    writerResult,
+    queenResult,
     opportunityBoard,
     queryPlan,
     watchlist,
@@ -86,74 +97,128 @@ export default async function HomePage() {
     : "The next finished piece will land here with a point of view, a source trail, and enough snap to deserve the front page.";
   const leadQuote =
     storyQuote(leadStory) ||
-    "The work is serious. The delivery is allowed to have perfume, boots, and a little edge.";
+    "The desk is not chasing volume. It is chasing the receipt that makes the next sentence inevitable.";
   const latestDate = leadStory?.published_at || leadStory?.created_at;
   const latestStoryType = storyTypeLabel(leadStory?.object_type);
 
-  const latestPosts = publishedStories.slice(0, 6);
+  const latestPosts = publishedStories.slice(0, 5);
+  const draftQueue = draftStories.slice(0, 6);
+  const writerSlate = writerResult?.story_slate ?? [];
+  const writingQueue = writerSlate.length
+    ? writerSlate.slice(0, 6).map((story) => ({
+        key: story.id ?? story.slug ?? story.title ?? "writer-slate",
+        title: cleanCopy(story.title) || "Untitled writing pass",
+        href: story.slug ? `/story/${story.slug}` : "/archive",
+        status: cleanCopy(story.status) || "draft",
+        detail: cleanCopy(story.why_now || story.selected_angle) || "A live angle from the writing pass.",
+      }))
+    : draftQueue.map((story) => ({
+        key: story.id,
+        title: cleanCopy(story.title) || "Untitled draft",
+        href: storyHref(story),
+        status: cleanCopy(story.status) || "draft",
+        detail: storySummary(story),
+      }));
+
   const channelCards = activeThemes.slice(0, 6);
   const heatMap = (watchlist.length ? watchlist : activeThemes).slice(0, 6);
-  const visibleQueries = queryPlan.slice(0, 5);
-  const visibleOpportunities = opportunityBoard.slice(0, 4);
-  const receiptLinks = (curatedLinks.length ? curatedLinks : queenLinks).slice(0, 5);
+  const visibleQueries = queryPlan.slice(0, 6);
+  const visibleOpportunities = opportunityBoard.slice(0, 6);
+  const researchLaneItems: Opportunity[] = visibleOpportunities.length
+    ? visibleOpportunities
+    : visibleQueries.map((query) => ({ angle: query, query_hint: query }));
+  const receiptLinks = (curatedLinks.length ? curatedLinks : queenLinks).slice(0, 6);
   const socialLines = liveSocialLines.slice(0, 4);
-  const houseCopyLines = houseLines;
   const topChannel = channelCards[0];
   const topQuery = cleanCopy(visibleQueries[0]);
-  const storyCount = publishedStories.length;
-  const leadStoryCount = publishedStories.filter((story) => story.object_type === "lead_story").length;
-  const themeTakeCount = publishedStories.filter((story) => story.object_type === "theme_take").length;
+  const researchCount = researcherResult?.query_count ?? visibleQueries.length;
   const freshestSources = researcherResult?.source_quality_mix?.fresh_sources ?? 0;
   const highQualityKept = researcherResult?.source_quality_mix?.high_quality_kept ?? 0;
+  const briefCount = analystResult?.brief_count ?? 0;
   const editionLabel =
     cleanCopy(snapshot?.layout_json?.edition) ||
     (latestCycle?.completed_at ? `Edition ${safeDate(latestCycle.completed_at)}` : "Live edition");
   const heroLine =
     cleanCopy(snapshot?.layout_json?.tagline) ||
-    "A cowgirl-sharp anti-Trump blog with Texas gloss, feminine nerve, and receipts close enough to slap on the table.";
+    "A live anti-Trump research desk: search wide, verify hard, write only after the receipts start talking.";
 
   const dataCards = [
     {
-      label: "Dispatches",
-      value: storyCount.toString(),
-      copy: `${leadStoryCount} lead stories and ${themeTakeCount} channel takes are ready to read.`,
+      label: "Search sweep",
+      value: (researchCount || 30).toString(),
+      copy: "30-search sweep cadence across legal collision, war powers, oil shock, patronage, and institutional tells.",
     },
     {
-      label: "Channels",
-      value: activeThemes.length.toString(),
-      copy: topChannel ? `${themeName(topChannel)} is setting the room temperature.` : "The channel board is warming up.",
+      label: "Sources kept",
+      value: (highQualityKept || freshestSources).toString(),
+      copy: freshestSources ? `${freshestSources} fresh sources stayed in the working set.` : "The source set updates with each live pass.",
     },
     {
-      label: "Receipts",
-      value: (receiptLinks.length || highQualityKept || freshestSources).toString(),
-      copy: receiptLinks.length ? "Outside links are dressed and on the reading table." : "Fresh links will surface after the next sweep.",
+      label: "Analysis briefs",
+      value: briefCount.toString(),
+      copy: "Briefs turn the pile into lane pressure, tone, source roles, and story targets.",
     },
     {
-      label: "Notebook",
-      value: (researcherResult?.query_count ?? visibleQueries.length).toString(),
-      copy: topQuery ? `First tab open: ${topQuery}` : "Queries will appear when the next research pass closes.",
+      label: "Writing queue",
+      value: writingQueue.length.toString(),
+      copy: "The queue shows what the desk is turning from signal into finished copy.",
     },
   ];
+
+  const pulseCards = [
+    {
+      label: "Research",
+      status: cycleStatus(latestCycle, "researcher"),
+      metric: `${researchCount || 0} searches`,
+      detail: `${highQualityKept || freshestSources || 0} usable source signals kept this cycle.`,
+    },
+    {
+      label: "Analysis",
+      status: cycleStatus(latestCycle, "analyst"),
+      metric: `${briefCount} briefs`,
+      detail: "Tone lanes, source roles, and story targets are being pulled forward.",
+    },
+    {
+      label: "Writing",
+      status: cycleStatus(latestCycle, "writer"),
+      metric: `${writingQueue.length} in queue`,
+      detail: "The writer is turning live research into posts, not repeating old outrage.",
+    },
+    {
+      label: "Curation",
+      status: cycleStatus(latestCycle, "queen"),
+      metric: `${receiptLinks.length || queenResult?.curated_links?.length || 0} links`,
+      detail: "Source links and social-ready lines wait until a story earns the table.",
+    },
+  ];
+
+  const toneRows = distributionRows(analystResult?.tone_distribution);
+  const roleRows = distributionRows(analystResult?.role_distribution);
+  const storyTargetRows = distributionRows(analystResult?.story_target_distribution, 3);
+  const waitingRows: Array<[string, number]> = [["waiting", 0]];
 
   return (
     <>
       <PublicHeader data={siteData} />
       <main className="shell home-shell redesigned-home">
-        <section className="hero-board">
+        <section className="hero-board live-desk-hero">
           <article className="home-hero-primary">
-            <p className="hero-kicker">{editionLabel}</p>
-            <h1>Cowgirl politics with lipstick on the glass and receipts on the table.</h1>
+            <div className="hero-edition-line">
+              <span>{editionLabel}</span>
+              <span>{latestCycle?.status ? `Cycle ${latestCycle.status}` : "Cycle warming"}</span>
+            </div>
+            <h1>Live research, sharper writing, receipts in reach.</h1>
             <p className="hero-dek">{heroLine}</p>
             <p className="hero-note">
-              BAT is personal, source-backed, anti-Trump, and written like a woman is actually in the room.
-              The voice stays stylish, but the receipts stay close enough to check.
+              BAT now reads like a working desk: wider searches, visible lanes, source quality, analysis pressure, and
+              writing that earns the front page before it asks for attention.
             </p>
             <div className="hero-actions">
               <Link href={leadHref} className="button-link">
                 Read the latest
               </Link>
-              <Link href="/themes" className="button-link muted">
-                Browse channels
+              <Link href="/workflow" className="button-link muted">
+                Open notebook
               </Link>
             </div>
           </article>
@@ -182,30 +247,133 @@ export default async function HomePage() {
           ))}
         </section>
 
-
-        <section className="brand-shop-window" aria-label="BAT editorial stance">
-          <div className="brand-shop-copy">
-            <p className="section-kicker">Editorial stance</p>
-            <h2>Pretty does not mean soft.</h2>
+        <section className="cycle-pulse" aria-label="Live cycle pulse">
+          <div className="section-heading section-heading-wide">
+            <p className="section-kicker">Cycle pulse</p>
+            <h2>The machine is visible now.</h2>
             <p>
-              The public face should feel polished, direct, and a little dangerous. The page keeps the writing in front, then lets
-              the best lines, source trails, and recurring tells give the whole thing a pulse.
+              A medium-term cadence needs a page that shows the work in motion: research first, analysis second, writing
+              third, curation only after the story has earned it.
             </p>
-            <div className="brand-shop-tags">
-              <span>Source-led</span>
-              <span>Specific</span>
-              <span>Sharp</span>
-              <span>Readable</span>
-            </div>
           </div>
-          <div className="merch-preview-grid" aria-label="BAT editorial principle cards">
-            {stanceCards.map((card) => (
-              <article key={card.title} className={`merch-preview-card ${card.tone}`}>
+          <div className="cycle-pulse-grid">
+            {pulseCards.map((card) => (
+              <article key={card.label} className={`cycle-card ${card.status}`}>
                 <span>{card.label}</span>
-                <strong>{card.title}</strong>
-                <p>{card.copy}</p>
+                <strong>{card.metric}</strong>
+                <p>{card.detail}</p>
+                <em>{card.status}</em>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className="research-workbench">
+          <div className="research-workbench-copy">
+            <p className="section-kicker">Research lanes</p>
+            <h2>The new front page starts where the search starts.</h2>
+            <p>
+              The plan is no longer a decorative blog shell. It is a visible operating room for live queries, opportunity
+              lanes, source quality, and the angles that deserve another pass.
+            </p>
+          </div>
+
+          <div className="research-lane-grid">
+            {researchLaneItems.map((item, index) => (
+              <article key={`${item.slug ?? "query"}-${item.query_hint ?? item.angle ?? index}`} className="research-lane-card">
+                <span>{cleanCopy(item.theme) || humanizeSlug(item.slug) || `Lane ${index + 1}`}</span>
+                <strong>{cleanCopy(item.angle || item.query_hint) || "Angle warming"}</strong>
+                <p>{cleanCopy(item.query_hint) || "This lane stays open while the receipts develop."}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="analysis-radar">
+          <article className="radar-panel">
+            <div className="section-heading">
+              <p className="section-kicker">Analysis radar</p>
+              <h2>From pile to pattern.</h2>
+              <p>Briefs are doing the narrowing work: tone, source role, and story target instead of a generic recap.</p>
+            </div>
+            <div className="radar-grid">
+              <div>
+                <span>Tone distribution</span>
+                {(toneRows.length ? toneRows : waitingRows).map(([label, value]) => (
+                  <p key={label}>
+                    <strong>{humanizeSlug(label)}</strong>
+                    <em>{value}</em>
+                  </p>
+                ))}
+              </div>
+              <div>
+                <span>Source roles</span>
+                {(roleRows.length ? roleRows : waitingRows).map(([label, value]) => (
+                  <p key={label}>
+                    <strong>{humanizeSlug(label)}</strong>
+                    <em>{value}</em>
+                  </p>
+                ))}
+              </div>
+              <div>
+                <span>Story targets</span>
+                {(storyTargetRows.length ? storyTargetRows : waitingRows).map(([label, value]) => (
+                  <p key={label}>
+                    <strong>{humanizeSlug(label)}</strong>
+                    <em>{value}</em>
+                  </p>
+                ))}
+              </div>
+            </div>
+          </article>
+
+          <aside className="source-ledger">
+            <div className="section-heading">
+              <p className="section-kicker">Source ledger</p>
+              <h2>Receipts stay near the writing.</h2>
+              <p>Outside links are treated as working material, not wallpaper.</p>
+            </div>
+            <div className="ledger-list">
+              {receiptLinks.length ? (
+                receiptLinks.map((link) => (
+                  <a key={`${link.url}-${link.title}`} href={link.url ?? "#"} target="_blank" rel="noreferrer">
+                    <strong>{cleanCopy(link.title) || "Untitled reporting pick"}</strong>
+                    <span>
+                      {cleanCopy(link.source_name) || "source"}
+                      {link.credibility_tier ? ` / ${link.credibility_tier}` : ""}
+                      {link.quality_score ? ` / ${link.quality_score.toFixed(1)}` : ""}
+                    </span>
+                  </a>
+                ))
+              ) : (
+                <p className="stack-empty">The source ledger fills after the next curation pass.</p>
+              )}
+            </div>
+          </aside>
+        </section>
+
+        <section className="writing-queue">
+          <div className="section-heading section-heading-wide">
+            <p className="section-kicker">Writing queue</p>
+            <h2>Fresh pieces from the current machine.</h2>
+            <p>The newest queue shows what is being shaped from the live lane board, not a static brand wrapper.</p>
+          </div>
+          <div className="queue-grid">
+            {writingQueue.length ? (
+              writingQueue.map((story) => (
+                <Link key={story.key} href={story.href} className="queue-card">
+                  <span>{story.status}</span>
+                  <strong>{story.title}</strong>
+                  <p>{story.detail}</p>
+                </Link>
+              ))
+            ) : (
+              <article className="queue-card static">
+                <span>Queue warming</span>
+                <strong>The next writing pass will show up here.</strong>
+                <p>The page will favor live drafts and newly published pieces once the cycle has more to say.</p>
+              </article>
+            )}
           </div>
         </section>
 
@@ -263,8 +431,8 @@ export default async function HomePage() {
         <section className="channel-showcase">
           <div className="section-heading section-heading-wide">
             <p className="section-kicker">Channels</p>
-            <h2>The beats I keep circling</h2>
-            <p>Not categories for decoration. Channels are how the blog remembers what Trump-world keeps trying to rebrand.</p>
+            <h2>The beats that keep proving themselves.</h2>
+            <p>Channels are memory lanes for Trump-world patterns: the place the page keeps continuity between cycles.</p>
           </div>
           <div className="channel-grid">
             {channelCards.length ? (
@@ -311,8 +479,8 @@ export default async function HomePage() {
 
           <article className="story-panel line-shelf-panel">
             <div className="section-heading">
-              <p className="section-kicker">Group chat shelf</p>
-              <h2>Lines with legs</h2>
+              <p className="section-kicker">Line shelf</p>
+              <h2>Fast lines with receipts behind them</h2>
               <p>Short, portable, a little wicked, and useful when somebody needs the point fast.</p>
             </div>
             <div className="line-shelf">
@@ -330,62 +498,18 @@ export default async function HomePage() {
           </article>
         </section>
 
-
-        <section className="slogan-wall" aria-label="BAT house lines">
-          <div className="section-heading section-heading-wide">
-            <p className="section-kicker">House lines</p>
-            <h2>Short enough to remember. Sharp enough to matter.</h2>
-            <p>These are the lines that carry the attitude without asking the reader to forget the evidence.</p>
-          </div>
-          <div className="slogan-grid">
-            {houseCopyLines.map((line, index) => (
-              <article key={`${index}-${line}`} className="slogan-tile">
-                <span>BAT {String(index + 1).padStart(2, "0")}</span>
-                <strong>{line}</strong>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="notebook-proof">
-          <div className="section-heading section-heading-wide">
-            <p className="section-kicker">Open notebook</p>
-            <h2>The tabs behind the latest take</h2>
-            <p>The tabs stay available for anyone who wants the trail: queries, opportunities, and receipts when you want to look closer.</p>
-          </div>
-          <div className="notebook-grid">
-            <article>
-              <span>First search string</span>
-              <strong>{topQuery || "Waiting on the next live sweep"}</strong>
-              <p>{topQuery ? "The question tells you where the writing started pulling." : "New query language appears here after a research pass closes."}</p>
-            </article>
-            <article>
-              <span>Sources kept</span>
-              <strong>{freshestSources} fresh / {highQualityKept} high quality</strong>
-              <p>The data stays readable, but the writing stays in charge.</p>
-            </article>
-            {visibleOpportunities.slice(0, 2).map((item) => (
-              <article key={`${item.slug}-${item.query_hint}`}>
-                <span>{cleanCopy(item.theme) || humanizeSlug(item.slug) || "Opportunity"}</span>
-                <strong>{cleanCopy(item.angle || item.query_hint) || "Angle still hot"}</strong>
-                <p>This one is still tugging on the sleeve.</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
         <section className="home-closing-note">
           <p>
-            BAT should feel like a sharp personal blog first: current enough to keep up, stylish enough to remember, and disciplined enough
-            to keep the receipts in reach.
+            BAT should feel like a sharp public notebook with a living research backbone: current enough to keep up,
+            disciplined enough to cite, and stylish enough to remember.
           </p>
-          <p className="closing-signoff">Boots on. Woman-led. Smart mouth. Receipts in reach.</p>
+          <p className="closing-signoff">Search wide. Narrow hard. Publish only when the receipt bites.</p>
           <div className="hero-actions">
             <Link href="/archive" className="button-link">
               Read the archive
             </Link>
-            <Link href="/about" className="button-link muted">
-              Why BAT exists
+            <Link href="/workflow" className="button-link muted">
+              Open the notebook
             </Link>
           </div>
         </section>

@@ -7,8 +7,6 @@ type PublicHeaderProps = {
   data?: PublicSiteData;
 };
 
-const brandPuns = ["Blonde, not blind", "Bad at tyranny", "Receipts are my love language", "All are welcome. Bullshit is not."];
-
 export async function PublicHeader({ data }: PublicHeaderProps = {}) {
   const { leadStory, activeThemes, latestCycle, publishedStories, queryPlan, snapshot, curatedLinks } = data ?? (await getPublicSiteData());
   const editionStamp = new Intl.DateTimeFormat("en-US", {
@@ -38,6 +36,7 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
     .filter(Boolean)
     .join(" / ");
   const receiptCount = curatedLinks.length;
+  const queryCount = queryPlan.length || 30;
 
   return (
     <header className="shell public-header">
@@ -69,19 +68,19 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
 
         <div className="masthead-copy">
           <p className="kicker">Updated {editionStamp}</p>
-          <p className="masthead-title">Big hair. Bigger receipts.</p>
+          <p className="masthead-title">Search wide. Narrow hard.</p>
           <p className="subhed">
-            A cowgirl-sharp anti-Trump blog for linked reporting, political heat, and the kind of feminine authority that
-            walks in with boots on and receipts ready.
+            A live anti-Trump research desk for linked reporting, channel heat, source trails, and writing with enough
+            taste to stay sharp without losing the receipts.
           </p>
-          <div className="masthead-merch-lines" aria-label="BAT house lines">
-            <span>Smart mouth</span>
-            <span>Sharp politics</span>
-            <span>Good hair, better evidence</span>
+          <div className="masthead-signal-strip" aria-label="BAT desk signals">
+            <span>Research lanes</span>
+            <span>Source ledger</span>
+            <span>Writing queue</span>
           </div>
           <div className="brand-flags">
-            <span>Cowgirl editorial</span>
-            <span>Receipts first</span>
+            <span>Live desk</span>
+            <span>{queryCount}-search sweep</span>
             <span>{channelLine || "Live channels"}</span>
           </div>
         </div>
@@ -98,13 +97,8 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
       </div>
 
       <div className="banner header-ticker">
-        <span className="banner-pill">Live desk</span>
-        {freshnessLine} {receiptCount ? `${receiptCount} outside receipts are on the reading table.` : "The reading table is warming up."}
-      </div>
-      <div className="brand-pun-strip" aria-label="Blondes Against Trump slogans">
-        {brandPuns.map((line) => (
-          <span key={line}>{line}</span>
-        ))}
+        <span className="banner-pill">Cycle pulse</span>
+        {freshnessLine} {receiptCount ? `${receiptCount} source links are in the ledger.` : "The source ledger is warming up."}
       </div>
     </header>
   );
