@@ -420,7 +420,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
                 </div>
               ))}
               {!socialPackage.dispatch && !socialPackage.quote_card && !(socialPackage.thread ?? []).length ? (
-                <p className="stack-empty">Share lines land here once this story is ready to leave the page and start traveling.</p>
+                <p className="stack-empty">Share lines land here once this story is ready to leave the piece and start traveling.</p>
               ) : null}
             </div>
           </article>

@@ -44,7 +44,7 @@ export default async function ThemesIndexPage() {
           </article>
           <article className="process-card">
             <span>File it</span>
-            <p>The archive and homepage get sharper when the pattern has a proper drawer to live in.</p>
+            <p>The archive and front page get sharper when the pattern has a proper drawer to live in.</p>
           </article>
         </section>
 
@@ -52,7 +52,7 @@ export default async function ThemesIndexPage() {
           <article className="story-panel">
             <p className="section-kicker">Active lanes</p>
             <h3>{themes.length}</h3>
-            <p>Pattern buckets currently warm enough to keep influencing the homepage and the notebook.</p>
+            <p>Patterns warm enough to keep influencing what I read, file, and argue next.</p>
           </article>
 
           <article className="story-panel">
@@ -64,7 +64,7 @@ export default async function ThemesIndexPage() {
           <article className="story-panel">
             <p className="section-kicker">Latest edition</p>
             <h3>{latestCycle?.completed_at ? safeDate(latestCycle.completed_at) : "Live now"}</h3>
-            <p>The theme board refreshes against the same live cycle feeding the front page and notebook.</p>
+            <p>The latest sweep keeps the lanes close to the actual news instead of yesterday's mood.</p>
           </article>
         </section>
 
@@ -73,7 +73,7 @@ export default async function ThemesIndexPage() {
             <p className="section-kicker">How to use the lanes</p>
             <h3>Read them the way I do when the headlines start getting slippery.</h3>
             <p>
-              If the homepage tells you what is hottest, the lanes tell you why it belongs there. They are the recurring logics, moods, and
+              If the front page tells you what is hottest, the lanes tell you why it belongs there. They are the recurring logics, moods, and
               power patterns I keep finding underneath the daily spectacle.
             </p>
           </article>
@@ -89,7 +89,7 @@ export default async function ThemesIndexPage() {
                   </div>
                 ))
               ) : (
-                <p className="stack-empty">Fresh opportunity notes will show up here after the next research sweep finishes.</p>
+                <p className="stack-empty">Fresh opportunity notes will land here after the next sweep finds something worth keeping.</p>
               )}
             </div>
           </article>
@@ -121,7 +121,7 @@ export default async function ThemesIndexPage() {
             <article className="story-panel panel-span-2">
               <p className="section-kicker">Board warming up</p>
               <h3>The next completed cycle will repopulate the public lane board.</h3>
-              <p>Once the themes are available again, this page will show the patterns shaping the rest of the site.</p>
+              <p>Once the themes are available again, the patterns will have names worth using.</p>
             </article>
           )}
         </section>

@@ -22,14 +22,14 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
   const deskNote =
     cleanCopy(snapshot?.layout_json?.lead?.why_now) ||
     (leadStory ? storySummary(leadStory) : "") ||
-    "I keep the page current enough that you can drop in cold and still find a sharp place to start.";
+    "Come in through the freshest contradiction; I keep the receipts close and the perfume off the evidence.";
   const notebookPrompt =
     cleanCopy(queryPlan[0]) ||
     cleanCopy(snapshot?.layout_json?.lead_angle) ||
     "What Trump-world is trying to pass off as normal this week.";
   const freshnessLine = latestCycle?.completed_at
-    ? `Latest research sweep closed ${safeDate(latestCycle.completed_at)} and the shelf is holding ${publishedStories.length} published pieces.`
-    : "The page is live now, with the archive, notebook, and reading table all updating against the same cycle.";
+    ? `Latest research sweep closed ${safeDate(latestCycle.completed_at)}; ${publishedStories.length} published pieces are on the shelf.`
+    : "The room is open: fresh reads, linked receipts, and the archive close enough to check.";
   const channelLine = activeThemes
     .slice(0, 3)
     .map((theme) => themeName(theme))
@@ -45,7 +45,7 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
           <span className="brand-mini-seal">BAT</span>
           <span className="brand-mini-copy">
             <span>Blondes Against Trump</span>
-            <span className="brand-mini-line">All are welcome. Receipts are not optional.</span>
+            <span className="brand-mini-line">Woman-owned politics. Receipts are not optional.</span>
           </span>
         </Link>
         <nav className="utility" aria-label="Primary navigation">
@@ -70,8 +70,8 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
           <p className="kicker">Updated {editionStamp}</p>
           <p className="masthead-title">Search wide. Narrow hard.</p>
           <p className="subhed">
-            A live anti-Trump research desk for linked reporting, channel heat, source trails, and writing with enough
-            taste to stay sharp without losing the receipts.
+            An anti-Trump publication run by one woman with a long memory, a good lamp, and no patience for power
+            pretending it misplaced the evidence.
           </p>
           <div className="masthead-signal-strip" aria-label="BAT desk signals">
             <span>Research lanes</span>
@@ -79,9 +79,9 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
             <span>Writing queue</span>
           </div>
           <div className="brand-flags">
-            <span>Live desk</span>
+            <span>Woman-owned</span>
             <span>{queryCount}-search sweep</span>
-            <span>{channelLine || "Live channels"}</span>
+            <span>{channelLine || "Trump-world watch"}</span>
           </div>
         </div>
 
@@ -97,8 +97,8 @@ export async function PublicHeader({ data }: PublicHeaderProps = {}) {
       </div>
 
       <div className="banner header-ticker">
-        <span className="banner-pill">Cycle pulse</span>
-        {freshnessLine} {receiptCount ? `${receiptCount} source links are in the ledger.` : "The source ledger is warming up."}
+        <span className="banner-pill">On the table</span>
+        {freshnessLine} {receiptCount ? `${receiptCount} source links are worth keeping open.` : "New receipts are still being sorted."}
       </div>
     </header>
   );

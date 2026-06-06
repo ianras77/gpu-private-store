@@ -19,10 +19,11 @@ export default async function ArchivePage() {
       <main className="page-wrap">
         <section className="page-hero">
           <p className="hero-kicker">Archive</p>
-          <h1>The shelf where I keep the site's memory</h1>
+          <h1>The shelf where I keep BAT's memory</h1>
           <p className="hero-note">
-            This is not just a dump of posts. It is the shelf that keeps the homepage honest, with recurring lanes, sharper lead pieces,
-            and enough continuity that the current mess can still be read in context instead of as a permanent surprise.
+            The archive is not a dump of posts. It is the shelf that keeps the front page honest, with recurring lanes,
+            sharper lead pieces, and enough continuity that the current mess can still be read in context instead of as
+            a permanent surprise.
           </p>
         </section>
 
@@ -55,7 +56,7 @@ export default async function ArchivePage() {
           <article className="story-panel">
             <p className="section-kicker">Lead stories</p>
             <h3>{leadStories.length}</h3>
-            <p>The bigger front-page pieces that set the temperature for the rest of the site.</p>
+            <p>The bigger front-page pieces that set the temperature for everything around them.</p>
           </article>
 
           <article className="story-panel">
@@ -110,19 +111,20 @@ export default async function ArchivePage() {
               you want to see what pattern I think the current outrage belongs to.
             </p>
             <p>
-              The archive matters because I do not want the site to begin from zero every morning. The shelf is how BAT remembers itself.
+              The archive matters because I do not want BAT to begin from zero every morning. The shelf is how the
+              publication remembers itself.
             </p>
           </article>
 
           <article className="story-panel">
             <p className="section-kicker">Current rhythm</p>
-            <h3>Fresh edition, active shelf, visible recency.</h3>
+            <h3>Fresh edition, active shelf, recency you can check.</h3>
             <p>
               Latest archive update: {latestPublished ? safeDate(latestPublished.published_at || latestPublished.created_at) : "still warming up"}.
             </p>
             <p>
-              Latest site edition: {latestCycle?.completed_at ? safeDate(latestCycle.completed_at) : "running live now"}. I want those two
-              timestamps to stay close enough that the site never feels abandoned.
+              Latest BAT edition: {latestCycle?.completed_at ? safeDate(latestCycle.completed_at) : "running live now"}. I want those two
+              timestamps to stay close enough that the room never feels abandoned.
             </p>
           </article>
         </section>

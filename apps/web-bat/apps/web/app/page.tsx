@@ -94,10 +94,10 @@ export default async function HomePage() {
   const leadTitle = leadStory ? cleanCopy(leadStory.title) : "The next clean contradiction";
   const leadSummary = leadStory
     ? storySummary(leadStory)
-    : "The next finished piece will land here with a point of view, a source trail, and enough snap to deserve the front page.";
+    : "I will put the next finished piece here once it has a point of view, a source trail, and enough snap to deserve the front page.";
   const leadQuote =
     storyQuote(leadStory) ||
-    "The desk is not chasing volume. It is chasing the receipt that makes the next sentence inevitable.";
+    "I am not chasing volume. I am chasing the receipt that makes the next sentence inevitable.";
   const latestDate = leadStory?.published_at || leadStory?.created_at;
   const latestStoryType = storyTypeLabel(leadStory?.object_type);
 
@@ -140,28 +140,28 @@ export default async function HomePage() {
     (latestCycle?.completed_at ? `Edition ${safeDate(latestCycle.completed_at)}` : "Live edition");
   const heroLine =
     cleanCopy(snapshot?.layout_json?.tagline) ||
-    "A live anti-Trump research desk: search wide, verify hard, write only after the receipts start talking.";
+    "Anti-Trump politics with a long memory: I search wide, verify hard, and write only when the receipts start talking.";
 
   const dataCards = [
     {
       label: "Search sweep",
       value: (researchCount || 30).toString(),
-      copy: "30-search sweep cadence across legal collision, war powers, oil shock, patronage, and institutional tells.",
+      copy: "Thirty searches across legal collisions, war powers, oil shocks, patronage, and every institutional tell Trump-world tries to launder.",
     },
     {
       label: "Sources kept",
       value: (highQualityKept || freshestSources).toString(),
-      copy: freshestSources ? `${freshestSources} fresh sources stayed in the working set.` : "The source set updates with each live pass.",
+      copy: freshestSources ? `${freshestSources} fresh sources stayed on the table.` : "Fresh sources stay close until the argument can hold them.",
     },
     {
       label: "Analysis briefs",
       value: briefCount.toString(),
-      copy: "Briefs turn the pile into lane pressure, tone, source roles, and story targets.",
+      copy: "Briefs separate real pressure from noise before a line gets dressed up.",
     },
     {
       label: "Writing queue",
       value: writingQueue.length.toString(),
-      copy: "The queue shows what the desk is turning from signal into finished copy.",
+      copy: "Drafts wait here until they have an argument, a source trail, and a reason to exist.",
     },
   ];
 
@@ -170,25 +170,25 @@ export default async function HomePage() {
       label: "Research",
       status: cycleStatus(latestCycle, "researcher"),
       metric: `${researchCount || 0} searches`,
-      detail: `${highQualityKept || freshestSources || 0} usable source signals kept this cycle.`,
+      detail: `${highQualityKept || freshestSources || 0} usable source signals kept under the lamp.`,
     },
     {
       label: "Analysis",
       status: cycleStatus(latestCycle, "analyst"),
       metric: `${briefCount} briefs`,
-      detail: "Tone lanes, source roles, and story targets are being pulled forward.",
+      detail: "Tone, source role, and story target have to line up before the attitude earns its keep.",
     },
     {
       label: "Writing",
       status: cycleStatus(latestCycle, "writer"),
       metric: `${writingQueue.length} in queue`,
-      detail: "The writer is turning live research into posts, not repeating old outrage.",
+      detail: "The draft has to say something sharper than the outrage everybody already brought with them.",
     },
     {
       label: "Curation",
       status: cycleStatus(latestCycle, "queen"),
       metric: `${receiptLinks.length || queenResult?.curated_links?.length || 0} links`,
-      detail: "Source links and social-ready lines wait until a story earns the table.",
+      detail: "Links and lines wait until the story can carry them without wobbling.",
     },
   ];
 
@@ -207,11 +207,11 @@ export default async function HomePage() {
               <span>{editionLabel}</span>
               <span>{latestCycle?.status ? `Cycle ${latestCycle.status}` : "Cycle warming"}</span>
             </div>
-            <h1>Live research, sharper writing, receipts in reach.</h1>
+            <h1>One woman, sharp politics, receipts in reach.</h1>
             <p className="hero-dek">{heroLine}</p>
             <p className="hero-note">
-              BAT now reads like a working desk: wider searches, visible lanes, source quality, analysis pressure, and
-              writing that earns the front page before it asks for attention.
+              This is woman-owned anti-Trump work: one woman reading the room, keeping the receipts close, and refusing
+              to let Trump-world make exhaustion look like inevitability.
             </p>
             <div className="hero-actions">
               <Link href={leadHref} className="button-link">
@@ -250,10 +250,10 @@ export default async function HomePage() {
         <section className="cycle-pulse" aria-label="Live cycle pulse">
           <div className="section-heading section-heading-wide">
             <p className="section-kicker">Cycle pulse</p>
-            <h2>The machine is visible now.</h2>
+            <h2>Tonight's desk has a pulse.</h2>
             <p>
-              A medium-term cadence needs a page that shows the work in motion: research first, analysis second, writing
-              third, curation only after the story has earned it.
+              The rhythm is simple: read widely, sort hard, write sharply, and only pass along what can stand under its
+              own receipts.
             </p>
           </div>
           <div className="cycle-pulse-grid">
@@ -271,10 +271,10 @@ export default async function HomePage() {
         <section className="research-workbench">
           <div className="research-workbench-copy">
             <p className="section-kicker">Research lanes</p>
-            <h2>The new front page starts where the search starts.</h2>
+            <h2>The front page starts where the receipts start.</h2>
             <p>
-              The plan is no longer a decorative blog shell. It is a visible operating room for live queries, opportunity
-              lanes, source quality, and the angles that deserve another pass.
+              Before a line gets lipstick, it gets evidence. These are the angles still tugging at the sleeve because
+              Trump-world keeps leaving the same fingerprints.
             </p>
           </div>
 
@@ -283,7 +283,7 @@ export default async function HomePage() {
               <article key={`${item.slug ?? "query"}-${item.query_hint ?? item.angle ?? index}`} className="research-lane-card">
                 <span>{cleanCopy(item.theme) || humanizeSlug(item.slug) || `Lane ${index + 1}`}</span>
                 <strong>{cleanCopy(item.angle || item.query_hint) || "Angle warming"}</strong>
-                <p>{cleanCopy(item.query_hint) || "This lane stays open while the receipts develop."}</p>
+                <p>{cleanCopy(item.query_hint) || "I keep this lane open while the receipts develop."}</p>
               </article>
             ))}
           </div>
@@ -294,7 +294,7 @@ export default async function HomePage() {
             <div className="section-heading">
               <p className="section-kicker">Analysis radar</p>
               <h2>From pile to pattern.</h2>
-              <p>Briefs are doing the narrowing work: tone, source role, and story target instead of a generic recap.</p>
+              <p>The narrowing work is where the attitude earns its keep: tone, source role, story target, then the line.</p>
             </div>
             <div className="radar-grid">
               <div>
@@ -331,7 +331,7 @@ export default async function HomePage() {
             <div className="section-heading">
               <p className="section-kicker">Source ledger</p>
               <h2>Receipts stay near the writing.</h2>
-              <p>Outside links are treated as working material, not wallpaper.</p>
+              <p>No perfume without paper.</p>
             </div>
             <div className="ledger-list">
               {receiptLinks.length ? (
@@ -346,7 +346,7 @@ export default async function HomePage() {
                   </a>
                 ))
               ) : (
-                <p className="stack-empty">The source ledger fills after the next curation pass.</p>
+                <p className="stack-empty">New receipts will land here when they are worth keeping open.</p>
               )}
             </div>
           </aside>
@@ -355,8 +355,8 @@ export default async function HomePage() {
         <section className="writing-queue">
           <div className="section-heading section-heading-wide">
             <p className="section-kicker">Writing queue</p>
-            <h2>Fresh pieces from the current machine.</h2>
-            <p>The newest queue shows what is being shaped from the live lane board, not a static brand wrapper.</p>
+            <h2>What is sharp enough to survive the draft.</h2>
+            <p>The next pieces sit here until they have more than heat: they need a reason, a target, and a sentence worth carrying.</p>
           </div>
           <div className="queue-grid">
             {writingQueue.length ? (
@@ -370,8 +370,8 @@ export default async function HomePage() {
             ) : (
               <article className="queue-card static">
                 <span>Queue warming</span>
-                <strong>The next writing pass will show up here.</strong>
-                <p>The page will favor live drafts and newly published pieces once the cycle has more to say.</p>
+                <strong>The next draft has to earn the space.</strong>
+                <p>I would rather leave the shelf quiet than dress up a weak argument.</p>
               </article>
             )}
           </div>
@@ -432,7 +432,7 @@ export default async function HomePage() {
           <div className="section-heading section-heading-wide">
             <p className="section-kicker">Channels</p>
             <h2>The beats that keep proving themselves.</h2>
-            <p>Channels are memory lanes for Trump-world patterns: the place the page keeps continuity between cycles.</p>
+            <p>These are the Trump-world habits I refuse to let vanish into daily churn.</p>
           </div>
           <div className="channel-grid">
             {channelCards.length ? (
@@ -447,7 +447,7 @@ export default async function HomePage() {
               <article className="channel-card static">
                 <span>Channels warming</span>
                 <strong>The next pass will name the patterns.</strong>
-                <p>Once the theme board updates, this section becomes the living channel guide.</p>
+                <p>Once the pattern is clear enough, I will give it a proper name.</p>
               </article>
             )}
           </div>
@@ -472,7 +472,7 @@ export default async function HomePage() {
                   </a>
                 ))
               ) : (
-                <p className="stack-empty">Links from the next curation pass will land here when they are worth the table space.</p>
+              <p className="stack-empty">Links from the next curation pass will land here when they are worth the table space.</p>
               )}
             </div>
           </article>
@@ -500,8 +500,8 @@ export default async function HomePage() {
 
         <section className="home-closing-note">
           <p>
-            BAT should feel like a sharp public notebook with a living research backbone: current enough to keep up,
-            disciplined enough to cite, and stylish enough to remember.
+            BAT is one woman keeping the shelf current, the memory intact, the style alive, and the receipts close enough
+            for anyone to check.
           </p>
           <p className="closing-signoff">Search wide. Narrow hard. Publish only when the receipt bites.</p>
           <div className="hero-actions">

@@ -24,11 +24,11 @@ export default async function AboutPage() {
       <main className="page-wrap">
         <section className="page-hero">
           <p className="hero-kicker">About BAT</p>
-          <h1>Why this became a room, not just another politics page</h1>
+          <h1>A woman-owned room for anti-Trump memory, heat, and receipts.</h1>
           <p className="hero-note">
-            I wanted somewhere to keep up with Trump-world without surrendering taste, memory, or authorship. So BAT became the room where
-            I keep the reporting straight, the archive close, and the design warm enough that the work still feels like it belongs to a
-            human being.
+            I wanted somewhere to keep up with Trump-world without surrendering taste, memory, or authorship. BAT is the
+            room where I keep the reporting straight, the archive close, and the design warm enough to feel like a person
+            arranged the table before asking you to pay attention.
           </p>
         </section>
 
@@ -59,7 +59,7 @@ export default async function AboutPage() {
           <article className="story-panel">
             <p className="section-kicker">Live shelf</p>
             <h3>{publishedStories.length}</h3>
-            <p>Published stories currently carrying the site&apos;s memory instead of leaving the homepage to fend for itself.</p>
+            <p>Published stories carrying the memory so the newest outrage does not get to arrive without context.</p>
           </article>
 
           <article className="story-panel">
@@ -72,8 +72,8 @@ export default async function AboutPage() {
             <p className="section-kicker">Latest edition</p>
             <h3>{latestCycle?.completed_at ? safeDate(latestCycle.completed_at) : "Live now"}</h3>
             <p>
-              {researcherResult?.query_count ?? 0} research queries in the most recent sweep, because the site should feel current before
-              it feels polished.
+              {researcherResult?.query_count ?? 0} research queries in the most recent sweep, because I would rather be
+              current than decorative.
             </p>
           </article>
         </section>
@@ -82,12 +82,12 @@ export default async function AboutPage() {
           <article className="editorial-copy">
             <h2>What BAT is for</h2>
             <p>
-              BAT is an anti-Trump site, yes, but more specifically it is the front page I would make for myself if I wanted one place
-              that could hold urgency, memory, and taste at the same time.
+              BAT is anti-Trump, yes, but more specifically it is the front page I wanted for myself: one place that
+              could hold urgency, memory, taste, and enough nerve to say the ugly part plainly.
             </p>
             <p>
-              That means the homepage can be intimate, the archive can act like a shelf, and the notebook can stay public enough for you
-              to understand how the place thinks.
+              The front page can be intimate, the archive can act like a shelf, and the notebook can show enough of the
+              receipts that the voice does not have to ask for blind trust.
             </p>
           </article>
 
@@ -98,19 +98,20 @@ export default async function AboutPage() {
               and a little wicked, but it only earns that attitude when the sourcing is solid.
             </p>
             <p>
-              The site does not hide that a woman made choices here. That is part of the point. Precision and femininity are not enemies.
+              BAT is woman-owned on purpose. Precision and femininity are not enemies, and politics does not become more
+              serious just because it starts dressing like a fluorescent hallway.
             </p>
           </article>
 
           <article className="editorial-copy">
             <h2>How the automation fits</h2>
             <p>
-              I use the pipeline for sweeps, leads, theme clustering, and link curation, but I do not want the public site to feel like it
-              was dumped straight out of a prompt. The machine can gather. The room still needs authorship.
+              I use automation for sweeps, leads, theme clustering, and link curation, but it does not get to be the
+              author. It gathers. I choose. The final line still has to sound like one woman with standards.
             </p>
             <p>
-              That is why the writing, framing, archive language, and page rhythm matter so much. The reader should feel the hand, not
-              just the system.
+              That is why the writing, framing, archive language, and rhythm matter. The reader should feel a hand on the
+              wheel, not a dashboard blinking for attention.
             </p>
           </article>
         </div>
@@ -118,7 +119,7 @@ export default async function AboutPage() {
         <section className="column-band">
           <article className="story-panel">
             <p className="section-kicker">Start here</p>
-            <h3>The pieces that show the site fastest</h3>
+            <h3>The pieces that show BAT fastest</h3>
             <div className="stack-list compact">
               {freshestStories.map((story) => (
                 <Link key={story.id} href={`/story/${story.slug}`} className="stack-item">
@@ -161,8 +162,9 @@ export default async function AboutPage() {
             <p className="section-kicker">Reader promise</p>
             <h3>Current first, memory intact, style still welcome.</h3>
             <p>
-              If you come here often, the site should reward that. The archive should deepen the homepage, the themes should explain the
-              obsessions, and each edition should feel like it belongs to the same person rather than a new anonymous machine.
+              If you come here often, BAT should reward that. The archive should deepen the front page, the themes should
+              explain the obsessions, and each edition should feel like it came from the same woman rather than a new
+              anonymous churn.
             </p>
             <p>{latestEdition}</p>
             <div className="hero-actions">

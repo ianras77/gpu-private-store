@@ -35,10 +35,10 @@ export default async function WorkflowPage() {
       <main className="page-wrap">
         <section className="page-hero">
           <p className="hero-kicker">Notebook</p>
-          <h1>My public notebook for how the room gets made</h1>
+          <h1>The notebook behind the finished line.</h1>
           <p className="hero-note">
-            This page is the public version of my working notebook. I want visitors to understand that BAT is not just a pile of posts. It
-            is a repeating practice of research, sorting, writing, curating, and deciding what is sharp enough to survive the night.
+            I keep the notebook open because a voice this particular has to prove it is not just a pose. These are the
+            searches, near-misses, drafts, and receipts behind the lines that make it to the front.
           </p>
         </section>
 
@@ -61,13 +61,13 @@ export default async function WorkflowPage() {
           <article className="story-panel">
             <p className="section-kicker">Active themes</p>
             <h3>{researcherResult?.themes_active ?? activeThemes.length}</h3>
-            <p>Pattern lanes still hot enough to influence the homepage, archive, and next round of writing.</p>
+            <p>Pattern lanes still hot enough to shape the front page, archive, and next round of writing.</p>
           </article>
 
           <article className="story-panel">
             <p className="section-kicker">Latest pass</p>
             <h3>{latestCycle?.completed_at ? safeDate(latestCycle.completed_at) : "Live now"}</h3>
-            <p>The notebook is most useful when the timestamps are visible and the work still feels close to the present.</p>
+            <p>Timestamps matter because stale outrage has a way of putting on fresh lipstick.</p>
           </article>
         </section>
 
@@ -84,7 +84,7 @@ export default async function WorkflowPage() {
                   </div>
                 ))
               ) : (
-                <p className="stack-empty">The next cycle will repopulate the opportunity board once the researcher closes another sweep.</p>
+                <p className="stack-empty">The next sweep will refill the board when something keeps tugging hard enough.</p>
               )}
             </div>
           </article>
@@ -97,7 +97,7 @@ export default async function WorkflowPage() {
                 visibleQueries.map((query) => (
                   <div key={query} className="stack-item static">
                     <strong>{cleanCopy(query)}</strong>
-                    <span>The search language stays visible because I like readers seeing the work before the pose.</span>
+                    <span>I keep the exact search language because receipts are stronger than mystique.</span>
                   </div>
                 ))
               ) : (
@@ -125,7 +125,7 @@ export default async function WorkflowPage() {
               {!analystResult?.theme_briefs?.length ? (
                 <div className="stack-item static">
                   <strong>Analysis pulse</strong>
-                  <span>The next analyst pass will leave a visible tone and topic map here.</span>
+                  <span>The next analysis pass will leave a tone and topic map worth reading.</span>
                 </div>
               ) : null}
             </div>
@@ -145,7 +145,7 @@ export default async function WorkflowPage() {
               ) : (
                 <div className="stack-item static">
                   <strong>Hold reason</strong>
-                  <span>The next stalled draft will explain itself here once the writer hits a guardrail worth showing.</span>
+                  <span>The next stalled draft will have to name what stopped it.</span>
                 </div>
               )}
             </div>
@@ -163,7 +163,7 @@ export default async function WorkflowPage() {
                   </div>
                 ))
               ) : (
-                <p className="stack-empty">The next writer slate will land here once the system spins up another round.</p>
+                <p className="stack-empty">The next writer slate will land here when another angle deserves the trouble.</p>
               )}
             </div>
           </article>
@@ -184,12 +184,12 @@ export default async function WorkflowPage() {
           </article>
 
           <article className="story-panel">
-            <p className="section-kicker">Why I show this page at all</p>
-            <h3>The notebook is part of the trust.</h3>
+            <p className="section-kicker">Why keep the notebook open</p>
+            <h3>Trust is easier when the receipts stay close.</h3>
             <p>
-              If BAT is going to talk in a voice this particular, I think the reader deserves to see some of the machinery too. The
-              notebook keeps the site honest, keeps the archive legible, and reminds me that polish is only worth anything if the work
-              beneath it is real.
+              If BAT is going to talk in a voice this particular, the work has to stay close enough to inspect. The
+              notebook keeps the archive legible, keeps the argument honest, and reminds me that polish is only worth
+              anything when the evidence underneath it is real.
             </p>
             <div className="hero-actions">
               <Link href="/themes" className="button-link muted small">

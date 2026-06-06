@@ -6,7 +6,7 @@ import { getPublicSiteData, themeName, themeNarrative } from "@/lib/public-site"
 const tastePrinciples = [
   {
     label: "Warm",
-    copy: "The site should feel like paper, lacquer, lipstick, and a desk lamp, not a fluorescent panic room.",
+    copy: "BAT should feel like paper, lacquer, lipstick, and a desk lamp, not a fluorescent panic room.",
   },
   {
     label: "Sharp",
@@ -14,7 +14,7 @@ const tastePrinciples = [
   },
   {
     label: "Travelable",
-    copy: "If the site is going to make good lines, the whole publication has to survive a screenshot, a second look, and somebody reading it out loud.",
+    copy: "If BAT is going to make good lines, the whole publication has to survive a screenshot, a second look, and somebody reading it out loud.",
   },
 ];
 
@@ -32,8 +32,8 @@ export default async function CatPage() {
           <p className="hero-kicker">Taste</p>
           <h1>The visual and emotional brief behind BAT</h1>
           <p className="hero-note">
-            This page exists because I do not think aesthetics are separate from editorial intent. BAT is supposed to feel warm, witty,
-            and unmistakably feminine while still being perfectly clear about the stakes. The design is part of how the site keeps its nerve.
+            Aesthetics are not separate from editorial intent. BAT is supposed to feel warm, witty, and unmistakably
+            feminine while still being perfectly clear about the stakes. The look is part of how the work keeps its nerve.
           </p>
         </section>
 
@@ -50,11 +50,11 @@ export default async function CatPage() {
           <article className="editorial-copy">
             <h2>Why it is warm</h2>
             <p>
-              I do not want BAT to feel like institutional beige or default dark-mode dread. The warm paper palette says this is a place
+              I do not want BAT to feel like institutional beige or default dark-mode dread. The warm paper palette says BAT is a place
               where a person arranged the table before asking you to sit down and pay attention.
             </p>
             <p>
-              That softness matters because the subject matter is abrasive. The site should welcome you in without lying about where you
+              That softness matters because the subject matter is abrasive. BAT should welcome you in without lying about where you
               are.
             </p>
           </article>
@@ -62,7 +62,7 @@ export default async function CatPage() {
           <article className="editorial-copy">
             <h2>Why it still cuts</h2>
             <p>
-              The softness is not there to blur the argument. It is there so the sharp lines land harder. The page can look lacquered and
+              The softness is not there to blur the argument. It is there so the sharp lines land harder. BAT can look lacquered and
               still carry a sentence that leaves a mark.
             </p>
             <p>
@@ -74,7 +74,7 @@ export default async function CatPage() {
           <article className="editorial-copy">
             <h2>Why the voice has to travel</h2>
             <p>
-              A good BAT line should work on the homepage, yes, but it should also hold up in a screenshot, a forwarded text,
+              A good BAT line should work on the front page, yes, but it should also hold up in a screenshot, a forwarded text,
               or the side conversation where people decide what they actually believe.
             </p>
             <p>
@@ -99,7 +99,7 @@ export default async function CatPage() {
 
           <article className="story-panel">
             <p className="section-kicker">Lines that hold</p>
-            <h3>The sort of language the site needs to keep</h3>
+            <h3>The sort of language BAT needs to keep</h3>
             <div className="social-cards">
               {lineShelf.length ? (
                 lineShelf.map((line, index) => (
@@ -127,10 +127,10 @@ export default async function CatPage() {
 
           <article className="story-panel">
             <p className="section-kicker">Where the taste goes next</p>
-            <h3>The homepage, the archive, and the notebook all answer to the same brief.</h3>
+            <h3>The front page, archive, and notebook all answer to the same woman.</h3>
             <p>
-              The public site should feel cohesive: the home page invites you in, the archive keeps the memory, the notebook shows the
-              process, and the visual language makes the whole thing feel deliberate instead of disposable.
+              BAT should feel cohesive: the front page invites you in, the archive keeps the memory, the notebook keeps
+              the receipts close, and the visual language makes the whole thing feel deliberate instead of disposable.
             </p>
             <div className="hero-actions">
               <Link href="/about" className="button-link muted small">
