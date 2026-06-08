@@ -7,6 +7,7 @@ import useSWR from "swr";
 import { Clapperboard, Images, MapPin, Play, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { type PhotoItem, type PhotoShelfPayload } from "../lib/media-controller";
+import { useVisibilityGate } from "../lib/use-visibility-gate";
 import { PhotoSurface } from "./PhotoSurface";
 import { Button } from "./ui/button";
 
@@ -41,8 +42,10 @@ const buildMetaLine = (item?: PhotoItem | null) =>
   [item?.collection, item?.location, item?.camera].filter(Boolean).slice(0, 2).join(" · ");
 
 export function PhotosShowcase() {
-  const { data } = useSWR<PhotoShelfPayload>("/api/photos?limit=18&source=immich", fetcher, {
-    refreshInterval: 30000
+  const { active, ref } = useVisibilityGate<HTMLElement>("720px");
+  const { data } = useSWR<PhotoShelfPayload>(active ? "/api/photos?limit=18&source=immich" : null, fetcher, {
+    refreshInterval: active ? 60000 : 0,
+    revalidateOnFocus: false
   });
   const items = Array.isArray(data?.items) ? data.items : [];
   const [activeIndex, setActiveIndex] = useState(0);
@@ -73,7 +76,7 @@ export function PhotosShowcase() {
   const immichSummary = data?.sources?.immich;
 
   return (
-    <section id="photos" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-10">
+    <section ref={ref} id="photos" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-10">
       <div className="relative overflow-hidden rounded-[38px] border border-white/12 bg-[radial-gradient(circle_at_top_left,rgba(255,232,150,0.14),transparent_24%),radial-gradient(circle_at_84%_14%,rgba(66,245,255,0.16),transparent_26%),radial-gradient(circle_at_76%_80%,rgba(255,79,216,0.14),transparent_34%),linear-gradient(145deg,rgba(7,11,26,0.96),rgba(18,9,32,0.92))] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.38)] md:p-8">
         <div className="absolute -left-8 top-6 h-28 w-28 rounded-full bg-glow/18 blur-3xl" />
         <div className="absolute right-10 top-10 h-36 w-36 rounded-full bg-aurora/14 blur-3xl" />

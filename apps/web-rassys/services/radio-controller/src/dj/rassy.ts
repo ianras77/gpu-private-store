@@ -112,6 +112,7 @@ const boothSystemPrompt = `You are Mr Rassy, the live on-air voice of Mr Rassy R
     `Let the mood react to dayOfWeek, dayPart, timeOfDay, and emotionalWeather so the station feels alive to the hour.\n` +
     `The mood should feel authored and cinematic, not like a generic genre tag or one-word vibe label.\n` +
     `Choose ONLY from the provided candidateTracks and snippetCandidates. Never invent slots, ids, or titles.\n` +
+    `Snippet candidates are short on-air bumpers, drops, cuts, and station IDs. Use snippetSlot when a 2 to 5 second flash would make the set feel authored, not as filler.\n` +
     `If intent is "playlist", think in real sets, not isolated tracks.\n` +
     `When you return "playlistSlots", match playlistSize and make every window feel authored.\n` +
     `If playlistSize is 2, think thesis -> answer. If playlistSize is 3 to 5, think thesis -> hinge -> landing. If playlistSize is 6 or more, think in full sets: opener -> build -> hinge -> left turn -> landing.\n` +
@@ -142,6 +143,7 @@ const boothSystemPrompt = `You are Mr Rassy, the live on-air voice of Mr Rassy R
 const boothRescueSystemPrompt = `You are Mr Rassy, the live DJ on Mr Rassy Radio.\n` +
     `Respond ONLY with strict JSON. Allowed keys are trackSlot (number), playlistSlots (array of slot numbers), mood (string), talkScript (string), snippetSlot (number), and reason (string).\n` +
     `Choose ONLY from the provided candidateTracks and snippetCandidates. Never invent tracks, slots, ids, or titles.\n` +
+    `Snippet candidates are short produced station cuts. Use snippetSlot when a fast bumper would sharpen the handoff.\n` +
     `If intent is "playlist", return playlistSlots that match playlistSize and still move with a clear emotional arc.\n` +
     `If playlistSize is 2, make it a sharp two-step instead of padding to a bigger suite. If playlistSize is 6 or more, make the set breathe like a real radio sequence instead of a short burst.\n` +
     `Program from feel, motion, and transition pressure, not just metadata similarity.\n` +
@@ -221,7 +223,7 @@ const longFormSystemPrompt = `You are Mr Rassy deciding how long-form records sh
     `Choose clip when a passage gives the listener the right hit without swallowing the set.\n` +
     `If you choose clip, return a segment of opening, middle, or late.\n` +
     `Think like a real radio editor with taste, not a timid playlist bot.\n` +
-    `You also get occasional transition opportunities that the station spaces randomly every 3 to 10 songs.\n` +
+    `You also get regular transition opportunities that the station spaces randomly every 2 to 5 songs.\n` +
     `When a transition opportunity is present, decide the human feel of that handoff and choose one transition style: tight-cut, blend, bloom, long-blend, lift, or drop.\n` +
     `Only mark transitionAfter true for provided transitionOpportunity slots. Do not force transitions on every song.\n` +
     `transitionFeel should be a short human phrase, not a technical label: warm lift, smoky drop, clean left turn, slow bloom, etc.\n` +
@@ -2045,7 +2047,7 @@ const buildLongFormPrompt = (context, tracks) => JSON.stringify({
     programming: buildProgrammingPayload(context.programming),
     nowPlaying: context.nowPlaying,
     transitionSystem: {
-        spacing: "The station creates transition opportunities randomly every 3 to 10 songs.",
+        spacing: "The station creates transition opportunities randomly every 2 to 5 songs.",
         instruction: "Use these as human DJ levers. Pick the feel and style only when the opportunity is listed."
     },
     transitionOpportunities: (context.transitionOpportunities ?? []).map((opportunity) => {

@@ -6,6 +6,11 @@ import {
   planTrackPlayback
 } from "../liquidsoap/uris";
 
+const sequenceRandom = (...values: number[]) => {
+  let index = 0;
+  return () => values[Math.min(index++, values.length - 1)] ?? 0;
+};
+
 describe("buildTrackQueueUri", () => {
   it("annotates track metadata for Liquidsoap", () => {
     const uri = buildTrackQueueUri({
@@ -90,21 +95,24 @@ describe("buildTrackQueueUri", () => {
 });
 
 describe("planSnippetPlayback", () => {
-  it("plays short snippets in full", () => {
+  it("cuts ordinary station snippets by default", () => {
     expect(
       planSnippetPlayback(
         {
           duration: 92
         },
         {
-          random: () => 0.5
+          random: sequenceRandom(1, 0.5)
         }
       )
     ).toEqual({
       durationSeconds: 92,
-      trimmed: false,
-      cueInSeconds: 0,
-      cueOutSeconds: 92
+      trimmed: true,
+      cueInSeconds: 43.5,
+      cueOutSeconds: 48.5,
+      fadeInSeconds: 0.35,
+      fadeOutSeconds: 0.5,
+      transitionSeconds: 2.5
     });
   });
 
@@ -124,12 +132,51 @@ describe("planSnippetPlayback", () => {
     expect(plan.cueInSeconds).toBe(120);
     expect(plan.cueOutSeconds).toBe(240);
   });
+
+  it("cuts station snippets to a short produced bumper window", () => {
+    const plan = planSnippetPlayback(
+      {
+        duration: 23
+      },
+      {
+        minPlayWindowSeconds: 2,
+        playWindowSeconds: 5,
+        random: sequenceRandom(1, 0.5)
+      }
+    );
+
+    expect(plan.trimmed).toBe(true);
+    expect(plan.cueInSeconds).toBe(9);
+    expect(plan.cueOutSeconds).toBe(14);
+    expect(plan.fadeInSeconds).toBe(0.35);
+    expect(plan.fadeOutSeconds).toBe(0.5);
+  });
+
+  it("keeps very short station IDs intact with bumper fades", () => {
+    const plan = planSnippetPlayback(
+      {
+        duration: 3
+      },
+      {
+        minPlayWindowSeconds: 2,
+        playWindowSeconds: 5,
+        random: sequenceRandom(1, 0.5)
+      }
+    );
+
+    expect(plan.trimmed).toBe(false);
+    expect(plan.cueInSeconds).toBe(0);
+    expect(plan.cueOutSeconds).toBe(3);
+    expect(plan.fadeInSeconds).toBe(0.35);
+    expect(plan.fadeOutSeconds).toBe(0.5);
+  });
 });
 
 describe("buildSnippetQueueUri", () => {
   it("adds Liquidsoap cue metadata for trimmed snippets", () => {
     const uri = buildSnippetQueueUri(
       {
+        id: "snippet-ident",
         path: "/dj/identifier.mp3",
         label: "Station Ident",
         duration: 400
@@ -146,6 +193,32 @@ describe("buildSnippetQueueUri", () => {
     expect(uri).toContain('liq_cue_in="70"');
     expect(uri).toContain('liq_cue_out="190"');
     expect(uri.endsWith(":/dj/identifier.mp3")).toBe(true);
+  });
+
+  it("adds produced bumper fades and transition metadata to snippet cuts", () => {
+    const uri = buildSnippetQueueUri(
+      {
+        id: "snippet-short-cut",
+        path: "/dj/drop.mp3",
+        label: "Tiny Drop",
+        duration: 23
+      },
+      {
+        minPlayWindowSeconds: 2,
+        playWindowSeconds: 5,
+        random: sequenceRandom(1, 0.5)
+      }
+    );
+
+    expect(uri).toContain('snippet_id="snippet-short-cut"');
+    expect(uri).toContain('liq_cue_in="9"');
+    expect(uri).toContain('liq_cue_out="14"');
+    expect(uri).toContain('liq_fade_in="0.35"');
+    expect(uri).toContain('liq_fade_out="0.5"');
+    expect(uri).toContain('liq_fade_in_type="sin"');
+    expect(uri).toContain('liq_fade_out_type="exp"');
+    expect(uri).toContain('rassy_playback_mode="snippet-cut"');
+    expect(uri).toContain('rassy_transition_seconds="2.5"');
   });
 });
 

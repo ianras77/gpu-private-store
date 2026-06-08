@@ -15,6 +15,7 @@ const requiredEnv = {
 const previousEnv = new Map<string, string | undefined>();
 
 let buildQueuePushCommands: typeof import("../liquidsoap/client").buildQueuePushCommands;
+let hasTelnetError: typeof import("../liquidsoap/client").hasTelnetError;
 
 beforeAll(async () => {
   for (const [key, value] of Object.entries(requiredEnv)) {
@@ -22,7 +23,20 @@ beforeAll(async () => {
     process.env[key] = value;
   }
 
-  ({ buildQueuePushCommands } = await import("../liquidsoap/client"));
+  ({ buildQueuePushCommands, hasTelnetError } = await import("../liquidsoap/client"));
+});
+
+describe("hasTelnetError", () => {
+  it("does not treat ordinary metadata text as a telnet error", () => {
+    expect(
+      hasTelnetError('album="Unknown Pleasures"\ntitle="Candidate"\ntrack_id="abc123"\nEND')
+    ).toBe(false);
+  });
+
+  it("still catches actual telnet error lines", () => {
+    expect(hasTelnetError("ERROR: no such request\nEND")).toBe(true);
+    expect(hasTelnetError("Unknown command queue.nope\nEND")).toBe(true);
+  });
 });
 
 afterAll(() => {

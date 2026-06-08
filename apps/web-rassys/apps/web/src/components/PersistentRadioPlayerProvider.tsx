@@ -977,7 +977,7 @@ export function PersistentRadioPlayerProvider({
         key={activeStreamUrl}
         ref={audioRef}
         src={activeStreamUrl}
-        preload="auto"
+        preload="none"
         crossOrigin="anonymous"
         tabIndex={-1}
         aria-hidden="true"

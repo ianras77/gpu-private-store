@@ -1,4 +1,3 @@
-set("log.file", "/var/log/liquidsoap/rassy.log")
 set("server.telnet", true)
 set("server.telnet.bind_addr", "0.0.0.0")
 set("server.telnet.port", 1234)
@@ -7,6 +6,11 @@ set("server.telnet.port", 1234)
 
 def env(key, default) =
   environment.get(default=default, key)
+end
+
+def env_bool(key, default) =
+  value = env(key, default)
+  value == "true" or value == "1" or value == "yes" or value == "on"
 end
 
 music_dir = env("MUSIC_LIBRARY_PATH", "/media/music")
@@ -23,9 +27,10 @@ lossless_mount = env("STREAM_LOSSLESS_MOUNT", "/live-lossless.ogg")
 station_name = env("STATION_NAME", "Mr Rassy Radio")
 station_desc = env("STATION_DESCRIPTION", "Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.")
 station_genre = env("STATION_GENRE", "eclectic")
-transition_default_seconds = float_of_string(env("RADIO_TRANSITION_DEFAULT_SECONDS", "0.0"))
+transition_default_seconds = float_of_string(env("RADIO_TRANSITION_DEFAULT_SECONDS", "1.2"))
 transition_fade_in_seconds = float_of_string(env("RADIO_TRANSITION_FADE_IN_SECONDS", "3.0"))
 transition_fade_out_seconds = float_of_string(env("RADIO_TRANSITION_FADE_OUT_SECONDS", "3.0"))
+processing_enabled = env_bool("RADIO_PROCESSING_ENABLED", "true")
 
 # Queue for controller-driven selections
 queue = request.queue(id="queue")
@@ -69,8 +74,33 @@ produced_radio = crossfade(
   core_radio
 )
 
-radio = mksafe(produced_radio)
-lossless_radio = mksafe(produced_radio)
+processed_radio =
+  if processing_enabled then
+    normalize(
+      id="rassy-even-air",
+      target=-14.0,
+      gain_max=4.0,
+      gain_min=-6.0,
+      up=4.0,
+      down=0.25,
+      track_sensitive=false,
+      compress(
+        id="rassy-soft-glue",
+        threshold=-12.0,
+        ratio=1.4,
+        attack=35.0,
+        release=320.0,
+        knee=3.0,
+        wet=0.45,
+        produced_radio
+      )
+    )
+  else
+    produced_radio
+  end
+
+radio = mksafe(processed_radio)
+lossless_radio = mksafe(processed_radio)
 
 # Register a skip command for telnet
 

@@ -58,11 +58,16 @@ const sendTelnetCommand = (command: string, timeoutMs = 4000) =>
     socket.setTimeout(timeoutMs);
   });
 
-const hasTelnetError = (value: string) =>
+export const hasTelnetError = (value: string) =>
   value
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .some((line) => /^ERROR\b/i.test(line) || /unknown/i.test(line) || /no such command/i.test(line));
+    .some(
+      (line) =>
+        /^ERROR\b/i.test(line) ||
+        /^unknown\b/i.test(line) ||
+        /^no such command\b/i.test(line)
+    );
 
 const needsQuotedTelnetArgument = (value: string) => /[\s"\\]/.test(value);
 

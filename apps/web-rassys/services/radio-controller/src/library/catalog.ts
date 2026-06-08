@@ -5,6 +5,16 @@ import type { PodcastEpisode, PodcastSeries, Snippet, Track } from "./types";
 const CATALOG_SCOPE = "library";
 const WRITE_CHUNK_SIZE = 250;
 
+export const CATALOG_CACHE_TABLES = [
+  "LibraryPodcastEpisode",
+  "LibraryPodcastSeries",
+  "LibrarySnippet",
+  "LibraryTrack"
+] as const;
+
+export const buildCatalogCacheTruncateSql = () =>
+  `TRUNCATE TABLE ${CATALOG_CACHE_TABLES.map((table) => `"${table}"`).join(", ")} RESTART IDENTITY CASCADE`;
+
 type CatalogSnapshot = {
   tracks: Track[];
   snippets: Snippet[];
@@ -331,10 +341,7 @@ export const persistLibraryCatalog = async (
   try {
     await prisma.$transaction(
       async (tx) => {
-        await tx.libraryPodcastEpisode.deleteMany();
-        await tx.libraryPodcastSeries.deleteMany();
-        await tx.librarySnippet.deleteMany();
-        await tx.libraryTrack.deleteMany();
+        await tx.$executeRawUnsafe(buildCatalogCacheTruncateSql());
 
         await writeChunked(
           snapshot.tracks.map((track) => trackToRow(track, scanToken)),

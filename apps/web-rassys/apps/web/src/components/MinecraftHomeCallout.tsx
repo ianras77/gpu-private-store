@@ -6,6 +6,7 @@ import { Bot, Copy, MapPinned, Swords } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { formatTimeAgo } from "../lib/utils";
+import { useVisibilityGate } from "../lib/use-visibility-gate";
 import {
   normalizeMinecraftServerHost,
   resolveMinecraftMapBaseUrl,
@@ -98,6 +99,7 @@ const splitServerAddress = (value: string) => {
 
 export function MinecraftHomeCallout() {
   const [copied, setCopied] = useState(false);
+  const { active, ref } = useVisibilityGate<HTMLElement>("820px");
   const serverAddress = normalizeMinecraftServerHost(
     process.env.NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS,
   );
@@ -111,24 +113,27 @@ export function MinecraftHomeCallout() {
     : "";
 
   const { data: troupeData } = useSWR<TroupeStatusPayload>(
-    "/api/minecraft/troupe-status",
+    active ? "/api/minecraft/troupe-status" : null,
     fetchJson,
     {
-      refreshInterval: 5000,
+      refreshInterval: active ? 15000 : 0,
+      revalidateOnFocus: false,
     },
   );
   const { data: events } = useSWR<MinecraftEvent[]>(
-    "/api/minecraft/events",
+    active ? "/api/minecraft/events" : null,
     fetchJson,
     {
-      refreshInterval: 5000,
+      refreshInterval: active ? 15000 : 0,
+      revalidateOnFocus: false,
     },
   );
   const { data: playersData, error: playersError } = useSWR<LivePlayersPayload>(
-    publicMapUrl ? "/mc-troupe-map/maps/world/live/players.json" : null,
+    active && publicMapUrl ? "/mc-troupe-map/maps/world/live/players.json" : null,
     fetchJson,
     {
-      refreshInterval: 5000,
+      refreshInterval: active ? 15000 : 0,
+      revalidateOnFocus: false,
     },
   );
 
@@ -231,6 +236,7 @@ export function MinecraftHomeCallout() {
 
   return (
     <section
+      ref={ref}
       id="troupe"
       className="mx-auto max-w-6xl scroll-mt-28 px-6 py-8"
     >

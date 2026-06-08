@@ -1,4 +1,5 @@
 import { fetchRadio } from "./radio-api";
+import { createVolatileCache } from "./stale-cache";
 
 export type RadioNoteTrack = {
   id?: string;
@@ -160,6 +161,25 @@ export const normalizeRadioNote = (note: RadioNote): RadioNote => ({
 export const normalizeRadioNotes = (notes: RadioNote[]) =>
   notes.map((note) => normalizeRadioNote(note));
 
+const notesListCache = new Map<
+  number,
+  ReturnType<typeof createVolatileCache<RadioNote[]>>
+>();
+
+const getNotesListCache = (limit: number) => {
+  let cache = notesListCache.get(limit);
+  if (!cache) {
+    cache = createVolatileCache<RadioNote[]>();
+    notesListCache.set(limit, cache);
+  }
+  return cache;
+};
+
+const envNumber = (key: string, fallback: number) => {
+  const parsed = Number(process.env[key]);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 const safeDate = (value: string) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -167,11 +187,25 @@ const safeDate = (value: string) => {
 
 export const listRadioNotes = async (limit = 24) => {
   const safeLimit = Math.min(120, Math.max(1, Math.floor(limit)));
+  const cache = getNotesListCache(safeLimit);
+  const cacheTtlMs = Math.max(
+    0,
+    envNumber("RADIO_NOTES_LIST_CACHE_TTL_MS", 20_000)
+  );
+  const cached = cacheTtlMs > 0 ? cache.read(cacheTtlMs) : null;
+
+  if (cached) return cached.value;
 
   try {
     const payload = await fetchRadio<{ notes?: RadioNote[] }>(`/public/notes?limit=${safeLimit}`);
-    return Array.isArray(payload.notes) ? normalizeRadioNotes(payload.notes) : [];
+    const notes = Array.isArray(payload.notes) ? normalizeRadioNotes(payload.notes) : [];
+    cache.write(notes);
+    return notes;
   } catch {
+    const stale = cache.read(
+      Math.max(0, envNumber("RADIO_NOTES_LIST_STALE_TTL_MS", 2 * 60 * 1000))
+    );
+    if (stale) return stale.value;
     return [];
   }
 };

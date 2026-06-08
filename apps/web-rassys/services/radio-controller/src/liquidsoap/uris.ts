@@ -2,7 +2,11 @@ import { DJTrackPlaybackPlan, type DJTrackPlaybackSegment } from "../dj/interfac
 import { Snippet, Track } from "../library/types";
 
 const DEFAULT_SNIPPET_TRIM_THRESHOLD_SECONDS = 3 * 60;
-const DEFAULT_SNIPPET_PLAY_WINDOW_SECONDS = 2 * 60;
+const DEFAULT_SNIPPET_MIN_PLAY_WINDOW_SECONDS = 2;
+const DEFAULT_SNIPPET_PLAY_WINDOW_SECONDS = 5;
+const DEFAULT_SNIPPET_FADE_IN_SECONDS = 0.35;
+const DEFAULT_SNIPPET_FADE_OUT_SECONDS = 0.5;
+const DEFAULT_SNIPPET_TRANSITION_SECONDS = 2.5;
 const DEFAULT_LONG_TRACK_THRESHOLD_SECONDS = 12 * 60;
 const DEFAULT_LONG_TRACK_CLIP_SECONDS = 5 * 60;
 const DEFAULT_LONG_TRACK_EDGE_PADDING_SECONDS = 45;
@@ -204,42 +208,80 @@ export const planSnippetPlayback = (
   snippet: Pick<Snippet, "duration">,
   options: {
     trimThresholdSeconds?: number;
+    minPlayWindowSeconds?: number;
     playWindowSeconds?: number;
+    fadeInSeconds?: number;
+    fadeOutSeconds?: number;
+    transitionSeconds?: number;
     random?: () => number;
   } = {}
 ) => {
+  const nextRandom = () => Math.min(1, Math.max(0, options.random?.() ?? Math.random()));
   const trimThresholdSeconds = Math.max(
     1,
     options.trimThresholdSeconds ?? DEFAULT_SNIPPET_TRIM_THRESHOLD_SECONDS
   );
-  const playWindowSeconds = Math.max(
+  const minPlayWindowSeconds = Math.max(
     1,
+    options.minPlayWindowSeconds ?? DEFAULT_SNIPPET_MIN_PLAY_WINDOW_SECONDS
+  );
+  const playWindowSeconds = Math.max(
+    minPlayWindowSeconds,
     options.playWindowSeconds ?? DEFAULT_SNIPPET_PLAY_WINDOW_SECONDS
   );
+  const fadeInSeconds = Math.max(0, options.fadeInSeconds ?? DEFAULT_SNIPPET_FADE_IN_SECONDS);
+  const fadeOutSeconds = Math.max(0, options.fadeOutSeconds ?? DEFAULT_SNIPPET_FADE_OUT_SECONDS);
+  const transitionSeconds = Math.max(0.5, options.transitionSeconds ?? DEFAULT_SNIPPET_TRANSITION_SECONDS);
   const durationSeconds =
     typeof snippet.duration === "number" && Number.isFinite(snippet.duration) && snippet.duration > 0
       ? snippet.duration
       : null;
 
-  if (durationSeconds === null || durationSeconds <= trimThresholdSeconds) {
+  if (durationSeconds === null) {
     return {
       durationSeconds,
       trimmed: false,
       cueInSeconds: 0,
-      cueOutSeconds: durationSeconds
+      cueOutSeconds: durationSeconds,
+      fadeInSeconds,
+      fadeOutSeconds,
+      transitionSeconds
     };
   }
 
-  const maxCueInSeconds = Math.max(0, durationSeconds - playWindowSeconds);
-  const randomValue = Math.min(1, Math.max(0, options.random?.() ?? Math.random()));
-  const cueInSeconds = maxCueInSeconds > 0 ? randomValue * maxCueInSeconds : 0;
-  const cueOutSeconds = Math.min(durationSeconds, cueInSeconds + playWindowSeconds);
+  if (durationSeconds <= playWindowSeconds) {
+    return {
+      durationSeconds,
+      trimmed: false,
+      cueInSeconds: 0,
+      cueOutSeconds: durationSeconds,
+      fadeInSeconds,
+      fadeOutSeconds,
+      transitionSeconds
+    };
+  }
+
+  const oldLongSnippetWindow =
+    playWindowSeconds > DEFAULT_SNIPPET_PLAY_WINDOW_SECONDS && durationSeconds > trimThresholdSeconds;
+  const maxWindowSeconds = Math.min(playWindowSeconds, durationSeconds);
+  const minWindowSeconds = oldLongSnippetWindow
+    ? maxWindowSeconds
+    : Math.min(minPlayWindowSeconds, maxWindowSeconds);
+  const windowRandom = oldLongSnippetWindow ? 1 : nextRandom();
+  const selectedWindowSeconds =
+    minWindowSeconds + (maxWindowSeconds - minWindowSeconds) * windowRandom;
+  const maxCueInSeconds = Math.max(0, durationSeconds - selectedWindowSeconds);
+  const cueInSeconds = maxCueInSeconds > 0 ? nextRandom() * maxCueInSeconds : 0;
+  const cueOutSeconds = Math.min(durationSeconds, cueInSeconds + selectedWindowSeconds);
 
   return {
     durationSeconds,
     trimmed: true,
     cueInSeconds,
-    cueOutSeconds
+    cueOutSeconds,
+    fadeInSeconds,
+    fadeOutSeconds,
+    transitionSeconds
   };
 };
 
@@ -247,7 +289,11 @@ export const buildSnippetQueueUri = (
   snippet: Pick<Snippet, "id" | "path" | "label" | "duration">,
   options: {
     trimThresholdSeconds?: number;
+    minPlayWindowSeconds?: number;
     playWindowSeconds?: number;
+    fadeInSeconds?: number;
+    fadeOutSeconds?: number;
+    transitionSeconds?: number;
     random?: () => number;
   } = {}
 ) => {
@@ -266,6 +312,12 @@ export const buildSnippetQueueUri = (
     pushMetadata(metadata, "liq_cue_in", formatCueValue(plan.cueInSeconds));
     pushMetadata(metadata, "liq_cue_out", formatCueValue(plan.cueOutSeconds ?? plan.cueInSeconds));
   }
+  pushMetadata(metadata, "liq_fade_in", formatCueValue(plan.fadeInSeconds));
+  pushMetadata(metadata, "liq_fade_out", formatCueValue(plan.fadeOutSeconds));
+  pushMetadata(metadata, "liq_fade_in_type", "sin");
+  pushMetadata(metadata, "liq_fade_out_type", "exp");
+  pushMetadata(metadata, "rassy_playback_mode", plan.trimmed ? "snippet-cut" : "snippet");
+  pushMetadata(metadata, "rassy_transition_seconds", formatCueValue(plan.transitionSeconds));
 
   return metadata.length > 0 ? `annotate:${metadata.join(",")}:${snippet.path}` : snippet.path;
 };

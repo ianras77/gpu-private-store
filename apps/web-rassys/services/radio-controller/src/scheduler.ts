@@ -13,6 +13,7 @@ import { buildBoothDossier } from "./dj/rassy";
 import { fetchMeta, isLiquidsoapReady, pushToQueue, readQueuedEntries, skipCurrent } from "./liquidsoap/client";
 import { buildSnippetQueueUri, buildTrackQueueUri, planTrackPlayback } from "./liquidsoap/uris";
 import { logger } from "./logger";
+import { planSnippetBumperCluster } from "./snippets/clusters";
 import { createStationChatMessage, pushStationChatMessage } from "./station-chat";
 import { buildNoteCurrentTrack, buildNoteSetlist } from "./notes";
 import { buildBoothSignature, buildFallbackBoothDossier } from "./booth-dossier";
@@ -1849,7 +1850,11 @@ const enqueueSnippet = async (snippetId, options = {}) => {
         return null;
     const queued = await pushToQueue(buildSnippetQueueUri(snippet, {
         trimThresholdSeconds: config.RADIO_SNIPPET_TRIM_THRESHOLD_SECONDS,
-        playWindowSeconds: config.RADIO_SNIPPET_PLAY_WINDOW_SECONDS
+        minPlayWindowSeconds: config.RADIO_SNIPPET_MIN_PLAY_WINDOW_SECONDS,
+        playWindowSeconds: config.RADIO_SNIPPET_PLAY_WINDOW_SECONDS,
+        fadeInSeconds: config.RADIO_SNIPPET_FADE_IN_SECONDS,
+        fadeOutSeconds: config.RADIO_SNIPPET_FADE_OUT_SECONDS,
+        transitionSeconds: config.RADIO_SNIPPET_TRANSITION_SECONDS
     }));
     if (!queued) {
         logger.warn({ snippetId: snippet.id, label: snippet.label }, "Failed to enqueue snippet");
@@ -1876,21 +1881,26 @@ const maybeEnqueueSnippet = async (context, pendingSnippet, usedSnippets, allowR
             pickedSnippet = djSnippet;
         }
     }
-    if (pickedSnippet) {
-        const queuedSnippetId = await enqueueSnippet(pickedSnippet, { excludeIds: usedSnippets });
-        if (queuedSnippetId) {
-            usedSnippets.add(queuedSnippetId);
-        }
-        else {
-            pendingSnippet.value = pickedSnippet;
-        }
+    const clusterCount = planSnippetBumperCluster({
+        hasPrimarySnippet: Boolean(pickedSnippet),
+        allowRandomFallback,
+        snippetChance: config.RADIO_SNIPPET_CHANCE,
+        clusterChance: config.RADIO_SNIPPET_CLUSTER_CHANCE,
+        maxCluster: config.RADIO_SNIPPET_CLUSTER_MAX
+    });
+    if (clusterCount <= 0)
         return;
-    }
-    if (allowRandomFallback && Math.random() < config.RADIO_SNIPPET_CHANCE) {
-        const queuedSnippetId = await enqueueSnippet(undefined, { excludeIds: usedSnippets });
+    let enqueuedCount = 0;
+    for (let index = 0; index < clusterCount; index += 1) {
+        const requestedSnippet = index === 0 ? pickedSnippet ?? undefined : undefined;
+        const queuedSnippetId = await enqueueSnippet(requestedSnippet, { excludeIds: usedSnippets });
         if (queuedSnippetId) {
             usedSnippets.add(queuedSnippetId);
+            enqueuedCount += 1;
         }
+    }
+    if (pickedSnippet && enqueuedCount === 0) {
+        pendingSnippet.value = pickedSnippet;
     }
 };
 const selectNextTracks = async (count, options = {}) => {
