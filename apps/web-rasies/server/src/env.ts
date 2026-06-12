@@ -15,9 +15,9 @@ const EnvSchema = z.object({
   SEARXNG_PATH: z.string().default('/search'),
   SEARXNG_TIMEOUT_MS: z.coerce.number().default(9000),
 
-  CAT_BASE_URL: z.string().default('http://rassygpt-gateway:8080'),
+  CAT_BASE_URL: z.string().default('http://host.docker.internal:8844'),
   CAT_PUBLIC_URL: z.string().optional(),
-  CAT_CHAT_PATH: z.string().default('/api/chat'),
+  CAT_CHAT_PATH: z.string().default('/v1/chat/completions'),
   CAT_TIMEOUT_MS: z.coerce.number().default(60000),
   CAT_MODEL: z.string().default('rassy-smart'),
   CAT_API_KEY: z.string().default(''),

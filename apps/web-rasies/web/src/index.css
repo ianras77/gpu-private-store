@@ -6334,6 +6334,16 @@ select:focus-visible {
 }
 
 /* House Chat workbench */
+.chat-panel-minimal,
+.chat-panel-minimal .chat-shell,
+.chat-panel-minimal .chat-main {
+  width: 100%;
+}
+
+.chat-panel-minimal .chat-shell {
+  grid-template-columns: 1fr;
+}
+
 .chat-panel-minimal .chat-main {
   grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
   grid-template-areas:
@@ -6415,7 +6425,7 @@ select:focus-visible {
 
 .chat-panel-minimal .chat-compose {
   grid-area: compose;
-  grid-column: auto;
+  grid-column: 1 / -1;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   border: 1px solid rgba(224, 191, 114, 0.13);
