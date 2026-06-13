@@ -4,12 +4,13 @@ import base64
 
 import requests
 
-LOCALAI_API_BASE = os.getenv("LOCALAI_API_BASE", "http://host.docker.internal:8111/v1")
-LOCALAI_API_KEY = os.getenv("LOCALAI_API_KEY", "localai-demo-key")
+RASSYCODEX_API_BASE = os.getenv("RASSYCODEX_API_BASE", "http://host.docker.internal:8844/v1")
+LOCALAI_API_BASE = os.getenv("LOCALAI_API_BASE", RASSYCODEX_API_BASE)
+LOCALAI_API_KEY = os.getenv("LOCALAI_API_KEY") or os.getenv("RASSYCODEX_API_KEY", "")
 
-EMBED_MODEL = os.getenv("LOCALAI_EMBED_MODEL", "all-MiniLM-L6-v2")
-RERANK_MODEL = os.getenv("LOCALAI_RERANK_MODEL", "jina-reranker-v1-base-en")
-IMAGE_MODEL = os.getenv("LOCALAI_IMAGE_MODEL", "stablediffusion")
+EMBED_MODEL = os.getenv("LOCALAI_EMBED_MODEL", os.getenv("RASSYCODEX_EMBED_MODEL", "rassy-embed"))
+RERANK_MODEL = os.getenv("LOCALAI_RERANK_MODEL", os.getenv("RASSYCODEX_RERANK_MODEL", "rassy-rerank"))
+IMAGE_MODEL = os.getenv("LOCALAI_IMAGE_MODEL", os.getenv("RASSYCODEX_IMAGE_MODEL", "rassy-image"))
 
 
 def _headers() -> Dict[str, str]:
@@ -23,7 +24,7 @@ def _headers() -> Dict[str, str]:
 
 def embed_texts(texts: List[str]) -> List[List[float]]:
     """
-    Uses LocalAI's OpenAI-compatible /embeddings endpoint.
+    Uses RassyCodex's OpenAI-compatible /embeddings endpoint.
     input: List[str] -> output: List[embedding vectors]
     """
     url = f"{LOCALAI_API_BASE}/embeddings"
@@ -50,7 +51,7 @@ def rerank_documents(
     top_n: int = 5,
 ) -> List[Dict[str, Any]]:
     """
-    Uses LocalAI's /v1/rerank endpoint with a reranker backend.
+    Uses RassyCodex's /v1/rerank endpoint with a reranker backend.
     Returns list of {index, document, score}, sorted by score desc.
     """
     url = f"{LOCALAI_API_BASE}/rerank"
@@ -95,7 +96,7 @@ def generate_image(
     size: str = "1024x1024",
 ) -> bytes:
     """
-    Uses LocalAI /v1/images/generations to produce an image with 'IMAGE_MODEL'.
+    Uses RassyCodex /v1/images/generations to produce an image with 'IMAGE_MODEL'.
     Returns raw image bytes (PNG/JPEG depending on backend).
     """
     url = f"{LOCALAI_API_BASE}/images/generations"

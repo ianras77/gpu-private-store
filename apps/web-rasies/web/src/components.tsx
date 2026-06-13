@@ -150,13 +150,6 @@ const CHAT_STARTERS = [
   "Draft a warm note I can send to the family without making it sound stiff.",
 ];
 
-const CHAT_MINIMAL_PROMPTS = [
-  "Help me make tonight feel easier.",
-  "Write a warm family text from me.",
-  "Give me one weird, useful idea for this house on the web.",
-  "Turn my messy thought into a simple next step.",
-];
-
 const BIRTHDAY_UNLOCK_SEQUENCE = [...KONAMI_SEQUENCE, "select", "start"];
 
 const BIRTHDAY_ARCADE_BUTTONS = [
@@ -199,13 +192,6 @@ const CHAT_MODES = [
 
 const CHAT_SYSTEM_PROMPT =
   "You are House Chat, the friendly assistant on the Rasies family site. Help with everyday questions, planning, writing, research prep, and gentle guidance around the family's self-hosted tools. Keep replies concise, practical, warm, and clear.";
-
-const CHAT_CAPABILITIES = [
-  "Calm plans for family life, chores, trips, and all the other real stuff",
-  "Warm writing help for notes, invites, updates, and everyday messages",
-  "Read small uploaded notes, lists, and text files right in the chat",
-  "Friendly guidance for the Rasies house on the web and the tools that live here",
-];
 
 const DEFAULT_SPOTLIGHT: SpotlightPayload = {
   mood: "The house is open, the lights are on, and House Chat is ready to help.",
@@ -1102,12 +1088,6 @@ export function SmartQuickChat() {
         </div>
       </div>
 
-      <p className="dj-copy">
-        House Chat stays near the top because this site is supposed to help with
-        real life, not send you digging. Bring a plan, a note, a question, or
-        the kind of half-formed thought that just needs a calm next step.
-      </p>
-
       <div className="dj-spotlight-grid" aria-label="Live House Chat spotlight">
         <div className="dj-spotlight-card">
           <span>Mood</span>
@@ -1160,10 +1140,7 @@ export function SmartQuickChat() {
 
       <div className="dj-transcript" aria-live="polite">
         {latestMessages.length === 0 ? (
-          <div className="dj-empty">
-            Drop a thought here when home life gets noisy. House Chat will hand
-            back something calmer, clearer, and easier to work with.
-          </div>
+          <div className="dj-empty">New thread</div>
         ) : (
           latestMessages.map((message) => (
             <div key={message.id} className={`dj-line dj-line-${message.role}`}>
@@ -1201,14 +1178,14 @@ export function SmartQuickChat() {
       >
         <label htmlFor="quick-chat-input" className="input-callout">
           <span>Quick ask</span>
-          <strong>Ask House Chat right here</strong>
+          <strong>Message House Chat</strong>
         </label>
         <textarea
           id="quick-chat-input"
           ref={inputRef}
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Ask for a plan, a note, a search idea, or help untangling the evening..."
+          placeholder="Type here..."
           rows={3}
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
@@ -1272,16 +1249,9 @@ export function HomeChatPreview() {
       aria-labelledby="home-chat-preview-heading"
     >
       <div>
-        <p className="hero-side-label">House Chat, one clear place</p>
-        <h2 id="home-chat-preview-heading">
-          The full chat lives a little farther down the page
-        </h2>
+        <p className="hero-side-label">House Chat</p>
+        <h2 id="home-chat-preview-heading">House Chat</h2>
       </div>
-
-      <p className="dj-copy">
-        That keeps the conversation, the draft, and the helper tools together in
-        one workspace. Start with a prompt here and jump straight into it.
-      </p>
 
       <div
         className="dj-spotlight-grid"
@@ -3371,6 +3341,10 @@ ${current.trim()}`
   );
   const isMinimal = variant === "minimal";
   const canSend = input.trim().length > 0 || attachments.length > 0;
+  const draftWords = input.trim()
+    ? input.trim().split(/\s+/).filter(Boolean).length
+    : 0;
+  const visibleStarters = isMinimal ? starters.slice(0, 4) : starters;
 
   return (
     <div className={isMinimal ? "chat-panel chat-panel-minimal" : "chat-panel"}>
@@ -3419,21 +3393,23 @@ ${current.trim()}`
               </div>
 
               <div className="chat-sidebar-intro">
-                <h3>Ask House Chat anything useful</h3>
-                <p>
-                  This is where I untangle plans, notes, family logistics, and
-                  little self-hosting questions.
-                </p>
+                <h3>House Chat</h3>
               </div>
 
-              <ul
-                className="chat-capability-list"
-                aria-label="House Chat capabilities"
-              >
-                {CHAT_CAPABILITIES.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+              <div className="chat-rail-metrics" aria-label="Thread state">
+                <div className="chat-rail-metric">
+                  <span>Thread</span>
+                  <strong>{messages.length}</strong>
+                </div>
+                <div className="chat-rail-metric">
+                  <span>Draft</span>
+                  <strong>{draftWords}</strong>
+                </div>
+                <div className="chat-rail-metric">
+                  <span>Files</span>
+                  <strong>{attachments.length}</strong>
+                </div>
+              </div>
 
               <div className="chat-mode-row" aria-label="Chat helper modes">
                 {CHAT_MODES.map((mode) => (
@@ -3449,7 +3425,7 @@ ${current.trim()}`
               </div>
 
               <div className="chat-starters" aria-label="Chat starter prompts">
-                {starters.map((starter) => (
+                {visibleStarters.map((starter) => (
                   <button
                     key={starter}
                     type="button"
@@ -3470,17 +3446,13 @@ ${current.trim()}`
 
         <div className="chat-main">
           {isMinimal && (
-            <>
-              <div className="chat-mini-status" aria-label="House Chat status">
+            <aside className="chat-utility-rail" aria-label="House Chat tools">
+              <div className="chat-rail-topline">
                 <div>
                   <p className="card-kicker">House Chat</p>
-                  <h2>Chat with the whole page, not a tiny corner.</h2>
-                  <p>
-                    A roomy spot for plans, notes, family messages, odd ideas,
-                    and anything that needs a calmer next step.
-                  </p>
+                  <h2>House Chat</h2>
                 </div>
-                <div className="chat-mini-status-stack">
+                <div className="chat-rail-tools">
                   <div className="chat-health">
                     <span className={`dot dot-${health}`} aria-hidden />
                     <span>{healthLabel(health)}</span>
@@ -3491,58 +3463,112 @@ ${current.trim()}`
                     onClick={refreshStarters}
                   >
                     <WandSparkles className="h-3.5 w-3.5" />
-                    New sparks
+                    New prompts
                   </button>
                 </div>
               </div>
 
-              {messages.length === 0 && (
-                <div
-                  className="chat-mini-launchpad"
-                  aria-label="House Chat starting sparks"
-                >
-                  <div className="chat-mini-launchpad-copy">
-                    <span>Start with a spark</span>
-                    <strong>Pick one, then make it yours.</strong>
-                  </div>
-                  <div
-                    className="chat-mini-prompt-grid"
-                    aria-label="House Chat quick prompts"
-                  >
-                    {CHAT_MINIMAL_PROMPTS.map((prompt) => (
-                      <button
-                        key={prompt}
-                        type="button"
-                        className="chat-mini-prompt"
-                        onClick={() => {
-                          trackUsage("chat.minimal_prompt");
-                          setInput(prompt);
-                          inputRef.current?.focus();
-                        }}
-                      >
-                        {prompt}
-                      </button>
-                    ))}
-                  </div>
+              <div className="chat-rail-metrics" aria-label="Thread state">
+                <div className="chat-rail-metric">
+                  <span>Thread</span>
+                  <strong>{messages.length}</strong>
                 </div>
-              )}
-            </>
+                <div className="chat-rail-metric">
+                  <span>Draft</span>
+                  <strong>{draftWords}</strong>
+                </div>
+                <div className="chat-rail-metric">
+                  <span>Files</span>
+                  <strong>{attachments.length}</strong>
+                </div>
+              </div>
+
+              <div className="chat-rail-section">
+                <div className="chat-rail-section-head">
+                  <span>Mode</span>
+                </div>
+                <div className="chat-mode-grid" aria-label="Chat modes">
+                  {CHAT_MODES.map((mode) => (
+                    <button
+                      key={mode.label}
+                      type="button"
+                      className="chat-mode-button"
+                      onClick={() => applyMode(mode.instruction)}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="chat-rail-section chat-prompt-deck">
+                <div className="chat-rail-section-head">
+                  <span>Prompt deck</span>
+                  <button
+                    type="button"
+                    className="chat-text-button"
+                    onClick={refreshStarters}
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    Shuffle
+                  </button>
+                </div>
+                <div className="chat-prompt-card-grid">
+                  {visibleStarters.map((starter) => (
+                    <button
+                      key={starter}
+                      type="button"
+                      className="chat-prompt-card"
+                      onClick={() => {
+                        trackUsage("chat.minimal_prompt");
+                        setInput(starter);
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      {starter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="chat-rail-actions">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={copyConversation}
+                  disabled={messages.length === 0}
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={clearChat}
+                  disabled={
+                    busy ||
+                    (messages.length === 0 && input.trim().length === 0)
+                  }
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Clear
+                </button>
+              </div>
+            </aside>
           )}
 
           {!isMinimal && (
             <div className="chat-meta" aria-label="Chat workspace status">
               <span>{totalTurns} messages exchanged</span>
               <span>
-                {messages.length > 0
-                  ? "Conversation kept in this browser"
-                  : "New conversation"}
+                {messages.length > 0 ? "Open thread" : "New thread"}
               </span>
               <span>
                 {input.trim().length > 0
                   ? "Draft ready"
                   : initialDraft
                     ? "Draft restored"
-                    : "Draft stays in this browser"}
+                    : "Draft empty"}
               </span>
             </div>
           )}
@@ -3550,21 +3576,13 @@ ${current.trim()}`
           <div className="chat-log" ref={logRef}>
             {isMinimal && messages.length === 0 && (
               <div className="chat-empty chat-empty-minimal">
-                <p className="card-kicker">Ready when you are</p>
-                <h3>Ask the messy version.</h3>
-                <p>
-                  House Chat can turn a loose thought into a plan, a note, a
-                  search handoff, or a better question without making you leave
-                  the page.
-                </p>
+                <p className="card-kicker">New thread</p>
+                <h3>Ready.</h3>
               </div>
             )}
 
             {!isMinimal && messages.length === 0 && (
-              <div className="chat-empty">
-                Ask about family life, trips, groceries, schedules, home tech,
-                or anything else that needs a calmer next step.
-              </div>
+              <div className="chat-empty">New thread</div>
             )}
 
             {messages.map((message) => {
@@ -3660,8 +3678,8 @@ ${current.trim()}`
               htmlFor="family-chat-input"
               className={isMinimal ? "sr-only" : "input-callout"}
             >
-              <span>Full chat</span>
-              <strong>Ask Ian's House Chat</strong>
+              <span>Message</span>
+              <strong>Message House Chat</strong>
             </label>
             <textarea
               id="family-chat-input"
@@ -3670,8 +3688,8 @@ ${current.trim()}`
               onChange={(event) => setInput(event.target.value)}
               placeholder={
                 isMinimal
-                  ? "Ask me something real: a plan, a note, a weird idea, or what to do next..."
-                  : "Bring House Chat a question, a task, or a half-formed idea..."
+                  ? "Type here..."
+                  : "Type here..."
               }
               rows={isMinimal ? 3 : 5}
               onKeyDown={(event) => {
@@ -3738,8 +3756,9 @@ ${current.trim()}`
                 {!isMinimal && (
                   <div className="chat-footnote">
                     <RefreshCw className="h-3.5 w-3.5" aria-hidden />
-                    Drafts stay here. Text files get a safe preview; images and
-                    PDFs go by name until the backend supports richer reads.
+                    {draftWords > 0
+                      ? `${draftWords} draft words`
+                      : `${messages.length} thread items`}
                   </div>
                 )}
               </div>

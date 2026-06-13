@@ -35,11 +35,12 @@ Crewai is packaged here as an internal JupyterHub workbench for agent, notebook,
 - Do not let this node become the public edge by accident.
 - If this app should be reachable externally later, proxy it from the primary node rather than moving edge duties here.
 
-## Runtime notes
+## RassyCodex notes
 
 - The Docker socket is intentionally preserved because Crewai/Jupyter workflows may use Docker-backed tools from inside the workbench.
-- The model layer currently targets the existing RassyGPT gateway using stable alias names:
-  - `rassy-smart`
+- The model layer now targets the standalone RassyCodex gateway through `http://host.docker.internal:8844/v1`.
+- The package keeps OpenAI-compatible and LocalAI-style env names so existing notebooks can keep working while the canonical defaults move to:
+  - `rassy-codex`
   - `rassy-embed`
   - `rassy-rerank`
   - `rassy-image`

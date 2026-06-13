@@ -5,13 +5,13 @@
   "exposable": false,
   "dynamic_config": true,
   "id": "learning-minio",
-  "description": "MinIO object storage from the learning stack, split into its own Runtipi app with console and S3 endpoints.",
-  "tipi_version": 1,
+  "description": "MinIO object storage from the learning stack for RassyCodex learning artifacts, with console and S3 endpoints.",
+  "tipi_version": 2,
   "version": "latest",
   "categories": [
     "utilities"
   ],
-  "short_desc": "Split-out MinIO object storage from the learning stack.",
+  "short_desc": "Object storage for learning artifacts and RassyCodex experiment assets.",
   "author": "https://github.com/ianras77/learning.git",
   "source": "https://github.com/ianras77/learning",
   "form_fields": [],
@@ -20,5 +20,5 @@
   ],
   "no_gui": false,
   "created_at": 1774649000000,
-  "updated_at": 1774649000000
+  "updated_at": 1780877402511
 }

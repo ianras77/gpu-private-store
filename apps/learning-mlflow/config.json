@@ -5,21 +5,35 @@
   "exposable": false,
   "dynamic_config": true,
   "id": "learning-mlflow",
-  "description": "MLflow tracking server from the learning stack, split into its own Runtipi app with dedicated Postgres and artifact storage.",
-  "tipi_version": 2,
+  "description": "MLflow tracking server from the learning stack, split into its own Runtipi app with RassyCodex experiment defaults.",
+  "tipi_version": 3,
   "version": "2.12.2",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "Split-out MLflow tracking server from the learning stack.",
+  "short_desc": "MLflow tracking and artifacts for RassyCodex-backed experiments.",
   "author": "https://github.com/ianras77/learning.git",
   "source": "https://github.com/ianras77/learning",
-  "form_fields": [],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyCodex API key",
+      "required": false,
+      "env_variable": "MLFLOW_RASSYCODEX_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyCodex base URL",
+      "default": "http://host.docker.internal:8844/v1",
+      "required": true,
+      "env_variable": "MLFLOW_RASSYCODEX_API_BASE"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1774649000000,
-  "updated_at": 1780017759882
+  "updated_at": 1780877402511
 }

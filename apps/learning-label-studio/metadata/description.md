@@ -18,3 +18,9 @@ Label Studio from the old `learning` bundle, split into its own Runtipi app.
 - Source repo: `/data/repos/apps/learning`
 - Original compose source: `/data/repos/apps/learning/docker-compose.yml`
 - Host and CSRF URLs are intentionally left override-friendly through `user-config`.
+
+## RassyCodex notes
+
+- Label Studio receives RassyCodex OpenAI-compatible defaults for assisted annotation workflows.
+- Use `LABEL_STUDIO_RASSYCODEX_API_KEY` for the standalone gateway key.
+- The default gateway URL is `http://host.docker.internal:8844/v1`.

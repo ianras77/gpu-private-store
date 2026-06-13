@@ -31,4 +31,16 @@ describe("layout CSS", () => {
       "grid-column: 1 / -1",
     );
   });
+
+  it("gives the minimal House Chat a real utility rail", () => {
+    expect(ruleFor(".chat-panel-minimal .chat-main")).toContain(
+      "grid-template-areas",
+    );
+    expect(ruleFor(".chat-utility-rail")).toContain("grid-area: rail");
+    expect(ruleFor(".chat-rail-metrics")).toContain(
+      "grid-template-columns: repeat(3, minmax(0, 1fr))",
+    );
+    expect(ruleFor(".chat-prompt-deck")).toContain("display: grid");
+    expect(ruleFor(".chat-rail-actions")).toContain("display: grid");
+  });
 });

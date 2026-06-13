@@ -5,14 +5,14 @@
   "exposable": false,
   "dynamic_config": true,
   "id": "langflow",
-  "description": "Langflow exposes a primary web interface. with persistent supporting data services.",
-  "tipi_version": 2,
+  "description": "Langflow exposes a primary web interface with persistent supporting data services and RassyCodex defaults.",
+  "tipi_version": 3,
   "version": "latest-runtipi2",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "Langflow exposes a primary web interface. with persistent supporting data services.",
+  "short_desc": "Langflow with Postgres, Redis, and RassyCodex model defaults.",
   "author": "https://github.com/ianras77/langflow.git",
   "source": "https://github.com/ianras77/langflow",
   "form_fields": [
@@ -37,9 +37,16 @@
     },
     {
       "type": "password",
-      "label": "OpenAI-compatible API key",
+      "label": "RassyCodex API key",
       "required": false,
-      "env_variable": "LANGFLOW_OPENAI_API_KEY"
+      "env_variable": "LANGFLOW_RASSYCODEX_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyCodex base URL",
+      "default": "http://host.docker.internal:8844/v1",
+      "required": true,
+      "env_variable": "LANGFLOW_RASSYCODEX_API_BASE"
     }
   ],
   "supported_architectures": [
@@ -47,5 +54,5 @@
   ],
   "no_gui": false,
   "created_at": 1774316487166,
-  "updated_at": 1780059600000
+  "updated_at": 1780877402511
 }

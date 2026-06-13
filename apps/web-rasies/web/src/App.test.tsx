@@ -530,11 +530,15 @@ describe("App", () => {
         screen.getByRole("heading", { name: /Notes I want easy to find/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("textbox", { name: /Ask Ian's House Chat/i }),
+        screen.getByRole("textbox", { name: /Message House Chat/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/Chat with the whole page, not a tiny corner/i),
+        screen.getByRole("heading", { name: /^House Chat$/i }),
       ).toBeInTheDocument();
+      expect(screen.getByText(/^Prompt deck$/i)).toBeInTheDocument();
+      expect(screen.getByText(/^Thread$/i)).toBeInTheDocument();
+      expect(screen.getByText(/^Draft$/i)).toBeInTheDocument();
+      expect(screen.getByText(/^Files$/i)).toBeInTheDocument();
       expect(
         screen.getByRole("heading", { name: /^Search$/i }),
       ).toBeInTheDocument();
@@ -584,6 +588,17 @@ describe("App", () => {
       expect(screen.getAllByText(/Sign-in Apps/i).length).toBeGreaterThan(0);
       expect(screen.getAllByText(/Direct Links/i).length).toBeGreaterThan(0);
     });
+
+    expect(
+      screen.queryByText(/Chat with the whole page, not a tiny corner/i),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/A roomy spot for plans/i),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Start with a spark/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Ask the messy version/i),
+    ).not.toBeInTheDocument();
 
     expect(
       screen.getAllByRole("link", { name: /Media signup/i })[0],
@@ -698,7 +713,7 @@ describe("App", () => {
     });
 
     await user.type(
-      screen.getByRole("textbox", { name: /Ask Ian's House Chat/i }),
+      screen.getByRole("textbox", { name: /Message House Chat/i }),
       "Can you read this?",
     );
     await user.click(screen.getByRole("button", { name: /^Send$/i }));

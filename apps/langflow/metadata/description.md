@@ -35,3 +35,9 @@ Langflow exposes a primary web interface. with persistent supporting data servic
 
 - Do not let this node become the public edge by accident.
 - If this app should be reachable externally later, proxy it from the primary node rather than moving edge duties here.
+
+## RassyCodex notes
+
+- Langflow defaults to the standalone RassyCodex OpenAI-compatible gateway at `http://host.docker.internal:8844/v1`.
+- Use the `RassyCodex API key` field or `LANGFLOW_RASSYCODEX_API_KEY` in `app.env` when gateway auth is enabled.
+- Canonical model aliases are `rassy-codex` for chat/coding and `rassy-embed` for embeddings.

@@ -37,25 +37,57 @@ services:
       AIRFLOW_ADMIN_FIRSTNAME: ${AIRFLOW_ADMIN_FIRSTNAME:-Ian}
       AIRFLOW_ADMIN_LASTNAME: ${AIRFLOW_ADMIN_LASTNAME:-Rasmussen}
       AIRFLOW_ADMIN_EMAIL: ${AIRFLOW_ADMIN_EMAIL:-ian@rasies.com}
-      OPENAI_API_KEY: ${AIRFLOW_OPENAI_API_KEY:-}
-      OPENAI_API_BASE: ${AIRFLOW_OPENAI_API_BASE:-http://rassygpt-gateway:8080/v1}
-      OPENAI_BASE_URL: ${AIRFLOW_OPENAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
-      RASSYGPT_CHAT_MODEL: ${AIRFLOW_RASSYGPT_CHAT_MODEL:-rassy-smart}
-      RASSYGPT_CODER_MODEL: ${AIRFLOW_RASSYGPT_CODER_MODEL:-rassy-coder}
-      RASSYGPT_EMBED_MODEL: ${AIRFLOW_RASSYGPT_EMBED_MODEL:-rassy-embed}
+      RASSYCODEX_API_BASE: ${AIRFLOW_RASSYCODEX_API_BASE:-${RASSYCODEX_API_BASE:-http://host.docker.internal:8844/v1}}
+      RASSYCODEX_API_KEY: ${AIRFLOW_RASSYCODEX_API_KEY:-${RASSYCODEX_API_KEY:-${AIRFLOW_OPENAI_API_KEY:-}}}
+      RASSYCODEX_CHAT_MODEL: ${AIRFLOW_RASSYCODEX_CHAT_MODEL:-rassy-codex}
+      RASSYCODEX_CODER_MODEL: ${AIRFLOW_RASSYCODEX_CODER_MODEL:-rassy-codex}
+      RASSYCODEX_EMBED_MODEL: ${AIRFLOW_RASSYCODEX_EMBED_MODEL:-rassy-embed}
+      OPENAI_API_KEY: ${AIRFLOW_RASSYCODEX_API_KEY:-${RASSYCODEX_API_KEY:-${AIRFLOW_OPENAI_API_KEY:-}}}
+      OPENAI_API_BASE: ${AIRFLOW_RASSYCODEX_API_BASE:-${RASSYCODEX_API_BASE:-http://host.docker.internal:8844/v1}}
+      OPENAI_BASE_URL: ${AIRFLOW_RASSYCODEX_API_BASE:-${RASSYCODEX_API_BASE:-http://host.docker.internal:8844/v1}}
+    extra_hosts:
+      - host.docker.internal:host-gateway
     command: >-
       bash -lc "airflow db migrate &&
       (airflow users create
-      -u \"$AIRFLOW_ADMIN_USERNAME\"
-      -p \"$AIRFLOW_ADMIN_PASSWORD\"
-      -f \"$AIRFLOW_ADMIN_FIRSTNAME\"
-      -l \"$AIRFLOW_ADMIN_LASTNAME\"
+      -u \"$$AIRFLOW_ADMIN_USERNAME\"
+      -p \"$$AIRFLOW_ADMIN_PASSWORD\"
+      -f \"$$AIRFLOW_ADMIN_FIRSTNAME\"
+      -l \"$$AIRFLOW_ADMIN_LASTNAME\"
       -r Admin
-      -e \"$AIRFLOW_ADMIN_EMAIL\" || true) &&
+      -e \"$$AIRFLOW_ADMIN_EMAIL\" || true) &&
       exec airflow webserver"
     x-runtipi:
       is_main: true
       internal_port: 8080
+
+  scheduler:
+    image: apache/airflow:2.7.1-python3.10
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ${APP_DATA_DIR}/app-data/learning-airflow/named/dags:/opt/airflow/dags
+      - ${APP_DATA_DIR}/app-data/learning-airflow/named/logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "True"
+      RASSYCODEX_API_BASE: ${AIRFLOW_RASSYCODEX_API_BASE:-${RASSYCODEX_API_BASE:-http://host.docker.internal:8844/v1}}
+      RASSYCODEX_API_KEY: ${AIRFLOW_RASSYCODEX_API_KEY:-${RASSYCODEX_API_KEY:-${AIRFLOW_OPENAI_API_KEY:-}}}
+      RASSYCODEX_CHAT_MODEL: ${AIRFLOW_RASSYCODEX_CHAT_MODEL:-rassy-codex}
+      RASSYCODEX_CODER_MODEL: ${AIRFLOW_RASSYCODEX_CODER_MODEL:-rassy-codex}
+      RASSYCODEX_EMBED_MODEL: ${AIRFLOW_RASSYCODEX_EMBED_MODEL:-rassy-embed}
+      OPENAI_API_KEY: ${AIRFLOW_RASSYCODEX_API_KEY:-${RASSYCODEX_API_KEY:-${AIRFLOW_OPENAI_API_KEY:-}}}
+      OPENAI_API_BASE: ${AIRFLOW_RASSYCODEX_API_BASE:-${RASSYCODEX_API_BASE:-http://host.docker.internal:8844/v1}}
+      OPENAI_BASE_URL: ${AIRFLOW_RASSYCODEX_API_BASE:-${RASSYCODEX_API_BASE:-http://host.docker.internal:8844/v1}}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    command:
+      - airflow
+      - scheduler
 
 x-runtipi:
   schema_version: 2

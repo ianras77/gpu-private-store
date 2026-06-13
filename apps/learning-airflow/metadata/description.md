@@ -19,3 +19,9 @@ Apache Airflow from the old `learning` bundle, split into its own Runtipi app.
 - Source repo: `/data/repos/apps/learning`
 - Original compose source: `/data/repos/apps/learning/docker-compose.yml`
 - Split reason: the original `learning` folder bundled several separate products that should not ship as one fake app.
+
+## RassyCodex notes
+
+- Airflow webserver and scheduler containers receive RassyCodex OpenAI-compatible env defaults.
+- DAGs can call `http://host.docker.internal:8844/v1` with `AIRFLOW_RASSYCODEX_API_KEY`.
+- Canonical aliases are `rassy-codex` for chat/coding and `rassy-embed` for embeddings.

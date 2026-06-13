@@ -5,21 +5,35 @@
   "exposable": false,
   "dynamic_config": true,
   "id": "learning-wandb",
-  "description": "Weights & Biases local server from the learning stack, split into its own Runtipi app.",
-  "tipi_version": 1,
+  "description": "Weights & Biases local server from the learning stack, split into its own Runtipi app with RassyCodex model defaults.",
+  "tipi_version": 2,
   "version": "local",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "Split-out Weights & Biases local server from the learning stack.",
+  "short_desc": "Local W&B experiment dashboard with RassyCodex defaults.",
   "author": "https://github.com/ianras77/learning.git",
   "source": "https://github.com/ianras77/learning",
-  "form_fields": [],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyCodex API key",
+      "required": false,
+      "env_variable": "WANDB_RASSYCODEX_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyCodex base URL",
+      "default": "http://host.docker.internal:8844/v1",
+      "required": true,
+      "env_variable": "WANDB_RASSYCODEX_API_BASE"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1774649000000,
-  "updated_at": 1774649000000
+  "updated_at": 1780877402511
 }

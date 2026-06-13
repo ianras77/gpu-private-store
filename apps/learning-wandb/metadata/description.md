@@ -17,3 +17,9 @@ Weights & Biases Local from the old `learning` bundle, split into its own Runtip
 - Source repo: `/data/repos/apps/learning`
 - Original compose source: `/data/repos/apps/learning/docker-compose.yml`
 - License and API key are intentionally expected from `user-config`, not baked into the shared store package.
+
+## RassyCodex notes
+
+- W&B Local receives RassyCodex OpenAI-compatible env defaults for experiment agents and evaluation jobs.
+- Use `WANDB_RASSYCODEX_API_KEY` for the standalone gateway key.
+- The default gateway URL is `http://host.docker.internal:8844/v1`.

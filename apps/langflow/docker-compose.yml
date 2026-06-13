@@ -18,12 +18,14 @@ services:
       LANGFLOW_REDIS_DB: '0'
       LANGFLOW_REDIS_CACHE_EXPIRE: '3600'
       LANGFLOW_CONFIG_DIR: /config
-      OPENAI_API_KEY: ${LANGFLOW_OPENAI_API_KEY:-}
-      OPENAI_API_BASE: ${LANGFLOW_OPENAI_API_BASE:-http://rassygpt-gateway:8080/v1}
-      OPENAI_BASE_URL: ${LANGFLOW_OPENAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
-      RASSYGPT_CHAT_MODEL: ${LANGFLOW_RASSYGPT_CHAT_MODEL:-rassy-smart}
-      RASSYGPT_CODER_MODEL: ${LANGFLOW_RASSYGPT_CODER_MODEL:-rassy-coder}
-      RASSYGPT_EMBED_MODEL: ${LANGFLOW_RASSYGPT_EMBED_MODEL:-rassy-embed}
+      RASSYCODEX_API_BASE: ${LANGFLOW_RASSYCODEX_API_BASE:-${RASSYCODEX_API_BASE:-http://host.docker.internal:8844/v1}}
+      RASSYCODEX_API_KEY: ${LANGFLOW_RASSYCODEX_API_KEY:-${RASSYCODEX_API_KEY:-${LANGFLOW_OPENAI_API_KEY:-}}}
+      RASSYCODEX_CHAT_MODEL: ${LANGFLOW_RASSYCODEX_CHAT_MODEL:-rassy-codex}
+      RASSYCODEX_CODER_MODEL: ${LANGFLOW_RASSYCODEX_CODER_MODEL:-rassy-codex}
+      RASSYCODEX_EMBED_MODEL: ${LANGFLOW_RASSYCODEX_EMBED_MODEL:-rassy-embed}
+      OPENAI_API_KEY: ${LANGFLOW_RASSYCODEX_API_KEY:-${RASSYCODEX_API_KEY:-${LANGFLOW_OPENAI_API_KEY:-}}}
+      OPENAI_API_BASE: ${LANGFLOW_RASSYCODEX_API_BASE:-${RASSYCODEX_API_BASE:-http://host.docker.internal:8844/v1}}
+      OPENAI_BASE_URL: ${LANGFLOW_RASSYCODEX_API_BASE:-${RASSYCODEX_API_BASE:-http://host.docker.internal:8844/v1}}
     command:
     - langflow
     - run
@@ -34,6 +36,8 @@ services:
     volumes:
     - ${APP_DATA_DIR}/app-data/langflow/bind/langflow-data:/config
     - ${APP_DATA_DIR}/app-data/langflow/bind/custom-components:/app/custom_components:ro
+    extra_hosts:
+    - host.docker.internal:host-gateway
     networks:
     - langflow_net
     x-runtipi:

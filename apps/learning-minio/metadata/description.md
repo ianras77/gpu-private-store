@@ -18,3 +18,9 @@ MinIO from the old `learning` bundle, split into its own Runtipi app.
 - Source repo: `/data/repos/apps/learning`
 - Original compose source: `/data/repos/apps/learning/docker-compose.yml`
 - Split out so object storage can be managed and backed up independently from the rest of the learning stack.
+
+## RassyCodex notes
+
+- MinIO does not call the model gateway directly.
+- It supports the RassyCodex learning stack as durable object storage for datasets, artifacts, exports, and evaluation assets.
+- Keep credentials in `app.env` or Runtipi user config; do not bake them into the appstore package.

@@ -5,14 +5,14 @@
   "exposable": false,
   "dynamic_config": true,
   "id": "learning-qdrant",
-  "description": "Qdrant vector database from the learning stack, split into its own Runtipi app for internal API use.",
-  "tipi_version": 1,
+  "description": "Qdrant vector database from the learning stack, kept as an internal companion to RassyCodex retrieval work.",
+  "tipi_version": 2,
   "version": "latest",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "Split-out Qdrant vector store from the learning stack.",
+  "short_desc": "Internal vector store companion for RassyCodex learning workflows.",
   "author": "https://github.com/ianras77/learning.git",
   "source": "https://github.com/ianras77/learning",
   "form_fields": [],
@@ -21,5 +21,5 @@
   ],
   "no_gui": true,
   "created_at": 1774649000000,
-  "updated_at": 1774649000000
+  "updated_at": 1780877402511
 }

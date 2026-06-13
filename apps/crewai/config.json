@@ -5,21 +5,35 @@
   "exposable": false,
   "dynamic_config": true,
   "id": "crewai",
-  "description": "Internal JupyterHub-based Crewai workbench with Qdrant state, preserved Docker tooling, and model access via the existing host AI gateway.",
-  "tipi_version": 2,
+  "description": "Internal JupyterHub-based Crewai workbench with Qdrant state, preserved Docker tooling, and model access through RassyCodex.",
+  "tipi_version": 3,
   "version": "latest",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "Internal Crewai JupyterHub workbench with Qdrant and preserved host-tool access.",
+  "short_desc": "Internal Crewai workbench wired to RassyCodex, Qdrant, and host tools.",
   "author": "https://github.com/ianras77/crewai-app.git",
   "source": "https://github.com/ianras77/crewai-app",
-  "form_fields": [],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyCodex API key",
+      "required": false,
+      "env_variable": "CREWAI_RASSYCODEX_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyCodex base URL",
+      "default": "http://host.docker.internal:8844/v1",
+      "required": true,
+      "env_variable": "CREWAI_RASSYCODEX_API_BASE"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1774316487140,
-  "updated_at": 1780017759882
+  "updated_at": 1780877402511
 }

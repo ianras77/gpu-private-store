@@ -1,15 +1,19 @@
 import os
 from crewai import LLM
 
-LOCALAI_API_BASE = os.getenv("LOCALAI_API_BASE", "http://host.docker.internal:8111/v1")
-LOCALAI_API_KEY = os.getenv("LOCALAI_API_KEY", "localai-demo-key")
-LOCALAI_LLM_MODEL = os.getenv("LOCALAI_LLM_MODEL", "watt-ai_watt-tool-70b")
+RASSYCODEX_API_BASE = os.getenv("RASSYCODEX_API_BASE", "http://host.docker.internal:8844/v1")
+LOCALAI_API_BASE = os.getenv("LOCALAI_API_BASE", RASSYCODEX_API_BASE)
+LOCALAI_API_KEY = os.getenv("LOCALAI_API_KEY") or os.getenv("RASSYCODEX_API_KEY", "")
+LOCALAI_LLM_MODEL = os.getenv(
+    "LOCALAI_LLM_MODEL",
+    os.getenv("RASSYCODEX_CHAT_MODEL", "rassy-codex"),
+)
 
 
 def get_llm() -> LLM:
     """
     Main chat LLM for all your agents.
-    Uses LocalAI as an OpenAI-compatible backend.
+    Uses RassyCodex as an OpenAI-compatible backend.
     """
     print(f"[LLM] Using LocalAI model={LOCALAI_LLM_MODEL} base={LOCALAI_API_BASE}")
 

@@ -19,3 +19,9 @@ MLflow from the old `learning` bundle, split into its own Runtipi app.
 - Original source repo: `/data/repos/apps/learning`
 - Original compose source: `/data/repos/apps/learning/docker-compose.yml`
 - The tracked `mlflow` build files were restored from the repo history so the split package can build faithfully.
+
+## RassyCodex notes
+
+- MLflow receives RassyCodex OpenAI-compatible env defaults for model evaluation and experiment logging code.
+- Use `MLFLOW_RASSYCODEX_API_KEY` for the standalone gateway key.
+- The default gateway URL is `http://host.docker.internal:8844/v1`.

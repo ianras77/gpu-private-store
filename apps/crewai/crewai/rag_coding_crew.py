@@ -3,12 +3,15 @@ from crewai import Agent, Task, Crew
 from crewai import LLM
 from rag_tools import qdrant_tool
 
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
+RASSYCODEX_API_BASE = os.getenv("RASSYCODEX_API_BASE", "http://host.docker.internal:8844/v1")
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", RASSYCODEX_API_BASE)
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", os.getenv("RASSYCODEX_CODER_MODEL", "rassy-codex"))
+RASSYCODEX_API_KEY = os.getenv("RASSYCODEX_API_KEY") or os.getenv("OPENAI_API_KEY", "")
 
 ollama_llm = LLM(
     model=OLLAMA_MODEL,
     base_url=OLLAMA_BASE_URL,
+    api_key=RASSYCODEX_API_KEY,
 )
 
 coder_with_memory = Agent(

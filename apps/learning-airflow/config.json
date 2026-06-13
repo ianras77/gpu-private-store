@@ -5,20 +5,34 @@
   "exposable": false,
   "dynamic_config": true,
   "id": "learning-airflow",
-  "description": "Apache Airflow workbench from the learning stack, split into its own Runtipi app with dedicated metadata storage.",
-  "tipi_version": 1,
+  "description": "Apache Airflow workbench from the learning stack, split into its own Runtipi app with RassyCodex defaults for DAGs.",
+  "tipi_version": 2,
   "version": "2.7.1-python3.10",
   "categories": [
     "utilities"
   ],
-  "short_desc": "Split-out Airflow workbench from the learning stack.",
+  "short_desc": "Airflow workbench for RassyCodex-backed learning workflows.",
   "author": "https://github.com/ianras77/learning.git",
   "source": "https://github.com/ianras77/learning",
-  "form_fields": [],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyCodex API key",
+      "required": false,
+      "env_variable": "AIRFLOW_RASSYCODEX_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyCodex base URL",
+      "default": "http://host.docker.internal:8844/v1",
+      "required": true,
+      "env_variable": "AIRFLOW_RASSYCODEX_API_BASE"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1774649000000,
-  "updated_at": 1774649000000
+  "updated_at": 1780877402511
 }
