@@ -32,6 +32,10 @@ type ThoughtDetailResponse = {
   thought: Thought;
 };
 
+function getThoughtSummaries(data?: ThoughtsLibraryResponse) {
+  return Array.isArray(data?.thoughts) ? data.thoughts : [];
+}
+
 function formatDate(value: string) {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return 'Freshly added';
@@ -125,8 +129,9 @@ function ThoughtsEmptyState() {
 
 export function ThoughtsHighlight() {
   const { loading, error, data } = useThoughtsLibrary();
-  const featured = data?.featuredThought ?? data?.thoughts[0];
-  const supportingThoughts = data?.thoughts.filter((thought) => thought.slug !== featured?.slug).slice(0, 2) ?? [];
+  const thoughts = getThoughtSummaries(data);
+  const featured = data?.featuredThought ?? thoughts[0];
+  const supportingThoughts = thoughts.filter((thought) => thought.slug !== featured?.slug).slice(0, 2);
 
   return (
     <section id="thoughts" className="panel panel-thoughts-highlight reveal reveal-3" aria-labelledby="thoughts-heading">
@@ -192,6 +197,7 @@ export function ThoughtsHighlight() {
 
 export function ThoughtsLibraryPage() {
   const { loading, error, data } = useThoughtsLibrary();
+  const thoughts = getThoughtSummaries(data);
   usePageMeta(
     'Rassy Thoughts | Rassy',
     'A quiet shelf for longer notes about family life, home projects, and the slower side of the site.'
@@ -238,11 +244,11 @@ export function ThoughtsLibraryPage() {
           </div>
         )}
 
-        {!loading && !error && data && data.thoughts.length === 0 && <ThoughtsEmptyState />}
+        {!loading && !error && data && thoughts.length === 0 && <ThoughtsEmptyState />}
 
-        {!loading && !error && data && data.thoughts.length > 0 && (
+        {!loading && !error && data && thoughts.length > 0 && (
           <section className="thought-library-grid" aria-label="Thought posts">
-            {data.thoughts.map((thought) => (
+            {thoughts.map((thought) => (
               <ThoughtCard key={thought.slug} thought={thought} />
             ))}
           </section>

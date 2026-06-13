@@ -71,11 +71,11 @@ const EnvSchema = z.object({
   ABOUT_BIO: z
     .string()
     .default(
-      'I built this place so the Rasies would have a home on the web that feels like us. Self-hosting lets the useful stuff stay close, the memory stuff stay safe, and the whole site keep a little personality.'
+      'A family home base for the useful things, the memory things, and the playful things we want close by. It should feel familiar, private, and unmistakably ours.'
     ),
   ABOUT_HIGHLIGHTS: z
     .string()
-    .default('Built for the Rasies,Family memories first,Self-hosted with care,Gardener energy')
+    .default('For the Rasies,Family memories first,Self-hosted with care,Gardener energy')
 });
 
 export type Env = z.infer<typeof EnvSchema>;

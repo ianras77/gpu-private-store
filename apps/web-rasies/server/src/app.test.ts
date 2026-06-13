@@ -40,7 +40,7 @@ describe("app", () => {
     const res = await app.inject({ method: "GET", url: "/api/config" });
     expect(res.statusCode).toBe(200);
     const body = res.json() as Record<string, unknown> & {
-      about?: { name?: string };
+      about?: { bio?: string; name?: string };
     };
     expect(body.publicBaseUrl).toBe(env.PUBLIC_BASE_URL);
     expect(body.personalSiteUrl).toBe(env.PERSONAL_SITE_URL);
@@ -49,6 +49,7 @@ describe("app", () => {
     expect(body.plexUrl).toBe(env.PLEX_URL);
     expect(body.signupEnabled).toBe(true);
     expect(body.about?.name).toBeDefined();
+    expect(body.about?.bio ?? "").not.toMatch(/\bI built this\b/i);
   });
 
   it("allows both bare and www Rasies origins for browser API calls", async () => {

@@ -100,7 +100,7 @@ const defaultAbout: AboutConfig = {
   name: "Rassy",
   tagline:
     "Husband, dad, gardener, and the person keeping this little family web house running.",
-  bio: "I built this so our family has one familiar place for the stuff we actually use: photos, notes, planning, media, and a few fun extras.",
+  bio: "A familiar place for the stuff our family actually uses: photos, notes, planning, media, and a few fun extras.",
   highlights: [
     "For our family",
     "Memories first",

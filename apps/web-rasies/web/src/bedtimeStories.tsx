@@ -70,6 +70,22 @@ type StoryBookDetailResponse = {
   };
 };
 
+const FALLBACK_STORY_SHOW: StoryShow = {
+  title: 'Real Life Bedtime Stories',
+  subtitle: 'A little shelf of bedtime recordings.',
+  description: 'Bedtime stories kept close for the family.',
+  author: 'Rassy',
+  pageUrl: STORIES_LIBRARY_PATH,
+  feedUrl: '/podcast/real-life-bedtime-stories.xml',
+  feedAbsoluteUrl: '/podcast/real-life-bedtime-stories.xml',
+  bookCount: 0,
+  episodeCount: 0
+};
+
+function getStoryBooks(data?: StoriesLibraryResponse) {
+  return Array.isArray(data?.books) ? data.books : [];
+}
+
 const STORY_PALETTES = [
   { start: '#6b3f2a', end: '#e6a05d', glow: 'rgba(230, 160, 93, 0.34)' },
   { start: '#304b73', end: '#8cc6ff', glow: 'rgba(140, 198, 255, 0.3)' },
@@ -267,10 +283,12 @@ function StoryCard({ book }: { book: StoryBookSummary }) {
 
 export function BedtimeStoriesHighlight() {
   const { loading, error, data } = useStoriesLibrary();
-  const featured = data?.featuredBook ?? data?.books[0];
+  const books = getStoryBooks(data);
+  const show = data?.show ?? FALLBACK_STORY_SHOW;
+  const featured = data?.featuredBook ?? books[0];
   const supportingBooks = useMemo(
-    () => data?.books.filter((book) => book.slug !== featured?.slug).slice(0, 2) ?? [],
-    [data, featured?.slug]
+    () => books.filter((book) => book.slug !== featured?.slug).slice(0, 2),
+    [books, featured?.slug]
   );
 
   return (
@@ -331,9 +349,9 @@ export function BedtimeStoriesHighlight() {
             </div>
             <div className="story-highlight-copy">
               <div className="story-eyebrow">
-                <span>{data.show.title}</span>
-                <span>{`${data.show.bookCount} books`}</span>
-                <span>{`${data.show.episodeCount} episodes`}</span>
+                <span>{show.title}</span>
+                <span>{`${show.bookCount || books.length} books`}</span>
+                <span>{`${show.episodeCount} episodes`}</span>
               </div>
               <h3>{featured.title}</h3>
               <p className="story-highlight-summary">{featured.summary}</p>
@@ -410,6 +428,8 @@ function StoriesEmptyState({ show }: { show?: StoryShow | null }) {
 
 export function BedtimeStoriesLibraryPage() {
   const { loading, error, data } = useStoriesLibrary();
+  const books = getStoryBooks(data);
+  const show = data?.show ?? FALLBACK_STORY_SHOW;
   usePageMeta(
     'Real Life Bedtime Stories | Rassy',
     'A cozy family shelf of bedtime stories recorded with love and kept close for later nights.'
@@ -424,7 +444,7 @@ export function BedtimeStoriesLibraryPage() {
             Back home
           </a>
           {data && (
-            <a href={data.show.feedUrl} className="story-feed-link">
+            <a href={show.feedUrl} className="story-feed-link">
               <Radio className="h-4 w-4" />
               Podcast feed
             </a>
@@ -443,21 +463,21 @@ export function BedtimeStoriesLibraryPage() {
               <>
                 <div className="story-route-stats">
                   <div>
-                    <strong>{data.show.bookCount}</strong>
+                    <strong>{show.bookCount || books.length}</strong>
                     <span>Books on the shelf</span>
                   </div>
                   <div>
-                    <strong>{data.show.episodeCount}</strong>
+                    <strong>{show.episodeCount}</strong>
                     <span>Total episodes</span>
                   </div>
                   <div>
-                    <strong>{data.show.author}</strong>
+                    <strong>{show.author}</strong>
                     <span>Voice behind the stories</span>
                   </div>
                 </div>
                 <FeedActions
-                  feedUrl={data.show.feedUrl}
-                  feedAbsoluteUrl={data.show.feedAbsoluteUrl}
+                  feedUrl={show.feedUrl}
+                  feedAbsoluteUrl={show.feedAbsoluteUrl}
                 />
               </>
             )}
@@ -487,11 +507,11 @@ export function BedtimeStoriesLibraryPage() {
           </div>
         )}
 
-        {!loading && !error && data && data.books.length === 0 && <StoriesEmptyState show={data.show} />}
+        {!loading && !error && data && books.length === 0 && <StoriesEmptyState show={show} />}
 
-        {!loading && !error && data && data.books.length > 0 && (
+        {!loading && !error && data && books.length > 0 && (
           <section className="story-library-grid" aria-label="Bedtime story books">
-            {data.books.map((book) => (
+            {books.map((book) => (
               <StoryCard key={book.slug} book={book} />
             ))}
           </section>

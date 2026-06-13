@@ -2076,7 +2076,7 @@ export function AboutPanel({ about }: { about: AboutConfig }) {
         ))}
       </div>
       <div className="card-footer-note">
-        Built so useful things can still feel warm and unmistakably ours.
+        Useful things can still feel warm and unmistakably ours.
       </div>
     </section>
   );

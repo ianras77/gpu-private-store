@@ -619,6 +619,36 @@ describe("App", () => {
     ).toHaveAttribute("href", "/#/apps");
   });
 
+  it("keeps the fallback about copy centered on the family, not implementation notes", async () => {
+    window.history.pushState({}, "", "/apps");
+
+    vi.mocked(globalThis.fetch).mockImplementation(
+      (input: string | URL | Request) => {
+        const url = String(input);
+
+        if (url.includes("/api/config")) {
+          return Promise.resolve(
+            new Response(JSON.stringify({}), { status: 500 }),
+          );
+        }
+
+        return Promise.resolve(
+          new Response(JSON.stringify({}), { status: 200 }),
+        );
+      },
+    );
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/A familiar place for the stuff our family actually uses/i),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText(/\bI built this\b/i)).not.toBeInTheDocument();
+  });
+
   it("keeps media libraries and Authentik accounts as separate clear lanes", async () => {
     render(<App />);
 
