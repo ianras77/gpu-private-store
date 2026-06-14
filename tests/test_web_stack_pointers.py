@@ -92,3 +92,15 @@ def test_web_astro_api_uses_node_image_with_native_build_tools():
     assert "image: node:20-bullseye" in api_service_text
     assert "dockerfile:" not in api_service_text
     assert "apt-get install" not in api_service_text
+
+
+def test_web_app_build_contexts_use_runtipi_host_root():
+    apps_root = Path(__file__).resolve().parents[1] / "apps"
+    hits: list[str] = []
+
+    for compose_path in sorted(apps_root.glob("web-*/docker-compose.yml")):
+        text = compose_path.read_text(encoding="utf-8")
+        if "${RUNTIPI_APP_BUILD_ROOT:-/data/apps}" in text:
+            hits.append(str(compose_path.relative_to(apps_root)))
+
+    assert hits == []

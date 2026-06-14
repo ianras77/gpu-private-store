@@ -145,7 +145,7 @@ services:
     image: runtipi-local-web-usmender-worker:latest
   api:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-usmender/repo
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo
       dockerfile: apps/api/Dockerfile
     pull_policy: build
     restart: unless-stopped
@@ -206,7 +206,7 @@ services:
       start_period: 5s
   web:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-usmender/repo
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}

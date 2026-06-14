@@ -3,7 +3,7 @@ services:
     image: runtipi-local-web-rasies-rasies-portal:latest
     pull_policy: build
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-/data/apps}/${APP_STORE_ID}/web-rasies
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rasies
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
