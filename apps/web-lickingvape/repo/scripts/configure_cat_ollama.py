@@ -15,8 +15,8 @@ def main() -> int:
     metadata_path = Path(
         os.getenv("CAT_METADATA_PATH", "/data/metadata.json")
     )
-    llm_base = os.getenv("OLLAMA_GENERAL_BASE_URL", "http://rassygpt-gateway:8080")
-    embed_base = os.getenv("OLLAMA_EMBED_BASE_URL", "http://rassygpt-gateway:8080")
+    llm_base = os.getenv("OLLAMA_GENERAL_BASE_URL", "http://host.docker.internal:8844")
+    embed_base = os.getenv("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844")
     llm_model = os.getenv("OLLAMA_GENERAL_MODEL", "rassy-smart")
     embed_model = os.getenv("OLLAMA_EMBED_MODEL", "rassy-embed")
 

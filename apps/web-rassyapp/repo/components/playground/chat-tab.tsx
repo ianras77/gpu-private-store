@@ -30,7 +30,7 @@ const statusTone: Record<string, string> = {
   Failed: "bg-ember-500/15 text-ember-300 border border-ember-500/30"
 };
 
-type JumpTab = "templates" | "worlds" | "assets" | "plugins" | "memory" | "status";
+type JumpTab = "templates" | "worlds" | "sections" | "assets" | "plugins" | "memory" | "status";
 
 type PromotionMode = "skill" | "workflow" | "loop" | "writer-pack";
 
@@ -499,6 +499,15 @@ export function ChatTab({
               worldRecipeHeadline: summary.studioProject?.worldRecipe?.headline,
               worldRecipeLines: summary.studioProject?.worldRecipe?.promptLines ?? [],
               worldCrewLines: summary.studioProject?.worldRecipe?.crewLines ?? [],
+              gameSectionTitles:
+                summary.studioProject?.gameSections.map((section) => section.title) ?? [],
+              gameSectionLines:
+                summary.studioProject?.gameSections.map(
+                  (section) =>
+                    `${section.title} -> ${section.studioPath} (${section.status}; ${section.codeTasks
+                      .slice(0, 2)
+                      .join(" | ")})`
+                ) ?? [],
               selectedAssetPackSlugs: summary.studioProject?.selectedAssetPackSlugs ?? [],
               selectedAssetPackTitles:
                 summary.studioProject?.selectedAssetPacks.map((pack) => pack.title) ?? [],
@@ -517,8 +526,7 @@ export function ChatTab({
                 summary.studioProject?.approvedCodePackages
                   .slice(0, 4)
                   .map(
-                    (pkg) =>
-                      `${pkg.title} -> ${pkg.targetContainer} (${pkg.localModulePath})`
+                    (pkg) => `${pkg.title} -> ${pkg.targetContainer} (${pkg.localModulePath})`
                   ) ?? [],
               lastEditedBy: summary.studioProject?.lastEditedBy?.username ?? null,
               buildPlan: summary.studioProject?.buildPlan
@@ -584,7 +592,8 @@ export function ChatTab({
     [activeFile, busy, openFiles, summary, threadId, threadLoading]
   );
 
-  const workspaceName = summary?.studioProject?.title ?? summary?.workspace.name ?? "Launchpad Project";
+  const workspaceName =
+    summary?.studioProject?.title ?? summary?.workspace.name ?? "Launchpad Project";
   const branchLabel = summary?.workspace.branch ?? "creative";
   const collaboratorCount = summary?.workspace.collaboratorCount ?? 0;
   const studioProject = summary?.studioProject ?? null;
@@ -667,7 +676,9 @@ export function ChatTab({
               ? { templateSlug: summary.studioProject.templatePack.slug }
               : {}),
             ...(summary?.studioProject?.theme ? { projectTheme: summary.studioProject.theme } : {}),
-            ...(summary?.studioProject?.heroGoal ? { heroGoal: summary.studioProject.heroGoal } : {}),
+            ...(summary?.studioProject?.heroGoal
+              ? { heroGoal: summary.studioProject.heroGoal }
+              : {}),
             ...(summary?.studioProject?.worldProfile?.title
               ? { worldProfileTitle: summary.studioProject.worldProfile.title }
               : {}),
@@ -679,6 +690,15 @@ export function ChatTab({
               : {}),
             worldRecipeLines: summary?.studioProject?.worldRecipe?.promptLines ?? [],
             worldCrewLines: summary?.studioProject?.worldRecipe?.crewLines ?? [],
+            gameSectionTitles:
+              summary?.studioProject?.gameSections.map((section) => section.title) ?? [],
+            gameSectionLines:
+              summary?.studioProject?.gameSections.map(
+                (section) =>
+                  `${section.title} -> ${section.studioPath} (${section.status}; ${section.codeTasks
+                    .slice(0, 2)
+                    .join(" | ")})`
+              ) ?? [],
             selectedAssetPackSlugs: summary?.studioProject?.selectedAssetPackSlugs ?? [],
             selectedAssetPackTitles:
               summary?.studioProject?.selectedAssetPacks.map((pack) => pack.title) ?? [],
@@ -696,7 +716,8 @@ export function ChatTab({
             approvedCodePackageLines:
               summary?.studioProject?.approvedCodePackages
                 .slice(0, 4)
-                .map((pkg) => `${pkg.title} -> ${pkg.targetContainer} (${pkg.localModulePath})`) ?? [],
+                .map((pkg) => `${pkg.title} -> ${pkg.targetContainer} (${pkg.localModulePath})`) ??
+              [],
             ...(summary?.studioProject?.buildPlan?.oneLiner
               ? { buildPlanOneLiner: summary.studioProject.buildPlan.oneLiner }
               : {}),
@@ -842,16 +863,14 @@ export function ChatTab({
       <Card className="intro-rise p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-xs uppercase tracking-[0.3em] text-ink-400">
-              Game Coach
-            </div>
+            <div className="text-xs uppercase tracking-[0.3em] text-ink-400">Game Coach</div>
             <h2 className="mt-2 text-2xl font-semibold text-ink-50">
               Keep the idea in front and pull tools in only when they help.
             </h2>
             <p className="mt-2 max-w-3xl text-sm text-ink-300">
               This lane ties the current project, files, run state, and family team presence
-              directly to your coach thread so the Cat can act like a guided studio helper, not
-              just a chatbot.
+              directly to your coach thread so the Cat can act like a guided studio helper, not just
+              a chatbot.
             </p>
           </div>
 
@@ -864,7 +883,7 @@ export function ChatTab({
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-7">
+        <div className="mt-5 grid gap-3 md:grid-cols-4 xl:grid-cols-8">
           <button
             onClick={() =>
               runQuickPrompt(
@@ -875,7 +894,9 @@ export function ChatTab({
           >
             <div className="text-[10px] uppercase tracking-[0.24em] text-glow-300">Ask</div>
             <div className="mt-2 text-sm font-semibold text-ink-100">Pitch a new game</div>
-            <div className="mt-2 text-xs text-ink-300">Get a genre, loop, and first build plan.</div>
+            <div className="mt-2 text-xs text-ink-300">
+              Get a genre, loop, and first build plan.
+            </div>
           </button>
           <button
             onClick={() => onJumpToTab?.("templates")}
@@ -883,7 +904,9 @@ export function ChatTab({
           >
             <div className="text-[10px] uppercase tracking-[0.24em] text-glow-300">Templates</div>
             <div className="mt-2 text-sm font-semibold text-ink-100">Pick a starter</div>
-            <div className="mt-2 text-xs text-ink-300">Choose the game feeling, theme, and goal first.</div>
+            <div className="mt-2 text-xs text-ink-300">
+              Choose the game feeling, theme, and goal first.
+            </div>
           </button>
           <button
             onClick={() => onJumpToTab?.("worlds")}
@@ -891,7 +914,9 @@ export function ChatTab({
           >
             <div className="text-[10px] uppercase tracking-[0.24em] text-glow-300">Map Forge</div>
             <div className="mt-2 text-sm font-semibold text-ink-100">Shape the world</div>
-            <div className="mt-2 text-xs text-ink-300">Pick the biome, route shape, and world crew recipe.</div>
+            <div className="mt-2 text-xs text-ink-300">
+              Pick the biome, route shape, and world crew recipe.
+            </div>
           </button>
           <button
             onClick={() => onJumpToTab?.("assets")}
@@ -899,7 +924,19 @@ export function ChatTab({
           >
             <div className="text-[10px] uppercase tracking-[0.24em] text-glow-300">Asset Shelf</div>
             <div className="mt-2 text-sm font-semibold text-ink-100">Open safe shelves</div>
-            <div className="mt-2 text-xs text-ink-300">Decorate with approved art, props, and sounds.</div>
+            <div className="mt-2 text-xs text-ink-300">
+              Decorate with approved art, props, and sounds.
+            </div>
+          </button>
+          <button
+            onClick={() => onJumpToTab?.("sections")}
+            className="rounded-2xl border border-ink-800 bg-ink-950/70 p-4 text-left transition hover:border-glow-500/40"
+          >
+            <div className="text-[10px] uppercase tracking-[0.24em] text-glow-300">Sections</div>
+            <div className="mt-2 text-sm font-semibold text-ink-100">Focus a build</div>
+            <div className="mt-2 text-xs text-ink-300">
+              Choose one Studio path, asset group, and code task.
+            </div>
           </button>
           <button
             onClick={() => onJumpToTab?.("memory")}
@@ -907,7 +944,9 @@ export function ChatTab({
           >
             <div className="text-[10px] uppercase tracking-[0.24em] text-glow-300">Remix</div>
             <div className="mt-2 text-sm font-semibold text-ink-100">Open idea vault</div>
-            <div className="mt-2 text-xs text-ink-300">Reuse notes, phrases, and project memory.</div>
+            <div className="mt-2 text-xs text-ink-300">
+              Reuse notes, phrases, and project memory.
+            </div>
           </button>
           <button
             onClick={() => onJumpToTab?.("plugins")}
@@ -915,7 +954,9 @@ export function ChatTab({
           >
             <div className="text-[10px] uppercase tracking-[0.24em] text-glow-300">Build Kits</div>
             <div className="mt-2 text-sm font-semibold text-ink-100">Open kit lab</div>
-            <div className="mt-2 text-xs text-ink-300">Create reusable helpers for quests, NPCs, and mechanics.</div>
+            <div className="mt-2 text-xs text-ink-300">
+              Create reusable helpers for quests, NPCs, and mechanics.
+            </div>
           </button>
           <button
             onClick={() => onJumpToTab?.("status")}
@@ -923,7 +964,9 @@ export function ChatTab({
           >
             <div className="text-[10px] uppercase tracking-[0.24em] text-glow-300">Publish</div>
             <div className="mt-2 text-sm font-semibold text-ink-100">Check studio pulse</div>
-            <div className="mt-2 text-xs text-ink-300">Inspect engine health and the future publish path.</div>
+            <div className="mt-2 text-xs text-ink-300">
+              Inspect engine health and the future publish path.
+            </div>
           </button>
         </div>
 
@@ -931,7 +974,9 @@ export function ChatTab({
           <div className="mt-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <div className="text-xs uppercase tracking-[0.3em] text-ink-400">Template sparks</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-ink-400">
+                  Template sparks
+                </div>
                 <div className="mt-2 text-lg font-semibold text-ink-50">
                   Start from a kid-friendly game pattern instead of a blank page
                 </div>
@@ -975,7 +1020,9 @@ export function ChatTab({
                       </span>
                     ))}
                   </div>
-                  <div className="mt-4 text-xs font-medium text-ink-200">Launch this starter with the coach</div>
+                  <div className="mt-4 text-xs font-medium text-ink-200">
+                    Launch this starter with the coach
+                  </div>
                 </button>
               ))}
             </div>
@@ -996,7 +1043,9 @@ export function ChatTab({
                 </div>
               </div>
               <div className="rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-3">
-                <div className="text-[10px] uppercase tracking-[0.22em] text-ink-500">Build lane</div>
+                <div className="text-[10px] uppercase tracking-[0.22em] text-ink-500">
+                  Build lane
+                </div>
                 <div className="mt-1 text-sm font-semibold text-ink-100">
                   {activeSession?.title ?? "Pending"}
                 </div>
@@ -1005,7 +1054,9 @@ export function ChatTab({
                 </div>
               </div>
               <div className="rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-3">
-                <div className="text-[10px] uppercase tracking-[0.22em] text-ink-500">Active file</div>
+                <div className="text-[10px] uppercase tracking-[0.22em] text-ink-500">
+                  Active file
+                </div>
                 <div className="mt-1 text-sm font-semibold text-ink-100">
                   {activeFile ?? "No file selected"}
                 </div>
@@ -1020,7 +1071,9 @@ export function ChatTab({
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="text-xs uppercase tracking-[0.3em] text-ink-400">Guide rails</div>
-                <div className="mt-2 text-lg font-semibold text-ink-50">Kid-safe studio checklist</div>
+                <div className="mt-2 text-lg font-semibold text-ink-50">
+                  Kid-safe studio checklist
+                </div>
               </div>
               <Badge variant={studioProject?.parentModeEnabled ? "glow" : "neutral"}>
                 Parent mode {studioProject?.parentModeEnabled ? "On" : "Off"}
@@ -1059,9 +1112,7 @@ export function ChatTab({
                     disabled={file.type !== "file"}
                     className={cn(
                       "flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left transition",
-                      file.path === activeFile
-                        ? "bg-ink-800 text-ink-50"
-                        : "hover:bg-ink-900/80"
+                      file.path === activeFile ? "bg-ink-800 text-ink-50" : "hover:bg-ink-900/80"
                     )}
                     style={{ paddingLeft: `${file.depth * 12 + 8}px` }}
                   >
@@ -1082,7 +1133,9 @@ export function ChatTab({
           <Card className="p-5">
             <div className="text-xs uppercase tracking-[0.3em] text-ink-400">Live preview</div>
             <pre className="mt-4 max-h-[280px] overflow-y-auto whitespace-pre-wrap rounded-2xl border border-ink-800 bg-ink-950/70 p-4 font-mono text-[11px] text-ink-200">
-              {filePreview.map((line, index) => `${String(index + 1).padStart(2, "0")} ${line}`).join("\n")}
+              {filePreview
+                .map((line, index) => `${String(index + 1).padStart(2, "0")} ${line}`)
+                .join("\n")}
             </pre>
           </Card>
         </div>
@@ -1096,10 +1149,16 @@ export function ChatTab({
                 </div>
                 <div className="mt-2 text-xl font-semibold text-ink-50">Live build thread</div>
                 <div className="mt-1 text-sm text-ink-300">
-                  Ask for game pitches, scene plans, reusable build kits, inspiration help, or publish-readiness advice.
+                  Ask for game pitches, scene plans, reusable build kits, inspiration help, or
+                  publish-readiness advice.
                 </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={resetChat} disabled={busy || threadLoading}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={resetChat}
+                disabled={busy || threadLoading}
+              >
                 Clear thread
               </Button>
             </div>
@@ -1108,7 +1167,9 @@ export function ChatTab({
               {messages.length === 0 ? (
                 <div className="rounded-3xl border border-dashed border-ink-700 bg-ink-950/60 p-8 text-center">
                   <div className="text-sm font-semibold text-ink-100">
-                    {threadLoading ? "Initializing your coach thread..." : "Tell Launchpad what you want to build."}
+                    {threadLoading
+                      ? "Initializing your coach thread..."
+                      : "Tell Launchpad what you want to build."}
                   </div>
                   <div className="mt-2 text-sm text-ink-400">
                     The coach already knows your current project, active files, track, and session
@@ -1182,12 +1243,15 @@ export function ChatTab({
           <Card className="p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs uppercase tracking-[0.3em] text-ink-400">Build Kit Runner</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-ink-400">
+                  Build Kit Runner
+                </div>
                 <div className="mt-2 text-lg font-semibold text-ink-50">
                   Promote a live thread into reusable studio powers
                 </div>
                 <div className="mt-2 text-sm text-ink-300">
-                  Use the conversation itself as the brief, then turn it into a build kit, a recurring recipe, or a linked writer room that builds the world in visible passes.
+                  Use the conversation itself as the brief, then turn it into a build kit, a
+                  recurring recipe, or a linked writer room that builds the world in visible passes.
                 </div>
               </div>
               <Badge variant={latestUserMessage ? "glow" : "neutral"}>
@@ -1211,7 +1275,9 @@ export function ChatTab({
                 disabled={!latestUserMessage || Boolean(promotionBusy)}
                 className="w-full rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-3 text-left transition hover:border-glow-500/40 disabled:opacity-50"
               >
-                <div className="text-sm font-semibold text-ink-100">Draft recurring build recipe</div>
+                <div className="text-sm font-semibold text-ink-100">
+                  Draft recurring build recipe
+                </div>
                 <div className="mt-1 text-xs text-ink-300">
                   Convert the latest exchange into a multi-step studio recipe.
                 </div>
@@ -1221,9 +1287,12 @@ export function ChatTab({
                 disabled={!messages.length || Boolean(promotionBusy)}
                 className="w-full rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-3 text-left transition hover:border-glow-500/40 disabled:opacity-50"
               >
-                <div className="text-sm font-semibold text-ink-100">Draft world-building writer room</div>
+                <div className="text-sm font-semibold text-ink-100">
+                  Draft world-building writer room
+                </div>
                 <div className="mt-1 text-xs text-ink-300">
-                  Create linked agents for pitch, terrain, landmarks, scenery, quests, scripts, and playtests.
+                  Create linked agents for pitch, terrain, landmarks, scenery, quests, scripts, and
+                  playtests.
                 </div>
               </button>
               <button
@@ -1231,7 +1300,9 @@ export function ChatTab({
                 disabled={!messages.length || Boolean(promotionBusy)}
                 className="w-full rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-3 text-left transition hover:border-glow-500/40 disabled:opacity-50"
               >
-                <div className="text-sm font-semibold text-ink-100">Draft coach loop from thread</div>
+                <div className="text-sm font-semibold text-ink-100">
+                  Draft coach loop from thread
+                </div>
                 <div className="mt-1 text-xs text-ink-300">
                   Use the broader thread context to generate a reusable loop with safe checkpoints.
                 </div>
@@ -1239,7 +1310,7 @@ export function ChatTab({
             </div>
 
             {promotionBusy ? (
-              <div className="mt-4 rounded-2xl border border-glow-500/30 bg-glow-500/10 px-4 py-3 text-sm text-glow-200">
+              <div className="text-glow-200 mt-4 rounded-2xl border border-glow-500/30 bg-glow-500/10 px-4 py-3 text-sm">
                 Building a {promotionLabel(promotionBusy)} draft from this conversation...
               </div>
             ) : null}
@@ -1252,9 +1323,7 @@ export function ChatTab({
                 <div className="mt-2 text-sm font-semibold text-ink-100">
                   {promotionResult.draft.name}
                 </div>
-                <div className="mt-2 text-xs text-ink-300">
-                  {promotionResult.draft.description}
-                </div>
+                <div className="mt-2 text-xs text-ink-300">{promotionResult.draft.description}</div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button
                     variant="glow"
@@ -1274,7 +1343,7 @@ export function ChatTab({
                   </Button>
                 </div>
                 {promotionResult.routine ? (
-                  <div className="mt-3 rounded-2xl border border-glow-500/20 bg-glow-500/10 px-3 py-3 text-xs text-glow-100">
+                  <div className="text-glow-100 mt-3 rounded-2xl border border-glow-500/20 bg-glow-500/10 px-3 py-3 text-xs">
                     {promotionResult.writerPack
                       ? `${promotionResult.writerPack.stageCount ?? promotionResult.routines?.length ?? 0} linked routines created for the writer room.`
                       : `Persistent routine created: ${promotionResult.routine.name}`}
@@ -1287,12 +1356,15 @@ export function ChatTab({
           <Card className="p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs uppercase tracking-[0.3em] text-ink-400">Automation roster</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-ink-400">
+                  Automation roster
+                </div>
                 <div className="mt-2 text-lg font-semibold text-ink-50">
                   Persistent routines tied to this project
                 </div>
                 <div className="mt-2 text-sm text-ink-300">
-                  Workflow, loop, and writer-room promotions land here as durable routines you can pause, resume, and run on demand.
+                  Workflow, loop, and writer-room promotions land here as durable routines you can
+                  pause, resume, and run on demand.
                 </div>
               </div>
               <Badge variant={routines.length ? "glow" : "neutral"}>
@@ -1319,7 +1391,9 @@ export function ChatTab({
                         <Badge variant={routine.kind === "loop" ? "ember" : "neutral"}>
                           {routine.kind}
                         </Badge>
-                        {routine.stageKey ? <Badge variant="neutral">{routine.stageKey}</Badge> : null}
+                        {routine.stageKey ? (
+                          <Badge variant="neutral">{routine.stageKey}</Badge>
+                        ) : null}
                         <Badge variant={routine.status === "Active" ? "glow" : "neutral"}>
                           {routine.status}
                         </Badge>
@@ -1379,7 +1453,8 @@ export function ChatTab({
                 })
               ) : (
                 <div className="rounded-2xl border border-ink-800 bg-ink-950/60 px-4 py-4 text-sm text-ink-400">
-                  No persistent routines yet. Promote a build recipe or coach loop from the conversation to create one.
+                  No persistent routines yet. Promote a build recipe or coach loop from the
+                  conversation to create one.
                 </div>
               )}
             </div>
@@ -1401,7 +1476,11 @@ export function ChatTab({
                 Review the current project context
               </button>
               <button
-                onClick={() => runQuickPrompt("Plan the next steps to turn this into a polished kid-friendly Roblox game project.")}
+                onClick={() =>
+                  runQuickPrompt(
+                    "Plan the next steps to turn this into a polished kid-friendly Roblox game project."
+                  )
+                }
                 className="w-full rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-3 text-left text-sm text-ink-200 hover:border-ink-600"
               >
                 Plan the next build sprint
@@ -1422,7 +1501,9 @@ export function ChatTab({
           </Card>
 
           <Card className="p-5">
-            <div className="text-xs uppercase tracking-[0.3em] text-ink-400">Project patch preview</div>
+            <div className="text-xs uppercase tracking-[0.3em] text-ink-400">
+              Project patch preview
+            </div>
             <div className="mt-4 space-y-1 font-mono text-[11px]">
               {diffDisplay.map((line, index) => (
                 <div

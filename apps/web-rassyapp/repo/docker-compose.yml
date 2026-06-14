@@ -39,9 +39,6 @@ services:
       - cheshire-cat-vector-memory
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - default
-      - ollama
     restart: unless-stopped
 
   cheshire-cat-vector-memory:
@@ -59,8 +56,3 @@ volumes:
   cat_plugins:
   cat_data:
   qdrant_storage:
-
-networks:
-  ollama:
-    external: true
-    name: ollama_llm-net

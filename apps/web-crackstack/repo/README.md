@@ -62,9 +62,9 @@ CRACKSTACK_RUN_DB_TESTS=1 python3 -m pytest -q -r s
 LLM backend (LocalAI):
 
 ```bash
-# Defaults to http://127.0.0.1:8112 and model qwen3-1.7b
-export LOCALAI_BASE_URL=http://127.0.0.1:8112
-export LOCALAI_MODEL=qwen3-1.7b
+# Defaults to http://host.docker.internal:8844 and model rassy-smart
+export LOCALAI_BASE_URL=http://host.docker.internal:8844
+export LOCALAI_MODEL=rassy-smart
 export CRACKSTACK_API_KEYS=local-dev-key:tenant_demo
 uvicorn app.main:app --reload --port 8000
 

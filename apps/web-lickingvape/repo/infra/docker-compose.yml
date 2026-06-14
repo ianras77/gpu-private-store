@@ -93,8 +93,8 @@ services:
     environment:
       INTERNAL_API_BASE: http://api:8000
       INTERNAL_TOOL_TOKEN: ${INTERNAL_TOOL_TOKEN:-change-me}
-      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
-      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://host.docker.internal:8844}
       OLLAMA_GENERAL_MODEL: ${OLLAMA_GENERAL_MODEL:-rassy-smart}
       OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-rassy-embed}
       EDITOR_WORLD_CONTEXT_QUERY_LIMIT: ${EDITOR_WORLD_CONTEXT_QUERY_LIMIT:-2}
@@ -103,6 +103,8 @@ services:
       - ../cat/plugins:/app/cat/plugins
       - ../cat/data:/app/cat/data
       - ../cat/bootstrap:/app/cat/bootstrap:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command:
       - /bin/sh
       - -lc
@@ -111,7 +113,6 @@ services:
       - "${LICKINGWEB_CAT_PORT:-3201}:80"
     networks:
       - internal
-      - ollama
 
 volumes:
   db_data:
@@ -119,6 +120,3 @@ volumes:
 networks:
   internal:
     driver: bridge
-  ollama:
-    external: true
-    name: ollama_llm-net

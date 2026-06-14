@@ -130,8 +130,8 @@ def _pick_model(base_url: str, configured: str) -> str:
 
 def main() -> int:
     metadata_path = Path(_env("CAT_METADATA_PATH", "/cat-data/metadata.json"))
-    llm_base = _env("OLLAMA_BASE_URL", "http://rassygpt-gateway:8080")
-    embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://rassygpt-gateway:8080")
+    llm_base = _env("OLLAMA_BASE_URL", "http://host.docker.internal:8844")
+    embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844")
     apply_embedder = _env_flag("OLLAMA_APPLY_EMBEDDER", True)
     llm_model = _pick_model(llm_base, _env("OLLAMA_LLM_MODEL", "rassy-smart"))
     embed_model = (

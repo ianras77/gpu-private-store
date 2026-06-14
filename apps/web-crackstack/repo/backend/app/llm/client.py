@@ -5,7 +5,7 @@ from typing import Any
 
 import httpx
 
-LOCALAI_BASE_URL = os.getenv("LOCALAI_BASE_URL", "http://rassygpt-gateway:8080")
+LOCALAI_BASE_URL = os.getenv("LOCALAI_BASE_URL", "http://host.docker.internal:8844")
 LOCALAI_MODEL = os.getenv("LOCALAI_MODEL", "rassy-smart")
 LOCALAI_API_KEY = os.getenv("LOCALAI_API_KEY", "")
 

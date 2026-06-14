@@ -70,8 +70,8 @@ def _tags_url(base_url: str) -> str:
 
 def main() -> int:
     metadata_path = Path(_env("CAT_METADATA_PATH", "/data/metadata.json"))
-    llm_base = _env("CAT_OLLAMA_GENERAL_BASE_URL", _env("OLLAMA_GENERAL_BASE_URL", "http://rassygpt-gateway:8080"))
-    embed_base = _env("CAT_OLLAMA_EMBED_BASE_URL", _env("OLLAMA_EMBED_BASE_URL", "http://rassygpt-gateway:8080"))
+    llm_base = _env("CAT_OLLAMA_GENERAL_BASE_URL", _env("OLLAMA_GENERAL_BASE_URL", "http://host.docker.internal:8844"))
+    embed_base = _env("CAT_OLLAMA_EMBED_BASE_URL", _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844"))
     llm_model = _env("CAT_OLLAMA_GENERAL_MODEL", _env("OLLAMA_GENERAL_MODEL", "rassy-smart"))
     embed_model = _env("CAT_OLLAMA_EMBED_MODEL", _env("OLLAMA_EMBED_MODEL", "rassy-embed"))
     ollama_num_ctx = max(2048, int(_env("CAT_OLLAMA_NUM_CTX", _env("OLLAMA_NUM_CTX", "8192"))))

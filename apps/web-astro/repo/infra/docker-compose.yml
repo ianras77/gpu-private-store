@@ -60,8 +60,8 @@ services:
       ALLOW_DEV_AUTH: "true"
       DEV_USER_EMAIL: dev@example.com
       OPENAI_API_KEY: ${OPENAI_API_KEY:-localai}
-      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-http://localai-lb:8080/v1}
-      OPENAI_MODEL: ${OPENAI_MODEL:-qwen3-1.7b}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-http://host.docker.internal:8844/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-rassy-smart}
       MAPBOX_TOKEN: ${MAPBOX_TOKEN:-}
       OPENCAGE_KEY: ${OPENCAGE_KEY:-}
       NOMINATIM_BASE_URL: ${NOMINATIM_BASE_URL:-https://nominatim.openstreetmap.org}
@@ -87,11 +87,10 @@ services:
       - db
       - redis
       - qdrant
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${ASTRO_API_PORT:-4020}:4020"
-    networks:
-      - default
-      - localai
 
   web-jupiterseek:
     image: node:20-alpine
@@ -187,8 +186,3 @@ volumes:
   astro_db:
   astro_redis:
   astro_qdrant:
-
-networks:
-  localai:
-    external: true
-    name: localai_default

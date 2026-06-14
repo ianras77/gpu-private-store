@@ -4,10 +4,7 @@ import { getSessionFromRequest, resolveEngineUserId } from "@/lib/auth/session";
 import { getCatProfileConfig } from "@/lib/cat/topology";
 import { prisma } from "@/lib/db";
 import { streamChat } from "@/lib/cat/chat";
-import {
-  summarizeAssetItemsForPrompt,
-  summarizeCodePackagesForPrompt
-} from "@/lib/studio/assets";
+import { summarizeAssetItemsForPrompt, summarizeCodePackagesForPrompt } from "@/lib/studio/assets";
 import { getStudioSummary } from "@/lib/studio/data";
 import { buildWriterRoomSystemGuidance } from "@/lib/studio/writer-team";
 import { getOrCreateWorkspace } from "@/lib/workspace/data";
@@ -35,6 +32,7 @@ type PromptProjectContext = {
   worldRecipeHeadline?: string | null;
   worldRecipeLines?: string[];
   worldCrewLines?: string[];
+  gameSectionLines?: string[];
   selectedAssetPackSlugs?: string[];
   selectedAssetPackTitles?: string[];
   selectedAssetManifestLines?: string[];
@@ -105,14 +103,21 @@ function buildPrompt(options: {
       options.project.templateName ? `Starter template: ${options.project.templateName}` : null,
       options.project.theme ? `Theme: ${options.project.theme}` : null,
       options.project.heroGoal ? `Hero goal: ${options.project.heroGoal}` : null,
-      options.project.worldProfileTitle ? `World profile: ${options.project.worldProfileTitle}` : null,
+      options.project.worldProfileTitle
+        ? `World profile: ${options.project.worldProfileTitle}`
+        : null,
       options.project.mapPatternTitle ? `Map pattern: ${options.project.mapPatternTitle}` : null,
-      options.project.worldRecipeHeadline ? `World recipe: ${options.project.worldRecipeHeadline}` : null,
+      options.project.worldRecipeHeadline
+        ? `World recipe: ${options.project.worldRecipeHeadline}`
+        : null,
       options.project.worldRecipeLines?.length
         ? `World recipe lines: ${options.project.worldRecipeLines.join(" | ")}`
         : null,
       options.project.worldCrewLines?.length
         ? `World crew: ${options.project.worldCrewLines.join(" | ")}`
+        : null,
+      options.project.gameSectionLines?.length
+        ? `Game sections: ${options.project.gameSectionLines.join(" | ")}`
         : null,
       options.project.selectedAssetPackSlugs?.length
         ? `Approved asset shelves: ${options.project.selectedAssetPackSlugs.join(", ")}`
@@ -129,8 +134,12 @@ function buildPrompt(options: {
       options.project.approvedCodePackageLines?.length
         ? `Local module manifests: ${options.project.approvedCodePackageLines.join(" | ")}`
         : null,
-      options.project.buildPlan?.oneLiner ? `One-line pitch: ${options.project.buildPlan.oneLiner}` : null,
-      options.project.buildPlan?.coreLoop ? `Core loop: ${options.project.buildPlan.coreLoop}` : null,
+      options.project.buildPlan?.oneLiner
+        ? `One-line pitch: ${options.project.buildPlan.oneLiner}`
+        : null,
+      options.project.buildPlan?.coreLoop
+        ? `Core loop: ${options.project.buildPlan.coreLoop}`
+        : null,
       options.project.buildPlan?.scenes?.length
         ? `Scenes: ${options.project.buildPlan.scenes.join(", ")}`
         : null,
@@ -140,7 +149,9 @@ function buildPrompt(options: {
       options.project.buildPlan?.scripts?.length
         ? `Roblox script tasks: ${options.project.buildPlan.scripts.join(", ")}`
         : null,
-      options.project.lastEditedBy ? `Last collaborator to save: ${options.project.lastEditedBy}` : null,
+      options.project.lastEditedBy
+        ? `Last collaborator to save: ${options.project.lastEditedBy}`
+        : null,
       options.project.writerStages?.length
         ? `Writer room: ${options.project.writerStages
             .map((stage) => `${stage.title}=${stage.status}`)
@@ -154,10 +165,18 @@ function buildPrompt(options: {
   }
 
   const metadataLines = [
-    readString(options.metadata.sessionTitle) ? `Current build lane: ${readString(options.metadata.sessionTitle)}` : null,
-    readString(options.metadata.activeFile) ? `Active file: ${readString(options.metadata.activeFile)}` : null,
-    readString(options.metadata.branch) ? `Workspace branch: ${readString(options.metadata.branch)}` : null,
-    readString(options.metadata.role) ? `Current collaborator role: ${readString(options.metadata.role)}` : null,
+    readString(options.metadata.sessionTitle)
+      ? `Current build lane: ${readString(options.metadata.sessionTitle)}`
+      : null,
+    readString(options.metadata.activeFile)
+      ? `Active file: ${readString(options.metadata.activeFile)}`
+      : null,
+    readString(options.metadata.branch)
+      ? `Workspace branch: ${readString(options.metadata.branch)}`
+      : null,
+    readString(options.metadata.role)
+      ? `Current collaborator role: ${readString(options.metadata.role)}`
+      : null,
     readStringArray(options.metadata.openFiles).length
       ? `Open files: ${readStringArray(options.metadata.openFiles).join(", ")}`
       : null
@@ -236,9 +255,18 @@ export async function POST(request: NextRequest, context: { params: { id: string
           worldRecipeHeadline: studioProject.worldRecipe?.headline ?? null,
           worldRecipeLines: studioProject.worldRecipe?.promptLines ?? [],
           worldCrewLines: studioProject.worldRecipe?.crewLines ?? [],
+          gameSectionLines: studioProject.gameSections.map(
+            (section) =>
+              `${section.title} -> ${section.studioPath} (${section.status}; ${section.codeTasks
+                .slice(0, 2)
+                .join(" | ")})`
+          ),
           selectedAssetPackSlugs: studioProject.selectedAssetPackSlugs,
           selectedAssetPackTitles: studioProject.selectedAssetPacks.map((pack) => pack.title),
-          selectedAssetManifestLines: summarizeAssetItemsForPrompt(studioProject.selectedAssetItems, 8),
+          selectedAssetManifestLines: summarizeAssetItemsForPrompt(
+            studioProject.selectedAssetItems,
+            8
+          ),
           approvedCodePackageTitles: studioProject.approvedCodePackages.map((pkg) => pkg.title),
           approvedCodePackageLines: summarizeCodePackagesForPrompt(
             studioProject.approvedCodePackages,

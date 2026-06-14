@@ -169,6 +169,29 @@ export type StudioWriterStageSummary = {
   handoff?: Record<string, unknown> | null;
 };
 
+export type StudioGameSectionLinkedAssetSummary = {
+  slug: string;
+  title: string;
+  kind: string;
+  targetPath: string;
+  localBundleKey: string;
+  placementHint: string;
+};
+
+export type StudioGameSectionSummary = {
+  slug: string;
+  title: string;
+  sectionType: "spawn" | "route" | "finale" | "systems";
+  playerGoal: string;
+  studioPath: string;
+  studioServices: string[];
+  sceneBeats: string[];
+  linkedAssets: StudioGameSectionLinkedAssetSummary[];
+  codeTasks: string[];
+  coachPrompt: string;
+  status: "Ready to build" | "Needs assets" | "Needs code review";
+};
+
 export type StudioProjectSummary = {
   id: string;
   slug: string;
@@ -202,6 +225,7 @@ export type StudioProjectSummary = {
   buildPlan: StudioBuildPlanSummary | null;
   publishTarget: StudioPublishTargetSummary | null;
   writerStages: StudioWriterStageSummary[];
+  gameSections: StudioGameSectionSummary[];
   availableTemplates: StudioTemplateSummary[];
   nextActions: string[];
 };

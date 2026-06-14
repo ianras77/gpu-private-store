@@ -1,8 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { buildGameSections } from "@/lib/studio/game-sections";
 import type {
   StudioAssetItemSummary,
   StudioCodePackageSummary,
+  StudioGameSectionSummary,
   StudioProjectSummary
 } from "@/lib/studio/types";
 
@@ -37,6 +39,7 @@ export type RojoExportManifest = {
     launchpadWritesTo: string;
   };
   counts: {
+    sections: number;
     zones: number;
     assetItems: number;
     codePackages: number;
@@ -174,6 +177,8 @@ function deriveControls(project: StudioProjectSummary): LuaRecord {
 }
 
 function buildProjectSpec(project: StudioProjectSummary): LuaRecord {
+  const sections = gameSectionsFor(project);
+
   return {
     title: project.title,
     slug: project.slug,
@@ -196,6 +201,13 @@ function buildProjectSpec(project: StudioProjectSummary): LuaRecord {
       traversal: textList(project.worldRecipe?.traversalMoments),
       atmosphere: textList(project.worldRecipe?.atmosphereBeats)
     },
+    sections: sections.map((section) => ({
+      slug: section.slug,
+      title: section.title,
+      sectionType: section.sectionType,
+      studioPath: section.studioPath,
+      playerGoal: section.playerGoal
+    })),
     controls: deriveControls(project),
     safety: {
       robloxAuth: "Roblox Studio handles login and publishing.",
@@ -261,6 +273,34 @@ function buildAssetManifestTable(project: StudioProjectSummary): LuaRecord {
   };
 }
 
+function gameSectionsFor(project: StudioProjectSummary) {
+  return project.gameSections?.length ? project.gameSections : buildGameSections(project);
+}
+
+function buildGameSectionsTable(sections: StudioGameSectionSummary[]): LuaRecord {
+  return {
+    sections: sections.map((section) => ({
+      slug: section.slug,
+      title: section.title,
+      sectionType: section.sectionType,
+      status: section.status,
+      studioPath: section.studioPath,
+      studioServices: section.studioServices,
+      playerGoal: section.playerGoal,
+      sceneBeats: section.sceneBeats,
+      linkedAssets: section.linkedAssets.map((asset) => ({
+        slug: asset.slug,
+        title: asset.title,
+        kind: asset.kind,
+        targetPath: asset.targetPath,
+        localBundleKey: asset.localBundleKey,
+        placementHint: asset.placementHint
+      })),
+      codeTasks: section.codeTasks
+    }))
+  };
+}
+
 function buildLuaModule(name: string, table: LuaRecord) {
   return [`local ${name} = ${luaValue(table)}`, "", `return ${name}`, ""].join("\n");
 }
@@ -279,16 +319,51 @@ function buildServerScript(project: StudioProjectSummary) {
     .join("\n");
 
   return [
+    'local Workspace = game:GetService("Workspace")',
     'local ReplicatedStorage = game:GetService("ReplicatedStorage")',
     'local Launchpad = ReplicatedStorage:WaitForChild("Launchpad")',
     "local ProjectSpec = require(Launchpad.ProjectSpec)",
     "local BuildPlan = require(Launchpad.BuildPlan)",
     "local AssetManifest = require(Launchpad.AssetManifest)",
+    "local GameSections = require(Launchpad.GameSections)",
     requires,
+    "",
+    "local function ensureFolder(parent, name)",
+    "\tlocal existing = parent:FindFirstChild(name)",
+    '\tif existing and existing:IsA("Folder") then',
+    "\t\treturn existing",
+    "\tend",
+    '\tlocal folder = Instance.new("Folder")',
+    "\tfolder.Name = name",
+    "\tfolder.Parent = parent",
+    "\treturn folder",
+    "end",
+    "",
+    "local function sectionFolderName(section)",
+    '\treturn string.match(section.studioPath, "Workspace/LaunchpadWorld/(.+)") or section.slug',
+    "end",
+    "",
+    "local function ensureSectionMarkers()",
+    '\tlocal worldFolder = ensureFolder(Workspace, "LaunchpadWorld")',
+    "\tfor index, section in ipairs(GameSections.sections) do",
+    "\t\tlocal folder = ensureFolder(worldFolder, sectionFolderName(section))",
+    '\t\tif not folder:FindFirstChild("SectionMarker") then',
+    '\t\t\tlocal marker = Instance.new("Part")',
+    '\t\t\tmarker.Name = "SectionMarker"',
+    "\t\t\tmarker.Anchored = true",
+    "\t\t\tmarker.Size = Vector3.new(16, 1, 16)",
+    "\t\t\tmarker.Position = Vector3.new((index - 1) * 24, 1, 0)",
+    "\t\t\tmarker.Parent = folder",
+    "\t\tend",
+    "\tend",
+    "end",
+    "",
+    "ensureSectionMarkers()",
     "",
     'print(string.format("[Launchpad] Loaded %s", ProjectSpec.title))',
     'print(string.format("[Launchpad] Core loop: %s", BuildPlan.coreLoop))',
     'print(string.format("[Launchpad] Approved assets: %d", #AssetManifest.items))',
+    'print(string.format("[Launchpad] Game sections: %d", #GameSections.sections))',
     "",
     "-- Keep generated behavior inside the Launchpad namespace.",
     "-- Add map Parts, Models, and UI manually or through the future Studio plugin using this plan.",
@@ -338,6 +413,78 @@ function buildHudModel(project: StudioProjectSummary) {
   );
 }
 
+function vector3(x: number, y: number, z: number) {
+  return {
+    $type: "Vector3",
+    X: x,
+    Y: y,
+    Z: z
+  };
+}
+
+function color3(r: number, g: number, b: number) {
+  return {
+    $type: "Color3",
+    R: r,
+    G: g,
+    B: b
+  };
+}
+
+function sectionColor(sectionType: StudioGameSectionSummary["sectionType"]) {
+  if (sectionType === "spawn") return color3(0.26, 0.82, 0.74);
+  if (sectionType === "route") return color3(0.39, 0.64, 1);
+  if (sectionType === "finale") return color3(1, 0.79, 0.29);
+  return color3(0.76, 0.56, 1);
+}
+
+function folderNameFromStudioPath(section: StudioGameSectionSummary) {
+  const marker = "Workspace/LaunchpadWorld/";
+  return section.studioPath.startsWith(marker)
+    ? section.studioPath.slice(marker.length)
+    : pascalCase(section.title);
+}
+
+function buildWorkspaceModel(sections: StudioGameSectionSummary[]) {
+  const children = Object.fromEntries(
+    sections
+      .filter((section) => section.studioPath.startsWith("Workspace/LaunchpadWorld/"))
+      .map((section, index) => {
+        const folderName = folderNameFromStudioPath(section);
+        return [
+          folderName,
+          {
+            $className: "Folder",
+            Name: folderName,
+            SectionNote: {
+              $className: "StringValue",
+              Name: "SectionNote",
+              Value: section.playerGoal
+            },
+            SectionMarker: {
+              $className: "Part",
+              Name: "SectionMarker",
+              Anchored: true,
+              Size: vector3(16, 1, 16),
+              Position: vector3(index * 24, 1, 0),
+              Color: sectionColor(section.sectionType)
+            }
+          }
+        ];
+      })
+  );
+
+  return JSON.stringify(
+    {
+      $className: "Folder",
+      Name: "LaunchpadWorld",
+      ...children
+    },
+    null,
+    2
+  );
+}
+
 function buildRojoProject(project: StudioProjectSummary) {
   return JSON.stringify(
     {
@@ -354,6 +501,12 @@ function buildRojoProject(project: StudioProjectSummary) {
         ServerScriptService: {
           $className: "ServerScriptService",
           $path: "src/ServerScriptService"
+        },
+        Workspace: {
+          $className: "Workspace",
+          LaunchpadWorld: {
+            $path: "src/Workspace/LaunchpadWorld.model.json"
+          }
         },
         StarterPlayer: {
           $className: "StarterPlayer",
@@ -408,6 +561,7 @@ function buildChecks(project: StudioProjectSummary): RojoExportCheck[] {
 
 function buildManifest(
   project: StudioProjectSummary,
+  sections: StudioGameSectionSummary[],
   checks: RojoExportCheck[]
 ): RojoExportManifest {
   return {
@@ -431,6 +585,7 @@ function buildManifest(
         "ReplicatedStorage/Launchpad, ServerScriptService, StarterPlayerScripts, StarterGui"
     },
     counts: {
+      sections: sections.length,
       zones: project.worldRecipe?.zoneSequence.length ?? project.buildPlan?.scenes.length ?? 0,
       assetItems: project.selectedAssetItems.length,
       codePackages: project.approvedCodePackages.length,
@@ -501,18 +656,62 @@ function buildReviewPlan(project: StudioProjectSummary) {
   return lines.join("\n");
 }
 
+function buildGameSectionsReview(sections: StudioGameSectionSummary[]) {
+  const lines = [
+    "# Game Sections",
+    "",
+    "Use these focused sections to decide what to build, inspect, or ask the coach about next.",
+    ""
+  ];
+
+  for (const section of sections) {
+    lines.push(
+      `## ${section.title}`,
+      "",
+      `- Type: ${section.sectionType}`,
+      `- Status: ${section.status}`,
+      `- Studio path: ${section.studioPath}`,
+      `- Player goal: ${section.playerGoal}`,
+      `- Studio services: ${section.studioServices.join(", ")}`,
+      "",
+      "### Scene Beats",
+      "",
+      ...(section.sceneBeats.length
+        ? section.sceneBeats.map((beat) => `- ${beat}`)
+        : ["- Add one visible beat."]),
+      "",
+      "### Linked Assets",
+      "",
+      ...(section.linkedAssets.length
+        ? section.linkedAssets.map((asset) => `- ${asset.title}: ${asset.targetPath}`)
+        : ["- No linked assets yet."]),
+      "",
+      "### Luau Tasks",
+      "",
+      ...(section.codeTasks.length
+        ? section.codeTasks.map((task) => `- ${task}`)
+        : ["- Ask the coach for the first Luau task."]),
+      ""
+    );
+  }
+
+  return lines.join("\n");
+}
+
 function entry(name: string, text: string): RojoExportEntry {
   return { name, data: buffer(text) };
 }
 
 export function buildRojoExportPackage(project: StudioProjectSummary): RojoExportPackage {
+  const sections = gameSectionsFor(project);
   const checks = buildChecks(project);
-  const manifest = buildManifest(project, checks);
+  const manifest = buildManifest(project, sections, checks);
   const entries: RojoExportEntry[] = [
     entry("default.project.json", buildRojoProject(project)),
     entry("launchpad.manifest.json", JSON.stringify(manifest, null, 2)),
     entry("README.md", buildReadme(project)),
     entry("review/build-plan.md", buildReviewPlan(project)),
+    entry("review/game-sections.md", buildGameSectionsReview(sections)),
     entry(
       "src/ReplicatedStorage/Launchpad/ProjectSpec.lua",
       buildLuaModule("ProjectSpec", buildProjectSpec(project))
@@ -525,12 +724,17 @@ export function buildRojoExportPackage(project: StudioProjectSummary): RojoExpor
       "src/ReplicatedStorage/Launchpad/AssetManifest.lua",
       buildLuaModule("AssetManifest", buildAssetManifestTable(project))
     ),
+    entry(
+      "src/ReplicatedStorage/Launchpad/GameSections.lua",
+      buildLuaModule("GameSections", buildGameSectionsTable(sections))
+    ),
     ...project.approvedCodePackages.map((pkg) =>
       entry(
         `src/ReplicatedStorage/Launchpad/Modules/${moduleNameFor(pkg)}.lua`,
         readCodePackageSource(pkg)
       )
     ),
+    entry("src/Workspace/LaunchpadWorld.model.json", buildWorkspaceModel(sections)),
     entry("src/ServerScriptService/Launchpad.server.lua", buildServerScript(project)),
     entry("src/StarterPlayer/StarterPlayerScripts/Launchpad.client.lua", buildClientScript()),
     entry("src/StarterGui/LaunchpadHud.model.json", buildHudModel(project))

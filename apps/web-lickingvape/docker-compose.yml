@@ -42,8 +42,8 @@ services:
       CAT_METADATA_PATH: /data/metadata.json
       INTERNAL_API_BASE: http://lickingvape-api:8000
       INTERNAL_TOOL_TOKEN: ${LICKINGVAPE_INTERNAL_TOOL_TOKEN:-change-me}
-      OLLAMA_GENERAL_BASE_URL: ${LICKINGVAPE_OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
-      OLLAMA_EMBED_BASE_URL: ${LICKINGVAPE_OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_BASE_URL: ${LICKINGVAPE_OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}
+      OLLAMA_EMBED_BASE_URL: ${LICKINGVAPE_OLLAMA_EMBED_BASE_URL:-http://host.docker.internal:8844}
       OLLAMA_GENERAL_MODEL: ${LICKINGVAPE_OLLAMA_GENERAL_MODEL:-rassy-smart}
       OLLAMA_EMBED_MODEL: ${LICKINGVAPE_OLLAMA_EMBED_MODEL:-rassy-embed}
       EDITOR_WORLD_CONTEXT_QUERY_LIMIT: ${LICKINGVAPE_EDITOR_WORLD_CONTEXT_QUERY_LIMIT:-2}
@@ -51,6 +51,8 @@ services:
     volumes:
       - ${APP_DATA_DIR}/app-data/web-lickingvape/named/lickingvape-cat-data:/data
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/scripts/configure_cat_ollama.py:/app/cat/bootstrap/auto_configure_ollama.py:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
     command:
       - /bin/sh
       - -lc

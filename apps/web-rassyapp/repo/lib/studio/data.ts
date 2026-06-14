@@ -25,6 +25,7 @@ import type {
   StudioWriterStageSummary
 } from "@/lib/studio/types";
 import { ROBLOX_WRITER_STAGES } from "@/lib/studio/writer-team";
+import { buildGameSections } from "@/lib/studio/game-sections";
 import {
   buildWorldRecipe,
   getMapPatternBySlug,
@@ -141,9 +142,11 @@ const TEMPLATE_SEEDS: TemplateSeed[] = [
     primaryMechanics: ["Dialogue prompts", "Clue collection", "Scene progression"],
     starterQuestText:
       "Find the missing camp map by talking to characters and following the clue trail.",
-    artDirection: "Storybook woods, lantern light, props with strong silhouettes, and cozy mystery mood.",
+    artDirection:
+      "Storybook woods, lantern light, props with strong silhouettes, and cozy mystery mood.",
     defaultOneLiner: "Explore a mystery camp, collect clues, and uncover the final reveal.",
-    defaultCoreLoop: "Talk to characters, collect clues, unlock the next scene, and solve the mystery.",
+    defaultCoreLoop:
+      "Talk to characters, collect clues, unlock the next scene, and solve the mystery.",
     starterNpcs: ["Ranger Rue", "Scout Nova"],
     starterScripts: ["Dialogue trigger", "Clue tracker", "Scene unlock controller"]
   }
@@ -153,7 +156,9 @@ function parseJsonArray(raw?: string | null) {
   if (!raw) return [] as string[];
   try {
     const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === "string")
+      : [];
   } catch {
     return [];
   }
@@ -235,7 +240,9 @@ function toTemplateSummary(
     starterPrompt: template.starterPrompt,
     defaultTheme: template.defaultTheme,
     starterScenes:
-      "starterScenes" in template ? template.starterScenes : parseJsonArray(template.starterScenesJson),
+      "starterScenes" in template
+        ? template.starterScenes
+        : parseJsonArray(template.starterScenesJson),
     primaryMechanics:
       "primaryMechanics" in template
         ? template.primaryMechanics
@@ -279,7 +286,9 @@ function buildNextActions(project: {
   }
 
   if (!project.worldProfileSlug || !project.mapPatternSlug) {
-    actions.push("Lock a world profile and map pattern so the terrain crew can build visible progress fast.");
+    actions.push(
+      "Lock a world profile and map pattern so the terrain crew can build visible progress fast."
+    );
   }
 
   if (!selectedAssets.length) {
@@ -287,7 +296,9 @@ function buildNextActions(project: {
   }
 
   if (project.connectionStatus === "Guest") {
-    actions.push("Keep building in shared guest mode until the team wants a Roblox Studio handoff.");
+    actions.push(
+      "Keep building in shared guest mode until the team wants a Roblox Studio handoff."
+    );
   }
 
   if (!project.robloxUsername) {
@@ -303,7 +314,9 @@ function buildNextActions(project: {
   }
 
   if (project.publishReadiness !== "Studio-ready") {
-    actions.push("Use the coach to expand scenes, Luau tasks, NPCs, and build kits before publish.");
+    actions.push(
+      "Use the coach to expand scenes, Luau tasks, NPCs, and build kits before publish."
+    );
   }
 
   return actions.slice(0, 4);
@@ -354,7 +367,9 @@ function buildStarterBuildPlanData(options: {
     heroGoal,
     selectedAssetPackSlugs
   });
-  const scenes = worldRecipe.zoneSequence.length ? worldRecipe.zoneSequence : template.starterScenes;
+  const scenes = worldRecipe.zoneSequence.length
+    ? worldRecipe.zoneSequence
+    : template.starterScenes;
   const mechanics = Array.from(
     new Set([...template.primaryMechanics, ...worldRecipe.mapPattern.traversalBeats.slice(0, 2)])
   ).slice(0, 6);
@@ -461,20 +476,20 @@ async function adoptLegacyMemberProject(workspaceId: string, actorUserId: string
   });
 }
 
-async function ensureStudioScaffold(
-  project: {
-    id: string;
-    title: string;
-    theme: string;
-    heroGoal?: string | null;
-    templatePackSlug?: string | null;
-    worldProfileSlug?: string | null;
-    mapPatternSlug?: string | null;
-    selectedAssetPackSlugsJson?: string | null;
-  }
-) {
+async function ensureStudioScaffold(project: {
+  id: string;
+  title: string;
+  theme: string;
+  heroGoal?: string | null;
+  templatePackSlug?: string | null;
+  worldProfileSlug?: string | null;
+  mapPatternSlug?: string | null;
+  selectedAssetPackSlugsJson?: string | null;
+}) {
   const template = findTemplateSeed(project.templatePackSlug);
-  const selectedAssetPackSlugs = sanitizeAssetPackSlugs(parseJsonArray(project.selectedAssetPackSlugsJson));
+  const selectedAssetPackSlugs = sanitizeAssetPackSlugs(
+    parseJsonArray(project.selectedAssetPackSlugsJson)
+  );
 
   const [buildPlan, publishTarget] = await Promise.all([
     prisma.buildPlan.findFirst({
@@ -665,7 +680,7 @@ export async function updateStudioProject(options: {
   );
   const normalizedGoal =
     options.patch.heroGoal === undefined
-      ? project.heroGoal ?? defaultHeroGoal(selectedTemplate)
+      ? (project.heroGoal ?? defaultHeroGoal(selectedTemplate))
       : trimOrNull(options.patch.heroGoal);
   const theme = trimOrNull(options.patch.theme) ?? project.theme ?? selectedTemplate.defaultTheme;
   const title = trimOrNull(options.patch.title) ?? project.title;
@@ -853,7 +868,9 @@ function toCodePackageSummary(pkg: ApprovedCodePackage): StudioCodePackageSummar
   };
 }
 
-function toWorldProfileSummary(profile: NonNullable<ReturnType<typeof getWorldProfileBySlug>>): StudioWorldProfileSummary {
+function toWorldProfileSummary(
+  profile: NonNullable<ReturnType<typeof getWorldProfileBySlug>>
+): StudioWorldProfileSummary {
   return {
     slug: profile.slug,
     title: profile.title,
@@ -874,7 +891,9 @@ function toWorldProfileSummary(profile: NonNullable<ReturnType<typeof getWorldPr
   };
 }
 
-function toMapPatternSummary(pattern: NonNullable<ReturnType<typeof getMapPatternBySlug>>): StudioMapPatternSummary {
+function toMapPatternSummary(
+  pattern: NonNullable<ReturnType<typeof getMapPatternBySlug>>
+): StudioMapPatternSummary {
   return {
     slug: pattern.slug,
     title: pattern.title,
@@ -910,10 +929,12 @@ function toWorldRecipeSummary(
   };
 }
 
-function deriveWriterStageStatus(routine?: {
-  status: string;
-  runs: Array<{ status: string }>;
-} | null) {
+function deriveWriterStageStatus(
+  routine?: {
+    status: string;
+    runs: Array<{ status: string }>;
+  } | null
+) {
   if (!routine) return "Not started";
   if (routine.status === "Paused") return "Paused";
   const latestRun = routine.runs[0];
@@ -921,10 +942,7 @@ function deriveWriterStageStatus(routine?: {
   return "Ready";
 }
 
-function summarizeWriterOutput(
-  outputText?: string | null,
-  handoffJson?: string | null
-) {
+function summarizeWriterOutput(outputText?: string | null, handoffJson?: string | null) {
   const trimmedOutput = trimOrNull(outputText);
   if (trimmedOutput) {
     return trimText(trimmedOutput.replace(/\s+/g, " "), 160);
@@ -977,7 +995,10 @@ async function listWriterStageSummaries(workspaceId: string): Promise<StudioWrit
       status: deriveWriterStageStatus(routine),
       routineId: routine?.id ?? null,
       draftSlug: routine?.draftSlug ?? null,
-      latestRunPreview: summarizeWriterOutput(latestRun?.outputText, latestRun?.handoffJson ?? routine?.handoffJson),
+      latestRunPreview: summarizeWriterOutput(
+        latestRun?.outputText,
+        latestRun?.handoffJson ?? routine?.handoffJson
+      ),
       latestRunAt:
         latestRun?.completedAt?.toISOString() ??
         latestRun?.startedAt?.toISOString() ??
@@ -1001,7 +1022,9 @@ export async function getStudioSummary(
   const templateSummary = project.templatePack ? toTemplateSummary(project.templatePack) : null;
   const buildPlan = toBuildPlanSummary(project.buildPlans[0]);
   const publishTarget = toPublishTargetSummary(project.publishTargets[0]);
-  const selectedAssetPackSlugs = sanitizeAssetPackSlugs(parseJsonArray(project.selectedAssetPackSlugsJson));
+  const selectedAssetPackSlugs = sanitizeAssetPackSlugs(
+    parseJsonArray(project.selectedAssetPackSlugsJson)
+  );
   const selectedAssetPacks = getAssetPacksBySlugs(selectedAssetPackSlugs);
   const selectedAssetItems = listAssetItemsForPacks(selectedAssetPackSlugs);
   const approvedCodePackages = listApprovedCodePackagesForPacks(selectedAssetPackSlugs);
@@ -1034,7 +1057,7 @@ export async function getStudioSummary(
       })
     : null;
 
-  return {
+  const summary = {
     id: project.id,
     slug: project.slug,
     workspaceId: project.workspaceId ?? null,
@@ -1066,5 +1089,10 @@ export async function getStudioSummary(
     writerStages,
     availableTemplates: templates.map((template) => toTemplateSummary(template)),
     nextActions: buildNextActions(project)
+  };
+
+  return {
+    ...summary,
+    gameSections: buildGameSections(summary)
   };
 }

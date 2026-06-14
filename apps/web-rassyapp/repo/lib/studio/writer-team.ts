@@ -42,6 +42,7 @@ export type WriterProjectSnapshot = {
   worldRecipeHeadline?: string | null;
   worldRecipeLines: string[];
   worldCrewLines: string[];
+  gameSectionLines: string[];
   selectedAssetPackSlugs: string[];
   selectedAssetPackTitles: string[];
   selectedAssetManifestLines: string[];
@@ -109,7 +110,8 @@ export const ROBLOX_WRITER_STAGES: WriterStageDefinition[] = [
     stageKey: "landmarks",
     agentKey: "landmark-writer",
     title: "Landmark Writer",
-    mission: "Place the memorable structures, set pieces, and visual anchors that make the world exciting fast.",
+    mission:
+      "Place the memorable structures, set pieces, and visual anchors that make the world exciting fast.",
     outputLabel: "Landmark pass",
     handoffLabel: "Scenery pass",
     dependsOnStageKey: "terrain",
@@ -125,7 +127,8 @@ export const ROBLOX_WRITER_STAGES: WriterStageDefinition[] = [
     stageKey: "scenery",
     agentKey: "scenery-writer",
     title: "Scenery Writer",
-    mission: "Fill the world with cozy detail, atmosphere, and kid-friendly decoration without overcomplicating the map.",
+    mission:
+      "Fill the world with cozy detail, atmosphere, and kid-friendly decoration without overcomplicating the map.",
     outputLabel: "Scenery pass",
     handoffLabel: "Quest beats",
     dependsOnStageKey: "landmarks",
@@ -157,7 +160,8 @@ export const ROBLOX_WRITER_STAGES: WriterStageDefinition[] = [
     stageKey: "script",
     agentKey: "script-writer",
     title: "Script Writer",
-    mission: "Translate the plan into Roblox Studio objects, Luau scripts, and exact placement guidance.",
+    mission:
+      "Translate the plan into Roblox Studio objects, Luau scripts, and exact placement guidance.",
     outputLabel: "Studio build sheet",
     handoffLabel: "Playtest checklist",
     dependsOnStageKey: "quest",
@@ -219,7 +223,8 @@ export function buildWriterProjectSnapshot(
 ): WriterProjectSnapshot | null {
   if (!snapshot) return null;
 
-  const title = typeof snapshot.title === "string" && snapshot.title.trim() ? snapshot.title.trim() : null;
+  const title =
+    typeof snapshot.title === "string" && snapshot.title.trim() ? snapshot.title.trim() : null;
   const templateName =
     typeof snapshot.templateName === "string" && snapshot.templateName.trim()
       ? snapshot.templateName.trim()
@@ -228,13 +233,17 @@ export function buildWriterProjectSnapshot(
     typeof snapshot.templateSlug === "string" && snapshot.templateSlug.trim()
       ? snapshot.templateSlug.trim()
       : null;
-  const theme = typeof snapshot.theme === "string" && snapshot.theme.trim() ? snapshot.theme.trim() : null;
+  const theme =
+    typeof snapshot.theme === "string" && snapshot.theme.trim() ? snapshot.theme.trim() : null;
   const heroGoal =
-    typeof snapshot.heroGoal === "string" && snapshot.heroGoal.trim() ? snapshot.heroGoal.trim() : null;
+    typeof snapshot.heroGoal === "string" && snapshot.heroGoal.trim()
+      ? snapshot.heroGoal.trim()
+      : null;
 
   const hasAssetContext =
     uniqueStrings(snapshot.worldRecipeLines, 10).length > 0 ||
     uniqueStrings(snapshot.worldCrewLines, 8).length > 0 ||
+    uniqueStrings(snapshot.gameSectionLines, 12).length > 0 ||
     uniqueStrings(snapshot.selectedAssetPackSlugs, 12).length > 0 ||
     uniqueStrings(snapshot.selectedAssetPackTitles, 12).length > 0 ||
     uniqueStrings(snapshot.selectedAssetManifestLines, 8).length > 0 ||
@@ -255,7 +264,9 @@ export function buildWriterProjectSnapshot(
 
   return {
     projectId:
-      typeof snapshot.projectId === "string" && snapshot.projectId.trim() ? snapshot.projectId.trim() : null,
+      typeof snapshot.projectId === "string" && snapshot.projectId.trim()
+        ? snapshot.projectId.trim()
+        : null,
     title,
     templateName,
     templateSlug,
@@ -275,6 +286,7 @@ export function buildWriterProjectSnapshot(
         : null,
     worldRecipeLines: uniqueStrings(snapshot.worldRecipeLines, 10),
     worldCrewLines: uniqueStrings(snapshot.worldCrewLines, 8),
+    gameSectionLines: uniqueStrings(snapshot.gameSectionLines, 12),
     selectedAssetPackSlugs: uniqueStrings(snapshot.selectedAssetPackSlugs, 12),
     selectedAssetPackTitles: uniqueStrings(snapshot.selectedAssetPackTitles, 12),
     selectedAssetManifestLines: uniqueStrings(snapshot.selectedAssetManifestLines, 8),
@@ -309,6 +321,9 @@ function buildProjectLines(project?: WriterProjectSnapshot | null) {
       ? `World recipe lines: ${project.worldRecipeLines.join(" | ")}`
       : null,
     project.worldCrewLines.length ? `World crew: ${project.worldCrewLines.join(" | ")}` : null,
+    project.gameSectionLines.length
+      ? `Game sections: ${project.gameSectionLines.join(" | ")}`
+      : null,
     project.selectedAssetPackTitles.length
       ? `Approved asset shelves: ${project.selectedAssetPackTitles.join(", ")}`
       : project.selectedAssetPackSlugs.length
@@ -357,14 +372,22 @@ export function buildWriterStageBrief(options: {
     branch?: string;
   } | null;
 }) {
-  const stageIndex = ROBLOX_WRITER_STAGES.findIndex((item) => item.stageKey === options.stage.stageKey);
+  const stageIndex = ROBLOX_WRITER_STAGES.findIndex(
+    (item) => item.stageKey === options.stage.stageKey
+  );
   const previousStage = stageIndex > 0 ? ROBLOX_WRITER_STAGES[stageIndex - 1] : null;
   const nextStage = ROBLOX_WRITER_STAGES[stageIndex + 1] ?? null;
   const workspaceLines = [
-    options.workspaceContext?.workspaceName ? `Workspace: ${options.workspaceContext.workspaceName}` : null,
-    options.workspaceContext?.sessionTitle ? `Session lane: ${options.workspaceContext.sessionTitle}` : null,
+    options.workspaceContext?.workspaceName
+      ? `Workspace: ${options.workspaceContext.workspaceName}`
+      : null,
+    options.workspaceContext?.sessionTitle
+      ? `Session lane: ${options.workspaceContext.sessionTitle}`
+      : null,
     options.workspaceContext?.branch ? `Branch: ${options.workspaceContext.branch}` : null,
-    options.workspaceContext?.activeFile ? `Active file: ${options.workspaceContext.activeFile}` : null,
+    options.workspaceContext?.activeFile
+      ? `Active file: ${options.workspaceContext.activeFile}`
+      : null,
     options.workspaceContext?.openFiles?.length
       ? `Open files: ${options.workspaceContext.openFiles.join(", ")}`
       : null

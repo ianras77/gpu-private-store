@@ -61,15 +61,15 @@ It also seeds a demo account on first boot:
 
 The API will fall back to built-in neutral copy if no external LLM service is configured.
 
-## Optional External Ollama Network
-By default both bundled Cheshire Cat containers try `host.docker.internal:11434` for Ollama.
-If you already run separate `ollama-general`, `ollama-code`, and `ollama-embed` containers on `ollama_llm-net`, use the extra compose file:
+## Optional Shared RassyCodex Gateway
+By default both bundled Cheshire Cat containers use `host.docker.internal:8844` for the local RassyCodex compatibility gateway.
+If you need to override those endpoints for a deployment, use the extra compose file:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.ai.yml up -d --build
 ```
 
-That overlay keeps the same app stack and joins both Cat containers to the external Ollama network.
+That overlay keeps the same app stack and can point both Cat containers at a different model gateway.
 
 The Cheshire Cat plugin now exposes a `mediate_turn` endpoint that lets the API ask for a rewritten message, sender coaching, recipient framing, and the mediator's likely next prompt in one pass.
 The API routes proposal drafting, proposal refinement, and closeout guidance through a support Cat when available, then falls back to the primary Cat so the room keeps moving if the secondary model is down.

@@ -1,16 +1,20 @@
 services:
   cat:
     environment:
-      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
-      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://host.docker.internal:8844}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - default
       - tipi_main
 
   cat-support:
     environment:
-      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_SUPPORT_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
-      OLLAMA_EMBED_BASE_URL: ${OLLAMA_SUPPORT_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_SUPPORT_GENERAL_BASE_URL:-http://host.docker.internal:8844}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_SUPPORT_EMBED_BASE_URL:-http://host.docker.internal:8844}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - default
       - tipi_main

@@ -5,8 +5,8 @@ services:
     environment:
       CCAT_METADATA_FILE: /app/cat/data/metadata.json
       CAT_METADATA_PATH: /app/cat/data/metadata.json
-      OLLAMA_GENERAL_BASE_URL: ${USMENDER_OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
-      OLLAMA_EMBED_BASE_URL: ${USMENDER_OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_BASE_URL: ${USMENDER_OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}
+      OLLAMA_EMBED_BASE_URL: ${USMENDER_OLLAMA_EMBED_BASE_URL:-http://host.docker.internal:8844}
       OLLAMA_GENERAL_MODEL: ${USMENDER_OLLAMA_GENERAL_MODEL:-rassy-smart}
       OLLAMA_EMBED_MODEL: ${USMENDER_OLLAMA_EMBED_MODEL:-rassy-embed}
       PYTHONDONTWRITEBYTECODE: "1"
@@ -16,6 +16,8 @@ services:
     - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/plugins:/app/cat/plugins:ro
     - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/static:/app/cat/static:ro
     - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/bootstrap:/app/cat/bootstrap:ro
+    extra_hosts:
+    - host.docker.internal:host-gateway
     command:
     - /bin/sh
     - -lc
@@ -38,8 +40,8 @@ services:
     environment:
       CCAT_METADATA_FILE: /app/cat/data/metadata.json
       CAT_METADATA_PATH: /app/cat/data/metadata.json
-      OLLAMA_GENERAL_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
-      OLLAMA_EMBED_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}
+      OLLAMA_EMBED_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_EMBED_BASE_URL:-http://host.docker.internal:8844}
       OLLAMA_GENERAL_MODEL: ${USMENDER_SUPPORT_OLLAMA_GENERAL_MODEL:-rassy-coder}
       OLLAMA_EMBED_MODEL: ${USMENDER_SUPPORT_OLLAMA_EMBED_MODEL:-rassy-embed}
       PYTHONDONTWRITEBYTECODE: "1"
@@ -49,6 +51,8 @@ services:
     - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/plugins:/app/cat/plugins:ro
     - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/static:/app/cat/static:ro
     - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/bootstrap:/app/cat/bootstrap:ro
+    extra_hosts:
+    - host.docker.internal:host-gateway
     command:
     - /bin/sh
     - -lc

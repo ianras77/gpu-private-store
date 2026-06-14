@@ -1,7 +1,7 @@
 import { autoModerateText, type AutoModerationOutcome } from "./moderation";
 
 const rawBaseUrl =
-  process.env.LOCALAI_BASE_URL || "http://rassygpt-gateway:8080/v1";
+  process.env.LOCALAI_BASE_URL || "http://host.docker.internal:8844/v1";
 const baseUrl = rawBaseUrl.endsWith("/v1")
   ? rawBaseUrl
   : `${rawBaseUrl.replace(/\/$/, "")}/v1`;

@@ -11,6 +11,7 @@ import { BrandMark } from "@/components/brand/mark";
 import { ChatTab } from "@/components/playground/chat-tab";
 import { TemplatesTab } from "@/components/playground/templates-tab";
 import { WorldForgeTab } from "@/components/playground/world-forge-tab";
+import { GameSectionsTab } from "@/components/playground/game-sections-tab";
 import { StudioHandoffTab } from "@/components/playground/studio-handoff-tab";
 import { MemoryTab } from "@/components/playground/memory-tab";
 import { AssetShelfTab } from "@/components/playground/asset-shelf-tab";
@@ -31,6 +32,7 @@ type TabId =
   | "chat"
   | "templates"
   | "worlds"
+  | "sections"
   | "assets"
   | "handoff"
   | "plugins"
@@ -73,6 +75,12 @@ const tabs: TabMeta[] = [
     label: "Map Forge",
     description:
       "Choose a world vibe, a route shape, and the world-building crew recipe before the agents fan out.",
+    group: "core"
+  },
+  {
+    id: "sections",
+    label: "Game Sections",
+    description: "Focus on one Roblox area with its Studio path, assets, and Luau tasks.",
     group: "core"
   },
   {
@@ -201,6 +209,10 @@ function metricForTab(tabId: TabId, features: FeatureSnapshot, summary: Workspac
   if (tabId === "assets") {
     return `${CURATED_ASSET_PACKS.length} approved shelves`;
   }
+  if (tabId === "sections") {
+    const count = summary?.studioProject?.gameSections.length ?? 0;
+    return count ? `${count} build sections` : "Sections loading";
+  }
   if (tabId === "handoff") {
     return summary?.studioProject?.publishReadiness === "Studio-ready"
       ? "Rojo package ready"
@@ -228,7 +240,13 @@ function metricTone(tabId: TabId, features: FeatureSnapshot) {
   if (tabId === "chat" && features.catOnline) {
     return "text-glow-300";
   }
-  if (tabId === "templates" || tabId === "worlds" || tabId === "assets" || tabId === "handoff") {
+  if (
+    tabId === "templates" ||
+    tabId === "worlds" ||
+    tabId === "sections" ||
+    tabId === "assets" ||
+    tabId === "handoff"
+  ) {
     return "text-glow-300";
   }
   if (tabId === "status" && features.catOnline === false) {
@@ -571,6 +589,12 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
                     Browse approved shelves
                   </button>
                   <button
+                    onClick={() => setActiveTab("sections")}
+                    className="w-full rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-3 text-left hover:border-ink-600"
+                  >
+                    Focus one game section
+                  </button>
+                  <button
                     onClick={() => setActiveTab("chat")}
                     className="w-full rounded-2xl border border-ink-800 bg-ink-950/70 px-3 py-3 text-left hover:border-ink-600"
                   >
@@ -648,6 +672,13 @@ export function ConsoleShell({ user }: { user: UserSummary }) {
                   onJumpToTab={(tab) => setActiveTab(tab)}
                   onSendToCoach={launchCoachPrompt}
                   onRefreshSummary={refreshSummary}
+                />
+              ) : null}
+              {activeTab === "sections" ? (
+                <GameSectionsTab
+                  summary={summary}
+                  onJumpToTab={(tab) => setActiveTab(tab)}
+                  onSendToCoach={launchCoachPrompt}
                 />
               ) : null}
               {activeTab === "assets" ? (

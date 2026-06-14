@@ -23,8 +23,8 @@ services:
     environment:
       CCAT_METADATA_FILE: /app/cat/data/metadata.json
       CAT_METADATA_PATH: /app/cat/data/metadata.json
-      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
-      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_EMBED_BASE_URL:-http://host.docker.internal:8844}
       OLLAMA_GENERAL_MODEL: ${OLLAMA_GENERAL_MODEL:-rassy-smart}
       OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-rassy-embed}
     extra_hosts:
@@ -48,8 +48,8 @@ services:
     environment:
       CCAT_METADATA_FILE: /app/cat/data/metadata.json
       CAT_METADATA_PATH: /app/cat/data/metadata.json
-      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_SUPPORT_GENERAL_BASE_URL:-http://rassygpt-gateway:8080}
-      OLLAMA_EMBED_BASE_URL: ${OLLAMA_SUPPORT_EMBED_BASE_URL:-http://rassygpt-gateway:8080}
+      OLLAMA_GENERAL_BASE_URL: ${OLLAMA_SUPPORT_GENERAL_BASE_URL:-http://host.docker.internal:8844}
+      OLLAMA_EMBED_BASE_URL: ${OLLAMA_SUPPORT_EMBED_BASE_URL:-http://host.docker.internal:8844}
       OLLAMA_GENERAL_MODEL: ${OLLAMA_SUPPORT_GENERAL_MODEL:-rassy-coder}
       OLLAMA_EMBED_MODEL: ${OLLAMA_SUPPORT_EMBED_MODEL:-rassy-embed}
     extra_hosts:

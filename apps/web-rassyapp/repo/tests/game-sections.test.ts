@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { buildRojoExportPackage } from "@/lib/studio/rojo-export";
+import { buildGameSections } from "@/lib/studio/game-sections";
 import type { StudioProjectSummary } from "@/lib/studio/types";
 
-const sampleProject = {
+const baseProject = {
   id: "project-1",
   slug: "sky-hopper-adventure",
   title: "Sky Hopper Adventure",
   theme: "Candy sky",
   heroGoal: "Reach the golden flag",
-  targetAudience: "Kids 7-12",
+  targetAudience: "Kids 11-13",
   connectionStatus: "Guest",
   publishReadiness: "Studio-ready",
   parentModeEnabled: true,
@@ -50,6 +50,24 @@ const sampleProject = {
       tags: ["checkpoint"],
       buildHints: ["Pair with checkpoint trigger"],
       safetyNote: "No embedded public scripts."
+    },
+    {
+      slug: "coin-ring",
+      title: "Coin Ring",
+      kind: "model",
+      storageMode: "inventory-library",
+      sourceLabel: "Launchpad reviewed Roblox sample library reference",
+      sourceType: "Roblox sample shelf",
+      summary: "A reward loop marker.",
+      localBundleKey: "obby/coin-ring",
+      localManifestPath: "data/roblox-catalog/packs/happy-obby-pieces.json",
+      targetContainer: "Workspace",
+      targetPath: "Workspace/Map/Rewards",
+      instanceHint: "Model",
+      placementHint: "Place near jumps and safe islands.",
+      tags: ["reward"],
+      buildHints: ["Connect to reward UI"],
+      safetyNote: "No embedded public scripts."
     }
   ],
   approvedCodePackages: [
@@ -79,7 +97,7 @@ const sampleProject = {
     biomeTags: ["sky"],
     skyline: "Cloud decks.",
     traversalStyle: "Short hops.",
-    zoneThemes: ["Cloud Dock"],
+    zoneThemes: ["Cloud Dock", "Rainbow Stepway", "Star Podium"],
     landmarkIdeas: ["Balloon harbor tower"],
     sceneryHooks: ["Cloud puffs"],
     atmosphereHooks: ["Bell chimes"],
@@ -150,107 +168,35 @@ const sampleProject = {
   nextActions: []
 } as StudioProjectSummary;
 
-function readEntry(pkg: ReturnType<typeof buildRojoExportPackage>, name: string) {
-  const entry = pkg.entries.find((item) => item.name === name);
-  expect(entry).toBeDefined();
-  return entry?.data.toString("utf8") ?? "";
-}
+describe("game section builder", () => {
+  it("turns a saved project into focusable Studio build sections", () => {
+    const sections = buildGameSections(baseProject);
 
-describe("Rojo export package", () => {
-  it("builds a Rojo project package from the saved studio project", () => {
-    const pkg = buildRojoExportPackage(sampleProject);
-
-    expect(pkg.filename).toBe("sky-hopper-adventure-rojo.zip");
-    expect(pkg.entries.map((entry) => entry.name)).toEqual(
-      expect.arrayContaining([
-        "default.project.json",
-        "launchpad.manifest.json",
-        "README.md",
-        "review/build-plan.md",
-        "review/game-sections.md",
-        "src/ReplicatedStorage/Launchpad/ProjectSpec.lua",
-        "src/ReplicatedStorage/Launchpad/BuildPlan.lua",
-        "src/ReplicatedStorage/Launchpad/AssetManifest.lua",
-        "src/ReplicatedStorage/Launchpad/GameSections.lua",
-        "src/ReplicatedStorage/Launchpad/Modules/CheckpointService.lua",
-        "src/Workspace/LaunchpadWorld.model.json",
-        "src/ServerScriptService/Launchpad.server.lua",
-        "src/StarterPlayer/StarterPlayerScripts/Launchpad.client.lua"
-      ])
-    );
-  });
-
-  it("emits a Rojo v7 project that keeps Launchpad in its own namespace", () => {
-    const pkg = buildRojoExportPackage(sampleProject);
-    const project = JSON.parse(readEntry(pkg, "default.project.json")) as {
-      name?: string;
-      tree?: Record<string, unknown>;
-      globIgnorePaths?: string[];
-    };
-
-    expect(project.name).toBe("Sky Hopper Adventure");
-    expect(project.globIgnorePaths).toContain("review/**");
-    expect(project.tree).toMatchObject({
-      $className: "DataModel",
-      ReplicatedStorage: {
-        $className: "ReplicatedStorage",
-        Launchpad: {
-          $path: "src/ReplicatedStorage/Launchpad"
-        }
-      },
-      ServerScriptService: {
-        $className: "ServerScriptService",
-        $path: "src/ServerScriptService"
-      },
-      StarterPlayer: {
-        $className: "StarterPlayer",
-        StarterPlayerScripts: {
-          $className: "StarterPlayerScripts",
-          $path: "src/StarterPlayer/StarterPlayerScripts"
-        }
-      },
-      Workspace: {
-        $className: "Workspace",
-        LaunchpadWorld: {
-          $path: "src/Workspace/LaunchpadWorld.model.json"
-        }
-      }
+    expect(sections.map((section) => section.slug)).toEqual([
+      "spawn-cloud-dock",
+      "route-rainbow-stepway",
+      "finale-star-podium",
+      "systems-rewards"
+    ]);
+    expect(sections[0]).toMatchObject({
+      title: "Cloud Dock",
+      studioPath: "Workspace/LaunchpadWorld/01-CloudDock",
+      sectionType: "spawn",
+      playerGoal: "Learn the goal and start safely."
     });
-  });
-
-  it("grounds generated Luau in project context, assets, and approved modules", () => {
-    const pkg = buildRojoExportPackage(sampleProject);
-
-    expect(readEntry(pkg, "src/ReplicatedStorage/Launchpad/ProjectSpec.lua")).toContain(
-      'title = "Sky Hopper Adventure"'
-    );
-    expect(readEntry(pkg, "src/ReplicatedStorage/Launchpad/BuildPlan.lua")).toContain(
-      'coreLoop = "Jump, checkpoint, collect, retry."'
-    );
-    expect(readEntry(pkg, "src/ReplicatedStorage/Launchpad/AssetManifest.lua")).toContain(
-      'targetPath = "Workspace/Map/Checkpoints"'
-    );
-    expect(readEntry(pkg, "src/ServerScriptService/Launchpad.server.lua")).toContain(
-      "local CheckpointService = require(Launchpad.Modules.CheckpointService)"
+    expect(sections[1].linkedAssets.map((asset) => asset.title)).toContain("Checkpoint Arch");
+    expect(sections[1].codeTasks).toContain(
+      "Wire Checkpoint Service in ReplicatedStorage for this section."
     );
   });
 
-  it("exports focusable game sections and a starter Workspace model", () => {
-    const pkg = buildRojoExportPackage(sampleProject);
-    const sections = readEntry(pkg, "src/ReplicatedStorage/Launchpad/GameSections.lua");
-    const sectionReview = readEntry(pkg, "review/game-sections.md");
-    const worldModel = JSON.parse(readEntry(pkg, "src/Workspace/LaunchpadWorld.model.json")) as {
-      Name?: string;
-      [key: string]: unknown;
-    };
+  it("creates section coach prompts that stay tied to Studio paths and Luau tasks", () => {
+    const sections = buildGameSections(baseProject);
+    const route = sections.find((section) => section.slug === "route-rainbow-stepway");
 
-    expect(sections).toContain('studioPath = "Workspace/LaunchpadWorld/02-RainbowStepway"');
-    expect(sections).toContain('title = "Rainbow Stepway"');
-    expect(sectionReview).toContain("## Rainbow Stepway");
-    expect(worldModel.Name).toBe("LaunchpadWorld");
-    expect(worldModel["02-RainbowStepway"]).toMatchObject({
-      $className: "Folder",
-      Name: "02-RainbowStepway"
-    });
+    expect(route?.coachPrompt).toContain("Focus on the Rainbow Stepway section");
+    expect(route?.coachPrompt).toContain("Workspace/LaunchpadWorld/02-RainbowStepway");
+    expect(route?.coachPrompt).toContain("Checkpoint Service");
+    expect(route?.coachPrompt).toContain("Luau");
   });
 });

@@ -15,7 +15,7 @@ Purpose: capture the current Crackstack behavior before Stage 1 changes.
   - `POST /agent/threads` creates in-memory thread (global `THREADS` dict), optionally binds dataset (defaults to demo via `ensure_demo_dataset`).
   - `POST /agent/threads/{id}/chat` calls `run_agent`, which loops tool-calling LLM responses and stores history per thread.
 - Agent runtime (`app/llm/*`):
-  - LocalAI-compatible client hitting `LOCALAI_BASE_URL` (default `http://127.0.0.1:8112`) with model `qwen3-1.7b`.
+  - LocalAI-compatible client hitting `LOCALAI_BASE_URL` (default `http://host.docker.internal:8844`) with model `rassy-smart`.
   - Tool catalog includes `list_datasets`, `get_schema`, `sample_rows`, `profile_columns`, `propose_recipe`, `preview_recipe`, `validate_recipe`, `request_approval`, `run_recipe` (validation + DuckDB-backed transforms).
   - Recipes execute deterministically via DuckDB (`store.run_recipe`) with risk flags for filters/drops/date casts.
 - Tests present: health, dataset list, uploads, RLS isolation, SQL Server export. Tests that require Postgres are skipped if `DATABASE_URL` unreachable.

@@ -23,7 +23,7 @@ make up
 ```
 
 Canonical startup now lives in `scripts/stack.sh`, and both `make up` and `pnpm stack:up` call it.
-The script will create the shared `ollama_llm-net` Docker network if it is missing, then run `docker compose up -d --build`.
+The script runs `docker compose up -d --build`; model calls use the host-published RassyCodex gateway at `host.docker.internal:8844`.
 All services use `restart: unless-stopped`, so they come back after reboot/session restart.
 
 Equivalent commands:
@@ -124,8 +124,8 @@ The API can use the LocalAI cluster on this server. Set in `apps/api/.env`:
 
 ```
 OPENAI_ENABLED=true
-LOCALAI_BASE_URL=http://localhost:8111/v1
-LOCALAI_CHAT_MODEL=qwen3-1.7b
+LOCALAI_BASE_URL=http://host.docker.internal:8844/v1
+LOCALAI_CHAT_MODEL=rassy-smart
 LOCALAI_MODERATION_MODEL=ibm-granite.granite-4.0-1b
 LOCALAI_EMBED_MODEL=granite-embedding-125m-english
 LOCALAI_TRANSCRIBE_MODEL=whisper-1
@@ -150,8 +150,8 @@ CHESHIRE_CAT_URL=http://cheshire-cat:80
 
 The in-stack Cheshire Cat now bootstraps itself to the shared local Ollama services:
 
-- chat/general: `ollama-general:11434`
-- embeddings: `ollama-embed:11434`
+- chat/general: `host.docker.internal:8844`
+- embeddings: `host.docker.internal:8844`
 
 ## iOS Audio Transcription
 

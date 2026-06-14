@@ -19,15 +19,15 @@ const normalizeMode = (value) => {
 };
 const config = {
     PORT: toNumber(process.env.PORT, 1865),
-    LLM_BASE_URL: process.env.LLM_BASE_URL ?? "http://rassygpt-gateway:8080/v1",
+    LLM_BASE_URL: process.env.LLM_BASE_URL ?? "http://host.docker.internal:8844/v1",
     LLM_MODE: normalizeMode(process.env.LLM_MODE),
     LLM_MODEL: process.env.LLM_MODEL ?? "rassy-smart",
     LLM_API_KEY: process.env.LLM_API_KEY ?? "",
-    EMBED_BASE_URL: process.env.EMBED_BASE_URL ?? "http://rassygpt-gateway:8080/v1",
+    EMBED_BASE_URL: process.env.EMBED_BASE_URL ?? "http://host.docker.internal:8844/v1",
     EMBED_MODE: normalizeMode(process.env.EMBED_MODE),
     EMBED_MODEL: process.env.EMBED_MODEL ?? "rassy-embed",
     EMBED_API_KEY: process.env.EMBED_API_KEY ?? "",
-    RERANK_BASE_URL: process.env.RERANK_BASE_URL ?? process.env.LLM_BASE_URL ?? "http://rassygpt-gateway:8080/v1",
+    RERANK_BASE_URL: process.env.RERANK_BASE_URL ?? process.env.LLM_BASE_URL ?? "http://host.docker.internal:8844/v1",
     RERANK_MODEL: process.env.RERANK_MODEL ?? "rassy-rerank",
     RERANK_API_KEY: process.env.RERANK_API_KEY ?? process.env.LLM_API_KEY ?? "",
     REQUEST_TIMEOUT_MS: toNumber(process.env.REQUEST_TIMEOUT_MS, 30000),

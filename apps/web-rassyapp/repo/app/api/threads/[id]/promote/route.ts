@@ -46,6 +46,8 @@ const PromoteSchema = z.object({
       worldRecipeHeadline: z.string().max(320).optional(),
       worldRecipeLines: z.array(z.string().max(500)).max(12).optional(),
       worldCrewLines: z.array(z.string().max(320)).max(12).optional(),
+      gameSectionTitles: z.array(z.string().max(160)).max(12).optional(),
+      gameSectionLines: z.array(z.string().max(500)).max(12).optional(),
       selectedAssetPackSlugs: z.array(z.string().max(120)).max(12).optional(),
       selectedAssetPackTitles: z.array(z.string().max(160)).max(12).optional(),
       selectedAssetManifestLines: z.array(z.string().max(240)).max(12).optional(),
@@ -110,8 +112,7 @@ function modeMeta(mode: PromotionMode) {
     return {
       suffix: "writer-room",
       title: "Writer Room",
-      description:
-        "Linked Roblox writer-room routines promoted from a live studio conversation.",
+      description: "Linked Roblox writer-room routines promoted from a live studio conversation.",
       instruction:
         "Turn this into a reusable Roblox writer room. Break the work into staged agents with explicit handoffs, and spend multiple passes on the world first: pitch, terrain, landmarks, scenery, quest, script, and playtest."
     };
@@ -165,10 +166,7 @@ function pickFocusMessages(options: {
   if (focus.role === "user") {
     return slice.filter(
       (message, index) =>
-        index === 0 ||
-        index === 1 ||
-        message.role === "assistant" ||
-        message.id === focus.id
+        index === 0 || index === 1 || message.role === "assistant" || message.id === focus.id
     );
   }
 
@@ -219,11 +217,19 @@ function buildProjectSnapshot(
       worldRecipeHeadline: studioProject.worldRecipe?.headline ?? null,
       worldRecipeLines: studioProject.worldRecipe?.promptLines ?? [],
       worldCrewLines: studioProject.worldRecipe?.crewLines ?? [],
+      gameSectionLines: studioProject.gameSections.map(
+        (section) =>
+          `${section.title} -> ${section.studioPath} (${section.status}; ${section.codeTasks
+            .slice(0, 2)
+            .join(" | ")})`
+      ),
       selectedAssetPackSlugs: studioProject.selectedAssetPackSlugs,
       selectedAssetPackTitles: studioProject.selectedAssetPacks.map((pack) => pack.title),
       selectedAssetManifestLines: studioProject.selectedAssetItems
         .slice(0, 8)
-        .map((item) => `${item.title} -> ${item.targetPath} (${item.kind}; ${item.localBundleKey})`),
+        .map(
+          (item) => `${item.title} -> ${item.targetPath} (${item.kind}; ${item.localBundleKey})`
+        ),
       approvedCodePackageTitles: studioProject.approvedCodePackages.map((pkg) => pkg.title),
       approvedCodePackageLines: studioProject.approvedCodePackages
         .slice(0, 4)
@@ -248,6 +254,7 @@ function buildProjectSnapshot(
     worldRecipeHeadline: workspaceContext?.worldRecipeHeadline,
     worldRecipeLines: workspaceContext?.worldRecipeLines ?? [],
     worldCrewLines: workspaceContext?.worldCrewLines ?? [],
+    gameSectionLines: workspaceContext?.gameSectionLines ?? [],
     selectedAssetPackSlugs: workspaceContext?.selectedAssetPackSlugs ?? [],
     selectedAssetPackTitles: workspaceContext?.selectedAssetPackTitles ?? [],
     selectedAssetManifestLines: workspaceContext?.selectedAssetManifestLines ?? [],
@@ -279,8 +286,13 @@ function buildProjectLines(project?: WriterProjectSnapshot | null) {
       ? `Mechanics: ${project.buildPlanMechanics.join(", ")}`
       : null,
     project.buildPlanScripts.length ? `Luau tasks: ${project.buildPlanScripts.join(", ")}` : null,
-    project.worldRecipeLines.length ? `World recipe lines: ${project.worldRecipeLines.join(" | ")}` : null,
+    project.worldRecipeLines.length
+      ? `World recipe lines: ${project.worldRecipeLines.join(" | ")}`
+      : null,
     project.worldCrewLines.length ? `World crew: ${project.worldCrewLines.join(" | ")}` : null,
+    project.gameSectionLines.length
+      ? `Game sections: ${project.gameSectionLines.join(" | ")}`
+      : null,
     project.selectedAssetPackSlugs.length
       ? `Approved asset shelves: ${project.selectedAssetPackSlugs.join(", ")}`
       : null
@@ -293,7 +305,9 @@ function buildWorkspaceLines(workspaceContext?: WorkspaceContext) {
     workspaceContext?.branch ? `Branch: ${workspaceContext.branch}` : null,
     workspaceContext?.sessionTitle ? `Session lane: ${workspaceContext.sessionTitle}` : null,
     workspaceContext?.activeFile ? `Active file: ${workspaceContext.activeFile}` : null,
-    workspaceContext?.openFiles?.length ? `Open files: ${workspaceContext.openFiles.join(", ")}` : null,
+    workspaceContext?.openFiles?.length
+      ? `Open files: ${workspaceContext.openFiles.join(", ")}`
+      : null,
     typeof workspaceContext?.collaboratorCount === "number"
       ? `Collaborators: ${workspaceContext.collaboratorCount}`
       : null
@@ -337,19 +351,25 @@ function buildBrief(options: {
     .join("\n");
 }
 
-function buildRoutineContext(workspaceContext?: WorkspaceContext, project?: WriterProjectSnapshot | null) {
+function buildRoutineContext(
+  workspaceContext?: WorkspaceContext,
+  project?: WriterProjectSnapshot | null
+) {
   return {
     ...(workspaceContext ?? {}),
     projectTitle: project?.title ?? workspaceContext?.projectTitle ?? null,
     templateName: project?.templateName ?? workspaceContext?.templateName ?? null,
     templateSlug: project?.templateSlug ?? workspaceContext?.templateSlug ?? null,
-    projectTheme: project?.theme ?? workspaceContext?.projectTheme ?? workspaceContext?.theme ?? null,
+    projectTheme:
+      project?.theme ?? workspaceContext?.projectTheme ?? workspaceContext?.theme ?? null,
     heroGoal: project?.heroGoal ?? workspaceContext?.heroGoal ?? null,
     worldProfileTitle: project?.worldProfileTitle ?? workspaceContext?.worldProfileTitle ?? null,
     mapPatternTitle: project?.mapPatternTitle ?? workspaceContext?.mapPatternTitle ?? null,
-    worldRecipeHeadline: project?.worldRecipeHeadline ?? workspaceContext?.worldRecipeHeadline ?? null,
+    worldRecipeHeadline:
+      project?.worldRecipeHeadline ?? workspaceContext?.worldRecipeHeadline ?? null,
     worldRecipeLines: project?.worldRecipeLines ?? workspaceContext?.worldRecipeLines ?? [],
     worldCrewLines: project?.worldCrewLines ?? workspaceContext?.worldCrewLines ?? [],
+    gameSectionLines: project?.gameSectionLines ?? workspaceContext?.gameSectionLines ?? [],
     selectedAssetPackSlugs:
       project?.selectedAssetPackSlugs ?? workspaceContext?.selectedAssetPackSlugs ?? [],
     selectedAssetPackTitles:
@@ -380,7 +400,8 @@ async function createWriterPackRoutines(options: {
   workspaceContext?: WorkspaceContext;
 }): Promise<Array<ReturnType<typeof serializeRoutine>>> {
   const routines: Array<ReturnType<typeof serializeRoutine>> = [];
-  const projectTitle = options.project?.title ?? options.workspaceContext?.projectTitle ?? "Launchpad";
+  const projectTitle =
+    options.project?.title ?? options.workspaceContext?.projectTitle ?? "Launchpad";
   let dependsOnRoutineId: string | null = null;
 
   for (const stage of ROBLOX_WRITER_STAGES) {
@@ -499,9 +520,10 @@ export async function POST(request: NextRequest, context: { params: { id: string
         }
       })
     : null;
-  const studioProject = await getStudioSummary(workspaceMember?.workspaceId ?? workspace.id, session.userId).catch(
-    () => null
-  );
+  const studioProject = await getStudioSummary(
+    workspaceMember?.workspaceId ?? workspace.id,
+    session.userId
+  ).catch(() => null);
   const projectSnapshot = buildProjectSnapshot(studioProject, parsed.data.workspaceContext);
 
   const seedText = buildSeedText(thread.title, focusMessages);

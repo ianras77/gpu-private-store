@@ -23,6 +23,7 @@ type ExportPreview = {
       launchpadWritesTo: string;
     };
     counts: {
+      sections: number;
       zones: number;
       assetItems: number;
       codePackages: number;
@@ -121,7 +122,7 @@ export function StudioHandoffTab({ summary }: { summary: WorkspaceSummary | null
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3 md:grid-cols-4">
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               <div className="rounded-2xl border border-ink-800 bg-ink-950/70 px-4 py-3">
                 <div className="text-[10px] uppercase tracking-[0.24em] text-ink-500">Project</div>
                 <div className="mt-1 text-sm font-semibold text-ink-100">
@@ -132,6 +133,12 @@ export function StudioHandoffTab({ summary }: { summary: WorkspaceSummary | null
                 <div className="text-[10px] uppercase tracking-[0.24em] text-ink-500">Template</div>
                 <div className="mt-1 text-sm font-semibold text-ink-100">
                   {preview?.manifest.project.template ?? project?.templatePack?.name ?? "Starter"}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-ink-800 bg-ink-950/70 px-4 py-3">
+                <div className="text-[10px] uppercase tracking-[0.24em] text-ink-500">Sections</div>
+                <div className="mt-1 text-lg font-semibold text-ink-100">
+                  {preview?.manifest.counts.sections ?? project?.gameSections.length ?? "--"}
                 </div>
               </div>
               <div className="rounded-2xl border border-ink-800 bg-ink-950/70 px-4 py-3">
@@ -164,6 +171,33 @@ export function StudioHandoffTab({ summary }: { summary: WorkspaceSummary | null
                     {preview?.manifest.studioBoundary.publish ?? "Roblox Studio handles publish."}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-3xl border border-ink-800 bg-ink-950/70 p-4">
+              <div className="text-sm font-semibold text-ink-100">Game sections in this export</div>
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                {(project?.gameSections ?? []).slice(0, 6).map((section) => (
+                  <div
+                    key={section.slug}
+                    className="rounded-2xl border border-ink-800 bg-ink-900/60 px-3 py-3"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-semibold text-ink-100">{section.title}</div>
+                      <Badge variant={section.status === "Ready to build" ? "glow" : "neutral"}>
+                        {section.sectionType}
+                      </Badge>
+                    </div>
+                    <div className="mt-2 break-words text-xs text-ink-400">
+                      {section.studioPath}
+                    </div>
+                  </div>
+                ))}
+                {!project?.gameSections.length ? (
+                  <div className="rounded-2xl border border-ink-800 bg-ink-900/60 px-3 py-3 text-sm text-ink-400">
+                    Game sections will appear after the project summary loads.
+                  </div>
+                ) : null}
               </div>
             </div>
 

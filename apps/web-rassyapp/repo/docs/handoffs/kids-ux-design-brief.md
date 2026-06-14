@@ -94,7 +94,33 @@ It should show:
 
 The design should make the kid feel the world changing before they ever open Studio.
 
-### 4. Asset Shelf
+### 4. Game Sections
+
+This is the focus board between the map and Studio.
+
+Each section should show:
+
+- section name,
+- plain player goal,
+- Roblox Studio path,
+- linked safe assets,
+- related Luau tasks,
+- one action to ask the coach for that section.
+
+Design goal:
+
+- make the saved game feel like real buildable places,
+- help kids work on one area at a time,
+- keep code attached to a section instead of floating in a raw editor,
+- make the Rojo export contents understandable before opening Studio.
+
+Avoid:
+
+- a generic kanban board,
+- raw file-tree dumps,
+- too many code details before the kid asks for them.
+
+### 5. Asset Shelf
 
 Assets should feel like safe toy bins or sticker packs.
 
@@ -107,7 +133,7 @@ Show:
 
 Avoid raw search, asset IDs, and licensing text in the child path.
 
-### 5. Studio Handoff
+### 6. Studio Handoff
 
 This is the parent/coach bridge.
 

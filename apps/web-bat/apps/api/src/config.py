@@ -97,7 +97,7 @@ class Settings(BaseSettings):
     cat_secondary_memory_recall_limit: int = 12
     cat_secondary_memory_max_chars: int = 2400
 
-    llm_api_url: str = "http://rassygpt-gateway:8080/api/chat"
+    llm_api_url: str = "http://host.docker.internal:8844/api/chat"
     llm_api_key: str = ""
     llm_model: str = "rassy-smart"
     llm_challenger_model: str = "rassy-general"
@@ -107,7 +107,7 @@ class Settings(BaseSettings):
     ollama_repeat_penalty: float = 1.12
     ollama_keep_alive: str = "15m"
 
-    embedding_api_url: str = "http://rassygpt-gateway:8080/api/embeddings"
+    embedding_api_url: str = "http://host.docker.internal:8844/api/embed"
     embedding_model: str = "rassy-embed"
     embedding_allow_fallback: bool = False
     embedding_request_timeout_seconds: float = 12.0

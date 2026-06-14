@@ -14,7 +14,7 @@ Code Console is a multi-user AI coding workspace built on Next.js and Prisma. It
 - Recommended source repo target: `/data/repos/apps/web-rassyapp`
 - Conversion strategy: `auto-with-manual-review`
 - Migration complexity: `medium`
-- This package now uses the shared Runtipi main network to reach the migrated `ollama` foundation app instead of recreating the old external `ollama_llm-net` compose network.
+- This package now uses the host-published RassyCodex gateway instead of recreating the old external Ollama compose network.
 - Cheshire Cat and Qdrant stay internal to the package by default. The main web app remains the only host-facing service.
 
 ## Data notes
@@ -41,5 +41,5 @@ Code Console is a multi-user AI coding workspace built on Next.js and Prisma. It
 
 ## Runtime notes
 
-- Install `ollama:gpu-private-store` first so `cheshire-cat-core` can resolve `ollama-general` and `ollama-embed` on the shared Runtipi network.
+- Keep the RassyCodex gateway available on `host.docker.internal:8844` so `cheshire-cat-core` can resolve `rassy-smart` and `rassy-embed`.
 - Keep app secrets and node-local overrides in `/data/runtipi/user-config/gpu-private-store/web-rassyapp/app.env` instead of relying on the source repo `.env`.

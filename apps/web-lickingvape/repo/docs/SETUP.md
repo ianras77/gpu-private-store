@@ -43,10 +43,10 @@ Create a `.env` file next to `infra/docker-compose.yml` (or export vars in your 
 - `WORLD_AUTOPUBLISH_DISPLAY_NAME` (default `night desk`) byline used for automatic posts
 - `EDITOR_WORLD_CONTEXT_QUERY_LIMIT` (default `2`) number of lanes the Cat plugin auto-loads while drafting
 - `EDITOR_WORLD_CONTEXT_ITEMS_LIMIT` (default `3`) number of items per lane the Cat plugin auto-loads while drafting
-- `OLLAMA_GENERAL_BASE_URL` (default `http://ollama-general:11434`) LLM endpoint used by Cheshire Cat
-- `OLLAMA_EMBED_BASE_URL` (default `http://ollama-embed:11434`) embedding endpoint used by Cheshire Cat
-- `OLLAMA_GENERAL_MODEL` (default `gpt-oss:20b`)
-- `OLLAMA_EMBED_MODEL` (default `nomic-embed-text:latest`)
+- `OLLAMA_GENERAL_BASE_URL` (default `http://host.docker.internal:8844`) LLM endpoint used by Cheshire Cat
+- `OLLAMA_EMBED_BASE_URL` (default `http://host.docker.internal:8844`) embedding endpoint used by Cheshire Cat
+- `OLLAMA_GENERAL_MODEL` (default `rassy-smart`)
+- `OLLAMA_EMBED_MODEL` (default `rassy-embed`)
 
 ## Run locally (Docker)
 ```
@@ -69,8 +69,8 @@ With the defaults above, the worker continuously:
 3. Lets Cheshire Cat auto-load that stored pulse while drafting
 4. Publishes short night-desk posts on a schedule, up to the daily cap
 
-## Cheshire + local Ollama
-If you are running local Ollama stacks on this machine (`ollama-general` and `ollama-embed`), apply:
+## Cheshire + local RassyCodex
+If you are running the local RassyCodex gateway on this machine, apply:
 ```
 python3 scripts/configure_cat_ollama.py
 ```

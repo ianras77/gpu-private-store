@@ -31,14 +31,20 @@ function buildContextLines(metadata?: Record<string, unknown> | null) {
   const consoleContext = readRecord(metadata.console_context);
   const lines = [
     readString(metadata.projectTitle) ? `Project: ${readString(metadata.projectTitle)}` : null,
-    readString(metadata.templateName) ? `Starter template: ${readString(metadata.templateName)}` : null,
-    readString(metadata.templateSlug) ? `Template slug: ${readString(metadata.templateSlug)}` : null,
+    readString(metadata.templateName)
+      ? `Starter template: ${readString(metadata.templateName)}`
+      : null,
+    readString(metadata.templateSlug)
+      ? `Template slug: ${readString(metadata.templateSlug)}`
+      : null,
     readString(metadata.projectTheme) ? `Theme: ${readString(metadata.projectTheme)}` : null,
     readString(metadata.heroGoal) ? `Hero goal: ${readString(metadata.heroGoal)}` : null,
     readString(metadata.worldProfileTitle)
       ? `World profile: ${readString(metadata.worldProfileTitle)}`
       : null,
-    readString(metadata.mapPatternTitle) ? `Map pattern: ${readString(metadata.mapPatternTitle)}` : null,
+    readString(metadata.mapPatternTitle)
+      ? `Map pattern: ${readString(metadata.mapPatternTitle)}`
+      : null,
     readString(metadata.worldRecipeHeadline)
       ? `World recipe: ${readString(metadata.worldRecipeHeadline)}`
       : null,
@@ -77,6 +83,9 @@ function buildContextLines(metadata?: Record<string, unknown> | null) {
       : null,
     readStringArray(metadata.worldCrewLines).length
       ? `World crew lines: ${readStringArray(metadata.worldCrewLines).join(" | ")}`
+      : null,
+    readStringArray(metadata.gameSectionLines).length
+      ? `Game sections: ${readStringArray(metadata.gameSectionLines).join(" | ")}`
       : null,
     readString(metadata.sessionTitle) ? `Build lane: ${readString(metadata.sessionTitle)}` : null,
     readString(metadata.activeFile) ? `Active file: ${readString(metadata.activeFile)}` : null,
@@ -158,7 +167,9 @@ export function buildRobloxRoutinePrompt(options: {
   contextJson?: string | null;
   input?: string;
 }) {
-  const storedContext = options.contextJson ? `Stored shared context:\n${options.contextJson}` : null;
+  const storedContext = options.contextJson
+    ? `Stored shared context:\n${options.contextJson}`
+    : null;
   const runInput = options.input ? `Run input:\n${options.input}` : null;
 
   return [
