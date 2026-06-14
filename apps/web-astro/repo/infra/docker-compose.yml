@@ -28,10 +28,7 @@ services:
       - astro_qdrant:/qdrant/storage
 
   api:
-    build:
-      context: ..
-      dockerfile: Dockerfile.api
-    image: web-astro-api:local
+    image: node:20-bullseye
     working_dir: /repo
     restart: unless-stopped
     volumes:

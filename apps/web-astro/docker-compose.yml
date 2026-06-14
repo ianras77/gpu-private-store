@@ -30,10 +30,7 @@ services:
       - ${APP_DATA_DIR}/app-data/web-astro/named/astro-qdrant:/qdrant/storage
 
   astro-api:
-    build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo
-      dockerfile: Dockerfile.api
-    image: ${APP_ID:-web-astro-gpu-private-store}-astro-api:latest
+    image: node:20-bullseye
     working_dir: /repo
     restart: unless-stopped
     init: true
