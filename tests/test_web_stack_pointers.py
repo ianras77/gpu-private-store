@@ -106,13 +106,15 @@ def test_web_app_build_contexts_use_runtipi_host_root():
     assert hits == []
 
 
-def test_web_jogmania_minio_alias_is_on_app_network():
+def test_web_jogmania_api_and_minio_share_default_alias_network():
     compose_text = (
         Path(__file__).resolve().parents[1] / "apps" / "web-jogmania" / "docker-compose.yml"
     ).read_text(encoding="utf-8")
 
-    minio_service_text = compose_text.split("  minio:", 1)[1].split("  postgres:", 1)[0]
+    api_service_text = compose_text.split("  api:", 1)[1].split("\n  minio:", 1)[0]
+    minio_service_text = compose_text.split("\n  minio:", 1)[1].split("\n  postgres:", 1)[0]
 
-    assert "web-jogmania_gpu-private-store_network:" in minio_service_text
+    assert "MINIO_ENDPOINT: http://jogmania-minio:9000" in api_service_text
+    assert "networks:\n      default: {}" in api_service_text
+    assert "default:" in minio_service_text
     assert "- jogmania-minio" in minio_service_text
-    assert "- minio" in minio_service_text
