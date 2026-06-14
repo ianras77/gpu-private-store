@@ -72,6 +72,10 @@ services:
       default:
         aliases:
         - jogmania-minio
+      web-jogmania_gpu-private-store_network:
+        aliases:
+        - jogmania-minio
+        - minio
   postgres:
     image: postgres:15
     restart: unless-stopped
