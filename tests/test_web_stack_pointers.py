@@ -81,3 +81,15 @@ def test_web_apps_do_not_point_at_retired_local_llm_stack():
                         hits.append(f"{path.relative_to(apps_root)}: replace {pointer!r}; {replacement}")
 
     assert hits == []
+
+
+def test_web_astro_api_bakes_os_packages_into_image():
+    app_root = Path(__file__).resolve().parents[1] / "apps" / "web-astro"
+    compose_text = (app_root / "docker-compose.yml").read_text(encoding="utf-8")
+    dockerfile_text = (app_root / "repo" / "Dockerfile.api").read_text(encoding="utf-8")
+
+    api_service_text = compose_text.split("  astro-api:", 1)[1].split("    depends_on:", 1)[0]
+
+    assert "dockerfile: Dockerfile.api" in api_service_text
+    assert "apt-get install" not in api_service_text
+    assert "apt-get install -y --no-install-recommends python3 make g++" in dockerfile_text

@@ -28,7 +28,10 @@ services:
       - astro_qdrant:/qdrant/storage
 
   api:
-    image: node:20-bullseye-slim
+    build:
+      context: ..
+      dockerfile: Dockerfile.api
+    image: web-astro-api:local
     working_dir: /repo
     restart: unless-stopped
     volumes:
@@ -74,10 +77,7 @@ services:
       READING_RATE_LIMIT_MAX: ${READING_RATE_LIMIT_MAX:-20}
       READING_RATE_LIMIT_WINDOW_MS: ${READING_RATE_LIMIT_WINDOW_MS:-60000}
     command: >
-      sh -c "apt-get update
-      && apt-get install -y --no-install-recommends python3 make g++
-      && rm -rf /var/lib/apt/lists/*
-      && corepack enable
+      sh -c "corepack enable
       && pnpm --store-dir $$PNPM_STORE_DIR install
       && pnpm --store-dir $$PNPM_STORE_DIR --filter @astro/astro-engine-swiss rebuild swisseph
       && pnpm --filter @astro/api exec prisma generate
