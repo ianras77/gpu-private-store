@@ -33,6 +33,7 @@ def test_medium_term_content_machine_compose_defaults() -> None:
     assert "WORKER_CYCLE_MINUTES: ${WORKER_CYCLE_MINUTES:-15}" in compose_text
     assert "WORKER_MAX_CYCLE_SECONDS: ${WORKER_MAX_CYCLE_SECONDS:-7200}" in compose_text
     assert "PIPELINE_LOCK_TTL_SECONDS: ${PIPELINE_LOCK_TTL_SECONDS:-7200}" in compose_text
+    assert "LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-180}" in compose_text
     assert "RESEARCH_QUERY_CONCURRENCY: ${RESEARCH_QUERY_CONCURRENCY:-8}" in compose_text
     assert "WRITER_THEME_CONCURRENCY: ${WRITER_THEME_CONCURRENCY:-2}" in compose_text
     assert "WRITER_THEME_TAKE_LIMIT: ${WRITER_THEME_TAKE_LIMIT:-8}" in compose_text
@@ -51,6 +52,7 @@ def test_medium_term_content_machine_api_defaults(monkeypatch) -> None:
         "WORKER_HEARTBEAT_TTL_SECONDS",
         "PIPELINE_LOCK_TTL_SECONDS",
         "PIPELINE_STALE_AFTER_SECONDS",
+        "LLM_REQUEST_TIMEOUT_SECONDS",
         "RESEARCH_QUERY_CONCURRENCY",
         "ANALYSIS_SOURCE_LIMIT",
         "ANALYSIS_THEME_LIMIT",
@@ -70,6 +72,7 @@ def test_medium_term_content_machine_api_defaults(monkeypatch) -> None:
     assert settings.worker_heartbeat_ttl_seconds == 9000
     assert settings.pipeline_lock_ttl_seconds == 7200
     assert settings.pipeline_stale_after_seconds == 7200
+    assert settings.llm_request_timeout_seconds == 180
     assert settings.research_query_concurrency == 8
     assert settings.analysis_source_limit == 10
     assert settings.analysis_theme_limit == 8
@@ -89,3 +92,19 @@ def test_app_versions_stay_in_sync() -> None:
     assert package_json["version"] == app_config["version"]
     assert package_lock["version"] == app_config["version"]
     assert package_lock["packages"][""]["version"] == app_config["version"]
+
+
+def test_runtime_docs_match_runtipi_defaults() -> None:
+    readme_text = (APP_ROOT / "README.md").read_text(encoding="utf-8")
+    deployment_text = (APP_ROOT / "docs/deployment.md").read_text(encoding="utf-8")
+    docs_text = f"{readme_text}\n{deployment_text}"
+
+    assert "RassyGPT gateway" not in docs_text
+    assert "RassyGPT service" not in docs_text
+    assert "WORKER_CYCLE_MINUTES=30" not in docs_text
+    assert "PIPELINE_LOCK_TTL_SECONDS=3600" not in docs_text
+    assert "PIPELINE_STALE_AFTER_SECONDS=1800" not in docs_text
+    assert "RassyCodex gateway" in docs_text
+    assert "WORKER_CYCLE_MINUTES=15" in docs_text
+    assert "PIPELINE_LOCK_TTL_SECONDS=7200" in docs_text
+    assert "PIPELINE_STALE_AFTER_SECONDS=7200" in docs_text

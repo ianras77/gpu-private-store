@@ -10,6 +10,7 @@ from routes.health import (
     _build_llm_probe_payload,
     _normalize_model_name,
     _ollama_tags_url,
+    _qdrant_vector_result_from_payload,
     _readiness_critical_ok,
 )
 
@@ -117,6 +118,47 @@ class HealthRouteTests(unittest.TestCase):
             )
         )
 
+    def test_readiness_treats_qdrant_vector_shape_as_core_dependency(self) -> None:
+        checks = _healthy_readiness_checks()
+        checks["qdrant_vectors"] = {"ok": False, "reason": "vector_size_mismatch"}
+
+        self.assertFalse(
+            _readiness_critical_ok(
+                checks,
+                cat_required=False,
+                llm_required=True,
+                embedding_required=True,
+                search_required=False,
+            )
+        )
+
+    def test_qdrant_vector_payload_result_reports_collection_mismatch(self) -> None:
+        payload = {
+            "result": {
+                "config": {
+                    "params": {
+                        "vectors": {
+                            "size": 768,
+                            "distance": "Cosine",
+                        }
+                    }
+                },
+                "points_count": 16532,
+            }
+        }
+
+        result = _qdrant_vector_result_from_payload(
+            payload,
+            expected_vector_size=4096,
+            collection="source_chunks_v4096",
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["collection"], "source_chunks_v4096")
+        self.assertEqual(result["expected_vector_size"], 4096)
+        self.assertEqual(result["existing_vector_size"], 768)
+        self.assertEqual(result["reason"], "vector_size_mismatch")
+
     def test_pipeline_admin_marks_old_running_cycle_interrupted(self) -> None:
         cycle = {
             "status": "running",
@@ -134,6 +176,7 @@ def _healthy_readiness_checks() -> dict[str, dict[str, bool]]:
         "database": {"ok": True},
         "redis": {"ok": True},
         "qdrant": {"ok": True},
+        "qdrant_vectors": {"ok": True},
         "cheshire_cat": {"ok": True},
         "search_connector": {"ok": True},
         "embedding_api": {"ok": True},

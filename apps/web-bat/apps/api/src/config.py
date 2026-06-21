@@ -101,7 +101,7 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_model: str = "rassy-smart"
     llm_challenger_model: str = "rassy-general"
-    llm_request_timeout_seconds: float = 90.0
+    llm_request_timeout_seconds: float = 180.0
     ollama_num_ctx: int = 8192
     ollama_repeat_last_n: int = 96
     ollama_repeat_penalty: float = 1.12

@@ -5,7 +5,7 @@ from config import settings
 from services.http_clients import get_shared_async_client
 from services.structured_logging import get_logger, log_event
 
-COLLECTION = "source_chunks"
+COLLECTION = "source_chunks_v4096"
 logger = get_logger("bat.qdrant")
 _COLLECTION_CACHE_TTL_SECONDS = 300.0
 _collection_state: dict[str, tuple[int, float]] = {}

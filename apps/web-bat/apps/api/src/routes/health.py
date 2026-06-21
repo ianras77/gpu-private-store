@@ -15,6 +15,8 @@ from db import get_db
 from models import EditorialObject, HomepageSnapshot, RevisionHistory, SocialPost, Source, SourceEmbedding, Theme
 from services.cat_client import _extract_chat_completion_text, _extract_text_from_payload
 from services.http_clients import get_shared_async_client
+from services.qdrant_service import COLLECTION as QDRANT_COLLECTION
+from services.qdrant_service import _extract_vector_size
 
 router = APIRouter(prefix="/health", tags=["health"])
 
@@ -334,6 +336,70 @@ async def _embedding_check() -> dict[str, Any]:
     return await _ollama_embedding_check(settings.embedding_api_url, settings.embedding_model)
 
 
+def _qdrant_vector_result_from_payload(
+    payload: dict[str, Any],
+    *,
+    expected_vector_size: int,
+    collection: str,
+) -> dict[str, Any]:
+    result = payload.get("result") if isinstance(payload, dict) else {}
+    existing_vector_size = _extract_vector_size(payload) if isinstance(payload, dict) else None
+    base: dict[str, Any] = {
+        "collection": collection,
+        "expected_vector_size": int(expected_vector_size),
+        "existing_vector_size": existing_vector_size,
+        "points_count": result.get("points_count") if isinstance(result, dict) else None,
+    }
+
+    if existing_vector_size == int(expected_vector_size):
+        return {**base, "ok": True}
+
+    if existing_vector_size is None:
+        return {**base, "ok": False, "reason": "vector_size_missing"}
+
+    return {**base, "ok": False, "reason": "vector_size_mismatch"}
+
+
+async def _qdrant_vector_check(expected_vector_size: int) -> dict[str, Any]:
+    started = datetime.utcnow()
+    url = f"{settings.qdrant_url.rstrip('/')}/collections/{QDRANT_COLLECTION}"
+    try:
+        client = get_shared_async_client()
+        response = await client.get(url, timeout=8)
+        if response.status_code == 404:
+            return {
+                "ok": False,
+                "method": "GET",
+                "status_code": response.status_code,
+                "collection": QDRANT_COLLECTION,
+                "expected_vector_size": int(expected_vector_size),
+                "reason": "collection_missing",
+            }
+        response.raise_for_status()
+        payload = response.json() if response.content else {}
+        result = _qdrant_vector_result_from_payload(
+            payload if isinstance(payload, dict) else {},
+            expected_vector_size=int(expected_vector_size),
+            collection=QDRANT_COLLECTION,
+        )
+        return {
+            **result,
+            "method": "GET",
+            "status_code": response.status_code,
+            "latency_ms": int((datetime.utcnow() - started).total_seconds() * 1000),
+        }
+    except Exception as exc:  # noqa: BLE001
+        detail = str(exc).strip() or exc.__class__.__name__
+        return {
+            "ok": False,
+            "method": "GET",
+            "collection": QDRANT_COLLECTION,
+            "expected_vector_size": int(expected_vector_size),
+            "reason": "collection_probe_failed",
+            "error": detail,
+        }
+
+
 async def _cat_check() -> dict[str, Any]:
     started = datetime.utcnow()
     base_url = settings.cheshire_cat_url.rstrip("/")
@@ -450,6 +516,7 @@ def _readiness_critical_ok(
         checks["database"].get("ok")
         and checks["redis"].get("ok")
         and checks["qdrant"].get("ok")
+        and (checks["qdrant_vectors"].get("ok") or not embedding_required)
         and (checks["search_connector"].get("ok") or not search_required)
         and (checks["cheshire_cat"].get("ok") or not cat_required)
         and (checks["llm_api"].get("ok") or not llm_required)
@@ -484,12 +551,21 @@ async def health_ready(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     # Cheshire Cat and the direct writer probe both hit the same Ollama proxy, so probe them
     # sequentially to avoid creating a false-negative "server busy" collision during readiness checks.
     llm_check = await _llm_check()
+    if embedding_check.get("ok") and isinstance(embedding_check.get("vector_size"), int):
+        qdrant_vector_check = await _qdrant_vector_check(int(embedding_check["vector_size"]))
+    else:
+        qdrant_vector_check = {
+            "ok": False,
+            "collection": QDRANT_COLLECTION,
+            "reason": "embedding_probe_unavailable",
+        }
     cat_check = await _cat_check()
 
     checks = {
         "database": db_check,
         "redis": redis_check,
         "qdrant": qdrant_check,
+        "qdrant_vectors": qdrant_vector_check,
         "cheshire_cat": {
             **cat_check,
             "required": cat_required,

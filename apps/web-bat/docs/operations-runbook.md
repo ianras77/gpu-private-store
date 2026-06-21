@@ -123,7 +123,7 @@ docker compose exec -T postgres psql -U bat -d bat -c "select count(*) from sour
 Qdrant points count:
 
 ```bash
-curl -sS http://localhost:6337/collections/source_chunks | jq '.result.points_count'
+curl -sS http://localhost:6337/collections/source_chunks_v4096 | jq '.result.points_count'
 ```
 
 If counts stop moving while ingestion updates sources, check:
