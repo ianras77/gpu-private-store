@@ -242,8 +242,11 @@ describe("generateHumanGuide", () => {
     );
     expect(parsed.metaFrame.orientation).toContain("correspondence");
     expect(parsed.overview.map((section) => section.body).join(" ")).toContain("more awake inside it");
-    expect(parsed.internalMap.root.guide).toContain("inner chamber rather than a label");
-    expect(parsed.internalMap.shadowGate.guide).toContain("The Way of Hermes");
+    expect(parsed.internalMap.root.guide).toContain("ground-wire of the map");
+    expect(parsed.internalMap.shadowGate.guide).toContain("pressure chamber, not the enemy");
+    expect(parsed.internalMap.inspirationGate.guide).toContain("vibration be tested by embodiment");
+    expect(parsed.internalMap.root.guide).not.toBe(parsed.internalMap.heartChamber.guide);
+    expect(parsed.internalMap.shadowGate.guide).toContain("forgiveness as the heat");
     expect(parsed.practices.map((section) => section.body).join(" ")).toContain("practical altar");
     expect(parsed.sourceProvenance).toEqual(goldenSourceProvenance);
 

@@ -177,21 +177,90 @@ const sourceLens = (sourceProvenance: SourceUse[]): string =>
     ? `through ${sourceProvenance.map((source) => source.title).join(", ")}`
     : "through the supplied contemplative sources";
 
+const sourceConcepts = (sourceProvenance: SourceUse[], loreContext?: string): string[] => {
+  const concepts = new Set<string>();
+  const text = `${sourceProvenance
+    .flatMap((source) => [source.title, source.tags.join(" "), source.sections.join(" ")])
+    .join(" ")} ${loreContext ?? ""}`.toLowerCase();
+
+  if (text.includes("hermes") || text.includes("hermetic") || text.includes("correspondence")) {
+    concepts.add("correspondence between visible pattern and invisible life");
+  }
+  if (text.includes("plotinus") || text.includes("participation") || text.includes("ascent")) {
+    concepts.add("participation in a larger order rather than isolated selfhood");
+  }
+  if (text.includes("cross") || text.includes("axis")) {
+    concepts.add("the crossing of vertical inspiration with horizontal action");
+  }
+  if (text.includes("contemplative") || text.includes("attention") || text.includes("inward")) {
+    concepts.add("attention as the doorway where love becomes practical");
+  }
+  if (text.includes("vibration")) {
+    concepts.add("vibration tested by whether it becomes kinder, clearer, and more useful");
+  }
+
+  return concepts.size
+    ? Array.from(concepts)
+    : ["correspondence, attention, and practical love as the shared source grammar"];
+};
+
+const sourceWeave = (concepts: string[]): string => concepts.slice(0, 3).join("; ");
+
 const guideNode = (
+  key: keyof HumanGuide["internalMap"],
   node: AnalysisMapNode,
   fallbackBasis: string[],
-  sourceProvenance: SourceUse[]
+  sourceProvenance: SourceUse[],
+  concepts: string[]
 ): HumanGuide["internalMap"]["root"] => {
   const chartBasis = publicChartBasis(node.chartBasis, fallbackBasis);
   const nodeSourceBasis = [...node.sourceBasis, ...sourceBasis(sourceProvenance)];
+  const weave = sourceWeave(concepts);
+  const guideByKey: Record<string, string> = {
+    root: `Root is the ground-wire of the map. ${basisText(
+      chartBasis
+    )} asks the reader to let instinct become honest presence. In the source lens of ${weave}, this chamber is where inspiration descends into breath, boundary, and felt truth. The gift is ${
+      node.gift
+    }; the distortion is ${node.distortion}. Practice it as a return, not a punishment: ${node.practice}`,
+    heartChamber: `Heart Chamber is the covenant of affection. ${basisText(
+      chartBasis
+    )} shows where warmth wants to become visible without becoming performance. Read through ${weave}: love is not a mood but a tested alignment between attention, reciprocity, and boundary. The gift is ${
+      node.gift
+    }; the distortion is ${node.distortion}. Let the mantra hold the measure: ${node.mantra}`,
+    voiceAndMind: `Voice and Mind is the translator. ${basisText(
+      chartBasis
+    )} carries signal from feeling into language, study, and choice. Through ${weave}, the mind is not asked to dominate mystery; it is asked to make the signal usable. The gift is ${
+      node.gift
+    }; the distortion is ${node.distortion}. Begin with the simple version first.`,
+    crownAndStar: `Crown and Star is the visible lamp. ${basisText(
+      chartBasis
+    )} describes how identity, vocation, and recognition can become service. The source lens of ${weave} keeps visibility from hardening into vanity: the higher light must become a generous role. The gift is ${
+      node.gift
+    }; the distortion is ${node.distortion}. Choose the role that matches the work.`,
+    shadowGate: `Shadow Gate is the pressure chamber, not the enemy. ${basisText(
+      chartBasis
+    )} names where defense, fear, or control may gather. Read through ${weave}: the hidden pattern is met so it can be redeemed into practice. The gift is ${
+      node.gift
+    }; the distortion is ${node.distortion}. Work the hard pattern in small reps, with forgiveness as the heat.`,
+    serviceGate: `Service Gate is where the inner map becomes bread for the world. ${basisText(
+      chartBasis
+    )} asks what contribution can be offered without turning usefulness into self-worth. Through ${weave}, service is the practical altar: inspiration made visible as a loving action. The gift is ${
+      node.gift
+    }; the distortion is ${node.distortion}. Define the service before the audience.`,
+    inspirationGate: `Inspiration Gate is the receiving station. ${basisText(
+      chartBasis
+    )} shows how future signal, intuition, and language arrive. The source lens of ${weave} asks that vibration be tested by embodiment: if it is true, it becomes kinder, clearer, and more useful. The gift is ${
+      node.gift
+    }; the distortion is ${node.distortion}. Capture the spark, then test it in practice.`
+  };
 
   return {
     ...node,
     chartBasis,
     sourceBasis: nodeSourceBasis,
-    guide: `${node.name} translates ${basisText(chartBasis)} into ${node.theme} ${sourceLens(
-      sourceProvenance
-    )}. Treat this as an inner chamber rather than a label: receive the ${node.gift}, watch for ${node.distortion}, choose one grounded practice, and return to the mantra: ${node.mantra}`
+    guide:
+      guideByKey[key] ??
+      `${node.name} translates ${basisText(chartBasis)} into ${node.theme} ${sourceLens(sourceProvenance)}.`
   };
 };
 
@@ -214,7 +283,8 @@ const fallbackHumanGuide = (
   chart: NatalChart,
   brand: BrandConfig,
   sourceProvenance: SourceUse[],
-  analysis: ChartAnalysis
+  analysis: ChartAnalysis,
+  loreContext?: string
 ): HumanGuide => {
   const map = analysis.internalMap;
   const chartFacts = chartSummary(chart);
@@ -227,6 +297,8 @@ const fallbackHumanGuide = (
   const shadowBasis = publicChartBasis(map.shadowGate.chartBasis, fallbackBasis);
   const inspirationBasis = publicChartBasis(map.inspirationGate.chartBasis, fallbackBasis);
   const provenanceBasis = sourceBasis(sourceProvenance);
+  const concepts = sourceConcepts(sourceProvenance, loreContext);
+  const weave = sourceWeave(concepts);
 
   return {
     title: `${brand.name} Human Guide`,
@@ -243,7 +315,7 @@ const fallbackHumanGuide = (
     overview: [
       section(
         "Living Cosmos",
-        `This guide reads ${chartFacts} as correspondences between inner life and visible choices. The aim is not to become more mechanical about the self, but more awake inside it: notice the pattern, ask what it serves, and choose a practice that makes the wisdom usable.`,
+        `This guide reads ${chartFacts} as correspondences between inner life and visible choices. The working source grammar is ${weave}. The aim is not to become more mechanical about the self, but more awake inside it: notice the pattern, ask what it serves, and choose a practice that makes the wisdom usable.`,
         chart.points.map((point) => `${point.key} in ${point.sign}${point.house ? `, House ${point.house}` : ""}`),
         provenanceBasis,
         "Name one chart fact that feels alive today, then choose one action that honors it.",
@@ -271,13 +343,13 @@ const fallbackHumanGuide = (
       )
     ],
     internalMap: {
-      root: guideNode(map.root, fallbackBasis, sourceProvenance),
-      heartChamber: guideNode(map.heartChamber, fallbackBasis, sourceProvenance),
-      voiceAndMind: guideNode(map.voiceAndMind, fallbackBasis, sourceProvenance),
-      crownAndStar: guideNode(map.crownAndStar, fallbackBasis, sourceProvenance),
-      shadowGate: guideNode(map.shadowGate, fallbackBasis, sourceProvenance),
-      serviceGate: guideNode(map.serviceGate, fallbackBasis, sourceProvenance),
-      inspirationGate: guideNode(map.inspirationGate, fallbackBasis, sourceProvenance),
+      root: guideNode("root", map.root, fallbackBasis, sourceProvenance, concepts),
+      heartChamber: guideNode("heartChamber", map.heartChamber, fallbackBasis, sourceProvenance, concepts),
+      voiceAndMind: guideNode("voiceAndMind", map.voiceAndMind, fallbackBasis, sourceProvenance, concepts),
+      crownAndStar: guideNode("crownAndStar", map.crownAndStar, fallbackBasis, sourceProvenance, concepts),
+      shadowGate: guideNode("shadowGate", map.shadowGate, fallbackBasis, sourceProvenance, concepts),
+      serviceGate: guideNode("serviceGate", map.serviceGate, fallbackBasis, sourceProvenance, concepts),
+      inspirationGate: guideNode("inspirationGate", map.inspirationGate, fallbackBasis, sourceProvenance, concepts),
       paths: map.paths.map((path) => ({
         ...path,
         chartBasis: publicChartBasis(path.chartBasis, fallbackBasis),
@@ -380,7 +452,7 @@ export const generateHumanGuide = async ({
   let usedFallback = !guide;
   let quality = guide ? evaluateHumanGuideQuality(guide, chart) : null;
   if (!guide || !quality?.passed) {
-    guide = fallbackHumanGuide(chart, brand, normalizedSources, analysis);
+    guide = fallbackHumanGuide(chart, brand, normalizedSources, analysis, loreContext);
     quality = evaluateHumanGuideQuality(guide, chart);
     usedFallback = true;
   }
