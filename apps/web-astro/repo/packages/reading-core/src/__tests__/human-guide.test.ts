@@ -1,8 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { NatalChart } from "@astro/astro-core";
 import { BRANDS } from "@astro/brands";
 import { generateHumanGuide } from "../human-guide";
 import { HumanGuideSchema } from "../human-guide-schema";
+import { evaluateHumanGuideQuality } from "../human-guide-quality";
+
+const fixturePath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../fixtures/human-guide.jupiterseek.golden.json"
+);
 
 const chart: NatalChart = {
   points: [
@@ -36,6 +45,33 @@ const sourceProvenance = [
     sections: ["metaFrame", "internalMap"]
   }
 ];
+
+const goldenSourceProvenance = [
+  {
+    title: "The Way of Hermes",
+    source: "/data/runtipi/media/data/web-astro/Esoteric/Hermetica/The Way of Hermes.pdf",
+    tags: ["source:hermetic", "source:perennial"],
+    sections: ["correspondence", "inner practice"]
+  },
+  {
+    title: "The Cloud of Unknowing",
+    source: "/data/runtipi/media/data/web-astro/Esoteric/Christian Mysticism/The Cloud of Unknowing.pdf",
+    tags: ["source:contemplative", "source:wisdom-teacher"],
+    sections: ["direct inspiration", "love"]
+  },
+  {
+    title: "The Kybalion",
+    source: "/data/runtipi/media/data/web-astro/Esoteric/Hermetic/The Kybalion.pdf",
+    tags: ["source:hermetic"],
+    sections: ["mental universe", "rhythm"]
+  }
+];
+
+const stableJson = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe("generateHumanGuide", () => {
   it("returns schema-valid fallback with internal map and provenance", async () => {
@@ -172,5 +208,49 @@ describe("generateHumanGuide", () => {
         ]
       })
     ).rejects.toThrow();
+  });
+
+  it("matches the JupiterSeek golden sample; set WRITE_HUMAN_GUIDE_FIXTURE=1 to refresh", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("OPENAI_BASE_URL", "");
+    vi.stubEnv("LLM_BASE_URL", "");
+
+    const result = await generateHumanGuide({
+      chart,
+      brand: BRANDS.jupiterseek,
+      sourceProvenance: goldenSourceProvenance,
+      loreContext: [
+        "Hermetic source tone: the visible and invisible answer each other through correspondence.",
+        "Contemplative source tone: love is tested through attention, humility, and direct inward turning.",
+        "Product tone: vibration over materialism, practical ancient counsel, internal map rather than doctrine."
+      ].join("\n")
+    });
+
+    const parsed = HumanGuideSchema.parse(result.guide);
+    const quality = evaluateHumanGuideQuality(parsed, chart);
+    const golden = {
+      guide: parsed,
+      quality,
+      meta: result.meta
+    };
+
+    expect(quality.passed).toBe(true);
+    expect(parsed.metaFrame.tone).toEqual(
+      expect.arrayContaining(["non-doctrinal", "hermetic", "practical", "loving", "direct-inspiration"])
+    );
+    expect(parsed.metaFrame.orientation).toContain("correspondence");
+    expect(parsed.overview.map((section) => section.body).join(" ")).toContain("more awake inside it");
+    expect(parsed.internalMap.root.guide).toContain("inner chamber rather than a label");
+    expect(parsed.internalMap.shadowGate.guide).toContain("The Way of Hermes");
+    expect(parsed.practices.map((section) => section.body).join(" ")).toContain("practical altar");
+    expect(parsed.sourceProvenance).toEqual(goldenSourceProvenance);
+
+    if (process.env.WRITE_HUMAN_GUIDE_FIXTURE === "1") {
+      await mkdir(path.dirname(fixturePath), { recursive: true });
+      await writeFile(fixturePath, stableJson(golden));
+    }
+
+    const expected = await readFile(fixturePath, "utf8");
+    expect(stableJson(golden)).toBe(expected);
   });
 });

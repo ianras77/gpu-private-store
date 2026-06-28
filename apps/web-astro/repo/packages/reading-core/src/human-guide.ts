@@ -166,16 +166,32 @@ const publicChartBasis = (chartBasis: string[], fallbackBasis: string[]): string
 const basisText = (chartBasis: string[]): string =>
   chartBasis.length ? chartBasis.join("; ") : "the wider chart pattern";
 
+const sourceBasis = (sourceProvenance: SourceUse[]): string[] =>
+  sourceProvenance.map((source) => {
+    const tags = source.tags.length ? ` (${source.tags.join(", ")})` : "";
+    return `${source.title}${tags}`;
+  });
+
+const sourceLens = (sourceProvenance: SourceUse[]): string =>
+  sourceProvenance.length
+    ? `through ${sourceProvenance.map((source) => source.title).join(", ")}`
+    : "through the supplied contemplative sources";
+
 const guideNode = (
   node: AnalysisMapNode,
-  fallbackBasis: string[]
+  fallbackBasis: string[],
+  sourceProvenance: SourceUse[]
 ): HumanGuide["internalMap"]["root"] => {
   const chartBasis = publicChartBasis(node.chartBasis, fallbackBasis);
+  const nodeSourceBasis = [...node.sourceBasis, ...sourceBasis(sourceProvenance)];
 
   return {
     ...node,
     chartBasis,
-    guide: `${node.name} translates ${basisText(chartBasis)} into ${node.theme}. Notice the ${node.gift}, choose one grounded practice, and return to the mantra: ${node.mantra}`
+    sourceBasis: nodeSourceBasis,
+    guide: `${node.name} translates ${basisText(chartBasis)} into ${node.theme} ${sourceLens(
+      sourceProvenance
+    )}. Treat this as an inner chamber rather than a label: receive the ${node.gift}, watch for ${node.distortion}, choose one grounded practice, and return to the mantra: ${node.mantra}`
   };
 };
 
@@ -210,6 +226,7 @@ const fallbackHumanGuide = (
   const serviceBasis = publicChartBasis(map.serviceGate.chartBasis, fallbackBasis);
   const shadowBasis = publicChartBasis(map.shadowGate.chartBasis, fallbackBasis);
   const inspirationBasis = publicChartBasis(map.inspirationGate.chartBasis, fallbackBasis);
+  const provenanceBasis = sourceBasis(sourceProvenance);
 
   return {
     title: `${brand.name} Human Guide`,
@@ -217,18 +234,18 @@ const fallbackHumanGuide = (
     metaFrame: {
       world: "living-cosmos",
       orientation:
-        "The chart is treated as a symbolic map of participation in a living cosmos, not a verdict about fate.",
+        "The chart is treated as a symbolic map of participation in a living cosmos: a pattern of correspondence, conscience, and choice rather than a verdict about fate.",
       wisdomTeacherFrame:
-        "Jesus is held here as a wisdom teacher of compassion, forgiveness, and direct inner alignment, without institutional authority claims.",
+        "Jesus is held here as a wisdom teacher of compassion, forgiveness, and direct inner alignment, alongside the perennial invitation to receive inspiration directly and test it through love.",
       tone: ["non-doctrinal", "hermetic", "practical", "loving", "direct-inspiration"]
     },
     sourceProvenance,
     overview: [
       section(
         "Living Cosmos",
-        `This guide reads ${chartFacts} as correspondences between inner life and visible choices. The aim is to notice the pattern, ask what it serves, and choose a practice that makes the wisdom usable.`,
+        `This guide reads ${chartFacts} as correspondences between inner life and visible choices. The aim is not to become more mechanical about the self, but more awake inside it: notice the pattern, ask what it serves, and choose a practice that makes the wisdom usable.`,
         chart.points.map((point) => `${point.key} in ${point.sign}${point.house ? `, House ${point.house}` : ""}`),
-        sourceProvenance.map((source) => source.title),
+        provenanceBasis,
         "Name one chart fact that feels alive today, then choose one action that honors it.",
         fallbackBasis
       ),
@@ -236,9 +253,9 @@ const fallbackHumanGuide = (
         "Heart and Direction",
         `${sun ? `${sun.key} in ${sun.sign}${sun.house ? `, House ${sun.house}` : ""}` : "The solar pattern"} points toward visible purpose, while ${
           moon ? `${moon.key} in ${moon.sign}${moon.house ? `, House ${moon.house}` : ""}` : "the lunar pattern"
-        } asks for emotional honesty. Let the public path serve the private truth.`,
+        } asks for emotional honesty. Let the public path serve the private truth, so ambition becomes service rather than self-protection.`,
         [...map.crownAndStar.chartBasis, ...map.root.chartBasis],
-        [...map.crownAndStar.sourceBasis, ...map.root.sourceBasis],
+        [...map.crownAndStar.sourceBasis, ...map.root.sourceBasis, ...provenanceBasis],
         "Before committing, ask whether the visible choice keeps faith with the inner need.",
         fallbackBasis
       ),
@@ -246,49 +263,50 @@ const fallbackHumanGuide = (
         "Direct Inspiration",
         `${asc ? `${asc.key} in ${asc.sign}` : "The presentation pattern"} sets the threshold, and ${basisText(
           inspirationBasis
-        )} shows how insight becomes language. Return to simple words before making the signal grand.`,
+        )} shows how insight becomes language. Return to simple words before making the signal grand; the truest vibration should become kinder, clearer, and more practical when it enters speech.`,
         inspirationBasis,
-        map.inspirationGate.sourceBasis,
+        [...map.inspirationGate.sourceBasis, ...provenanceBasis],
         "Capture the spark in one sentence, then test it through one concrete practice.",
         fallbackBasis
       )
     ],
     internalMap: {
-      root: guideNode(map.root, fallbackBasis),
-      heartChamber: guideNode(map.heartChamber, fallbackBasis),
-      voiceAndMind: guideNode(map.voiceAndMind, fallbackBasis),
-      crownAndStar: guideNode(map.crownAndStar, fallbackBasis),
-      shadowGate: guideNode(map.shadowGate, fallbackBasis),
-      serviceGate: guideNode(map.serviceGate, fallbackBasis),
-      inspirationGate: guideNode(map.inspirationGate, fallbackBasis),
+      root: guideNode(map.root, fallbackBasis, sourceProvenance),
+      heartChamber: guideNode(map.heartChamber, fallbackBasis, sourceProvenance),
+      voiceAndMind: guideNode(map.voiceAndMind, fallbackBasis, sourceProvenance),
+      crownAndStar: guideNode(map.crownAndStar, fallbackBasis, sourceProvenance),
+      shadowGate: guideNode(map.shadowGate, fallbackBasis, sourceProvenance),
+      serviceGate: guideNode(map.serviceGate, fallbackBasis, sourceProvenance),
+      inspirationGate: guideNode(map.inspirationGate, fallbackBasis, sourceProvenance),
       paths: map.paths.map((path) => ({
         ...path,
         chartBasis: publicChartBasis(path.chartBasis, fallbackBasis),
-        guide: `${path.from} and ${path.to} form a path of ${path.tension}. Choose the medicine gently: ${path.medicine}`
+        sourceBasis: [...path.sourceBasis, ...provenanceBasis],
+        guide: `${path.from} and ${path.to} form a path of ${path.tension}. Read it as a living polarity, not a defect. Choose the medicine gently: ${path.medicine}`
       }))
     },
     practices: [
       section(
         "Root Practice",
-        `Begin with ${basisText(rootBasis)}. Notice the need before solving it, then return to the body and breathe until the next honest choice is simple.`,
+        `Begin with ${basisText(rootBasis)}. Notice the need before solving it, then return to the body and breathe until the next honest choice is simple. The root is not proof of limitation; it is the place where inspiration learns to become embodied.`,
         rootBasis,
-        map.root.sourceBasis,
+        [...map.root.sourceBasis, ...provenanceBasis],
         map.root.practice,
         fallbackBasis
       ),
       section(
         "Shadow Practice",
-        `Work with ${shadowBasis.join("; ")} without fear. The task is not to defeat the shadow, but to forgive what defended you and choose a cleaner response.`,
+        `Work with ${shadowBasis.join("; ")} without fear. The task is not to defeat the shadow, but to forgive what defended you and choose a cleaner response. Pressure becomes wisdom when it is met without worshiping it.`,
         shadowBasis,
-        map.shadowGate.sourceBasis,
+        [...map.shadowGate.sourceBasis, ...provenanceBasis],
         map.shadowGate.practice,
         fallbackBasis
       ),
       section(
         "Service Practice",
-        `Let ${serviceBasis.join("; ")} serve something real. Ask what contribution can be offered without turning usefulness into self-worth.`,
+        `Let ${serviceBasis.join("; ")} serve something real. Ask what contribution can be offered without turning usefulness into self-worth. This is the practical altar: a loving action that makes the inner pattern visible.`,
         serviceBasis,
-        map.serviceGate.sourceBasis,
+        [...map.serviceGate.sourceBasis, ...provenanceBasis],
         map.serviceGate.practice,
         fallbackBasis
       )

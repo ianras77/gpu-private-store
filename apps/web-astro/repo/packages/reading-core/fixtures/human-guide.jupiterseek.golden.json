@@ -1,0 +1,389 @@
+{
+  "guide": {
+    "title": "Jupiterseek Human Guide",
+    "subtitle": "A practical internal map for direct inspiration and loving discernment.",
+    "metaFrame": {
+      "world": "living-cosmos",
+      "orientation": "The chart is treated as a symbolic map of participation in a living cosmos: a pattern of correspondence, conscience, and choice rather than a verdict about fate.",
+      "wisdomTeacherFrame": "Jesus is held here as a wisdom teacher of compassion, forgiveness, and direct inner alignment, alongside the perennial invitation to receive inspiration directly and test it through love.",
+      "tone": [
+        "non-doctrinal",
+        "hermetic",
+        "practical",
+        "loving",
+        "direct-inspiration"
+      ]
+    },
+    "sourceProvenance": [
+      {
+        "title": "The Way of Hermes",
+        "source": "/data/runtipi/media/data/web-astro/Esoteric/Hermetica/The Way of Hermes.pdf",
+        "tags": [
+          "source:hermetic",
+          "source:perennial"
+        ],
+        "sections": [
+          "correspondence",
+          "inner practice"
+        ]
+      },
+      {
+        "title": "The Cloud of Unknowing",
+        "source": "/data/runtipi/media/data/web-astro/Esoteric/Christian Mysticism/The Cloud of Unknowing.pdf",
+        "tags": [
+          "source:contemplative",
+          "source:wisdom-teacher"
+        ],
+        "sections": [
+          "direct inspiration",
+          "love"
+        ]
+      },
+      {
+        "title": "The Kybalion",
+        "source": "/data/runtipi/media/data/web-astro/Esoteric/Hermetic/The Kybalion.pdf",
+        "tags": [
+          "source:hermetic"
+        ],
+        "sections": [
+          "mental universe",
+          "rhythm"
+        ]
+      }
+    ],
+    "overview": [
+      {
+        "title": "Living Cosmos",
+        "body": "This guide reads Sun in Leo, House 10; Moon in Scorpio, House 1; Mercury in Cancer, House 9; Venus in Leo, House 10; Mars in Aquarius, House 4; Jupiter in Aries, House 6; Saturn in Scorpio, House 1; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3; Pluto in Scorpio, House 1; Asc in Libra; MC in Cancer as correspondences between inner life and visible choices. The aim is not to become more mechanical about the self, but more awake inside it: notice the pattern, ask what it serves, and choose a practice that makes the wisdom usable.",
+        "chartBasis": [
+          "Sun in Leo, House 10",
+          "Moon in Scorpio, House 1",
+          "Mercury in Cancer, House 9",
+          "Venus in Leo, House 10",
+          "Mars in Aquarius, House 4",
+          "Jupiter in Aries, House 6",
+          "Saturn in Scorpio, House 1",
+          "Uranus in Sagittarius, House 2",
+          "Neptune in Sagittarius, House 3",
+          "Pluto in Scorpio, House 1",
+          "Asc in Libra",
+          "MC in Cancer"
+        ],
+        "sourceBasis": [
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "practice": "Name one chart fact that feels alive today, then choose one action that honors it."
+      },
+      {
+        "title": "Heart and Direction",
+        "body": "Sun in Leo, House 10 points toward visible purpose, while Moon in Scorpio, House 1 asks for emotional honesty. Let the public path serve the private truth, so ambition becomes service rather than self-protection.",
+        "chartBasis": [
+          "Sun in Leo, House 10",
+          "Venus in Leo, House 10",
+          "MC in Cancer",
+          "Moon in Scorpio, House 1",
+          "Mars in Aquarius, House 4"
+        ],
+        "sourceBasis": [
+          "Sun, chart ruler, MC, and 10th-house placements",
+          "Moon, IC, and 4th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "practice": "Before committing, ask whether the visible choice keeps faith with the inner need."
+      },
+      {
+        "title": "Direct Inspiration",
+        "body": "Asc in Libra sets the threshold, and Mercury in Cancer, House 9; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3 shows how insight becomes language. Return to simple words before making the signal grand; the truest vibration should become kinder, clearer, and more practical when it enters speech.",
+        "chartBasis": [
+          "Mercury in Cancer, House 9",
+          "Uranus in Sagittarius, House 2",
+          "Neptune in Sagittarius, House 3"
+        ],
+        "sourceBasis": [
+          "Mercury, Uranus, 3rd-house, and 9th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "practice": "Capture the spark in one sentence, then test it through one concrete practice."
+      }
+    ],
+    "internalMap": {
+      "root": {
+        "name": "Root",
+        "theme": "belonging and instinct",
+        "gift": "emotional truth",
+        "distortion": "defensive retreat",
+        "practice": "Name the need before solving it.",
+        "mantra": "I can be steady with what I feel.",
+        "chartBasis": [
+          "Moon in Scorpio, House 1",
+          "Mars in Aquarius, House 4"
+        ],
+        "sourceBasis": [
+          "Moon, IC, and 4th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "guide": "Root translates Moon in Scorpio, House 1; Mars in Aquarius, House 4 into belonging and instinct through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the emotional truth, watch for defensive retreat, choose one grounded practice, and return to the mantra: I can be steady with what I feel."
+      },
+      "heartChamber": {
+        "name": "Heart Chamber",
+        "theme": "affection and reciprocity",
+        "gift": "generous connection",
+        "distortion": "performing for approval",
+        "practice": "Offer warmth with a clear boundary.",
+        "mantra": "Love works best when it stays honest.",
+        "chartBasis": [
+          "Venus in Leo, House 10"
+        ],
+        "sourceBasis": [
+          "Venus, 5th-house, and 7th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "guide": "Heart Chamber translates Venus in Leo, House 10 into affection and reciprocity through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the generous connection, watch for performing for approval, choose one grounded practice, and return to the mantra: Love works best when it stays honest."
+      },
+      "voiceAndMind": {
+        "name": "Voice and Mind",
+        "theme": "language, learning, and pattern",
+        "gift": "clear translation",
+        "distortion": "scattered interpretation",
+        "practice": "Say the simple version first.",
+        "mantra": "My mind can make the signal usable.",
+        "chartBasis": [
+          "Mercury in Cancer, House 9",
+          "Uranus in Sagittarius, House 2",
+          "Neptune in Sagittarius, House 3"
+        ],
+        "sourceBasis": [
+          "Mercury, Uranus, 3rd-house, and 9th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "guide": "Voice and Mind translates Mercury in Cancer, House 9; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3 into language, learning, and pattern through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the clear translation, watch for scattered interpretation, choose one grounded practice, and return to the mantra: My mind can make the signal usable."
+      },
+      "crownAndStar": {
+        "name": "Crown and Star",
+        "theme": "identity and visible direction",
+        "gift": "confident presence",
+        "distortion": "chasing recognition",
+        "practice": "Choose the role that matches the work.",
+        "mantra": "Visibility can serve purpose.",
+        "chartBasis": [
+          "Sun in Leo, House 10",
+          "Venus in Leo, House 10",
+          "MC in Cancer"
+        ],
+        "sourceBasis": [
+          "Sun, chart ruler, MC, and 10th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "guide": "Crown and Star translates Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer into identity and visible direction through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the confident presence, watch for chasing recognition, choose one grounded practice, and return to the mantra: Visibility can serve purpose."
+      },
+      "shadowGate": {
+        "name": "Shadow Gate",
+        "theme": "pressure, defense, and repair",
+        "gift": "disciplined courage",
+        "distortion": "control under stress",
+        "practice": "Work the hard pattern in small reps.",
+        "mantra": "I can meet pressure without becoming it.",
+        "chartBasis": [
+          "Mars in Aquarius, House 4",
+          "Saturn in Scorpio, House 1",
+          "Moon & Mars square"
+        ],
+        "sourceBasis": [
+          "Saturn, Mars, South Node, hard aspects, 8th-house, and 12th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "guide": "Shadow Gate translates Mars in Aquarius, House 4; Saturn in Scorpio, House 1; Moon & Mars square into pressure, defense, and repair through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the disciplined courage, watch for control under stress, choose one grounded practice, and return to the mantra: I can meet pressure without becoming it."
+      },
+      "serviceGate": {
+        "name": "Service Gate",
+        "theme": "work offered to the world",
+        "gift": "responsible contribution",
+        "distortion": "usefulness as self-worth",
+        "practice": "Define the service before the audience.",
+        "mantra": "My work can be useful without consuming me.",
+        "chartBasis": [
+          "Sun in Leo, House 10",
+          "Venus in Leo, House 10",
+          "MC in Cancer"
+        ],
+        "sourceBasis": [
+          "Sun, chart ruler, MC, and 10th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "guide": "Service Gate translates Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer into work offered to the world through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the responsible contribution, watch for usefulness as self-worth, choose one grounded practice, and return to the mantra: My work can be useful without consuming me."
+      },
+      "inspirationGate": {
+        "name": "Inspiration Gate",
+        "theme": "insight and future signal",
+        "gift": "inventive perspective",
+        "distortion": "restless abstraction",
+        "practice": "Capture the spark, then test it in practice.",
+        "mantra": "Inspiration becomes real when I translate it.",
+        "chartBasis": [
+          "Mercury in Cancer, House 9",
+          "Uranus in Sagittarius, House 2",
+          "Neptune in Sagittarius, House 3"
+        ],
+        "sourceBasis": [
+          "Mercury, Uranus, 3rd-house, and 9th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "guide": "Inspiration Gate translates Mercury in Cancer, House 9; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3 into insight and future signal through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the inventive perspective, watch for restless abstraction, choose one grounded practice, and return to the mantra: Inspiration becomes real when I translate it."
+      },
+      "paths": [
+        {
+          "from": "Moon",
+          "to": "Mars",
+          "tension": "square asks for conscious integration",
+          "medicine": "Slow down, name both needs, and choose one grounded next action.",
+          "practice": "Pause before reacting.",
+          "chartBasis": [
+            "Moon & Mars square"
+          ],
+          "sourceBasis": [
+            "square aspect, orb 0.5, exact 90",
+            "The Way of Hermes (source:hermetic, source:perennial)",
+            "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+            "The Kybalion (source:hermetic)"
+          ],
+          "guide": "Moon and Mars form a path of square asks for conscious integration. Read it as a living polarity, not a defect. Choose the medicine gently: Slow down, name both needs, and choose one grounded next action."
+        }
+      ]
+    },
+    "practices": [
+      {
+        "title": "Root Practice",
+        "body": "Begin with Moon in Scorpio, House 1; Mars in Aquarius, House 4. Notice the need before solving it, then return to the body and breathe until the next honest choice is simple. The root is not proof of limitation; it is the place where inspiration learns to become embodied.",
+        "chartBasis": [
+          "Moon in Scorpio, House 1",
+          "Mars in Aquarius, House 4"
+        ],
+        "sourceBasis": [
+          "Moon, IC, and 4th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "practice": "Name the need before solving it."
+      },
+      {
+        "title": "Shadow Practice",
+        "body": "Work with Mars in Aquarius, House 4; Saturn in Scorpio, House 1; Moon & Mars square without fear. The task is not to defeat the shadow, but to forgive what defended you and choose a cleaner response. Pressure becomes wisdom when it is met without worshiping it.",
+        "chartBasis": [
+          "Mars in Aquarius, House 4",
+          "Saturn in Scorpio, House 1",
+          "Moon & Mars square"
+        ],
+        "sourceBasis": [
+          "Saturn, Mars, South Node, hard aspects, 8th-house, and 12th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "practice": "Work the hard pattern in small reps."
+      },
+      {
+        "title": "Service Practice",
+        "body": "Let Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer serve something real. Ask what contribution can be offered without turning usefulness into self-worth. This is the practical altar: a loving action that makes the inner pattern visible.",
+        "chartBasis": [
+          "Sun in Leo, House 10",
+          "Venus in Leo, House 10",
+          "MC in Cancer"
+        ],
+        "sourceBasis": [
+          "Sun, chart ruler, MC, and 10th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
+          "The Kybalion (source:hermetic)"
+        ],
+        "practice": "Define the service before the audience."
+      }
+    ],
+    "disclaimer": "This Human Guide is for reflection, self-inquiry, and entertainment. It is not medical, legal, financial, psychological, or religious authority."
+  },
+  "quality": {
+    "passed": true,
+    "checks": {
+      "schema": {
+        "passed": true,
+        "evidence": [
+          "HumanGuideSchema"
+        ],
+        "failures": []
+      },
+      "chartSpecificity": {
+        "passed": true,
+        "evidence": [
+          "sun",
+          "leo",
+          "house 10",
+          "moon",
+          "scorpio",
+          "house 1",
+          "mercury",
+          "cancer",
+          "house 9",
+          "venus",
+          "mars",
+          "aquarius"
+        ],
+        "failures": []
+      },
+      "sourceGrounding": {
+        "passed": true,
+        "evidence": [
+          "The Way of Hermes",
+          "The Cloud of Unknowing",
+          "The Kybalion"
+        ],
+        "failures": []
+      },
+      "nonDoctrinalTone": {
+        "passed": true,
+        "evidence": [
+          "No institutional or coercive authority language detected."
+        ],
+        "failures": []
+      },
+      "practicalCounsel": {
+        "passed": true,
+        "evidence": [
+          "practice",
+          "notice",
+          "choose",
+          "return",
+          "ask",
+          "serve",
+          "forgive"
+        ],
+        "failures": []
+      }
+    }
+  },
+  "meta": {
+    "provider": "fallback",
+    "model": "fallback",
+    "usedFallback": true,
+    "cached": false
+  }
+}

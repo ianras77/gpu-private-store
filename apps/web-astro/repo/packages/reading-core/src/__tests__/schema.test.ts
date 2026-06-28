@@ -4,6 +4,9 @@ import { ReadingOutputSchema, CompatibilityOutputSchema } from "../schemas";
 describe("ReadingOutputSchema", () => {
   it("validates reading output", () => {
     const reading = {
+      title: "The Architect's Fire",
+      subtitle: "A grounded natal reading for purpose, rhythm, and repair.",
+      excerpt: "A concise doorway into the full reading.",
       overview: [
         "Line one",
         "Line two",
