@@ -12,6 +12,7 @@
   "dependencies": {
     "@astro/astro-core": "workspace:*",
     "@astro/brands": "workspace:*",
+    "@astro/chart-analysis": "workspace:*",
     "@astro/utils": "workspace:*",
     "openai": "^4.56.0",
     "zod": "^3.23.8"
