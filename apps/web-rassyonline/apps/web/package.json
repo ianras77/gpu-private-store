@@ -11,12 +11,16 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "next": "15.5.18",
+    "pg": "^8.22.0",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.4.22",

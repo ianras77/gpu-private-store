@@ -36,6 +36,10 @@ a {
   font: inherit;
 }
 
+a {
+  color: inherit;
+}
+
 .app-shell {
   position: relative;
   min-height: 100vh;
@@ -161,7 +165,17 @@ h2 {
   font-size: 1rem;
 }
 
-.stage-chip {
+.top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.stage-chip,
+.ghost-button,
+.account-chip {
   padding: 11px 14px;
   border: 1px solid rgba(255, 224, 138, 0.35);
   border-radius: 999px;
@@ -169,6 +183,23 @@ h2 {
   color: var(--gold);
   font-size: 0.82rem;
   font-weight: 800;
+  text-decoration: none;
+}
+
+.ghost-button {
+  border-color: rgba(142, 247, 255, 0.22);
+  background: rgba(142, 247, 255, 0.08);
+  color: var(--cyan);
+  cursor: pointer;
+}
+
+.account-chip {
+  max-width: 260px;
+  overflow: hidden;
+  border-color: var(--line);
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .workspace-grid {
@@ -406,6 +437,10 @@ h2 {
   }
 
   .stage-chip {
+    grid-column: auto;
+  }
+
+  .top-actions {
     grid-column: 1 / -1;
     justify-self: start;
   }
@@ -432,5 +467,172 @@ h2 {
   .composer-preview {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+.auth-shell,
+.admin-shell {
+  min-height: 100vh;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(142, 247, 255, 0.2), transparent 26%),
+    radial-gradient(circle at 88% 20%, rgba(255, 120, 183, 0.16), transparent 24%),
+    linear-gradient(145deg, #060817 0%, #0d1231 52%, #150d2b 100%);
+}
+
+.auth-panel,
+.admin-header,
+.admin-grid,
+.user-table {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.auth-panel {
+  display: grid;
+  gap: 28px;
+  padding-top: 36px;
+}
+
+.back-link {
+  display: inline-flex;
+  width: fit-content;
+  padding: 10px 14px;
+  border: 1px solid rgba(142, 247, 255, 0.24);
+  border-radius: 999px;
+  color: var(--cyan);
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.auth-form,
+.admin-tile,
+.user-table {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--panel);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.24);
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.auth-form input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(142, 247, 255, 0.2);
+  border-radius: 16px;
+  background: rgba(3, 6, 18, 0.74);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+  padding: 0 14px;
+}
+
+.auth-form input:focus {
+  border-color: rgba(142, 247, 255, 0.68);
+  box-shadow: 0 0 0 4px rgba(142, 247, 255, 0.12);
+}
+
+.auth-form button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  color: #050713;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.form-error {
+  width: fit-content;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 120, 183, 0.36);
+  border-radius: 16px;
+  background: rgba(255, 120, 183, 0.1);
+  color: #ffd9ea;
+}
+
+.admin-header {
+  display: grid;
+  gap: 22px;
+  padding-top: 28px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.admin-tile {
+  min-height: 160px;
+  padding: 20px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.admin-tile h2 {
+  color: var(--text);
+}
+
+.admin-tile p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-tile.action {
+  border-color: rgba(142, 247, 255, 0.38);
+}
+
+.user-table {
+  margin-top: 28px;
+  overflow: hidden;
+}
+
+.user-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 110px 120px 120px;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.user-row.heading {
+  color: var(--cyan);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+@media (max-width: 800px) {
+  .auth-grid,
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-row {
+    grid-template-columns: 1fr;
   }
 }
