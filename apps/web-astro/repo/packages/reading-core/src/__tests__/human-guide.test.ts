@@ -91,6 +91,11 @@ describe("generateHumanGuide", () => {
     expect(result.guide.metaFrame.world).toBe("living-cosmos");
     expect(result.guide.internalMap.root.name).toBe("Root");
     expect(result.guide.sourceProvenance[0]?.title).toBe("The Way of Hermes");
+    const craftedSections = [...result.guide.overview, ...result.guide.practices];
+    expect(craftedSections.every((section) => section.force.length > 20)).toBe(true);
+    expect(craftedSections.every((section) => section.allegory.length > 20)).toBe(true);
+    expect(craftedSections.every((section) => section.practicalCounsel.length > 20)).toBe(true);
+    expect(craftedSections.every((section) => section.mysteryQuestion.endsWith("?"))).toBe(true);
   });
 
   it("preserves fallback metadata when returning a cached guide", async () => {
@@ -262,6 +267,9 @@ describe("generateHumanGuide", () => {
     expect(parsed.internalMap.inspirationGate.guide).toContain("vibration be tested by embodiment");
     expect(parsed.internalMap.root.guide).not.toBe(parsed.internalMap.heartChamber.guide);
     expect(parsed.internalMap.shadowGate.guide).toContain("forgiveness as the heat");
+    expect(parsed.overview[0]?.force).toContain("as above, so below");
+    expect(parsed.overview[0]?.allegory).toContain("lamp");
+    expect(parsed.overview[0]?.mysteryQuestion).toContain("universe inside");
     expect(parsed.practices.map((section) => section.body).join(" ")).toContain("practical altar");
     expect(parsed.sourceProvenance).toEqual(goldenSourceProvenance);
 

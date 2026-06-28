@@ -58,6 +58,10 @@
       {
         "title": "Living Cosmos",
         "body": "This guide reads Sun in Leo, House 10; Moon in Scorpio, House 1; Mercury in Cancer, House 9; Venus in Leo, House 10; Mars in Aquarius, House 4; Jupiter in Aries, House 6; Saturn in Scorpio, House 1; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3; Pluto in Scorpio, House 1; Asc in Libra; MC in Cancer as correspondences between inner life and visible choices. The working source grammar is correspondence between visible pattern and invisible life; attention as the doorway where love becomes practical; participation in a larger order rather than isolated selfhood. The aim is not to become more mechanical about the self, but more awake inside it: notice the pattern, ask what it serves, and choose a practice that makes the wisdom usable.",
+        "force": "The force here is correspondence: as above, so below, not as a slogan but as a responsibility. The chart describes pressures, gifts, appetites, and openings that ask to become conscious choice rather than unconscious repetition.",
+        "allegory": "Imagine the birth chart as a lamp lowered into a many-roomed house. Some rooms are golden, some dusty, some locked, but every room belongs to the same inner dwelling. The work is not to worship the lamp; it is to walk by its light.",
+        "practicalCounsel": "Choose one placement that feels alive, then translate it into one behavior today: a boundary, a confession, a study hour, a generous act, or a return to the body.",
+        "mysteryQuestion": "What part of the universe inside you is asking to be entered with more courage?",
         "chartBasis": [
           "Sun in Leo, House 10",
           "Moon in Scorpio, House 1",
@@ -82,6 +86,10 @@
       {
         "title": "Heart and Direction",
         "body": "Sun in Leo, House 10 points toward visible purpose, while Moon in Scorpio, House 1 asks for emotional honesty. Let the public path serve the private truth, so ambition becomes service rather than self-protection.",
+        "force": "The force is the meeting of identity and need: the solar call to become visible must learn the lunar art of staying emotionally true.",
+        "allegory": "This is the parable of a crown that can only be worn by the child it once protected. If the public self forgets the private self, the crown grows heavy; when they bless each other, vocation becomes warm.",
+        "practicalCounsel": "Before choosing the visible path, ask what feeling it must protect, honor, or repair. Let direction be a form of care rather than escape.",
+        "mysteryQuestion": "Where is your life asking achievement to become a vessel for love?",
         "chartBasis": [
           "Sun in Leo, House 10",
           "Venus in Leo, House 10",
@@ -101,6 +109,10 @@
       {
         "title": "Direct Inspiration",
         "body": "Asc in Libra sets the threshold, and Mercury in Cancer, House 9; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3 shows how insight becomes language. Return to simple words before making the signal grand; the truest vibration should become kinder, clearer, and more practical when it enters speech.",
+        "force": "The force is reception: inspiration wants a clean channel, but the channel must be tested by humility, usefulness, and love.",
+        "allegory": "Picture a messenger arriving at dawn with a sealed letter from the inner sky. The letter is real, but it still has to be opened slowly, read accurately, and carried into the village without drama.",
+        "practicalCounsel": "Write the inspiration in one plain sentence. Then ask what action would make it kinder, clearer, and more useful by nightfall.",
+        "mysteryQuestion": "What signal keeps returning because it is waiting for you to become simple enough to receive it?",
         "chartBasis": [
           "Mercury in Cancer, House 9",
           "Uranus in Sagittarius, House 2",
@@ -277,6 +289,10 @@
       {
         "title": "Root Practice",
         "body": "Begin with Moon in Scorpio, House 1; Mars in Aquarius, House 4. Notice the need before solving it, then return to the body and breathe until the next honest choice is simple. The root is not proof of limitation; it is the place where inspiration learns to become embodied.",
+        "force": "The force is embodiment: the chart becomes trustworthy when its insight can live in breath, timing, food, rest, attention, and honest limits.",
+        "allegory": "The root is a garden gate. Mystery may bloom above it, but the hinge still needs oil, the path still needs clearing, and the hand still has to open what it asks to enter.",
+        "practicalCounsel": "Treat the body as the first altar. Regulate before interpreting; name the sensation before naming the story.",
+        "mysteryQuestion": "What wisdom becomes available only after you return to the ground?",
         "chartBasis": [
           "Moon in Scorpio, House 1",
           "Mars in Aquarius, House 4"
@@ -292,6 +308,10 @@
       {
         "title": "Shadow Practice",
         "body": "Work with Mars in Aquarius, House 4; Saturn in Scorpio, House 1; Moon & Mars square without fear. The task is not to defeat the shadow, but to forgive what defended you and choose a cleaner response. Pressure becomes wisdom when it is met without worshiping it.",
+        "force": "The force is transmutation: a defensive pattern becomes a teacher when it is neither obeyed nor shamed.",
+        "allegory": "This is the cave where the old guard stands with a lantern and a locked chest. The guard looks frightening until you realize it has been waiting for instructions from the adult self.",
+        "practicalCounsel": "When the pressure rises, pause long enough to ask what the pattern is protecting. Thank the protection, then choose the cleaner response.",
+        "mysteryQuestion": "Which guarded place in you is ready to become strength without becoming armor?",
         "chartBasis": [
           "Mars in Aquarius, House 4",
           "Saturn in Scorpio, House 1",
@@ -308,6 +328,10 @@
       {
         "title": "Service Practice",
         "body": "Let Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer serve something real. Ask what contribution can be offered without turning usefulness into self-worth. This is the practical altar: a loving action that makes the inner pattern visible.",
+        "force": "The force is offering: the birth chart ripens when personal pattern becomes useful care, craft, truth, or protection in the world.",
+        "allegory": "Imagine carrying a small loaf from the inner temple to the common table. Its holiness is proven not by how rare it looks, but by whether it feeds someone.",
+        "practicalCounsel": "Choose one service that is small enough to complete and honest enough to matter. Let usefulness be an expression of love, not a demand for identity.",
+        "mysteryQuestion": "What gift becomes more yours when you give it without abandoning yourself?",
         "chartBasis": [
           "Sun in Leo, House 10",
           "Venus in Leo, House 10",
@@ -378,6 +402,13 @@
           "ask",
           "serve",
           "forgive"
+        ],
+        "failures": []
+      },
+      "craftedSections": {
+        "passed": true,
+        "evidence": [
+          "6/6 crafted sections complete"
         ],
         "failures": []
       }

@@ -12,6 +12,10 @@ export const SourceProvenanceSchema = z.array(SourceUseSchema).min(1);
 export const GuideSectionSchema = z.object({
   title: z.string(),
   body: z.string(),
+  force: z.string(),
+  allegory: z.string(),
+  practicalCounsel: z.string(),
+  mysteryQuestion: z.string(),
   chartBasis: z.array(z.string()).default([]),
   sourceBasis: z.array(z.string()).default([]),
   practice: z.string().optional()

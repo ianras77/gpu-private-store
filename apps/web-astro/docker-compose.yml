@@ -36,7 +36,7 @@ services:
     init: true
     volumes:
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
-      - ${ROOT_FOLDER_HOST}/media/data/books/2-Collections/Esoterica:/esoterica:ro
+      - ${ROOT_FOLDER_HOST}/media/data/web-astro:/esoterica:ro
     environment:
       PORT: 4020
       HOST: 0.0.0.0

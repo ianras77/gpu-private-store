@@ -1,7 +1,5 @@
 import "dotenv/config";
-import { exec } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { promisify } from "node:util";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
@@ -19,18 +17,29 @@ import { contentRoutes } from "./routes/content";
 import { inferBrandId } from "./lib/brand";
 import { sendApiError } from "./lib/http-errors";
 import { getGeoProviderHealth } from "./lib/geo";
+import { runEsotericaIngest } from "./lib/esoterica-ingestor";
 
-const execAsync = promisify(exec);
 let esotericaRefreshing = false;
 
 const runEsotericaRefresh = async (logger: ReturnType<typeof Fastify>["log"]) => {
   if (esotericaRefreshing) return;
   esotericaRefreshing = true;
   try {
-    await execAsync("pnpm --filter @astro/api esoterica:index", {
-      cwd: process.cwd()
+    const result = await runEsotericaIngest({
+      writeJsonl: process.env.ESOTERICA_WRITE_JSONL === "1"
     });
-    logger.info("Esoterica index refresh complete.");
+    logger.info(
+      {
+        filesDiscovered: result.filesDiscovered,
+        filesChanged: result.filesChanged,
+        filesSkipped: result.filesSkipped,
+        filesFailed: result.filesFailed,
+        chunksEmbedded: result.chunksEmbedded,
+        chunksUpserted: result.chunksUpserted,
+        collection: result.collection
+      },
+      "Esoterica index refresh complete."
+    );
   } catch (error) {
     logger.error(error, "Esoterica index refresh failed.");
   } finally {

@@ -12,6 +12,7 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx scripts/seed.ts",
     "esoterica:index": "tsx scripts/index-esoterica.ts",
+    "esoterica:dry-run": "tsx scripts/index-esoterica.ts --dry-run",
     "content:worker": "tsx src/workers/content-engine.ts",
     "content:run": "CONTENT_ENGINE_RUN_ONCE=1 tsx src/workers/content-engine.ts",
     "smoke:geo": "bash scripts/geo-smoke.sh",

@@ -15,6 +15,7 @@ export type HumanGuideQuality = {
     sourceGrounding: QualityCheck;
     nonDoctrinalTone: QualityCheck;
     practicalCounsel: QualityCheck;
+    craftedSections: QualityCheck;
   };
 };
 
@@ -46,6 +47,14 @@ export const evaluateHumanGuideQuality = (guide: HumanGuide, chart: NatalChart):
   );
   const forbidden = ["pope", "church authority", "only true", "damned", "curse", "must obey"];
   const practicalWords = ["practice", "notice", "choose", "return", "ask", "serve", "forgive"];
+  const sections = [...guide.overview, ...guide.practices];
+  const completeCraftedSections = sections.filter(
+    (section) =>
+      section.force.trim().length >= 20 &&
+      section.allegory.trim().length >= 20 &&
+      section.practicalCounsel.trim().length >= 20 &&
+      section.mysteryQuestion.trim().endsWith("?")
+  );
 
   const checks = {
     schema: check(parsed.success, ["HumanGuideSchema"], "Guide does not match HumanGuideSchema."),
@@ -68,6 +77,11 @@ export const evaluateHumanGuideQuality = (guide: HumanGuide, chart: NatalChart):
       practicalWords.some((word) => text.includes(word)),
       practicalWords.filter((word) => text.includes(word)),
       "Guide lacks practical counsel language."
+    ),
+    craftedSections: check(
+      completeCraftedSections.length === sections.length,
+      [`${completeCraftedSections.length}/${sections.length} crafted sections complete`],
+      "Guide sections must include force, allegory, practical counsel, and a mystery question."
     )
   };
 

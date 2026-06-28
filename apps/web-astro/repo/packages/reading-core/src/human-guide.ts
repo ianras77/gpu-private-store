@@ -47,6 +47,8 @@ const humanGuideSystemPrompt = [
   "You write Human Guide astrology reports as JSON only.",
   "Use a non-doctrinal Hermetic source grammar: living cosmos, correspondence, interior practice, and direct inspiration.",
   "Jesus may appear only as a wisdom teacher or compassion exemplar, never as institutional authority.",
+  "Each section should feel crafted by an attentive guide: educational, allegorical, practical, spiritual, whimsical, and mind-opening.",
+  "Give the reader agency, responsibility, wonder, and the sense of a universe inside them: as above, so below.",
   "Do not use fear, coercion, fatalism, church authority, or claims of the only true path.",
   "Do not make source claims unless they are grounded in the provided source provenance.",
   "Do not cite Seth or Jane Roberts unless they appear in source provenance."
@@ -88,8 +90,11 @@ const buildPrompt = (
     'metaFrame.world must be exactly "living-cosmos".',
     "internalMap must include root, heartChamber, voiceAndMind, crownAndStar, shadowGate, serviceGate, inspirationGate, and paths.",
     "Each internalMap node must include name, theme, gift, distortion, practice, mantra, chartBasis, sourceBasis, and guide.",
-    "Each guide section must include title, body, chartBasis, sourceBasis, and optional practice.",
+    "Each guide section must include title, body, force, allegory, practicalCounsel, mysteryQuestion, chartBasis, sourceBasis, and optional practice.",
+    "For every guide section: force explains the astrological pressure or invitation in plain language; allegory gives an image, parable, or symbolic scene that can deepen over time; practicalCounsel gives one grounded way to live the section; mysteryQuestion ends with a question mark and opens self-inquiry.",
     "Use concrete chart facts frequently: planet, sign, and house where available.",
+    "Make the report agentic: cover required sections, but make each section detailed, nuanced, personal, allegorical, practical, educational, and spiritually spacious.",
+    "The reader should leave feeling the power of their birth, the responsibility of finding oneself, and excitement that mysteries remain waiting inside them.",
     "Use sourceProvenance exactly as supplied; do not invent books, teachers, or documents.",
     "Chart facts:",
     chartSummary(chart),
@@ -290,6 +295,10 @@ const guideNode = (
 const section = (
   title: string,
   body: string,
+  force: string,
+  allegory: string,
+  practicalCounsel: string,
+  mysteryQuestion: string,
   chartBasis: string[],
   sourceBasis: string[],
   practice: string | undefined,
@@ -297,6 +306,10 @@ const section = (
 ): HumanGuide["overview"][number] => ({
   title,
   body,
+  force,
+  allegory,
+  practicalCounsel,
+  mysteryQuestion,
   chartBasis: publicChartBasis(chartBasis, fallbackBasis),
   sourceBasis,
   practice
@@ -338,6 +351,10 @@ const fallbackHumanGuide = (
       section(
         "Living Cosmos",
         `This guide reads ${chartFacts} as correspondences between inner life and visible choices. The working source grammar is ${weave}. The aim is not to become more mechanical about the self, but more awake inside it: notice the pattern, ask what it serves, and choose a practice that makes the wisdom usable.`,
+        `The force here is correspondence: as above, so below, not as a slogan but as a responsibility. The chart describes pressures, gifts, appetites, and openings that ask to become conscious choice rather than unconscious repetition.`,
+        "Imagine the birth chart as a lamp lowered into a many-roomed house. Some rooms are golden, some dusty, some locked, but every room belongs to the same inner dwelling. The work is not to worship the lamp; it is to walk by its light.",
+        "Choose one placement that feels alive, then translate it into one behavior today: a boundary, a confession, a study hour, a generous act, or a return to the body.",
+        "What part of the universe inside you is asking to be entered with more courage?",
         chart.points.map((point) => `${point.key} in ${point.sign}${point.house ? `, House ${point.house}` : ""}`),
         provenanceBasis,
         "Name one chart fact that feels alive today, then choose one action that honors it.",
@@ -348,6 +365,10 @@ const fallbackHumanGuide = (
         `${sun ? `${sun.key} in ${sun.sign}${sun.house ? `, House ${sun.house}` : ""}` : "The solar pattern"} points toward visible purpose, while ${
           moon ? `${moon.key} in ${moon.sign}${moon.house ? `, House ${moon.house}` : ""}` : "the lunar pattern"
         } asks for emotional honesty. Let the public path serve the private truth, so ambition becomes service rather than self-protection.`,
+        "The force is the meeting of identity and need: the solar call to become visible must learn the lunar art of staying emotionally true.",
+        "This is the parable of a crown that can only be worn by the child it once protected. If the public self forgets the private self, the crown grows heavy; when they bless each other, vocation becomes warm.",
+        "Before choosing the visible path, ask what feeling it must protect, honor, or repair. Let direction be a form of care rather than escape.",
+        "Where is your life asking achievement to become a vessel for love?",
         [...map.crownAndStar.chartBasis, ...map.root.chartBasis],
         [...map.crownAndStar.sourceBasis, ...map.root.sourceBasis, ...provenanceBasis],
         "Before committing, ask whether the visible choice keeps faith with the inner need.",
@@ -358,6 +379,10 @@ const fallbackHumanGuide = (
         `${asc ? `${asc.key} in ${asc.sign}` : "The presentation pattern"} sets the threshold, and ${basisText(
           inspirationBasis
         )} shows how insight becomes language. Return to simple words before making the signal grand; the truest vibration should become kinder, clearer, and more practical when it enters speech.`,
+        "The force is reception: inspiration wants a clean channel, but the channel must be tested by humility, usefulness, and love.",
+        "Picture a messenger arriving at dawn with a sealed letter from the inner sky. The letter is real, but it still has to be opened slowly, read accurately, and carried into the village without drama.",
+        "Write the inspiration in one plain sentence. Then ask what action would make it kinder, clearer, and more useful by nightfall.",
+        "What signal keeps returning because it is waiting for you to become simple enough to receive it?",
         inspirationBasis,
         [...map.inspirationGate.sourceBasis, ...provenanceBasis],
         "Capture the spark in one sentence, then test it through one concrete practice.",
@@ -383,6 +408,10 @@ const fallbackHumanGuide = (
       section(
         "Root Practice",
         `Begin with ${basisText(rootBasis)}. Notice the need before solving it, then return to the body and breathe until the next honest choice is simple. The root is not proof of limitation; it is the place where inspiration learns to become embodied.`,
+        "The force is embodiment: the chart becomes trustworthy when its insight can live in breath, timing, food, rest, attention, and honest limits.",
+        "The root is a garden gate. Mystery may bloom above it, but the hinge still needs oil, the path still needs clearing, and the hand still has to open what it asks to enter.",
+        "Treat the body as the first altar. Regulate before interpreting; name the sensation before naming the story.",
+        "What wisdom becomes available only after you return to the ground?",
         rootBasis,
         [...map.root.sourceBasis, ...provenanceBasis],
         map.root.practice,
@@ -391,6 +420,10 @@ const fallbackHumanGuide = (
       section(
         "Shadow Practice",
         `Work with ${shadowBasis.join("; ")} without fear. The task is not to defeat the shadow, but to forgive what defended you and choose a cleaner response. Pressure becomes wisdom when it is met without worshiping it.`,
+        "The force is transmutation: a defensive pattern becomes a teacher when it is neither obeyed nor shamed.",
+        "This is the cave where the old guard stands with a lantern and a locked chest. The guard looks frightening until you realize it has been waiting for instructions from the adult self.",
+        "When the pressure rises, pause long enough to ask what the pattern is protecting. Thank the protection, then choose the cleaner response.",
+        "Which guarded place in you is ready to become strength without becoming armor?",
         shadowBasis,
         [...map.shadowGate.sourceBasis, ...provenanceBasis],
         map.shadowGate.practice,
@@ -399,6 +432,10 @@ const fallbackHumanGuide = (
       section(
         "Service Practice",
         `Let ${serviceBasis.join("; ")} serve something real. Ask what contribution can be offered without turning usefulness into self-worth. This is the practical altar: a loving action that makes the inner pattern visible.`,
+        "The force is offering: the birth chart ripens when personal pattern becomes useful care, craft, truth, or protection in the world.",
+        "Imagine carrying a small loaf from the inner temple to the common table. Its holiness is proven not by how rare it looks, but by whether it feeds someone.",
+        "Choose one service that is small enough to complete and honest enough to matter. Let usefulness be an expression of love, not a demand for identity.",
+        "What gift becomes more yours when you give it without abandoning yourself?",
         serviceBasis,
         [...map.serviceGate.sourceBasis, ...provenanceBasis],
         map.serviceGate.practice,
@@ -448,7 +485,7 @@ export const generateHumanGuide = async ({
 
   const prompt = buildPrompt(chart, brand, normalizedSources, analysis, loreContext);
   const llmResponse = await callLLM(humanGuideSystemPrompt, prompt, {
-    maxTokens: 2200,
+    maxTokens: 3200,
     temperature: 0.72
   });
 
@@ -461,7 +498,7 @@ export const generateHumanGuide = async ({
       humanGuideSystemPrompt,
       `${prompt}\n\nThe previous JSON failed HumanGuideSchema validation. Return valid JSON only.`,
       {
-        maxTokens: 2200,
+        maxTokens: 3200,
         temperature: 0.62
       }
     );
