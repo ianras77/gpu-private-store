@@ -16,6 +16,7 @@
       "@astro/astro-core": ["packages/astro-core/src"],
       "@astro/astro-engine-astro": ["packages/astro-engine-astro/src"],
       "@astro/astro-engine-swiss": ["packages/astro-engine-swiss/src"],
+      "@astro/chart-analysis": ["packages/chart-analysis/src"],
       "@astro/reading-core": ["packages/reading-core/src"],
       "@astro/ui": ["packages/ui/src"],
       "@astro/brands": ["packages/brands/src"],
