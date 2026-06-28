@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { NatalChart } from "@astro/astro-core";
 import { BRANDS } from "@astro/brands";
-import { generateHumanGuide } from "../human-guide";
+import { generateHumanGuide, sourceConcepts } from "../human-guide";
 import { HumanGuideSchema } from "../human-guide-schema";
 import { evaluateHumanGuideQuality } from "../human-guide-quality";
 
@@ -65,7 +65,7 @@ const goldenSourceProvenance = [
     title: "The Symbolism of the Cross",
     source: "/data/runtipi/media/data/web-astro/Esoteric/_OceanofPDF.com_The_Symbolism_of_the_Cross_-_Rene_Guenon.pdf",
     tags: ["source:perennial", "source:contemplative"],
-    sections: ["axis", "correspondence"]
+    sections: ["axis", "correspondence", "embodiment", "vibration"]
   }
 ];
 
@@ -212,6 +212,26 @@ describe("generateHumanGuide", () => {
     ).rejects.toThrow();
   });
 
+  it("assembles source concepts only from source provenance metadata", () => {
+    expect(sourceConcepts(goldenSourceProvenance)).toEqual([
+      "correspondence between visible pattern and invisible life",
+      "attention as the doorway where love becomes practical",
+      "participation in a larger order rather than isolated selfhood",
+      "the crossing of vertical inspiration with horizontal action",
+      "vibration tested by whether it becomes kinder, clearer, and more useful"
+    ]);
+    expect(
+      sourceConcepts([
+        {
+          title: "Plain Source",
+          source: "/data/runtipi/media/data/web-astro/Esoteric/plain.pdf",
+          tags: [],
+          sections: []
+        }
+      ])
+    ).not.toContain("vibration tested by whether it becomes kinder, clearer, and more useful");
+  });
+
   it("matches the JupiterSeek golden sample; set WRITE_HUMAN_GUIDE_FIXTURE=1 to refresh", async () => {
     vi.stubEnv("OPENAI_API_KEY", "");
     vi.stubEnv("OPENAI_BASE_URL", "");
@@ -220,12 +240,7 @@ describe("generateHumanGuide", () => {
     const result = await generateHumanGuide({
       chart,
       brand: BRANDS.jupiterseek,
-      sourceProvenance: goldenSourceProvenance,
-      loreContext: [
-        "Hermetic source tone: the visible and invisible answer each other through correspondence.",
-        "Contemplative source tone: love is tested through attention, humility, and direct inward turning.",
-        "Product tone: vibration over materialism, practical ancient counsel, internal map rather than doctrine."
-      ].join("\n")
+      sourceProvenance: goldenSourceProvenance
     });
 
     const parsed = HumanGuideSchema.parse(result.guide);

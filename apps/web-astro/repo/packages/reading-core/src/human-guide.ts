@@ -177,26 +177,49 @@ const sourceLens = (sourceProvenance: SourceUse[]): string =>
     ? `through ${sourceProvenance.map((source) => source.title).join(", ")}`
     : "through the supplied contemplative sources";
 
-const sourceConcepts = (sourceProvenance: SourceUse[], loreContext?: string): string[] => {
-  const concepts = new Set<string>();
-  const text = `${sourceProvenance
-    .flatMap((source) => [source.title, source.tags.join(" "), source.sections.join(" ")])
-    .join(" ")} ${loreContext ?? ""}`.toLowerCase();
+type SourceConceptRule = {
+  id: string;
+  match: string[];
+  concept: string;
+};
 
-  if (text.includes("hermes") || text.includes("hermetic") || text.includes("correspondence")) {
-    concepts.add("correspondence between visible pattern and invisible life");
+const SOURCE_CONCEPT_RULES: SourceConceptRule[] = [
+  {
+    id: "hermetic-correspondence",
+    match: ["hermes", "hermetic", "correspondence"],
+    concept: "correspondence between visible pattern and invisible life"
+  },
+  {
+    id: "plotinian-participation",
+    match: ["plotinus", "participation", "ascent"],
+    concept: "participation in a larger order rather than isolated selfhood"
+  },
+  {
+    id: "cross-axis",
+    match: ["cross", "axis"],
+    concept: "the crossing of vertical inspiration with horizontal action"
+  },
+  {
+    id: "contemplative-attention",
+    match: ["contemplative", "attention", "inner practice", "inner ascent"],
+    concept: "attention as the doorway where love becomes practical"
+  },
+  {
+    id: "embodied-vibration",
+    match: ["vibration", "embodiment"],
+    concept: "vibration tested by whether it becomes kinder, clearer, and more useful"
   }
-  if (text.includes("plotinus") || text.includes("participation") || text.includes("ascent")) {
-    concepts.add("participation in a larger order rather than isolated selfhood");
-  }
-  if (text.includes("cross") || text.includes("axis")) {
-    concepts.add("the crossing of vertical inspiration with horizontal action");
-  }
-  if (text.includes("contemplative") || text.includes("attention") || text.includes("inward")) {
-    concepts.add("attention as the doorway where love becomes practical");
-  }
-  if (text.includes("vibration")) {
-    concepts.add("vibration tested by whether it becomes kinder, clearer, and more useful");
+];
+
+export const sourceConcepts = (sourceProvenance: SourceUse[]): string[] => {
+  const concepts = new Set<string>();
+  for (const source of sourceProvenance) {
+    const evidence = [source.title, ...source.tags, ...source.sections].join(" ").toLowerCase();
+    for (const rule of SOURCE_CONCEPT_RULES) {
+      if (rule.match.some((token) => evidence.includes(token))) {
+        concepts.add(rule.concept);
+      }
+    }
   }
 
   return concepts.size
@@ -283,8 +306,7 @@ const fallbackHumanGuide = (
   chart: NatalChart,
   brand: BrandConfig,
   sourceProvenance: SourceUse[],
-  analysis: ChartAnalysis,
-  loreContext?: string
+  analysis: ChartAnalysis
 ): HumanGuide => {
   const map = analysis.internalMap;
   const chartFacts = chartSummary(chart);
@@ -297,7 +319,7 @@ const fallbackHumanGuide = (
   const shadowBasis = publicChartBasis(map.shadowGate.chartBasis, fallbackBasis);
   const inspirationBasis = publicChartBasis(map.inspirationGate.chartBasis, fallbackBasis);
   const provenanceBasis = sourceBasis(sourceProvenance);
-  const concepts = sourceConcepts(sourceProvenance, loreContext);
+  const concepts = sourceConcepts(sourceProvenance);
   const weave = sourceWeave(concepts);
 
   return {
@@ -452,7 +474,7 @@ export const generateHumanGuide = async ({
   let usedFallback = !guide;
   let quality = guide ? evaluateHumanGuideQuality(guide, chart) : null;
   if (!guide || !quality?.passed) {
-    guide = fallbackHumanGuide(chart, brand, normalizedSources, analysis, loreContext);
+    guide = fallbackHumanGuide(chart, brand, normalizedSources, analysis);
     quality = evaluateHumanGuideQuality(guide, chart);
     usedFallback = true;
   }
