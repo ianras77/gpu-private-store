@@ -40,7 +40,8 @@ const chart: NatalChart = {
 const sourceProvenance = [
   {
     title: "The Way of Hermes",
-    source: "/data/runtipi/media/data/web-astro/Esoteric/hermes.pdf",
+    source:
+      "/data/runtipi/media/data/web-astro/Esoteric/_OceanofPDF.com_The_Way_of_Hermes_New_Translations_of_The_Corpus_Hermeticum_and_The_Definitions_of_Hermes_Trismegistus_to_Asclepius_-_Clement_Salaman.pdf",
     tags: ["source:hermetic"],
     sections: ["metaFrame", "internalMap"]
   }
@@ -49,21 +50,22 @@ const sourceProvenance = [
 const goldenSourceProvenance = [
   {
     title: "The Way of Hermes",
-    source: "/data/runtipi/media/data/web-astro/Esoteric/Hermetica/The Way of Hermes.pdf",
+    source:
+      "/data/runtipi/media/data/web-astro/Esoteric/_OceanofPDF.com_The_Way_of_Hermes_New_Translations_of_The_Corpus_Hermeticum_and_The_Definitions_of_Hermes_Trismegistus_to_Asclepius_-_Clement_Salaman.pdf",
     tags: ["source:hermetic", "source:perennial"],
     sections: ["correspondence", "inner practice"]
   },
   {
-    title: "The Cloud of Unknowing",
-    source: "/data/runtipi/media/data/web-astro/Esoteric/Christian Mysticism/The Cloud of Unknowing.pdf",
-    tags: ["source:contemplative", "source:wisdom-teacher"],
-    sections: ["direct inspiration", "love"]
+    title: "Plotinus Enneads",
+    source: "/data/runtipi/media/data/web-astro/Esoteric/Plotinus-–-Enneads.pdf",
+    tags: ["source:perennial", "source:contemplative"],
+    sections: ["participation", "inner ascent"]
   },
   {
-    title: "The Kybalion",
-    source: "/data/runtipi/media/data/web-astro/Esoteric/Hermetic/The Kybalion.pdf",
-    tags: ["source:hermetic"],
-    sections: ["mental universe", "rhythm"]
+    title: "The Symbolism of the Cross",
+    source: "/data/runtipi/media/data/web-astro/Esoteric/_OceanofPDF.com_The_Symbolism_of_the_Cross_-_Rene_Guenon.pdf",
+    tags: ["source:perennial", "source:contemplative"],
+    sections: ["axis", "correspondence"]
   }
 ];
 

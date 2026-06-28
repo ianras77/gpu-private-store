@@ -17,7 +17,7 @@
     "sourceProvenance": [
       {
         "title": "The Way of Hermes",
-        "source": "/data/runtipi/media/data/web-astro/Esoteric/Hermetica/The Way of Hermes.pdf",
+        "source": "/data/runtipi/media/data/web-astro/Esoteric/_OceanofPDF.com_The_Way_of_Hermes_New_Translations_of_The_Corpus_Hermeticum_and_The_Definitions_of_Hermes_Trismegistus_to_Asclepius_-_Clement_Salaman.pdf",
         "tags": [
           "source:hermetic",
           "source:perennial"
@@ -28,26 +28,27 @@
         ]
       },
       {
-        "title": "The Cloud of Unknowing",
-        "source": "/data/runtipi/media/data/web-astro/Esoteric/Christian Mysticism/The Cloud of Unknowing.pdf",
+        "title": "Plotinus Enneads",
+        "source": "/data/runtipi/media/data/web-astro/Esoteric/Plotinus-–-Enneads.pdf",
         "tags": [
-          "source:contemplative",
-          "source:wisdom-teacher"
+          "source:perennial",
+          "source:contemplative"
         ],
         "sections": [
-          "direct inspiration",
-          "love"
+          "participation",
+          "inner ascent"
         ]
       },
       {
-        "title": "The Kybalion",
-        "source": "/data/runtipi/media/data/web-astro/Esoteric/Hermetic/The Kybalion.pdf",
+        "title": "The Symbolism of the Cross",
+        "source": "/data/runtipi/media/data/web-astro/Esoteric/_OceanofPDF.com_The_Symbolism_of_the_Cross_-_Rene_Guenon.pdf",
         "tags": [
-          "source:hermetic"
+          "source:perennial",
+          "source:contemplative"
         ],
         "sections": [
-          "mental universe",
-          "rhythm"
+          "axis",
+          "correspondence"
         ]
       }
     ],
@@ -71,8 +72,8 @@
         ],
         "sourceBasis": [
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
         "practice": "Name one chart fact that feels alive today, then choose one action that honors it."
       },
@@ -90,8 +91,8 @@
           "Sun, chart ruler, MC, and 10th-house placements",
           "Moon, IC, and 4th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
         "practice": "Before committing, ask whether the visible choice keeps faith with the inner need."
       },
@@ -106,8 +107,8 @@
         "sourceBasis": [
           "Mercury, Uranus, 3rd-house, and 9th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
         "practice": "Capture the spark in one sentence, then test it through one concrete practice."
       }
@@ -127,10 +128,10 @@
         "sourceBasis": [
           "Moon, IC, and 4th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
-        "guide": "Root translates Moon in Scorpio, House 1; Mars in Aquarius, House 4 into belonging and instinct through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the emotional truth, watch for defensive retreat, choose one grounded practice, and return to the mantra: I can be steady with what I feel."
+        "guide": "Root translates Moon in Scorpio, House 1; Mars in Aquarius, House 4 into belonging and instinct through The Way of Hermes, Plotinus Enneads, The Symbolism of the Cross. Treat this as an inner chamber rather than a label: receive the emotional truth, watch for defensive retreat, choose one grounded practice, and return to the mantra: I can be steady with what I feel."
       },
       "heartChamber": {
         "name": "Heart Chamber",
@@ -145,10 +146,10 @@
         "sourceBasis": [
           "Venus, 5th-house, and 7th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
-        "guide": "Heart Chamber translates Venus in Leo, House 10 into affection and reciprocity through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the generous connection, watch for performing for approval, choose one grounded practice, and return to the mantra: Love works best when it stays honest."
+        "guide": "Heart Chamber translates Venus in Leo, House 10 into affection and reciprocity through The Way of Hermes, Plotinus Enneads, The Symbolism of the Cross. Treat this as an inner chamber rather than a label: receive the generous connection, watch for performing for approval, choose one grounded practice, and return to the mantra: Love works best when it stays honest."
       },
       "voiceAndMind": {
         "name": "Voice and Mind",
@@ -165,10 +166,10 @@
         "sourceBasis": [
           "Mercury, Uranus, 3rd-house, and 9th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
-        "guide": "Voice and Mind translates Mercury in Cancer, House 9; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3 into language, learning, and pattern through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the clear translation, watch for scattered interpretation, choose one grounded practice, and return to the mantra: My mind can make the signal usable."
+        "guide": "Voice and Mind translates Mercury in Cancer, House 9; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3 into language, learning, and pattern through The Way of Hermes, Plotinus Enneads, The Symbolism of the Cross. Treat this as an inner chamber rather than a label: receive the clear translation, watch for scattered interpretation, choose one grounded practice, and return to the mantra: My mind can make the signal usable."
       },
       "crownAndStar": {
         "name": "Crown and Star",
@@ -185,10 +186,10 @@
         "sourceBasis": [
           "Sun, chart ruler, MC, and 10th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
-        "guide": "Crown and Star translates Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer into identity and visible direction through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the confident presence, watch for chasing recognition, choose one grounded practice, and return to the mantra: Visibility can serve purpose."
+        "guide": "Crown and Star translates Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer into identity and visible direction through The Way of Hermes, Plotinus Enneads, The Symbolism of the Cross. Treat this as an inner chamber rather than a label: receive the confident presence, watch for chasing recognition, choose one grounded practice, and return to the mantra: Visibility can serve purpose."
       },
       "shadowGate": {
         "name": "Shadow Gate",
@@ -205,10 +206,10 @@
         "sourceBasis": [
           "Saturn, Mars, South Node, hard aspects, 8th-house, and 12th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
-        "guide": "Shadow Gate translates Mars in Aquarius, House 4; Saturn in Scorpio, House 1; Moon & Mars square into pressure, defense, and repair through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the disciplined courage, watch for control under stress, choose one grounded practice, and return to the mantra: I can meet pressure without becoming it."
+        "guide": "Shadow Gate translates Mars in Aquarius, House 4; Saturn in Scorpio, House 1; Moon & Mars square into pressure, defense, and repair through The Way of Hermes, Plotinus Enneads, The Symbolism of the Cross. Treat this as an inner chamber rather than a label: receive the disciplined courage, watch for control under stress, choose one grounded practice, and return to the mantra: I can meet pressure without becoming it."
       },
       "serviceGate": {
         "name": "Service Gate",
@@ -225,10 +226,10 @@
         "sourceBasis": [
           "Sun, chart ruler, MC, and 10th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
-        "guide": "Service Gate translates Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer into work offered to the world through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the responsible contribution, watch for usefulness as self-worth, choose one grounded practice, and return to the mantra: My work can be useful without consuming me."
+        "guide": "Service Gate translates Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer into work offered to the world through The Way of Hermes, Plotinus Enneads, The Symbolism of the Cross. Treat this as an inner chamber rather than a label: receive the responsible contribution, watch for usefulness as self-worth, choose one grounded practice, and return to the mantra: My work can be useful without consuming me."
       },
       "inspirationGate": {
         "name": "Inspiration Gate",
@@ -245,10 +246,10 @@
         "sourceBasis": [
           "Mercury, Uranus, 3rd-house, and 9th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
-        "guide": "Inspiration Gate translates Mercury in Cancer, House 9; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3 into insight and future signal through The Way of Hermes, The Cloud of Unknowing, The Kybalion. Treat this as an inner chamber rather than a label: receive the inventive perspective, watch for restless abstraction, choose one grounded practice, and return to the mantra: Inspiration becomes real when I translate it."
+        "guide": "Inspiration Gate translates Mercury in Cancer, House 9; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3 into insight and future signal through The Way of Hermes, Plotinus Enneads, The Symbolism of the Cross. Treat this as an inner chamber rather than a label: receive the inventive perspective, watch for restless abstraction, choose one grounded practice, and return to the mantra: Inspiration becomes real when I translate it."
       },
       "paths": [
         {
@@ -263,8 +264,8 @@
           "sourceBasis": [
             "square aspect, orb 0.5, exact 90",
             "The Way of Hermes (source:hermetic, source:perennial)",
-            "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-            "The Kybalion (source:hermetic)"
+            "Plotinus Enneads (source:perennial, source:contemplative)",
+            "The Symbolism of the Cross (source:perennial, source:contemplative)"
           ],
           "guide": "Moon and Mars form a path of square asks for conscious integration. Read it as a living polarity, not a defect. Choose the medicine gently: Slow down, name both needs, and choose one grounded next action."
         }
@@ -281,8 +282,8 @@
         "sourceBasis": [
           "Moon, IC, and 4th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
         "practice": "Name the need before solving it."
       },
@@ -297,8 +298,8 @@
         "sourceBasis": [
           "Saturn, Mars, South Node, hard aspects, 8th-house, and 12th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
         "practice": "Work the hard pattern in small reps."
       },
@@ -313,8 +314,8 @@
         "sourceBasis": [
           "Sun, chart ruler, MC, and 10th-house placements",
           "The Way of Hermes (source:hermetic, source:perennial)",
-          "The Cloud of Unknowing (source:contemplative, source:wisdom-teacher)",
-          "The Kybalion (source:hermetic)"
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
         "practice": "Define the service before the audience."
       }
@@ -353,8 +354,8 @@
         "passed": true,
         "evidence": [
           "The Way of Hermes",
-          "The Cloud of Unknowing",
-          "The Kybalion"
+          "Plotinus Enneads",
+          "The Symbolism of the Cross"
         ],
         "failures": []
       },
