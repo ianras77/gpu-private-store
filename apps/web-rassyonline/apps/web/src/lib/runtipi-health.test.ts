@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { buildHealthReport } from "./runtipi-health";
 
 describe("buildHealthReport", () => {
-  test("reports stage one readiness when required runtime settings are present", () => {
+  test("reports current readiness when required runtime settings are present", () => {
     const report = buildHealthReport({
       RASSY_ONLINE_PUBLIC_BASE_URL: "https://rassy.online",
       RASSYCODEX_BASE_URL: "http://host.docker.internal:8844",
@@ -12,7 +12,7 @@ describe("buildHealthReport", () => {
     });
 
     expect(report.ok).toBe(true);
-    expect(report.stage).toBe("stage-1-runtipi-skeleton");
+    expect(report.stage).toBe("stage-4-document-memory");
     expect(report.dependencies.rassycodex.configured).toBe(true);
     expect(report.dependencies.database.configured).toBe(true);
     expect(report.dependencies.database.target).toBe("postgresql://rassy:***@postgres:5432/rassy_online");

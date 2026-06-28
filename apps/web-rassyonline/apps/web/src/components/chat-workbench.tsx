@@ -1,11 +1,21 @@
 "use client";
 
-import { FormEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { ChatMode, ChatModeId } from "@/lib/rassycodex";
 
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
+};
+
+type UserDocument = {
+  id: string;
+  title: string;
+  filename: string;
+  status: "pending" | "ready" | "failed";
+  active: boolean;
+  error: string | null;
+  chunkCount: number;
 };
 
 export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn: boolean }) {
@@ -19,9 +29,66 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   ]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [documents, setDocuments] = useState<UserDocument[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [documentNotice, setDocumentNotice] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
+  const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
+
+  useEffect(() => {
+    if (!signedIn) return;
+    void refreshDocuments();
+  }, [signedIn]);
+
+  async function refreshDocuments() {
+    const response = await fetch("/api/documents", { cache: "no-store" });
+    if (!response.ok) return;
+    const data = (await response.json()) as { documents?: UserDocument[] };
+    setDocuments(data.documents ?? []);
+  }
+
+  async function uploadDocument(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setDocumentNotice("Indexing document...");
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", file.name);
+
+    try {
+      const response = await fetch("/api/documents", {
+        method: "POST",
+        body: formData
+      });
+      const data = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(data.error ?? "upload_failed");
+      setDocumentNotice("Document indexed and ready.");
+      await refreshDocuments();
+    } catch (error) {
+      setDocumentNotice(error instanceof Error ? error.message : "Upload failed");
+      await refreshDocuments();
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  async function toggleDocument(document: UserDocument) {
+    const nextActive = !document.active;
+    setDocuments((current) => current.map((item) => (item.id === document.id ? { ...item, active: nextActive } : item)));
+    const response = await fetch(`/api/documents/${document.id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ active: nextActive })
+    });
+    if (!response.ok) {
+      setDocuments((current) => current.map((item) => (item.id === document.id ? { ...item, active: document.active } : item)));
+      setDocumentNotice("Could not update document toggle.");
+    }
+  }
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,11 +108,12 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         method: "POST",
         headers: { "content-type": "application/json" },
         signal: abort.signal,
-        body: JSON.stringify({
-          mode,
-          threadId,
-          messages: nextMessages.map((message) => ({ role: message.role, content: message.content }))
-        })
+          body: JSON.stringify({
+            mode,
+            threadId,
+            activeDocumentIds: activeDocuments.map((document) => document.id),
+            messages: nextMessages.map((message) => ({ role: message.role, content: message.content }))
+          })
       });
 
       const nextThreadId = response.headers.get("x-thread-id");
@@ -102,6 +170,43 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           </select>
         </label>
       </div>
+
+      <section className="document-tray" aria-label="Document memory">
+        <div className="document-tray-header">
+          <div>
+            <p className="system-label">Document Charms</p>
+            <h2>{signedIn ? `${activeDocuments.length} active` : "Sign in to save knowledge"}</h2>
+          </div>
+          {signedIn ? (
+            <label className={uploading ? "upload-button disabled" : "upload-button"}>
+              {uploading ? "Indexing" : "Upload"}
+              <input type="file" accept=".txt,.md,.markdown,.json,.csv,.log,.yaml,.yml,text/*,application/json" onChange={uploadDocument} disabled={uploading} />
+            </label>
+          ) : null}
+        </div>
+        {documentNotice ? <p className="document-notice">{documentNotice}</p> : null}
+        {signedIn ? (
+          <div className="document-list">
+            {documents.length === 0 ? <p className="empty-documents">No documents yet.</p> : null}
+            {documents.map((document) => (
+              <button
+                className={document.active ? "document-pill active" : "document-pill"}
+                disabled={document.status !== "ready"}
+                key={document.id}
+                onClick={() => toggleDocument(document)}
+                type="button"
+              >
+                <span>{document.title}</span>
+                <small>
+                  {document.status === "ready" ? `${document.chunkCount} chunks` : document.error ?? document.status}
+                </small>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="empty-documents">Anonymous chats stay ephemeral. Accounts unlock durable document memory.</p>
+        )}
+      </section>
 
       <div className="message-list">
         {messages.map((message, index) => (

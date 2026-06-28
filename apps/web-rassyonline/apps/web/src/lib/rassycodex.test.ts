@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { extractDeltaFromSseLine, getChatMode } from "./rassycodex";
+import { extractDeltaFromSseLine, getChatMode, getRassyCodexEmbeddingsUrl } from "./rassycodex";
 
 describe("RassyCodex mode mapping", () => {
   test("maps friendly modes to exact RassyCodex model ids", () => {
@@ -25,5 +25,11 @@ describe("extractDeltaFromSseLine", () => {
     expect(extractDeltaFromSseLine("data: [DONE]")).toBeNull();
     expect(extractDeltaFromSseLine("event: ping")).toBeNull();
     expect(extractDeltaFromSseLine("data: nope")).toBeNull();
+  });
+});
+
+describe("RassyCodex URLs", () => {
+  test("builds the OpenAI-compatible embeddings URL", () => {
+    expect(getRassyCodexEmbeddingsUrl("http://host.docker.internal:8844/")).toBe("http://host.docker.internal:8844/v1/embeddings");
   });
 });

@@ -8,7 +8,7 @@ type DependencyHealth = {
 export type HealthReport = {
   ok: boolean;
   app: "rassy-online";
-  stage: "stage-1-runtipi-skeleton";
+  stage: "stage-4-document-memory";
   publicBaseUrl: string | null;
   uploadRoot: string | null;
   dependencies: {
@@ -56,7 +56,7 @@ export function buildHealthReport(env: RuntimeEnv): HealthReport {
   return {
     ok: missing.length === 0,
     app: "rassy-online",
-    stage: "stage-1-runtipi-skeleton",
+    stage: "stage-4-document-memory",
     publicBaseUrl: present(env.RASSY_ONLINE_PUBLIC_BASE_URL) ? env.RASSY_ONLINE_PUBLIC_BASE_URL : null,
     uploadRoot: present(env.RASSY_ONLINE_UPLOAD_ROOT) ? env.RASSY_ONLINE_UPLOAD_ROOT : null,
     dependencies: {

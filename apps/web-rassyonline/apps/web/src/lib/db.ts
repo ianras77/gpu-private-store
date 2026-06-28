@@ -63,5 +63,38 @@ async function migrate(): Promise<void> {
       metadata jsonb not null default '{}'::jsonb,
       created_at timestamptz not null default now()
     );
+
+    create table if not exists documents (
+      id text primary key,
+      user_id text not null references users(id) on delete cascade,
+      title text not null,
+      filename text not null,
+      mime_type text not null,
+      size_bytes integer not null,
+      storage_path text not null,
+      checksum text not null,
+      status text not null check (status in ('pending', 'ready', 'failed')) default 'pending',
+      active boolean not null default true,
+      error text,
+      chunk_count integer not null default 0,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    );
+
+    create index if not exists documents_user_id_idx on documents(user_id);
+    create index if not exists documents_user_active_idx on documents(user_id, active);
+
+    create table if not exists document_chunks (
+      id text primary key,
+      document_id text not null references documents(id) on delete cascade,
+      user_id text not null references users(id) on delete cascade,
+      chunk_index integer not null,
+      text_preview text not null,
+      status text not null check (status in ('ready', 'failed')) default 'ready',
+      created_at timestamptz not null default now()
+    );
+
+    create index if not exists document_chunks_document_id_idx on document_chunks(document_id);
+    create index if not exists document_chunks_user_id_idx on document_chunks(user_id);
   `);
 }

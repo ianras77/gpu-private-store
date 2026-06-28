@@ -36,7 +36,7 @@ export const CHAT_MODES: ChatMode[] = [
     id: "knowledge",
     label: "Knowledge",
     model: "rassy-general",
-    description: "Document-grounded chat; retrieval arrives in Stage 4."
+    description: "Document-grounded chat with enabled user memory."
   }
 ];
 
@@ -46,6 +46,37 @@ export function getChatMode(value: string | null | undefined): ChatMode {
 
 export function getRassyCodexChatUrl(baseUrl: string): string {
   return `${baseUrl.replace(/\/$/, "")}/v1/chat/completions`;
+}
+
+export function getRassyCodexEmbeddingsUrl(baseUrl: string): string {
+  return `${baseUrl.replace(/\/$/, "")}/v1/embeddings`;
+}
+
+export async function embedTexts(texts: string[]): Promise<number[][]> {
+  if (texts.length === 0) return [];
+  const baseUrl = process.env.RASSYCODEX_BASE_URL ?? "http://host.docker.internal:8844";
+  const response = await fetch(getRassyCodexEmbeddingsUrl(baseUrl), {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      ...(process.env.RASSYCODEX_API_KEY ? { authorization: `Bearer ${process.env.RASSYCODEX_API_KEY}` } : {})
+    },
+    body: JSON.stringify({
+      model: "rassy-embed",
+      input: texts
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`RassyCodex embeddings failed: ${response.status} ${await response.text()}`);
+  }
+
+  const parsed = (await response.json()) as { data?: Array<{ embedding?: number[] }> };
+  const embeddings = parsed.data?.map((item) => item.embedding ?? []) ?? [];
+  if (embeddings.length !== texts.length || embeddings.some((embedding) => embedding.length === 0)) {
+    throw new Error("RassyCodex embeddings response was incomplete");
+  }
+  return embeddings;
 }
 
 export function extractDeltaFromSseLine(line: string): string | null {
