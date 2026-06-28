@@ -36,6 +36,13 @@ export interface GenerateHumanGuideResult {
   meta: HumanGuideGenerationMeta;
 }
 
+type HumanGuideCacheMeta = Pick<HumanGuideGenerationMeta, "provider" | "model" | "usedFallback">;
+
+type HumanGuideCacheEntry = {
+  guide: HumanGuide;
+  meta: HumanGuideCacheMeta;
+};
+
 const humanGuideSystemPrompt = [
   "You write Human Guide astrology reports as JSON only.",
   "Use a non-doctrinal Hermetic source grammar: living cosmos, correspondence, interior practice, and direct inspiration.",
@@ -107,24 +114,82 @@ const safeParse = (payload: string): HumanGuide | null => {
   }
 };
 
-const basisText = (node: AnalysisMapNode): string =>
-  node.chartBasis.length ? node.chartBasis.join("; ") : "the wider chart pattern";
+const safeParseCacheEntry = (payload: string): HumanGuideCacheEntry | null => {
+  try {
+    const data = JSON.parse(payload) as unknown;
+    const legacyGuide = HumanGuideSchema.safeParse(data);
+    if (legacyGuide.success) {
+      return {
+        guide: legacyGuide.data,
+        meta: {
+          provider: "cache",
+          model: "cache",
+          usedFallback: false
+        }
+      };
+    }
 
-const guideNode = (node: AnalysisMapNode): HumanGuide["internalMap"]["root"] => ({
-  ...node,
-  guide: `${node.name} translates ${basisText(node)} into ${node.theme}. Notice the ${node.gift}, choose one grounded practice, and return to the mantra: ${node.mantra}`
+    if (!data || typeof data !== "object" || !("guide" in data)) {
+      return null;
+    }
+
+    const envelope = data as {
+      guide: unknown;
+      meta?: Partial<HumanGuideCacheMeta>;
+    };
+    const guide = HumanGuideSchema.safeParse(envelope.guide);
+    if (!guide.success) {
+      return null;
+    }
+
+    return {
+      guide: guide.data,
+      meta: {
+        provider: envelope.meta?.provider ?? "cache",
+        model: envelope.meta?.model ?? "cache",
+        usedFallback: envelope.meta?.usedFallback ?? false
+      }
+    };
+  } catch {
+    return null;
+  }
+};
+
+const withSourceProvenance = (guide: HumanGuide, sourceProvenance: SourceUse[]): HumanGuide => ({
+  ...guide,
+  sourceProvenance
 });
+
+const publicChartBasis = (chartBasis: string[], fallbackBasis: string[]): string[] =>
+  chartBasis.length ? chartBasis : fallbackBasis;
+
+const basisText = (chartBasis: string[]): string =>
+  chartBasis.length ? chartBasis.join("; ") : "the wider chart pattern";
+
+const guideNode = (
+  node: AnalysisMapNode,
+  fallbackBasis: string[]
+): HumanGuide["internalMap"]["root"] => {
+  const chartBasis = publicChartBasis(node.chartBasis, fallbackBasis);
+
+  return {
+    ...node,
+    chartBasis,
+    guide: `${node.name} translates ${basisText(chartBasis)} into ${node.theme}. Notice the ${node.gift}, choose one grounded practice, and return to the mantra: ${node.mantra}`
+  };
+};
 
 const section = (
   title: string,
   body: string,
   chartBasis: string[],
   sourceBasis: string[],
-  practice?: string
+  practice: string | undefined,
+  fallbackBasis: string[]
 ): HumanGuide["overview"][number] => ({
   title,
   body,
-  chartBasis,
+  chartBasis: publicChartBasis(chartBasis, fallbackBasis),
   sourceBasis,
   practice
 });
@@ -137,12 +202,14 @@ const fallbackHumanGuide = (
 ): HumanGuide => {
   const map = analysis.internalMap;
   const chartFacts = chartSummary(chart);
+  const fallbackBasis = [chartFacts || "No concrete chart placements were available."];
   const sun = chart.points.find((point) => point.key === "Sun");
   const moon = chart.points.find((point) => point.key === "Moon");
   const asc = chart.points.find((point) => point.key === "Asc");
-  const serviceBasis = map.serviceGate.chartBasis.length ? map.serviceGate.chartBasis : [chartFacts];
-  const shadowBasis = map.shadowGate.chartBasis.length ? map.shadowGate.chartBasis : [chartFacts];
-  const inspirationBasis = map.inspirationGate.chartBasis.length ? map.inspirationGate.chartBasis : [chartFacts];
+  const rootBasis = publicChartBasis(map.root.chartBasis, fallbackBasis);
+  const serviceBasis = publicChartBasis(map.serviceGate.chartBasis, fallbackBasis);
+  const shadowBasis = publicChartBasis(map.shadowGate.chartBasis, fallbackBasis);
+  const inspirationBasis = publicChartBasis(map.inspirationGate.chartBasis, fallbackBasis);
 
   return {
     title: `${brand.name} Human Guide`,
@@ -162,7 +229,8 @@ const fallbackHumanGuide = (
         `This guide reads ${chartFacts} as correspondences between inner life and visible choices. The aim is to notice the pattern, ask what it serves, and choose a practice that makes the wisdom usable.`,
         chart.points.map((point) => `${point.key} in ${point.sign}${point.house ? `, House ${point.house}` : ""}`),
         sourceProvenance.map((source) => source.title),
-        "Name one chart fact that feels alive today, then choose one action that honors it."
+        "Name one chart fact that feels alive today, then choose one action that honors it.",
+        fallbackBasis
       ),
       section(
         "Heart and Direction",
@@ -171,52 +239,58 @@ const fallbackHumanGuide = (
         } asks for emotional honesty. Let the public path serve the private truth.`,
         [...map.crownAndStar.chartBasis, ...map.root.chartBasis],
         [...map.crownAndStar.sourceBasis, ...map.root.sourceBasis],
-        "Before committing, ask whether the visible choice keeps faith with the inner need."
+        "Before committing, ask whether the visible choice keeps faith with the inner need.",
+        fallbackBasis
       ),
       section(
         "Direct Inspiration",
         `${asc ? `${asc.key} in ${asc.sign}` : "The presentation pattern"} sets the threshold, and ${basisText(
-          map.inspirationGate
+          inspirationBasis
         )} shows how insight becomes language. Return to simple words before making the signal grand.`,
         inspirationBasis,
         map.inspirationGate.sourceBasis,
-        "Capture the spark in one sentence, then test it through one concrete practice."
+        "Capture the spark in one sentence, then test it through one concrete practice.",
+        fallbackBasis
       )
     ],
     internalMap: {
-      root: guideNode(map.root),
-      heartChamber: guideNode(map.heartChamber),
-      voiceAndMind: guideNode(map.voiceAndMind),
-      crownAndStar: guideNode(map.crownAndStar),
-      shadowGate: guideNode(map.shadowGate),
-      serviceGate: guideNode(map.serviceGate),
-      inspirationGate: guideNode(map.inspirationGate),
+      root: guideNode(map.root, fallbackBasis),
+      heartChamber: guideNode(map.heartChamber, fallbackBasis),
+      voiceAndMind: guideNode(map.voiceAndMind, fallbackBasis),
+      crownAndStar: guideNode(map.crownAndStar, fallbackBasis),
+      shadowGate: guideNode(map.shadowGate, fallbackBasis),
+      serviceGate: guideNode(map.serviceGate, fallbackBasis),
+      inspirationGate: guideNode(map.inspirationGate, fallbackBasis),
       paths: map.paths.map((path) => ({
         ...path,
+        chartBasis: publicChartBasis(path.chartBasis, fallbackBasis),
         guide: `${path.from} and ${path.to} form a path of ${path.tension}. Choose the medicine gently: ${path.medicine}`
       }))
     },
     practices: [
       section(
         "Root Practice",
-        `Begin with ${basisText(map.root)}. Notice the need before solving it, then return to the body and breathe until the next honest choice is simple.`,
-        map.root.chartBasis.length ? map.root.chartBasis : [chartFacts],
+        `Begin with ${basisText(rootBasis)}. Notice the need before solving it, then return to the body and breathe until the next honest choice is simple.`,
+        rootBasis,
         map.root.sourceBasis,
-        map.root.practice
+        map.root.practice,
+        fallbackBasis
       ),
       section(
         "Shadow Practice",
         `Work with ${shadowBasis.join("; ")} without fear. The task is not to defeat the shadow, but to forgive what defended you and choose a cleaner response.`,
         shadowBasis,
         map.shadowGate.sourceBasis,
-        map.shadowGate.practice
+        map.shadowGate.practice,
+        fallbackBasis
       ),
       section(
         "Service Practice",
         `Let ${serviceBasis.join("; ")} serve something real. Ask what contribution can be offered without turning usefulness into self-worth.`,
         serviceBasis,
         map.serviceGate.sourceBasis,
-        map.serviceGate.practice
+        map.serviceGate.practice,
+        fallbackBasis
       )
     ],
     disclaimer:
@@ -240,18 +314,19 @@ export const generateHumanGuide = async ({
   })}`;
   const cached = cache ? await cache.get(cacheKey) : null;
   if (cached) {
-    const parsed = safeParse(cached);
+    const parsed = safeParseCacheEntry(cached);
     if (parsed) {
-      const quality = evaluateHumanGuideQuality(parsed, chart);
+      const guide = withSourceProvenance(parsed.guide, normalizedSources);
+      const quality = evaluateHumanGuideQuality(guide, chart);
       if (quality.passed) {
         return {
-          guide: parsed,
+          guide,
           analysis,
           quality,
           meta: {
-            provider: "cache",
-            model: "cache",
-            usedFallback: false,
+            provider: parsed.meta.provider,
+            model: parsed.meta.model,
+            usedFallback: parsed.meta.usedFallback,
             cached: true
           }
         };
@@ -266,6 +341,9 @@ export const generateHumanGuide = async ({
   });
 
   let guide = llmResponse.content ? safeParse(llmResponse.content) : null;
+  if (guide) {
+    guide = withSourceProvenance(guide, normalizedSources);
+  }
   if (!guide && llmResponse.content) {
     const repaired = await callLLM(
       humanGuideSystemPrompt,
@@ -276,6 +354,9 @@ export const generateHumanGuide = async ({
       }
     );
     guide = repaired.content ? safeParse(repaired.content) : null;
+    if (guide) {
+      guide = withSourceProvenance(guide, normalizedSources);
+    }
   }
 
   let usedFallback = !guide;
@@ -287,7 +368,18 @@ export const generateHumanGuide = async ({
   }
 
   if (cache) {
-    await cache.set(cacheKey, JSON.stringify(guide), 60 * 60 * 12);
+    await cache.set(
+      cacheKey,
+      JSON.stringify({
+        guide,
+        meta: {
+          provider: llmResponse.provider,
+          model: llmResponse.model,
+          usedFallback
+        }
+      }),
+      60 * 60 * 12
+    );
   }
 
   return {
