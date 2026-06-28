@@ -34,6 +34,7 @@ def test_medium_term_content_machine_compose_defaults() -> None:
     assert "WORKER_MAX_CYCLE_SECONDS: ${WORKER_MAX_CYCLE_SECONDS:-7200}" in compose_text
     assert "PIPELINE_LOCK_TTL_SECONDS: ${PIPELINE_LOCK_TTL_SECONDS:-7200}" in compose_text
     assert "LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-180}" in compose_text
+    assert "LLM_READINESS_INFERENCE_PROBE_ENABLED: ${LLM_READINESS_INFERENCE_PROBE_ENABLED:-true}" in compose_text
     assert "RESEARCH_QUERY_CONCURRENCY: ${RESEARCH_QUERY_CONCURRENCY:-8}" in compose_text
     assert "WRITER_THEME_CONCURRENCY: ${WRITER_THEME_CONCURRENCY:-2}" in compose_text
     assert "WRITER_THEME_TAKE_LIMIT: ${WRITER_THEME_TAKE_LIMIT:-8}" in compose_text
@@ -53,6 +54,7 @@ def test_medium_term_content_machine_api_defaults(monkeypatch) -> None:
         "PIPELINE_LOCK_TTL_SECONDS",
         "PIPELINE_STALE_AFTER_SECONDS",
         "LLM_REQUEST_TIMEOUT_SECONDS",
+        "LLM_READINESS_INFERENCE_PROBE_ENABLED",
         "RESEARCH_QUERY_CONCURRENCY",
         "ANALYSIS_SOURCE_LIMIT",
         "ANALYSIS_THEME_LIMIT",
@@ -73,6 +75,7 @@ def test_medium_term_content_machine_api_defaults(monkeypatch) -> None:
     assert settings.pipeline_lock_ttl_seconds == 7200
     assert settings.pipeline_stale_after_seconds == 7200
     assert settings.llm_request_timeout_seconds == 180
+    assert settings.llm_readiness_inference_probe_enabled is True
     assert settings.research_query_concurrency == 8
     assert settings.analysis_source_limit == 10
     assert settings.analysis_theme_limit == 8

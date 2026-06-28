@@ -19,6 +19,7 @@ from services.qdrant_service import COLLECTION as QDRANT_COLLECTION
 from services.qdrant_service import _extract_vector_size
 
 router = APIRouter(prefix="/health", tags=["health"])
+LLM_READINESS_PROBE_MAX_TOKENS = 128
 
 
 def _serialize_revision(row: RevisionHistory) -> dict[str, Any]:
@@ -110,7 +111,7 @@ def _build_llm_probe_payload(endpoint_url: str, model: str) -> dict[str, Any]:
         return {
             "model": model,
             "messages": [{"role": "user", "content": "Reply with exactly READY"}],
-            "options": {"temperature": 0.0, "num_predict": 4},
+            "options": {"temperature": 0.0, "num_predict": LLM_READINESS_PROBE_MAX_TOKENS},
             "stream": False,
         }
 
@@ -118,9 +119,16 @@ def _build_llm_probe_payload(endpoint_url: str, model: str) -> dict[str, Any]:
         "model": model,
         "messages": [{"role": "user", "content": "Reply with exactly READY"}],
         "temperature": 0.0,
-        "max_tokens": 6,
+        "max_tokens": LLM_READINESS_PROBE_MAX_TOKENS,
         "stream": False,
     }
+
+
+def _build_llm_probe_headers() -> dict[str, str]:
+    api_key = str(settings.llm_api_key or "").strip()
+    if not api_key:
+        return {}
+    return {"Authorization": f"Bearer {api_key}"}
 
 
 def _build_embedding_probe_payload(endpoint_url: str, model: str) -> dict[str, Any]:
@@ -233,6 +241,7 @@ async def _ollama_chat_check(endpoint_url: str, model: str) -> dict[str, Any]:
             response = await client.post(
                 endpoint_url,
                 json=_build_llm_probe_payload(endpoint_url, model),
+                headers=_build_llm_probe_headers(),
                 timeout=max(20.0, min(float(settings.llm_request_timeout_seconds), 120.0)),
             )
             response.raise_for_status()
@@ -309,9 +318,34 @@ async def _llm_check() -> dict[str, Any]:
     tags_url = _ollama_tags_url(settings.llm_api_url)
     if tags_url:
         model_check = await _ollama_model_check(settings.llm_api_url, settings.llm_model)
-        if model_check.get("ok"):
-            model_check["inference_probe"] = "skipped_on_ready"
-        return model_check
+        if not settings.llm_readiness_inference_probe_enabled:
+            model_check["inference_probe"] = "disabled"
+            return model_check
+
+        inference_check = await _ollama_chat_check(
+            settings.llm_api_url,
+            settings.llm_model,
+        )
+        if inference_check.get("ok"):
+            inference_check["available_probe"] = model_check.get("probe")
+            if not model_check.get("ok"):
+                inference_check["model_catalog_warning"] = model_check
+            return inference_check
+        if not model_check.get("ok"):
+            inference_check["model_catalog_warning"] = model_check
+        else:
+            inference_check["available_probe"] = model_check.get("probe")
+            inference_check["model_catalog_ok"] = True
+        return inference_check
+
+    if not settings.llm_readiness_inference_probe_enabled:
+        return {
+            "ok": False,
+            "method": "POST",
+            "probe": "chat_inference",
+            "inference_probe": "disabled",
+            "error": "LLM readiness inference probe is disabled for a non-catalog endpoint.",
+        }
 
     return await _ollama_chat_check(
         settings.llm_api_url,

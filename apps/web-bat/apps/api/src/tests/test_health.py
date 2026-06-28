@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, patch
 
 from routes.admin import _finalize_pipeline_cycle_status
 from routes.health import (
@@ -9,9 +10,11 @@ from routes.health import (
     _extract_embedding_vector,
     _build_llm_probe_payload,
     _normalize_model_name,
+    _ollama_chat_check,
     _ollama_tags_url,
     _qdrant_vector_result_from_payload,
     _readiness_critical_ok,
+    _llm_check,
 )
 
 
@@ -41,7 +44,15 @@ class HealthRouteTests(unittest.TestCase):
 
         self.assertEqual(payload["model"], "qwen3.6:27b")
         self.assertEqual(payload["stream"], False)
-        self.assertEqual(payload["options"]["num_predict"], 4)
+        self.assertEqual(payload["options"]["num_predict"], 128)
+        self.assertEqual(payload["messages"][0]["content"], "Reply with exactly READY")
+
+    def test_openai_chat_probe_payload_allows_reasoning_models_to_finish(self) -> None:
+        payload = _build_llm_probe_payload("http://localhost:11435/v1/chat/completions", "rassy-smart")
+
+        self.assertEqual(payload["model"], "rassy-smart")
+        self.assertEqual(payload["stream"], False)
+        self.assertEqual(payload["max_tokens"], 128)
         self.assertEqual(payload["messages"][0]["content"], "Reply with exactly READY")
 
     def test_cat_message_probe_payload_includes_service_user(self) -> None:
@@ -169,6 +180,73 @@ class HealthRouteTests(unittest.TestCase):
 
         self.assertEqual(finalized["status"], "interrupted")
         self.assertTrue(finalized["interrupted"])
+
+
+class HealthLlmReadinessTests(unittest.IsolatedAsyncioTestCase):
+    async def test_llm_readiness_runs_inference_after_model_catalog_probe(self) -> None:
+        model_check = {"ok": True, "probe": "ollama_tags", "model": "rassy-smart"}
+        inference_check = {"ok": True, "probe": "chat_inference", "model": "rassy-smart"}
+
+        with (
+            patch("routes.health.settings.llm_api_url", "http://localhost:8844/api/chat"),
+            patch("routes.health.settings.llm_model", "rassy-smart"),
+            patch("routes.health.settings.llm_readiness_inference_probe_enabled", True),
+            patch("routes.health._ollama_model_check", AsyncMock(return_value=model_check)) as model_probe,
+            patch("routes.health._ollama_chat_check", AsyncMock(return_value=inference_check)) as chat_probe,
+        ):
+            result = await _llm_check()
+
+        model_probe.assert_awaited_once_with("http://localhost:8844/api/chat", "rassy-smart")
+        chat_probe.assert_awaited_once_with("http://localhost:8844/api/chat", "rassy-smart")
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["probe"], "chat_inference")
+        self.assertEqual(result["available_probe"], "ollama_tags")
+
+    async def test_llm_readiness_can_skip_inference_probe_when_disabled(self) -> None:
+        model_check = {"ok": True, "probe": "ollama_tags", "model": "rassy-smart"}
+
+        with (
+            patch("routes.health.settings.llm_api_url", "http://localhost:8844/api/chat"),
+            patch("routes.health.settings.llm_model", "rassy-smart"),
+            patch("routes.health.settings.llm_readiness_inference_probe_enabled", False),
+            patch("routes.health._ollama_model_check", AsyncMock(return_value=model_check)),
+            patch("routes.health._ollama_chat_check", AsyncMock()) as chat_probe,
+        ):
+            result = await _llm_check()
+
+        chat_probe.assert_not_awaited()
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["probe"], "ollama_tags")
+        self.assertEqual(result["inference_probe"], "disabled")
+
+    async def test_llm_chat_probe_sends_configured_bearer_token(self) -> None:
+        class FakeResponse:
+            status_code = 200
+
+            def json(self) -> dict:
+                return {"choices": [{"message": {"content": "READY"}}]}
+
+            def raise_for_status(self) -> None:
+                return None
+
+        class FakeClient:
+            def __init__(self) -> None:
+                self.calls: list[dict] = []
+
+            async def post(self, url: str, *, json: dict, headers: dict, timeout: float) -> FakeResponse:
+                self.calls.append({"url": url, "json": json, "headers": headers, "timeout": timeout})
+                return FakeResponse()
+
+        client = FakeClient()
+        with (
+            patch("routes.health.get_shared_async_client", return_value=client),
+            patch("routes.health.settings.llm_api_key", "secret-token"),
+            patch("routes.health.settings.llm_request_timeout_seconds", 180.0),
+        ):
+            result = await _ollama_chat_check("http://localhost:8844/v1/chat/completions", "rassy-smart")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(client.calls[0]["headers"]["Authorization"], "Bearer secret-token")
 
 
 def _healthy_readiness_checks() -> dict[str, dict[str, bool]]:
