@@ -45,4 +45,18 @@ describe("analyzeChart", () => {
     expect(analysis.internalMap.paths.length).toBeGreaterThan(0);
     expect(analysis.integrationTensions[0]?.chartBasis).toContain("Moon & Mars square");
   });
+
+  it("assigns South Node key variants to the shadow gate", () => {
+    const analysis = analyzeChart({
+      ...chart,
+      points: [
+        ...chart.points,
+        { key: "South Node", type: "point", degree: 340, sign: "Pisces", signDegree: 10 },
+        { key: "SouthNode", type: "point", degree: 341, sign: "Pisces", signDegree: 11 }
+      ]
+    });
+
+    expect(analysis.internalMap.shadowGate.chartBasis).toContain("South Node in Pisces");
+    expect(analysis.internalMap.shadowGate.chartBasis).toContain("SouthNode in Pisces");
+  });
 });

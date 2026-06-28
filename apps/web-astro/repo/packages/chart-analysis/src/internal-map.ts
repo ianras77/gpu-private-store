@@ -78,9 +78,11 @@ const isChartRuler = (point: ChartPoint, rulerKey: string | undefined): boolean 
 
 const isHardAspect = (aspect: Aspect): boolean => HARD_ASPECTS.has(aspect.type);
 
+const isSouthNodeKey = (key: string): boolean => key === "South Node" || key === "SouthNode";
+
 const isShadowAspect = (aspect: Aspect): boolean =>
   isHardAspect(aspect) ||
-  aspect.between.some((key) => key === "Saturn" || key === "Mars" || key === "SouthNode");
+  aspect.between.some((key) => key === "Saturn" || key === "Mars" || isSouthNodeKey(key));
 
 const buildPaths = (aspects: readonly Aspect[]): MapPath[] =>
   aspects.map((aspect) => {
@@ -123,7 +125,7 @@ export const buildInternalMap = (chart: NatalChart): InternalMap => {
       (point) =>
         point.key === "Saturn" ||
         point.key === "Mars" ||
-        point.key === "SouthNode" ||
+        isSouthNodeKey(point.key) ||
         hasHouse(point, [8, 12])
     ),
     ...aspectBases(aspects, isShadowAspect)
