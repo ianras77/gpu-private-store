@@ -22,7 +22,6 @@
     "@astro/astro-core": "workspace:*",
     "@astro/astro-engine-astro": "workspace:*",
     "@astro/astro-engine-swiss": "workspace:*",
-    "@astro/chart-analysis": "workspace:*",
     "@astro/reading-core": "workspace:*",
     "@astro/brands": "workspace:*",
     "@astro/utils": "workspace:*",
