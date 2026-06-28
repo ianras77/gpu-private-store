@@ -3,7 +3,7 @@ services:
     image: runtipi-local-web-rassyonline-web:latest
     pull_policy: build
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassyonline/apps/web
+      context: ./apps/web
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
@@ -24,8 +24,6 @@ services:
       QDRANT_API_KEY: ${RASSY_ONLINE_QDRANT_API_KEY}
     volumes:
       - ${APP_DATA_DIR}/app-data/web-rassyonline/uploads:/app-data/uploads
-    ports:
-      - ${APP_PORT}:3000
     extra_hosts:
       - host.docker.internal:host-gateway
     depends_on:
