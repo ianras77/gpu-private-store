@@ -3,10 +3,13 @@ export declare const PLANETS: readonly ["Sun", "Moon", "Mercury", "Venus", "Mars
 export type Planet = (typeof PLANETS)[number];
 export declare const OPTIONAL_POINTS: readonly ["NorthNode", "Chiron"];
 export type OptionalPoint = (typeof OPTIONAL_POINTS)[number];
-export declare const ANGLES: readonly ["Asc", "MC"];
+export declare const ANGLES: readonly ["Asc", "MC", "Desc", "IC"];
 export type Angle = (typeof ANGLES)[number];
 export type ChartPointType = "planet" | "angle" | "point";
 export type HouseSystem = "placidus" | "whole-sign";
+export type CalculationConfidence = "canonical" | "approximate" | "degraded";
+export type ZodiacMode = "tropical";
+export type TimezoneSource = "request" | "resolved" | "fallback";
 export type AspectType = "conjunction" | "opposition" | "trine" | "square" | "sextile";
 export interface Aspect {
     type: AspectType;
@@ -18,7 +21,9 @@ export interface HouseInfo {
     system: HouseSystem;
     cusps: number[];
     ascendant?: number;
+    descendant?: number;
     midheaven?: number;
+    imumCoeli?: number;
 }
 export interface ChartPoint {
     key: string;
@@ -28,6 +33,7 @@ export interface ChartPoint {
     signDegree: number;
     house?: number;
     retrograde?: boolean;
+    speed?: number;
 }
 export interface NatalChart {
     points: ChartPoint[];
@@ -37,7 +43,15 @@ export interface NatalChart {
         timeUnknown: boolean;
         timezone: string;
         calculatedAt: string;
+        birthMomentUtc?: string;
+        julianDay?: number;
         houseSystem?: HouseSystem;
+        engineId?: string;
+        engineVersion?: string;
+        ephemerisSource?: string;
+        calculationConfidence?: CalculationConfidence;
+        zodiacMode?: ZodiacMode;
+        timezoneSource?: TimezoneSource;
     };
 }
 export interface ChartInput {

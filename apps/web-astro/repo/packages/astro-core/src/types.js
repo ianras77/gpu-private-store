@@ -11,4 +11,4 @@ export const PLANETS = [
     "Pluto"
 ];
 export const OPTIONAL_POINTS = ["NorthNode", "Chiron"];
-export const ANGLES = ["Asc", "MC"];
+export const ANGLES = ["Asc", "MC", "Desc", "IC"];

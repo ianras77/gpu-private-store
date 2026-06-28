@@ -7,6 +7,7 @@ export declare const ChartPointSchema: z.ZodObject<{
     signDegree: z.ZodNumber;
     house: z.ZodOptional<z.ZodNumber>;
     retrograde: z.ZodOptional<z.ZodBoolean>;
+    speed: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     key: string;
     type: "planet" | "angle" | "point";
@@ -15,6 +16,7 @@ export declare const ChartPointSchema: z.ZodObject<{
     signDegree: number;
     house?: number | undefined;
     retrograde?: boolean | undefined;
+    speed?: number | undefined;
 }, {
     key: string;
     type: "planet" | "angle" | "point";
@@ -23,22 +25,29 @@ export declare const ChartPointSchema: z.ZodObject<{
     signDegree: number;
     house?: number | undefined;
     retrograde?: boolean | undefined;
+    speed?: number | undefined;
 }>;
 export declare const HouseInfoSchema: z.ZodObject<{
     system: z.ZodEnum<["placidus", "whole-sign"]>;
     cusps: z.ZodArray<z.ZodNumber, "many">;
     ascendant: z.ZodOptional<z.ZodNumber>;
+    descendant: z.ZodOptional<z.ZodNumber>;
     midheaven: z.ZodOptional<z.ZodNumber>;
+    imumCoeli: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     system: "placidus" | "whole-sign";
     cusps: number[];
     ascendant?: number | undefined;
+    descendant?: number | undefined;
     midheaven?: number | undefined;
+    imumCoeli?: number | undefined;
 }, {
     system: "placidus" | "whole-sign";
     cusps: number[];
     ascendant?: number | undefined;
+    descendant?: number | undefined;
     midheaven?: number | undefined;
+    imumCoeli?: number | undefined;
 }>;
 export declare const AspectSchema: z.ZodObject<{
     type: z.ZodEnum<["conjunction", "opposition", "trine", "square", "sextile"]>;
@@ -65,6 +74,7 @@ export declare const NatalChartSchema: z.ZodObject<{
         signDegree: z.ZodNumber;
         house: z.ZodOptional<z.ZodNumber>;
         retrograde: z.ZodOptional<z.ZodBoolean>;
+        speed: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
         key: string;
         type: "planet" | "angle" | "point";
@@ -73,6 +83,7 @@ export declare const NatalChartSchema: z.ZodObject<{
         signDegree: number;
         house?: number | undefined;
         retrograde?: boolean | undefined;
+        speed?: number | undefined;
     }, {
         key: string;
         type: "planet" | "angle" | "point";
@@ -81,6 +92,7 @@ export declare const NatalChartSchema: z.ZodObject<{
         signDegree: number;
         house?: number | undefined;
         retrograde?: boolean | undefined;
+        speed?: number | undefined;
     }>, "many">;
     aspects: z.ZodArray<z.ZodObject<{
         type: z.ZodEnum<["conjunction", "opposition", "trine", "square", "sextile"]>;
@@ -102,33 +114,63 @@ export declare const NatalChartSchema: z.ZodObject<{
         system: z.ZodEnum<["placidus", "whole-sign"]>;
         cusps: z.ZodArray<z.ZodNumber, "many">;
         ascendant: z.ZodOptional<z.ZodNumber>;
+        descendant: z.ZodOptional<z.ZodNumber>;
         midheaven: z.ZodOptional<z.ZodNumber>;
+        imumCoeli: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
         system: "placidus" | "whole-sign";
         cusps: number[];
         ascendant?: number | undefined;
+        descendant?: number | undefined;
         midheaven?: number | undefined;
+        imumCoeli?: number | undefined;
     }, {
         system: "placidus" | "whole-sign";
         cusps: number[];
         ascendant?: number | undefined;
+        descendant?: number | undefined;
         midheaven?: number | undefined;
+        imumCoeli?: number | undefined;
     }>>;
     meta: z.ZodObject<{
         timeUnknown: z.ZodBoolean;
         timezone: z.ZodString;
         calculatedAt: z.ZodString;
+        birthMomentUtc: z.ZodOptional<z.ZodString>;
+        julianDay: z.ZodOptional<z.ZodNumber>;
         houseSystem: z.ZodOptional<z.ZodEnum<["placidus", "whole-sign"]>>;
+        engineId: z.ZodOptional<z.ZodString>;
+        engineVersion: z.ZodOptional<z.ZodString>;
+        ephemerisSource: z.ZodOptional<z.ZodString>;
+        calculationConfidence: z.ZodOptional<z.ZodEnum<["canonical", "approximate", "degraded"]>>;
+        zodiacMode: z.ZodOptional<z.ZodEnum<["tropical"]>>;
+        timezoneSource: z.ZodOptional<z.ZodEnum<["request", "resolved", "fallback"]>>;
     }, "strip", z.ZodTypeAny, {
         timeUnknown: boolean;
         timezone: string;
         calculatedAt: string;
+        birthMomentUtc?: string | undefined;
+        julianDay?: number | undefined;
         houseSystem?: "placidus" | "whole-sign" | undefined;
+        engineId?: string | undefined;
+        engineVersion?: string | undefined;
+        ephemerisSource?: string | undefined;
+        calculationConfidence?: "canonical" | "approximate" | "degraded" | undefined;
+        zodiacMode?: "tropical" | undefined;
+        timezoneSource?: "request" | "resolved" | "fallback" | undefined;
     }, {
         timeUnknown: boolean;
         timezone: string;
         calculatedAt: string;
+        birthMomentUtc?: string | undefined;
+        julianDay?: number | undefined;
         houseSystem?: "placidus" | "whole-sign" | undefined;
+        engineId?: string | undefined;
+        engineVersion?: string | undefined;
+        ephemerisSource?: string | undefined;
+        calculationConfidence?: "canonical" | "approximate" | "degraded" | undefined;
+        zodiacMode?: "tropical" | undefined;
+        timezoneSource?: "request" | "resolved" | "fallback" | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     points: {
@@ -139,6 +181,7 @@ export declare const NatalChartSchema: z.ZodObject<{
         signDegree: number;
         house?: number | undefined;
         retrograde?: boolean | undefined;
+        speed?: number | undefined;
     }[];
     aspects: {
         type: "conjunction" | "opposition" | "trine" | "square" | "sextile";
@@ -150,13 +193,23 @@ export declare const NatalChartSchema: z.ZodObject<{
         timeUnknown: boolean;
         timezone: string;
         calculatedAt: string;
+        birthMomentUtc?: string | undefined;
+        julianDay?: number | undefined;
         houseSystem?: "placidus" | "whole-sign" | undefined;
+        engineId?: string | undefined;
+        engineVersion?: string | undefined;
+        ephemerisSource?: string | undefined;
+        calculationConfidence?: "canonical" | "approximate" | "degraded" | undefined;
+        zodiacMode?: "tropical" | undefined;
+        timezoneSource?: "request" | "resolved" | "fallback" | undefined;
     };
     houses?: {
         system: "placidus" | "whole-sign";
         cusps: number[];
         ascendant?: number | undefined;
+        descendant?: number | undefined;
         midheaven?: number | undefined;
+        imumCoeli?: number | undefined;
     } | undefined;
 }, {
     points: {
@@ -167,6 +220,7 @@ export declare const NatalChartSchema: z.ZodObject<{
         signDegree: number;
         house?: number | undefined;
         retrograde?: boolean | undefined;
+        speed?: number | undefined;
     }[];
     aspects: {
         type: "conjunction" | "opposition" | "trine" | "square" | "sextile";
@@ -178,13 +232,23 @@ export declare const NatalChartSchema: z.ZodObject<{
         timeUnknown: boolean;
         timezone: string;
         calculatedAt: string;
+        birthMomentUtc?: string | undefined;
+        julianDay?: number | undefined;
         houseSystem?: "placidus" | "whole-sign" | undefined;
+        engineId?: string | undefined;
+        engineVersion?: string | undefined;
+        ephemerisSource?: string | undefined;
+        calculationConfidence?: "canonical" | "approximate" | "degraded" | undefined;
+        zodiacMode?: "tropical" | undefined;
+        timezoneSource?: "request" | "resolved" | "fallback" | undefined;
     };
     houses?: {
         system: "placidus" | "whole-sign";
         cusps: number[];
         ascendant?: number | undefined;
+        descendant?: number | undefined;
         midheaven?: number | undefined;
+        imumCoeli?: number | undefined;
     } | undefined;
 }>;
 export type NatalChartSchemaType = z.infer<typeof NatalChartSchema>;
