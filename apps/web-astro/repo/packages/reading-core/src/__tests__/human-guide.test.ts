@@ -144,6 +144,7 @@ describe("generateHumanGuide", () => {
     expect(result.guide.overview.every((section) => section.chartBasis.length > 0)).toBe(true);
     expect(result.guide.practices.every((section) => section.chartBasis.length > 0)).toBe(true);
     expect(nodes.every((node) => node.chartBasis.length > 0)).toBe(true);
+    expect(result.quality.passed).toBe(true);
   });
 
   it("rejects empty source provenance before generating a guide", async () => {
@@ -152,6 +153,23 @@ describe("generateHumanGuide", () => {
         chart,
         brand: BRANDS.jupiterseek,
         sourceProvenance: []
+      })
+    ).rejects.toThrow();
+  });
+
+  it("rejects blank source provenance before generating a guide", async () => {
+    await expect(
+      generateHumanGuide({
+        chart,
+        brand: BRANDS.jupiterseek,
+        sourceProvenance: [
+          {
+            title: " ",
+            source: "\t",
+            tags: ["source:blank"],
+            sections: ["metaFrame"]
+          }
+        ]
       })
     ).rejects.toThrow();
   });

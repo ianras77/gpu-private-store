@@ -38,22 +38,26 @@ const check = (passed: boolean, evidence: string[], failure: string): QualityChe
 export const evaluateHumanGuideQuality = (guide: HumanGuide, chart: NatalChart): HumanGuideQuality => {
   const parsed = HumanGuideSchema.safeParse(guide);
   const text = textOf(guide);
-  const tokens = chartTokens(chart);
+  const tokens = Array.from(new Set(chartTokens(chart)));
   const matchedTokens = tokens.filter((token) => text.includes(token));
+  const chartSpecificityThreshold = Math.min(6, Math.max(1, tokens.length));
+  const groundedSources = guide.sourceProvenance.filter(
+    (source) => source.title.trim().length > 0 && source.source.trim().length > 0
+  );
   const forbidden = ["pope", "church authority", "only true", "damned", "curse", "must obey"];
   const practicalWords = ["practice", "notice", "choose", "return", "ask", "serve", "forgive"];
 
   const checks = {
     schema: check(parsed.success, ["HumanGuideSchema"], "Guide does not match HumanGuideSchema."),
     chartSpecificity: check(
-      matchedTokens.length >= 6,
+      matchedTokens.length >= chartSpecificityThreshold,
       matchedTokens.slice(0, 12),
       "Guide does not name enough concrete chart facts."
     ),
     sourceGrounding: check(
-      guide.sourceProvenance.length > 0,
-      guide.sourceProvenance.map((source) => source.title),
-      "Guide has no source provenance."
+      groundedSources.length > 0,
+      groundedSources.map((source) => source.title),
+      "Guide has no source provenance with non-empty title and source."
     ),
     nonDoctrinalTone: check(
       forbidden.every((term) => !text.includes(term)),

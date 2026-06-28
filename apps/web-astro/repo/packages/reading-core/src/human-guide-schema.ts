@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const SourceUseSchema = z.object({
-  title: z.string(),
-  source: z.string(),
+  title: z.string().trim().min(1),
+  source: z.string().trim().min(1),
   tags: z.array(z.string()).default([]),
   sections: z.array(z.string()).default([])
 });
