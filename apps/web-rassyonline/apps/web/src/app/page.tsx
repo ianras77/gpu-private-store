@@ -68,7 +68,7 @@ export default async function Home() {
         <aside className="thread-rail" aria-label="Stage map">
           <div className="rail-heading">Build Loop</div>
           {stageGates.map((gate, index) => (
-            <div className={index === 3 ? "gate active" : "gate"} key={gate}>
+            <div className={index === 4 ? "gate active" : "gate"} key={gate}>
               <span>{index + 1}</span>
               <p>{gate}</p>
             </div>

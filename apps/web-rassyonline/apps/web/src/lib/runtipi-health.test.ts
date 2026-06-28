@@ -12,7 +12,7 @@ describe("buildHealthReport", () => {
     });
 
     expect(report.ok).toBe(true);
-    expect(report.stage).toBe("stage-4-document-memory");
+    expect(report.stage).toBe("stage-5-magical-ux");
     expect(report.dependencies.rassycodex.configured).toBe(true);
     expect(report.dependencies.database.configured).toBe(true);
     expect(report.dependencies.database.target).toBe("postgresql://rassy:***@postgres:5432/rassy_online");

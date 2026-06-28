@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { ChatMode, ChatModeId } from "@/lib/rassycodex";
+import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -32,15 +33,27 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const [uploading, setUploading] = useState(false);
   const [documentNotice, setDocumentNotice] = useState<string | null>(null);
+  const [themeId, setThemeId] = useState<ThemeId>("aurora");
   const abortRef = useRef<AbortController | null>(null);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
+  const activeTheme = getTheme(themeId);
 
   useEffect(() => {
     if (!signedIn) return;
     void refreshDocuments();
   }, [signedIn]);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("rassy-online-theme");
+    setThemeId(getTheme(stored).id);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.rassyTheme = themeId;
+    window.localStorage.setItem("rassy-online-theme", themeId);
+  }, [themeId]);
 
   async function refreshDocuments() {
     const response = await fetch("/api/documents", { cache: "no-store" });
@@ -94,6 +107,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     event.preventDefault();
     const prompt = input.trim();
     if (!prompt || sending) return;
+    const requestedTheme = detectThemeIntent(prompt);
+    if (requestedTheme) {
+      setThemeId(requestedTheme);
+    }
 
     const nextMessages = [...messages, { role: "user" as const, content: prompt }];
     setMessages([...nextMessages, { role: "assistant", content: "" }]);
@@ -170,6 +187,27 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           </select>
         </label>
       </div>
+
+      <section className="theme-tray" aria-label="Theme controls">
+        <div>
+          <p className="system-label">Atmosphere</p>
+          <h2>{activeTheme.label}</h2>
+        </div>
+        <div className="theme-options">
+          {THEME_PRESETS.map((theme) => (
+            <button
+              className={theme.id === themeId ? "theme-swatch active" : "theme-swatch"}
+              data-theme-swatch={theme.id}
+              key={theme.id}
+              onClick={() => setThemeId(theme.id)}
+              type="button"
+            >
+              <span />
+              {theme.label}
+            </button>
+          ))}
+        </div>
+      </section>
 
       <section className="document-tray" aria-label="Document memory">
         <div className="document-tray-header">
