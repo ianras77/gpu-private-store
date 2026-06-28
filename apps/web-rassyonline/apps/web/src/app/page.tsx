@@ -1,3 +1,8 @@
+import Link from "next/link";
+import { getCurrentUser } from "@/lib/auth/users";
+import { CHAT_MODES } from "@/lib/rassycodex";
+import { ChatWorkbench } from "@/components/chat-workbench";
+
 const modes = [
   { name: "General", model: "rassy-general", state: "Ready path" },
   { name: "Deep Coding", model: "rassy-codex", state: "Reserved" },
@@ -63,7 +68,7 @@ export default async function Home() {
         <aside className="thread-rail" aria-label="Stage map">
           <div className="rail-heading">Build Loop</div>
           {stageGates.map((gate, index) => (
-            <div className={index === 0 ? "gate active" : "gate"} key={gate}>
+            <div className={index === 2 ? "gate active" : "gate"} key={gate}>
               <span>{index + 1}</span>
               <p>{gate}</p>
             </div>
@@ -71,7 +76,7 @@ export default async function Home() {
         </aside>
 
         <section className="chat-stage" aria-label="Rassy Online preview">
-          <div className="constellation">
+          <div className="constellation compact">
             {modes.map((mode, index) => (
               <article className={`mode-node node-${index}`} key={mode.name}>
                 <div>
@@ -83,12 +88,7 @@ export default async function Home() {
             ))}
           </div>
 
-          <div className="composer-preview" aria-label="Composer preview">
-            <div className="prompt-line">Ask RassyCodex anything...</div>
-            <button type="button" disabled>
-              Chat unlocks in Stage 3
-            </button>
-          </div>
+          <ChatWorkbench modes={CHAT_MODES} signedIn={Boolean(user)} />
         </section>
 
         <aside className="status-panel" aria-label="Runtipi readiness">
@@ -111,5 +111,3 @@ export default async function Home() {
     </main>
   );
 }
-import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth/users";
