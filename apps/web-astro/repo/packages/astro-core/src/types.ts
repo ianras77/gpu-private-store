@@ -18,12 +18,16 @@ export type Planet = (typeof PLANETS)[number];
 export const OPTIONAL_POINTS = ["NorthNode", "Chiron"] as const;
 export type OptionalPoint = (typeof OPTIONAL_POINTS)[number];
 
-export const ANGLES = ["Asc", "MC"] as const;
+export const ANGLES = ["Asc", "MC", "Desc", "IC"] as const;
 export type Angle = (typeof ANGLES)[number];
 
 export type ChartPointType = "planet" | "angle" | "point";
 
 export type HouseSystem = "placidus" | "whole-sign";
+
+export type CalculationConfidence = "canonical" | "approximate" | "degraded";
+export type ZodiacMode = "tropical";
+export type TimezoneSource = "request" | "resolved" | "fallback";
 
 export type AspectType =
   | "conjunction"
@@ -43,7 +47,9 @@ export interface HouseInfo {
   system: HouseSystem;
   cusps: number[]; // length 12, each 0..360
   ascendant?: number;
+  descendant?: number;
   midheaven?: number;
+  imumCoeli?: number;
 }
 
 export interface ChartPoint {
@@ -54,6 +60,7 @@ export interface ChartPoint {
   signDegree: number; // 0..30
   house?: number; // 1..12
   retrograde?: boolean;
+  speed?: number;
 }
 
 export interface NatalChart {
@@ -67,6 +74,12 @@ export interface NatalChart {
     birthMomentUtc?: string;
     julianDay?: number;
     houseSystem?: HouseSystem;
+    engineId?: string;
+    engineVersion?: string;
+    ephemerisSource?: string;
+    calculationConfidence?: CalculationConfidence;
+    zodiacMode?: ZodiacMode;
+    timezoneSource?: TimezoneSource;
   };
 }
 
