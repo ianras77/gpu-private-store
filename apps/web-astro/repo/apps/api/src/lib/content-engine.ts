@@ -154,7 +154,7 @@ export const createInitialReport = async (params: {
   }
 
   const result = await generateReading({
-    chart: chart.chartJson as NatalChart,
+    chart: chart.chartJson as unknown as NatalChart,
     brand,
     length: params.length,
     cache
@@ -211,7 +211,7 @@ export const createWeeklyUpdate = async (params: {
   });
 
   const result: GenerateWeeklyContentResult = await generateWeeklyContent({
-    chart: chart.chartJson as NatalChart,
+    chart: chart.chartJson as unknown as NatalChart,
     brand,
     weekOf,
     previousEntries,
