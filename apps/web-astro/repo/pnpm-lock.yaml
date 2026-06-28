@@ -44,6 +44,9 @@ importers:
       '@astro/brands':
         specifier: workspace:*
         version: link:../../packages/brands
+      '@astro/chart-analysis':
+        specifier: workspace:*
+        version: link:../../packages/chart-analysis
       '@astro/reading-core':
         specifier: workspace:*
         version: link:../../packages/reading-core

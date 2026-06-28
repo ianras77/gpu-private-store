@@ -4,6 +4,7 @@ import type { ZodIssue } from "zod";
 export type ApiErrorCode =
   | "BAD_REQUEST"
   | "RATE_LIMITED"
+  | "SERVICE_UNAVAILABLE"
   | "GEO_PROVIDER_UNAVAILABLE"
   | "GEO_PROVIDER_REQUEST_FAILED"
   | "INTERNAL_SERVER_ERROR";

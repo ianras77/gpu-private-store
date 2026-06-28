@@ -116,6 +116,15 @@ export const GENERAL_TAGS: LoreTag[] = [
   }
 ];
 
+export const SOURCE_FAMILY_TAGS: LoreTag[] = [
+  { id: "source:hermetic", keywords: ["hermes", "hermetic", "trismegistus", "microcosm", "macrocosm"] },
+  { id: "source:astrology", keywords: ["astrology", "zodiac", "birth chart", "house", "planet", "aspect"] },
+  { id: "source:contemplative", keywords: ["meditation", "forgiveness", "wisdom", "contemplation", "prayer"] },
+  { id: "source:human-design", keywords: ["human design", "bodygraph", "authority", "profile", "centers"] },
+  { id: "source:myth", keywords: ["myth", "goddess", "hero", "underworld", "oracle"] },
+  { id: "source:excluded-occult", keywords: ["necromancer", "curse", "sworn book", "abramelin", "galdrabok"] }
+];
+
 export const SEASONAL_BRAND_PROMPTS: Record<string, Record<Season, string>> = {
   oracleveil: {
     winter: "Winter: enter the inner temple, decode dreams, and work with stillness.",
@@ -157,7 +166,9 @@ const collectTags = (text: string, tags: LoreTag[]): string[] => {
 };
 
 export const inferTags = (text: string): string[] => {
-  return Array.from(new Set([...collectTags(text, BRAND_TAGS), ...collectTags(text, GENERAL_TAGS)]));
+  return Array.from(
+    new Set([...collectTags(text, BRAND_TAGS), ...collectTags(text, GENERAL_TAGS), ...collectTags(text, SOURCE_FAMILY_TAGS)])
+  );
 };
 
 export const getSeasonalPrompt = (brandId: string, season: Season): string | undefined => {

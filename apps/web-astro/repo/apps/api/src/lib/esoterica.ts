@@ -6,7 +6,7 @@ import type { NatalChart } from "@astro/astro-core";
 import { buildChartFacts, chartFactsToString } from "@astro/reading-core";
 import { getSeasonalPrompt, inferTags, type Season } from "./esoterica-taxonomy";
 
-type EsotericaChunk = {
+export type EsotericaChunk = {
   id: string;
   source: string;
   title?: string;
@@ -15,6 +15,22 @@ type EsotericaChunk = {
   text: string;
   embedding: number[];
   tags?: string[];
+};
+
+export type SourcePolicy = {
+  includeTags: string[];
+  excludeTags: string[];
+};
+
+export const HUMAN_GUIDE_SOURCE_POLICY: SourcePolicy = {
+  includeTags: [
+    "source:hermetic",
+    "source:astrology",
+    "source:contemplative",
+    "source:human-design",
+    "source:myth"
+  ],
+  excludeTags: ["source:excluded-occult"]
 };
 
 type EsotericaMeta = {
@@ -170,6 +186,22 @@ const qdrantSearch = async (
   }));
 };
 
+const tagsForChunk = (chunk: EsotericaChunk): string[] => chunk.tags ?? inferTags(chunk.text);
+
+const withResolvedTags = (chunk: EsotericaChunk): EsotericaChunk => ({
+  ...chunk,
+  tags: tagsForChunk(chunk)
+});
+
+const applySourcePolicy = (chunks: EsotericaChunk[], policy?: SourcePolicy): EsotericaChunk[] => {
+  if (!policy) return chunks;
+  return chunks.map(withResolvedTags).filter((chunk) => {
+    const tags = chunk.tags ?? [];
+    if (tags.some((tag) => policy.excludeTags.includes(tag))) return false;
+    return policy.includeTags.length === 0 || tags.some((tag) => policy.includeTags.includes(tag));
+  });
+};
+
 export const buildLoreQuery = (chart: NatalChart, brand: BrandConfig): string => {
   const facts = buildChartFacts(chart);
   const placements = facts.placements.slice(0, 5).join("; ");
@@ -199,12 +231,14 @@ export const buildLoreQuery = (chart: NatalChart, brand: BrandConfig): string =>
 export const retrieveEsotericaLore = async (
   query: string,
   topK = 4,
-  brandTag?: string
+  brandTag?: string,
+  sourcePolicy?: SourcePolicy
 ): Promise<EsotericaChunk[]> => {
   const embedding = await embedQuery(query);
   if (!embedding) return [];
   const rotate = process.env.ESOTERICA_ROTATE_DAILY === "1";
-  const poolSize = rotate ? Math.max(topK * 3, 8) : topK;
+  const policyPoolSize = sourcePolicy ? Math.max(topK * 3, 8) : topK;
+  const poolSize = rotate ? Math.max(topK * 3, 8) : policyPoolSize;
   const strictBrand = process.env.ESOTERICA_STRICT_BRAND_FILTER === "1";
   if (process.env.QDRANT_URL) {
     const branded = brandTag ? await qdrantSearch(embedding, poolSize, brandTag) : [];
@@ -218,11 +252,12 @@ export const retrieveEsotericaLore = async (
       }, []);
       results = merged;
     }
-    if (!rotate) return results.slice(0, topK);
+    const policyResults = applySourcePolicy(results, sourcePolicy);
+    if (!rotate) return policyResults.slice(0, topK);
     const seed = dayOfYear(new Date());
-    if (!results.length) return [];
-    const offset = seed % results.length;
-    const rotated = [...results.slice(offset), ...results.slice(0, offset)];
+    if (!policyResults.length) return [];
+    const offset = seed % policyResults.length;
+    const rotated = [...policyResults.slice(offset), ...policyResults.slice(0, offset)];
     return rotated.slice(0, topK);
   }
   const index = await loadIndex();
@@ -230,12 +265,15 @@ export const retrieveEsotericaLore = async (
   const enriched = index.chunks.map((chunk) => ({
     chunk,
     score: cosineSimilarity(embedding, chunk.embedding),
-    tags: chunk.tags ?? inferTags(chunk.text)
+    tags: tagsForChunk(chunk)
   }));
   const filtered = brandTag ? enriched.filter((item) => item.tags.includes(brandTag)) : enriched;
   const scored = (filtered.length || process.env.ESOTERICA_STRICT_BRAND_FILTER === "1" ? filtered : enriched)
     .sort((a, b) => b.score - a.score);
-  const results = scored.slice(0, poolSize).map((item) => item.chunk);
+  const results = applySourcePolicy(
+    scored.slice(0, poolSize).map((item) => ({ ...item.chunk, tags: item.tags })),
+    sourcePolicy
+  );
   if (!rotate) return results.slice(0, topK);
   if (!results.length) return [];
   const seed = dayOfYear(new Date());

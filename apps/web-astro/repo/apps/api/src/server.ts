@@ -13,6 +13,7 @@ import { meRoutes } from "./routes/me";
 import { chartsRoutes } from "./routes/charts";
 import { accountRoutes } from "./routes/account";
 import { loreRoutes } from "./routes/lore";
+import { humanGuideRoutes } from "./routes/human-guide";
 import { authRoutes } from "./routes/auth";
 import { contentRoutes } from "./routes/content";
 import { inferBrandId } from "./lib/brand";
@@ -101,6 +102,7 @@ export const buildServer = () => {
   app.register(chartsRoutes, { prefix: "/v1/charts" });
   app.register(accountRoutes, { prefix: "/v1" });
   app.register(loreRoutes, { prefix: "/v1/lore" });
+  app.register(humanGuideRoutes, { prefix: "/v1/human-guide" });
   app.register(authRoutes, { prefix: "/v1" });
   app.register(contentRoutes, { prefix: "/v1" });
 
