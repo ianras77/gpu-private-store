@@ -1,0 +1,85 @@
+services:
+  rassy-online-web:
+    image: runtipi-local-web-rassyonline-web:latest
+    pull_policy: build
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassyonline/apps/web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      RASSY_ONLINE_PUBLIC_BASE_URL: ${RASSY_ONLINE_PUBLIC_BASE_URL:-https://rassy.online}
+      RASSY_ONLINE_AUTH_SECRET: ${RASSY_ONLINE_AUTH_SECRET}
+      RASSY_ONLINE_BOOTSTRAP_ADMIN_EMAIL: ${RASSY_ONLINE_BOOTSTRAP_ADMIN_EMAIL:-}
+      RASSY_ONLINE_REGISTRATION_POLICY: ${RASSY_ONLINE_REGISTRATION_POLICY:-open}
+      RASSY_ONLINE_UPLOAD_LIMIT_MB: ${RASSY_ONLINE_UPLOAD_LIMIT_MB:-25}
+      RASSY_ONLINE_UPLOAD_ROOT: /app-data/uploads
+      RASSYCODEX_BASE_URL: ${RASSYCODEX_BASE_URL:-http://host.docker.internal:8844}
+      RASSYCODEX_API_KEY: ${RASSYCODEX_API_KEY:-}
+      DATABASE_URL: postgresql://rassy_online:${RASSY_ONLINE_POSTGRES_PASSWORD}@rassy-online-postgres:5432/rassy_online
+      QDRANT_URL: http://rassy-online-qdrant:6333
+      QDRANT_API_KEY: ${RASSY_ONLINE_QDRANT_API_KEY}
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-rassyonline/uploads:/app-data/uploads
+    ports:
+      - ${APP_PORT}:3000
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      rassy-online-postgres:
+        condition: service_healthy
+      rassy-online-qdrant:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    x-runtipi:
+      is_main: true
+      internal_port: 3000
+
+  rassy-online-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rassy_online
+      POSTGRES_USER: rassy_online
+      POSTGRES_PASSWORD: ${RASSY_ONLINE_POSTGRES_PASSWORD}
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-rassyonline/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U rassy_online -d rassy_online
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  rassy-online-qdrant:
+    image: qdrant/qdrant:v1.13.6
+    restart: unless-stopped
+    environment:
+      QDRANT__SERVICE__API_KEY: ${RASSY_ONLINE_QDRANT_API_KEY}
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-rassyonline/qdrant:/qdrant/storage
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "bash -ec 'exec 3<>/dev/tcp/127.0.0.1/6333'"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+x-runtipi:
+  schema_version: 2

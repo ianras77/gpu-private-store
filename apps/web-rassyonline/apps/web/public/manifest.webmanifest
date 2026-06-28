@@ -1,0 +1,9 @@
+{
+  "name": "Rassy Online",
+  "short_name": "Rassy Online",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050713",
+  "theme_color": "#0d1231",
+  "description": "A magical RassyCodex web workbench."
+}
