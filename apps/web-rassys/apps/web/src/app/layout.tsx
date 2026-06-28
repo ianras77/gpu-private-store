@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { EasterEggs } from "../components/EasterEggs";
 import { PersistentRadioPlayerProvider } from "../components/PersistentRadioPlayerProvider";
@@ -10,6 +11,20 @@ export const metadata: Metadata = {
     "Ian Rasmussen's home on the web, with Mr Rassy Radio, photos, bedtime stories, a listening room, a Minecraft observatory, and a running notebook.",
 };
 
+function UmamiAnalytics() {
+  const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  if (!websiteId) return null;
+
+  return (
+    <Script
+      src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL || "https://umami.rasies.com/script.js"}
+      data-website-id={websiteId}
+      data-domains={process.env.NEXT_PUBLIC_UMAMI_DOMAINS || undefined}
+      strategy="afterInteractive"
+    />
+  );
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -18,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased relative">
+        <UmamiAnalytics />
         <div className="rave-backdrop" aria-hidden="true" />
         <PersistentRadioPlayerProvider>
           <div className="relative z-10">

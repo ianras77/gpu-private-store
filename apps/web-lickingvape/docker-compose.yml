@@ -88,12 +88,20 @@ services:
       retries: 10
 
   lickingvape-web:
-    build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/web
+    build:
+      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/web
+      args:
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${LICKINGVAPE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${LICKINGVAPE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     restart: unless-stopped
     pull_policy: build
     environment:
       API_PROXY_TARGET: http://lickingvape-api:8000
       NEXT_PUBLIC_API_BASE: ${LICKINGVAPE_PUBLIC_API_BASE:-/api}
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${LICKINGVAPE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${LICKINGVAPE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
       PORT: "3000"
     depends_on:
       lickingvape-api:

@@ -104,6 +104,9 @@ services:
       dockerfile: Dockerfile
       args:
         APP_NAME: xlcrack
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${CRACKSTACK_XLCRACK_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${CRACKSTACK_XLCRACK_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     image: runtipi-local-web-crackstack-xlcrack:latest
     pull_policy: build
     restart: unless-stopped
@@ -115,6 +118,9 @@ services:
       PORT: 3000
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${CRACKSTACK_XLCRACK_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${CRACKSTACK_XLCRACK_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     depends_on:
       crackstack-backend:
         condition: service_healthy
@@ -138,6 +144,9 @@ services:
       dockerfile: Dockerfile
       args:
         APP_NAME: tapecrack
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${CRACKSTACK_TAPECRACK_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${CRACKSTACK_TAPECRACK_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     image: runtipi-local-web-crackstack-tapecrack:latest
     pull_policy: build
     restart: unless-stopped
@@ -149,6 +158,9 @@ services:
       PORT: 3000
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${CRACKSTACK_TAPECRACK_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${CRACKSTACK_TAPECRACK_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     depends_on:
       crackstack-backend:
         condition: service_healthy

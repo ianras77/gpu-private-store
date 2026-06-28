@@ -119,6 +119,9 @@ services:
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
     environment:
       NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_JUPITERSEEK_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_JUPITERSEEK_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     command: >
       sh -c "corepack enable
       && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
@@ -150,6 +153,9 @@ services:
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
     environment:
       NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_MALEFICME_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_MALEFICME_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     command: >
       sh -c "corepack enable
       && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
@@ -178,6 +184,9 @@ services:
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
     environment:
       NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_SATURNLEO_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_SATURNLEO_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     command: >
       sh -c "corepack enable
       && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
@@ -206,6 +215,9 @@ services:
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
     environment:
       NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_SATURNSEER_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_SATURNSEER_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     command: >
       sh -c "corepack enable
       && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done
@@ -234,6 +246,9 @@ services:
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-astro/repo:/repo
     environment:
       NEXT_PUBLIC_API_BASE: ${ASTRO_PUBLIC_API_BASE:-http://${APP_HOST}:${ASTRO_API_PORT:-3200}}
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_ORACLEVEIL_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_ORACLEVEIL_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     command: >
       sh -c "corepack enable
       && until [ -d /repo/node_modules/.pnpm ]; do echo 'waiting for deps'; sleep 2; done

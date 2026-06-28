@@ -211,11 +211,17 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
         API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:3001}
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${USMENDER_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${USMENDER_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     pull_policy: build
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:3001}
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${USMENDER_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${USMENDER_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     depends_on:
       api:
         condition: service_healthy

@@ -5,6 +5,9 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${TRT_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${TRT_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     pull_policy: build
     command: sh -lc "pnpm -C apps/api exec prisma migrate deploy && pnpm -C apps/api start"
     environment:
@@ -124,12 +127,18 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${TRT_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${TRT_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     pull_policy: build
     command: sh -lc "pnpm -C apps/web start"
     environment:
       NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
       NEXT_PUBLIC_SUPABASE_URL: ${TRT_SUPABASE_URL:-}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${TRT_SUPABASE_ANON_KEY:-}
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${TRT_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${TRT_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
       API_INTERNAL_URL: http://trt-api:3191
     depends_on:
       trt-api:
@@ -153,6 +162,9 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${TRT_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${TRT_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     pull_policy: build
     command: sh -lc "pnpm -C apps/api start:worker"
     environment:

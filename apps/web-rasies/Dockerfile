@@ -1,6 +1,12 @@
 # ---------- build web ----------
 FROM node:20-alpine AS webbuild
 WORKDIR /app/web
+ARG VITE_UMAMI_SCRIPT_URL="https://umami.rasies.com/script.js"
+ARG VITE_UMAMI_WEBSITE_ID=""
+ARG VITE_UMAMI_DOMAINS=""
+ENV VITE_UMAMI_SCRIPT_URL=${VITE_UMAMI_SCRIPT_URL}
+ENV VITE_UMAMI_WEBSITE_ID=${VITE_UMAMI_WEBSITE_ID}
+ENV VITE_UMAMI_DOMAINS=${VITE_UMAMI_DOMAINS}
 COPY web/package.json web/package-lock.json ./
 RUN npm ci
 COPY web/ ./

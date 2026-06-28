@@ -19,6 +19,28 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
     <title>Rasies | Family Corner of the Internet</title>
+    <script>
+      (() => {
+        const websiteId = "%VITE_UMAMI_WEBSITE_ID%";
+        if (!websiteId || websiteId.startsWith("%VITE_")) return;
+
+        const script = document.createElement("script");
+        const scriptUrl = "%VITE_UMAMI_SCRIPT_URL%";
+        const domains = "%VITE_UMAMI_DOMAINS%";
+
+        script.async = true;
+        script.defer = true;
+        script.src =
+          scriptUrl && !scriptUrl.startsWith("%VITE_")
+            ? scriptUrl
+            : "https://umami.rasies.com/script.js";
+        script.setAttribute("data-website-id", websiteId);
+        if (domains && !domains.startsWith("%VITE_")) {
+          script.setAttribute("data-domains", domains);
+        }
+        document.head.appendChild(script);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

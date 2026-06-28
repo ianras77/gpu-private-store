@@ -1,6 +1,7 @@
 import "./globals.css";
 import { ClientProviders } from "@/components/ClientProviders";
 import { Orbitron, Space_Grotesk, Press_Start_2P } from "next/font/google";
+import Script from "next/script";
 
 const displayFont = Orbitron({
   subsets: ["latin"],
@@ -25,6 +26,20 @@ export const metadata = {
   description: "Retro-future running adventures powered by your real-world workouts."
 };
 
+function UmamiAnalytics() {
+  const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  if (!websiteId) return null;
+
+  return (
+    <Script
+      src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL || "https://umami.rasies.com/script.js"}
+      data-website-id={websiteId}
+      data-domains={process.env.NEXT_PUBLIC_UMAMI_DOMAINS || undefined}
+      strategy="afterInteractive"
+    />
+  );
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -37,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={`${bodyFont.variable} ${displayFont.variable} ${pixelFont.variable} font-body`}>
+        <UmamiAnalytics />
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>

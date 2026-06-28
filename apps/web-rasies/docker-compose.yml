@@ -5,9 +5,16 @@ services:
     build:
       context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rasies
       dockerfile: Dockerfile
+      args:
+        VITE_UMAMI_SCRIPT_URL: ${VITE_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        VITE_UMAMI_WEBSITE_ID: ${RASIES_UMAMI_WEBSITE_ID:-${VITE_UMAMI_WEBSITE_ID:-}}
+        VITE_UMAMI_DOMAINS: ${RASIES_UMAMI_DOMAINS:-${VITE_UMAMI_DOMAINS:-}}
     restart: unless-stopped
     environment:
       - PORT=3000
+      - VITE_UMAMI_SCRIPT_URL=${VITE_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      - VITE_UMAMI_WEBSITE_ID=${RASIES_UMAMI_WEBSITE_ID:-${VITE_UMAMI_WEBSITE_ID:-}}
+      - VITE_UMAMI_DOMAINS=${RASIES_UMAMI_DOMAINS:-${VITE_UMAMI_DOMAINS:-}}
       - PUBLIC_BASE_URL=https://www.rasies.com
       - PUBLIC_PROBE_URL=http://127.0.0.1:3000
       - PERSONAL_SITE_URL=https://rassys.com

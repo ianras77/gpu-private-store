@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 import './globals.css';
 import { serverApiBase } from './lib/api';
 
@@ -21,6 +22,20 @@ export const metadata = {
 export const viewport = {
   themeColor: '#09060d'
 };
+
+function UmamiAnalytics() {
+  const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  if (!websiteId) return null;
+
+  return (
+    <Script
+      src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL || 'https://umami.rasies.com/script.js'}
+      data-website-id={websiteId}
+      data-domains={process.env.NEXT_PUBLIC_UMAMI_DOMAINS || undefined}
+      strategy="afterInteractive"
+    />
+  );
+}
 
 function withFallbackFontStack(value: unknown, fallback: string) {
   if (typeof value !== 'string') return fallback;
@@ -69,6 +84,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="en">
       <body style={style}>
+        <UmamiAnalytics />
         <header className="site-header">
           <div className="masthead">
             <div className="masthead-kicker">

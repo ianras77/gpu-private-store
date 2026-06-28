@@ -2,6 +2,7 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Space_Grotesk, Sora } from "next/font/google";
+import Script from "next/script";
 
 const display = Space_Grotesk({
   subsets: ["latin"],
@@ -21,10 +22,27 @@ export const metadata: Metadata = {
     "A family-friendly AI game studio that wraps Cheshire Cat with guided coaching, build kits, and supervised publishing flows."
 };
 
+function UmamiAnalytics() {
+  const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  if (!websiteId) return null;
+
+  return (
+    <Script
+      src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL || "https://umami.rasies.com/script.js"}
+      data-website-id={websiteId}
+      data-domains={process.env.NEXT_PUBLIC_UMAMI_DOMAINS || undefined}
+      strategy="afterInteractive"
+    />
+  );
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-screen bg-ink-950 font-body text-ink-50">{children}</body>
+      <body className="min-h-screen bg-ink-950 font-body text-ink-50">
+        <UmamiAnalytics />
+        {children}
+      </body>
     </html>
   );
 }
