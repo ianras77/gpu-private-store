@@ -120,7 +120,13 @@ const bodyIdFromDef = (swiss: SwissEphemeris, body: BodyDef): number => {
   return id;
 };
 
-const buildPoint = (key: string, type: ChartPoint["type"], degree: number, retrograde?: boolean): ChartPoint => {
+const buildPoint = (
+  key: string,
+  type: ChartPoint["type"],
+  degree: number,
+  retrograde?: boolean,
+  speed?: number
+): ChartPoint => {
   const normalized = normalizeDegree(degree);
   return {
     key,
@@ -128,11 +134,16 @@ const buildPoint = (key: string, type: ChartPoint["type"], degree: number, retro
     degree: normalized,
     sign: degreeToSign(normalized),
     signDegree: degreeToSignDegree(normalized),
-    retrograde
+    retrograde,
+    speed
   };
 };
 
-const calcBody = (swiss: SwissEphemeris, jd: number, body: BodyDef): { degree: number; retrograde: boolean } => {
+const calcBody = (
+  swiss: SwissEphemeris,
+  jd: number,
+  body: BodyDef
+): { degree: number; retrograde: boolean; speed: number } => {
   const bodyId = bodyIdFromDef(swiss, body);
   const flags = [swiss.SEFLG_SWIEPH | swiss.SEFLG_SPEED, swiss.SEFLG_MOSEPH | swiss.SEFLG_SPEED];
   let lastError = "";
@@ -150,7 +161,8 @@ const calcBody = (swiss: SwissEphemeris, jd: number, body: BodyDef): { degree: n
     }
     return {
       degree: normalizeDegree(lon.longitude),
-      retrograde: lon.longitudeSpeed < 0
+      retrograde: lon.longitudeSpeed < 0,
+      speed: lon.longitudeSpeed
     };
   }
 
@@ -165,7 +177,9 @@ const mapPlacidusHouses = (rawCusps: number[], asc: number, mc: number): HouseIn
     system: "placidus",
     cusps: rawCusps.slice(0, 12).map((cusp) => normalizeDegree(cusp)),
     ascendant: normalizeDegree(asc),
-    midheaven: normalizeDegree(mc)
+    descendant: normalizeDegree(asc + 180),
+    midheaven: normalizeDegree(mc),
+    imumCoeli: normalizeDegree(mc + 180)
   };
 };
 
@@ -189,17 +203,17 @@ export class SwissEphemerisEngine implements AstroEngine {
 
     for (const body of PLANET_DEFS) {
       const result = calcBody(swiss, jd, body);
-      points.push(buildPoint(body.key, "planet", result.degree, result.retrograde));
+      points.push(buildPoint(body.key, "planet", result.degree, result.retrograde, result.speed));
     }
 
     if (options.includePoints?.northNode) {
       const result = calcBody(swiss, jd, OPTIONAL_POINT_DEFS.NorthNode);
-      points.push(buildPoint("NorthNode", "point", result.degree, result.retrograde));
+      points.push(buildPoint("NorthNode", "point", result.degree, result.retrograde, result.speed));
     }
 
     if (options.includePoints?.chiron) {
       const result = calcBody(swiss, jd, OPTIONAL_POINT_DEFS.Chiron);
-      points.push(buildPoint("Chiron", "point", result.degree, result.retrograde));
+      points.push(buildPoint("Chiron", "point", result.degree, result.retrograde, result.speed));
     }
 
     let houses: HouseInfo | undefined;
@@ -212,14 +226,25 @@ export class SwissEphemerisEngine implements AstroEngine {
 
       const asc = normalizeDegree(rawHouses.ascendant);
       const mc = normalizeDegree(rawHouses.mc);
+      const desc = normalizeDegree(asc + 180);
+      const ic = normalizeDegree(mc + 180);
 
       houses =
         houseSystem === "whole-sign"
           ? computeHouses("whole-sign", asc, mc)
           : mapPlacidusHouses(rawHouses.house, asc, mc);
+      houses = {
+        ...houses,
+        ascendant: asc,
+        descendant: desc,
+        midheaven: mc,
+        imumCoeli: ic
+      };
 
       points.push(buildPoint("Asc", "angle", asc));
       points.push(buildPoint("MC", "angle", mc));
+      points.push(buildPoint("Desc", "angle", desc));
+      points.push(buildPoint("IC", "angle", ic));
 
       for (const point of points) {
         if (point.type === "angle") continue;
@@ -239,7 +264,13 @@ export class SwissEphemerisEngine implements AstroEngine {
         calculatedAt: new Date().toISOString(),
         birthMomentUtc: dateUTC.toISOString(),
         julianDay: Number(jd.toFixed(8)),
-        houseSystem: timeUnknown ? undefined : houseSystem
+        houseSystem: timeUnknown ? undefined : houseSystem,
+        engineId: this.id,
+        engineVersion: "0.1.0",
+        ephemerisSource: "swiss-ephemeris",
+        calculationConfidence: "canonical",
+        zodiacMode: "tropical",
+        timezoneSource: "request"
       }
     };
   }

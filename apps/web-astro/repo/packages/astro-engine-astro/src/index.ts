@@ -144,10 +144,21 @@ export class AstronomyEngineEngine implements AstroEngine {
     if (!timeUnknown) {
       const asc = computeAscendant(jd, input.latitude, input.longitude);
       const mc = computeMidheaven(jd, input.longitude);
+      const desc = normalizeDegree(asc + 180);
+      const ic = normalizeDegree(mc + 180);
       houses = computeHouses(houseSystem, asc, mc);
+      houses = {
+        ...houses,
+        ascendant: asc,
+        descendant: desc,
+        midheaven: mc,
+        imumCoeli: ic
+      };
 
       points.push(buildPoint("Asc", "angle", asc));
       points.push(buildPoint("MC", "angle", mc));
+      points.push(buildPoint("Desc", "angle", desc));
+      points.push(buildPoint("IC", "angle", ic));
 
       const cusps = houses.cusps;
       for (const point of points) {
@@ -168,7 +179,13 @@ export class AstronomyEngineEngine implements AstroEngine {
         calculatedAt: new Date().toISOString(),
         birthMomentUtc: dateUTC.toISOString(),
         julianDay: Number(jd.toFixed(8)),
-        houseSystem: timeUnknown ? undefined : houseSystem
+        houseSystem: timeUnknown ? undefined : houseSystem,
+        engineId: this.id,
+        engineVersion: "0.1.0",
+        ephemerisSource: "mean-period-dev-engine",
+        calculationConfidence: "approximate",
+        zodiacMode: "tropical",
+        timezoneSource: "request"
       }
     };
   }

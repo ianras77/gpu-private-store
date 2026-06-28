@@ -55,6 +55,20 @@ describeIfSwiss("SwissEphemerisEngine", () => {
     }
   });
 
+  it("emits canonical metadata and all four angles", async () => {
+    const engine = createSwissEngine();
+    const chart = await engine.calculateChart(BASE_INPUT);
+
+    expect(chart.meta.engineId).toBe("swiss-ephemeris");
+    expect(chart.meta.calculationConfidence).toBe("canonical");
+    expect(chart.meta.zodiacMode).toBe("tropical");
+    expect(chart.houses?.descendant).toBeDefined();
+    expect(chart.houses?.imumCoeli).toBeDefined();
+    expect(chart.points.find((point) => point.key === "Desc")).toBeDefined();
+    expect(chart.points.find((point) => point.key === "IC")).toBeDefined();
+    expect(chart.points.find((point) => point.key === "Sun")?.speed).toEqual(expect.any(Number));
+  });
+
   it("supports whole-sign house calculations while keeping angle points", async () => {
     const engine = createSwissEngine();
     const chart = await engine.calculateChart(BASE_INPUT, { houseSystem: "whole-sign" });
