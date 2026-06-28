@@ -82,6 +82,14 @@ describe("esoterica retrieval", () => {
           embedding: [0.95, 0]
         }),
         JSON.stringify({
+          id: "explicit-include-with-excluded-text",
+          source: "mixed.pdf",
+          title: "Hermetic Curse Source",
+          text: "A hermetic note that still contains a necromancer curse.",
+          embedding: [0.94, 0],
+          tags: ["source:hermetic"]
+        }),
+        JSON.stringify({
           id: "untagged",
           source: "plain.pdf",
           title: "Plain Source",

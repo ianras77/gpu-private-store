@@ -192,7 +192,6 @@ const sourceTextForChunk = (chunk: EsotericaChunk): string => {
 
 const tagsForChunk = (chunk: EsotericaChunk): string[] => {
   const tags = chunk.tags ?? [];
-  if (tags.some((tag) => tag.startsWith("source:"))) return tags;
   return Array.from(new Set([...tags, ...inferTags(sourceTextForChunk(chunk))]));
 };
 
