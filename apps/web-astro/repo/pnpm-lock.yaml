@@ -266,6 +266,12 @@ importers:
 
   packages/brands: {}
 
+  packages/chart-analysis:
+    dependencies:
+      '@astro/astro-core':
+        specifier: workspace:*
+        version: link:../astro-core
+
   packages/reading-core:
     dependencies:
       '@astro/astro-core':
@@ -274,6 +280,9 @@ importers:
       '@astro/brands':
         specifier: workspace:*
         version: link:../brands
+      '@astro/chart-analysis':
+        specifier: workspace:*
+        version: link:../chart-analysis
       '@astro/utils':
         specifier: workspace:*
         version: link:../utils

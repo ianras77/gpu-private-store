@@ -6,7 +6,7 @@ import { callLLM } from "./llm";
 import { evaluateHumanGuideQuality, type HumanGuideQuality } from "./human-guide-quality";
 import {
   HumanGuideSchema,
-  SourceUseSchema,
+  SourceProvenanceSchema,
   type HumanGuide,
   type SourceUse
 } from "./human-guide-schema";
@@ -232,7 +232,7 @@ export const generateHumanGuide = async ({
   cache
 }: GenerateHumanGuideInput): Promise<GenerateHumanGuideResult> => {
   const analysis = analyzeChart(chart);
-  const normalizedSources = SourceUseSchema.array().parse(sourceProvenance);
+  const normalizedSources = SourceProvenanceSchema.parse(sourceProvenance);
   const cacheKey = `human-guide:${brand.id}:${hashObject({
     chart,
     sourceProvenance: normalizedSources,

@@ -7,6 +7,8 @@ export const SourceUseSchema = z.object({
   sections: z.array(z.string()).default([])
 });
 
+export const SourceProvenanceSchema = z.array(SourceUseSchema).min(1);
+
 export const GuideSectionSchema = z.object({
   title: z.string(),
   body: z.string(),
@@ -47,7 +49,7 @@ export const HumanGuideSchema = z.object({
     wisdomTeacherFrame: z.string(),
     tone: z.array(z.string()).min(1)
   }),
-  sourceProvenance: z.array(SourceUseSchema),
+  sourceProvenance: SourceProvenanceSchema,
   overview: z.array(GuideSectionSchema).min(3),
   internalMap: z.object({
     root: MapNodeSchema,

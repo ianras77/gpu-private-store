@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { NatalChart } from "@astro/astro-core";
 import { BRANDS } from "@astro/brands";
@@ -52,5 +51,15 @@ describe("generateHumanGuide", () => {
     expect(result.guide.metaFrame.world).toBe("living-cosmos");
     expect(result.guide.internalMap.root.name).toBe("Root");
     expect(result.guide.sourceProvenance[0]?.title).toBe("The Way of Hermes");
+  });
+
+  it("rejects empty source provenance before generating a guide", async () => {
+    await expect(
+      generateHumanGuide({
+        chart,
+        brand: BRANDS.jupiterseek,
+        sourceProvenance: []
+      })
+    ).rejects.toThrow();
   });
 });
