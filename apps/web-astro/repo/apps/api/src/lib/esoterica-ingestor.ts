@@ -150,8 +150,14 @@ export const chunkTextForIngest = (text: string, maxWords = 850, overlap = 140):
   return chunks;
 };
 
-export const buildChunkId = (sourcePath: string, contentHash: string, chunkIndex: number): string =>
-  crypto.createHash("sha256").update(`${sourcePath}:${contentHash}:${chunkIndex}`).digest("hex");
+export const buildChunkId = (sourcePath: string, contentHash: string, chunkIndex: number): string => {
+  const hash = crypto.createHash("sha256").update(`${sourcePath}:${contentHash}:${chunkIndex}`).digest("hex");
+  const variant = ((Number.parseInt(hash.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, "0");
+  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-${variant}${hash.slice(
+    18,
+    20
+  )}-${hash.slice(20, 32)}`;
+};
 
 const NOISY_PDF_WARNINGS = ["Ran out of space in font private use area"];
 
