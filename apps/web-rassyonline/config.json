@@ -1,0 +1,103 @@
+{
+  "name": "Rassy Online",
+  "available": true,
+  "port": 3199,
+  "exposable": true,
+  "dynamic_config": true,
+  "id": "web-rassyonline",
+  "description": "A magical Runtipi-native RassyCodex web app with public chat, accounts, per-user vector workspaces, document toggles, and admin controls.",
+  "tipi_version": 1,
+  "version": "0.1.0",
+  "min_tipi_version": "v4.0.0",
+  "categories": [
+    "ai",
+    "utilities"
+  ],
+  "short_desc": "Magical public RassyCodex chat with accounts, documents, vectors, and admin controls.",
+  "author": "Ian Rasmussen",
+  "source": "https://github.com/ianras77/gpu-private-store",
+  "form_fields": [
+    {
+      "type": "text",
+      "label": "Public Base URL",
+      "max": 256,
+      "min": 1,
+      "required": true,
+      "env_variable": "RASSY_ONLINE_PUBLIC_BASE_URL",
+      "default": "https://rassy.online"
+    },
+    {
+      "type": "password",
+      "label": "Auth Secret",
+      "max": 256,
+      "min": 32,
+      "required": true,
+      "env_variable": "RASSY_ONLINE_AUTH_SECRET"
+    },
+    {
+      "type": "email",
+      "label": "Bootstrap Admin Email",
+      "max": 256,
+      "min": 3,
+      "required": false,
+      "env_variable": "RASSY_ONLINE_BOOTSTRAP_ADMIN_EMAIL"
+    },
+    {
+      "type": "text",
+      "label": "RassyCodex Base URL",
+      "max": 256,
+      "min": 1,
+      "required": true,
+      "env_variable": "RASSYCODEX_BASE_URL",
+      "default": "http://host.docker.internal:8844"
+    },
+    {
+      "type": "password",
+      "label": "RassyCodex API Key",
+      "max": 512,
+      "min": 0,
+      "required": false,
+      "env_variable": "RASSYCODEX_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "Registration Policy",
+      "max": 32,
+      "min": 4,
+      "required": true,
+      "env_variable": "RASSY_ONLINE_REGISTRATION_POLICY",
+      "default": "open"
+    },
+    {
+      "type": "number",
+      "label": "Upload Limit MB",
+      "max": 1024,
+      "min": 1,
+      "required": true,
+      "env_variable": "RASSY_ONLINE_UPLOAD_LIMIT_MB",
+      "default": 25
+    },
+    {
+      "type": "password",
+      "label": "Postgres Password",
+      "max": 128,
+      "min": 12,
+      "required": true,
+      "env_variable": "RASSY_ONLINE_POSTGRES_PASSWORD"
+    },
+    {
+      "type": "password",
+      "label": "Qdrant API Key",
+      "max": 128,
+      "min": 12,
+      "required": true,
+      "env_variable": "RASSY_ONLINE_QDRANT_API_KEY"
+    }
+  ],
+  "supported_architectures": [
+    "amd64"
+  ],
+  "no_gui": false,
+  "created_at": 1782669600000,
+  "updated_at": 1782669600000
+}

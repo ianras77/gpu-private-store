@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Rassy Online</title>
+  <desc id="desc">A luminous compass-star logo for Rassy Online.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
+      <stop offset="0%" stop-color="#28336f"/>
+      <stop offset="45%" stop-color="#101638"/>
+      <stop offset="100%" stop-color="#050713"/>
+    </radialGradient>
+    <linearGradient id="star" x1="116" y1="92" x2="396" y2="420">
+      <stop offset="0%" stop-color="#8ef7ff"/>
+      <stop offset="42%" stop-color="#c7a7ff"/>
+      <stop offset="72%" stop-color="#ffe08a"/>
+      <stop offset="100%" stop-color="#ff78b7"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.56 0 0 0 0 0.87 0 0 0 0 1 0 0 0 0.85 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="172" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2"/>
+  <circle cx="256" cy="256" r="122" fill="none" stroke="#8ef7ff" stroke-opacity="0.2" stroke-width="2" stroke-dasharray="12 18"/>
+  <path d="M256 76 296 216 436 256 296 296 256 436 216 296 76 256 216 216Z" fill="url(#star)" filter="url(#glow)"/>
+  <path d="M256 148 281 231 364 256 281 281 256 364 231 281 148 256 231 231Z" fill="#080b1d" fill-opacity="0.74"/>
+  <path d="M216 190c30-31 76-30 106-1 30 30 29 77-2 107l-28-28c15-15 15-38 1-53-15-14-38-14-53 1-15 15-15 38-1 53l68 68h-56l-40-40c-30-30-27-77 5-107Z" fill="#f8fbff"/>
+  <circle cx="162" cy="146" r="8" fill="#ffe08a"/>
+  <circle cx="368" cy="164" r="6" fill="#8ef7ff"/>
+  <circle cx="148" cy="364" r="6" fill="#ff78b7"/>
+  <circle cx="386" cy="354" r="9" fill="#c7a7ff"/>
+</svg>
