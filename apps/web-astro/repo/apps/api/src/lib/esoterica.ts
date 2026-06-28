@@ -186,7 +186,15 @@ const qdrantSearch = async (
   }));
 };
 
-const tagsForChunk = (chunk: EsotericaChunk): string[] => chunk.tags ?? inferTags(chunk.text);
+const sourceTextForChunk = (chunk: EsotericaChunk): string => {
+  return [chunk.title, chunk.author, chunk.location, chunk.source, chunk.text].filter(Boolean).join("\n");
+};
+
+const tagsForChunk = (chunk: EsotericaChunk): string[] => {
+  const tags = chunk.tags ?? [];
+  if (tags.some((tag) => tag.startsWith("source:"))) return tags;
+  return Array.from(new Set([...tags, ...inferTags(sourceTextForChunk(chunk))]));
+};
 
 const withResolvedTags = (chunk: EsotericaChunk): EsotericaChunk => ({
   ...chunk,

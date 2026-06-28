@@ -109,17 +109,12 @@ export const ReadingRequestInput = z.object({
     .optional()
 });
 
-export const HumanGuideRequestInput = z.object({
-  chartJson: z.unknown(),
-  brandId: BrandIdSchema,
-  chartProfileId: z.string().uuid().optional(),
-  saveToFeed: z.boolean().optional(),
-  preferences: z
-    .object({
-      focus: z.string().optional()
-    })
-    .optional()
-});
+export const HumanGuideRequestInput = z
+  .object({
+    chartJson: z.unknown(),
+    brandId: BrandIdSchema
+  })
+  .strict();
 
 export const CompatibilityRequestInput = z.object({
   chartAJson: z.unknown(),

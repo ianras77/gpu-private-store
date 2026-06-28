@@ -36,6 +36,14 @@ const restoreEnv = () => {
   }
 };
 
+const jsonResponse = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "content-type": "application/json"
+    }
+  });
+
 describe("esoterica retrieval", () => {
   let tmpDir: string;
 
@@ -92,5 +100,52 @@ describe("esoterica retrieval", () => {
     expect(chunks.map((chunk) => chunk.id)).toEqual(["hermetic"]);
     expect(chunks[0]?.tags).toContain("source:hermetic");
     expect(chunks[0]?.tags).not.toContain("source:excluded-occult");
+  });
+
+  it("infers missing or empty Qdrant source-family tags before applying source policy", async () => {
+    process.env.QDRANT_URL = "http://qdrant.test";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        jsonResponse({
+          result: [
+            {
+              id: "astrology-missing-tags",
+              payload: {
+                source: "qdrant-astrology.pdf",
+                title: "Birth Chart Source",
+                text: "A birth chart uses planet, house, and aspect patterns."
+              }
+            },
+            {
+              id: "human-design-empty-tags",
+              payload: {
+                source: "qdrant-bodygraph.pdf",
+                title: "Bodygraph Source",
+                text: "Human design bodygraph centers and authority are mapped here.",
+                tags: []
+              }
+            },
+            {
+              id: "excluded-missing-tags",
+              payload: {
+                source: "qdrant-curse.pdf",
+                title: "Sworn Book Source",
+                text: "A necromancer curse from the sworn book."
+              }
+            }
+          ]
+        })
+      )
+    );
+
+    const { HUMAN_GUIDE_SOURCE_POLICY, retrieveEsotericaLore } = await import("../esoterica");
+
+    const chunks = await retrieveEsotericaLore("birth chart human design", 8, undefined, HUMAN_GUIDE_SOURCE_POLICY);
+
+    expect(chunks.map((chunk) => chunk.id)).toEqual(["astrology-missing-tags", "human-design-empty-tags"]);
+    expect(chunks[0]?.tags).toContain("source:astrology");
+    expect(chunks[1]?.tags).toContain("source:human-design");
+    expect(chunks.flatMap((chunk) => chunk.tags ?? [])).not.toContain("source:excluded-occult");
   });
 });

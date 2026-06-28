@@ -57,6 +57,16 @@ describe("human guide routes", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     retrieveEsotericaLore.mockResolvedValue([]);
+    generateHumanGuide.mockResolvedValue({
+      guide: {
+        title: "Human Guide"
+      },
+      meta: {
+        provider: "test",
+        model: "test",
+        usedFallback: false
+      }
+    });
 
     const { buildServer } = await import("../../server");
     app = buildServer();
@@ -91,5 +101,95 @@ describe("human guide routes", () => {
       requestId: "human-guide-empty-sources"
     });
     expect(generateHumanGuide).not.toHaveBeenCalled();
+  });
+
+  it("rejects unsupported persistence fields for generate-only requests", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/human-guide/natal",
+      headers: {
+        "content-type": "application/json",
+        "x-request-id": "human-guide-save-to-feed"
+      },
+      payload: {
+        chartJson,
+        brandId: "jupiterseek",
+        saveToFeed: true
+      }
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "BAD_REQUEST",
+        message: "Invalid human guide payload."
+      },
+      requestId: "human-guide-save-to-feed"
+    });
+    expect(retrieveEsotericaLore).not.toHaveBeenCalled();
+    expect(generateHumanGuide).not.toHaveBeenCalled();
+  });
+
+  it("retrieves with the Human Guide policy and returns the generator result", async () => {
+    const chunk = {
+      id: "hermetic-source",
+      source: "hermes.pdf",
+      title: "Hermetic Source",
+      text: "Hermes teaches microcosm and macrocosm.",
+      embedding: [],
+      tags: ["source:hermetic"]
+    };
+    const generatorResult = {
+      guide: {
+        title: "Human Guide",
+        sourceProvenance: [
+          {
+            title: "Hermetic Source",
+            source: "hermes.pdf",
+            tags: ["source:hermetic"],
+            sections: ["metaFrame", "internalMap", "practicalCounsel"]
+          }
+        ]
+      },
+      meta: {
+        provider: "test",
+        model: "test",
+        usedFallback: false
+      }
+    };
+    retrieveEsotericaLore.mockResolvedValue([chunk]);
+    generateHumanGuide.mockResolvedValue(generatorResult);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/human-guide/natal",
+      headers: {
+        "content-type": "application/json",
+        "x-request-id": "human-guide-happy"
+      },
+      payload: {
+        chartJson,
+        brandId: "jupiterseek"
+      }
+    });
+
+    const { HUMAN_GUIDE_SOURCE_POLICY } = await import("../../lib/esoterica");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(generatorResult);
+    expect(retrieveEsotericaLore).toHaveBeenCalledWith(expect.any(String), 8, undefined, HUMAN_GUIDE_SOURCE_POLICY);
+    expect(generateHumanGuide).toHaveBeenCalledWith(
+      expect.objectContaining({
+        loreContext: expect.stringContaining("Hermetic Source"),
+        sourceProvenance: [
+          {
+            title: "Hermetic Source",
+            source: "hermes.pdf",
+            tags: ["source:hermetic"],
+            sections: ["metaFrame", "internalMap", "practicalCounsel"]
+          }
+        ]
+      })
+    );
   });
 });
