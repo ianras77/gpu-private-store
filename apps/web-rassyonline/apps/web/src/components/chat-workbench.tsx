@@ -1,6 +1,8 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { applyLocalChatIntent, type WebSearchMode } from "@/lib/chat-intents";
+import { parseMarkdownBlocks } from "@/lib/markdown";
 import type { ChatMode, ChatModeId } from "@/lib/rassycodex";
 import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
 
@@ -19,13 +21,42 @@ type UserDocument = {
   chunkCount: number;
 };
 
+const PROMPT_RUNES = [
+  {
+    label: "Research",
+    prompt: "/search find current sources and summarize what matters for "
+  },
+  {
+    label: "Code Lane",
+    prompt: "/code"
+  },
+  {
+    label: "Patch",
+    prompt: "/code\nDraft the smallest safe patch for: "
+  },
+  {
+    label: "Trace",
+    prompt: "/local trace the source-to-sink path for: "
+  }
+];
+
+const MODE_GLYPHS: Record<ChatModeId, string> = {
+  general: "ASK",
+  "deep-coding": "CODE",
+  "fast-coding": "FAST",
+  quick: "SNAP",
+  knowledge: "KNOW"
+};
+
 export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn: boolean }) {
   const [mode, setMode] = useState(modes[0]?.id ?? "general");
+  const [webSearch, setWebSearch] = useState<WebSearchMode>("auto");
   const [threadId, setThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "Rassy Online is awake. Pick a mode, ask a question, and I will route it through RassyCodex."
+      content:
+        "RassyCodex is listening.\n\nPick a lane, ask for a patch, trace a system, or light up web search. I will keep the model route visible so you always know what kind of mind you are invoking."
     }
   ]);
   const [input, setInput] = useState("");
@@ -39,6 +70,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
   const activeTheme = getTheme(themeId);
+  const webSearchLabel = webSearch === "on" ? "web lit" : webSearch === "off" ? "local only" : "auto web";
 
   useEffect(() => {
     if (!signedIn) return;
@@ -105,14 +137,35 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const prompt = input.trim();
+    let prompt = input.trim();
     if (!prompt || sending) return;
+    let intentNotice: ChatMessage | null = null;
+    let requestWebSearch = webSearch;
+
+    const localIntent = applyLocalChatIntent(prompt);
+    if (localIntent) {
+      if (localIntent.updates.mode) setMode(localIntent.updates.mode);
+      if (localIntent.updates.themeId) setThemeId(localIntent.updates.themeId);
+      if (localIntent.updates.webSearch) {
+        requestWebSearch = localIntent.updates.webSearch;
+        setWebSearch(localIntent.updates.webSearch);
+      }
+      if (localIntent.kind === "local") {
+        setMessages((current) => [...current, { role: "assistant", content: localIntent.notice }]);
+        setInput("");
+        return;
+      }
+      prompt = localIntent.prompt ?? prompt;
+      intentNotice = { role: "assistant", content: localIntent.notice };
+    }
+
     const requestedTheme = detectThemeIntent(prompt);
     if (requestedTheme) {
       setThemeId(requestedTheme);
     }
 
-    const nextMessages = [...messages, { role: "user" as const, content: prompt }];
+    const visibleMessages = intentNotice ? [...messages, intentNotice] : messages;
+    const nextMessages = [...visibleMessages, { role: "user" as const, content: prompt }];
     setMessages([...nextMessages, { role: "assistant", content: "" }]);
     setInput("");
     setSending(true);
@@ -125,12 +178,13 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         method: "POST",
         headers: { "content-type": "application/json" },
         signal: abort.signal,
-          body: JSON.stringify({
-            mode,
-            threadId,
-            activeDocumentIds: activeDocuments.map((document) => document.id),
-            messages: nextMessages.map((message) => ({ role: message.role, content: message.content }))
-          })
+        body: JSON.stringify({
+          mode,
+          threadId,
+          activeDocumentIds: activeDocuments.map((document) => document.id),
+          webSearch: requestWebSearch,
+          messages: nextMessages.map((message) => ({ role: message.role, content: message.content }))
+        })
       });
 
       const nextThreadId = response.headers.get("x-thread-id");
@@ -170,97 +224,136 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
   return (
     <section className="chat-workbench" aria-label="RassyCodex chat">
-      <div className="chat-toolbar">
-        <div>
-          <p className="system-label">Active Mode</p>
+      <aside className="ritual-rail" aria-label="Rassy controls">
+        <div className="focus-orb" aria-label={`Current routing is ${webSearchLabel}`}>
+          <span>{webSearch === "off" ? "local" : webSearch}</span>
+          <strong>{webSearchLabel}</strong>
+        </div>
+
+        <div className="rail-card primary">
+          <p className="system-label">Mode</p>
           <h2>{activeMode?.label ?? "General"}</h2>
           <p>{activeMode?.description}</p>
-        </div>
-        <label>
-          Mode
-          <select value={mode} onChange={(event) => setMode(event.target.value as ChatModeId)}>
+          <select value={mode} onChange={(event) => setMode(event.target.value as ChatModeId)} aria-label="Mode">
             {modes.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.label} - {item.model}
               </option>
             ))}
           </select>
-        </label>
-      </div>
-
-      <section className="theme-tray" aria-label="Theme controls">
-        <div>
-          <p className="system-label">Atmosphere</p>
-          <h2>{activeTheme.label}</h2>
         </div>
-        <div className="theme-options">
-          {THEME_PRESETS.map((theme) => (
-            <button
-              className={theme.id === themeId ? "theme-swatch active" : "theme-swatch"}
-              data-theme-swatch={theme.id}
-              key={theme.id}
-              onClick={() => setThemeId(theme.id)}
-              type="button"
-            >
-              <span />
-              {theme.label}
+
+        <div className="lane-deck" aria-label="RassyCodex lane deck">
+          {modes.map((item) => (
+            <button className={item.id === mode ? "lane-card active" : "lane-card"} key={item.id} onClick={() => setMode(item.id)} type="button">
+              <span>{MODE_GLYPHS[item.id]}</span>
+              <strong>{item.label}</strong>
+              <small>{item.model}</small>
             </button>
           ))}
         </div>
-      </section>
 
-      <section className="document-tray" aria-label="Document memory">
-        <div className="document-tray-header">
-          <div>
-            <p className="system-label">Document Charms</p>
-            <h2>{signedIn ? `${activeDocuments.length} active` : "Sign in to save knowledge"}</h2>
-          </div>
-          {signedIn ? (
-            <label className={uploading ? "upload-button disabled" : "upload-button"}>
-              {uploading ? "Indexing" : "Upload"}
-              <input type="file" accept=".txt,.md,.markdown,.json,.csv,.log,.yaml,.yml,text/*,application/json" onChange={uploadDocument} disabled={uploading} />
-            </label>
-          ) : null}
-        </div>
-        {documentNotice ? <p className="document-notice">{documentNotice}</p> : null}
-        {signedIn ? (
-          <div className="document-list">
-            {documents.length === 0 ? <p className="empty-documents">No documents yet.</p> : null}
-            {documents.map((document) => (
-              <button
-                className={document.active ? "document-pill active" : "document-pill"}
-                disabled={document.status !== "ready"}
-                key={document.id}
-                onClick={() => toggleDocument(document)}
-                type="button"
-              >
-                <span>{document.title}</span>
-                <small>
-                  {document.status === "ready" ? `${document.chunkCount} chunks` : document.error ?? document.status}
-                </small>
+        <div className="rail-card">
+          <p className="system-label">Web</p>
+          <div className="segmented-control" aria-label="Web search mode">
+            {(["auto", "on", "off"] as WebSearchMode[]).map((item) => (
+              <button className={webSearch === item ? "active" : ""} key={item} onClick={() => setWebSearch(item)} type="button">
+                {item}
               </button>
             ))}
           </div>
-        ) : (
-          <p className="empty-documents">Anonymous chats stay ephemeral. Accounts unlock durable document memory.</p>
-        )}
-      </section>
+        </div>
 
-      <div className="message-list">
-        {messages.map((message, index) => (
-          <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-            <span>{message.role === "user" ? "You" : "RassyCodex"}</span>
-            <p>{message.content || (sending ? "..." : "")}</p>
-          </article>
-        ))}
+        <div className="rail-card">
+          <p className="system-label">Atmosphere</p>
+          <h2>{activeTheme.label}</h2>
+          <div className="theme-options">
+            {THEME_PRESETS.map((theme) => (
+              <button
+                aria-label={theme.label}
+                className={theme.id === themeId ? "theme-swatch active" : "theme-swatch"}
+                data-theme-swatch={theme.id}
+                key={theme.id}
+                onClick={() => setThemeId(theme.id)}
+                type="button"
+              >
+                <span />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <section className="rail-card document-tray" aria-label="Document memory">
+          <div className="document-tray-header">
+            <div>
+              <p className="system-label">Memory</p>
+              <h2>{signedIn ? `${activeDocuments.length} active` : "Ephemeral"}</h2>
+            </div>
+            {signedIn ? (
+              <label className={uploading ? "upload-button disabled" : "upload-button"}>
+                {uploading ? "Indexing" : "Upload"}
+                <input type="file" accept=".txt,.md,.markdown,.json,.csv,.log,.yaml,.yml,text/*,application/json" onChange={uploadDocument} disabled={uploading} />
+              </label>
+            ) : null}
+          </div>
+          {documentNotice ? <p className="document-notice">{documentNotice}</p> : null}
+          {signedIn ? (
+            <div className="document-list">
+              {documents.length === 0 ? <p className="empty-documents">No documents yet.</p> : null}
+              {documents.map((document) => (
+                <button
+                  className={document.active ? "document-pill active" : "document-pill"}
+                  disabled={document.status !== "ready"}
+                  key={document.id}
+                  onClick={() => toggleDocument(document)}
+                  type="button"
+                >
+                  <span>{document.title}</span>
+                  <small>{document.status === "ready" ? `${document.chunkCount} chunks` : document.error ?? document.status}</small>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="empty-documents">Sign in when you want durable document memory.</p>
+          )}
+        </section>
+      </aside>
+
+      <div className="transcript-shell">
+        <div className="route-readout" aria-label="Active RassyCodex route">
+          <div>
+            <span>{MODE_GLYPHS[mode]}</span>
+            <strong>{activeMode?.model ?? "rassy-general"}</strong>
+          </div>
+          <p>{webSearchLabel}</p>
+          <p>{activeDocuments.length ? `${activeDocuments.length} memory charms` : "no memory charms"}</p>
+          <p>{sending ? "streaming" : "ready"}</p>
+        </div>
+
+        <div className="message-list">
+          {messages.map((message, index) => (
+            <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
+              <span>{message.role === "user" ? "You" : "RassyCodex"}</span>
+              <MarkdownMessage content={message.content || (sending ? "..." : "")} />
+            </article>
+          ))}
+        </div>
       </div>
 
       <form className="composer-preview live" onSubmit={sendMessage}>
-        <input
+        <div className="prompt-runes" aria-label="Prompt shortcuts">
+          {PROMPT_RUNES.map((rune) => (
+            <button key={rune.label} onClick={() => setInput(rune.prompt)} type="button">
+              {rune.label}
+            </button>
+          ))}
+        </div>
+        <textarea
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Ask RassyCodex anything..."
+          placeholder="Try /code patch this, /search current docs, /know compare notes, or ask naturally..."
           aria-label="Message"
+          rows={1}
         />
         {sending ? (
           <button type="button" onClick={() => abortRef.current?.abort()}>
@@ -272,8 +365,94 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       </form>
 
       <div className="persistence-note">
-        {signedIn ? "Signed in: this thread can be saved." : "Anonymous: this chat is local to this browser session."}
+        {signedIn ? "Signed in. Threads can persist." : "Anonymous session. Nothing durable unless you log in."}
       </div>
     </section>
   );
+}
+
+function MarkdownMessage({ content }: { content: string }) {
+  const blocks = parseMarkdownBlocks(content);
+  return (
+    <div className="markdown-body">
+      {blocks.map((block, index) => {
+        if (block.type === "heading") {
+          const Heading = (`h${block.depth + 2}` as "h3" | "h4" | "h5");
+          return <Heading key={index}>{renderInline(block.text)}</Heading>;
+        }
+        if (block.type === "list") {
+          const List = block.ordered ? "ol" : "ul";
+          return (
+            <List key={index}>
+              {block.items.map((item) => (
+                <li key={item}>{renderInline(item)}</li>
+              ))}
+            </List>
+          );
+        }
+        if (block.type === "quote") {
+          return <blockquote key={index}>{renderInline(block.text)}</blockquote>;
+        }
+        if (block.type === "table") {
+          return (
+            <div className="markdown-table-wrap" key={index}>
+              <table>
+                <thead>
+                  <tr>
+                    {block.headers.map((header) => (
+                      <th key={header}>{renderInline(header)}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {block.rows.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {row.map((cell, cellIndex) => (
+                        <td key={`${cell}-${cellIndex}`}>{renderInline(cell)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        }
+        if (block.type === "code") {
+          return (
+            <pre key={index}>
+              <code>{block.text}</code>
+            </pre>
+          );
+        }
+        return <p key={index}>{renderInline(block.text)}</p>;
+      })}
+    </div>
+  );
+}
+
+function renderInline(text: string) {
+  const nodes: ReactNode[] = [];
+  const pattern = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(pattern)) {
+    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
+    const token = match[0];
+    if (token.startsWith("**")) {
+      nodes.push(<strong key={`${token}-${match.index}`}>{token.slice(2, -2)}</strong>);
+    } else if (token.startsWith("`")) {
+      nodes.push(<code key={`${token}-${match.index}`}>{token.slice(1, -1)}</code>);
+    } else {
+      const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      nodes.push(
+        <a key={`${token}-${match.index}`} href={link?.[2] ?? "#"} target="_blank" rel="noreferrer">
+          {link?.[1] ?? token}
+        </a>
+      );
+    }
+    lastIndex = match.index + token.length;
+  }
+
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
 }

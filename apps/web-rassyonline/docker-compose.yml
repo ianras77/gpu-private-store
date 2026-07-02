@@ -17,6 +17,7 @@ services:
       RASSY_ONLINE_REGISTRATION_POLICY: ${RASSY_ONLINE_REGISTRATION_POLICY:-open}
       RASSY_ONLINE_UPLOAD_LIMIT_MB: ${RASSY_ONLINE_UPLOAD_LIMIT_MB:-25}
       RASSY_ONLINE_UPLOAD_ROOT: /app-data/uploads
+      RASSY_ONLINE_SEARCH_URL: ${RASSY_ONLINE_SEARCH_URL:-https://search.rasies.com}
       RASSYCODEX_BASE_URL: ${RASSYCODEX_BASE_URL:-http://host.docker.internal:8844}
       RASSYCODEX_API_KEY: ${RASSYCODEX_API_KEY:-}
       DATABASE_URL: postgresql://rassy_online:${RASSY_ONLINE_POSTGRES_PASSWORD}@rassy-online-postgres:5432/rassy_online

@@ -7,6 +7,7 @@ import { buildDocumentContextMessage } from "@/lib/document-memory";
 import { getReadyDocumentIdsForUser } from "@/lib/documents";
 import { searchUserDocuments } from "@/lib/qdrant";
 import { embedTexts, extractDeltaFromSseLine, getChatMode, getRassyCodexChatUrl } from "@/lib/rassycodex";
+import { buildSearchContextMessage, searchWebResources, shouldUseWebSearch } from "@/lib/web-search";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,8 @@ const chatRequestSchema = z.object({
   mode: z.string().optional(),
   threadId: z.string().optional().nullable(),
   messages: z.array(chatMessageSchema).min(1).max(60),
-  activeDocumentIds: z.array(z.string()).max(50).optional()
+  activeDocumentIds: z.array(z.string()).max(50).optional(),
+  webSearch: z.enum(["auto", "on", "off"]).optional()
 });
 
 export async function POST(request: NextRequest) {
@@ -28,6 +30,7 @@ export async function POST(request: NextRequest) {
   const user = await getUserForSessionToken(request.cookies.get(SESSION_COOKIE)?.value);
   const latestUserMessage = [...parsed.messages].reverse().find((message) => message.role === "user");
   let upstreamMessages = parsed.messages;
+  let usedWebSearch = false;
 
   let threadId: string | null = null;
   if (user && latestUserMessage) {
@@ -70,6 +73,27 @@ export async function POST(request: NextRequest) {
       );
       if (contextMessage) {
         upstreamMessages = [contextMessage, ...parsed.messages];
+      }
+    }
+  }
+
+  if (latestUserMessage) {
+    const searchMode = parsed.webSearch ?? "auto";
+    const shouldSearch = searchMode === "on" || (searchMode === "auto" && shouldUseWebSearch(latestUserMessage.content));
+    if (shouldSearch) {
+      try {
+        const searchContext = buildSearchContextMessage(await searchWebResources(latestUserMessage.content));
+        if (searchContext) {
+          upstreamMessages = [searchContext, ...upstreamMessages];
+          usedWebSearch = true;
+        }
+      } catch {
+        const searchFailed = {
+          role: "system" as const,
+          content:
+            "The user allowed web search, but search.rasies.com was unavailable for this request. Answer from available context and say that live search could not be reached if freshness matters."
+        };
+        upstreamMessages = [searchFailed, ...upstreamMessages];
       }
     }
   }
@@ -141,7 +165,8 @@ export async function POST(request: NextRequest) {
       "cache-control": "no-store",
       ...(threadId ? { "x-thread-id": threadId } : {}),
       "x-rassy-mode": mode.id,
-      "x-rassy-model": mode.model
+      "x-rassy-model": mode.model,
+      "x-rassy-web-search": usedWebSearch ? "used" : "not-used"
     }
   });
 }

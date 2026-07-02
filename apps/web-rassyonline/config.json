@@ -7,7 +7,7 @@
   "id": "web-rassyonline",
   "description": "A magical Runtipi-native RassyCodex web app with public chat, accounts, per-user vector workspaces, document toggles, and admin controls.",
   "tipi_version": 1,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -61,6 +61,15 @@
     },
     {
       "type": "text",
+      "label": "Web Search URL",
+      "max": 256,
+      "min": 1,
+      "required": true,
+      "env_variable": "RASSY_ONLINE_SEARCH_URL",
+      "default": "https://search.rasies.com"
+    },
+    {
+      "type": "text",
       "label": "Registration Policy",
       "max": 32,
       "min": 4,
@@ -99,5 +108,5 @@
   ],
   "no_gui": false,
   "created_at": 1782669600000,
-  "updated_at": 1782669600000
+  "updated_at": 1782958459000
 }
