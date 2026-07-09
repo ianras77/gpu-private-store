@@ -34,17 +34,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="astro-site-header-shell">
               <header className="astro-site-header">
                 <Link href="/" className="astro-site-brand">
-                  {brand.name}
+                  <span>{brand.name}</span>
+                  <small>RassyGPT live</small>
                 </Link>
                 <nav className="astro-site-nav" aria-label="Primary">
+                  <Link href="/" className="astro-site-link astro-site-link-strong">
+                    Chat
+                  </Link>
                   <Link href="/intake" className="astro-site-link">
-                    Birth Chart
+                    Chart
                   </Link>
                   <Link href="/reading" className="astro-site-link">
-                    Reading
+                    Guide
                   </Link>
-                  <Link href="/account" className="astro-site-link astro-site-link-strong">
-                    Account
+                  <Link href="/compatibility" className="astro-site-link">
+                    Compare
+                  </Link>
+                  <Link href="/account" className="astro-site-link">
+                    Grimoire
                   </Link>
                 </nav>
               </header>
