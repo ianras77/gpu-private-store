@@ -55,8 +55,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content:
-        "RassyCodex is listening.\n\nPick a lane, ask for a patch, trace a system, or light up web search. I will keep the model route visible so you always know what kind of mind you are invoking."
+      content: "RassyCodex is awake. Give me the thread, the bug, the plan, or the question."
     }
   ]);
   const [input, setInput] = useState("");
@@ -224,17 +223,17 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
   return (
     <section className="chat-workbench" aria-label="RassyCodex chat">
-      <aside className="ritual-rail" aria-label="Rassy controls">
-        <div className="focus-orb" aria-label={`Current routing is ${webSearchLabel}`}>
-          <span>{webSearch === "off" ? "local" : webSearch}</span>
-          <strong>{webSearchLabel}</strong>
-        </div>
-
-        <div className="rail-card primary">
-          <p className="system-label">Mode</p>
-          <h2>{activeMode?.label ?? "General"}</h2>
-          <p>{activeMode?.description}</p>
-          <select value={mode} onChange={(event) => setMode(event.target.value as ChatModeId)} aria-label="Mode">
+      <div className="command-deck" aria-label="Rassy controls">
+        <div className="route-core">
+          <div className="sigil" aria-label={`Current routing is ${webSearchLabel}`}>
+            <span>{MODE_GLYPHS[mode]}</span>
+          </div>
+          <div className="route-copy">
+            <p className="system-label">RassyCodex Route</p>
+            <h2>{activeMode?.label ?? "General"}</h2>
+            <p>{activeMode?.model ?? "rassy-general"} · {webSearchLabel} · {sending ? "streaming" : "ready"}</p>
+          </div>
+          <select className="mode-select" value={mode} onChange={(event) => setMode(event.target.value as ChatModeId)} aria-label="Mode">
             {modes.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.label} - {item.model}
@@ -253,21 +252,16 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           ))}
         </div>
 
-        <div className="rail-card">
-          <p className="system-label">Web</p>
+        <div className="deck-tools">
           <div className="segmented-control" aria-label="Web search mode">
             {(["auto", "on", "off"] as WebSearchMode[]).map((item) => (
               <button className={webSearch === item ? "active" : ""} key={item} onClick={() => setWebSearch(item)} type="button">
-                {item}
+                {item === "on" ? "search" : item === "off" ? "local" : "auto"}
               </button>
             ))}
           </div>
-        </div>
 
-        <div className="rail-card">
-          <p className="system-label">Atmosphere</p>
-          <h2>{activeTheme.label}</h2>
-          <div className="theme-options">
+          <div className="theme-options" aria-label={`Atmosphere: ${activeTheme.label}`}>
             {THEME_PRESETS.map((theme) => (
               <button
                 aria-label={theme.label}
@@ -283,12 +277,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           </div>
         </div>
 
-        <section className="rail-card document-tray" aria-label="Document memory">
-          <div className="document-tray-header">
-            <div>
-              <p className="system-label">Memory</p>
-              <h2>{signedIn ? `${activeDocuments.length} active` : "Ephemeral"}</h2>
-            </div>
+        <section className="memory-strip" aria-label="Document memory">
+          <div className="memory-head">
+            <p className="system-label">Memory</p>
+            <strong>{signedIn ? `${activeDocuments.length} active` : "Ephemeral"}</strong>
             {signedIn ? (
               <label className={uploading ? "upload-button disabled" : "upload-button"}>
                 {uploading ? "Indexing" : "Upload"}
@@ -314,10 +306,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
               ))}
             </div>
           ) : (
-            <p className="empty-documents">Sign in when you want durable document memory.</p>
+            <p className="empty-documents">Sign in for durable memory.</p>
           )}
         </section>
-      </aside>
+      </div>
 
       <div className="transcript-shell">
         <div className="route-readout" aria-label="Active RassyCodex route">
@@ -341,6 +333,13 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       </div>
 
       <form className="composer-preview live" onSubmit={sendMessage}>
+        <textarea
+          value={input}
+          onChange={(event) => setInput(event.target.value)}
+          placeholder="Ask RassyCodex. Use /search, /code, /fast, /know, or just speak naturally..."
+          aria-label="Message"
+          rows={1}
+        />
         <div className="prompt-runes" aria-label="Prompt shortcuts">
           {PROMPT_RUNES.map((rune) => (
             <button key={rune.label} onClick={() => setInput(rune.prompt)} type="button">
@@ -348,13 +347,6 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
             </button>
           ))}
         </div>
-        <textarea
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          placeholder="Try /code patch this, /search current docs, /know compare notes, or ask naturally..."
-          aria-label="Message"
-          rows={1}
-        />
         {sending ? (
           <button type="button" onClick={() => abortRef.current?.abort()}>
             Stop

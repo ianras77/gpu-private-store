@@ -7,7 +7,7 @@
   "id": "web-rassyonline",
   "description": "A magical Runtipi-native RassyCodex web app with public chat, accounts, per-user vector workspaces, document toggles, and admin controls.",
   "tipi_version": 1,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -108,5 +108,5 @@
   ],
   "no_gui": false,
   "created_at": 1782669600000,
-  "updated_at": 1782958459000
+  "updated_at": 1783558053000
 }

@@ -16,7 +16,7 @@ export default async function Home() {
         </div>
         <div>
           <p className="system-label">Rassy Online</p>
-          <h1>RassyCodex ritual console.</h1>
+          <h1>RassyCodex, online.</h1>
         </div>
         <div className="top-actions">
           {user ? (
