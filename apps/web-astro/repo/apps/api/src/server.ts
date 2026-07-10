@@ -14,7 +14,6 @@ import { loreRoutes } from "./routes/lore";
 import { humanGuideRoutes } from "./routes/human-guide";
 import { authRoutes } from "./routes/auth";
 import { contentRoutes } from "./routes/content";
-import { rassyChatRoutes } from "./routes/rassy-chat";
 import { inferBrandId } from "./lib/brand";
 import { sendApiError } from "./lib/http-errors";
 import { getGeoProviderHealth } from "./lib/geo";
@@ -113,7 +112,6 @@ export const buildServer = () => {
   app.register(accountRoutes, { prefix: "/v1" });
   app.register(loreRoutes, { prefix: "/v1/lore" });
   app.register(humanGuideRoutes, { prefix: "/v1/human-guide" });
-  app.register(rassyChatRoutes, { prefix: "/v1/rassy-chat" });
   app.register(authRoutes, { prefix: "/v1" });
   app.register(contentRoutes, { prefix: "/v1" });
 
