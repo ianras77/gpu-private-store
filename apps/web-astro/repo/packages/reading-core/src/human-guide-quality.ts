@@ -50,8 +50,10 @@ export const evaluateHumanGuideQuality = (guide: HumanGuide, chart: NatalChart):
   const sections = [...guide.overview, ...guide.practices];
   const completeCraftedSections = sections.filter(
     (section) =>
+      (section.chartInstruction?.trim().length ?? 0) >= 20 &&
       section.force.trim().length >= 20 &&
       section.allegory.trim().length >= 20 &&
+      (section.story?.trim().length ?? 0) >= 20 &&
       section.practicalCounsel.trim().length >= 20 &&
       section.mysteryQuestion.trim().endsWith("?")
   );
@@ -81,7 +83,7 @@ export const evaluateHumanGuideQuality = (guide: HumanGuide, chart: NatalChart):
     craftedSections: check(
       completeCraftedSections.length === sections.length,
       [`${completeCraftedSections.length}/${sections.length} crafted sections complete`],
-      "Guide sections must include force, allegory, practical counsel, and a mystery question."
+      "Guide sections must include chart instruction, force, allegory, story, practical counsel, and a mystery question."
     )
   };
 

@@ -5,6 +5,7 @@ import { brandPrompt, systemPrompt } from "./prompt";
 import { chartFactsToString, buildChartFacts } from "./builder";
 import { callLLM } from "./llm";
 import { ReadingOutputSchema, type ReadingOutput } from "./schemas";
+import { brandMysticLens } from "./human-guide";
 
 export type ReadingLength = "short" | "standard" | "deep";
 
@@ -62,6 +63,9 @@ const buildPrompt = (
     "Chart facts:",
     facts,
     "Return JSON with keys: title, subtitle, excerpt, overview, narrative, characterSheet, bigThree, planets, houses?, aspects, brandLens, ritualCalendar, actionables, disclaimer.",
+    "Also include guideSections: 4-7 structured sections for the first birth chart report.",
+    "Each guideSections item must include title, chartInstruction, force, allegory, story, practicalCounsel, mysteryQuestion, and chartBasis.",
+    "chartInstruction must plainly teach what the chart says using concrete chart facts. story should work like a wisdom parable: simple enough to understand, layered enough to reread over time. Think clear teaching, then parable, then practice; do not preach doctrine or claim religious authority.",
     "Title should feel like the name of a private chart report.",
     "Subtitle should be a one-line hook under 18 words.",
     "Excerpt should be 1-2 sentences suitable for a saved feed card.",
@@ -90,6 +94,7 @@ const safeParse = (payload: string): ReadingOutput | null => {
 
 const fallbackReading = (chart: NatalChart, brand: BrandConfig, length: ReadingLength): ReadingOutput => {
   const facts = buildChartFacts(chart);
+  const lens = brandMysticLens(brand);
   const overviewLines = [
     `This chart emphasizes ${facts.bigThree.sun || "core vitality"} and ${facts.bigThree.moon || "emotional cadence"}.`,
     `You carry a distinct rhythm: ${facts.bigThree.rising ? facts.bigThree.rising : "a grounded presentation style"}.`,
@@ -186,6 +191,62 @@ const fallbackReading = (chart: NatalChart, brand: BrandConfig, length: ReadingL
     text: `${module.description} Focus on one high-impact choice this week.`
   }));
 
+  const guideSections = [
+    {
+      title: "What The Chart Says",
+      chartInstruction: `Instruction: begin with the concrete chart before interpretation. The Big Three are ${facts.bigThree.sun}, ${facts.bigThree.moon}, and ${facts.bigThree.rising ?? "presentation inferred from the available chart"}. The main placements are ${facts.placements.join("; ")}.`,
+      force: "The force is wholeness: the chart is not one slogan, but a council of planetary voices asking to be understood in relation.",
+      allegory:
+        "The chart is a round table lit by one candle. Each planet has a chair, a need, a gift, and a way it distorts when ignored.",
+      story:
+        "A teacher asked a student to listen to every voice in the house before judging which one was wise. By evening the student learned that even the difficult voices were carrying part of the truth.",
+      practicalCounsel:
+        "Read the placements once as facts, once as gifts, and once as responsibilities. Let the meaning grow from the chart instead of floating above it.",
+      mysteryQuestion: "Which chart fact becomes more alive when you treat it as a responsibility rather than a label?",
+      chartBasis: facts.placements
+    },
+    {
+      title: `${brand.name} Gate`,
+      chartInstruction: `Instruction: this report is generated through ${brand.domain}, so the same chart is emphasized through this lens: ${lens.reportBias}`,
+      force: `The force is the brand gate. ${lens.archetypalCharge} ${lens.shadowInvitation}`,
+      allegory:
+        "Five readers entered the same temple by five doors. The temple did not change, but the first doorway taught each reader what to notice first.",
+      story:
+        "One person called the well blessing, another discipline, another dream, another fire, another crown. The water was the same; the name changed how carefully each person drew it.",
+      practicalCounsel: lens.styleRules.join(" "),
+      mysteryQuestion: "Which doorway into your chart makes you more honest and more able to practice love?",
+      chartBasis: [...facts.placements.slice(0, 6), ...facts.aspects.slice(0, 3)]
+    },
+    {
+      title: "The Aspect Web",
+      chartInstruction: `Instruction: aspects describe relationships between inner forces. The supplied aspect pattern includes ${facts.aspects.length ? facts.aspects.join("; ") : "no major aspects in the current chart payload"}.`,
+      force:
+        "The force is relationship: hard aspects ask for integration, grace aspects ask to be used consciously, and conjunctions ask for discernment because two forces share a chamber.",
+      allegory:
+        "The aspects are bridges between towers. Some bridges are narrow, some sunlit, some shaking in the wind, but each exists because something needs to cross.",
+      story:
+        "Two towers sent signals by fire but never repaired the bridge between them. When the bridge shook, both towers thought it was war. At dawn they saw it had only been asking for care.",
+      practicalCounsel:
+        "For one aspect, let each planet speak one clean sentence. Then write the bridge sentence: what both forces can build together.",
+      mysteryQuestion: "Which inner conversation is ready to become a bridge instead of a battlefield?",
+      chartBasis: facts.aspects
+    },
+    {
+      title: "Practice And Return",
+      chartInstruction: `Instruction: turn the chart into practice through the houses, elements, modalities, and repeated placements. Dominant elements: ${elementFocus}. Modalities: ${modalityFocus}.`,
+      force:
+        "The force is embodiment: a mystical report becomes useful when it changes how the reader notices, chooses, returns, forgives, serves, and practices.",
+      allegory:
+        "The body is the small monastery that travels with the soul. Its bells are hunger, fatigue, pleasure, tension, and breath.",
+      story:
+        "A student asked for a revelation and was handed a broom, a bowl of soup, and a bedtime. Only when the room grew quiet could the next true sentence be heard.",
+      practicalCounsel:
+        "Choose one daily rhythm that lets the loudest chart signature become steadier, kinder, and more useful.",
+      mysteryQuestion: "What would your chart become if your ordinary day became part of the temple?",
+      chartBasis: [...facts.houses.slice(0, 4), ...facts.placements.slice(0, 4)]
+    }
+  ];
+
   const actionables = [
     "Name one habit that will amplify your next 30 days.",
     "Design a boundary that protects your energy and time.",
@@ -213,6 +274,7 @@ const fallbackReading = (chart: NatalChart, brand: BrandConfig, length: ReadingL
     houses,
     aspects,
     brandLens,
+    guideSections,
     ritualCalendar,
     actionables,
     disclaimer:

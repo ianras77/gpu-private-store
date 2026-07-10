@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+export const ReadingGuideSectionSchema = z.object({
+  title: z.string(),
+  chartInstruction: z.string(),
+  force: z.string(),
+  allegory: z.string(),
+  story: z.string(),
+  practicalCounsel: z.string(),
+  mysteryQuestion: z.string(),
+  chartBasis: z.array(z.string()).default([])
+});
+
 export const ReadingOutputSchema = z.object({
   title: z.string(),
   subtitle: z.string(),
@@ -52,6 +63,7 @@ export const ReadingOutputSchema = z.object({
       })
     )
     .min(1),
+  guideSections: z.array(ReadingGuideSectionSchema).min(4).optional(),
   ritualCalendar: z
     .array(
       z.object({

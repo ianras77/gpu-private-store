@@ -12,8 +12,10 @@ export const SourceProvenanceSchema = z.array(SourceUseSchema).min(1);
 export const GuideSectionSchema = z.object({
   title: z.string(),
   body: z.string(),
+  chartInstruction: z.string().optional(),
   force: z.string(),
   allegory: z.string(),
+  story: z.string().optional(),
   practicalCounsel: z.string(),
   mysteryQuestion: z.string(),
   chartBasis: z.array(z.string()).default([]),
@@ -44,9 +46,20 @@ export const MapPathSchema = z.object({
   guide: z.string().optional()
 });
 
+export const BrandLensSchema = z.object({
+  brandId: z.string(),
+  domain: z.string(),
+  archetypalCharge: z.string(),
+  giftInvitation: z.string(),
+  shadowInvitation: z.string(),
+  reportBias: z.string(),
+  styleRules: z.array(z.string()).min(1)
+});
+
 export const HumanGuideSchema = z.object({
   title: z.string(),
   subtitle: z.string(),
+  brandLens: BrandLensSchema,
   metaFrame: z.object({
     world: z.literal("living-cosmos"),
     orientation: z.string(),
@@ -57,6 +70,7 @@ export const HumanGuideSchema = z.object({
   overview: z.array(GuideSectionSchema).min(3),
   internalMap: z.object({
     root: MapNodeSchema,
+    bodyTemple: MapNodeSchema,
     heartChamber: MapNodeSchema,
     voiceAndMind: MapNodeSchema,
     crownAndStar: MapNodeSchema,

@@ -92,8 +92,12 @@ describe("generateHumanGuide", () => {
     expect(result.guide.internalMap.root.name).toBe("Root");
     expect(result.guide.sourceProvenance[0]?.title).toBe("The Way of Hermes");
     const craftedSections = [...result.guide.overview, ...result.guide.practices];
+    expect(result.guide.brandLens.domain).toBe("jupiterseek.com");
+    expect(result.guide.internalMap.bodyTemple.name).toBe("Body Temple");
+    expect(craftedSections.every((section) => (section.chartInstruction?.length ?? 0) > 20)).toBe(true);
     expect(craftedSections.every((section) => section.force.length > 20)).toBe(true);
     expect(craftedSections.every((section) => section.allegory.length > 20)).toBe(true);
+    expect(craftedSections.every((section) => (section.story?.length ?? 0) > 20)).toBe(true);
     expect(craftedSections.every((section) => section.practicalCounsel.length > 20)).toBe(true);
     expect(craftedSections.every((section) => section.mysteryQuestion.endsWith("?"))).toBe(true);
   });
@@ -176,6 +180,7 @@ describe("generateHumanGuide", () => {
     });
     const nodes = [
       result.guide.internalMap.root,
+      result.guide.internalMap.bodyTemple,
       result.guide.internalMap.heartChamber,
       result.guide.internalMap.voiceAndMind,
       result.guide.internalMap.crownAndStar,
@@ -261,8 +266,12 @@ describe("generateHumanGuide", () => {
       expect.arrayContaining(["non-doctrinal", "hermetic", "practical", "loving", "direct-inspiration"])
     );
     expect(parsed.metaFrame.orientation).toContain("correspondence");
+    expect(parsed.brandLens.archetypalCharge).toContain("Jupiter");
     expect(parsed.overview.map((section) => section.body).join(" ")).toContain("more awake inside it");
+    expect(parsed.overview.map((section) => section.chartInstruction).join(" ")).toContain("Instruction");
+    expect(parsed.overview.map((section) => section.story).join(" ")).toContain("teacher");
     expect(parsed.internalMap.root.guide).toContain("ground-wire of the map");
+    expect(parsed.internalMap.bodyTemple.guide).toContain("chapel of capacity");
     expect(parsed.internalMap.shadowGate.guide).toContain("pressure chamber, not the enemy");
     expect(parsed.internalMap.inspirationGate.guide).toContain("vibration be tested by embodiment");
     expect(parsed.internalMap.root.guide).not.toBe(parsed.internalMap.heartChamber.guide);

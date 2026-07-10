@@ -1,17 +1,31 @@
 {
   "guide": {
-    "title": "Jupiterseek Human Guide",
-    "subtitle": "A practical internal map for direct inspiration and loving discernment.",
+    "title": "Jupiterseek Birth Mandala",
+    "subtitle": "A practical internal map shaped through Jupiter as the seeker, threshold-opener, generous teacher, and guardian of meaningful expansion.",
+    "brandLens": {
+      "brandId": "jupiterseek",
+      "domain": "jupiterseek.com",
+      "archetypalCharge": "Jupiter as the seeker, threshold-opener, generous teacher, and guardian of meaningful expansion.",
+      "giftInvitation": "Lean toward courage, blessing, study, quest, abundance, and the doors that open when preparation meets grace.",
+      "shadowInvitation": "Watch for scattering, over-promising, spiritual bypass, or confusing optimism with devotion.",
+      "reportBias": "Emphasize growth edges, purpose, faith tested by action, opportunity by house, and the reader's next noble quest.",
+      "styleRules": [
+        "Make the chart feel like a map of roads, thresholds, teachers, and meaningful invitations.",
+        "Let practical counsel turn hope into preparation.",
+        "Keep expansion warm and discerning rather than grandiose."
+      ]
+    },
     "metaFrame": {
       "world": "living-cosmos",
-      "orientation": "The chart is treated as a symbolic map of participation in a living cosmos: a pattern of correspondence, conscience, and choice rather than a verdict about fate.",
+      "orientation": "The chart is treated as a symbolic map of participation in a living cosmos: a pattern of correspondence, conscience, and choice rather than a verdict about fate. On jupiterseek.com, the report is tilted through Emphasize growth edges, purpose, faith tested by action, opportunity by house, and the reader's next noble quest.",
       "wisdomTeacherFrame": "Jesus is held here as a wisdom teacher of compassion, forgiveness, and direct inner alignment, alongside the perennial invitation to receive inspiration directly and test it through love.",
       "tone": [
         "non-doctrinal",
         "hermetic",
         "practical",
         "loving",
-        "direct-inspiration"
+        "direct-inspiration",
+        "jupiterseek"
       ]
     },
     "sourceProvenance": [
@@ -58,8 +72,10 @@
       {
         "title": "Living Cosmos",
         "body": "This guide reads Sun in Leo, House 10; Moon in Scorpio, House 1; Mercury in Cancer, House 9; Venus in Leo, House 10; Mars in Aquarius, House 4; Jupiter in Aries, House 6; Saturn in Scorpio, House 1; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3; Pluto in Scorpio, House 1; Asc in Libra; MC in Cancer as correspondences between inner life and visible choices. The working source grammar is correspondence between visible pattern and invisible life; attention as the doorway where love becomes practical; participation in a larger order rather than isolated selfhood. The aim is not to become more mechanical about the self, but more awake inside it: notice the pattern, ask what it serves, and choose a practice that makes the wisdom usable.",
+        "chartInstruction": "Instruction: read the supplied placements as the foundation of the report. The chart says these planets, signs, and houses are the primary symbolic materials to study before making meaning: Sun in Leo, House 10; Moon in Scorpio, House 1; Mercury in Cancer, House 9; Venus in Leo, House 10; Mars in Aquarius, House 4; Jupiter in Aries, House 6; Saturn in Scorpio, House 1; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3; Pluto in Scorpio, House 1; Asc in Libra; MC in Cancer.",
         "force": "The force here is correspondence: as above, so below, not as a slogan but as a responsibility. The chart describes pressures, gifts, appetites, and openings that ask to become conscious choice rather than unconscious repetition.",
         "allegory": "Imagine the birth chart as a lamp lowered into a many-roomed house. Some rooms are golden, some dusty, some locked, but every room belongs to the same inner dwelling. The work is not to worship the lamp; it is to walk by its light.",
+        "story": "A teacher once pointed to a lamp and a house: the lamp was not the house, and the house was not the light, yet without the lamp the rooms stayed confused. So the student carried the lamp room by room, learning that revelation is patient and practical.",
         "practicalCounsel": "Choose one placement that feels alive, then translate it into one behavior today: a boundary, a confession, a study hour, a generous act, or a return to the body.",
         "mysteryQuestion": "What part of the universe inside you is asking to be entered with more courage?",
         "chartBasis": [
@@ -84,10 +100,73 @@
         "practice": "Name one chart fact that feels alive today, then choose one action that honors it."
       },
       {
+        "title": "Brand Gate",
+        "body": "Jupiterseek opens this chart through Jupiter as the seeker, threshold-opener, generous teacher, and guardian of meaningful expansion. The gift invitation is Lean toward courage, blessing, study, quest, abundance, and the doors that open when preparation meets grace. The shadow invitation is equally important: Watch for scattering, over-promising, spiritual bypass, or confusing optimism with devotion. This is how the same natal chart changes voice by domain without changing its bones. The calculation remains the foundation; the lens decides where the lantern is aimed first.",
+        "chartInstruction": "Instruction: keep the same chart facts, but emphasize them through jupiterseek.com. This report should especially notice: Emphasize growth edges, purpose, faith tested by action, opportunity by house, and the reader's next noble quest.",
+        "force": "The force is emphasis. jupiterseek.com does not rewrite the sky; it chooses which chamber of the sky to enter with the most devotion. Emphasize growth edges, purpose, faith tested by action, opportunity by house, and the reader's next noble quest.",
+        "allegory": "Imagine five readers entering the same temple by five doors. Jupiter enters through the road of blessing, Saturn through the stone stair of consequence, the oracle through the curtain of dream, the malefic through the furnace, and the solar king through the hall of craft. The temple is one; the first threshold changes what the soul notices.",
+        "story": "The parable is simple: five people found the same well. One called it mercy, one discipline, one dream, one fire, and one crown. The water did not change, but each name taught a different way to draw it.",
+        "practicalCounsel": "Make the chart feel like a map of roads, thresholds, teachers, and meaningful invitations. Let practical counsel turn hope into preparation. Keep expansion warm and discerning rather than grandiose.",
+        "mysteryQuestion": "Which doorway into your chart makes you more honest, more awake, and more loving?",
+        "chartBasis": [
+          "Sun in Leo, House 10",
+          "Moon in Scorpio, House 1",
+          "Mercury in Cancer, House 9",
+          "Venus in Leo, House 10",
+          "Mars in Aquarius, House 4",
+          "Jupiter in Aries, House 6",
+          "Saturn in Scorpio, House 1",
+          "Uranus in Sagittarius, House 2",
+          "Neptune in Sagittarius, House 3",
+          "Pluto in Scorpio, House 1",
+          "Asc in Libra",
+          "MC in Cancer",
+          "Moon & Mars square with 0.5 orb"
+        ],
+        "sourceBasis": [
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
+        ],
+        "practice": "Read the same chart once through gift, once through shadow, then choose the version that asks for the cleanest action."
+      },
+      {
+        "title": "Whole Chart Mandala",
+        "body": "The mandala begins with the full wheel: Sun in Leo, House 10; Moon in Scorpio, House 1; Mercury in Cancer, House 9; Venus in Leo, House 10; Mars in Aquarius, House 4; Jupiter in Aries, House 6; Saturn in Scorpio, House 1; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3; Pluto in Scorpio, House 1; Asc in Libra; MC in Cancer. Each placement is a room, and each room asks a different kind of attention. The Sun shows the lamp of identity, the Moon the weather of need, Mercury the interpreter, Venus the relational art, Mars the blade of action, Jupiter the blessing that must be practiced, Saturn the boundary that matures desire, Uranus the breaker of stale pattern, Neptune the dream-fog and devotion, Pluto the underworld pressure, and the angles the gates where inner life meets the world.",
+        "chartInstruction": "Instruction: do not reduce the person to one sign. Teach the whole chart by giving every supplied point a role in the inner council: Sun in Leo, House 10; Moon in Scorpio, House 1; Mercury in Cancer, House 9; Venus in Leo, House 10; Mars in Aquarius, House 4; Jupiter in Aries, House 6; Saturn in Scorpio, House 1; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3; Pluto in Scorpio, House 1; Asc in Libra; MC in Cancer.",
+        "force": "The force is wholeness. A person is not one sign or one slogan; the chart is a council of voices asking to be governed by consciousness rather than by the loudest impulse.",
+        "allegory": "Picture a round table lit by a central candle. Every planet has a chair. Some speak in poetry, some in law, some in hunger, some in thunder. The art is not to silence the difficult ones; it is to let the true king or queen within call the council into order.",
+        "story": "A householder had many servants and blamed the noisy one for every broken dish. A wise guest asked to meet all of them. By evening the householder saw that the quiet servant had hidden the keys, the gentle one had neglected the fire, and the noisy one had only been sounding the alarm.",
+        "practicalCounsel": "Choose three placements: one that feels natural, one that feels difficult, and one that feels mysterious. Give each one a sentence, a boundary, and a small act.",
+        "mysteryQuestion": "If every planet in you had a seat at the table, which voice needs to be heard without being allowed to rule alone?",
+        "chartBasis": [
+          "Sun in Leo, House 10",
+          "Moon in Scorpio, House 1",
+          "Mercury in Cancer, House 9",
+          "Venus in Leo, House 10",
+          "Mars in Aquarius, House 4",
+          "Jupiter in Aries, House 6",
+          "Saturn in Scorpio, House 1",
+          "Uranus in Sagittarius, House 2",
+          "Neptune in Sagittarius, House 3",
+          "Pluto in Scorpio, House 1",
+          "Asc in Libra",
+          "MC in Cancer"
+        ],
+        "sourceBasis": [
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
+        ],
+        "practice": "Write a one-line vow for the loudest placement and a one-line blessing for the quietest placement."
+      },
+      {
         "title": "Heart and Direction",
         "body": "Sun in Leo, House 10 points toward visible purpose, while Moon in Scorpio, House 1 asks for emotional honesty. Let the public path serve the private truth, so ambition becomes service rather than self-protection.",
+        "chartInstruction": "Instruction: teach the relationship between the Sun and Moon first. The Sun describes visible vitality and direction; the Moon describes need, memory, and emotional truth. Here the Sun is Leo in House 10. Here the Moon is Scorpio in House 1.",
         "force": "The force is the meeting of identity and need: the solar call to become visible must learn the lunar art of staying emotionally true.",
         "allegory": "This is the parable of a crown that can only be worn by the child it once protected. If the public self forgets the private self, the crown grows heavy; when they bless each other, vocation becomes warm.",
+        "story": "A child carried a crown in a cloth bundle for many years, afraid it would make others leave. When the child grew, the crown was not placed above the heart but beside it, and the kingdom became a place where tenderness could govern strength.",
         "practicalCounsel": "Before choosing the visible path, ask what feeling it must protect, honor, or repair. Let direction be a form of care rather than escape.",
         "mysteryQuestion": "Where is your life asking achievement to become a vessel for love?",
         "chartBasis": [
@@ -107,10 +186,32 @@
         "practice": "Before committing, ask whether the visible choice keeps faith with the inner need."
       },
       {
+        "title": "Aspect Web",
+        "body": "The aspect web describes how the inner figures speak to one another. Here the supplied pattern is: Moon & Mars square, orb 0.5, exact 90. Hard aspects such as squares, oppositions, and conjunctions are treated as integration work: not punishment, but pressure asking for consciousness. Grace aspects such as trines and sextiles are treated as channels: not laziness, but gifts that must be used on purpose. The chart becomes richer when each relationship is read as a conversation between forces.",
+        "chartInstruction": "Instruction: interpret aspects as relationships between planets. Name the planets, name the aspect, then teach what kind of relationship it creates. The supplied aspect facts are: Moon & Mars square, orb 0.5, exact 90.",
+        "force": "The force is relationship. The integration tensions include Moon & Mars square. No grace channel was supplied.",
+        "allegory": "Imagine threads stretched between the rooms of the inner house. Some threads are silk, some iron, some hot wire. The point is not to cut them. The point is to learn which thread carries music, which carries warning, and which becomes a bridge after enough patient crossings.",
+        "story": "Two neighbors shared a narrow bridge. One crossed at dawn with bread, the other at dusk with tools, and each accused the other of blocking the way. A teacher told them to build a bell at the center. From then on, the bridge did not remove tension; it taught timing.",
+        "practicalCounsel": "For each hard aspect, name both needs before choosing. For each grace aspect, schedule one deliberate use of the ease so the gift does not remain ornamental.",
+        "mysteryQuestion": "Which inner conversation has been asking to become a bridge instead of a battlefield?",
+        "chartBasis": [
+          "Moon & Mars square with 0.5 orb"
+        ],
+        "sourceBasis": [
+          "square aspect, orb 0.5, exact 90",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
+        ],
+        "practice": "Map one aspect as two voices, then write the one sentence that lets both be partly true."
+      },
+      {
         "title": "Direct Inspiration",
         "body": "Asc in Libra sets the threshold, and Mercury in Cancer, House 9; Uranus in Sagittarius, House 2; Neptune in Sagittarius, House 3 shows how insight becomes language. Return to simple words before making the signal grand; the truest vibration should become kinder, clearer, and more practical when it enters speech.",
+        "chartInstruction": "Instruction: teach how inspiration enters the person through presentation, language, study, and future-signal markers. The Ascendant is Libra, so the doorway style begins there.",
         "force": "The force is reception: inspiration wants a clean channel, but the channel must be tested by humility, usefulness, and love.",
         "allegory": "Picture a messenger arriving at dawn with a sealed letter from the inner sky. The letter is real, but it still has to be opened slowly, read accurately, and carried into the village without drama.",
+        "story": "A messenger once ran so fast with a holy letter that the ink blurred before anyone could read it. The second time, the messenger walked, breathed, and kept the page dry. The miracle was not slower; it was legible.",
         "practicalCounsel": "Write the inspiration in one plain sentence. Then ask what action would make it kinder, clearer, and more useful by nightfall.",
         "mysteryQuestion": "What signal keeps returning because it is waiting for you to become simple enough to receive it?",
         "chartBasis": [
@@ -146,6 +247,25 @@
           "The Symbolism of the Cross (source:perennial, source:contemplative)"
         ],
         "guide": "Root is the ground-wire of the map. Moon in Scorpio, House 1; Mars in Aquarius, House 4 asks the reader to let instinct become honest presence. In the source lens of correspondence between visible pattern and invisible life; attention as the doorway where love becomes practical; participation in a larger order rather than isolated selfhood, this chamber is where inspiration descends into breath, boundary, and felt truth. The gift is emotional truth; the distortion is defensive retreat. Practice it as a return, not a punishment: Name the need before solving it."
+      },
+      "bodyTemple": {
+        "name": "Body Temple",
+        "theme": "daily care and capacity",
+        "gift": "sustainable rhythm",
+        "distortion": "overriding limits",
+        "practice": "Track energy before adding commitments.",
+        "mantra": "My pace is part of the path.",
+        "chartBasis": [
+          "Jupiter in Aries, House 6",
+          "Uranus in Sagittarius, House 2"
+        ],
+        "sourceBasis": [
+          "2nd- and 6th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
+        ],
+        "guide": "Body Temple is the chapel of capacity. Jupiter in Aries, House 6; Uranus in Sagittarius, House 2 shows how money, food, pace, labor, rest, and daily rhythm become spiritual materials rather than background noise. Through correspondence between visible pattern and invisible life; attention as the doorway where love becomes practical; participation in a larger order rather than isolated selfhood, embodiment is the test of vibration: the truest signal becomes livable. The gift is sustainable rhythm; the distortion is overriding limits. Let devotion become a schedule the body can trust: Track energy before adding commitments."
       },
       "heartChamber": {
         "name": "Heart Chamber",
@@ -289,8 +409,10 @@
       {
         "title": "Root Practice",
         "body": "Begin with Moon in Scorpio, House 1; Mars in Aquarius, House 4. Notice the need before solving it, then return to the body and breathe until the next honest choice is simple. The root is not proof of limitation; it is the place where inspiration learns to become embodied.",
+        "chartInstruction": "Instruction: use the root signatures to teach instinct, belonging, memory, home, and emotional regulation. The relevant chart basis is Moon in Scorpio, House 1; Mars in Aquarius, House 4.",
         "force": "The force is embodiment: the chart becomes trustworthy when its insight can live in breath, timing, food, rest, attention, and honest limits.",
         "allegory": "The root is a garden gate. Mystery may bloom above it, but the hinge still needs oil, the path still needs clearing, and the hand still has to open what it asks to enter.",
+        "story": "A gardener prayed for fruit and was told to water the roots. The gardener wanted a vision, but the instruction was mud, patience, and return. By harvest, the gardener understood that roots are not less mystical because they are hidden.",
         "practicalCounsel": "Treat the body as the first altar. Regulate before interpreting; name the sensation before naming the story.",
         "mysteryQuestion": "What wisdom becomes available only after you return to the ground?",
         "chartBasis": [
@@ -306,10 +428,33 @@
         "practice": "Name the need before solving it."
       },
       {
+        "title": "Body Temple Practice",
+        "body": "Work with Jupiter in Aries, House 6; Uranus in Sagittarius, House 2 as the daily altar of the chart. The mystical life is not proved by intensity alone; it is proved by whether the signal can survive breakfast, sleep, money, work, and the ordinary hour. Capacity is a sacred fact, not a failure of devotion.",
+        "chartInstruction": "Instruction: read 2nd- and 6th-house signatures, along with embodied placements, as the chart's teaching about capacity, resources, work rhythm, and care. The relevant chart basis is Jupiter in Aries, House 6; Uranus in Sagittarius, House 2.",
+        "force": "The force is rhythm: inspiration needs a vessel, and the vessel is built from repeated care, honest limits, and bodily timing.",
+        "allegory": "The body is the small monastery that travels with you. Its bells are hunger, fatigue, pleasure, tension, and breath. Ignore the bells and the temple grows noisy; answer them with respect and the whole chart becomes easier to hear.",
+        "story": "A student asked how to hear heaven. The teacher handed them a broom, a bowl of soup, and a bedtime. The student was offended until the noise inside them grew quiet enough to hear the next true sentence.",
+        "practicalCounsel": "Track energy before adding commitments. Choose one rhythm that would make the rest of the chart easier to live.",
+        "mysteryQuestion": "What would your chart become if your body believed you were on its side?",
+        "chartBasis": [
+          "Jupiter in Aries, House 6",
+          "Uranus in Sagittarius, House 2"
+        ],
+        "sourceBasis": [
+          "2nd- and 6th-house placements",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
+        ],
+        "practice": "Track energy before adding commitments."
+      },
+      {
         "title": "Shadow Practice",
         "body": "Work with Mars in Aquarius, House 4; Saturn in Scorpio, House 1; Moon & Mars square without fear. The task is not to defeat the shadow, but to forgive what defended you and choose a cleaner response. Pressure becomes wisdom when it is met without worshiping it.",
+        "chartInstruction": "Instruction: teach Saturn, Mars, hard aspects, 8th/12th-house signatures, and South Node material as pressure points for repair. The relevant chart basis is Mars in Aquarius, House 4; Saturn in Scorpio, House 1; Moon & Mars square.",
         "force": "The force is transmutation: a defensive pattern becomes a teacher when it is neither obeyed nor shamed.",
         "allegory": "This is the cave where the old guard stands with a lantern and a locked chest. The guard looks frightening until you realize it has been waiting for instructions from the adult self.",
+        "story": "A person found a guard at the cave mouth and called it an enemy. But the guard had stood there since childhood, keeping a younger self alive. When thanked and given a new post, the guard became courage.",
         "practicalCounsel": "When the pressure rises, pause long enough to ask what the pattern is protecting. Thank the protection, then choose the cleaner response.",
         "mysteryQuestion": "Which guarded place in you is ready to become strength without becoming armor?",
         "chartBasis": [
@@ -326,10 +471,32 @@
         "practice": "Work the hard pattern in small reps."
       },
       {
+        "title": "Aspect Integration Practice",
+        "body": "Return to the aspect web: Moon & Mars square, orb 0.5, exact 90. Every aspect is a relationship practice. A square asks for strength without war. An opposition asks for room enough to hold both ends. A conjunction asks for discernment because two forces share one chamber. A trine or sextile asks that ease become service instead of sleep.",
+        "chartInstruction": "Instruction: make the aspect practical by letting each planet speak for a need, then identifying the aspect as the style of negotiation. The supplied aspect facts are: Moon & Mars square, orb 0.5, exact 90.",
+        "force": "The force is dialogue: the chart matures when the inner voices learn timing, proportion, and honorable exchange.",
+        "allegory": "Think of the aspects as bridges between towers. Some bridges sway in wind; some are wide and sunlit. A bridge is not judged by whether it feels easy. It is judged by whether it can carry truth across the gap.",
+        "story": "Two towers sent signals by fire but never walked the bridge between them. One night the bridge shook, and each tower thought the other was attacking. At dawn they found the bridge had been asking for repair, not war.",
+        "practicalCounsel": "Choose one aspect and give each planet a clean sentence. Then write the third sentence: the bridge they can build together.",
+        "mysteryQuestion": "Which two forces in you are ready to stop arguing and start carrying one another's wisdom?",
+        "chartBasis": [
+          "Moon & Mars square with 0.5 orb"
+        ],
+        "sourceBasis": [
+          "square aspect, orb 0.5, exact 90",
+          "The Way of Hermes (source:hermetic, source:perennial)",
+          "Plotinus Enneads (source:perennial, source:contemplative)",
+          "The Symbolism of the Cross (source:perennial, source:contemplative)"
+        ],
+        "practice": "Let each planet in one aspect speak for one minute, then answer with one integrative action."
+      },
+      {
         "title": "Service Practice",
         "body": "Let Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer serve something real. Ask what contribution can be offered without turning usefulness into self-worth. This is the practical altar: a loving action that makes the inner pattern visible.",
+        "chartInstruction": "Instruction: read Sun, chart ruler, MC, and 10th-house signatures as the service line of the chart. The relevant chart basis is Sun in Leo, House 10; Venus in Leo, House 10; MC in Cancer.",
         "force": "The force is offering: the birth chart ripens when personal pattern becomes useful care, craft, truth, or protection in the world.",
         "allegory": "Imagine carrying a small loaf from the inner temple to the common table. Its holiness is proven not by how rare it looks, but by whether it feeds someone.",
+        "story": "A teacher blessed a loaf and broke it into ordinary pieces. The students expected thunder, but the miracle was that everyone had enough to keep walking. Service is often the sacred becoming edible.",
         "practicalCounsel": "Choose one service that is small enough to complete and honest enough to matter. Let usefulness be an expression of love, not a demand for identity.",
         "mysteryQuestion": "What gift becomes more yours when you give it without abandoning yourself?",
         "chartBasis": [
@@ -408,7 +575,7 @@
       "craftedSections": {
         "passed": true,
         "evidence": [
-          "6/6 crafted sections complete"
+          "11/11 crafted sections complete"
         ],
         "failures": []
       }

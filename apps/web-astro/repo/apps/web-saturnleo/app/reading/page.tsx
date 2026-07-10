@@ -199,6 +199,31 @@ export default function ReadingPage() {
             </>
           ) : null}
 
+          {reading.guideSections?.length ? (
+            <>
+              <Heading level={2}>Chart Teachings</Heading>
+              <div className="astro-stack-tight">
+                {reading.guideSections.map((section: any) => (
+                  <Card key={section.title}>
+                    <Heading level={3}>{section.title}</Heading>
+                    <div className="astro-prose">
+                      <Text>{section.chartInstruction}</Text>
+                      <Text muted>{section.force}</Text>
+                      <Text>{section.allegory}</Text>
+                      <Text>{section.story}</Text>
+                      <Text muted>{section.practicalCounsel}</Text>
+                    </div>
+                    {section.mysteryQuestion ? (
+                      <div className="astro-note-strip">
+                        <strong>{section.mysteryQuestion}</strong>
+                      </div>
+                    ) : null}
+                  </Card>
+                ))}
+              </div>
+            </>
+          ) : null}
+
           <Heading level={2}>Overview</Heading>
           <ul className="astro-list">
             {reading.overview.map((line: string, idx: number) => (
