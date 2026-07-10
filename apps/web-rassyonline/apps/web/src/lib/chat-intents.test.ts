@@ -7,13 +7,13 @@ describe("applyLocalChatIntent", () => {
       kind: "send",
       prompt: "latest Next.js docs",
       updates: { webSearch: "on" },
-      notice: "Web search is on for this request."
+      notice: "Web search is lit for this request."
     });
     expect(applyLocalChatIntent("/local explain this function")).toEqual({
       kind: "send",
       prompt: "explain this function",
       updates: { webSearch: "off" },
-      notice: "This request will stay local."
+      notice: "This request will stay local to the room."
     });
   });
 
@@ -21,12 +21,12 @@ describe("applyLocalChatIntent", () => {
     expect(applyLocalChatIntent("/mode deep-coding")).toEqual({
       kind: "local",
       updates: { mode: "deep-coding" },
-      notice: "Mode changed to deep-coding."
+      notice: "Mode changed to deep-coding; the next answer will route through that lane."
     });
     expect(applyLocalChatIntent("/theme ember")).toEqual({
       kind: "local",
       updates: { themeId: "ember" },
-      notice: "Atmosphere shifted to ember."
+      notice: "Atmosphere shifted to ember; the room can keep tuning around the conversation."
     });
   });
 
@@ -34,17 +34,17 @@ describe("applyLocalChatIntent", () => {
     expect(applyLocalChatIntent("/code")).toEqual({
       kind: "local",
       updates: { mode: "deep-coding" },
-      notice: "RassyCodex deep coding lane is active."
+      notice: "Deep Codex is steering the thread."
     });
     expect(applyLocalChatIntent("/fast")).toEqual({
       kind: "local",
       updates: { mode: "quick" },
-      notice: "RassyCodex quick lane is active."
+      notice: "Spark lane is active for quick turns."
     });
     expect(applyLocalChatIntent("/know")).toEqual({
       kind: "local",
       updates: { mode: "knowledge" },
-      notice: "RassyCodex knowledge lane is active."
+      notice: "Memory lane is active; enabled documents can shape the answer."
     });
   });
 
@@ -53,13 +53,13 @@ describe("applyLocalChatIntent", () => {
       kind: "send",
       prompt: "draft a patch",
       updates: { mode: "deep-coding" },
-      notice: "RassyCodex deep coding lane is active."
+      notice: "Deep Codex is steering the thread."
     });
     expect(applyLocalChatIntent("/know compare these notes")).toEqual({
       kind: "send",
       prompt: "compare these notes",
       updates: { mode: "knowledge" },
-      notice: "RassyCodex knowledge lane is active."
+      notice: "Memory lane is active; enabled documents can shape the answer."
     });
   });
 });

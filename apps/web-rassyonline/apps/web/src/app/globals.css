@@ -168,6 +168,14 @@ textarea {
   text-transform: uppercase;
 }
 
+.topbar-subtitle {
+  max-width: 620px;
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
 h1,
 h2,
 h3,
@@ -314,7 +322,7 @@ h2 {
 .route-copy h2 {
   overflow: hidden;
   color: var(--text);
-  font-size: 1.02rem;
+  font-size: 1.08rem;
   font-weight: 920;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -389,7 +397,11 @@ h2 {
 .lane-card small {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.lane-card strong {
+  min-height: 2.05em;
+  white-space: normal;
 }
 
 .lane-card strong {
@@ -401,6 +413,7 @@ h2 {
 .lane-card small {
   color: var(--muted);
   font-size: 0.68rem;
+  white-space: nowrap;
 }
 
 .lane-card.active {
@@ -905,6 +918,11 @@ h2 {
   .top-actions {
     grid-column: 1 / -1;
     justify-self: start;
+  }
+
+  .topbar-subtitle {
+    max-width: 100%;
+    font-size: 0.86rem;
   }
 
   h1 {

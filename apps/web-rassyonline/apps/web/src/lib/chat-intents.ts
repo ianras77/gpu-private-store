@@ -27,7 +27,7 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
       kind: value ? "send" : "local",
       ...(value ? { prompt: value } : {}),
       updates: { mode: "deep-coding" },
-      notice: "RassyCodex deep coding lane is active."
+      notice: "Deep Codex is steering the thread."
     };
   }
 
@@ -36,7 +36,7 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
       kind: value ? "send" : "local",
       ...(value ? { prompt: value } : {}),
       updates: { mode: "quick" },
-      notice: "RassyCodex quick lane is active."
+      notice: "Spark lane is active for quick turns."
     };
   }
 
@@ -45,7 +45,7 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
       kind: value ? "send" : "local",
       ...(value ? { prompt: value } : {}),
       updates: { mode: "knowledge" },
-      notice: "RassyCodex knowledge lane is active."
+      notice: "Memory lane is active; enabled documents can shape the answer."
     };
   }
 
@@ -54,7 +54,7 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
       kind: "send",
       prompt: value,
       updates: { webSearch: "on" },
-      notice: "Web search is on for this request."
+      notice: "Web search is lit for this request."
     };
   }
 
@@ -63,7 +63,7 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
       kind: "send",
       prompt: value,
       updates: { webSearch: "off" },
-      notice: "This request will stay local."
+      notice: "This request will stay local to the room."
     };
   }
 
@@ -71,7 +71,7 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
     return {
       kind: "local",
       updates: { mode: value as ChatModeId },
-      notice: `Mode changed to ${value}.`
+      notice: `Mode changed to ${value}; the next answer will route through that lane.`
     };
   }
 
@@ -79,7 +79,7 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
     return {
       kind: "local",
       updates: { themeId: value as ThemeId },
-      notice: `Atmosphere shifted to ${value}.`
+      notice: `Atmosphere shifted to ${value}; the room can keep tuning around the conversation.`
     };
   }
 

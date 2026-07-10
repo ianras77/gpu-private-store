@@ -16,7 +16,8 @@ export default async function Home() {
         </div>
         <div>
           <p className="system-label">Rassy Online</p>
-          <h1>RassyCodex, online.</h1>
+          <h1>The conversation is the interface.</h1>
+          <p className="topbar-subtitle">RassyGPT routes code, search, memory, documents, and atmosphere from one living thread.</p>
         </div>
         <div className="top-actions">
           {user ? (

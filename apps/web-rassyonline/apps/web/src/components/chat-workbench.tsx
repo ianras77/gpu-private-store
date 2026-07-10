@@ -23,20 +23,24 @@ type UserDocument = {
 
 const PROMPT_RUNES = [
   {
-    label: "Research",
+    label: "Ask",
+    prompt: "Help me think through "
+  },
+  {
+    label: "Search",
     prompt: "/search find current sources and summarize what matters for "
   },
   {
-    label: "Code Lane",
-    prompt: "/code"
+    label: "Code",
+    prompt: "/code draft the smallest safe patch for: "
   },
   {
-    label: "Patch",
-    prompt: "/code\nDraft the smallest safe patch for: "
+    label: "Memory",
+    prompt: "/know compare this against my active documents: "
   },
   {
-    label: "Trace",
-    prompt: "/local trace the source-to-sink path for: "
+    label: "Tune",
+    prompt: "Make the room feel more aurora while we work on "
   }
 ];
 
@@ -55,7 +59,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "RassyCodex is awake. Give me the thread, the bug, the plan, or the question."
+      content: "RassyGPT is awake. This page is the thread: ask for code, search, memory, planning, documents, or a shift in the room and I will route it from here."
     }
   ]);
   const [input, setInput] = useState("");
@@ -229,7 +233,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
             <span>{MODE_GLYPHS[mode]}</span>
           </div>
           <div className="route-copy">
-            <p className="system-label">RassyCodex Route</p>
+            <p className="system-label">RassyGPT Engine</p>
             <h2>{activeMode?.label ?? "General"}</h2>
             <p>{activeMode?.model ?? "rassy-general"} · {webSearchLabel} · {sending ? "streaming" : "ready"}</p>
           </div>
@@ -280,7 +284,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <section className="memory-strip" aria-label="Document memory">
           <div className="memory-head">
             <p className="system-label">Memory</p>
-            <strong>{signedIn ? `${activeDocuments.length} active` : "Ephemeral"}</strong>
+            <strong>{signedIn ? `${activeDocuments.length} active` : "Ephemeral thread"}</strong>
             {signedIn ? (
               <label className={uploading ? "upload-button disabled" : "upload-button"}>
                 {uploading ? "Indexing" : "Upload"}
@@ -291,7 +295,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           {documentNotice ? <p className="document-notice">{documentNotice}</p> : null}
           {signedIn ? (
             <div className="document-list">
-              {documents.length === 0 ? <p className="empty-documents">No documents yet.</p> : null}
+              {documents.length === 0 ? <p className="empty-documents">Upload notes, specs, logs, or research and let the thread remember them.</p> : null}
               {documents.map((document) => (
                 <button
                   className={document.active ? "document-pill active" : "document-pill"}
@@ -306,7 +310,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
               ))}
             </div>
           ) : (
-            <p className="empty-documents">Sign in for durable memory.</p>
+            <p className="empty-documents">Sign in to turn this from a passing conversation into a durable workspace.</p>
           )}
         </section>
       </div>
@@ -318,7 +322,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
             <strong>{activeMode?.model ?? "rassy-general"}</strong>
           </div>
           <p>{webSearchLabel}</p>
-          <p>{activeDocuments.length ? `${activeDocuments.length} memory charms` : "no memory charms"}</p>
+          <p>{activeDocuments.length ? `${activeDocuments.length} memory sources` : "thread memory off"}</p>
           <p>{sending ? "streaming" : "ready"}</p>
         </div>
 
@@ -336,7 +340,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <textarea
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Ask RassyCodex. Use /search, /code, /fast, /know, or just speak naturally..."
+          placeholder="Talk to RassyGPT. Ask for code, search, memory, a plan, or a shift in the room..."
           aria-label="Message"
           rows={1}
         />
@@ -357,7 +361,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       </form>
 
       <div className="persistence-note">
-        {signedIn ? "Signed in. Threads can persist." : "Anonymous session. Nothing durable unless you log in."}
+        {signedIn ? "Signed in. This thread can become part of your workspace." : "Anonymous session. The room is live, but memory becomes durable after login."}
       </div>
     </section>
   );

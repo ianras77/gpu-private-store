@@ -10,33 +10,33 @@ export type ChatMode = {
 export const CHAT_MODES: ChatMode[] = [
   {
     id: "general",
-    label: "General",
+    label: "Talk",
     model: "rassy-general",
-    description: "Broad assistant chat and analysis."
+    description: "Broad assistant chat, thinking, and synthesis."
   },
   {
     id: "deep-coding",
-    label: "Deep Coding",
+    label: "Deep Codex",
     model: "rassy-codex",
-    description: "High-context coding and operator reasoning."
+    description: "High-context coding, systems reasoning, and operator work."
   },
   {
     id: "fast-coding",
-    label: "Fast Coding",
+    label: "Fast Codex",
     model: "rassy-codex-lite",
-    description: "Normal coding loops and faster agent work."
+    description: "Fast coding loops, implementation passes, and focused edits."
   },
   {
     id: "quick",
-    label: "Quick",
+    label: "Spark",
     model: "rassy-fast",
-    description: "Short answers, titles, and summaries."
+    description: "Short answers, titles, summaries, and quick transforms."
   },
   {
     id: "knowledge",
-    label: "Knowledge",
+    label: "Memory",
     model: "rassy-general",
-    description: "Document-grounded chat with enabled user memory."
+    description: "Document-grounded chat with enabled workspace memory."
   }
 ];
 
