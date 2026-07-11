@@ -106,7 +106,12 @@ def main() -> int:
     embed_base = _env("CAT_OLLAMA_EMBED_BASE_URL", _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844"))
     llm_model = _env("CAT_OLLAMA_GENERAL_MODEL", _env("OLLAMA_GENERAL_MODEL", "rassy-smart"))
     embed_model = _env("CAT_OLLAMA_EMBED_MODEL", _env("OLLAMA_EMBED_MODEL", "rassy-embed"))
-    ollama_api_key = os.getenv("CAT_OLLAMA_API_KEY", os.getenv("OLLAMA_API_KEY", os.getenv("LLM_API_KEY", ""))).strip()
+    ollama_api_key = (
+        os.getenv("CAT_OLLAMA_API_KEY")
+        or os.getenv("OLLAMA_API_KEY")
+        or os.getenv("LLM_API_KEY")
+        or ""
+    ).strip()
     ollama_num_ctx = max(2048, int(_env("CAT_OLLAMA_NUM_CTX", _env("OLLAMA_NUM_CTX", "8192"))))
     ollama_repeat_last_n = max(0, int(_env("CAT_OLLAMA_REPEAT_LAST_N", _env("OLLAMA_REPEAT_LAST_N", "96"))))
     ollama_repeat_penalty = max(
