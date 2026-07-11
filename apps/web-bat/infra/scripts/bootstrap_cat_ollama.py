@@ -68,6 +68,12 @@ def _tags_url(base_url: str) -> str:
     return f"{normalized}/api/tags"
 
 
+def _gateway_headers(api_key: str) -> dict[str, str]:
+    if not api_key.strip():
+        return {}
+    return {"Authorization": f"Bearer {api_key.strip()}"}
+
+
 def _patch_cat_embedder_auth(api_key: str, *, source_path: Path = Path("/app/cat/factory/custom_embedder.py")) -> bool:
     if not api_key.strip() or not source_path.exists():
         return False
@@ -164,7 +170,8 @@ def main() -> int:
         last_error = ""
         while True:
             try:
-                with urllib.request.urlopen(tags_url, timeout=5) as response:
+                request = urllib.request.Request(tags_url, headers=_gateway_headers(ollama_api_key))
+                with urllib.request.urlopen(request, timeout=5) as response:
                     payload = json.loads(response.read().decode("utf-8"))
                 models = [
                     str(item.get("name") or item.get("model") or "").strip()
