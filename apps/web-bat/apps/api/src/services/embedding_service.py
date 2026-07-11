@@ -32,6 +32,13 @@ def _build_embedding_payload(texts: Sequence[str]) -> dict[str, Any]:
     return payload
 
 
+def _build_embedding_headers() -> dict[str, str]:
+    api_key = str(settings.embedding_api_key or settings.llm_api_key or "").strip()
+    if not api_key:
+        return {}
+    return {"Authorization": f"Bearer {api_key}"}
+
+
 def _extract_embedding_vectors(payload: Any, *, expected_count: int) -> list[list[float]]:
     if not isinstance(payload, dict):
         return []
@@ -104,6 +111,7 @@ async def _embed_batch(texts: Sequence[str]) -> list[list[float] | None]:
                 response = await client.post(
                     settings.embedding_api_url,
                     json=payload,
+                    headers=_build_embedding_headers(),
                     timeout=max(6.0, float(settings.embedding_request_timeout_seconds)),
                 )
                 response.raise_for_status()

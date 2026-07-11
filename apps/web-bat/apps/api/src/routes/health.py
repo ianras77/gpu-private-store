@@ -132,6 +132,13 @@ def _build_llm_probe_headers() -> dict[str, str]:
     return {"Authorization": f"Bearer {api_key}"}
 
 
+def _build_embedding_probe_headers() -> dict[str, str]:
+    api_key = str(settings.embedding_api_key or settings.llm_api_key or "").strip()
+    if not api_key:
+        return {}
+    return {"Authorization": f"Bearer {api_key}"}
+
+
 def _build_embedding_probe_payload(endpoint_url: str, model: str) -> dict[str, Any]:
     if endpoint_url.rstrip("/").endswith("/api/embed"):
         return {"model": model, "input": "healthcheck"}
@@ -200,7 +207,8 @@ async def _ollama_model_check(endpoint_url: str, model: str) -> dict[str, Any]:
     started = datetime.utcnow()
     try:
         client = get_shared_async_client()
-        response = await client.get(tags_url, timeout=8)
+        headers = _build_embedding_probe_headers() if endpoint_url == settings.embedding_api_url else _build_llm_probe_headers()
+        response = await client.get(tags_url, headers=headers, timeout=8)
         response.raise_for_status()
         payload = response.json()
         models = []
@@ -283,6 +291,7 @@ async def _ollama_embedding_check(endpoint_url: str, model: str) -> dict[str, An
             response = await client.post(
                 endpoint_url,
                 json=_build_embedding_probe_payload(endpoint_url, model),
+                headers=_build_embedding_probe_headers(),
                 timeout=max(6.0, min(float(settings.embedding_request_timeout_seconds), 12.0)),
             )
             response.raise_for_status()

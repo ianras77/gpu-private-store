@@ -6,11 +6,14 @@ from routes.admin import _finalize_pipeline_cycle_status
 from routes.health import (
     _build_cat_memory_probe_payload,
     _build_cat_message_probe_payload,
+    _build_embedding_probe_headers,
     _build_embedding_probe_payload,
     _extract_embedding_vector,
     _build_llm_probe_payload,
     _normalize_model_name,
     _ollama_chat_check,
+    _ollama_embedding_check,
+    _ollama_model_check,
     _ollama_tags_url,
     _qdrant_vector_result_from_payload,
     _readiness_critical_ok,
@@ -81,6 +84,13 @@ class HealthRouteTests(unittest.TestCase):
 
         self.assertEqual(payload["model"], "qwen3-embedding:8b")
         self.assertEqual(payload["input"], "healthcheck")
+
+    def test_embedding_probe_headers_fall_back_to_llm_api_key(self) -> None:
+        with (
+            patch("routes.health.settings.embedding_api_key", ""),
+            patch("routes.health.settings.llm_api_key", "secret-token"),
+        ):
+            self.assertEqual(_build_embedding_probe_headers(), {"Authorization": "Bearer secret-token"})
 
     def test_extract_embedding_vector_reads_embed_response_shape(self) -> None:
         vector = _extract_embedding_vector({"embeddings": [[1.0, 2.0, 3.0]]})
@@ -248,6 +258,66 @@ class HealthLlmReadinessTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertTrue(result["ok"])
         self.assertEqual(client.calls[0]["headers"]["Authorization"], "Bearer secret-token")
+
+    async def test_embedding_probe_sends_configured_bearer_token(self) -> None:
+        class FakeResponse:
+            status_code = 200
+
+            def json(self) -> dict:
+                return {"embeddings": [[1.0, 2.0, 3.0]]}
+
+            def raise_for_status(self) -> None:
+                return None
+
+        class FakeClient:
+            def __init__(self) -> None:
+                self.calls: list[dict] = []
+
+            async def post(self, url: str, *, json: dict, headers: dict, timeout: float) -> FakeResponse:
+                self.calls.append({"url": url, "json": json, "headers": headers, "timeout": timeout})
+                return FakeResponse()
+
+        client = FakeClient()
+        with (
+            patch("routes.health.get_shared_async_client", return_value=client),
+            patch("routes.health.settings.embedding_api_key", ""),
+            patch("routes.health.settings.llm_api_key", "secret-token"),
+            patch("routes.health.settings.embedding_request_timeout_seconds", 12.0),
+        ):
+            result = await _ollama_embedding_check("http://localhost:8844/api/embed", "rassy-embed")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(client.calls[0]["headers"]["Authorization"], "Bearer secret-token")
+
+    async def test_embedding_model_catalog_sends_configured_bearer_token(self) -> None:
+        class FakeResponse:
+            status_code = 200
+
+            def json(self) -> dict:
+                return {"models": [{"name": "rassy-embed:latest"}]}
+
+            def raise_for_status(self) -> None:
+                return None
+
+        class FakeClient:
+            def __init__(self) -> None:
+                self.calls: list[dict] = []
+
+            async def get(self, url: str, *, headers: dict, timeout: float) -> FakeResponse:
+                self.calls.append({"url": url, "headers": headers, "timeout": timeout})
+                return FakeResponse()
+
+        client = FakeClient()
+        with (
+            patch("routes.health.get_shared_async_client", return_value=client),
+            patch("routes.health.settings.embedding_api_url", "http://localhost:8844/api/embed"),
+            patch("routes.health.settings.embedding_api_key", "embed-token"),
+            patch("routes.health.settings.llm_api_key", "secret-token"),
+        ):
+            result = await _ollama_model_check("http://localhost:8844/api/embed", "rassy-embed")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(client.calls[0]["headers"]["Authorization"], "Bearer embed-token")
 
 
 def _healthy_readiness_checks() -> dict[str, dict[str, bool]]:

@@ -111,6 +111,7 @@ class Settings(BaseSettings):
     ollama_keep_alive: str = "15m"
 
     embedding_api_url: str = "http://host.docker.internal:8844/api/embed"
+    embedding_api_key: str = ""
     embedding_model: str = "rassy-embed"
     embedding_allow_fallback: bool = False
     embedding_request_timeout_seconds: float = 12.0

@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import httpx
 
-from services.embedding_service import embed_texts
+from services.embedding_service import _build_embedding_headers, embed_texts
 
 
 class _FakeResponse:
@@ -26,12 +26,26 @@ class _FakeClient:
         self._responses = list(responses)
         self.calls: list[dict] = []
 
-    async def post(self, url: str, *, json: dict, timeout: float) -> _FakeResponse:
-        self.calls.append({"url": url, "json": json, "timeout": timeout})
+    async def post(self, url: str, *, json: dict, headers: dict | None = None, timeout: float) -> _FakeResponse:
+        self.calls.append({"url": url, "json": json, "headers": headers or {}, "timeout": timeout})
         return self._responses.pop(0)
 
 
 class EmbeddingServiceTests(unittest.IsolatedAsyncioTestCase):
+    def test_build_embedding_headers_prefers_embedding_api_key(self) -> None:
+        with (
+            patch("services.embedding_service.settings.embedding_api_key", "embed-secret"),
+            patch("services.embedding_service.settings.llm_api_key", "llm-secret"),
+        ):
+            self.assertEqual(_build_embedding_headers(), {"Authorization": "Bearer embed-secret"})
+
+    def test_build_embedding_headers_falls_back_to_llm_api_key(self) -> None:
+        with (
+            patch("services.embedding_service.settings.embedding_api_key", ""),
+            patch("services.embedding_service.settings.llm_api_key", "llm-secret"),
+        ):
+            self.assertEqual(_build_embedding_headers(), {"Authorization": "Bearer llm-secret"})
+
     async def test_embed_texts_batches_and_dedupes_inputs(self) -> None:
         client = _FakeClient(
             [
