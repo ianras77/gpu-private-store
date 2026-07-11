@@ -68,12 +68,45 @@ def _tags_url(base_url: str) -> str:
     return f"{normalized}/api/tags"
 
 
+def _patch_cat_embedder_auth(api_key: str, *, source_path: Path = Path("/app/cat/factory/custom_embedder.py")) -> bool:
+    if not api_key.strip() or not source_path.exists():
+        return False
+
+    source = source_path.read_text()
+    if "_bat_gateway_headers" in source:
+        return False
+
+    helper = '''
+
+def _bat_gateway_headers():
+    api_key = (
+        os.getenv("CAT_OLLAMA_API_KEY")
+        or os.getenv("OLLAMA_API_KEY")
+        or os.getenv("LLM_API_KEY")
+        or ""
+    ).strip()
+    if not api_key:
+        return {}
+    return {"Authorization": f"Bearer {api_key}"}
+'''
+    if "import httpx\n" not in source:
+        return False
+    source = source.replace("import httpx\n", f"import httpx\n{helper}", 1)
+    source = source.replace(
+        "httpx.post(self.url, data=payload, timeout=None)",
+        "httpx.post(self.url, data=payload, headers=_bat_gateway_headers(), timeout=None)",
+    )
+    source_path.write_text(source)
+    return True
+
+
 def main() -> int:
     metadata_path = Path(_env("CAT_METADATA_PATH", "/data/metadata.json"))
     llm_base = _env("CAT_OLLAMA_GENERAL_BASE_URL", _env("OLLAMA_GENERAL_BASE_URL", "http://host.docker.internal:8844"))
     embed_base = _env("CAT_OLLAMA_EMBED_BASE_URL", _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844"))
     llm_model = _env("CAT_OLLAMA_GENERAL_MODEL", _env("OLLAMA_GENERAL_MODEL", "rassy-smart"))
     embed_model = _env("CAT_OLLAMA_EMBED_MODEL", _env("OLLAMA_EMBED_MODEL", "rassy-embed"))
+    ollama_api_key = os.getenv("CAT_OLLAMA_API_KEY", os.getenv("OLLAMA_API_KEY", os.getenv("LLM_API_KEY", ""))).strip()
     ollama_num_ctx = max(2048, int(_env("CAT_OLLAMA_NUM_CTX", _env("OLLAMA_NUM_CTX", "8192"))))
     ollama_repeat_last_n = max(0, int(_env("CAT_OLLAMA_REPEAT_LAST_N", _env("OLLAMA_REPEAT_LAST_N", "96"))))
     ollama_repeat_penalty = max(
@@ -85,6 +118,8 @@ def main() -> int:
         min(float(_env("CAT_OLLAMA_TEMPERATURE", _env("OLLAMA_TEMPERATURE", "0.2"))), 1.2),
     )
     bootstrap_wait_seconds = max(0, int(_env("CAT_BOOTSTRAP_WAIT_SECONDS", "45")))
+    if _patch_cat_embedder_auth(ollama_api_key):
+        print("[cat-bootstrap] patched CustomOllamaEmbeddings with gateway auth headers", file=sys.stderr)
     payload = _load_metadata(metadata_path)
 
     items = payload.setdefault("_default", {})

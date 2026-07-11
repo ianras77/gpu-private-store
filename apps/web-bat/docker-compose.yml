@@ -124,6 +124,8 @@ services:
       OLLAMA_EMBED_BASE_URL: ${CAT_OLLAMA_EMBED_BASE_URL:-${OLLAMA_EMBED_BASE_URL_CONTAINER:-http://host.docker.internal:8844}}
       OLLAMA_GENERAL_MODEL: ${CAT_OLLAMA_GENERAL_MODEL:-${OLLAMA_GENERAL_MODEL_CONTAINER:-rassy-smart}}
       OLLAMA_EMBED_MODEL: ${CAT_OLLAMA_EMBED_MODEL:-${OLLAMA_EMBED_MODEL_CONTAINER:-rassy-embed}}
+      CAT_OLLAMA_API_KEY: ${CAT_OLLAMA_API_KEY:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
     extra_hosts: *bat-host-gateway
     volumes:
       - ${APP_DATA_DIR:-./.docker-data}/app-data/web-bat/named/bat-cat-data:/data
