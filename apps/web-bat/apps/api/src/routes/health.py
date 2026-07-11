@@ -19,7 +19,7 @@ from services.qdrant_service import COLLECTION as QDRANT_COLLECTION
 from services.qdrant_service import _extract_vector_size
 
 router = APIRouter(prefix="/health", tags=["health"])
-LLM_READINESS_PROBE_MAX_TOKENS = 128
+LLM_READINESS_PROBE_MAX_TOKENS = 256
 
 
 def _serialize_revision(row: RevisionHistory) -> dict[str, Any]:
@@ -120,6 +120,7 @@ def _build_llm_probe_payload(endpoint_url: str, model: str) -> dict[str, Any]:
         "messages": [{"role": "user", "content": "Reply with exactly READY"}],
         "temperature": 0.0,
         "max_tokens": LLM_READINESS_PROBE_MAX_TOKENS,
+        "reasoning_effort": "none",
         "stream": False,
     }
 

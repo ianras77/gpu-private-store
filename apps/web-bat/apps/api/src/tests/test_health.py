@@ -44,7 +44,7 @@ class HealthRouteTests(unittest.TestCase):
 
         self.assertEqual(payload["model"], "qwen3.6:27b")
         self.assertEqual(payload["stream"], False)
-        self.assertEqual(payload["options"]["num_predict"], 128)
+        self.assertEqual(payload["options"]["num_predict"], 256)
         self.assertEqual(payload["messages"][0]["content"], "Reply with exactly READY")
 
     def test_openai_chat_probe_payload_allows_reasoning_models_to_finish(self) -> None:
@@ -52,7 +52,8 @@ class HealthRouteTests(unittest.TestCase):
 
         self.assertEqual(payload["model"], "rassy-smart")
         self.assertEqual(payload["stream"], False)
-        self.assertEqual(payload["max_tokens"], 128)
+        self.assertEqual(payload["max_tokens"], 256)
+        self.assertEqual(payload["reasoning_effort"], "none")
         self.assertEqual(payload["messages"][0]["content"], "Reply with exactly READY")
 
     def test_cat_message_probe_payload_includes_service_user(self) -> None:

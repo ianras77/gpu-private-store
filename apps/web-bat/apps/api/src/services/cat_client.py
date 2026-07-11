@@ -88,9 +88,6 @@ def _extract_chat_completion_text(payload: Any) -> str | None:
             content = message.get("content")
             if isinstance(content, str) and content.strip():
                 return content.strip()
-            reasoning = message.get("reasoning")
-            if isinstance(reasoning, str) and reasoning.strip():
-                return reasoning.strip()
             if isinstance(content, list):
                 parts: list[str] = []
                 for item in content:
@@ -228,6 +225,7 @@ def _build_llm_payload(
         "messages": messages,
         "temperature": temperature,
         "max_tokens": max_tokens,
+        "reasoning_effort": "none",
         "stream": False,
     }
 

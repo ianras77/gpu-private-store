@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 import unittest
 
+from config import settings
 from services.ingestion_service import _is_relevant_result, _normalize_query
 
 
@@ -33,6 +34,21 @@ class IngestionFilterTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(reason, "missing_political_signals")
         self.assertEqual(score, 0.0)
+
+    def test_default_search_blocklist_excludes_listing_spam_domains(self) -> None:
+        self.assertTrue(
+            {"zillow.com", "trulia.com", "homes.com", "redfin.com", "realtor.com", "movoto.com", "wikipedia.org"}.issubset(
+                settings.blocked_domains
+            )
+        )
+
+    def test_default_backlog_publish_window_is_five_days(self) -> None:
+        self.assertEqual(settings.backlog_publish_window_hours, 120)
+
+    def test_default_daily_publish_target_is_five_articles(self) -> None:
+        self.assertEqual(settings.daily_publish_target, 5)
+        self.assertGreaterEqual(settings.writer_theme_take_limit, 12)
+        self.assertGreaterEqual(settings.editorial_rework_queue_limit, 6)
 
     def test_accepts_political_content_with_signals(self) -> None:
         result = {

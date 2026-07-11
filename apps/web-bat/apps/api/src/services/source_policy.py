@@ -193,10 +193,15 @@ FUNDAMENTAL_VIEW_MARKERS = (
     "history",
 )
 PLACEHOLDER_MARKERS = (
+    "lead story draft",
+    "theme take draft",
     "draft pending source refresh",
     "current retrieval context does not contain enough high-quality grounded sources",
 )
 PROMPT_LEAK_MARKERS = (
+    "thinking process:",
+    "analyze user input",
+    "**headline:**",
     "use velvet hammer",
     "output labels required",
     "3 tight paragraphs",

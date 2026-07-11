@@ -7,8 +7,10 @@ from workers.jobs import (
     _research_content_branches,
     _search_safe_query,
     _theme_live_query,
+    _writer_branch_limit,
     _writer_should_run,
     run_pipeline_cycle,
+    run_princess_cycle,
     run_queen_cycle,
     run_writer_cycle,
 )
@@ -118,6 +120,15 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertTrue(should_run)
         self.assertEqual(reason, "cached_current_sources")
+
+    def test_writer_branch_limit_can_feed_daily_publish_target(self) -> None:
+        themes = [SimpleNamespace(active_score=1.0) for _ in range(14)]
+
+        with patch("workers.jobs.settings.writer_theme_take_limit", 12):
+            branch_limit, hot_theme_count = _writer_branch_limit(themes)
+
+        self.assertEqual(hot_theme_count, 14)
+        self.assertEqual(branch_limit, 14)
 
     async def test_run_writer_cycle_survives_theme_failure(self) -> None:
         lead_id = uuid.uuid4()
@@ -304,6 +315,8 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
 
         with (
             patch("workers.jobs.get_runtime_controls", new=AsyncMock(return_value={"direct_publish": False, "x_live_posting": False})),
+            patch("workers.jobs._published_editorial_count_today", new=AsyncMock(return_value=5)),
+            patch("workers.jobs.prune_editorial_backlog", new=AsyncMock(return_value={"ok": True, "rejected_count": 0})),
             patch(
                 "workers.jobs.rework_editorial_backlog",
                 new=AsyncMock(
@@ -361,6 +374,10 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
                 "skipped": [],
             }
 
+        async def _fake_prune(*_args, **_kwargs):
+            call_order.append("prune")
+            return {"ok": True, "rejected_count": 0}
+
         async def _fake_publish(*_args, **_kwargs):
             call_order.append("publish")
             return {
@@ -391,6 +408,8 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
 
         with (
             patch("workers.jobs.get_runtime_controls", new=AsyncMock(return_value={"direct_publish": True, "x_live_posting": False})),
+            patch("workers.jobs._published_editorial_count_today", new=AsyncMock(return_value=5)),
+            patch("workers.jobs.prune_editorial_backlog", new=AsyncMock(side_effect=_fake_prune)),
             patch("workers.jobs.rework_editorial_backlog", new=AsyncMock(side_effect=_fake_rework)),
             patch("workers.jobs.publish_ready_backlog", new=AsyncMock(side_effect=_fake_publish)),
             patch("workers.jobs.generate_social_posts", new=AsyncMock(side_effect=_fake_social)),
@@ -403,10 +422,177 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
                 writer_summary={"lead_story_id": str(lead_id), "homepage_angle": "Angle"},
             )
 
-        self.assertEqual(call_order[:3], ["rework", "social", "publish"])
+        self.assertEqual(call_order[:4], ["prune", "rework", "social", "publish"])
         self.assertEqual(summary["publish_package"]["homepage_snapshot_id"], str(backlog_homepage_id))
         self.assertEqual(summary["backlog"]["publish"]["published_editorial_count"], 2)
         self.assertEqual(summary["auto_published"]["editorial"], 2)
+
+    async def test_run_queen_cycle_keeps_rework_limit_separate_from_publish_scan_limit(self) -> None:
+        db = _FakeDB([_FakeResult(all_values=[])])
+        rework_mock = AsyncMock(
+            return_value={
+                "ok": True,
+                "candidate_count": 0,
+                "reworked_editorial_count": 0,
+                "reworked_editorials": [],
+                "publish_ready_editorial_ids": [],
+                "failure_count": 0,
+                "failures": [],
+                "skipped": [],
+            }
+        )
+        publish_mock = AsyncMock(
+            return_value={
+                "ok": True,
+                "published_editorial_count": 0,
+                "published_editorial_ids": [],
+                "published_social_count": 0,
+                "published_social_ids": [],
+                "homepage_snapshot_id": None,
+                "homepage_status": None,
+            }
+        )
+
+        with (
+            patch("workers.jobs.get_runtime_controls", new=AsyncMock(return_value={"direct_publish": True, "x_live_posting": False})),
+            patch("workers.jobs._published_editorial_count_today", new=AsyncMock(return_value=5)),
+            patch("workers.jobs.prune_editorial_backlog", new=AsyncMock(return_value={"ok": True, "rejected_count": 0})),
+            patch("workers.jobs.rework_editorial_backlog", new=rework_mock),
+            patch("workers.jobs.publish_ready_backlog", new=publish_mock),
+            patch("workers.jobs._curate_source_links", return_value=[]),
+            patch("workers.jobs.update_voice_memory", new=AsyncMock()),
+            patch("workers.jobs.settings.editorial_rework_queue_limit", 2),
+            patch("workers.jobs.settings.writer_theme_take_limit", 8),
+        ):
+            await run_queen_cycle(db, writer_summary={"skipped": True, "reason": "cached_current_sources"})
+
+        self.assertEqual(rework_mock.await_args.kwargs["limit"], 2)
+        self.assertEqual(publish_mock.await_args.kwargs["limit"], 8)
+
+    async def test_run_queen_cycle_scales_rework_when_below_daily_publish_target(self) -> None:
+        db = _FakeDB([_FakeResult(all_values=[])])
+        rework_mock = AsyncMock(
+            return_value={
+                "ok": True,
+                "candidate_count": 0,
+                "reworked_editorial_count": 0,
+                "reworked_editorials": [],
+                "publish_ready_editorial_ids": [],
+                "failure_count": 0,
+                "failures": [],
+                "skipped": [],
+            }
+        )
+        publish_mock = AsyncMock(
+            return_value={
+                "ok": True,
+                "published_editorial_count": 0,
+                "published_editorial_ids": [],
+                "published_social_count": 0,
+                "published_social_ids": [],
+                "homepage_snapshot_id": None,
+                "homepage_status": None,
+            }
+        )
+
+        with (
+            patch("workers.jobs.get_runtime_controls", new=AsyncMock(return_value={"direct_publish": True, "x_live_posting": False})),
+            patch("workers.jobs._published_editorial_count_today", new=AsyncMock(return_value=1)),
+            patch("workers.jobs.prune_editorial_backlog", new=AsyncMock(return_value={"ok": True, "rejected_count": 0})),
+            patch("workers.jobs.rework_editorial_backlog", new=rework_mock),
+            patch("workers.jobs.publish_ready_backlog", new=publish_mock),
+            patch("workers.jobs._curate_source_links", return_value=[]),
+            patch("workers.jobs.update_voice_memory", new=AsyncMock()),
+            patch("workers.jobs.settings.daily_publish_target", 5),
+            patch("workers.jobs.settings.editorial_rework_queue_limit", 2),
+            patch("workers.jobs.settings.writer_theme_take_limit", 8),
+        ):
+            summary = await run_queen_cycle(db, writer_summary={"skipped": True, "reason": "cached_current_sources"})
+
+        self.assertEqual(rework_mock.await_args.kwargs["limit"], 12)
+        self.assertEqual(publish_mock.await_args.kwargs["limit"], 12)
+        self.assertEqual(summary["daily_publish"]["target"], 5)
+        self.assertEqual(summary["daily_publish"]["published_before"], 1)
+        self.assertEqual(summary["daily_publish"]["shortfall_before"], 4)
+
+    async def test_run_princess_cycle_preps_publish_ready_handoff(self) -> None:
+        db = _FakeDB([])
+        prune_mock = AsyncMock(return_value={"ok": True, "checked_count": 500, "rejected_count": 3})
+        rework_mock = AsyncMock(
+            return_value={
+                "ok": True,
+                "candidate_count": 18,
+                "reworked_editorial_count": 9,
+                "publish_ready_editorial_ids": ["ready-a", "ready-b", "ready-c"],
+                "failure_count": 0,
+            }
+        )
+
+        with (
+            patch("workers.jobs._published_editorial_count_today", new=AsyncMock(return_value=2)),
+            patch("workers.jobs.prune_editorial_backlog", new=prune_mock),
+            patch("workers.jobs.rework_editorial_backlog", new=rework_mock),
+            patch("workers.jobs.update_voice_memory", new=AsyncMock()),
+            patch("workers.jobs.settings.daily_publish_target", 5),
+            patch("workers.jobs.settings.daily_publish_rework_multiplier", 3),
+            patch("workers.jobs.settings.editorial_rework_queue_limit", 6),
+            patch("workers.jobs.settings.writer_theme_take_limit", 12),
+        ):
+            summary = await run_princess_cycle(db, writer_summary={"story_slate": [{"id": "story-1"}]})
+
+        prune_mock.assert_awaited_once()
+        self.assertEqual(rework_mock.await_args.kwargs["limit"], 9)
+        self.assertEqual(summary["role"], "princess")
+        self.assertEqual(summary["daily_publish"]["shortfall_before"], 3)
+        self.assertEqual(summary["publish_ready_editorial_ids"], ["ready-a", "ready-b", "ready-c"])
+        self.assertEqual(summary["rejected_draft_count"], 3)
+
+    async def test_run_queen_cycle_consumes_princess_handoff_without_reworking(self) -> None:
+        db = _FakeDB([_FakeResult(all_values=[])])
+        publish_mock = AsyncMock(
+            return_value={
+                "ok": True,
+                "published_editorial_count": 2,
+                "published_editorial_ids": ["ready-a", "ready-b"],
+                "published_social_count": 2,
+                "published_social_ids": ["social-a", "social-b"],
+                "homepage_snapshot_id": None,
+                "homepage_status": None,
+            }
+        )
+        princess_summary = {
+            "role": "princess",
+            "daily_publish": {"target": 5, "published_before": 1, "shortfall_before": 4, "rework_limit": 12, "publish_limit": 12},
+            "backlog": {
+                "prune": {"ok": True, "rejected_count": 3},
+                "rework": {"ok": True, "reworked_editorial_count": 7, "publish_ready_editorial_ids": ["ready-a", "ready-b"]},
+            },
+            "publish_ready_editorial_ids": ["ready-a", "ready-b"],
+        }
+
+        with (
+            patch("workers.jobs.get_runtime_controls", new=AsyncMock(return_value={"direct_publish": True, "x_live_posting": False})),
+            patch("workers.jobs._published_editorial_count_today", new=AsyncMock(return_value=1)),
+            patch("workers.jobs.prune_editorial_backlog", new=AsyncMock()) as prune_mock,
+            patch("workers.jobs.rework_editorial_backlog", new=AsyncMock()) as rework_mock,
+            patch("workers.jobs.publish_ready_backlog", new=publish_mock),
+            patch("workers.jobs._curate_source_links", return_value=[]),
+            patch("workers.jobs.update_voice_memory", new=AsyncMock()),
+        ):
+            summary = await run_queen_cycle(
+                db,
+                writer_summary={"skipped": True, "reason": "cached_current_sources"},
+                princess_summary=princess_summary,
+            )
+
+        prune_mock.assert_not_awaited()
+        rework_mock.assert_not_awaited()
+        publish_mock.assert_awaited_once()
+        self.assertEqual(summary["backlog"]["prune"]["rejected_count"], 3)
+        self.assertEqual(summary["backlog"]["rework"]["reworked_editorial_count"], 7)
+        self.assertEqual(summary["backlog"]["publish"]["published_editorial_count"], 2)
+        self.assertTrue(summary["princess_handoff"]["present"])
+        self.assertEqual(summary["princess_handoff"]["publish_ready_editorial_ids"], ["ready-a", "ready-b"])
 
     async def test_run_queen_cycle_processes_backlog_when_writer_skips(self) -> None:
         db = _FakeDB([_FakeResult(all_values=[])])
@@ -436,6 +622,8 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
 
         with (
             patch("workers.jobs.get_runtime_controls", new=AsyncMock(return_value={"direct_publish": True, "x_live_posting": False})),
+            patch("workers.jobs._published_editorial_count_today", new=AsyncMock(return_value=5)),
+            patch("workers.jobs.prune_editorial_backlog", new=AsyncMock(return_value={"ok": True, "rejected_count": 0})),
             patch("workers.jobs.rework_editorial_backlog", new=rework_mock),
             patch("workers.jobs.publish_ready_backlog", new=publish_mock),
             patch("workers.jobs._curate_source_links", return_value=[]),
@@ -460,6 +648,13 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
                 },
             }
         )
+        princess_mock = AsyncMock(
+            return_value={
+                "role": "princess",
+                "publish_ready_editorial_ids": [],
+                "backlog": {"prune": {"rejected_count": 0}, "rework": {"reworked_editorial_count": 0}},
+            }
+        )
 
         with (
             patch("workers.jobs._acquire_pipeline_lock", new=AsyncMock(return_value=(True, None, "token"))),
@@ -469,13 +664,60 @@ class PipelineJobTests(unittest.IsolatedAsyncioTestCase):
             patch("workers.jobs.run_analyst_cycle", new=AsyncMock(return_value={})),
             patch("workers.jobs._writer_should_run", return_value=(False, "cached_current_sources")),
             patch("workers.jobs.run_writer_cycle", new=AsyncMock()),
+            patch("workers.jobs.run_princess_cycle", new=princess_mock),
             patch("workers.jobs.run_queen_cycle", new=queen_mock),
         ):
             summary = await run_pipeline_cycle(db)
 
+        princess_mock.assert_awaited_once()
         queen_mock.assert_awaited_once()
         self.assertEqual(summary["writer"]["reason"], "cached_current_sources")
         self.assertEqual(summary["queen"]["backlog"]["publish"]["published_editorial_count"], 1)
+
+    async def test_run_pipeline_cycle_runs_princess_before_queen(self) -> None:
+        db = _FakeDB([])
+        call_order: list[str] = []
+        princess_summary = {
+            "role": "princess",
+            "backlog": {
+                "prune": {"rejected_count": 2},
+                "rework": {"reworked_editorial_count": 4, "publish_ready_editorial_ids": ["ready-1", "ready-2"]},
+            },
+            "publish_ready_editorial_ids": ["ready-1", "ready-2"],
+        }
+
+        async def _fake_writer(*_args, **_kwargs):
+            call_order.append("writer")
+            return {"role": "writer", "lead_story_id": None, "homepage_snapshot_id": None}
+
+        async def _fake_princess(*_args, writer_summary, **_kwargs):
+            call_order.append("princess")
+            self.assertEqual(writer_summary["role"], "writer")
+            return princess_summary
+
+        async def _fake_queen(*_args, writer_summary, princess_summary, **_kwargs):
+            call_order.append("queen")
+            self.assertEqual(writer_summary["role"], "writer")
+            self.assertEqual(princess_summary["publish_ready_editorial_ids"], ["ready-1", "ready-2"])
+            return {"role": "queen", "princess_ready_count": 2, "backlog": {"publish": {"published_editorial_count": 2}}}
+
+        with (
+            patch("workers.jobs._acquire_pipeline_lock", new=AsyncMock(return_value=(True, None, "token"))),
+            patch("workers.jobs._release_pipeline_lock", new=AsyncMock()),
+            patch("workers.jobs.record_revision", new=AsyncMock()),
+            patch("workers.jobs.run_researcher_cycle", new=AsyncMock(return_value={"writer_material": {"ready_source_count": 3}})),
+            patch("workers.jobs.run_analyst_cycle", new=AsyncMock(return_value={"site_brief": {"confidence": 0.8}})),
+            patch("workers.jobs._writer_should_run", return_value=(True, "cached_current_sources")),
+            patch("workers.jobs.run_writer_cycle", new=_fake_writer),
+            patch("workers.jobs.run_princess_cycle", new=_fake_princess),
+            patch("workers.jobs.run_queen_cycle", new=_fake_queen),
+        ):
+            summary = await run_pipeline_cycle(db)
+
+        self.assertEqual(call_order, ["writer", "princess", "queen"])
+        self.assertIn("princess", summary["roles"])
+        self.assertEqual(summary["princess"], princess_summary)
+        self.assertEqual(summary["queen"]["princess_ready_count"], 2)
 
     async def test_run_pipeline_cycle_skips_when_another_cycle_has_lock(self) -> None:
         db = _FakeDB([])

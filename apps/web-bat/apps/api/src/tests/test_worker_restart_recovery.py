@@ -1,3 +1,4 @@
+import asyncio
 import unittest
 from unittest.mock import AsyncMock, patch
 
@@ -26,6 +27,38 @@ class _FakeRedis:
 
 
 class WorkerRestartRecoveryTests(unittest.IsolatedAsyncioTestCase):
+    def test_progress_heartbeat_interval_is_bounded(self) -> None:
+        self.assertEqual(worker_main._progress_heartbeat_interval_seconds(60), 30)
+        self.assertEqual(worker_main._progress_heartbeat_interval_seconds(900), 300)
+        self.assertEqual(worker_main._progress_heartbeat_interval_seconds(3600), 300)
+
+    async def test_cycle_progress_heartbeat_writes_running_progress(self) -> None:
+        writes: list[dict[str, object]] = []
+
+        async def _fake_sleep(_seconds: int) -> None:
+            if writes:
+                raise asyncio.CancelledError()
+
+        async def _fake_write_worker_heartbeat(**kwargs) -> None:
+            writes.append(kwargs)
+
+        with (
+            patch("workers.main.asyncio.sleep", new=_fake_sleep),
+            patch("workers.main._write_worker_heartbeat", new=_fake_write_worker_heartbeat),
+        ):
+            with self.assertRaises(asyncio.CancelledError):
+                await worker_main._cycle_progress_heartbeat(
+                    cycle_interval_seconds=90,
+                    cycle_started_at="2026-07-11T16:00:00+00:00",
+                    interval_seconds=1,
+                )
+
+        self.assertEqual(len(writes), 1)
+        self.assertEqual(writes[0]["status"], "running")
+        self.assertEqual(writes[0]["event"], "cycle_progress")
+        self.assertEqual(writes[0]["cycle_interval_seconds"], 90)
+        self.assertEqual(writes[0]["details"], {"cycle_started_at": "2026-07-11T16:00:00+00:00"})
+
     async def test_worker_startup_recovers_orphaned_worker_lock(self) -> None:
         redis_client = _FakeRedis("d495fad6-db2e-42a5-99b9-6c113ba958dc:worker")
         log_pipeline_event = AsyncMock()

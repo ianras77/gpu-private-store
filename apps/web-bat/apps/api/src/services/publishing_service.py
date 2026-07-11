@@ -56,6 +56,8 @@ async def _current_news_source_count(db: AsyncSession, editorial: EditorialObjec
 
 async def _editorial_publishable_now(db: AsyncSession, editorial: EditorialObject) -> tuple[bool, dict[str, Any]]:
     metadata = editorial.meta or {}
+    rework = metadata.get("rework") if isinstance(metadata, dict) else {}
+    blocked = rework.get("blocked") if isinstance(rework, dict) else None
     publish_recommendation = metadata.get("publish_recommendation", {}) if isinstance(metadata, dict) else {}
     style_gate = metadata.get("style_gate") or evaluate_style_gate(editorial.body_md or "", lane="editorial")
     title = derive_editorial_title(editorial.title, editorial.body_md, editorial.object_type)
@@ -64,6 +66,7 @@ async def _editorial_publishable_now(db: AsyncSession, editorial: EditorialObjec
 
     publishable = bool(
         editorial.status in {"draft", "approved"}
+        and not blocked
         and _draft_is_recent(editorial)
         and not editorial_looks_placeholder(title, editorial.body_md)
         and not contains_prompt_leak(title, editorial.body_md)

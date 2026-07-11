@@ -7,6 +7,7 @@ from services.cat_client import (
     _build_llm_payload,
     _clamp_generation_tokens,
     _compose_prompt_payload,
+    _extract_chat_completion_text,
     _generation_timeout_seconds,
     _is_retryable_llm_error,
     _looks_like_cat_not_configured,
@@ -68,8 +69,23 @@ class CatClientTests(unittest.TestCase):
 
         self.assertEqual(payload["max_tokens"], 333)
         self.assertEqual(payload["temperature"], 0.52)
+        self.assertEqual(payload["reasoning_effort"], "none")
         self.assertNotIn("keep_alive", payload)
         self.assertNotIn("options", payload)
+
+    def test_chat_completion_extractor_does_not_publish_reasoning_as_content(self) -> None:
+        payload = {
+            "choices": [
+                {
+                    "message": {
+                        "content": "",
+                        "reasoning": "Thinking Process:\nAnalyze User Input\nDraft a plan before answering.",
+                    }
+                }
+            ]
+        }
+
+        self.assertIsNone(_extract_chat_completion_text(payload))
 
     def test_llm_payload_accepts_model_override_for_challenger(self) -> None:
         payload = _build_llm_payload(

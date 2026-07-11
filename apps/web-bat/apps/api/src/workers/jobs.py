@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Any
 
 import redis.asyncio as redis
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
@@ -20,6 +20,7 @@ from services.editorial_service import (
     generate_homepage_snapshot,
     generate_social_posts,
     get_runtime_controls,
+    prune_editorial_backlog,
     rework_editorial_backlog,
     update_voice_memory,
 )
@@ -427,8 +428,26 @@ def _theme_active_score(theme: Theme) -> float:
 def _writer_branch_limit(theme_pool: list[Theme]) -> tuple[int, int]:
     base_limit = max(3, int(settings.writer_theme_take_limit))
     hot_theme_count = sum(1 for theme in theme_pool if _theme_active_score(theme) >= 0.75)
-    branch_limit = min(8, max(base_limit, hot_theme_count))
+    daily_candidate_floor = max(base_limit, int(settings.daily_publish_target) * 3)
+    branch_limit = min(len(theme_pool), max(base_limit, hot_theme_count, daily_candidate_floor))
     return branch_limit, hot_theme_count
+
+
+def _utc_day_start() -> datetime:
+    return datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+async def _published_editorial_count_today(db: AsyncSession) -> int:
+    return int(
+        (
+            await db.scalar(
+                select(func.count())
+                .select_from(EditorialObject)
+                .where(EditorialObject.status == "published", EditorialObject.published_at >= _utc_day_start())
+            )
+        )
+        or 0
+    )
 
 
 def _brief_meta(brief: dict[str, object] | None) -> dict[str, object]:
@@ -1079,7 +1098,7 @@ async def run_writer_cycle(db: AsyncSession) -> dict:
         priority_board = priority_outcome
 
     gold_theme_count = sum(1 for item in priority_board if bool(item.get("gold_ready")))
-    effective_branch_limit = min(8, branch_limit + min(2, gold_theme_count))
+    effective_branch_limit = min(len(priority_board) or branch_limit, branch_limit + min(2, gold_theme_count))
     theme_by_slug = {str(theme.slug): theme for theme in theme_pool}
     selected_priority_items, duplicate_signal_count = _select_distinct_priority_items(
         priority_board,
@@ -1197,7 +1216,54 @@ async def run_writer_cycle(db: AsyncSession) -> dict:
     }
 
 
-async def run_queen_cycle(db: AsyncSession, *, writer_summary: dict) -> dict:
+async def run_princess_cycle(db: AsyncSession, *, writer_summary: dict) -> dict:
+    daily_target = max(1, int(settings.daily_publish_target))
+    published_before = await _published_editorial_count_today(db)
+    shortfall_before = max(0, daily_target - published_before)
+    rework_limit = max(
+        1,
+        int(settings.editorial_rework_queue_limit),
+        shortfall_before * max(1, int(settings.daily_publish_rework_multiplier)),
+    )
+    publish_limit = max(1, int(settings.writer_theme_take_limit), rework_limit, daily_target)
+    backlog_prune = await prune_editorial_backlog(db)
+    backlog_rework = await rework_editorial_backlog(db, limit=rework_limit)
+    publish_ready_ids = list(backlog_rework.get("publish_ready_editorial_ids") or [])
+
+    await update_voice_memory(
+        db,
+        memory_type="pipeline",
+        key="princess_last_cycle",
+        value=(
+            f"Completed at {datetime.utcnow().isoformat()} UTC | "
+            f"reworked={int(backlog_rework.get('reworked_editorial_count') or 0)} | "
+            f"ready={len(publish_ready_ids)}"
+        ),
+        weight=1.0,
+    )
+
+    return {
+        "role": "princess",
+        "plugins": _role_plugins("princess"),
+        "writer_story_count": len(writer_summary.get("story_slate") or []),
+        "daily_publish": {
+            "target": daily_target,
+            "published_before": published_before,
+            "shortfall_before": shortfall_before,
+            "rework_limit": rework_limit,
+            "publish_limit": publish_limit,
+        },
+        "backlog": {
+            "prune": backlog_prune,
+            "rework": backlog_rework,
+        },
+        "publish_ready_editorial_ids": publish_ready_ids,
+        "rejected_draft_count": int(backlog_prune.get("rejected_count") or 0),
+        "reworked_editorial_count": int(backlog_rework.get("reworked_editorial_count") or 0),
+    }
+
+
+async def run_queen_cycle(db: AsyncSession, *, writer_summary: dict, princess_summary: dict | None = None) -> dict:
     controls = await get_runtime_controls(db)
     direct_publish = bool(controls["direct_publish"])
     auto_publish_editorials = direct_publish or (settings.auto_publish and not settings.enable_manual_review)
@@ -1205,8 +1271,36 @@ async def run_queen_cycle(db: AsyncSession, *, writer_summary: dict) -> dict:
     homepage_snapshot_id = writer_summary.get("homepage_snapshot_id")
     social_count = 0
     auto_published = {"editorial": 0, "homepage": 0, "social": 0}
-    queue_limit = max(6, int(settings.writer_theme_take_limit), int(settings.editorial_rework_queue_limit))
-    backlog_rework = await rework_editorial_backlog(db, limit=queue_limit)
+    has_princess_handoff = isinstance(princess_summary, dict) and princess_summary.get("role") == "princess"
+    daily_target = max(1, int(settings.daily_publish_target))
+    published_before = await _published_editorial_count_today(db)
+    shortfall_before = max(0, daily_target - published_before)
+    princess_daily = princess_summary.get("daily_publish") if has_princess_handoff else {}
+    rework_limit = int(
+        (princess_daily or {}).get("rework_limit")
+        or max(
+            1,
+            int(settings.editorial_rework_queue_limit),
+            shortfall_before * max(1, int(settings.daily_publish_rework_multiplier)),
+        )
+    )
+    publish_limit = int((princess_daily or {}).get("publish_limit") or max(1, int(settings.writer_theme_take_limit), rework_limit, daily_target))
+    princess_backlog = princess_summary.get("backlog") if has_princess_handoff else {}
+    if has_princess_handoff and isinstance(princess_backlog, dict):
+        backlog_prune = princess_backlog.get("prune") or {"ok": True, "rejected_count": 0}
+        backlog_rework = princess_backlog.get("rework") or {
+            "ok": True,
+            "candidate_count": 0,
+            "reworked_editorial_count": 0,
+            "reworked_editorials": [],
+            "publish_ready_editorial_ids": [],
+            "failure_count": 0,
+            "failures": [],
+            "skipped": [],
+        }
+    else:
+        backlog_prune = await prune_editorial_backlog(db)
+        backlog_rework = await rework_editorial_backlog(db, limit=rework_limit)
     backlog_publish: dict[str, Any] = {
         "ok": True,
         "rework": {
@@ -1316,7 +1410,7 @@ async def run_queen_cycle(db: AsyncSession, *, writer_summary: dict) -> dict:
         refresh_backlog_homepage = not bool(homepage_snapshot_id)
         backlog_publish = await publish_ready_backlog(
             db,
-            limit=queue_limit,
+            limit=publish_limit,
             publish_social=True,
             rework_drafts=False,
             refresh_homepage=refresh_backlog_homepage,
@@ -1330,6 +1424,46 @@ async def run_queen_cycle(db: AsyncSession, *, writer_summary: dict) -> dict:
             homepage_snapshot_id = backlog_homepage_id
             if backlog_homepage_id != writer_summary.get("homepage_snapshot_id"):
                 await _annotate_homepage_snapshot(backlog_homepage_id)
+
+        remaining_shortfall = max(
+            0,
+            daily_target - (published_before + int(backlog_publish.get("published_editorial_count") or 0)),
+        )
+        extra_passes = 0 if has_princess_handoff else max(1, int(settings.editorial_rework_passes_per_cycle)) - 1
+        extra_reworks: list[dict[str, Any]] = []
+        extra_publishes: list[dict[str, Any]] = []
+        for _pass_index in range(extra_passes):
+            if remaining_shortfall <= 0:
+                break
+            extra_rework = await rework_editorial_backlog(db, limit=rework_limit)
+            extra_publish = await publish_ready_backlog(
+                db,
+                limit=publish_limit,
+                publish_social=True,
+                rework_drafts=False,
+                refresh_homepage=False,
+            )
+            extra_reworks.append(extra_rework)
+            extra_publishes.append(extra_publish)
+            published_now = int(extra_publish.get("published_editorial_count") or 0)
+            auto_published["editorial"] += published_now
+            auto_published["social"] += int(extra_publish.get("published_social_count") or 0)
+            remaining_shortfall = max(0, remaining_shortfall - published_now)
+        if extra_reworks or extra_publishes:
+            backlog_rework = {
+                **backlog_rework,
+                "extra_passes": extra_reworks,
+                "reworked_editorial_count": int(backlog_rework.get("reworked_editorial_count") or 0)
+                + sum(int(item.get("reworked_editorial_count") or 0) for item in extra_reworks),
+            }
+            backlog_publish = {
+                **backlog_publish,
+                "extra_passes": extra_publishes,
+                "published_editorial_count": int(backlog_publish.get("published_editorial_count") or 0)
+                + sum(int(item.get("published_editorial_count") or 0) for item in extra_publishes),
+                "published_social_count": int(backlog_publish.get("published_social_count") or 0)
+                + sum(int(item.get("published_social_count") or 0) for item in extra_publishes),
+            }
 
     await update_voice_memory(
         db,
@@ -1356,6 +1490,7 @@ async def run_queen_cycle(db: AsyncSession, *, writer_summary: dict) -> dict:
             "dispatch_ready": bool(social_count),
         },
         "backlog": {
+            "rejected": int(backlog_prune.get("rejected_count") or 0),
             "reworked": int(backlog_rework.get("reworked_editorial_count") or 0),
             "published": int(backlog_publish.get("published_editorial_count") or 0),
         },
@@ -1367,7 +1502,22 @@ async def run_queen_cycle(db: AsyncSession, *, writer_summary: dict) -> dict:
         "plugins": _role_plugins("queen"),
         "direct_publish": direct_publish,
         "auto_publish_editorials": auto_publish_editorials,
+        "princess_handoff": {
+            "present": has_princess_handoff,
+            "publish_ready_editorial_ids": list(princess_summary.get("publish_ready_editorial_ids") or [])
+            if has_princess_handoff
+            else [],
+        },
+        "daily_publish": {
+            "target": daily_target,
+            "published_before": published_before,
+            "shortfall_before": shortfall_before,
+            "rework_limit": rework_limit,
+            "publish_limit": publish_limit,
+            "published_after_backlog": published_before + int(backlog_publish.get("published_editorial_count") or 0),
+        },
         "backlog": {
+            "prune": backlog_prune,
             "rework": backlog_rework,
             "publish": backlog_publish,
         },
@@ -1415,6 +1565,7 @@ async def run_pipeline_cycle(db: AsyncSession, *, actor: str = "worker") -> dict
         "researcher": run_researcher_cycle,
         "analyst": run_analyst_cycle,
         "writer": run_writer_cycle,
+        "princess": run_princess_cycle,
         "queen": run_queen_cycle,
     }
 
@@ -1459,8 +1610,14 @@ async def run_pipeline_cycle(db: AsyncSession, *, actor: str = "worker") -> dict
                         )
                         continue
 
-                if stage == "queen":
+                if stage == "princess":
                     result = await stage_functions[stage](db, writer_summary=stage_results.get("writer", {}))
+                elif stage == "queen":
+                    result = await stage_functions[stage](
+                        db,
+                        writer_summary=stage_results.get("writer", {}),
+                        princess_summary=stage_results.get("princess", {}),
+                    )
                 else:
                     result = await stage_functions[stage](db)
                 result["duration_seconds"] = round((datetime.utcnow() - stage_started_at).total_seconds(), 2)

@@ -2015,7 +2015,7 @@ def _expand_fallback_body_sections(
     if not sections:
         return []
 
-    target_words = max(280, int(_story_form_word_floor(story_brief) * 0.78))
+    target_words = max(280, _target_body_word_range(story_brief)[0])
     total_words = sum(_word_count(section) for section in sections)
     for extra in extras:
         if total_words >= target_words:
@@ -3146,18 +3146,22 @@ def _publish_recommendation(
     freshness_age_days: int | None = None,
 ) -> dict[str, object]:
     freshness_ok = freshness_age_days is None or freshness_age_days <= int(settings.current_news_max_age_days)
+    fallback_selected = generation_path == "fallback_grounded"
     recommended = (
         bool(style_report.get("passes"))
         and grounded_source_count >= max(1, int(settings.generation_min_grounded_sources))
         and not needs_research
         and freshness_ok
+        and not fallback_selected
     )
     if needs_research:
         reason = "needs_more_grounded_sources"
     elif not freshness_ok:
         reason = "outside_current_news_window"
+    elif fallback_selected:
+        reason = "fallback_requires_model_rework"
     elif style_report.get("passes"):
-        reason = "ready_for_publish_fallback" if generation_path == "fallback_grounded" else "ready_for_publish"
+        reason = "ready_for_publish"
     else:
         reason = "style_gate_hold"
     return {
@@ -3352,6 +3356,13 @@ def _story_form_word_floor(story_brief: dict[str, object] | None) -> int:
         return int(STORY_FORM_WORD_FLOORS[story_form])
     body_paragraphs = int(story_brief.get("body_paragraphs") or 3)
     return 220 if body_paragraphs <= 2 else 280
+
+
+def _target_body_word_range(story_brief: dict[str, object] | None) -> tuple[int, int]:
+    word_floor = _story_form_word_floor(story_brief)
+    low = max(word_floor + 120, int(word_floor * 1.22))
+    low = ((low + 19) // 20) * 20
+    return low, low + 100
 
 
 def _source_role_label_for_source(source: dict[str, object], analysis_source_roles: list[dict[str, object]]) -> str:
@@ -4045,6 +4056,7 @@ def _build_editorial_task_prompt(
     story_mode = _clean_line(str(story_brief.get("story_mode") or "Dispatch"))
     story_form = str(story_brief.get("story_form") or "").strip().lower()
     word_floor = _story_form_word_floor(story_brief)
+    target_low, target_high = _target_body_word_range(story_brief)
     body_paragraphs = int(story_brief.get("body_paragraphs") or 3)
     selected_angle = _clean_line(str(story_brief.get("selected_angle") or ""))
     why_now = _clean_line(str(story_brief.get("why_now") or ""))
@@ -4063,6 +4075,7 @@ def _build_editorial_task_prompt(
     lines = [base_prompt.strip(), "", "This assignment overrides generic habits:"]
     lines.append(f"- Story form: {story_mode}")
     lines.append(f"- Minimum body length before Pattern Signals: {word_floor} words")
+    lines.append(f"- Aim for {target_low}-{target_high} body words before Pattern Signals so the piece reads filed, not sketched.")
     if selected_angle:
         lines.append(f"- Lock the piece to this angle: {selected_angle}")
     if why_now:
@@ -4199,6 +4212,7 @@ def _editorial_output_contract(object_type: str, story_brief: dict[str, object])
     story_mode = _clean_line(str(story_brief.get("story_mode") or "Dispatch"))
     target_words = _clean_line(str(story_brief.get("target_words") or ""))
     word_floor = _story_form_word_floor(story_brief)
+    target_low, target_high = _target_body_word_range(story_brief)
     lines = [
         "Return markdown with this exact structure:",
         f"- Story form label: {story_mode}",
@@ -4208,6 +4222,7 @@ def _editorial_output_contract(object_type: str, story_brief: dict[str, object])
     ]
     if target_words:
         lines.append(f"- Rough length target: {target_words} words")
+    lines.append(f"- Body target: {target_low}-{target_high} words before Pattern Signals")
     lines.append(f"- The body before any secondary heading must clear {word_floor} words")
     for job_line in _paragraph_job_lines(story_brief):
         lines.append(f"- {job_line}")
@@ -5831,6 +5846,106 @@ async def rework_editorial_object(
     }
 
 
+def _editorial_rework_block(metadata: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(metadata, dict):
+        return {}
+    rework = metadata.get("rework")
+    if isinstance(rework, dict) and isinstance(rework.get("blocked"), dict):
+        return rework["blocked"]
+    return {}
+
+
+async def _block_editorial_rework(
+    db: AsyncSession,
+    row: EditorialObject,
+    *,
+    reason: str,
+    detail: str | None = None,
+) -> dict[str, object]:
+    now = datetime.utcnow().isoformat()
+    metadata = row.meta or {}
+    rework = metadata.get("rework") if isinstance(metadata.get("rework"), dict) else {}
+    row.status = "rejected"
+    row.meta = {
+        **metadata,
+        "needs_rework": False,
+        "publish_recommendation": {
+            **((metadata.get("publish_recommendation") or {}) if isinstance(metadata.get("publish_recommendation"), dict) else {}),
+            "recommended": False,
+            "reason": reason,
+        },
+        "rework": {
+            **rework,
+            "ready_for_publish": False,
+            "blocked": {
+                "reason": reason,
+                "detail": detail,
+                "blocked_at": now,
+            },
+        },
+    }
+    row.updated_at = datetime.utcnow()
+    await db.commit()
+    await record_revision(
+        db,
+        object_table="editorial_objects",
+        object_id=row.id,
+        action="rework_rejected",
+        snapshot={
+            "status": row.status,
+            "title": row.title,
+            "reason": reason,
+            "detail": detail,
+        },
+    )
+    return {"id": str(row.id), "reason": reason}
+
+
+async def prune_editorial_backlog(db: AsyncSession, *, limit: int | None = None) -> dict[str, Any]:
+    prune_limit = max(1, int(limit or settings.editorial_backlog_prune_limit))
+    attempt_cap = max(1, int(settings.editorial_rework_max_attempts))
+    queue_window_open = datetime.now(timezone.utc) - timedelta(hours=int(settings.backlog_publish_window_hours))
+    rows = (
+        await db.execute(
+            select(EditorialObject)
+            .where(EditorialObject.status == "draft")
+            .order_by(EditorialObject.updated_at.asc(), EditorialObject.created_at.asc())
+            .limit(prune_limit)
+        )
+    ).scalars().all()
+
+    rejected: list[dict[str, object]] = []
+    retained = 0
+    for row in rows:
+        metadata = row.meta or {}
+        attempts = _editorial_rework_attempts(metadata)
+        updated_at = _editorial_queue_utc(row.updated_at or row.created_at)
+        reason = ""
+        detail = ""
+        if editorial_looks_placeholder(row.title, row.body_md) or contains_prompt_leak(row.title, row.body_md):
+            reason = "placeholder_or_prompt_leak"
+            detail = "rejected during backlog pruning"
+        elif attempts >= attempt_cap:
+            reason = "attempt_cap_reached"
+            detail = "rejected during backlog pruning after exhausting edit attempts"
+        elif updated_at < queue_window_open:
+            reason = "stale_queue_window"
+            detail = "rejected during backlog pruning because the draft aged out of the active publish window"
+
+        if reason:
+            rejected.append(await _block_editorial_rework(db, row, reason=reason, detail=detail))
+        else:
+            retained += 1
+
+    return {
+        "ok": True,
+        "checked_count": len(rows),
+        "rejected_count": len(rejected),
+        "retained_count": retained,
+        "rejected": rejected[:12],
+    }
+
+
 async def rework_editorial_backlog(
     db: AsyncSession,
     *,
@@ -5858,12 +5973,40 @@ async def rework_editorial_backlog(
         attempts = _editorial_rework_attempts(metadata)
         freshness_age = ((metadata.get("source_mix") or {}) if isinstance(metadata.get("source_mix"), dict) else {}).get("freshest_age_days")
         updated_at = _editorial_queue_utc(row.updated_at or row.created_at)
+        blocked = _editorial_rework_block(metadata)
 
+        if blocked:
+            skipped.append({"id": str(row.id), "reason": str(blocked.get("reason") or "rework_blocked")})
+            continue
+        if editorial_looks_placeholder(row.title, row.body_md) or contains_prompt_leak(row.title, row.body_md):
+            skipped.append(
+                await _block_editorial_rework(
+                    db,
+                    row,
+                    reason="placeholder_or_prompt_leak",
+                    detail="rejected before rework queue",
+                )
+            )
+            continue
         if updated_at < queue_window_open:
-            skipped.append({"id": str(row.id), "reason": "outside_queue_window"})
+            skipped.append(
+                await _block_editorial_rework(
+                    db,
+                    row,
+                    reason="stale_queue_window",
+                    detail="rejected because the draft aged out of the active publish window",
+                )
+            )
             continue
         if attempts >= attempt_cap:
-            skipped.append({"id": str(row.id), "reason": "attempt_cap_reached"})
+            skipped.append(
+                await _block_editorial_rework(
+                    db,
+                    row,
+                    reason="attempt_cap_reached",
+                    detail="rejected after exhausting agentic edit attempts",
+                )
+            )
             continue
         if bool(metadata.get("needs_research")):
             skipped.append({"id": str(row.id), "reason": "needs_more_grounding"})

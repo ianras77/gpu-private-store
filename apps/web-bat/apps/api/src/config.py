@@ -76,6 +76,8 @@ class Settings(BaseSettings):
     searxng_blocked_domains: str = (
         "yourdictionary.com|dictionary.com|wordreference.com|investopedia.com|"
         "gains.com|homedepot.com|lowes.com|ikea.com|menards.com|"
+        "zillow.com|trulia.com|homes.com|redfin.com|realtor.com|movoto.com|"
+        "wikipedia.org|"
         "econotimes.com|oilprice.com|"
         "townhall.com|breitbart.com|thegatewaypundit.com|"
         "dailycaller.com|newsmax.com|justthenews.com|redstate.com|dailywire.com|"
@@ -137,8 +139,8 @@ class Settings(BaseSettings):
     analysis_theme_concurrency: int = 4
     writer_theme_concurrency: int = 2
     social_dispatch_concurrency: int = 4
-    writer_theme_take_limit: int = 8
-    queen_curation_limit: int = 10
+    writer_theme_take_limit: int = 12
+    queen_curation_limit: int = 12
 
     x_enabled: bool = False
     x_dry_run: bool = True
@@ -169,10 +171,13 @@ class Settings(BaseSettings):
     current_news_explicit_min_quality_score: float = 4.6
     current_news_undated_min_quality_score: float = 6.2
     fundamental_view_min_quality_score: float = 7.6
-    backlog_publish_window_hours: int = 72
+    backlog_publish_window_hours: int = 120
+    daily_publish_target: int = 5
+    daily_publish_rework_multiplier: int = 3
     editorial_rework_queue_limit: int = 6
-    editorial_rework_max_attempts: int = 6
-    editorial_rework_passes_per_cycle: int = 2
+    editorial_rework_max_attempts: int = 4
+    editorial_rework_passes_per_cycle: int = 3
+    editorial_backlog_prune_limit: int = 500
     ingestion_min_quality_score: float = 3.0
     ingestion_min_text_length: int = 220
     generation_min_grounded_sources: int = 3

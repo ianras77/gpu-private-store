@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import asyncio
 import uuid
 from types import SimpleNamespace
@@ -12,6 +12,7 @@ from services.editorial_service import (
     _assess_grounded_editorial_candidate,
     _apply_voice_polish,
     _build_editorial_context_packet,
+    _build_editorial_task_prompt,
     _build_editorial_expansion_prompt,
     _build_editorial_revision_prompt,
     _catastrophic_editorial_underfill,
@@ -35,8 +36,11 @@ from services.editorial_service import (
     _social_package_assessment,
     _run_editorial_generation_pass,
     evaluate_style_gate,
+    prune_editorial_backlog,
+    rework_editorial_backlog,
     rework_editorial_object,
 )
+from services.publishing_service import _editorial_publishable_now
 from services.trend_engine import _change_type
 
 
@@ -232,7 +236,7 @@ class EditorialStyleTests(unittest.TestCase):
         self.assertIn("must clear at least 760 words", prompt)
         self.assertIn("Do not invent named officials", prompt)
 
-    def test_publish_recommendation_allows_strong_grounded_fallback(self) -> None:
+    def test_publish_recommendation_holds_grounded_fallback_for_rework(self) -> None:
         recommendation = _publish_recommendation(
             style_report={"passes": True, "score": 82},
             grounded_source_count=3,
@@ -242,8 +246,8 @@ class EditorialStyleTests(unittest.TestCase):
             freshness_age_days=1,
         )
 
-        self.assertTrue(recommendation["recommended"])
-        self.assertEqual(recommendation["reason"], "ready_for_publish_fallback")
+        self.assertFalse(recommendation["recommended"])
+        self.assertEqual(recommendation["reason"], "fallback_requires_model_rework")
 
     def test_preferred_story_sources_stay_locked_to_story_focus_query(self) -> None:
         sources = [
@@ -1271,7 +1275,7 @@ That gap matters because the legal paper is suddenly doing more governing than t
         self.assertNotIn("next site note", polished.lower())
         self.assertNotIn("freshest evidence:", polished.lower())
 
-    def test_publish_recommendation_allows_grounded_fallback_when_style_passes(self) -> None:
+    def test_publish_recommendation_holds_grounded_fallback_even_when_style_passes(self) -> None:
         recommendation = _publish_recommendation(
             style_report={"passes": True, "score": 82},
             grounded_source_count=4,
@@ -1281,8 +1285,8 @@ That gap matters because the legal paper is suddenly doing more governing than t
             freshness_age_days=1,
         )
 
-        self.assertTrue(recommendation["recommended"])
-        self.assertEqual(recommendation["reason"], "ready_for_publish_fallback")
+        self.assertFalse(recommendation["recommended"])
+        self.assertEqual(recommendation["reason"], "fallback_requires_model_rework")
 
     def test_curated_links_skip_generic_titles_even_when_snippets_sound_live(self) -> None:
         now = datetime.now(timezone.utc)
@@ -1675,6 +1679,206 @@ That gap matters because the legal paper is suddenly doing more governing than t
 
 
 class EditorialReworkTests(unittest.IsolatedAsyncioTestCase):
+    async def test_publish_ready_skips_rework_blocked_drafts(self) -> None:
+        editorial = EditorialObject(
+            id=uuid.uuid4(),
+            object_type="lead_story",
+            status="approved",
+            title="Court Filing Tightens the Trump Story",
+            body_md=(
+                "The Trump administration is still trying to sell a broad claim while the court record narrows it.\n\n"
+                "Reuters and AP put the contradiction in the paper trail, which makes the official story harder to launder.\n\n"
+                "That is the live institutional stress: power wants the clean headline, and the record keeps leaving marks."
+            ),
+            summary="",
+            primary_source_ids=[],
+            meta={
+                "style_gate": {"passes": True, "score": 90},
+                "publish_recommendation": {"recommended": True},
+                "source_mix": {"freshest_age_days": 0},
+                "selected_angle": "Trump administration court filing",
+                "rework": {"blocked": {"reason": "placeholder_or_prompt_leak"}},
+            },
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+        )
+
+        publishable, _diagnostics = await _editorial_publishable_now(SimpleNamespace(), editorial)
+
+        self.assertFalse(publishable)
+
+    async def test_rework_backlog_blocks_prompt_leak_drafts_before_retry(self) -> None:
+        editorial_id = uuid.uuid4()
+        editorial = EditorialObject(
+            id=editorial_id,
+            object_type="theme_take",
+            status="draft",
+            title="Thinking Process:",
+            body_md="Analyze user input before writing the final answer.",
+            summary="",
+            primary_source_ids=[],
+            meta={"style_gate": {"passes": False, "score": 4}, "publish_recommendation": {"recommended": False}},
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+        )
+
+        class _ScalarRows:
+            def all(self):
+                return [editorial]
+
+        class _ExecuteRows:
+            def scalars(self):
+                return _ScalarRows()
+
+        db = SimpleNamespace(execute=AsyncMock(return_value=_ExecuteRows()), commit=AsyncMock())
+
+        with patch("services.editorial_service.record_revision", new=AsyncMock()) as record_revision:
+            result = await rework_editorial_backlog(db, limit=1)
+
+        self.assertEqual(result["candidate_count"], 0)
+        self.assertEqual(result["reworked_editorial_count"], 0)
+        self.assertEqual(result["skipped"][0]["reason"], "placeholder_or_prompt_leak")
+        self.assertEqual(editorial.meta["rework"]["blocked"]["reason"], "placeholder_or_prompt_leak")
+        self.assertFalse(editorial.meta["publish_recommendation"]["recommended"])
+        record_revision.assert_awaited_once()
+
+    async def test_rework_backlog_rejects_stale_drafts_outside_publish_window(self) -> None:
+        editorial = EditorialObject(
+            id=uuid.uuid4(),
+            object_type="theme_take",
+            status="draft",
+            title="Trump Court Fight Loses Its News Window",
+            body_md=(
+                "The Trump administration court fight had a live hook when it was written, "
+                "but this draft is now stale enough that it should leave the active queue."
+            ),
+            summary="",
+            primary_source_ids=[],
+            meta={
+                "style_gate": {"passes": False, "score": 42},
+                "publish_recommendation": {"recommended": False, "reason": "style_gate_hold"},
+                "source_mix": {"freshest_age_days": 0},
+            },
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc) - timedelta(hours=settings.backlog_publish_window_hours + 6),
+        )
+
+        class _ScalarRows:
+            def all(self):
+                return [editorial]
+
+        class _ExecuteRows:
+            def scalars(self):
+                return _ScalarRows()
+
+        db = SimpleNamespace(execute=AsyncMock(return_value=_ExecuteRows()), commit=AsyncMock())
+
+        with patch("services.editorial_service.record_revision", new=AsyncMock()) as record_revision:
+            result = await rework_editorial_backlog(db, limit=1)
+
+        self.assertEqual(result["candidate_count"], 0)
+        self.assertEqual(result["skipped"][0]["reason"], "stale_queue_window")
+        self.assertEqual(editorial.status, "rejected")
+        self.assertEqual(editorial.meta["rework"]["blocked"]["reason"], "stale_queue_window")
+        record_revision.assert_awaited_once()
+
+    async def test_rework_backlog_rejects_drafts_after_attempt_cap(self) -> None:
+        editorial = EditorialObject(
+            id=uuid.uuid4(),
+            object_type="lead_story",
+            status="draft",
+            title="Trump Legal Collision Still Needs Editing",
+            body_md=(
+                "The Trump administration keeps making a broad claim while the court record narrows it. "
+                "AP and Reuters keep the contradiction in view, but the draft has not reached the standard."
+            ),
+            summary="",
+            primary_source_ids=[],
+            meta={
+                "style_gate": {"passes": False, "score": 44},
+                "publish_recommendation": {"recommended": False, "reason": "style_gate_hold"},
+                "source_mix": {"freshest_age_days": 0},
+                "rework": {"attempts": settings.editorial_rework_max_attempts},
+            },
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+        )
+
+        class _ScalarRows:
+            def all(self):
+                return [editorial]
+
+        class _ExecuteRows:
+            def scalars(self):
+                return _ScalarRows()
+
+        db = SimpleNamespace(execute=AsyncMock(return_value=_ExecuteRows()), commit=AsyncMock())
+
+        with patch("services.editorial_service.record_revision", new=AsyncMock()) as record_revision:
+            result = await rework_editorial_backlog(db, limit=1)
+
+        self.assertEqual(result["candidate_count"], 0)
+        self.assertEqual(result["skipped"][0]["reason"], "attempt_cap_reached")
+        self.assertEqual(editorial.status, "rejected")
+        self.assertEqual(editorial.meta["publish_recommendation"]["reason"], "attempt_cap_reached")
+        record_revision.assert_awaited_once()
+
+    async def test_prune_editorial_backlog_retires_old_active_drafts_in_batches(self) -> None:
+        stale = EditorialObject(
+            id=uuid.uuid4(),
+            object_type="theme_take",
+            status="draft",
+            title="Trump Draft That Missed the Window",
+            body_md="The Trump administration draft missed its useful publishing window.",
+            summary="",
+            primary_source_ids=[],
+            meta={"publish_recommendation": {"recommended": False, "reason": "style_gate_hold"}},
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc) - timedelta(hours=settings.backlog_publish_window_hours + 12),
+        )
+        fresh = EditorialObject(
+            id=uuid.uuid4(),
+            object_type="theme_take",
+            status="draft",
+            title="Trump Draft Still Active",
+            body_md="The Trump administration draft is still inside the active editing window.",
+            summary="",
+            primary_source_ids=[],
+            meta={"publish_recommendation": {"recommended": False, "reason": "style_gate_hold"}},
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+        )
+
+        class _ScalarRows:
+            def all(self):
+                return [stale, fresh]
+
+        class _ExecuteRows:
+            def scalars(self):
+                return _ScalarRows()
+
+        db = SimpleNamespace(execute=AsyncMock(return_value=_ExecuteRows()), commit=AsyncMock())
+
+        with patch("services.editorial_service.record_revision", new=AsyncMock()):
+            result = await prune_editorial_backlog(db, limit=10)
+
+        self.assertEqual(result["rejected_count"], 1)
+        self.assertEqual(stale.status, "rejected")
+        self.assertEqual(fresh.status, "draft")
+
+    def test_editorial_task_prompt_targets_publishable_length_above_floor(self) -> None:
+        story_brief = {
+            "story_mode": "Theme Column",
+            "story_form": "theme_column",
+            "body_paragraphs": 4,
+            "selected_angle": "Trump court fight exposes the paperwork gap",
+        }
+
+        prompt = _build_editorial_task_prompt("Write the piece.", story_brief, {"query_text": "Trump court fight"})
+
+        self.assertIn("Minimum body length before Pattern Signals: 620 words", prompt)
+        self.assertIn("Aim for 760-860 body words", prompt)
+
     async def test_rework_editorial_object_marks_publish_ready_draft_as_approved(self) -> None:
         editorial_id = uuid.uuid4()
         bundle = {

@@ -37,8 +37,11 @@ def test_medium_term_content_machine_compose_defaults() -> None:
     assert "LLM_READINESS_INFERENCE_PROBE_ENABLED: ${LLM_READINESS_INFERENCE_PROBE_ENABLED:-true}" in compose_text
     assert "RESEARCH_QUERY_CONCURRENCY: ${RESEARCH_QUERY_CONCURRENCY:-8}" in compose_text
     assert "WRITER_THEME_CONCURRENCY: ${WRITER_THEME_CONCURRENCY:-2}" in compose_text
-    assert "WRITER_THEME_TAKE_LIMIT: ${WRITER_THEME_TAKE_LIMIT:-8}" in compose_text
-    assert "QUEEN_CURATION_LIMIT: ${QUEEN_CURATION_LIMIT:-10}" in compose_text
+    assert "WRITER_THEME_TAKE_LIMIT: ${WRITER_THEME_TAKE_LIMIT:-12}" in compose_text
+    assert "QUEEN_CURATION_LIMIT: ${QUEEN_CURATION_LIMIT:-12}" in compose_text
+    assert "BACKLOG_PUBLISH_WINDOW_HOURS: ${BACKLOG_PUBLISH_WINDOW_HOURS:-120}" in compose_text
+    assert "DAILY_PUBLISH_TARGET: ${DAILY_PUBLISH_TARGET:-5}" in compose_text
+    assert "EDITORIAL_REWORK_PASSES_PER_CYCLE: ${EDITORIAL_REWORK_PASSES_PER_CYCLE:-3}" in compose_text
     assert "ANALYSIS_SOURCE_LIMIT: ${ANALYSIS_SOURCE_LIMIT:-10}" in compose_text
     assert "ANALYSIS_THEME_LIMIT: ${ANALYSIS_THEME_LIMIT:-8}" in compose_text
     assert "ANALYSIS_MAX_BRIEFS: ${ANALYSIS_MAX_BRIEFS:-18}" in compose_text
@@ -62,6 +65,13 @@ def test_medium_term_content_machine_api_defaults(monkeypatch) -> None:
         "WRITER_THEME_CONCURRENCY",
         "WRITER_THEME_TAKE_LIMIT",
         "QUEEN_CURATION_LIMIT",
+        "BACKLOG_PUBLISH_WINDOW_HOURS",
+        "DAILY_PUBLISH_TARGET",
+        "DAILY_PUBLISH_REWORK_MULTIPLIER",
+        "EDITORIAL_REWORK_QUEUE_LIMIT",
+        "EDITORIAL_REWORK_MAX_ATTEMPTS",
+        "EDITORIAL_REWORK_PASSES_PER_CYCLE",
+        "EDITORIAL_BACKLOG_PRUNE_LIMIT",
         "CAT_SECONDARY_MEMORY_RECALL_LIMIT",
         "CAT_SECONDARY_MEMORY_MAX_CHARS",
     ):
@@ -81,8 +91,15 @@ def test_medium_term_content_machine_api_defaults(monkeypatch) -> None:
     assert settings.analysis_theme_limit == 8
     assert settings.analysis_max_briefs == 18
     assert settings.writer_theme_concurrency == 2
-    assert settings.writer_theme_take_limit == 8
-    assert settings.queen_curation_limit == 10
+    assert settings.writer_theme_take_limit == 12
+    assert settings.queen_curation_limit == 12
+    assert settings.backlog_publish_window_hours == 120
+    assert settings.daily_publish_target == 5
+    assert settings.daily_publish_rework_multiplier == 3
+    assert settings.editorial_rework_queue_limit == 6
+    assert settings.editorial_rework_max_attempts == 4
+    assert settings.editorial_rework_passes_per_cycle == 3
+    assert settings.editorial_backlog_prune_limit == 500
     assert settings.cat_secondary_memory_recall_limit == 12
     assert settings.cat_secondary_memory_max_chars == 2400
 

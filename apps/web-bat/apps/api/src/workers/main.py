@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import suppress
 import json
 import os
 import uuid
@@ -25,6 +26,10 @@ def _heartbeat_ttl_seconds(cycle_interval_seconds: int) -> int:
         int(settings.worker_max_cycle_seconds) + 300,
         cycle_interval_seconds + 300,
     )
+
+
+def _progress_heartbeat_interval_seconds(cycle_interval_seconds: int) -> int:
+    return max(30, min(300, int(cycle_interval_seconds) // 3))
 
 
 def _heartbeat_payload(
@@ -71,6 +76,23 @@ async def _write_worker_heartbeat(
         log_event(logger, "worker.heartbeat_failed", level=40, error=str(exc))
     finally:
         await client.aclose()
+
+
+async def _cycle_progress_heartbeat(
+    *,
+    cycle_interval_seconds: int,
+    cycle_started_at: str,
+    interval_seconds: int | None = None,
+) -> None:
+    interval = max(1, int(interval_seconds or _progress_heartbeat_interval_seconds(cycle_interval_seconds)))
+    while True:
+        await asyncio.sleep(interval)
+        await _write_worker_heartbeat(
+            status="running",
+            event="cycle_progress",
+            cycle_interval_seconds=cycle_interval_seconds,
+            details={"cycle_started_at": cycle_started_at},
+        )
 
 
 def _parse_pipeline_lock_token(token: str | None) -> tuple[uuid.UUID, str] | None:
@@ -149,23 +171,36 @@ async def worker_loop() -> None:
 
     while True:
         try:
+            cycle_started_at = datetime.now(timezone.utc).isoformat()
             await _write_worker_heartbeat(
                 status="running",
                 event="cycle_started",
                 cycle_interval_seconds=cycle_interval_seconds,
+                details={"cycle_started_at": cycle_started_at},
             )
-            async with SessionLocal() as db:
-                cycle_summary = await asyncio.wait_for(run_pipeline_cycle(db), timeout=max_cycle_seconds)
-                log_event(logger, "worker.cycle_complete", summary=cycle_summary)
-                await _write_worker_heartbeat(
-                    status="sleeping",
-                    event="cycle_complete",
+            progress_heartbeat = asyncio.create_task(
+                _cycle_progress_heartbeat(
                     cycle_interval_seconds=cycle_interval_seconds,
-                    details={
-                        "cycle_id": cycle_summary.get("cycle_id"),
-                        "duration_seconds": cycle_summary.get("duration_seconds"),
-                    },
+                    cycle_started_at=cycle_started_at,
                 )
+            )
+            try:
+                async with SessionLocal() as db:
+                    cycle_summary = await asyncio.wait_for(run_pipeline_cycle(db), timeout=max_cycle_seconds)
+            finally:
+                progress_heartbeat.cancel()
+                with suppress(asyncio.CancelledError):
+                    await progress_heartbeat
+            log_event(logger, "worker.cycle_complete", summary=cycle_summary)
+            await _write_worker_heartbeat(
+                status="sleeping",
+                event="cycle_complete",
+                cycle_interval_seconds=cycle_interval_seconds,
+                details={
+                    "cycle_id": cycle_summary.get("cycle_id"),
+                    "duration_seconds": cycle_summary.get("duration_seconds"),
+                },
+            )
         except asyncio.TimeoutError:
             message = f"pipeline cycle exceeded {max_cycle_seconds} seconds"
             log_event(logger, "worker.cycle_timeout", level=40, error=message)

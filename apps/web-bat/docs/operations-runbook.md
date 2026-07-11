@@ -14,6 +14,21 @@ Restart API + worker only:
 docker compose up -d --build bat-api bat-worker
 ```
 
+Live Runtipi rebuilds must keep API and worker on the generated app network:
+
+```bash
+docker compose \
+  --env-file /data/runtipi/app-data/gpu-private-store/web-bat/app.env \
+  --env-file /data/runtipi/user-config/gpu-private-store/web-bat/app.env \
+  -f /data/runtipi/apps/gpu-private-store/web-bat/docker-compose.yml \
+  -p web-bat_gpu-private-store \
+  up -d --build --no-deps bat-api bat-worker
+python3 infra/scripts/verify_runtipi_network.py
+curl -sS http://localhost:8017/api/v1/health/ready | jq .
+```
+
+If the verifier reports that `bat-api` or `bat-worker` is attached only to a plain default compose network, attach it to `web-bat_gpu-private-store_web-bat_gpu-private-store_network` with the matching service alias before trusting readiness.
+
 Stop stack:
 
 ```bash

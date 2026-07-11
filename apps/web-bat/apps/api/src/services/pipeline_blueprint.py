@@ -21,9 +21,16 @@ CAT_ROLE_PIPELINE: list[dict] = [
         "outputs": ["story_slate", "homepage_angle", "launch_packets"],
     },
     {
+        "role": "princess",
+        "title": "Princess",
+        "description": "Preps the draft runway: prunes stale drafts, reworks promising pieces, and hands Queen only the publish-ready slate.",
+        "plugins": ["analysis_engine", "homepage_editor", "voice_memory"],
+        "outputs": ["rework_package", "publish_ready_editorial_ids", "rejected_drafts"],
+    },
+    {
         "role": "queen",
         "title": "Queen",
-        "description": "Curates links, generates social voice variants, and prepares the public-facing drop from the analyzed package.",
+        "description": "Performs final oversight, curates links, generates social voice variants, and releases Princess-approved work.",
         "plugins": ["analysis_engine", "social_voice", "homepage_editor", "voice_memory"],
         "outputs": ["publish_package", "social_rollout", "curated_links"],
     },
