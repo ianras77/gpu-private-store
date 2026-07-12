@@ -2208,6 +2208,12 @@ def _build_grounded_editorial_fallback(
                 audience_hook,
                 focus_subject=focus_subject,
             ),
+            _fallback_public_paragraph(
+                freshest_evidence or why_now,
+                f"The consequence in {focus_subject.lower()} is that the paper trail keeps asking for more seriousness than the performance offers.",
+                "That is where the column earns its point: the Trump line gets judged by the cleanup it creates, not the shine it borrows.",
+                focus_subject=focus_subject,
+            ),
         ]
         extra_candidates = [continuity_note, why_now, freshest_evidence, *pattern_signals]
     else:
@@ -2256,22 +2262,46 @@ def _build_grounded_editorial_fallback(
 
     supplemental_sections = [
         _fallback_public_paragraph(
-            f"{focus_subject} keeps tightening around {selected_angle or headline}",
-            why_now,
-            outlet_mix or third_receipt or support_receipt,
-            focus_subject=focus_subject,
+            "The first job is to separate the public performance from the institutional burden it creates.",
+            "That keeps the piece attached to evidence instead of treating the newest outrage as self-explanatory.",
+            f"The useful read on {focus_subject.lower()} starts with what the administration asks everyone else to absorb.",
+            focus_subject="",
         ),
         _fallback_public_paragraph(
-            continuity_note or theme_context or trend_signal,
-            audience_hook or why_now,
+            "The second job is to show how the same pattern keeps resurfacing under a different headline.",
             f"The pressure point in {focus_subject.lower()} is that the record is moving faster than the public sales pitch.",
-            focus_subject=focus_subject,
+            "That movement gives the piece its spine: promise, receipt, consequence.",
+            focus_subject="",
         ),
         _fallback_public_paragraph(
-            freshest_evidence or selected_angle or why_now,
-            trend_signal or audience_hook,
+            "The third job is to make the cost legible without pretending every new detail is equally important.",
             f"For the site, {focus_subject.lower()} is the kind of story that gets cleaner, not calmer, once the receipts stack up.",
-            focus_subject=focus_subject,
+            "The stronger inference comes from the combination of sources, not from one overworked sentence.",
+            focus_subject="",
+        ),
+        _fallback_public_paragraph(
+            f"The useful question is who gets the performance value from {focus_subject.lower()} and who has to carry the operational risk after the applause fades.",
+            "That is the difference between a message event and a governing record.",
+            f"The Trump White House can sell the first part quickly, but the second part stays with the institutions asked to make the story hold.",
+            focus_subject="",
+        ),
+        _fallback_public_paragraph(
+            f"The administrative tell in {focus_subject.lower()} is the distance between the clean public line and the messier work of implementation.",
+            "Courts, markets, agencies, allies, and voters tend to find that distance before the talking points admit it.",
+            "The record matters because it measures the cleanup, not the pose.",
+            focus_subject="",
+        ),
+        _fallback_public_paragraph(
+            f"The political cost of {focus_subject.lower()} is cumulative, because each new receipt makes the prior reassurance harder to sell.",
+            "That is why the strongest version of the piece follows the paper trail before it delivers the sting.",
+            "A good close does not need to overstate the case when the sequence is already doing the damage.",
+            focus_subject="",
+        ),
+        _fallback_public_paragraph(
+            f"The close has to land on consequence: {focus_subject.lower()} is not just a fresh item, it is another test of whether the official story can survive contact with the record.",
+            "That is the useful inference from the sources, and it is the part worth publishing.",
+            "When the record is this loud, restraint is sharper than decoration.",
+            focus_subject="",
         ),
     ]
 

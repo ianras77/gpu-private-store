@@ -101,6 +101,19 @@ def _social_publishable_now(post: SocialPost) -> bool:
     return bool(style_gate.get("passes"))
 
 
+def _dedupe_editorial_scan_rows(*row_groups: list[EditorialObject]) -> list[EditorialObject]:
+    rows: list[EditorialObject] = []
+    seen: set[str] = set()
+    for group in row_groups:
+        for row in group:
+            row_id = str(getattr(row, "id", "") or "")
+            if not row_id or row_id in seen:
+                continue
+            seen.add(row_id)
+            rows.append(row)
+    return rows
+
+
 async def publish_ready_backlog(
     db: AsyncSession,
     *,
@@ -123,7 +136,34 @@ async def publish_ready_backlog(
     if rework_drafts:
         rework_summary = await rework_editorial_backlog(db, limit=max(1, limit))
 
-    rows = (
+    ready_ids: list[uuid.UUID] = []
+    for raw_id in rework_summary.get("publish_ready_editorial_ids") or []:
+        try:
+            ready_ids.append(uuid.UUID(str(raw_id)))
+        except (TypeError, ValueError):
+            continue
+
+    ready_rows: list[EditorialObject] = []
+    if ready_ids:
+        ready_rows = (
+            await db.execute(
+                select(EditorialObject).where(
+                    EditorialObject.id.in_(ready_ids),
+                    EditorialObject.status.in_(["draft", "approved"]),
+                )
+            )
+        ).scalars().all()
+
+    approved_rows = (
+        await db.execute(
+            select(EditorialObject)
+            .where(EditorialObject.status == "approved")
+            .order_by(EditorialObject.updated_at.desc(), EditorialObject.created_at.desc())
+            .limit(max(limit * 4, 24))
+        )
+    ).scalars().all()
+
+    recent_rows = (
         await db.execute(
             select(EditorialObject)
             .where(EditorialObject.status.in_(["draft", "approved"]))
@@ -131,6 +171,7 @@ async def publish_ready_backlog(
             .limit(max(limit * 8, 48))
         )
     ).scalars().all()
+    rows = _dedupe_editorial_scan_rows(ready_rows, approved_rows, recent_rows)
 
     editorial_candidates: list[tuple[EditorialObject, dict[str, Any]]] = []
     for row in rows:

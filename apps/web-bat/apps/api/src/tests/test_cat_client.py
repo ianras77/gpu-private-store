@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import AsyncMock, patch
 
 import httpx
 
@@ -11,7 +12,24 @@ from services.cat_client import (
     _generation_timeout_seconds,
     _is_retryable_llm_error,
     _looks_like_cat_not_configured,
+    generate_with_cat,
 )
+
+
+class _RetryableAsyncClient:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def post(self, url: str, **kwargs):  # noqa: ANN003, ANN202
+        self.calls += 1
+        if self.calls == 1:
+            raise httpx.RemoteProtocolError("server disconnected")
+        request = httpx.Request("POST", url)
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": "READY"}}]},
+            request=request,
+        )
 
 
 class CatClientTests(unittest.TestCase):
@@ -141,3 +159,31 @@ class CatClientTests(unittest.TestCase):
 
         self.assertGreater(long_timeout, short_timeout)
         self.assertGreaterEqual(short_timeout, 30.0)
+
+
+class CatClientAsyncTests(unittest.IsolatedAsyncioTestCase):
+    async def test_generate_waits_configured_backoff_before_retrying_rassycodex_disconnect(self) -> None:
+        client = _RetryableAsyncClient()
+        sleep = AsyncMock()
+
+        with (
+            patch("services.cat_client.get_shared_async_client", return_value=client),
+            patch("services.cat_client.asyncio.sleep", sleep),
+            patch("services.cat_client.settings.cat_primary_enabled", False),
+            patch("services.cat_client.settings.llm_api_url", "http://rassycodex.test/v1/chat/completions"),
+            patch("services.cat_client.settings.llm_api_key", ""),
+            patch("services.cat_client.settings.llm_model", "rassy-smart"),
+            patch("services.cat_client.settings.llm_request_timeout_seconds", 180.0),
+            patch("services.cat_client.settings.llm_retry_backoff_seconds", 3.0),
+        ):
+            result = await generate_with_cat(
+                task_prompt="Say ready.",
+                context="",
+                system_prompt="System",
+                correlation_id="retry-test",
+                max_tokens=64,
+            )
+
+        self.assertEqual(result, "READY")
+        self.assertEqual(client.calls, 2)
+        sleep.assert_awaited_once_with(3.0)

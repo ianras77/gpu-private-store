@@ -240,8 +240,13 @@ async def admin_analysis(db: AsyncSession = Depends(get_db)) -> dict:
 
 
 @router.post("/publish-ready")
-async def publish_ready(limit: int = 12, publish_social: bool = True, db: AsyncSession = Depends(get_db)) -> dict:
-    return await publish_ready_backlog(db, limit=limit, publish_social=publish_social)
+async def publish_ready(
+    limit: int = 12,
+    publish_social: bool = True,
+    rework_drafts: bool = True,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    return await publish_ready_backlog(db, limit=limit, publish_social=publish_social, rework_drafts=rework_drafts)
 
 
 @router.get("/system-settings")

@@ -1275,6 +1275,73 @@ That gap matters because the legal paper is suddenly doing more governing than t
         self.assertNotIn("next site note", polished.lower())
         self.assertNotIn("freshest evidence:", polished.lower())
 
+    def test_grounded_editorial_fallback_clears_theme_column_floor_with_varied_source_work(self) -> None:
+        bundle = {
+            "query_text": "Trump Iran war oil prices Hormuz latest 2026",
+            "raw_sources": [
+                {
+                    "title": "US conducts new wave of strikes on Iran as ceasefire falters",
+                    "source_name": "Al Jazeera",
+                    "source_label": "Al Jazeera",
+                    "source_kind": "reporting",
+                    "quality_score": 8.8,
+                    "credibility_tier": "high",
+                    "age_days": 0,
+                    "snippet": "The United States conducted new strikes as the ceasefire frayed and diplomats warned of regional fallout.",
+                },
+                {
+                    "title": "Oil markets brace for Strait of Hormuz risk after Trump escalation",
+                    "source_name": "Reuters",
+                    "source_label": "Reuters",
+                    "source_kind": "reporting",
+                    "quality_score": 8.6,
+                    "credibility_tier": "high",
+                    "age_days": 0,
+                    "snippet": "Oil traders watched shipping and insurance costs as the Trump administration defended the strike.",
+                },
+                {
+                    "title": "Allies press White House for clearer Iran strategy",
+                    "source_name": "AP News",
+                    "source_label": "AP News",
+                    "source_kind": "reporting",
+                    "quality_score": 8.4,
+                    "credibility_tier": "high",
+                    "age_days": 0,
+                    "snippet": "Allied officials sought clarity from Washington as the administration tried to contain diplomatic fallout.",
+                },
+            ],
+        }
+        brief = {
+            "story_form": "theme_column",
+            "story_mode": "Theme Column",
+            "body_paragraphs": 4,
+            "focus_label": "Trump Iran escalation",
+            "selected_angle": "Trump Iran escalation turns the ceasefire into a credibility test",
+            "freshest_evidence": "US conducts new wave of strikes on Iran as ceasefire falters",
+            "why_now": "Fresh reporting shows the White House defending new strikes while allies and markets absorb the risk.",
+            "trend_signal": "The administration keeps selling control while the regional record keeps showing exposure.",
+            "theme_context": "This lane is about the cost of an act-first foreign policy line.",
+            "audience_hook": "The cost lands with troops, allies, markets, and everyone asked to pretend the plan was clear.",
+            "continuity_note": "Each Iran update keeps shrinking the space between domestic performance and diplomatic cleanup.",
+            "source_mix": {"freshest_age_days": 0},
+        }
+
+        body = _build_grounded_editorial_fallback(bundle, brief, object_type="theme_take")
+        report = _assess_grounded_editorial_candidate(
+            body,
+            title="Trump Iran escalation",
+            recent_coverage=[],
+            repetition_guard={},
+            story_brief=brief,
+            retrieval_bundle=bundle,
+            analysis_brief=None,
+        )
+
+        self.assertTrue(report["passes"])
+        self.assertGreaterEqual(int(report["body_word_count"] or 0), 620)
+        self.assertGreaterEqual(int(report["body_paragraph_count"] or 0), 4)
+        self.assertNotIn("belowstoryformfloor", "".join(str(reason) for reason in report["reasons"]).lower())
+
     def test_publish_recommendation_holds_grounded_fallback_even_when_style_passes(self) -> None:
         recommendation = _publish_recommendation(
             style_report={"passes": True, "score": 82},

@@ -246,6 +246,10 @@ def _is_retryable_llm_error(exc: Exception) -> bool:
     )
 
 
+def _llm_retry_backoff_seconds() -> float:
+    return min(max(float(settings.llm_retry_backoff_seconds), 0.0), 30.0)
+
+
 async def generate_with_cat(
     task_prompt: str,
     context: str,
@@ -409,6 +413,7 @@ async def generate_with_cat(
                 break
             except Exception as exc:  # noqa: BLE001
                 if attempt == 0 and _is_retryable_llm_error(exc):
+                    backoff_seconds = _llm_retry_backoff_seconds()
                     log_event(
                         logger,
                         "cat.generate.retrying",
@@ -417,9 +422,10 @@ async def generate_with_cat(
                         request_id=request_id,
                         url=llm_url,
                         attempt=attempt + 1,
+                        backoff_seconds=backoff_seconds,
                         error=str(exc),
                     )
-                    await asyncio.sleep(0.8)
+                    await asyncio.sleep(backoff_seconds)
                     continue
                 log_event(
                     logger,
