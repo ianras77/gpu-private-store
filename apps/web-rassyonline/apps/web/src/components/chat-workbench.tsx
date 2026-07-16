@@ -3,7 +3,8 @@
 import { ChangeEvent, FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { applyLocalChatIntent, type WebSearchMode } from "@/lib/chat-intents";
 import { parseMarkdownBlocks } from "@/lib/markdown";
-import type { ChatMode, ChatModeId } from "@/lib/rassycodex";
+import { getLaneDisplay } from "@/lib/chat-presentation";
+import type { ChatMode } from "@/lib/rassycodex";
 import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
 
 type ChatMessage = {
@@ -44,14 +45,6 @@ const PROMPT_RUNES = [
   }
 ];
 
-const MODE_GLYPHS: Record<ChatModeId, string> = {
-  general: "ASK",
-  "deep-coding": "CODE",
-  "fast-coding": "FAST",
-  quick: "SNAP",
-  knowledge: "KNOW"
-};
-
 export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn: boolean }) {
   const [mode, setMode] = useState(modes[0]?.id ?? "general");
   const [webSearch, setWebSearch] = useState<WebSearchMode>("auto");
@@ -59,7 +52,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "RassyGPT is awake. This page is the thread: ask for code, search, memory, planning, documents, or a shift in the room and I will route it from here."
+      content: "RassyCodex is on the line. Pick a lane, bring your documents if you are signed in, and start the thread."
     }
   ]);
   const [input, setInput] = useState("");
@@ -71,6 +64,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const abortRef = useRef<AbortController | null>(null);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
+  const activeLane = getLaneDisplay(mode);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
   const activeTheme = getTheme(themeId);
   const webSearchLabel = webSearch === "on" ? "web lit" : webSearch === "off" ? "local only" : "auto web";
@@ -227,36 +221,25 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
   return (
     <section className="chat-workbench" aria-label="RassyCodex chat">
-      <div className="command-deck" aria-label="Rassy controls">
-        <div className="route-core">
-          <div className="sigil" aria-label={`Current routing is ${webSearchLabel}`}>
-            <span>{MODE_GLYPHS[mode]}</span>
-          </div>
-          <div className="route-copy">
-            <p className="system-label">RassyGPT Engine</p>
-            <h2>{activeMode?.label ?? "General"}</h2>
-            <p>{activeMode?.model ?? "rassy-general"} · {webSearchLabel} · {sending ? "streaming" : "ready"}</p>
-          </div>
-          <select className="mode-select" value={mode} onChange={(event) => setMode(event.target.value as ChatModeId)} aria-label="Mode">
-            {modes.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label} - {item.model}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="lane-deck" aria-label="RassyCodex lane deck">
+      <div className="routing-ribbon" aria-label="RassyCodex controls">
+        <div className="lane-switcher" aria-label="RassyCodex lane">
           {modes.map((item) => (
-            <button className={item.id === mode ? "lane-card active" : "lane-card"} key={item.id} onClick={() => setMode(item.id)} type="button">
-              <span>{MODE_GLYPHS[item.id]}</span>
+            <button className={item.id === mode ? "lane-button active" : "lane-button"} key={item.id} onClick={() => setMode(item.id)} type="button">
+              <span>{getLaneDisplay(item.id).glyph}</span>
               <strong>{item.label}</strong>
-              <small>{item.model}</small>
             </button>
           ))}
         </div>
 
-        <div className="deck-tools">
+        <div className="route-status" aria-label="Active RassyCodex route">
+          <span>{activeLane.glyph}</span>
+          <div>
+            <strong>{activeMode?.model ?? "rassy-general"}</strong>
+            <small>{activeLane.capability} · {sending ? "streaming" : "ready"}</small>
+          </div>
+        </div>
+
+        <div className="ribbon-tools">
           <div className="segmented-control" aria-label="Web search mode">
             {(["auto", "on", "off"] as WebSearchMode[]).map((item) => (
               <button className={webSearch === item ? "active" : ""} key={item} onClick={() => setWebSearch(item)} type="button">
@@ -281,10 +264,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           </div>
         </div>
 
-        <section className="memory-strip" aria-label="Document memory">
+        <section className="memory-source-tray" aria-label="Document memory">
           <div className="memory-head">
-            <p className="system-label">Memory</p>
-            <strong>{signedIn ? `${activeDocuments.length} active` : "Ephemeral thread"}</strong>
+            <p className="system-label">Sources</p>
+            <strong>{signedIn ? `${activeDocuments.length} selected` : "sign in for durable memory"}</strong>
             {signedIn ? (
               <label className={uploading ? "upload-button disabled" : "upload-button"}>
                 {uploading ? "Indexing" : "Upload"}
@@ -294,8 +277,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           </div>
           {documentNotice ? <p className="document-notice">{documentNotice}</p> : null}
           {signedIn ? (
-            <div className="document-list">
-              {documents.length === 0 ? <p className="empty-documents">Upload notes, specs, logs, or research and let the thread remember them.</p> : null}
+            <div className="document-list memory-source-list">
+              {documents.length === 0 ? <p className="empty-documents">No sources loaded. Upload notes, specs, logs, or research.</p> : null}
               {documents.map((document) => (
                 <button
                   className={document.active ? "document-pill active" : "document-pill"}
@@ -310,7 +293,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
               ))}
             </div>
           ) : (
-            <p className="empty-documents">Sign in to turn this from a passing conversation into a durable workspace.</p>
+            <p className="empty-documents">This is a live anonymous thread. Sign in to add your own document memory.</p>
           )}
         </section>
       </div>
@@ -318,7 +301,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       <div className="transcript-shell">
         <div className="route-readout" aria-label="Active RassyCodex route">
           <div>
-            <span>{MODE_GLYPHS[mode]}</span>
+            <span>{activeLane.glyph}</span>
             <strong>{activeMode?.model ?? "rassy-general"}</strong>
           </div>
           <p>{webSearchLabel}</p>
@@ -340,8 +323,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <textarea
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Talk to RassyGPT. Ask for code, search, memory, a plan, or a shift in the room..."
-          aria-label="Message"
+          placeholder="Start the thread. /code, /fast, /know, /search, /local..."
+          aria-label="Message RassyCodex"
           rows={1}
         />
         <div className="prompt-runes" aria-label="Prompt shortcuts">
