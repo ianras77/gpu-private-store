@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-astro",
   "description": "Five branded astrology fronts powered by one shared API, Postgres, Redis, and a Qdrant-backed lore engine.",
-  "tipi_version": 2,
-  "version": "1.0.1",
+  "tipi_version": 3,
+  "version": "1.0.2",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",

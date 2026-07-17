@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-usmender",
   "description": "USMender is a mobile-first repair messenger built around a local Matrix core. Users see USMender rooms, private drafts, mediator approvals, trust controls, and mobile clients while Matrix/Synapse stays local underneath as the durable room/event substrate.",
-  "tipi_version": 4,
-  "version": "19",
+  "tipi_version": 5,
+  "version": "20",
   "categories": [
     "ai",
     "utilities"

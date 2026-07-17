@@ -11,8 +11,8 @@ def test_compose_defaults_use_reachable_rassygpt_host_gateway() -> None:
     compose_text = (APP_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
 
     assert "rassygpt-gateway:8080" not in compose_text
-    assert "http://host.docker.internal:8844/api/chat" in compose_text
-    assert "http://host.docker.internal:8844/api/embed" in compose_text
+    assert "http://host.docker.internal:8844/v1/chat/completions" in compose_text
+    assert "http://host.docker.internal:8844/v1/embeddings" in compose_text
     assert compose_text.count("http://host.docker.internal:8844") >= 4
     assert compose_text.count("extra_hosts: *bat-host-gateway") >= 3
 

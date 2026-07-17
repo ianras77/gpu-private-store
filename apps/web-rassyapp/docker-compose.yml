@@ -53,6 +53,7 @@ services:
       OLLAMA_LLM_MODEL: ${RASSY_OLLAMA_LLM_MODEL:-rassy-smart}
       OLLAMA_EMBED_MODEL: ${RASSY_OLLAMA_EMBED_MODEL:-rassy-embed}
       OLLAMA_APPLY_EMBEDDER: ${RASSY_OLLAMA_APPLY_EMBEDDER:-1}
+      CAT_OLLAMA_API_KEY: ${RASSYCODEX_API_KEY:-}
       BOOTSTRAP_TIMEOUT_SECONDS: ${RASSY_BOOTSTRAP_TIMEOUT_SECONDS:-180}
     volumes:
     - ${APP_DATA_DIR}/app-data/web-rassyapp/named/cat-static:/app/cat/static

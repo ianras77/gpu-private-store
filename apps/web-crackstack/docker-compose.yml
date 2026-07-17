@@ -69,7 +69,7 @@ services:
       CRACKSTACK_DATA_DIR: /app/data
       LOCALAI_BASE_URL: ${CRACKSTACK_LLM_BASE_URL:-http://host.docker.internal:8844}
       LOCALAI_MODEL: ${CRACKSTACK_LLM_MODEL:-rassy-smart}
-      LOCALAI_API_KEY: ${CRACKSTACK_LLM_API_KEY:-}
+      LOCALAI_API_KEY: ${CRACKSTACK_LLM_API_KEY:-${RASSYCODEX_API_KEY:-}}
     extra_hosts:
       - host.docker.internal:host-gateway
     depends_on:
