@@ -1,6 +1,6 @@
 services:
   lickingvape-api:
-    build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/api
+    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-lickingvape/repo/apps/api
     restart: unless-stopped
     pull_policy: build
     environment:
@@ -90,7 +90,7 @@ services:
 
   lickingvape-web:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/web
+      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-lickingvape/repo/apps/web
       args:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${LICKINGVAPE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
@@ -120,7 +120,7 @@ services:
       internal_port: 3000
 
   lickingvape-worker:
-    build: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/apps/worker
+    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-lickingvape/repo/apps/worker
     restart: unless-stopped
     pull_policy: build
     environment:

@@ -57,7 +57,7 @@ services:
 
   crackstack-backend:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-crackstack/repo/backend
+      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-crackstack/repo/backend
       dockerfile: Dockerfile
     image: runtipi-local-web-crackstack-backend:latest
     pull_policy: build
@@ -100,7 +100,7 @@ services:
 
   crackstack-xlcrack:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-crackstack/repo/web
+      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-crackstack/repo/web
       dockerfile: Dockerfile
       args:
         APP_NAME: xlcrack
@@ -140,7 +140,7 @@ services:
 
   crackstack-tapecrack:
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-crackstack/repo/web
+      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-crackstack/repo/web
       dockerfile: Dockerfile
       args:
         APP_NAME: tapecrack

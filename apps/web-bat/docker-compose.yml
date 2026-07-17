@@ -82,7 +82,7 @@ x-bat-host-gateway: &bat-host-gateway
 
 services:
   bat-api:
-    build: ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/apps/api
+    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/api
     environment:
       <<: *bat-runtime-env
     extra_hosts: *bat-host-gateway
@@ -204,7 +204,7 @@ services:
     restart: unless-stopped
 
   bat-social-publisher:
-    build: ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/apps/social-publisher
+    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/social-publisher
     healthcheck:
       test:
         - CMD
@@ -220,7 +220,7 @@ services:
 
   bat-web:
     build:
-      context: ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/apps/web
+      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/web
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
@@ -258,7 +258,7 @@ services:
       internal_port: 3000
 
   bat-worker:
-    build: ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/apps/api
+    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/api
     extra_hosts: *bat-host-gateway
     command:
       - python
