@@ -13,12 +13,14 @@ describe("Runtipi packaging", () => {
     const compose = readAppFile("docker-compose.yml");
 
     expect(compose).toContain(
-      "CAT_BASE_URL=${RASIES_CAT_BASE_URL:-http://host.docker.internal:8844}",
+      "RASSYCODEX_BASE_URL=${RASSYCODEX_BASE_URL:-${RASIES_CAT_BASE_URL:-http://host.docker.internal:8844}}",
     );
     expect(compose).toContain(
-      "CAT_CHAT_PATH=${RASIES_CAT_CHAT_PATH:-/v1/chat/completions}",
+      "RASSYCODEX_CHAT_PATH=${RASSYCODEX_CHAT_PATH:-${RASIES_CAT_CHAT_PATH:-/v1/chat/completions}}",
     );
-    expect(compose).toContain("CAT_API_KEY=${RASIES_CAT_API_KEY:-}");
+    expect(compose).toContain(
+      "RASSYCODEX_API_KEY=${RASSYCODEX_API_KEY:-${RASIES_CAT_API_KEY:-}}",
+    );
     expect(compose).toContain(
       "OLLAMA_GENERAL_BASE_URL=${RASIES_OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}",
     );

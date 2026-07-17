@@ -24,11 +24,11 @@ services:
       - SEARXNG_BASE_URL=https://search.rasies.com
       - SEARXNG_PATH=/search
       - SEARXNG_TIMEOUT_MS=9000
-      - CAT_BASE_URL=${RASIES_CAT_BASE_URL:-http://host.docker.internal:8844}
-      - CAT_CHAT_PATH=${RASIES_CAT_CHAT_PATH:-/v1/chat/completions}
-      - CAT_MODEL=${RASIES_CAT_MODEL:-rassy-smart}
-      - CAT_API_KEY=${RASIES_CAT_API_KEY:-}
-      - CAT_TIMEOUT_MS=60000
+      - RASSYCODEX_BASE_URL=${RASSYCODEX_BASE_URL:-${RASIES_CAT_BASE_URL:-http://host.docker.internal:8844}}
+      - RASSYCODEX_CHAT_PATH=${RASSYCODEX_CHAT_PATH:-${RASIES_CAT_CHAT_PATH:-/v1/chat/completions}}
+      - RASSYCODEX_MODEL=${RASSYCODEX_MODEL:-${RASIES_CAT_MODEL:-rassy-smart}}
+      - RASSYCODEX_API_KEY=${RASSYCODEX_API_KEY:-${RASIES_CAT_API_KEY:-}}
+      - RASSYCODEX_TIMEOUT_MS=${RASSYCODEX_TIMEOUT_MS:-60000}
       - HEIMDALL_URL=https://apps.rasies.com
       - GLANCE_URL=https://glance.rasies.com
       - GAMES_URL=https://gba.rasies.com

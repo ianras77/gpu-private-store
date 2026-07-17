@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { request } from "undici";
 import { z } from "zod";
-import { Env } from "./env.js";
+import { Env, getRassyCodexConfig } from "./env.js";
 import { extractLlmText } from "./llmText.js";
 
 const ChatAttachmentSchema = z.object({
@@ -64,11 +64,12 @@ function buildFileNote(files: ReturnType<typeof chatFilesFromBody>) {
 }
 
 function jsonHeaders(env: Env) {
+  const config = getRassyCodexConfig(env);
   const headers: Record<string, string> = {
     "content-type": "application/json",
     accept: "application/json",
   };
-  const apiKey = env.CAT_API_KEY.trim();
+  const apiKey = config.apiKey.trim();
   if (apiKey) {
     headers.authorization = `Bearer ${apiKey}`;
   }
@@ -76,8 +77,9 @@ function jsonHeaders(env: Env) {
 }
 
 function acceptHeaders(env: Env) {
+  const config = getRassyCodexConfig(env);
   const headers: Record<string, string> = { accept: "application/json" };
-  const apiKey = env.CAT_API_KEY.trim();
+  const apiKey = config.apiKey.trim();
   if (apiKey) {
     headers.authorization = `Bearer ${apiKey}`;
   }
@@ -160,15 +162,16 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
     }
 
     try {
-      const endpoint = new URL(env.CAT_CHAT_PATH, env.CAT_BASE_URL).toString();
-      const isCheshire = env.CAT_CHAT_PATH.includes("/message");
+      const config = getRassyCodexConfig(env);
+      const endpoint = new URL(config.chatPath, config.baseUrl).toString();
+      const isCheshire = config.chatPath.includes("/message");
       const prompt =
         "Return ONLY valid JSON with keys mood, mission, surprise, prompts. prompts must be an array of exactly 4 short prompt strings. Make the set feel warm, curious, and family-friendly for a self-hosted family site: include one practical life prompt, one fun prompt, one family note prompt, and one small self-hosting idea.";
 
       const payload = isCheshire
         ? { text: prompt, user_id: "spotlight" }
         : {
-            model: env.CAT_MODEL,
+            model: config.model,
             stream: false,
             messages: [
               {
@@ -184,8 +187,8 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
         method: "POST",
         headers: jsonHeaders(env),
         body: JSON.stringify(payload),
-        headersTimeout: env.CAT_TIMEOUT_MS,
-        bodyTimeout: env.CAT_TIMEOUT_MS,
+        headersTimeout: config.timeoutMs,
+        bodyTimeout: config.timeoutMs,
       });
 
       const text = await res.body.text();
@@ -234,8 +237,9 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
     }
 
     try {
-      const target = new URL(env.CAT_CHAT_PATH, env.CAT_BASE_URL).toString();
-      const isCheshire = env.CAT_CHAT_PATH.includes("/message");
+      const config = getRassyCodexConfig(env);
+      const target = new URL(config.chatPath, config.baseUrl).toString();
+      const isCheshire = config.chatPath.includes("/message");
 
       const lastUserMessage = [...parsed.data.messages]
         .reverse()
@@ -256,7 +260,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
             user_id: userId,
           }
         : {
-            model: env.CAT_MODEL,
+            model: config.model,
             messages: fileNote
               ? [...parsed.data.messages, { role: "user", content: fileNote }]
               : parsed.data.messages,
@@ -265,7 +269,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
 
       let res: Awaited<ReturnType<typeof request>> | null = null;
       let text = "";
-      const timeoutMs = env.CAT_TIMEOUT_MS;
+      const timeoutMs = config.timeoutMs;
       const retryTimeoutMs = Math.max(timeoutMs, 90000);
 
       for (let attempt = 1; attempt <= 2; attempt += 1) {
@@ -326,18 +330,19 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
   });
 
   app.get("/api/cat/health", async (req, reply) => {
-    const isCheshire = env.CAT_CHAT_PATH.includes("/message");
+    const config = getRassyCodexConfig(env);
+    const isCheshire = config.chatPath.includes("/message");
     const target = isCheshire
-      ? new URL("/", env.CAT_BASE_URL).toString()
-      : new URL("/health", env.CAT_BASE_URL).toString();
+      ? new URL("/", config.baseUrl).toString()
+      : new URL("/health", config.baseUrl).toString();
     const started = Date.now();
 
     try {
       const res = await request(target, {
         method: "GET",
         headers: acceptHeaders(env),
-        headersTimeout: env.CAT_TIMEOUT_MS,
-        bodyTimeout: env.CAT_TIMEOUT_MS,
+        headersTimeout: config.timeoutMs,
+        bodyTimeout: config.timeoutMs,
       });
 
       const latencyMs = Date.now() - started;
@@ -361,7 +366,8 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
   // pass-through: /api/cat/* -> CAT_BASE_URL/*
   app.all("/api/cat/*", async (req, reply) => {
     const suffix = (req.url ?? "").replace(/^\/api\/cat/, "");
-    const target = new URL(suffix, env.CAT_BASE_URL).toString();
+    const config = getRassyCodexConfig(env);
+    const target = new URL(suffix, config.baseUrl).toString();
 
     const method = toHttpMethod(req.method);
 
@@ -381,8 +387,8 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
       method,
       headers,
       body: rawBody,
-      headersTimeout: env.CAT_TIMEOUT_MS,
-      bodyTimeout: env.CAT_TIMEOUT_MS,
+      headersTimeout: config.timeoutMs,
+      bodyTimeout: config.timeoutMs,
     });
 
     reply.code(res.statusCode);

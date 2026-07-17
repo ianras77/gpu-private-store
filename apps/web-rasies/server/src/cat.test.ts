@@ -60,6 +60,65 @@ afterEach(async () => {
 });
 
 describe("cat routes", () => {
+  it("uses the canonical authenticated RassyCodex chat and health contract", async () => {
+    mockLlmResponse({
+      choices: [{ message: { content: "RassyCodex is connected." } }],
+    });
+
+    const app = await createApp(
+      makeEnv({
+        CAT_BASE_URL: "http://legacy-cat.local",
+        CAT_CHAT_PATH: "/legacy-chat",
+        CAT_MODEL: "legacy-model",
+        CAT_API_KEY: "legacy-key",
+        RASSYCODEX_BASE_URL: "http://rassycodex.local:8844",
+        RASSYCODEX_CHAT_PATH: "/v1/chat/completions",
+        RASSYCODEX_MODEL: "rassy-smart",
+        RASSYCODEX_API_KEY: "rassycodex-test-key",
+        RASSYCODEX_TIMEOUT_MS: 4321,
+      } as Partial<ReturnType<typeof loadEnv>>),
+      { webDistRoot: createTempWebDist() },
+    );
+    instances.push(app);
+
+    const chat = await app.inject({
+      method: "POST",
+      url: "/api/cat/chat",
+      payload: {
+        messages: [{ role: "user", content: "Say the gateway is connected." }],
+      },
+    });
+
+    expect(chat.statusCode).toBe(200);
+    expect(chat.json()).toEqual({ reply: "RassyCodex is connected." });
+    expect(mockedRequest).toHaveBeenCalledWith(
+      "http://rassycodex.local:8844/v1/chat/completions",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          authorization: "Bearer rassycodex-test-key",
+        }),
+        body: JSON.stringify({
+          model: "rassy-smart",
+          messages: [
+            { role: "user", content: "Say the gateway is connected." },
+          ],
+          stream: false,
+        }),
+        headersTimeout: 4321,
+        bodyTimeout: 4321,
+      }),
+    );
+
+    mockLlmResponse("ok");
+    const health = await app.inject({ method: "GET", url: "/api/cat/health" });
+    expect(health.statusCode).toBe(200);
+    expect(health.json()).toMatchObject({
+      ok: true,
+      target: "http://rassycodex.local:8844/health",
+      upstreamStatus: 200,
+    });
+  });
+
   it("proxies Cheshire Cat chat messages and extracts the assistant reply", async () => {
     mockLlmResponse({ content: [{ text: "Family link is working." }] });
 
