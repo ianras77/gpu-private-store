@@ -11,6 +11,25 @@ import uuid
 from pathlib import Path
 
 
+def _patch_cat_embedder_auth(api_key: str) -> bool:
+    source_path = Path("/app/cat/factory/custom_embedder.py")
+    if not api_key.strip() or not source_path.exists():
+        return False
+    source = source_path.read_text()
+    if "_usmender_gateway_headers" in source or "import httpx\n" not in source:
+        return False
+    helper = '''
+
+def _usmender_gateway_headers():
+    api_key = (os.getenv("CAT_OLLAMA_API_KEY") or os.getenv("OLLAMA_API_KEY") or "").strip()
+    return {"Authorization": f"Bearer {api_key}"} if api_key else {}
+'''
+    source = source.replace("import httpx\n", f"import httpx\n{helper}", 1)
+    source = source.replace("httpx.post(self.url, data=payload, timeout=None)", "httpx.post(self.url, data=payload, headers=_usmender_gateway_headers(), timeout=None)")
+    source_path.write_text(source)
+    return True
+
+
 def _env(name: str, default: str) -> str:
     value = os.getenv(name, default).strip()
     return value or default
@@ -40,6 +59,7 @@ def main() -> int:
     embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844")
     llm_model = _env("OLLAMA_GENERAL_MODEL", "rassy-smart")
     embed_model = _env("OLLAMA_EMBED_MODEL", "rassy-embed")
+    _patch_cat_embedder_auth(os.getenv("CAT_OLLAMA_API_KEY", ""))
 
     if not metadata_path.exists():
         print(f"[cat-bootstrap] metadata not found at {metadata_path}, skipping", file=sys.stderr)

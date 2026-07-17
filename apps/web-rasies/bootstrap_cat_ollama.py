@@ -16,6 +16,36 @@ def _env(name: str, default: str) -> str:
     return value or default
 
 
+def _patch_cat_embedder_auth(api_key: str) -> bool:
+    """Teach Cheshire's custom Ollama embedder to authenticate to RassyCodex."""
+    source_path = Path("/app/cat/factory/custom_embedder.py")
+    if not api_key.strip() or not source_path.exists():
+        return False
+
+    source = source_path.read_text()
+    if "_rasies_gateway_headers" in source or "import httpx\n" not in source:
+        return False
+
+    helper = '''
+
+def _rasies_gateway_headers():
+    api_key = (
+        os.getenv("CAT_OLLAMA_API_KEY")
+        or os.getenv("OLLAMA_API_KEY")
+        or os.getenv("LLM_API_KEY")
+        or ""
+    ).strip()
+    return {"Authorization": f"Bearer {api_key}"} if api_key else {}
+'''
+    source = source.replace("import httpx\n", f"import httpx\n{helper}", 1)
+    source = source.replace(
+        "httpx.post(self.url, data=payload, timeout=None)",
+        "httpx.post(self.url, data=payload, headers=_rasies_gateway_headers(), timeout=None)",
+    )
+    source_path.write_text(source)
+    return True
+
+
 def _new_entry(name: str, category: str | None, value: object) -> dict:
     return {
         "name": name,
@@ -67,6 +97,9 @@ def main() -> int:
     embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844")
     llm_model = _env("OLLAMA_GENERAL_MODEL", "rassy-smart")
     embed_model = _env("OLLAMA_EMBED_MODEL", "rassy-embed")
+    api_key = os.getenv("CAT_OLLAMA_API_KEY", "").strip()
+    if _patch_cat_embedder_auth(api_key):
+        print("[cat-bootstrap] patched CustomOllamaEmbeddings with gateway auth headers", file=sys.stderr)
 
     payload = _load_payload(metadata_path)
     items = payload.setdefault("_default", {})

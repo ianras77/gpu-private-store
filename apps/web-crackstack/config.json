@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-crackstack",
   "description": "Agentic data workbench with XLCRACK and TAPECRACK fronts on one backend with Postgres, Redis, MinIO, and Temporal.",
-  "tipi_version": 5,
-  "version": "1.0.4",
+  "tipi_version": 6,
+  "version": "1.0.5",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -16,7 +16,7 @@
   "short_desc": "Agentic data workbench with two branded fronts and one shared backend.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-crack",
-  "form_fields": [],
+  "form_fields": [{"type":"password","label":"RassyCodex API key","required":false,"env_variable":"RASSYCODEX_API_KEY"}],
   "supported_architectures": [
     "amd64"
   ],

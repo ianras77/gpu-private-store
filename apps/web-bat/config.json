@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-bat",
   "description": "Cowgirl-sharp anti-Trump editorial blog with Next.js, FastAPI automation, channel heat, linked receipts, and live research workflows.",
-  "tipi_version": 21,
-  "version": "1.0.20",
+  "tipi_version": 22,
+  "version": "1.0.21",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -16,7 +16,7 @@
   "short_desc": "Cowgirl-sharp anti-Trump blog with live channels, heat, and receipts.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-bat",
-  "form_fields": [],
+  "form_fields": [{"type":"password","label":"RassyCodex API key","required":false,"env_variable":"RASSYCODEX_API_KEY"}],
   "supported_architectures": [
     "amd64"
   ],

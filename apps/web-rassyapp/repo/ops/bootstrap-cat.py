@@ -14,6 +14,25 @@ import bcrypt
 import requests
 
 
+def _patch_cat_embedder_auth(api_key: str) -> bool:
+    source_path = Path("/app/cat/factory/custom_embedder.py")
+    if not api_key.strip() or not source_path.exists():
+        return False
+    source = source_path.read_text()
+    if "_rassyapp_gateway_headers" in source or "import httpx\n" not in source:
+        return False
+    helper = '''
+
+def _rassyapp_gateway_headers():
+    api_key = (os.getenv("CAT_OLLAMA_API_KEY") or os.getenv("OLLAMA_API_KEY") or "").strip()
+    return {"Authorization": f"Bearer {api_key}"} if api_key else {}
+'''
+    source = source.replace("import httpx\n", f"import httpx\n{helper}", 1)
+    source = source.replace("httpx.post(self.url, data=payload, timeout=None)", "httpx.post(self.url, data=payload, headers=_rassyapp_gateway_headers(), timeout=None)")
+    source_path.write_text(source)
+    return True
+
+
 ADMIN_PERMISSIONS = {
     "STATUS": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
     "MEMORY": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
@@ -141,6 +160,7 @@ def main() -> int:
     )
     admin_username = _env("CAT_ADMIN_USERNAME", "admin")
     admin_password = _env("CAT_ADMIN_PASSWORD", "admin")
+    _patch_cat_embedder_auth(os.getenv("CAT_OLLAMA_API_KEY", ""))
 
     if not metadata_path.exists():
         print(f"[cat-bootstrap] metadata not found at {metadata_path}, skipping", file=sys.stderr)

@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-jogmania",
   "description": "Jogmania turns Apple Watch and iPhone walk/run workouts into replayable adventure courses with route-derived hazards, rewards, and map overlays.",
-  "tipi_version": 11,
-  "version": "1.1.1",
+  "tipi_version": 12,
+  "version": "1.1.2",
   "categories": [
     "ai",
     "utilities"
@@ -15,7 +15,7 @@
   "short_desc": "Apple Watch run capture becomes replayable adventure courses with route-derived hazards and rewards.",
   "author": "https://github.com/ianras77/web-jogmania.git",
   "source": "https://github.com/ianras77/web-jogmania",
-  "form_fields": [],
+  "form_fields": [{"type":"password","label":"RassyCodex API key","required":false,"env_variable":"RASSYCODEX_API_KEY"}],
   "supported_architectures": [
     "amd64"
   ],

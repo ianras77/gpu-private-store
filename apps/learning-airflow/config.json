@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "learning-airflow",
   "description": "Apache Airflow workbench from the learning stack, split into its own Runtipi app with RassyCodex defaults for DAGs.",
-  "tipi_version": 2,
-  "version": "2.7.1-python3.10",
+  "tipi_version": 3,
+  "version": "2.7.2-python3.10",
   "categories": [
     "utilities"
   ],

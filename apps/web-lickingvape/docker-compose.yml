@@ -126,7 +126,7 @@ services:
     environment:
       DATABASE_URL: ${LICKINGVAPE_DATABASE_URL:-postgresql://lickingvape:lickingvape@lickingvape-postgres:5432/lickingvape}
       CAT_REVIEW_ENDPOINT: ${LICKINGVAPE_CAT_REVIEW_ENDPOINT:-http://lickingvape-cat:80/custom/editor/review}
-      CAT_API_KEY: ${LICKINGVAPE_CAT_API_KEY:-${RASSYCODEX_API_KEY:-}}
+      CAT_API_KEY: ${RASSYCODEX_API_KEY:-${LICKINGVAPE_CAT_API_KEY:-}}
       CAT_USER_ID: ${LICKINGVAPE_CAT_USER_ID:-}
       CAT_INTERNAL_TOKEN: ${LICKINGVAPE_CAT_INTERNAL_TOKEN:-}
       CAT_DRAFT_ENDPOINT: ${LICKINGVAPE_CAT_DRAFT_ENDPOINT:-http://lickingvape-cat:80/custom/editor/draft}

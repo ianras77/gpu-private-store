@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-lickingvape",
   "description": "Dark anonymous quit-vaping wall with Next.js, FastAPI, LLM-assisted moderation, Postgres, and a mode-based Stripe Scribe.",
-  "tipi_version": 5,
-  "version": "1.0.5",
+  "tipi_version": 6,
+  "version": "1.0.6",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -16,7 +16,7 @@
   "short_desc": "Dark anonymous quit-vaping wall with LLM-assisted moderation.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-lickingvape",
-  "form_fields": [],
+  "form_fields": [{"type":"password","label":"RassyCodex API key","required":false,"env_variable":"RASSYCODEX_API_KEY"}],
   "supported_architectures": [
     "amd64"
   ],

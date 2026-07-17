@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "learning-mlflow",
   "description": "MLflow tracking server from the learning stack, split into its own Runtipi app with RassyCodex experiment defaults.",
-  "tipi_version": 3,
-  "version": "2.12.2",
+  "tipi_version": 4,
+  "version": "2.12.3",
   "categories": [
     "ai",
     "utilities"
