@@ -16,3 +16,4 @@ scripts.root-owned-backup-*/
 **/.next-*/
 **/dist/
 **/.pytest_cache/
+.worktrees/
