@@ -87,6 +87,31 @@ class ValidatorTests(unittest.TestCase):
         self.assertTrue(any("host.docker.internal:8844" in error for error in errors), errors)
         self.assertTrue(any("rassy-general" in error for error in errors), errors)
 
+    def test_reports_quoted_disallowed_alias_without_model_context(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-one")
+        (app / "aliases.ts").write_text(
+            'const alias = "rassy-general";\n', encoding="utf-8"
+        )
+
+        errors = validator.validate_root(self.root)
+
+        self.assertTrue(any("aliases.ts:1" in error and "rassy-general" in error for error in errors), errors)
+
+    def test_rejects_gateway_host_found_only_in_a_comment(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-one")
+        (app / "docker-compose.yml").write_text(
+            "services:\n  app:\n    environment:\n"
+            "      # expected host is host.docker.internal:8844\n"
+            "      RASSYMIND_API_BASE: ${RASSYMIND_API_BASE:-http://wrong-host:8844/v1}\n",
+            encoding="utf-8",
+        )
+
+        errors = validator.validate_root(self.root)
+
+        self.assertTrue(any("must default its gateway" in error for error in errors), errors)
+
     def test_does_not_treat_supporting_learning_apps_as_direct_consumers(self) -> None:
         validator = load_validator()
         for name in ("learning-minio", "learning-qdrant"):

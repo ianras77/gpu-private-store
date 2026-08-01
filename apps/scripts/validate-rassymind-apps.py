@@ -83,6 +83,13 @@ BINARY_SUFFIXES = frozenset(
     }
 )
 ALIAS_PATTERN = re.compile(r"(?<![A-Za-z0-9_])rassy-[a-z0-9-]+")
+QUOTED_ALIAS_PATTERN = re.compile(
+    r"(?P<quote>['\"`])(?P<alias>rassy-[a-z0-9-]+)(?P=quote)"
+)
+GATEWAY_DEFAULT_PATTERN = re.compile(
+    r"^\s*(?:-\s*)?[A-Z0-9_]*RASSYMIND_(?:API_BASE|BASE_URL)\s*(?::|=)"
+    r"[^#]*host\.docker\.internal:8844"
+)
 
 
 def scoped_apps(root: Path) -> list[Path]:
@@ -126,6 +133,15 @@ def text_lines(path: Path) -> list[str] | None:
         return None
 
 
+def has_canonical_gateway_default(compose: str) -> bool:
+    """Return whether a live RassyMind API-base assignment uses the gateway."""
+    for raw_line in compose.splitlines():
+        line = raw_line.split("#", 1)[0]
+        if GATEWAY_DEFAULT_PATTERN.search(line):
+            return True
+    return False
+
+
 def validate_root(root: Path) -> list[str]:
     """Return deterministic, secret-safe contract errors for a repository root."""
     errors: list[str] = []
@@ -151,7 +167,7 @@ def validate_root(root: Path) -> list[str]:
         except (OSError, UnicodeDecodeError) as error:
             errors.append(f"{app.name}: cannot read docker-compose.yml ({type(error).__name__})")
             compose = ""
-        if "host.docker.internal:8844" not in compose:
+        if not has_canonical_gateway_default(compose):
             errors.append(
                 f"{app.name}/docker-compose.yml: direct consumer must default its gateway "
                 "to host.docker.internal:8844"
@@ -168,11 +184,15 @@ def validate_root(root: Path) -> list[str]:
                         errors.append(
                             f"{relative}:{line_number}: retired name {retired_name} must be replaced with RASSYMIND"
                         )
+                aliases = {
+                    match.group("alias") for match in QUOTED_ALIAS_PATTERN.finditer(line)
+                }
                 if "MODEL" in line.upper():
-                    for alias in sorted(set(ALIAS_PATTERN.findall(line)) - ALLOWED_ALIASES):
-                        errors.append(
-                            f"{relative}:{line_number}: model alias {alias} is outside the RassyMind allowlist"
-                        )
+                    aliases.update(ALIAS_PATTERN.findall(line))
+                for alias in sorted(aliases - ALLOWED_ALIASES):
+                    errors.append(
+                        f"{relative}:{line_number}: model alias {alias} is outside the RassyMind allowlist"
+                    )
 
     return sorted(set(errors))
 
