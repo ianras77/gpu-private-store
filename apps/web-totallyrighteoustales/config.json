@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-totallyrighteoustales",
   "description": "A modern Gutenberg storytelling studio for crafting, revising, sharing, and hearting medium-to-long tales across web and iOS.",
-  "tipi_version": 8,
-  "version": "0.5.3",
+  "tipi_version": 9,
+  "version": "0.5.4",
   "categories": [
     "ai",
     "utilities"
@@ -15,7 +15,7 @@
   "short_desc": "A modern Gutenberg storytelling studio for crafted long-form tales.",
   "author": "https://github.com/ianras77/web-totallyrighteoustales.git",
   "source": "https://github.com/ianras77/web-totallyrighteoustales",
-  "form_fields": [{"type":"password","label":"RassyCodex API key","required":false,"env_variable":"RASSYCODEX_API_KEY"}],
+  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
   "supported_architectures": [
     "amd64"
   ],

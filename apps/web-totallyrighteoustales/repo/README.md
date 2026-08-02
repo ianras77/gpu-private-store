@@ -23,7 +23,7 @@ make up
 ```
 
 Canonical startup now lives in `scripts/stack.sh`, and both `make up` and `pnpm stack:up` call it.
-The script runs `docker compose up -d --build`; model calls use the host-published RassyCodex gateway at `host.docker.internal:8844`.
+The script runs `docker compose up -d --build`; model calls use the host-published RassyMind gateway at `host.docker.internal:8844`.
 All services use `restart: unless-stopped`, so they come back after reboot/session restart.
 
 Equivalent commands:

@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-rassys",
   "description": "Public site, live radio, Minecraft bridge, Cheshire, Icecast, Liquidsoap, Redis, and Postgres in one stack.",
-  "tipi_version": 21,
-  "version": "1.0.19",
+  "tipi_version": 22,
+  "version": "1.0.20",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -16,7 +16,7 @@
   "short_desc": "Rassys site and live radio stack with Cheshire, Icecast, and a Minecraft bridge.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-rassy",
-  "form_fields": [{"type":"password","label":"RassyCodex API key","required":false,"env_variable":"RASSYCODEX_API_KEY"},
+  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"},
     {
       "type": "random",
       "label": "Admin Password",

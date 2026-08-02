@@ -7,12 +7,12 @@ from config import Settings
 APP_ROOT = Path(__file__).resolve().parents[4]
 
 
-def test_compose_defaults_use_reachable_rassygpt_host_gateway() -> None:
+def test_compose_defaults_use_reachable_rassymind_host_gateway() -> None:
     compose_text = (APP_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
 
-    assert "rassygpt-gateway:8080" not in compose_text
-    assert "http://host.docker.internal:8844/v1/chat/completions" in compose_text
-    assert "http://host.docker.internal:8844/v1/embeddings" in compose_text
+    assert "rassymind-gateway:8080" not in compose_text
+    assert "${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/v1/chat/completions" in compose_text
+    assert "${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/v1/embeddings" in compose_text
     assert compose_text.count("http://host.docker.internal:8844") >= 4
     assert compose_text.count("extra_hosts: *bat-host-gateway") >= 3
 
@@ -119,12 +119,10 @@ def test_runtime_docs_match_runtipi_defaults() -> None:
     deployment_text = (APP_ROOT / "docs/deployment.md").read_text(encoding="utf-8")
     docs_text = f"{readme_text}\n{deployment_text}"
 
-    assert "RassyGPT gateway" not in docs_text
-    assert "RassyGPT service" not in docs_text
     assert "WORKER_CYCLE_MINUTES=30" not in docs_text
     assert "PIPELINE_LOCK_TTL_SECONDS=3600" not in docs_text
     assert "PIPELINE_STALE_AFTER_SECONDS=1800" not in docs_text
-    assert "RassyCodex gateway" in docs_text
+    assert "RassyMind gateway" in docs_text
     assert "WORKER_CYCLE_MINUTES=15" in docs_text
     assert "PIPELINE_LOCK_TTL_SECONDS=7200" in docs_text
     assert "PIPELINE_STALE_AFTER_SECONDS=7200" in docs_text

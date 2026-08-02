@@ -4063,7 +4063,7 @@ def _build_dialectic_challenger_prompt(
     reasons = [str(reason) for reason in (style_report.get("reasons") or [])[:4]] if isinstance(style_report, dict) else []
     lines = [
         "Champion/challenger pass: challenge the draft once, then return a full strengthened draft.",
-        "Act as the smaller RassyGPT challenger: skeptical, concise, and useful. Do not write notes about the critique; rewrite the piece.",
+        "Act as the smaller RassyMind challenger: skeptical, concise, and useful. Do not write notes about the critique; rewrite the piece.",
         "Question the easiest reading, tighten the claim-versus-receipt gap, and improve the BAT voice without inventing facts.",
         f"Thesis to test: {_clean_line(dialectic.get('thesis') or story_brief.get('selected_angle'))}",
         f"Counterforce to take seriously: {_clean_line(dialectic.get('counterforce') or story_brief.get('counterforce'))}",

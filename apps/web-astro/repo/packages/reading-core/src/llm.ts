@@ -29,7 +29,7 @@ export const callLLM = async (
   options: LLMOptions = {}
 ): Promise<LLMResponse> => {
   const baseURL = process.env.OPENAI_BASE_URL || process.env.LLM_BASE_URL || undefined;
-  const apiKey = process.env.OPENAI_API_KEY || (baseURL ? "rassygpt-internal" : undefined);
+  const apiKey = process.env.OPENAI_API_KEY || (baseURL ? "rassymind-internal" : undefined);
   const model = process.env.OPENAI_MODEL ?? "rassy-smart";
   const provider =
     process.env.OPENAI_PROVIDER_NAME ??

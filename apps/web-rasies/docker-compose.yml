@@ -24,11 +24,11 @@ services:
       - SEARXNG_BASE_URL=https://search.rasies.com
       - SEARXNG_PATH=/search
       - SEARXNG_TIMEOUT_MS=9000
-      - RASSYCODEX_BASE_URL=${RASSYCODEX_BASE_URL:-${RASIES_CAT_BASE_URL:-http://host.docker.internal:8844}}
-      - RASSYCODEX_CHAT_PATH=${RASSYCODEX_CHAT_PATH:-${RASIES_CAT_CHAT_PATH:-/v1/chat/completions}}
-      - RASSYCODEX_MODEL=${RASSYCODEX_MODEL:-${RASIES_CAT_MODEL:-rassy-smart}}
-      - RASSYCODEX_API_KEY=${RASSYCODEX_API_KEY:-${RASIES_CAT_API_KEY:-}}
-      - RASSYCODEX_TIMEOUT_MS=${RASSYCODEX_TIMEOUT_MS:-60000}
+      - RASSYMIND_BASE_URL=${RASSYMIND_BASE_URL:-${RASIES_CAT_BASE_URL:-http://host.docker.internal:8844}}
+      - RASSYMIND_CHAT_PATH=${RASSYMIND_CHAT_PATH:-${RASIES_CAT_CHAT_PATH:-/v1/chat/completions}}
+      - RASSYMIND_MODEL=${RASSYMIND_MODEL:-${RASIES_CAT_MODEL:-rassy-smart}}
+      - RASSYMIND_API_KEY=${RASSYMIND_API_KEY:-${RASIES_CAT_API_KEY:-}}
+      - RASSYMIND_TIMEOUT_MS=${RASSYMIND_TIMEOUT_MS:-60000}
       - HEIMDALL_URL=https://apps.rasies.com
       - GLANCE_URL=https://glance.rasies.com
       - GAMES_URL=https://gba.rasies.com
@@ -86,11 +86,11 @@ services:
       - CCAT_DEBUG=false
       - CAT_METADATA_PATH=/data/metadata.json
       - CCAT_METADATA_FILE=/data/metadata.json
-      - OLLAMA_GENERAL_BASE_URL=${RASIES_OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}
-      - OLLAMA_EMBED_BASE_URL=${RASIES_OLLAMA_EMBED_BASE_URL:-http://host.docker.internal:8844}
+      - OLLAMA_GENERAL_BASE_URL=${RASIES_OLLAMA_GENERAL_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
+      - OLLAMA_EMBED_BASE_URL=${RASIES_OLLAMA_EMBED_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
       - OLLAMA_GENERAL_MODEL=${RASIES_OLLAMA_GENERAL_MODEL:-rassy-smart}
       - OLLAMA_EMBED_MODEL=${RASIES_OLLAMA_EMBED_MODEL:-rassy-embed}
-      - CAT_OLLAMA_API_KEY=${RASSYCODEX_API_KEY:-${RASIES_CAT_API_KEY:-}}
+      - CAT_OLLAMA_API_KEY=${RASSYMIND_API_KEY:-${RASIES_CAT_API_KEY:-}}
     volumes:
       - ${APP_DATA_DIR}/app-data/web-rasies/named/rasies-cat-data:/data
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rasies/bootstrap_cat_ollama.py:/app/cat/bootstrap/bootstrap_cat_ollama.py:ro

@@ -54,7 +54,7 @@ Readiness (dependency checks + degraded states):
 curl -sS http://localhost:8017/api/v1/health/ready | jq .
 ```
 
-The readiness response should show `checks.llm_api.probe == "chat_inference"` when `LLM_READINESS_INFERENCE_PROBE_ENABLED=true`; this proves the configured RassyCodex route can answer, not only that its model alias appears in `/api/tags`.
+The readiness response should show `checks.llm_api.probe == "chat_inference"` when `LLM_READINESS_INFERENCE_PROBE_ENABLED=true`; this proves the configured RassyMind route can answer, not only that its model alias appears in `/api/tags`.
 
 Diagnostics (recent jobs, failed jobs, queue depth, counts):
 

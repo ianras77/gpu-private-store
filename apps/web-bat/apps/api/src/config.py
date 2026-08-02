@@ -102,7 +102,7 @@ class Settings(BaseSettings):
     llm_api_url: str = "http://host.docker.internal:8844/v1/chat/completions"
     llm_api_key: str = ""
     llm_model: str = "rassy-smart"
-    llm_challenger_model: str = "rassy-general"
+    llm_challenger_model: str = "rassy-smart"
     llm_request_timeout_seconds: float = 180.0
     llm_retry_backoff_seconds: float = 3.0
     llm_readiness_inference_probe_enabled: bool = True

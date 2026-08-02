@@ -112,10 +112,10 @@ class CatClientTests(unittest.TestCase):
             prompt="User prompt",
             temperature=0.21,
             max_tokens=444,
-            model_override="rassy-general",
+            model_override="rassy-smart",
         )
 
-        self.assertEqual(payload["model"], "rassy-general")
+        self.assertEqual(payload["model"], "rassy-smart")
         self.assertEqual(payload["options"]["num_predict"], 444)
 
     def test_request_headers_omit_blank_bearer_token(self) -> None:
@@ -162,7 +162,7 @@ class CatClientTests(unittest.TestCase):
 
 
 class CatClientAsyncTests(unittest.IsolatedAsyncioTestCase):
-    async def test_generate_waits_configured_backoff_before_retrying_rassycodex_disconnect(self) -> None:
+    async def test_generate_waits_configured_backoff_before_retrying_rassymind_disconnect(self) -> None:
         client = _RetryableAsyncClient()
         sleep = AsyncMock()
 
@@ -170,7 +170,7 @@ class CatClientAsyncTests(unittest.IsolatedAsyncioTestCase):
             patch("services.cat_client.get_shared_async_client", return_value=client),
             patch("services.cat_client.asyncio.sleep", sleep),
             patch("services.cat_client.settings.cat_primary_enabled", False),
-            patch("services.cat_client.settings.llm_api_url", "http://rassycodex.test/v1/chat/completions"),
+            patch("services.cat_client.settings.llm_api_url", "http://rassymind.test/v1/chat/completions"),
             patch("services.cat_client.settings.llm_api_key", ""),
             patch("services.cat_client.settings.llm_model", "rassy-smart"),
             patch("services.cat_client.settings.llm_request_timeout_seconds", 180.0),

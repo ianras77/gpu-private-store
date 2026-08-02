@@ -242,6 +242,17 @@ class ValidatorTests(unittest.TestCase):
 
         self.assertEqual([], validator.validate_root(self.root))
 
+    def test_accepts_protocol_variable_derived_from_rassymind_base_url(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-openai-client")
+        (app / "docker-compose.yml").write_text(
+            "services:\n  app:\n    environment:\n"
+            "      OPENAI_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844/v1}\n",
+            encoding="utf-8",
+        )
+
+        self.assertEqual([], validator.validate_root(self.root))
+
     def test_rejects_gateway_host_in_compose_extension_and_label(self) -> None:
         validator = load_validator()
         app = self.add_app("web-one")

@@ -17,7 +17,7 @@ def _env(name: str, default: str) -> str:
 
 
 def _patch_cat_embedder_auth(api_key: str) -> bool:
-    """Teach Cheshire's custom Ollama embedder to authenticate to RassyCodex."""
+    """Teach Cheshire's custom Ollama embedder to authenticate to RassyMind."""
     source_path = Path("/app/cat/factory/custom_embedder.py")
     if not api_key.strip() or not source_path.exists():
         return False

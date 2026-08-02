@@ -291,7 +291,7 @@ const extractTextFromFile = async (filePath: string): Promise<string> => {
 
 const createEmbedder = (model: string): ((inputs: string[]) => Promise<number[][]>) => {
   const baseURL = process.env.ESOTERICA_EMBED_BASE_URL || process.env.OPENAI_BASE_URL;
-  const apiKey = process.env.OPENAI_API_KEY || (baseURL ? "rassygpt-internal" : undefined);
+  const apiKey = process.env.OPENAI_API_KEY || (baseURL ? "rassymind-internal" : undefined);
   if (!apiKey) {
     throw new Error("Missing OPENAI_API_KEY or ESOTERICA_EMBED_BASE_URL/OPENAI_BASE_URL env var.");
   }

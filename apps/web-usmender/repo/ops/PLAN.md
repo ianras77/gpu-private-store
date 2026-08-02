@@ -125,7 +125,7 @@ The mediator is not one prompt. It is a pipeline:
 - Reflection memory: stores durable facts only after approval or clear shared-room evidence.
 - Closeout worker: follow-up message and reminder suggestions.
 
-Keep the current primary/support Cat split, but wrap it behind a `MediationProvider` interface so RassyGPT, OpenAI-compatible APIs, or a future local RAG service can be swapped without changing the message flow.
+Keep the current primary/support Cat split, but wrap it behind a `MediationProvider` interface so RassyMind, OpenAI-compatible APIs, or a future local RAG service can be swapped without changing the message flow.
 
 ## Runtipi Stack
 

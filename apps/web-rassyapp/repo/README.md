@@ -2,19 +2,19 @@
 
 Rassy Launchpad is a kid-first AI game studio built on Next.js and Prisma. It wraps Cheshire Cat with guided coaching, starter templates, world recipes, inspiration shelves, build kits, and supervised next steps for Roblox-flavored projects. The WebSocket chat adapter uses the official `ccat-api` client.
 
-## Integrated Stack (App + Cheshire Cat + Qdrant + RassyCodex)
+## Integrated Stack (App + Cheshire Cat + Qdrant + RassyMind)
 
 This repository now includes a dedicated Cheshire Cat stack for this app:
 
 - `app` (Next.js frontend/backend wrapper)
 - `cheshire-cat-core` (AI orchestration)
 - `cheshire-cat-vector-memory` (Qdrant)
-- package-owned `cheshire-cat-core` bootstrap (RassyCodex model wiring + Cat auth provisioning)
+- package-owned `cheshire-cat-core` bootstrap (RassyMind model wiring + Cat auth provisioning)
 
 Prerequisites:
 
-1. Local RassyCodex gateway is running on `http://host.docker.internal:8844`
-2. Required RassyCodex aliases are available (example):
+1. Local RassyMind gateway is running on `http://host.docker.internal:8844`
+2. Required RassyMind aliases are available (example):
 
 ```bash
 curl http://127.0.0.1:8844/api/tags
@@ -83,8 +83,8 @@ App runs on `http://localhost:3000`.
 - `QDRANT_HOST_PORT` — Host port mapped to Qdrant (`6333` default).
 - `CCAT_QDRANT_API_KEY` — Optional Qdrant API key for Cheshire Cat.
 - `CAT_ADMIN_USERNAME` / `CAT_ADMIN_PASSWORD` — Credentials provisioned into this package's Cheshire Cat metadata on startup.
-- `OLLAMA_BASE_URL` — Chat/general RassyCodex compatibility URL from containers (`http://host.docker.internal:8844`).
-- `OLLAMA_EMBED_BASE_URL` — RassyCodex compatibility URL for embeddings (`http://host.docker.internal:8844`).
+- `OLLAMA_BASE_URL` — Chat/general RassyMind compatibility URL from containers (`http://host.docker.internal:8844`).
+- `OLLAMA_EMBED_BASE_URL` — RassyMind compatibility URL for embeddings (`http://host.docker.internal:8844`).
 - `OLLAMA_LLM_MODEL` — model alias to set for Cheshire Cat LLM (default `rassy-smart`).
 - `OLLAMA_EMBED_MODEL` — embedding model alias for Cheshire Cat (default `rassy-embed`).
 - `OLLAMA_APPLY_EMBEDDER` — `1`/`0` toggle for embedder auto-configuration (default `1`).
@@ -101,7 +101,7 @@ If you split model gateways later, set `OLLAMA_BASE_URL` for chat generation and
 ## Cheshire Cat Integration Notes
 
 - Auth is obtained via `POST /auth/token` and stored server-side in session records.
-- This repo now bootstraps the package-owned Cheshire Cat container on startup so RassyCodex model selection and Cat credentials come from this repo's `.env`.
+- This repo now bootstraps the package-owned Cheshire Cat container on startup so RassyMind model selection and Cat credentials come from this repo's `.env`.
 - Cat identity is bound from `GET /users/me` with JWT (`sub`) fallback to guarantee stable `user_id` mapping.
 - WebSocket streaming uses `/ws` with `?token=` and an optional `user_id` header for user-specific context.
 - Every authenticated request now forwards a deterministic `user_id`: `engineUserId` when available, otherwise `console-<appUserId>`, so multi-user memory/model state remains isolated even when Cat user lookup is limited.

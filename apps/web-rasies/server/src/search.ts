@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { request } from "undici";
-import { Env, getRassyCodexConfig } from "./env.js";
+import { Env, getRassyMindConfig } from "./env.js";
 import { extractLlmText } from "./llmText.js";
 
 const SearchQuerySchema = z.object({
@@ -53,7 +53,7 @@ function normalizeSuggestionList(input: unknown, limit = 14) {
 }
 
 async function fetchCatSuggestions(env: Env) {
-  const config = getRassyCodexConfig(env);
+  const config = getRassyMindConfig(env);
   const endpoint = new URL(config.chatPath, config.baseUrl).toString();
   const isCheshireEndpoint = config.chatPath.includes("/message");
   const prompt =

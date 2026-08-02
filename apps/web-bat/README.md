@@ -46,11 +46,11 @@ docker compose up -d --build
 - Qdrant: `http://localhost:6337`
 - Cheshire Cat: `http://localhost:1866`
 
-Cheshire Cat now auto-selects the host RassyCodex gateway through Docker host-gateway DNS on startup:
+Cheshire Cat now auto-selects the host RassyMind gateway through Docker host-gateway DNS on startup:
 - chat/general: `rassy-smart` via `http://host.docker.internal:8844`
 - embeddings: `rassy-embed` via `http://host.docker.internal:8844`
 
-The local compose stack is wired around RassyCodex and Qdrant-backed Cheshire Cat memory:
+The local compose stack is wired around RassyMind and Qdrant-backed Cheshire Cat memory:
 - the direct writer path uses `rassy-smart` at `/api/chat`
 - readiness verifies that `rassy-smart` can answer through the current gateway route, not only that the alias is listed
 - embeddings and Cat memory use `rassy-embed` at `/api/embed` for batched vectors
@@ -99,8 +99,8 @@ Key publish-first endpoints:
 ## Notes
 
 - If Cheshire Cat, LLM, embedding API, or SearXNG are unavailable, the system keeps deterministic fallback output in draft/preview lanes and holds direct homepage publication until a publish-ready story exists.
-- The stack expects a reachable model host through `LLM_API_URL_CONTAINER` / `EMBEDDING_API_URL_CONTAINER` in Docker; the defaults use `host.docker.internal:8844`, mapped with Docker `host-gateway`, so Runtipi containers can reach the local RassyCodex gateway.
-- `LLM_READINESS_INFERENCE_PROBE_ENABLED=true` keeps `/api/v1/health/ready` sensitive to routing drift after RassyCodex model-lane updates. Set it to `false` only when you need readiness to avoid live chat inference entirely.
+- The stack expects a reachable model host through `LLM_API_URL_CONTAINER` / `EMBEDDING_API_URL_CONTAINER` in Docker; the defaults use `host.docker.internal:8844`, mapped with Docker `host-gateway`, so Runtipi containers can reach the local RassyMind gateway.
+- `LLM_READINESS_INFERENCE_PROBE_ENABLED=true` keeps `/api/v1/health/ready` sensitive to routing drift after RassyMind model-lane updates. Set it to `false` only when you need readiness to avoid live chat inference entirely.
 - X publishing is adapter-driven and defaults to dry-run mode unless `x_live_posting` runtime control is enabled and X credentials are valid.
 - Cheshire Cat is included in the local stack now so its health and Ollama wiring can be observed continuously even when it is not the primary generation path.
 

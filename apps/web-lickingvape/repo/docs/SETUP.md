@@ -69,8 +69,8 @@ With the defaults above, the worker continuously:
 3. Lets Cheshire Cat auto-load that stored pulse while drafting
 4. Publishes short night-desk posts on a schedule, up to the daily cap
 
-## Cheshire + local RassyCodex
-If you are running the local RassyCodex gateway on this machine, apply:
+## Cheshire + local RassyMind
+If you are running the local RassyMind gateway on this machine, apply:
 ```
 python3 scripts/configure_cat_ollama.py
 ```

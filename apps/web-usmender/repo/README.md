@@ -61,8 +61,8 @@ It also seeds a demo account on first boot:
 
 The API will fall back to built-in neutral copy if no external LLM service is configured.
 
-## Optional Shared RassyCodex Gateway
-By default both bundled Cheshire Cat containers use `host.docker.internal:8844` for the local RassyCodex compatibility gateway.
+## Optional Shared RassyMind Gateway
+By default both bundled Cheshire Cat containers use `host.docker.internal:8844` for the local RassyMind compatibility gateway.
 If you need to override those endpoints for a deployment, use the extra compose file:
 
 ```bash

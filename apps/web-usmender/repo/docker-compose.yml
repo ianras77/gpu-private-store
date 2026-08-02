@@ -50,7 +50,7 @@ services:
       CAT_METADATA_PATH: /app/cat/data/metadata.json
       OLLAMA_GENERAL_BASE_URL: ${OLLAMA_SUPPORT_GENERAL_BASE_URL:-http://host.docker.internal:8844}
       OLLAMA_EMBED_BASE_URL: ${OLLAMA_SUPPORT_EMBED_BASE_URL:-http://host.docker.internal:8844}
-      OLLAMA_GENERAL_MODEL: ${OLLAMA_SUPPORT_GENERAL_MODEL:-rassy-coder}
+      OLLAMA_GENERAL_MODEL: ${OLLAMA_SUPPORT_GENERAL_MODEL:-rassy-code}
       OLLAMA_EMBED_MODEL: ${OLLAMA_SUPPORT_EMBED_MODEL:-rassy-embed}
     extra_hosts:
       - "host.docker.internal:host-gateway"

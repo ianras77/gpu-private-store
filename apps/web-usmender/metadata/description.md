@@ -13,7 +13,7 @@ USMender is a mobile-first repair messenger built around a local Matrix core. Us
 - Phase 0 uses the bundled local Postgres/SSE bridge while the Matrix provider boundary is built.
 - Target core: local Synapse plus a USMender Matrix appservice.
 - Raw drafts stay private to USMender; only approved mediated messages enter the Matrix room.
-- RAG/LLM mediation stays behind provider interfaces so local RassyGPT/Cheshire Cat lanes can evolve.
+- RAG/LLM mediation stays behind provider interfaces so local RassyMind/Cheshire Cat lanes can evolve.
 
 ## Data notes
 

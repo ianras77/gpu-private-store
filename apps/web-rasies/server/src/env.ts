@@ -17,11 +17,11 @@ const EnvSchema = z.object({
   SEARXNG_PATH: z.string().default("/search"),
   SEARXNG_TIMEOUT_MS: z.coerce.number().default(9000),
 
-  RASSYCODEX_BASE_URL: z.string().optional(),
-  RASSYCODEX_CHAT_PATH: z.string().optional(),
-  RASSYCODEX_TIMEOUT_MS: z.coerce.number().optional(),
-  RASSYCODEX_MODEL: z.string().optional(),
-  RASSYCODEX_API_KEY: z.string().optional(),
+  RASSYMIND_BASE_URL: z.string().optional(),
+  RASSYMIND_CHAT_PATH: z.string().optional(),
+  RASSYMIND_TIMEOUT_MS: z.coerce.number().optional(),
+  RASSYMIND_MODEL: z.string().optional(),
+  RASSYMIND_API_KEY: z.string().optional(),
 
   // Deprecated compatibility names. Existing deployed env files may still use these.
   CAT_BASE_URL: z.string().default("http://host.docker.internal:8844"),
@@ -100,13 +100,13 @@ const EnvSchema = z.object({
 
 export type Env = z.infer<typeof EnvSchema>;
 
-export function getRassyCodexConfig(env: Env) {
+export function getRassyMindConfig(env: Env) {
   return {
-    baseUrl: env.RASSYCODEX_BASE_URL ?? env.CAT_BASE_URL,
-    chatPath: env.RASSYCODEX_CHAT_PATH ?? env.CAT_CHAT_PATH,
-    timeoutMs: env.RASSYCODEX_TIMEOUT_MS ?? env.CAT_TIMEOUT_MS,
-    model: env.RASSYCODEX_MODEL ?? env.CAT_MODEL,
-    apiKey: env.RASSYCODEX_API_KEY ?? env.CAT_API_KEY,
+    baseUrl: env.RASSYMIND_BASE_URL ?? env.CAT_BASE_URL,
+    chatPath: env.RASSYMIND_CHAT_PATH ?? env.CAT_CHAT_PATH,
+    timeoutMs: env.RASSYMIND_TIMEOUT_MS ?? env.CAT_TIMEOUT_MS,
+    model: env.RASSYMIND_MODEL ?? env.CAT_MODEL,
+    apiKey: env.RASSYMIND_API_KEY ?? env.CAT_API_KEY,
   };
 }
 

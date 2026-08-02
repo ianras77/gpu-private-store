@@ -6,7 +6,7 @@ Approved direction: keep the homepage visually intact, make the first screen lig
 
 - Reduce home page wakeups by backing off noncritical polling and avoiding eager audio preload.
 - Cache repeated full archive note reads briefly so `/radio/notes` renders do not repeatedly hit the controller for 120-note payloads.
-- Route the local Cheshire proxy through the host-published RassyGPT gateway so the DJ enrichment path works from the Runtipi app network without joining another app's private network.
+- Route the local Cheshire proxy through the host-published RassyMind gateway so the DJ enrichment path works from the Runtipi app network without joining another app's private network.
 - Make station IDs and bumpers play as short 2-5 second cuts by default.
 - Allow occasional bumper clusters of up to three snippets before music returns.
 - Increase produced transition opportunities and attach richer Liquidsoap metadata for curves, cue points, and short handoffs.

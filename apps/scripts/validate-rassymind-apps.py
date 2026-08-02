@@ -192,7 +192,9 @@ def has_canonical_gateway_default(compose: str) -> bool:
         if not isinstance(service, dict):
             continue
         for name, value in environment_items(service.get("environment")):
-            if is_gateway_variable(name) and "host.docker.internal:8844" in str(value):
+            value_text = str(value)
+            derives_from_rassymind = "${RASSYMIND_BASE_URL" in value_text
+            if (is_gateway_variable(name) or derives_from_rassymind) and "host.docker.internal:8844" in value_text:
                 return True
     return False
 

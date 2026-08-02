@@ -60,9 +60,9 @@ afterEach(async () => {
 });
 
 describe("cat routes", () => {
-  it("uses the canonical authenticated RassyCodex chat and health contract", async () => {
+  it("uses the canonical authenticated RassyMind chat and health contract", async () => {
     mockLlmResponse({
-      choices: [{ message: { content: "RassyCodex is connected." } }],
+      choices: [{ message: { content: "RassyMind is connected." } }],
     });
 
     const app = await createApp(
@@ -71,11 +71,11 @@ describe("cat routes", () => {
         CAT_CHAT_PATH: "/legacy-chat",
         CAT_MODEL: "legacy-model",
         CAT_API_KEY: "legacy-key",
-        RASSYCODEX_BASE_URL: "http://rassycodex.local:8844",
-        RASSYCODEX_CHAT_PATH: "/v1/chat/completions",
-        RASSYCODEX_MODEL: "rassy-smart",
-        RASSYCODEX_API_KEY: "rassycodex-test-key",
-        RASSYCODEX_TIMEOUT_MS: 4321,
+        RASSYMIND_BASE_URL: "http://rassymind.local:8844",
+        RASSYMIND_CHAT_PATH: "/v1/chat/completions",
+        RASSYMIND_MODEL: "rassy-smart",
+        RASSYMIND_API_KEY: "rassymind-test-key",
+        RASSYMIND_TIMEOUT_MS: 4321,
       } as Partial<ReturnType<typeof loadEnv>>),
       { webDistRoot: createTempWebDist() },
     );
@@ -90,12 +90,12 @@ describe("cat routes", () => {
     });
 
     expect(chat.statusCode).toBe(200);
-    expect(chat.json()).toEqual({ reply: "RassyCodex is connected." });
+    expect(chat.json()).toEqual({ reply: "RassyMind is connected." });
     expect(mockedRequest).toHaveBeenCalledWith(
-      "http://rassycodex.local:8844/v1/chat/completions",
+      "http://rassymind.local:8844/v1/chat/completions",
       expect.objectContaining({
         headers: expect.objectContaining({
-          authorization: "Bearer rassycodex-test-key",
+          authorization: "Bearer rassymind-test-key",
         }),
         body: JSON.stringify({
           model: "rassy-smart",
@@ -114,7 +114,7 @@ describe("cat routes", () => {
     expect(health.statusCode).toBe(200);
     expect(health.json()).toMatchObject({
       ok: true,
-      target: "http://rassycodex.local:8844/health",
+      target: "http://rassymind.local:8844/health",
       upstreamStatus: 200,
     });
   });

@@ -5,11 +5,11 @@ services:
     environment:
       CCAT_METADATA_FILE: /app/cat/data/metadata.json
       CAT_METADATA_PATH: /app/cat/data/metadata.json
-      OLLAMA_GENERAL_BASE_URL: ${USMENDER_OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}
-      OLLAMA_EMBED_BASE_URL: ${USMENDER_OLLAMA_EMBED_BASE_URL:-http://host.docker.internal:8844}
+      OLLAMA_GENERAL_BASE_URL: ${USMENDER_OLLAMA_GENERAL_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
+      OLLAMA_EMBED_BASE_URL: ${USMENDER_OLLAMA_EMBED_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
       OLLAMA_GENERAL_MODEL: ${USMENDER_OLLAMA_GENERAL_MODEL:-rassy-smart}
       OLLAMA_EMBED_MODEL: ${USMENDER_OLLAMA_EMBED_MODEL:-rassy-embed}
-      CAT_OLLAMA_API_KEY: ${RASSYCODEX_API_KEY:-}
+      CAT_OLLAMA_API_KEY: ${RASSYMIND_API_KEY:-}
       PYTHONDONTWRITEBYTECODE: "1"
     volumes:
     - ${APP_DATA_DIR}/app-data/web-usmender/named/cat-primary-data:/app/cat/data
@@ -41,11 +41,11 @@ services:
     environment:
       CCAT_METADATA_FILE: /app/cat/data/metadata.json
       CAT_METADATA_PATH: /app/cat/data/metadata.json
-      OLLAMA_GENERAL_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_GENERAL_BASE_URL:-http://host.docker.internal:8844}
-      OLLAMA_EMBED_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_EMBED_BASE_URL:-http://host.docker.internal:8844}
-      OLLAMA_GENERAL_MODEL: ${USMENDER_SUPPORT_OLLAMA_GENERAL_MODEL:-rassy-code-agent}
+      OLLAMA_GENERAL_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_GENERAL_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
+      OLLAMA_EMBED_BASE_URL: ${USMENDER_SUPPORT_OLLAMA_EMBED_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
+      OLLAMA_GENERAL_MODEL: ${USMENDER_SUPPORT_OLLAMA_GENERAL_MODEL:-rassy-code}
       OLLAMA_EMBED_MODEL: ${USMENDER_SUPPORT_OLLAMA_EMBED_MODEL:-rassy-embed}
-      CAT_OLLAMA_API_KEY: ${RASSYCODEX_API_KEY:-}
+      CAT_OLLAMA_API_KEY: ${RASSYMIND_API_KEY:-}
       PYTHONDONTWRITEBYTECODE: "1"
     volumes:
     - ${APP_DATA_DIR}/app-data/web-usmender/named/cat-support-data:/app/cat/data

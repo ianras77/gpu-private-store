@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { request } from "undici";
 import { z } from "zod";
-import { Env, getRassyCodexConfig } from "./env.js";
+import { Env, getRassyMindConfig } from "./env.js";
 import { extractLlmText } from "./llmText.js";
 
 const ChatAttachmentSchema = z.object({
@@ -64,7 +64,7 @@ function buildFileNote(files: ReturnType<typeof chatFilesFromBody>) {
 }
 
 function jsonHeaders(env: Env) {
-  const config = getRassyCodexConfig(env);
+  const config = getRassyMindConfig(env);
   const headers: Record<string, string> = {
     "content-type": "application/json",
     accept: "application/json",
@@ -77,7 +77,7 @@ function jsonHeaders(env: Env) {
 }
 
 function acceptHeaders(env: Env) {
-  const config = getRassyCodexConfig(env);
+  const config = getRassyMindConfig(env);
   const headers: Record<string, string> = { accept: "application/json" };
   const apiKey = config.apiKey.trim();
   if (apiKey) {
@@ -162,7 +162,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
     }
 
     try {
-      const config = getRassyCodexConfig(env);
+      const config = getRassyMindConfig(env);
       const endpoint = new URL(config.chatPath, config.baseUrl).toString();
       const isCheshire = config.chatPath.includes("/message");
       const prompt =
@@ -237,7 +237,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
     }
 
     try {
-      const config = getRassyCodexConfig(env);
+      const config = getRassyMindConfig(env);
       const target = new URL(config.chatPath, config.baseUrl).toString();
       const isCheshire = config.chatPath.includes("/message");
 
@@ -330,7 +330,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
   });
 
   app.get("/api/cat/health", async (req, reply) => {
-    const config = getRassyCodexConfig(env);
+    const config = getRassyMindConfig(env);
     const isCheshire = config.chatPath.includes("/message");
     const target = isCheshire
       ? new URL("/", config.baseUrl).toString()
@@ -366,7 +366,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
   // pass-through: /api/cat/* -> CAT_BASE_URL/*
   app.all("/api/cat/*", async (req, reply) => {
     const suffix = (req.url ?? "").replace(/^\/api\/cat/, "");
-    const config = getRassyCodexConfig(env);
+    const config = getRassyMindConfig(env);
     const target = new URL(suffix, config.baseUrl).toString();
 
     const method = toHttpMethod(req.method);
