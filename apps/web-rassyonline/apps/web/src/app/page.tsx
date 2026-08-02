@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/users";
-import { CHAT_MODES } from "@/lib/rassycodex";
+import { CHAT_MODES } from "@/lib/rassymind";
 import { ChatWorkbench } from "@/components/chat-workbench";
 
 export default async function Home() {
@@ -17,7 +17,7 @@ export default async function Home() {
         <div>
           <p className="system-label">Rassy Online</p>
           <h1>The conversation is the instrument.</h1>
-          <p className="topbar-subtitle">RassyCodex routes code, local memory, and optional web context through one live thread.</p>
+          <p className="topbar-subtitle">RassyMind routes code, local memory, and optional web context through one live thread.</p>
         </div>
         <div className="top-actions">
           {user ? (

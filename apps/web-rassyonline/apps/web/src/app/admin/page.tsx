@@ -30,8 +30,8 @@ export default async function AdminPage() {
           <p>{process.env.RASSY_ONLINE_BOOTSTRAP_ADMIN_EMAIL || "Not configured"}</p>
         </article>
         <article className="admin-tile">
-          <h2>RassyCodex</h2>
-          <p>{process.env.RASSYCODEX_BASE_URL ?? "Not configured"}</p>
+          <h2>RassyMind</h2>
+          <p>{process.env.RASSYMIND_BASE_URL ?? "Not configured"}</p>
         </article>
         <Link className="admin-tile action" href="/admin/users">
           <h2>Users</h2>

@@ -13,7 +13,7 @@ import {
   markDocumentReady
 } from "@/lib/documents";
 import { deleteDocumentVectors, upsertDocumentChunks } from "@/lib/qdrant";
-import { embedTexts } from "@/lib/rassycodex";
+import { embedTexts } from "@/lib/rassymind";
 
 export const dynamic = "force-dynamic";
 

@@ -31,7 +31,7 @@ describe("parseMarkdownBlocks", () => {
         [
           "| Tool | Use |",
           "| --- | --- |",
-          "| RassyCodex | local model gateway |",
+          "| RassyMind | local model gateway |",
           "| search.rasies.com | fresh web context |"
         ].join("\n")
       )
@@ -40,7 +40,7 @@ describe("parseMarkdownBlocks", () => {
         type: "table",
         headers: ["Tool", "Use"],
         rows: [
-          ["RassyCodex", "local model gateway"],
+          ["RassyMind", "local model gateway"],
           ["search.rasies.com", "fresh web context"]
         ]
       }

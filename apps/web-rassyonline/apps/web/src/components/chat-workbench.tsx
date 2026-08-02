@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, type ReactNode, useEffect, useMemo, useRef, use
 import { applyLocalChatIntent, type WebSearchMode } from "@/lib/chat-intents";
 import { parseMarkdownBlocks } from "@/lib/markdown";
 import { getLaneDisplay } from "@/lib/chat-presentation";
-import type { ChatMode } from "@/lib/rassycodex";
+import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
 
 type ChatMessage = {
@@ -52,7 +52,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "RassyCodex is on the line. Pick a lane, bring your documents if you are signed in, and start the thread."
+      content: "RassyMind is on the line. Pick a lane, bring your documents if you are signed in, and start the thread."
     }
   ]);
   const [input, setInput] = useState("");
@@ -220,9 +220,9 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   }
 
   return (
-    <section className="chat-workbench" aria-label="RassyCodex chat">
-      <div className="routing-ribbon" aria-label="RassyCodex controls">
-        <div className="lane-switcher" aria-label="RassyCodex lane">
+    <section className="chat-workbench" aria-label="RassyMind chat">
+      <div className="routing-ribbon" aria-label="RassyMind controls">
+        <div className="lane-switcher" aria-label="RassyMind lane">
           {modes.map((item) => (
             <button className={item.id === mode ? "lane-button active" : "lane-button"} key={item.id} onClick={() => setMode(item.id)} type="button">
               <span>{getLaneDisplay(item.id).glyph}</span>
@@ -231,10 +231,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           ))}
         </div>
 
-        <div className="route-status" aria-label="Active RassyCodex route">
+        <div className="route-status" aria-label="Active RassyMind route">
           <span>{activeLane.glyph}</span>
           <div>
-            <strong>{activeMode?.model ?? "rassy-general"}</strong>
+            <strong>{activeMode?.model ?? "rassy-smart"}</strong>
             <small>{activeLane.capability} · {sending ? "streaming" : "ready"}</small>
           </div>
         </div>
@@ -299,10 +299,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       </div>
 
       <div className="transcript-shell">
-        <div className="route-readout" aria-label="Active RassyCodex route">
+        <div className="route-readout" aria-label="Active RassyMind route">
           <div>
             <span>{activeLane.glyph}</span>
-            <strong>{activeMode?.model ?? "rassy-general"}</strong>
+            <strong>{activeMode?.model ?? "rassy-smart"}</strong>
           </div>
           <p>{webSearchLabel}</p>
           <p>{activeDocuments.length ? `${activeDocuments.length} memory sources` : "thread memory off"}</p>
@@ -312,7 +312,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <div className="message-list">
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <span>{message.role === "user" ? "You" : "RassyCodex"}</span>
+              <span>{message.role === "user" ? "You" : "RassyMind"}</span>
               <MarkdownMessage content={message.content || (sending ? "..." : "")} />
             </article>
           ))}
@@ -324,7 +324,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           value={input}
           onChange={(event) => setInput(event.target.value)}
           placeholder="Start the thread. /code, /fast, /know, /search, /local..."
-          aria-label="Message RassyCodex"
+          aria-label="Message RassyMind"
           rows={1}
         />
         <div className="prompt-runes" aria-label="Prompt shortcuts">

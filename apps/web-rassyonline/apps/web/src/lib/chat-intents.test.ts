@@ -30,11 +30,11 @@ describe("applyLocalChatIntent", () => {
     });
   });
 
-  it("supports short RassyCodex lane aliases", () => {
+  it("supports short RassyMind lane aliases", () => {
     expect(applyLocalChatIntent("/code")).toEqual({
       kind: "local",
       updates: { mode: "deep-coding" },
-      notice: "Deep Codex is steering the thread."
+      notice: "Deep Code is steering the thread."
     });
     expect(applyLocalChatIntent("/fast")).toEqual({
       kind: "local",
@@ -53,7 +53,7 @@ describe("applyLocalChatIntent", () => {
       kind: "send",
       prompt: "draft a patch",
       updates: { mode: "deep-coding" },
-      notice: "Deep Codex is steering the thread."
+      notice: "Deep Code is steering the thread."
     });
     expect(applyLocalChatIntent("/know compare these notes")).toEqual({
       kind: "send",

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { getLaneDisplay } from "./chat-presentation";
 
-describe("RassyCodex lane display", () => {
+describe("RassyMind lane display", () => {
   test("describes each selectable lane without inventing a gateway capability", () => {
     expect(getLaneDisplay("general")).toMatchObject({ glyph: "ASK", capability: "Conversation and synthesis" });
     expect(getLaneDisplay("deep-coding")).toMatchObject({ glyph: "CODE", capability: "High-context coding" });

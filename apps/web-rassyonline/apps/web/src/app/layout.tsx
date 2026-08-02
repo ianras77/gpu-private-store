@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Rassy Online",
-  description: "A magical RassyCodex web app for chat, documents, vectors, and admin workflows.",
+  description: "A magical RassyMind web app for chat, documents, vectors, and admin workflows.",
   applicationName: "Rassy Online"
 };
 

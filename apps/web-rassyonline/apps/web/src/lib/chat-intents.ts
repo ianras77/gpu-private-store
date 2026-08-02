@@ -1,4 +1,4 @@
-import type { ChatModeId } from "./rassycodex";
+import type { ChatModeId } from "./rassymind";
 import type { ThemeId } from "./theme";
 
 export type WebSearchMode = "auto" | "on" | "off";
@@ -27,7 +27,7 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
       kind: value ? "send" : "local",
       ...(value ? { prompt: value } : {}),
       updates: { mode: "deep-coding" },
-      notice: "Deep Codex is steering the thread."
+      notice: "Deep Code is steering the thread."
     };
   }
 

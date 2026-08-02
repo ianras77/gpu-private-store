@@ -6,7 +6,7 @@ import { appendMessage, createThread, findThreadForUser } from "@/lib/chat-store
 import { buildDocumentContextMessage } from "@/lib/document-memory";
 import { getReadyDocumentIdsForUser } from "@/lib/documents";
 import { searchUserDocuments } from "@/lib/qdrant";
-import { embedTexts, extractDeltaFromSseLine, getChatMode, getRassyCodexChatUrl } from "@/lib/rassycodex";
+import { embedTexts, extractDeltaFromSseLine, getChatMode, getRassyMindChatUrl } from "@/lib/rassymind";
 import { buildSearchContextMessage, searchWebResources, shouldUseWebSearch } from "@/lib/web-search";
 
 export const dynamic = "force-dynamic";
@@ -98,12 +98,12 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const baseUrl = process.env.RASSYCODEX_BASE_URL ?? "http://host.docker.internal:8844";
-  const upstream = await fetch(getRassyCodexChatUrl(baseUrl), {
+  const baseUrl = process.env.RASSYMIND_BASE_URL ?? "http://host.docker.internal:8844";
+  const upstream = await fetch(getRassyMindChatUrl(baseUrl), {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      ...(process.env.RASSYCODEX_API_KEY ? { authorization: `Bearer ${process.env.RASSYCODEX_API_KEY}` } : {})
+      ...(process.env.RASSYMIND_API_KEY ? { authorization: `Bearer ${process.env.RASSYMIND_API_KEY}` } : {})
     },
     body: JSON.stringify({
       model: mode.model,
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
   if (!upstream.ok || !upstream.body) {
     const text = await upstream.text().catch(() => "");
-    return new Response(`RassyCodex request failed: ${upstream.status} ${text}`.trim(), { status: 502 });
+    return new Response(`RassyMind request failed: ${upstream.status} ${text}`.trim(), { status: 502 });
   }
 
   const decoder = new TextDecoder();

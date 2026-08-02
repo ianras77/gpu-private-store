@@ -1,4 +1,4 @@
-import type { ChatModeId } from "./rassycodex";
+import type { ChatModeId } from "./rassymind";
 
 type LaneDisplay = {
   glyph: string;
