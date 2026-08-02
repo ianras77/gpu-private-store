@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import {
+  CHAT_MODES,
   embedTexts,
   extractDeltaFromSseLine,
   getChatMode,
   getRassyMindChatUrl,
-  getRassyMindEmbeddingsUrl
+  getRassyMindEmbeddingsUrl,
+  getRassyMindRequestError
 } from "./rassymind";
 
 afterEach(() => {
@@ -13,6 +15,16 @@ afterEach(() => {
 });
 
 describe("RassyMind mode mapping", () => {
+  test("publishes the exact ordered chat modes", () => {
+    expect(CHAT_MODES).toEqual([
+      { id: "general", label: "Talk", model: "rassy-smart", description: "Broad assistant chat, thinking, and synthesis." },
+      { id: "deep-coding", label: "Deep Code", model: "rassy-code", description: "High-context coding, systems reasoning, and operator work." },
+      { id: "fast-coding", label: "Fast Code", model: "rassy-fast", description: "Fast coding loops, implementation passes, and focused edits." },
+      { id: "quick", label: "Spark", model: "rassy-utility", description: "Short answers, titles, summaries, and quick transforms." },
+      { id: "knowledge", label: "Memory", model: "rassy-mind", description: "Document-grounded chat with enabled workspace memory." }
+    ]);
+  });
+
   test("maps friendly modes to exact RassyMind model ids", () => {
     expect(getChatMode("general").model).toBe("rassy-smart");
     expect(getChatMode("deep-coding").model).toBe("rassy-code");
@@ -34,6 +46,11 @@ describe("RassyMind URLs", () => {
     expect(getRassyMindEmbeddingsUrl("http://host.docker.internal:8844/")).toBe(
       "http://host.docker.internal:8844/v1/embeddings"
     );
+  });
+
+  test("normalizes a base ending in multiple slashes", () => {
+    expect(getRassyMindChatUrl("http://rassymind.test:9000//")).toBe("http://rassymind.test:9000/v1/chat/completions");
+    expect(getRassyMindEmbeddingsUrl("http://rassymind.test:9000//")).toBe("http://rassymind.test:9000/v1/embeddings");
   });
 });
 
@@ -57,6 +74,22 @@ describe("embedTexts", () => {
         headers: expect.objectContaining({ authorization: "Bearer mind-secret" })
       })
     );
+  });
+
+  test("excludes upstream response bodies from errors", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("fake mind-secret", { status: 503 }));
+
+    const error = await embedTexts(["hello"]).catch((caught: unknown) => caught);
+    expect(error).toEqual(new Error("RassyMind request failed with status 503"));
+    expect(String(error)).not.toContain("mind-secret");
+  });
+});
+
+describe("RassyMind request errors", () => {
+  test("creates a safe generic chat error", () => {
+    const error = getRassyMindRequestError(502);
+    expect(error.message).toBe("RassyMind request failed with status 502");
+    expect(error.message).not.toContain("mind-secret");
   });
 });
 

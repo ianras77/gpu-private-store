@@ -6,7 +6,13 @@ import { appendMessage, createThread, findThreadForUser } from "@/lib/chat-store
 import { buildDocumentContextMessage } from "@/lib/document-memory";
 import { getReadyDocumentIdsForUser } from "@/lib/documents";
 import { searchUserDocuments } from "@/lib/qdrant";
-import { embedTexts, extractDeltaFromSseLine, getChatMode, getRassyMindChatUrl } from "@/lib/rassymind";
+import {
+  embedTexts,
+  extractDeltaFromSseLine,
+  getChatMode,
+  getRassyMindChatUrl,
+  getRassyMindRequestError
+} from "@/lib/rassymind";
 import { buildSearchContextMessage, searchWebResources, shouldUseWebSearch } from "@/lib/web-search";
 
 export const dynamic = "force-dynamic";
@@ -114,8 +120,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (!upstream.ok || !upstream.body) {
-    const text = await upstream.text().catch(() => "");
-    return new Response(`RassyMind request failed: ${upstream.status} ${text}`.trim(), { status: 502 });
+    return new Response(getRassyMindRequestError(upstream.status).message, { status: 502 });
   }
 
   const decoder = new TextDecoder();

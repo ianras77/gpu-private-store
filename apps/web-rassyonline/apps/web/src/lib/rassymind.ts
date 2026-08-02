@@ -20,11 +20,15 @@ export function getChatMode(value: string | null | undefined): ChatMode {
 }
 
 export function getRassyMindChatUrl(baseUrl: string): string {
-  return `${baseUrl.replace(/\/$/, "")}/v1/chat/completions`;
+  return `${baseUrl.replace(/\/+$/, "")}/v1/chat/completions`;
 }
 
 export function getRassyMindEmbeddingsUrl(baseUrl: string): string {
-  return `${baseUrl.replace(/\/$/, "")}/v1/embeddings`;
+  return `${baseUrl.replace(/\/+$/, "")}/v1/embeddings`;
+}
+
+export function getRassyMindRequestError(status: number): Error {
+  return new Error(`RassyMind request failed with status ${status}`);
 }
 
 export async function embedTexts(texts: string[]): Promise<number[][]> {
@@ -40,7 +44,7 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
   });
 
   if (!response.ok) {
-    throw new Error(`RassyMind embeddings failed: ${response.status} ${await response.text()}`);
+    throw getRassyMindRequestError(response.status);
   }
 
   const parsed = (await response.json()) as { data?: Array<{ embedding?: number[] }> };
