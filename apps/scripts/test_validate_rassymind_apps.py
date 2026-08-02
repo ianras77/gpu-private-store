@@ -87,6 +87,43 @@ class ValidatorTests(unittest.TestCase):
 
             self.assertEqual([], validator.validate_root(self.root))
 
+    def test_ignores_symlinked_web_app_root(self) -> None:
+        validator = load_validator()
+        with tempfile.TemporaryDirectory() as external_directory:
+            external_app = Path(external_directory) / "app"
+            external_app.mkdir()
+            (external_app / "config.json").write_text('{"form_fields": null}', encoding="utf-8")
+            (external_app / "docker-compose.yml").write_text("services: {}\n", encoding="utf-8")
+            (self.root / "web-external").symlink_to(external_app, target_is_directory=True)
+
+            self.assertEqual([], validator.validate_root(self.root))
+
+    def test_rejects_symlinked_contract_files(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-one")
+        with tempfile.TemporaryDirectory() as external_directory:
+            external = Path(external_directory)
+            external_config = external / "config.json"
+            external_config.write_text(
+                json.dumps({"form_fields": [{"env_variable": "RASSYMIND_API_KEY"}]}),
+                encoding="utf-8",
+            )
+            external_compose = external / "docker-compose.yml"
+            external_compose.write_text(
+                "services: {app: {environment: {RASSYMIND_API_BASE: "
+                '"http://host.docker.internal:8844/v1"}}}\n',
+                encoding="utf-8",
+            )
+            (app / "config.json").unlink()
+            (app / "config.json").symlink_to(external_config)
+            (app / "docker-compose.yml").unlink()
+            (app / "docker-compose.yml").symlink_to(external_compose)
+
+            errors = validator.validate_root(self.root)
+
+        self.assertTrue(any("config.json: contract path must not be a symlink" in error for error in errors), errors)
+        self.assertTrue(any("docker-compose.yml: contract path must not be a symlink" in error for error in errors), errors)
+
     def test_reports_missing_key_gateway_and_disallowed_alias(self) -> None:
         validator = load_validator()
         app = self.add_app("web-one", key="OTHER_API_KEY")
@@ -189,6 +226,10 @@ class ValidatorTests(unittest.TestCase):
                 "services: {app: {environment: {RASSYMIND_BASE_URL: "
                 '"http://host.docker.internal:8844/v1"}}}\n'
             ),
+            "web-prefixed-base-url": (
+                "services:\n  app:\n    environment:\n"
+                "      APP_RASSYMIND_BASE_URL: http://host.docker.internal:8844/v1\n"
+            ),
             "web-multiple": (
                 "services:\n  database:\n    environment:\n      POSTGRES_DB: app\n"
                 "  app:\n    environment:\n"
@@ -226,6 +267,12 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(1, len(first), first)
         self.assertIn("form must expose RASSYMIND_API_KEY", first[0])
+
+    def test_declares_validator_yaml_dependency(self) -> None:
+        requirement = VALIDATOR.with_name("requirements-rassymind-validator.txt")
+
+        self.assertTrue(requirement.is_file())
+        self.assertEqual("PyYAML==6.0.1", requirement.read_text(encoding="utf-8").strip())
 
     def test_does_not_treat_supporting_learning_apps_as_direct_consumers(self) -> None:
         validator = load_validator()

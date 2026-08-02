@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Validate the appstore's canonical RassyMind integration contract."""
+"""Validate the appstore's canonical RassyMind integration contract.
+
+Install dependencies with:
+python3 -m pip install -r scripts/requirements-rassymind-validator.txt
+"""
 
 from __future__ import annotations
 
@@ -105,8 +109,12 @@ MODEL_CONTEXT_PATTERN = re.compile(
 
 def scoped_apps(root: Path) -> list[Path]:
     """Return direct RassyMind consumers in stable name order."""
-    apps = [path for path in root.glob("web-*") if path.is_dir()]
-    apps.extend(root / name for name in LEARNING_AI_APP_NAMES if (root / name).is_dir())
+    apps = [path for path in root.glob("web-*") if path.is_dir() and not path.is_symlink()]
+    apps.extend(
+        root / name
+        for name in LEARNING_AI_APP_NAMES
+        if (root / name).is_dir() and not (root / name).is_symlink()
+    )
     return sorted(apps, key=lambda path: path.name)
 
 
@@ -152,7 +160,7 @@ def text_lines(path: Path) -> list[str] | None:
 def is_gateway_variable(name: object) -> bool:
     return isinstance(name, str) and (
         name in {"RASSYMIND_API_BASE", "RASSYMIND_BASE_URL"}
-        or name.endswith("_RASSYMIND_API_BASE")
+        or name.endswith(("_RASSYMIND_API_BASE", "_RASSYMIND_BASE_URL"))
     )
 
 
@@ -189,6 +197,20 @@ def has_canonical_gateway_default(compose: str) -> bool:
     return False
 
 
+def contract_path_error(app: Path, path: Path) -> str | None:
+    relative = f"{app.name}/{path.name}"
+    if path.is_symlink():
+        return f"{relative}: contract path must not be a symlink"
+    try:
+        app_root = app.resolve(strict=True)
+        resolved = path.resolve(strict=True)
+    except OSError:
+        return None
+    if not resolved.is_relative_to(app_root):
+        return f"{relative}: resolved contract path must remain inside {app.name}"
+    return None
+
+
 def validate_root(root: Path) -> list[str]:
     """Return deterministic, secret-safe contract errors for a repository root."""
     errors: list[str] = []
@@ -196,29 +218,39 @@ def validate_root(root: Path) -> list[str]:
         config_path = app / "config.json"
         compose_path = app / "docker-compose.yml"
 
-        try:
-            config = json.loads(config_path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
-            errors.append(f"{app.name}: cannot read config.json ({type(error).__name__})")
+        config_path_problem = contract_path_error(app, config_path)
+        if config_path_problem:
+            errors.append(config_path_problem)
             config = {}
+        else:
+            try:
+                config = json.loads(config_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+                errors.append(f"{app.name}: cannot read config.json ({type(error).__name__})")
+                config = {}
 
-        variables = form_variables(config) if isinstance(config, dict) else set()
-        if not any(variable == "RASSYMIND_API_KEY" or variable.endswith(KEY_SUFFIX) for variable in variables):
-            errors.append(
-                f"{app.name}/config.json: form must expose RASSYMIND_API_KEY "
-                f"or an app-prefixed *{KEY_SUFFIX} field"
-            )
+            variables = form_variables(config) if isinstance(config, dict) else set()
+            if not any(variable == "RASSYMIND_API_KEY" or variable.endswith(KEY_SUFFIX) for variable in variables):
+                errors.append(
+                    f"{app.name}/config.json: form must expose RASSYMIND_API_KEY "
+                    f"or an app-prefixed *{KEY_SUFFIX} field"
+                )
 
-        try:
-            compose = compose_path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError) as error:
-            errors.append(f"{app.name}: cannot read docker-compose.yml ({type(error).__name__})")
+        compose_path_problem = contract_path_error(app, compose_path)
+        if compose_path_problem:
+            errors.append(compose_path_problem)
             compose = ""
-        if not has_canonical_gateway_default(compose):
-            errors.append(
-                f"{app.name}/docker-compose.yml: direct consumer must default its gateway "
-                "to host.docker.internal:8844"
-            )
+        else:
+            try:
+                compose = compose_path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError) as error:
+                errors.append(f"{app.name}: cannot read docker-compose.yml ({type(error).__name__})")
+                compose = ""
+            if not has_canonical_gateway_default(compose):
+                errors.append(
+                    f"{app.name}/docker-compose.yml: direct consumer must default its gateway "
+                    "to host.docker.internal:8844"
+                )
 
         for path in active_files(app):
             lines = text_lines(path)
