@@ -5,7 +5,7 @@ describe("buildHealthReport", () => {
   test("reports current readiness when required runtime settings are present", () => {
     const report = buildHealthReport({
       RASSY_ONLINE_PUBLIC_BASE_URL: "https://rassy.online",
-      RASSYCODEX_BASE_URL: "http://host.docker.internal:8844",
+      RASSYMIND_BASE_URL: "http://host.docker.internal:8844",
       DATABASE_URL: "postgresql://rassy:secret@postgres:5432/rassy_online",
       QDRANT_URL: "http://rassy-online-qdrant:6333",
       RASSY_ONLINE_UPLOAD_ROOT: "/data/uploads"
@@ -13,7 +13,7 @@ describe("buildHealthReport", () => {
 
     expect(report.ok).toBe(true);
     expect(report.stage).toBe("stage-5-magical-ux");
-    expect(report.dependencies.rassycodex.configured).toBe(true);
+    expect(report.dependencies.rassymind.configured).toBe(true);
     expect(report.dependencies.database.configured).toBe(true);
     expect(report.dependencies.database.target).toBe("postgresql://rassy:***@postgres:5432/rassy_online");
     expect(report.dependencies.qdrant.configured).toBe(true);
@@ -26,7 +26,7 @@ describe("buildHealthReport", () => {
     expect(report.ok).toBe(false);
     expect(report.missing).toEqual([
       "RASSY_ONLINE_PUBLIC_BASE_URL",
-      "RASSYCODEX_BASE_URL",
+      "RASSYMIND_BASE_URL",
       "DATABASE_URL",
       "QDRANT_URL",
       "RASSY_ONLINE_UPLOAD_ROOT"

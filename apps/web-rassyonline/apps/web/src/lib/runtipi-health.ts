@@ -12,7 +12,7 @@ export type HealthReport = {
   publicBaseUrl: string | null;
   uploadRoot: string | null;
   dependencies: {
-    rassycodex: DependencyHealth;
+    rassymind: DependencyHealth;
     database: DependencyHealth;
     qdrant: DependencyHealth;
   };
@@ -21,7 +21,7 @@ export type HealthReport = {
 
 const REQUIRED_ENV = [
   "RASSY_ONLINE_PUBLIC_BASE_URL",
-  "RASSYCODEX_BASE_URL",
+  "RASSYMIND_BASE_URL",
   "DATABASE_URL",
   "QDRANT_URL",
   "RASSY_ONLINE_UPLOAD_ROOT"
@@ -60,7 +60,7 @@ export function buildHealthReport(env: RuntimeEnv): HealthReport {
     publicBaseUrl: present(env.RASSY_ONLINE_PUBLIC_BASE_URL) ? env.RASSY_ONLINE_PUBLIC_BASE_URL : null,
     uploadRoot: present(env.RASSY_ONLINE_UPLOAD_ROOT) ? env.RASSY_ONLINE_UPLOAD_ROOT : null,
     dependencies: {
-      rassycodex: dependency(env.RASSYCODEX_BASE_URL),
+      rassymind: dependency(env.RASSYMIND_BASE_URL),
       database: dependency(env.DATABASE_URL),
       qdrant: dependency(env.QDRANT_URL)
     },

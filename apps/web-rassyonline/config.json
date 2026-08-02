@@ -5,15 +5,15 @@
   "exposable": true,
   "dynamic_config": true,
   "id": "web-rassyonline",
-  "description": "A magical Runtipi-native RassyCodex web app with public chat, accounts, per-user vector workspaces, document toggles, and admin controls.",
-  "tipi_version": 3,
-  "version": "0.1.4",
+  "description": "A magical Runtipi-native RassyMind web app with public chat, accounts, per-user vector workspaces, document toggles, and admin controls.",
+  "tipi_version": 4,
+  "version": "0.1.5",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
     "utilities"
   ],
-  "short_desc": "Magical public RassyCodex chat with accounts, documents, vectors, and admin controls.",
+  "short_desc": "Magical public RassyMind chat with accounts, documents, vectors, and admin controls.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/gpu-private-store",
   "form_fields": [
@@ -44,20 +44,20 @@
     },
     {
       "type": "text",
-      "label": "RassyCodex Base URL",
+      "label": "RassyMind Base URL",
       "max": 256,
       "min": 1,
       "required": true,
-      "env_variable": "RASSYCODEX_BASE_URL",
+      "env_variable": "RASSYMIND_BASE_URL",
       "default": "http://host.docker.internal:8844"
     },
     {
       "type": "password",
-      "label": "RassyCodex API Key",
+      "label": "RassyMind API Key",
       "max": 512,
-      "min": 0,
-      "required": false,
-      "env_variable": "RASSYCODEX_API_KEY"
+      "min": 1,
+      "required": true,
+      "env_variable": "RASSYMIND_API_KEY"
     },
     {
       "type": "text",
