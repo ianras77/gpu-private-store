@@ -73,6 +73,20 @@ class ValidatorTests(unittest.TestCase):
 
         self.assertEqual([], validator.validate_root(self.root))
 
+    def test_ignores_symlinked_content_outside_the_app(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-one")
+        with tempfile.TemporaryDirectory() as external_directory:
+            external = Path(external_directory) / "outside.txt"
+            external.write_text("RASSYCODEX_API_BASE\n", encoding="utf-8")
+            (app / "outside.txt").symlink_to(external)
+            external_tree = Path(external_directory) / "tree"
+            external_tree.mkdir()
+            (external_tree / "legacy.txt").write_text("RASSYGPT\n", encoding="utf-8")
+            (app / "outside-tree").symlink_to(external_tree, target_is_directory=True)
+
+            self.assertEqual([], validator.validate_root(self.root))
+
     def test_reports_missing_key_gateway_and_disallowed_alias(self) -> None:
         validator = load_validator()
         app = self.add_app("web-one", key="OTHER_API_KEY")
@@ -159,6 +173,59 @@ class ValidatorTests(unittest.TestCase):
         errors = validator.validate_root(self.root)
 
         self.assertTrue(any("must default its gateway" in error for error in errors), errors)
+
+    def test_accepts_compose_environment_mapping_list_flow_and_multiple_services(self) -> None:
+        validator = load_validator()
+        variants = {
+            "web-mapping": (
+                "services:\n  app:\n    environment:\n"
+                "      RASSYMIND_API_BASE: http://host.docker.internal:8844/v1\n"
+            ),
+            "web-list": (
+                "services:\n  app:\n    environment:\n"
+                "      - APP_RASSYMIND_API_BASE=http://host.docker.internal:8844/v1\n"
+            ),
+            "web-flow": (
+                "services: {app: {environment: {RASSYMIND_BASE_URL: "
+                '"http://host.docker.internal:8844/v1"}}}\n'
+            ),
+            "web-multiple": (
+                "services:\n  database:\n    environment:\n      POSTGRES_DB: app\n"
+                "  app:\n    environment:\n"
+                "      APP_RASSYMIND_API_BASE: http://host.docker.internal:8844/v1\n"
+            ),
+        }
+        for app_name, compose in variants.items():
+            app = self.add_app(app_name)
+            (app / "docker-compose.yml").write_text(compose, encoding="utf-8")
+
+        self.assertEqual([], validator.validate_root(self.root))
+
+    def test_rejects_gateway_host_in_compose_extension_and_label(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-one")
+        (app / "docker-compose.yml").write_text(
+            "x-RASSYMIND_API_BASE: http://host.docker.internal:8844/v1\n"
+            "services:\n  app:\n    labels:\n"
+            "      RASSYMIND_API_BASE: http://host.docker.internal:8844/v1\n",
+            encoding="utf-8",
+        )
+
+        errors = validator.validate_root(self.root)
+
+        self.assertTrue(any("must default its gateway" in error for error in errors), errors)
+
+    def test_handles_null_form_fields_deterministically(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-one")
+        (app / "config.json").write_text('{"form_fields": null}\n', encoding="utf-8")
+
+        first = validator.validate_root(self.root)
+        second = validator.validate_root(self.root)
+
+        self.assertEqual(first, second)
+        self.assertEqual(1, len(first), first)
+        self.assertIn("form must expose RASSYMIND_API_KEY", first[0])
 
     def test_does_not_treat_supporting_learning_apps_as_direct_consumers(self) -> None:
         validator = load_validator()

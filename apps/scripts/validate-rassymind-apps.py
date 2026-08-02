@@ -7,6 +7,8 @@ import json
 import re
 from pathlib import Path
 
+import yaml
+
 
 ROOT = Path(__file__).resolve().parents[1]
 LEARNING_AI_APP_NAMES = (
@@ -96,10 +98,6 @@ BINARY_SUFFIXES = frozenset(
     }
 )
 ALIAS_PATTERN = re.compile(r"(?<![A-Za-z0-9_])rassy-[a-z0-9-]+")
-GATEWAY_DEFAULT_PATTERN = re.compile(
-    r"^\s*(?:-\s*)?[A-Z0-9_]*RASSYMIND_(?:API_BASE|BASE_URL)\s*(?::|=)"
-    r"[^#]*host\.docker\.internal:8844"
-)
 MODEL_CONTEXT_PATTERN = re.compile(
     r"(?:ALIAS|CHAT|CODER|EMBED|LLM|MODEL|RERANK|STT|SUMMAR|TTS)", re.IGNORECASE
 )
@@ -113,9 +111,12 @@ def scoped_apps(root: Path) -> list[Path]:
 
 
 def form_variables(config: dict) -> set[str]:
+    fields = config.get("form_fields")
+    if not isinstance(fields, list):
+        return set()
     return {
         variable
-        for field in config.get("form_fields", [])
+        for field in fields
         if isinstance(field, dict)
         and isinstance((variable := field.get("env_variable")), str)
     }
@@ -124,6 +125,8 @@ def form_variables(config: dict) -> set[str]:
 def active_files(app: Path) -> list[Path]:
     files: list[Path] = []
     for path in app.rglob("*"):
+        if path.is_symlink():
+            continue
         relative = path.relative_to(app)
         if any(part in IGNORED_DIRECTORIES or part.endswith(".cache") for part in relative.parts):
             continue
@@ -146,12 +149,43 @@ def text_lines(path: Path) -> list[str] | None:
         return None
 
 
+def is_gateway_variable(name: object) -> bool:
+    return isinstance(name, str) and (
+        name in {"RASSYMIND_API_BASE", "RASSYMIND_BASE_URL"}
+        or name.endswith("_RASSYMIND_API_BASE")
+    )
+
+
+def environment_items(environment: object) -> list[tuple[object, object]]:
+    if isinstance(environment, dict):
+        return list(environment.items())
+    if not isinstance(environment, list):
+        return []
+
+    items: list[tuple[object, object]] = []
+    for entry in environment:
+        if isinstance(entry, str) and "=" in entry:
+            items.append(tuple(entry.split("=", 1)))
+        elif isinstance(entry, dict):
+            items.extend(entry.items())
+    return items
+
+
 def has_canonical_gateway_default(compose: str) -> bool:
-    """Return whether a live RassyMind API-base assignment uses the gateway."""
-    for raw_line in compose.splitlines():
-        line = raw_line.split("#", 1)[0]
-        if GATEWAY_DEFAULT_PATTERN.search(line):
-            return True
+    """Inspect only Compose service environments for a canonical gateway value."""
+    try:
+        document = yaml.safe_load(compose)
+    except yaml.YAMLError:
+        return False
+    if not isinstance(document, dict) or not isinstance(document.get("services"), dict):
+        return False
+
+    for service in document["services"].values():
+        if not isinstance(service, dict):
+            continue
+        for name, value in environment_items(service.get("environment")):
+            if is_gateway_variable(name) and "host.docker.internal:8844" in str(value):
+                return True
     return False
 
 
