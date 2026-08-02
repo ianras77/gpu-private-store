@@ -98,6 +98,54 @@ class ValidatorTests(unittest.TestCase):
 
         self.assertTrue(any("aliases.ts:1" in error and "rassy-general" in error for error in errors), errors)
 
+    def test_reports_known_predecessor_aliases_without_model_context(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-one")
+        retired = (
+            "rassy-general",
+            "rassy-codex",
+            "rassy-codex-lite",
+            "rassy-agent",
+            "rassy-worker",
+            "rassy-worker-code",
+            "rassy-summarizer",
+        )
+        (app / "settings.md").write_text(
+            "Legacy values: " + ", ".join(f"`{alias}`" for alias in retired) + "\n",
+            encoding="utf-8",
+        )
+
+        errors = validator.validate_root(self.root)
+
+        for alias in retired:
+            self.assertTrue(any(alias in error for error in errors), (alias, errors))
+
+    def test_ignores_non_model_rassy_identifiers(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-one")
+        (app / "identifiers.ts").write_text(
+            'const product = "rassy-app";\n'
+            'const service = "rassy-online-web";\n'
+            'const cssClass = "rassy-wave-primary";\n'
+            'const transition = "rassy-produced-transitions";\n'
+            'const header = "x-rassy-model";\n'
+            'const storageKey = "mr-rassy-radio-chat-client-id";\n',
+            encoding="utf-8",
+        )
+
+        self.assertEqual([], validator.validate_root(self.root))
+
+    def test_reports_unknown_alias_in_model_context(self) -> None:
+        validator = load_validator()
+        app = self.add_app("web-one")
+        (app / "settings.ts").write_text(
+            'const configuredModel = "rassy-obsolete";\n', encoding="utf-8"
+        )
+
+        errors = validator.validate_root(self.root)
+
+        self.assertTrue(any("rassy-obsolete" in error for error in errors), errors)
+
     def test_rejects_gateway_host_found_only_in_a_comment(self) -> None:
         validator = load_validator()
         app = self.add_app("web-one")

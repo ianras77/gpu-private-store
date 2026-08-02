@@ -31,6 +31,19 @@ ALLOWED_ALIASES = frozenset(
         "rassy-tts",
     }
 )
+RETIRED_MODEL_ALIASES = frozenset(
+    {
+        "rassy-agent",
+        "rassy-code-agent",
+        "rassy-coder",
+        "rassy-codex",
+        "rassy-codex-lite",
+        "rassy-general",
+        "rassy-summarizer",
+        "rassy-worker",
+        "rassy-worker-code",
+    }
+)
 
 IGNORED_DIRECTORIES = frozenset(
     {
@@ -83,12 +96,12 @@ BINARY_SUFFIXES = frozenset(
     }
 )
 ALIAS_PATTERN = re.compile(r"(?<![A-Za-z0-9_])rassy-[a-z0-9-]+")
-QUOTED_ALIAS_PATTERN = re.compile(
-    r"(?P<quote>['\"`])(?P<alias>rassy-[a-z0-9-]+)(?P=quote)"
-)
 GATEWAY_DEFAULT_PATTERN = re.compile(
     r"^\s*(?:-\s*)?[A-Z0-9_]*RASSYMIND_(?:API_BASE|BASE_URL)\s*(?::|=)"
     r"[^#]*host\.docker\.internal:8844"
+)
+MODEL_CONTEXT_PATTERN = re.compile(
+    r"(?:ALIAS|CHAT|CODER|EMBED|LLM|MODEL|RERANK|STT|SUMMAR|TTS)", re.IGNORECASE
 )
 
 
@@ -184,11 +197,17 @@ def validate_root(root: Path) -> list[str]:
                         errors.append(
                             f"{relative}:{line_number}: retired name {retired_name} must be replaced with RASSYMIND"
                         )
-                aliases = {
-                    match.group("alias") for match in QUOTED_ALIAS_PATTERN.finditer(line)
-                }
-                if "MODEL" in line.upper():
-                    aliases.update(ALIAS_PATTERN.findall(line))
+                aliases: set[str] = set()
+                for match in ALIAS_PATTERN.finditer(line):
+                    alias = match.group()
+                    prefix = line[: match.start()]
+                    if re.search(r"[A-Za-z0-9_]-$", prefix):
+                        continue
+                    if alias in RETIRED_MODEL_ALIASES or (
+                        MODEL_CONTEXT_PATTERN.search(prefix)
+                        and (":" in prefix or "=" in prefix)
+                    ):
+                        aliases.add(alias)
                 for alias in sorted(aliases - ALLOWED_ALIASES):
                     errors.append(
                         f"{relative}:{line_number}: model alias {alias} is outside the RassyMind allowlist"
