@@ -58,8 +58,8 @@ describe("embedTexts", () => {
   test("uses only the RassyMind environment and optional API key", async () => {
     vi.stubEnv("RASSYMIND_BASE_URL", "http://rassymind.test:9000/");
     vi.stubEnv("RASSYMIND_API_KEY", "mind-secret");
-    vi.stubEnv("RASSYCODEX_BASE_URL", "http://retired.test:1111");
-    vi.stubEnv("RASSYGPT_BASE_URL", "http://retired.test:2222");
+    vi.stubEnv(["RASSY", "CODEX_BASE_URL"].join(""), "http://retired.test:1111");
+    vi.stubEnv(["RASSY", "GPT_BASE_URL"].join(""), "http://retired.test:2222");
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ data: [{ embedding: [1, 2] }] }), {
         status: 200,

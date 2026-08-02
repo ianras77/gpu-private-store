@@ -2,6 +2,8 @@
 
 Rassy Online is the Runtipi app for `rassy.online`, designed as the public web workbench for RassyMind.
 
+Rassy Online does not expose image generation; its RassyMind experience is focused on chat, documents, retrieval, and web context.
+
 The app includes:
 
 - Runtipi metadata and dynamic compose.
