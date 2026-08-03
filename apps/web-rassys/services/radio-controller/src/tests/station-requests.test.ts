@@ -4,7 +4,7 @@ vi.mock("../redis", () => ({
   redis: {}
 }));
 
-import { stationRequestsMatch, type StationRequest } from "../station-requests";
+import { isPendingStationRequest, stationRequestsMatch, type StationRequest } from "../station-requests";
 
 const buildRequest = (overrides: Partial<StationRequest> = {}): StationRequest => ({
   id: overrides.id ?? "request-1",
@@ -63,5 +63,17 @@ describe("stationRequestsMatch", () => {
     });
 
     expect(stationRequestsMatch(existing, candidate)).toBe(true);
+  });
+});
+
+describe("isPendingStationRequest", () => {
+  it("keeps accepted and considering requests available to the scheduler", () => {
+    expect(isPendingStationRequest(buildRequest({ status: "accepted" }))).toBe(true);
+    expect(isPendingStationRequest(buildRequest({ status: "considering" }))).toBe(true);
+  });
+
+  it("does not schedule a request again after it has entered the playback queue", () => {
+    expect(isPendingStationRequest(buildRequest({ status: "queued" }))).toBe(false);
+    expect(isPendingStationRequest(buildRequest({ status: "fulfilled" }))).toBe(false);
   });
 });

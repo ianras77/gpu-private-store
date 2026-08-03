@@ -62,6 +62,9 @@ const normalizeTrackIds = (value?: string[] | null) =>
 const isFacetRequest = (request: StationRequest) =>
   request.kind === "track" && Boolean(request.intent && request.intent !== "track");
 
+export const isPendingStationRequest = (request: StationRequest) =>
+  request.kind === "track" && request.status !== "queued" && request.status !== "fulfilled";
+
 export const stationRequestsMatch = (request: StationRequest, candidate: StationRequest) => {
   if (request.kind !== candidate.kind) return false;
   if ((request.target ?? null) !== (candidate.target ?? null)) return false;
@@ -210,7 +213,7 @@ export const readStationRequestSummaries = async (limit = 10) => {
 
 export const listPendingTrackRequests = async (limit = 10) => {
   const requests = await listStationRequests(limit);
-  return requests.filter((request) => request.kind === "track");
+  return requests.filter(isPendingStationRequest);
 };
 
 export const enqueueStationRequest = async (
@@ -262,7 +265,21 @@ export const consumeTrackRequest = async (trackId: string) => {
 
   const remainingTrackIds = normalizeTrackIds(match.trackIds).filter((candidateTrackId) => candidateTrackId !== trackId);
   if ((match.trackId === trackId || !match.trackId) && remainingTrackIds.length === 0) {
-    return removeStoredRequest(match);
+    return replaceStoredRequest(match, {
+      id: match.id,
+      kind: match.kind,
+      summary: match.summary,
+      listenerMessage: match.listenerMessage ?? null,
+      trackId: null,
+      trackIds: [],
+      reason: match.reason ?? null,
+      response: match.response ?? null,
+      createdAt: match.createdAt,
+      target: match.target ?? null,
+      source: match.source ?? null,
+      status: "queued",
+      intent: match.intent ?? null
+    });
   }
 
   return replaceStoredRequest(match, {
@@ -277,7 +294,7 @@ export const consumeTrackRequest = async (trackId: string) => {
     createdAt: match.createdAt,
     target: match.target ?? null,
     source: match.source ?? null,
-    status: remainingTrackIds.length > 0 ? match.status ?? "accepted" : "fulfilled",
+    status: remainingTrackIds.length > 0 ? match.status ?? "accepted" : "queued",
     intent: match.intent ?? null
   });
 };

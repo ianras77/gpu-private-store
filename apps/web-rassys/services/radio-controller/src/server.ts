@@ -3123,12 +3123,12 @@ export const buildServer = () => {
       safeJson<{ id?: string }>(await redis.get(NOW_KEY))?.id
     ].filter(Boolean) as string[]);
     await prisma.requestLog.create({ data: { request: summary } });
-    if (matchedTrack?.id && !liveTrackIds.has(matchedTrack.id)) {
+    if (!matchedTrack?.id || !liveTrackIds.has(matchedTrack.id)) {
       await enqueueStationRequest({
         kind: "track",
         summary,
-        trackId: matchedTrack.id,
-        trackIds: [matchedTrack.id],
+        trackId: matchedTrack?.id ?? null,
+        trackIds: matchedTrack?.id ? [matchedTrack.id] : [],
         listenerMessage: safeRequest,
         response: "Sent in from the request form.",
         source: "form",
