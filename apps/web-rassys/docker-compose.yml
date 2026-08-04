@@ -212,6 +212,7 @@ services:
       - internal
     volumes:
       - ${ROOT_FOLDER_HOST}/media/data/music:${MUSIC_LIBRARY_PATH:-/media/music}:ro
+      - /mnt/cannonball:/mnt/cannonball:ro
       - type: bind
         source: ${HOST_MUSIC_SYMLINK_ROOT:-${ROOT_FOLDER_HOST}/media/data/music}
         target: ${HOST_MUSIC_SYMLINK_ROOT:-/media/music}
@@ -303,6 +304,7 @@ services:
     volumes:
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys/infra/liquidsoap/rassy.liq:/etc/liquidsoap/rassy.liq:ro
       - ${ROOT_FOLDER_HOST}/media/data/music:${MUSIC_LIBRARY_PATH:-/media/music}:ro
+      - /mnt/cannonball:/mnt/cannonball:ro
       - type: bind
         source: ${HOST_MUSIC_SYMLINK_ROOT:-${ROOT_FOLDER_HOST}/media/data/music}
         target: ${HOST_MUSIC_SYMLINK_ROOT:-/media/music}
