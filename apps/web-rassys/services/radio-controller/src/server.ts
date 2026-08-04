@@ -2479,13 +2479,16 @@ export const buildServer = () => {
         const skipTarget = skipIntent ? findSkipTarget(context, safeMessage) : null;
         const strongSkipReason = skipIntent ? hasStrongSkipReason(safeMessage) : false;
         const llmReply = defaultDJ.replyToListener
-          ? await defaultDJ.replyToListener(context, {
-              message: safeMessage,
-              recentChat,
-              requestMatches,
-              requestCandidates,
-              liveSnapshot
-            })
+          ? await withSoftTimeout(
+              defaultDJ.replyToListener(context, {
+                message: safeMessage,
+                recentChat,
+                requestMatches,
+                requestCandidates,
+                liveSnapshot
+              }),
+              Number(process.env.RADIO_CHAT_LLM_TIMEOUT_MS ?? 8000)
+            )
           : null;
         let replySource: "llm" | "fallback" = llmReply ? "llm" : "fallback";
         let generatedReply =
