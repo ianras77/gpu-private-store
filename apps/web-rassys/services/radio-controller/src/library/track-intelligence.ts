@@ -2026,7 +2026,8 @@ export const recordTrackPlayInsight = async (track: TrackReference) => {
 export const rankTracksForRequestLine = async (
   message: string,
   tracks: TrackReference[],
-  limit = 5
+  limit = 5,
+  options: { remote?: boolean } = {}
 ) => {
   const profile = buildRequestProfile(message);
   if (!profile.normalized || profile.tokens.length === 0) {
@@ -2047,13 +2048,15 @@ export const rankTracksForRequestLine = async (
   }
 
   const insights = await getTrackInsightMap(shortlist);
-  const rerankScores = await fetchRerankScores(
-    profile.normalized,
-    shortlist.map((track) => ({
-      trackId: track.id,
-      text: buildRerankDocument(track, insights.get(track.id) ?? buildTrackInsightScaffold(track))
-    }))
-  );
+  const rerankScores = options.remote === false
+    ? null
+    : await fetchRerankScores(
+        profile.normalized,
+        shortlist.map((track) => ({
+          trackId: track.id,
+          text: buildRerankDocument(track, insights.get(track.id) ?? buildTrackInsightScaffold(track))
+        }))
+      );
   const vectorsByTrackId = new Map<string, number[] | null>();
   const rows = await prisma.libraryTrackInsight.findMany({
     where: {
@@ -2070,7 +2073,7 @@ export const rankTracksForRequestLine = async (
   }
 
   let queryEmbedding: number[] | null = null;
-  if (profile.broadLane || profile.wantsDeepCut) {
+  if (options.remote !== false && (profile.broadLane || profile.wantsDeepCut)) {
     const embeddings = await fetchEmbeddings([profile.normalized]);
     queryEmbedding = embeddings?.[0] ?? null;
   }

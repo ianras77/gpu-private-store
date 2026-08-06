@@ -1077,7 +1077,7 @@ const toRequestMatch = (track: {
 });
 
 const findRequestMatches = async (message: string, limit = 5): Promise<RequestMatchList> => {
-  const matches = await rankTracksForRequestLine(message, library.getTracks(), limit);
+  const matches = await rankTracksForRequestLine(message, library.getTracks(), limit, { remote: false });
   return matches.map((track) => toRequestMatch(track as Track));
 };
 
@@ -1137,7 +1137,7 @@ const buildListenerRequestCandidates = async (
   context.librarySample.slice(0, broadLaneRequest ? 24 : 10).forEach(add);
 
   const candidateLimit = broadLaneRequest ? 16 : 12;
-  const reranked = await rankTracksForRequestLine(message, candidates, candidateLimit);
+  const reranked = await rankTracksForRequestLine(message, candidates, candidateLimit, { remote: false });
   const ordered = reranked.length > 0 ? reranked : candidates.slice(0, candidateLimit);
   return ordered.map((track) => toRequestMatch(track));
 };

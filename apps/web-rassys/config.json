@@ -7,7 +7,7 @@
   "id": "web-rassys",
   "description": "Public site, live radio, Minecraft bridge, RassyMind, Icecast, Liquidsoap, Redis, and Postgres in one stack.",
   "tipi_version": 22,
-  "version": "1.0.22",
+  "version": "1.0.23",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
