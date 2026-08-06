@@ -1614,8 +1614,12 @@ const buildSnapshotContext = (context, setlistTracks) => {
     };
 };
 const queuePublishedBoothDossierRefresh = async (context, input, signature) => {
-    if (!config.CHESHIRE_BASE_URL)
+    if (!config.RASSYMIND_BASE_URL)
         return;
+    if (await hasRecentChatActivity().catch(() => false)) {
+        logger.info({ signature }, "Recent listener chat detected; deferring published booth dossier refresh");
+        return;
+    }
     const acquired = await redis.set(boothBuildingKey(signature), "1", "EX", Number(process.env.RADIO_HEARS_LOCK_SECONDS ?? 90), "NX");
     if (acquired !== "OK")
         return;
@@ -2360,8 +2364,8 @@ const refreshLibrary = async () => {
         logger.info("Recent listener chat detected; deferring LLM-backed library enrichment");
     }
     void syncTrackInsights(library.getTracks(), {
-        embed: Boolean(config.CHESHIRE_BASE_URL) && !chatIsActive,
-        analyze: Boolean(config.CHESHIRE_BASE_URL) && !chatIsActive,
+        embed: Boolean(config.RASSYMIND_BASE_URL) && !chatIsActive,
+        analyze: Boolean(config.RASSYMIND_BASE_URL) && !chatIsActive,
         limit: Math.max(0, config.RADIO_KNOWLEDGE_BOOTSTRAP_LIMIT),
         analysisLimit: Math.max(0, config.RADIO_KNOWLEDGE_ANALYSIS_LIMIT)
     }).catch((error) => {
@@ -2442,7 +2446,7 @@ export const startScheduler = async () => {
     if ((await redis.get(MOOD_KEY)) === null) {
         await redis.set(MOOD_KEY, config.RADIO_MOOD);
     }
-    if (config.CHESHIRE_BASE_URL) {
+    if (config.RASSYMIND_BASE_URL) {
         const currentDjMode = await redis.get(DJ_MODE_KEY);
         if (!currentDjMode || currentDjMode === "fallback") {
             await redis.set(DJ_MODE_KEY, defaultDJ.id);

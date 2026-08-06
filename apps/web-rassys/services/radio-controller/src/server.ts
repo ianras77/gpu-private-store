@@ -1022,7 +1022,7 @@ const queueBoothDossierRefresh = async (
   signature: string,
   existingSnapshotAt?: number | null
 ) => {
-  if (!config.CHESHIRE_BASE_URL) return;
+  if (!config.RASSYMIND_BASE_URL) return;
   if (!(await shouldQueueBoothRefresh(existingSnapshotAt))) return;
 
   const acquired = await redis.set(
@@ -2111,10 +2111,10 @@ export const buildServer = () => {
       })),
       requestLineDepth,
       llmDirector: {
-        active: Boolean(config.CHESHIRE_BASE_URL),
+        active: Boolean(config.RASSYMIND_BASE_URL),
         driving: (djMode ?? defaultDJ.id).startsWith(defaultDJ.id),
         name: "Mr Rassy",
-        model: config.CHESHIRE_MODEL
+        model: config.RASSYMIND_MODEL
       }
     };
   });

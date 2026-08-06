@@ -2,6 +2,11 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import crypto from "crypto";
+import {
+    canAcquireQueueSlot,
+    defaultQueueWaitMs,
+    shouldShedBackgroundLane
+} from "./queue-policy.js";
 const toNumber = (value, fallback) => {
     if (!value)
         return fallback;
@@ -30,12 +35,13 @@ const config = {
     RERANK_BASE_URL: process.env.RERANK_BASE_URL ?? process.env.LLM_BASE_URL ?? "http://host.docker.internal:8844/v1",
     RERANK_MODEL: process.env.RERANK_MODEL ?? "rassy-rerank",
     RERANK_API_KEY: process.env.RERANK_API_KEY ?? process.env.LLM_API_KEY ?? "",
-    REQUEST_TIMEOUT_MS: toNumber(process.env.REQUEST_TIMEOUT_MS, 30000),
-    REQUEST_RETRIES: toNumber(process.env.REQUEST_RETRIES, 1),
-    RETRY_DELAY_MS: toNumber(process.env.RETRY_DELAY_MS, 300),
+    REQUEST_TIMEOUT_MS: toNumber(process.env.REQUEST_TIMEOUT_MS, 45000),
+    REQUEST_RETRIES: toNumber(process.env.REQUEST_RETRIES, 0),
+    RETRY_DELAY_MS: toNumber(process.env.RETRY_DELAY_MS, 0),
     LLM_KEEP_ALIVE: process.env.LLM_KEEP_ALIVE ?? "15m",
     QUEUE_MAX_ACTIVE_REQUESTS: toNumber(process.env.QUEUE_MAX_ACTIVE_REQUESTS, 3),
-    QUEUE_MAX_WAIT_MS: toNumber(process.env.QUEUE_MAX_WAIT_MS, 90000)
+    QUEUE_MAX_WAIT_MS: toNumber(process.env.QUEUE_MAX_WAIT_MS, 10000),
+    QUEUE_RESERVED_LISTENER_SLOTS: toNumber(process.env.QUEUE_RESERVED_LISTENER_SLOTS, 1)
 };
 const laneState = {
     llm: {
@@ -95,14 +101,29 @@ const dispatchNextQueuedRequest = () => {
     if (cheshireQueueState.active >= Math.max(1, config.QUEUE_MAX_ACTIVE_REQUESTS)) {
         return;
     }
-    const next = cheshireQueueState.queue
+    const listenerPressure = cheshireQueueState.queuedByLane.has("listener");
+    const nextIndex = cheshireQueueState.queue
+        .map((ticket, index) => ({ ticket, index }))
+        .filter(({ ticket }) =>
+        canAcquireQueueSlot(
+            ticket.lane,
+            cheshireQueueState.active,
+            config.QUEUE_MAX_ACTIVE_REQUESTS,
+            config.QUEUE_RESERVED_LISTENER_SLOTS,
+            listenerPressure
+        ))
         .sort((left, right) => {
-        if (left.priority !== right.priority) {
-            return left.priority - right.priority;
-        }
-        return left.createdAt - right.createdAt;
-    })
-        .shift();
+            const a = left.ticket;
+            const b = right.ticket;
+            if (a.priority !== b.priority) {
+                return a.priority - b.priority;
+            }
+            return a.createdAt - b.createdAt;
+        })
+        .at(0)?.index;
+    if (nextIndex === undefined)
+        return;
+    const next = cheshireQueueState.queue.splice(nextIndex, 1)[0];
     if (!next)
         return;
     if (next.timeoutId)
@@ -124,7 +145,19 @@ const makeQueueRelease = (lane) => {
     };
 };
 const acquireQueueSlot = async (lane, priority, waitMs) => {
-    if (cheshireQueueState.active < Math.max(1, config.QUEUE_MAX_ACTIVE_REQUESTS)) {
+    const listenerPressure =
+        lane === "listener" ||
+        cheshireQueueState.activeByLane.has("listener") ||
+        cheshireQueueState.queuedByLane.has("listener");
+    if (shouldShedBackgroundLane(lane, listenerPressure))
+        return null;
+    if (canAcquireQueueSlot(
+        lane,
+        cheshireQueueState.active,
+        config.QUEUE_MAX_ACTIVE_REQUESTS,
+        config.QUEUE_RESERVED_LISTENER_SLOTS,
+        listenerPressure
+    )) {
         cheshireQueueState.active += 1;
         bumpLaneCount(cheshireQueueState.activeByLane, lane, 1);
         return makeQueueRelease(lane);
@@ -219,25 +252,6 @@ const normalizeQueuePriority = (value, fallback) => {
         return raw;
     }
     return fallback;
-};
-const defaultQueueWaitMs = (lane) => {
-    if (lane === "listener")
-        return 10000;
-    if (lane === "notes")
-        return 45000;
-    if (lane === "programming")
-        return 10000;
-    if (lane === "web")
-        return 10000;
-    if (lane === "dm")
-        return 15000;
-    if (lane === "admin")
-        return 10000;
-    if (lane === "curio")
-        return 2500;
-    if (lane === "embeddings")
-        return 4000;
-    return 8000;
 };
 const readQueueWaitMs = (value, fallback) => readOverrideInt(value, fallback, {
     min: 0,

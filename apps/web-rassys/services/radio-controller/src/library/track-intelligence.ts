@@ -970,7 +970,7 @@ const buildInsightUpdate = (
 };
 
 const shouldRefreshTrackAnalysis = (existing?: LibraryTrackInsightRow | null) => {
-  if (!config.CHESHIRE_BASE_URL) return false;
+  if (!config.RASSYMIND_BASE_URL) return false;
   if (!existing) return true;
   const hoursSinceLastAnalysis = existing.lastAnalyzedAt
     ? (Date.now() - existing.lastAnalyzedAt.getTime()) / (60 * 60 * 1000)
@@ -1033,11 +1033,11 @@ const requestTrackInsightAnalysis = async (
   track: TrackReference,
   insight: TrackInsight
 ): Promise<TrackInsightAnalysis | null> => {
-  if (!config.CHESHIRE_BASE_URL) return null;
+  if (!config.RASSYMIND_BASE_URL) return null;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), config.RADIO_TRACK_ANALYSIS_TIMEOUT_MS);
   try {
-    const response = await fetch(`${config.CHESHIRE_BASE_URL.replace(/\/$/, "")}/v1/chat/completions`, {
+    const response = await fetch(`${config.RASSYMIND_BASE_URL.replace(/\/$/, "")}/v1/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1047,10 +1047,10 @@ const requestTrackInsightAnalysis = async (
         "x-cheshire-priority": "low",
         "x-cheshire-queue-wait-ms": "2500",
         "x-cheshire-timeout-ms": String(Math.max(1000, config.RADIO_TRACK_ANALYSIS_TIMEOUT_MS - 750)),
-        ...(config.CHESHIRE_API_KEY ? { Authorization: `Bearer ${config.CHESHIRE_API_KEY}` } : {})
+        ...(config.RASSYMIND_API_KEY ? { Authorization: `Bearer ${config.RASSYMIND_API_KEY}` } : {})
       },
       body: JSON.stringify({
-        model: config.CHESHIRE_MODEL,
+        model: config.RASSYMIND_MODEL,
         temperature: 0.26,
         max_tokens: 520,
         response_format: {
@@ -1245,11 +1245,11 @@ const mapWithConcurrency = async <T>(
 };
 
 const fetchEmbeddings = async (input: string[]) => {
-  if (!config.CHESHIRE_BASE_URL || input.length === 0) return null;
+  if (!config.RASSYMIND_BASE_URL || input.length === 0) return null;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 4_500);
   try {
-    const response = await fetch(`${config.CHESHIRE_BASE_URL.replace(/\/$/, "")}/v1/embeddings`, {
+    const response = await fetch(`${config.RASSYMIND_BASE_URL.replace(/\/$/, "")}/v1/embeddings`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1259,7 +1259,7 @@ const fetchEmbeddings = async (input: string[]) => {
         "x-cheshire-priority": "low",
         "x-cheshire-queue-wait-ms": "2500",
         "x-cheshire-timeout-ms": "4000",
-        ...(config.CHESHIRE_API_KEY ? { Authorization: `Bearer ${config.CHESHIRE_API_KEY}` } : {})
+        ...(config.RASSYMIND_API_KEY ? { Authorization: `Bearer ${config.RASSYMIND_API_KEY}` } : {})
       },
       body: JSON.stringify({
         model: config.RADIO_EMBED_MODEL,
@@ -1323,13 +1323,13 @@ const fetchRerankScores = async (
   query: string,
   documents: Array<{ trackId: string; text: string }>
 ) => {
-  if (!config.RADIO_RERANK_ENABLED || !config.CHESHIRE_BASE_URL || documents.length === 0) {
+  if (!config.RADIO_RERANK_ENABLED || !config.RASSYMIND_BASE_URL || documents.length === 0) {
     return null;
   }
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 9_000);
   try {
-    const response = await fetch(`${config.CHESHIRE_BASE_URL.replace(/\/$/, "")}/v1/rerank`, {
+    const response = await fetch(`${config.RASSYMIND_BASE_URL.replace(/\/$/, "")}/v1/rerank`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1339,7 +1339,7 @@ const fetchRerankScores = async (
         "x-cheshire-priority": "normal",
         "x-cheshire-queue-wait-ms": "4500",
         "x-cheshire-timeout-ms": "8500",
-        ...(config.CHESHIRE_API_KEY ? { Authorization: `Bearer ${config.CHESHIRE_API_KEY}` } : {})
+        ...(config.RASSYMIND_API_KEY ? { Authorization: `Bearer ${config.RASSYMIND_API_KEY}` } : {})
       },
       body: JSON.stringify({
         model: config.RADIO_RERANK_MODEL,

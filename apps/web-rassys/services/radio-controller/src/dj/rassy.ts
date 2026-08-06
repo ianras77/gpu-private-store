@@ -1400,7 +1400,7 @@ const buildLibraryDna = (context) => ({
     topGenres: context.libraryProfile?.topGenres?.slice(0, 6) ?? [],
     topDecades: context.libraryProfile?.topDecades?.slice(0, 5) ?? []
 });
-const MR_RASSY_MODEL = config.CHESHIRE_MODEL || "rassy-smart";
+const MR_RASSY_MODEL = config.RASSYMIND_MODEL || "rassy-mind";
 const GENERIC_BOOTH_MEMORY_PATTERN = /\b(lands here|nice flow|good vibe|works because it fits|keeps the (?:room|hour|energy) moving|without flattening|real decision|real choice)\b/i;
 const SPECIFIC_BOOTH_MEMORY_PATTERN = /\b(19|20)\d{2}\b|\b(album|catalog|label|scene|groove|pocket|bass|drums?|vocal|harmony|arrangement|mix|reverb|echo|transition|handoff|request line|listen|hear|notice|catch|wait for)\b/i;
 const pickPromptBoothMemories = (values = []) => Array.from(new Set((values ?? [])
@@ -2236,15 +2236,15 @@ const isActionableDecision = (decision, intent) => {
     return hasTalkScript || hasSnippetSlot;
 };
 const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, options) => {
-    if (!config.CHESHIRE_BASE_URL)
+    if (!config.RASSYMIND_BASE_URL)
         return null;
     const label = options?.label ?? "unknown";
     if (llmCircuit.shouldSkip(label)) {
         return null;
     }
-    const endpoint = `${config.CHESHIRE_BASE_URL.replace(/\/$/, "")}/v1/chat/completions`;
+    const endpoint = `${config.RASSYMIND_BASE_URL.replace(/\/$/, "")}/v1/chat/completions`;
     const buildPayload = (jsonMode = "prompt") => ({
-        model: options?.model ?? config.CHESHIRE_MODEL,
+        model: options?.model ?? config.RASSYMIND_MODEL,
         messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt }
@@ -2261,8 +2261,8 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
     });
     const timeoutMs = Math.max(1000, options?.timeoutMs ?? config.DJ_REQUEST_TIMEOUT_MS);
     const proxyTimeoutMs = Math.max(1000, timeoutMs - 750);
-    const retries = Math.max(0, options?.retries ?? config.CHESHIRE_REQUEST_RETRIES);
-    const retryDelayMs = Math.max(0, options?.retryDelayMs ?? config.CHESHIRE_RETRY_DELAY_MS);
+    const retries = Math.max(0, options?.retries ?? config.RASSYMIND_REQUEST_RETRIES);
+    const retryDelayMs = Math.max(0, options?.retryDelayMs ?? config.RASSYMIND_RETRY_DELAY_MS);
     const laneName = options?.lane ?? "programming";
     const queueWaitMs = Math.max(0, options?.queueWaitMs ?? 1200);
     const jsonMode = options?.jsonMode === "json_object" ? "json_object" : "prompt";
@@ -2283,7 +2283,7 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
                     "x-cheshire-timeout-ms": String(proxyTimeoutMs),
                     "x-cheshire-retries": "0",
                     "x-cheshire-retry-delay-ms": "0",
-                    ...(config.CHESHIRE_API_KEY ? { Authorization: `Bearer ${config.CHESHIRE_API_KEY}` } : {})
+                    ...(config.RASSYMIND_API_KEY ? { Authorization: `Bearer ${config.RASSYMIND_API_KEY}` } : {})
                 },
                 body: JSON.stringify(buildPayload(jsonMode)),
                 signal: controller.signal
@@ -2291,8 +2291,12 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
             if (!response.ok) {
                 const bodySnippet = (await response.text()).slice(0, 240);
                 if (response.status === 503 && bodySnippet.includes("cheshire_queue_busy")) {
+                    options?.onCapacityFailure?.();
                     logger.info({ label, lane: laneName, status: response.status }, "Cheshire proxy queue busy; skipping call");
                     return null;
+                }
+                if (response.status === 429 || response.status >= 500) {
+                    options?.onCapacityFailure?.();
                 }
                 lastFailure = {
                     bodySnippet,
@@ -2359,6 +2363,7 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
             }
         }
         catch (error) {
+            options?.onCapacityFailure?.();
             lastFailure = {
                 error,
                 message: "Cheshire JSON call failed"
@@ -2543,17 +2548,23 @@ const callCheshireDecision = async (context, intent, playlistSize) => {
             analysisLimit: 2,
             limit: Math.min(6, decisionInsightTracks.length)
         });
+        let capacityFailure = false;
         let callSpec = buildDecisionCallSpec(intent, "full");
         let rawDecision = await callCheshireJson(boothSystemPrompt, buildUserPrompt(context, intent, playlistSize, {
             tracks: plan.trackCandidates,
             snippets: plan.snippetCandidates,
             sequenceSketches: plan.sequenceSketches
-        }, plan.frame, "full", decisionInsightMap), decisionSchema, callSpec.temperature, callSpec.options);
+        }, plan.frame, "full", decisionInsightMap), decisionSchema, callSpec.temperature, {
+            ...callSpec.options,
+            onCapacityFailure: () => {
+                capacityFailure = true;
+            }
+        });
         if (rawDecision && (looksLikeTemplateDecision(rawDecision) || !isActionableDecision(rawDecision, intent))) {
             logger.warn({ intent, rawDecision }, "Discarding non-actionable Cheshire decision");
             rawDecision = null;
         }
-        if (!rawDecision) {
+        if (!rawDecision && !capacityFailure) {
             logger.info({ intent }, "Retrying Cheshire decision with compact deck");
             plan = buildDecisionPromptPlan(context, intent, playlistSize, "rescue");
             decisionInsightTracks = plan.trackCandidates
@@ -2571,7 +2582,12 @@ const callCheshireDecision = async (context, intent, playlistSize) => {
                 tracks: plan.trackCandidates,
                 snippets: plan.snippetCandidates,
                 sequenceSketches: plan.sequenceSketches
-            }, plan.frame, "rescue", decisionInsightMap), decisionSchema, callSpec.temperature, callSpec.options);
+            }, plan.frame, "rescue", decisionInsightMap), decisionSchema, {
+                ...callSpec.options,
+                onCapacityFailure: () => {
+                    capacityFailure = true;
+                }
+            });
             if (rawDecision && (looksLikeTemplateDecision(rawDecision) || !isActionableDecision(rawDecision, intent))) {
                 logger.warn({ intent, rawDecision }, "Discarding non-actionable Cheshire rescue decision");
                 rawDecision = null;
@@ -2639,10 +2655,10 @@ const callCheshireListenerReply = async (context, input) => {
         maxTokens: 220,
         timeoutMs: 45000,
         label: "listener-reply",
-        retries: 2,
-        retryDelayMs: 350,
+        retries: 0,
+        retryDelayMs: 0,
         priority: "high",
-        queueWaitMs: 30000,
+        queueWaitMs: 10000,
         lane: "listener",
         model: MR_RASSY_MODEL,
         jsonMode: "json_object"
