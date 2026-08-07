@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { z } from "zod";
 import { config } from "../config";
+import { resolveListenerModel } from "./model-routing";
 import { isBoothDossierGrounded } from "../booth-dossier";
 import { buildTrackInsightScaffold, buildTrackKnowledgeCard, buildTrackTurnIntelligence, getTrackInsightMap, syncTrackInsights } from "../library/track-intelligence";
 import { logger } from "../logger";
@@ -1401,6 +1402,7 @@ const buildLibraryDna = (context) => ({
     topDecades: context.libraryProfile?.topDecades?.slice(0, 5) ?? []
 });
 const MR_RASSY_MODEL = config.RASSYMIND_MODEL || "rassy-mind";
+const MR_RASSY_LISTENER_MODEL = resolveListenerModel(config.RASSYMIND_LISTENER_MODEL);
 const GENERIC_BOOTH_MEMORY_PATTERN = /\b(lands here|nice flow|good vibe|works because it fits|keeps the (?:room|hour|energy) moving|without flattening|real decision|real choice)\b/i;
 const SPECIFIC_BOOTH_MEMORY_PATTERN = /\b(19|20)\d{2}\b|\b(album|catalog|label|scene|groove|pocket|bass|drums?|vocal|harmony|arrangement|mix|reverb|echo|transition|handoff|request line|listen|hear|notice|catch|wait for)\b/i;
 const pickPromptBoothMemories = (values = []) => Array.from(new Set((values ?? [])
@@ -2660,7 +2662,7 @@ const callCheshireListenerReply = async (context, input) => {
         priority: "high",
         queueWaitMs: 10000,
         lane: "listener",
-        model: MR_RASSY_MODEL,
+        model: MR_RASSY_LISTENER_MODEL,
         jsonMode: "json_object"
     });
 };
