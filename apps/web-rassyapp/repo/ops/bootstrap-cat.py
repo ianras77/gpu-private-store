@@ -33,6 +33,36 @@ def _rassyapp_gateway_headers():
     return True
 
 
+def _patch_cat_llm_auth(api_key: str) -> bool:
+    source_path = Path("/app/cat/factory/custom_llm.py")
+    if not api_key.strip() or not source_path.exists():
+        return False
+    source = source_path.read_text()
+    if "_rassyapp_gateway_client_kwargs" in source:
+        return False
+    marker = "from typing import Optional, List, Any, Mapping, Dict\n"
+    if marker not in source or "        super().__init__(**kwargs)" not in source:
+        return False
+    source = source.replace(marker, f"{marker}import os\n", 1)
+    source = source.replace(
+        "        super().__init__(**kwargs)",
+        """        def _rassyapp_gateway_client_kwargs():
+            gateway_key = (os.getenv("CAT_OLLAMA_API_KEY") or os.getenv("OLLAMA_API_KEY") or "").strip()
+            if not gateway_key:
+                return {}
+            return {"headers": {"Authorization": f"Bearer {gateway_key}"}}
+
+        kwargs["client_kwargs"] = {
+            **kwargs.get("client_kwargs", {}),
+            **_rassyapp_gateway_client_kwargs(),
+        }
+        super().__init__(**kwargs)""",
+        1,
+    )
+    source_path.write_text(source)
+    return True
+
+
 ADMIN_PERMISSIONS = {
     "STATUS": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
     "MEMORY": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
@@ -160,7 +190,9 @@ def main() -> int:
     )
     admin_username = _env("CAT_ADMIN_USERNAME", "admin")
     admin_password = _env("CAT_ADMIN_PASSWORD", "admin")
-    _patch_cat_embedder_auth(os.getenv("CAT_OLLAMA_API_KEY", ""))
+    cat_api_key = os.getenv("CAT_OLLAMA_API_KEY", "")
+    _patch_cat_embedder_auth(cat_api_key)
+    _patch_cat_llm_auth(cat_api_key)
 
     if not metadata_path.exists():
         print(f"[cat-bootstrap] metadata not found at {metadata_path}, skipping", file=sys.stderr)
