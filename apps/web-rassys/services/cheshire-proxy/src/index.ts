@@ -7,6 +7,7 @@ import {
     defaultQueueWaitMs,
     shouldShedBackgroundLane
 } from "./queue-policy.js";
+import { resolveCheshireModel } from "./model-routing.js";
 const toNumber = (value, fallback) => {
     if (!value)
         return fallback;
@@ -26,7 +27,9 @@ const config = {
     PORT: toNumber(process.env.PORT, 1865),
     LLM_BASE_URL: process.env.LLM_BASE_URL ?? "http://host.docker.internal:8844/v1",
     LLM_MODE: normalizeMode(process.env.LLM_MODE),
-    LLM_MODEL: process.env.LLM_MODEL ?? "rassy-mind",
+    LLM_MODEL: process.env.LLM_MODEL ?? "rassy-fast",
+    LLM_PROGRAMMING_MODEL: process.env.LLM_PROGRAMMING_MODEL ?? "rassy-code",
+    LLM_ADMIN_MODEL: process.env.LLM_ADMIN_MODEL ?? "rassy-mind",
     LLM_API_KEY: process.env.LLM_API_KEY ?? "",
     EMBED_BASE_URL: process.env.EMBED_BASE_URL ?? "http://host.docker.internal:8844/v1",
     EMBED_MODE: normalizeMode(process.env.EMBED_MODE),
@@ -839,7 +842,17 @@ const start = async () => {
             });
         }
         try {
-            const result = await resolveChat(body, requestOptions);
+            const routedBody = {
+                ...body,
+                model: resolveCheshireModel({
+                    requestedModel: body?.model,
+                    lane: requestLane,
+                    genericModel: config.LLM_MODEL,
+                    programmingModel: config.LLM_PROGRAMMING_MODEL,
+                    adminModel: config.LLM_ADMIN_MODEL
+                })
+            };
+            const result = await resolveChat(routedBody, requestOptions);
             return reply.code(result.status).send(result.body);
         }
         catch (error) {

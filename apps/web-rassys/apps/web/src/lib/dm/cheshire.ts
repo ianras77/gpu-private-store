@@ -354,7 +354,7 @@ const buildSystemPrompt = () =>
   ].join("\n");
 
 export const runContextAwareDmTurn = async (context: DmContextPacket): Promise<DmLlmCallResult> => {
-  const model = process.env.CHESHIRE_MODEL ?? "rassy-mind";
+  const model = process.env.CHESHIRE_MODEL ?? "rassy-fast";
   const messages: Array<{ role: "system" | "user"; content: string }> = [
     { role: "system", content: buildSystemPrompt() },
     {

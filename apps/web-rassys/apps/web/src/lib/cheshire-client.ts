@@ -135,7 +135,7 @@ export const requestCheshireChat = async (
     throw new Error("cheshire_unconfigured");
   }
 
-  const model = input.model ?? process.env.CHESHIRE_MODEL ?? "rassy-mind";
+  const model = input.model ?? process.env.CHESHIRE_MODEL ?? "rassy-fast";
   const payload: Record<string, unknown> = {
     model,
     messages: input.messages,
