@@ -41,5 +41,5 @@ Code Console is a multi-user AI coding workspace built on Next.js and Prisma. It
 
 ## Runtime notes
 
-- Keep the RassyMind gateway available on `host.docker.internal:8844` so `cheshire-cat-core` can resolve `rassy-smart` and `rassy-embed`.
+- Keep the RassyMind gateway available on `host.docker.internal:8844` so `cheshire-cat-core` can resolve `rassy-mind` and `rassy-embed`.
 - Keep app secrets and node-local overrides in `/data/runtipi/user-config/gpu-private-store/web-rassyapp/app.env` instead of relying on the source repo `.env`.

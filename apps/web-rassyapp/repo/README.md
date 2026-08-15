@@ -85,7 +85,7 @@ App runs on `http://localhost:3000`.
 - `CAT_ADMIN_USERNAME` / `CAT_ADMIN_PASSWORD` — Credentials provisioned into this package's Cheshire Cat metadata on startup.
 - `OLLAMA_BASE_URL` — Chat/general RassyMind compatibility URL from containers (`http://host.docker.internal:8844`).
 - `OLLAMA_EMBED_BASE_URL` — RassyMind compatibility URL for embeddings (`http://host.docker.internal:8844`).
-- `OLLAMA_LLM_MODEL` — model alias to set for Cheshire Cat LLM (default `rassy-smart`).
+- `OLLAMA_LLM_MODEL` — model alias to set for Cheshire Cat LLM (default `rassy-mind`).
 - `OLLAMA_EMBED_MODEL` — embedding model alias for Cheshire Cat (default `rassy-embed`).
 - `OLLAMA_APPLY_EMBEDDER` — `1`/`0` toggle for embedder auto-configuration (default `1`).
 - `BOOTSTRAP_TIMEOUT_SECONDS` — Timeout while waiting for Cheshire Cat startup.

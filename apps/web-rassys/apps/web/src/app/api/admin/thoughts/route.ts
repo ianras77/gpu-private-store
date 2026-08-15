@@ -29,7 +29,7 @@ const callCheshire = async (seed: string, title?: string) => {
   try {
     const response = await requestCheshireJson(
       {
-        model: process.env.CHESHIRE_MODEL ?? "rassy-smart",
+        model: process.env.CHESHIRE_MODEL ?? "rassy-mind",
         temperature: 0.5,
         messages: [
           {

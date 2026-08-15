@@ -26,7 +26,7 @@ const config = {
     PORT: toNumber(process.env.PORT, 1865),
     LLM_BASE_URL: process.env.LLM_BASE_URL ?? "http://host.docker.internal:8844/v1",
     LLM_MODE: normalizeMode(process.env.LLM_MODE),
-    LLM_MODEL: process.env.LLM_MODEL ?? "rassy-smart",
+    LLM_MODEL: process.env.LLM_MODEL ?? "rassy-mind",
     LLM_API_KEY: process.env.LLM_API_KEY ?? "",
     EMBED_BASE_URL: process.env.EMBED_BASE_URL ?? "http://host.docker.internal:8844/v1",
     EMBED_MODE: normalizeMode(process.env.EMBED_MODE),
@@ -257,7 +257,10 @@ const readQueueWaitMs = (value, fallback) => readOverrideInt(value, fallback, {
     min: 0,
     max: Math.max(1000, config.QUEUE_MAX_WAIT_MS)
 });
-const buildRequestOptions = (headers, signal) => ({
+const requestTimeoutForLane = (lane) => lane === "listener"
+    ? Math.min(config.REQUEST_TIMEOUT_MS, 12_000)
+    : Math.max(config.REQUEST_TIMEOUT_MS, 60_000);
+const buildRequestOptions = (headers, signal, timeoutFallback = config.REQUEST_TIMEOUT_MS) => ({
     retries: readOverrideInt(headers["x-cheshire-retries"], config.REQUEST_RETRIES, {
         min: 0,
         max: 4
@@ -267,7 +270,7 @@ const buildRequestOptions = (headers, signal) => ({
         max: 60_000
     }),
     signal,
-    timeoutMs: readOverrideInt(headers["x-cheshire-timeout-ms"], config.REQUEST_TIMEOUT_MS, {
+    timeoutMs: readOverrideInt(headers["x-cheshire-timeout-ms"], timeoutFallback, {
         min: 1_000,
         max: 10 * 60 * 1_000
     })
@@ -333,13 +336,11 @@ const snapshotLane = (lane) => {
 };
 class ProxyUpstreamError extends Error {
     status;
-    bodySnippet;
     retryable;
     constructor(message, options) {
         super(message);
         this.name = "ProxyUpstreamError";
         this.status = options?.status;
-        this.bodySnippet = options?.bodySnippet;
         this.retryable = options?.retryable ?? true;
     }
 }
@@ -451,9 +452,8 @@ const postJsonUpstream = async (lane, url, payload, apiKey, options) => {
                 noteLaneSuccess(lane, latencyMs);
                 return response;
             }
-            const bodySnippet = (await response.text()).slice(0, 240);
+            await response.text();
             throw new ProxyUpstreamError(`upstream_http_${response.status}`, {
-                bodySnippet,
                 retryable: shouldRetryStatus(response.status),
                 status: response.status
             });
@@ -469,7 +469,7 @@ const postJsonUpstream = async (lane, url, payload, apiKey, options) => {
                 await sleep(retryDelayMs * (attempt + 1));
                 continue;
             }
-            noteLaneFailure(lane, typed.bodySnippet ? `${typed.message}:${typed.bodySnippet}` : typed.message, latencyMs);
+            noteLaneFailure(lane, typed.message, latencyMs);
             throw typed;
         }
     }
@@ -482,7 +482,6 @@ const parseJsonResponse = async (response, fallbackMessage) => {
     }
     catch {
         throw new ProxyUpstreamError(fallbackMessage, {
-            bodySnippet: text.slice(0, 240),
             retryable: false,
             status: 502
         });
@@ -769,11 +768,10 @@ const runDeepHealth = async () => {
 const toErrorPayload = (error) => {
     if (error instanceof ProxyUpstreamError) {
         return {
-            status: error.status ?? 502,
-            body: {
-                error: error.message,
-                ...(error.bodySnippet ? { detail: error.bodySnippet } : {})
-            }
+                status: error.status ?? 502,
+                body: {
+                    error: error.message
+                }
         };
     }
     return {
@@ -825,10 +823,10 @@ const start = async () => {
             return reply.code(400).send({ error: "invalid_chat_payload" });
         }
         const clientAbort = createClientAbort(request);
-        const requestOptions = buildRequestOptions(request.headers, clientAbort.signal);
         const requestClient = readHeaderValue(request.headers["x-cheshire-client"]);
         const requestPurpose = readHeaderValue(request.headers["x-cheshire-purpose"]);
         const requestLane = normalizeQueueLane(request.headers["x-cheshire-lane"], "general");
+        const requestOptions = buildRequestOptions(request.headers, clientAbort.signal, requestTimeoutForLane(requestLane));
         const requestPriority = normalizeQueuePriority(request.headers["x-cheshire-priority"], requestLane === "listener" ? "high" : requestLane === "notes" ? "low" : "normal");
         const queueWaitMs = readQueueWaitMs(request.headers["x-cheshire-queue-wait-ms"], defaultQueueWaitMs(requestLane));
         const queueRelease = await acquireQueueSlot(requestLane, requestPriority, queueWaitMs);
@@ -865,9 +863,9 @@ const start = async () => {
             return reply.code(400).send({ error: "invalid_embeddings_payload" });
         }
         const clientAbort = createClientAbort(request);
-        const requestOptions = buildRequestOptions(request.headers, clientAbort.signal);
         const requestClient = readHeaderValue(request.headers["x-cheshire-client"]);
         const requestLane = normalizeQueueLane(request.headers["x-cheshire-lane"], "embeddings");
+        const requestOptions = buildRequestOptions(request.headers, clientAbort.signal, requestTimeoutForLane(requestLane));
         const requestPriority = normalizeQueuePriority(request.headers["x-cheshire-priority"], "low");
         const queueWaitMs = readQueueWaitMs(request.headers["x-cheshire-queue-wait-ms"], defaultQueueWaitMs(requestLane));
         const queueRelease = await acquireQueueSlot(requestLane, requestPriority, queueWaitMs);

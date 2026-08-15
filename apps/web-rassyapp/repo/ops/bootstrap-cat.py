@@ -152,7 +152,7 @@ def main() -> int:
     llm_base = _env("OLLAMA_BASE_URL", "http://host.docker.internal:8844")
     embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844")
     apply_embedder = _env_flag("OLLAMA_APPLY_EMBEDDER", True)
-    llm_model = _pick_model(llm_base, _env("OLLAMA_LLM_MODEL", "rassy-smart"))
+    llm_model = _pick_model(llm_base, _env("OLLAMA_LLM_MODEL", "rassy-mind"))
     embed_model = (
         _pick_model(embed_base, _env("OLLAMA_EMBED_MODEL", "rassy-embed"))
         if apply_embedder

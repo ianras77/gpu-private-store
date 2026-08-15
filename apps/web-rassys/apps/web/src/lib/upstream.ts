@@ -6,13 +6,11 @@ export type UpstreamFetchOptions = {
 
 export class UpstreamError extends Error {
   status?: number;
-  bodySnippet?: string;
 
-  constructor(message: string, status?: number, bodySnippet?: string) {
+  constructor(message: string, status?: number) {
     super(message);
     this.name = "UpstreamError";
     this.status = status;
-    this.bodySnippet = bodySnippet;
   }
 }
 
@@ -60,8 +58,8 @@ export const fetchUpstream = async (
 
       if (response.ok) return response;
 
-      const bodySnippet = (await response.text()).slice(0, 240);
-      const error = new UpstreamError(`upstream_error_${response.status}`, response.status, bodySnippet);
+      await response.text();
+      const error = new UpstreamError(`upstream_error_${response.status}`, response.status);
 
       if (attempt < retries && shouldRetryStatus(response.status)) {
         await sleep(retryDelayMs * (attempt + 1));

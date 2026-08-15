@@ -23,7 +23,7 @@ const schema = z.object({
   RASSYMIND_LISTENER_MODEL: z.string().optional(),
   CHESHIRE_BASE_URL: z.string().optional().default(""),
   CHESHIRE_API_KEY: z.string().optional(),
-  CHESHIRE_MODEL: z.string().optional().default("rassy-smart"),
+  CHESHIRE_MODEL: z.string().optional().default("rassy-mind"),
   RADIO_CHESHIRE_MODEL: z.string().optional().default(""),
   RADIO_EMBED_MODEL: z.string().optional().default("rassy-embed"),
   RADIO_RERANK_ENABLED: z.string().optional().default("true"),

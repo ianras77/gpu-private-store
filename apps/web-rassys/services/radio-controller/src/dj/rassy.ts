@@ -2291,17 +2291,16 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
                 signal: controller.signal
             });
             if (!response.ok) {
-                const bodySnippet = (await response.text()).slice(0, 240);
-                if (response.status === 503 && bodySnippet.includes("cheshire_queue_busy")) {
+                await response.text();
+                if (response.status === 503) {
                     options?.onCapacityFailure?.();
-                    logger.info({ label, lane: laneName, status: response.status }, "Cheshire proxy queue busy; skipping call");
+                    logger.info({ label, lane: laneName, status: response.status }, "Cheshire proxy capacity unavailable; skipping call");
                     return null;
                 }
                 if (response.status === 429 || response.status >= 500) {
                     options?.onCapacityFailure?.();
                 }
                 lastFailure = {
-                    bodySnippet,
                     message: "Cheshire request failed",
                     status: response.status
                 };
@@ -2333,7 +2332,6 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
                     return parsed.data;
                 }
                 lastFailure = {
-                    contentPreview: extracted.slice(0, 240),
                     issues: parsed.error.issues.slice(0, 4),
                     message: "Cheshire JSON schema validation failed"
                 };
@@ -2353,7 +2351,6 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
                     }
                 }
                 lastFailure = {
-                    contentPreview: content.slice(0, 240),
                     error,
                     message: "Cheshire JSON parsing failed"
                 };
@@ -2383,8 +2380,6 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
     const circuit = llmCircuit.noteFailure(label);
     logger.warn({
         label,
-        bodySnippet: lastFailure?.bodySnippet,
-        contentPreview: lastFailure?.contentPreview,
         error: lastFailure?.error ? toLoggableError(lastFailure.error) : undefined,
         issues: lastFailure?.issues,
         status: lastFailure?.status,
