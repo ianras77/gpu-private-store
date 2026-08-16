@@ -65,12 +65,14 @@ def _patch_cat_llm_auth(api_key: str) -> bool:
         for key in self._default_params:
             if key in kwargs:
                 params[key] = kwargs[key]
-        params["options"]["stop"] = stop
+        options = {key: value for key, value in params["options"].items() if value is not None}
+        if stop is not None:
+            options["stop"] = stop
         request = {
             "model": params["model"],
             "messages": ollama_messages,
             "stream": False,
-            "options": Options(**params["options"]),
+            "options": Options(**options),
             "keep_alive": params["keep_alive"],
             "format": params["format"],
         }
@@ -85,12 +87,14 @@ def _patch_cat_llm_auth(api_key: str) -> bool:
         for key in self._default_params:
             if key in kwargs:
                 params[key] = kwargs[key]
-        params["options"]["stop"] = stop
+        options = {key: value for key, value in params["options"].items() if value is not None}
+        if stop is not None:
+            options["stop"] = stop
         request = {
             "model": params["model"],
             "messages": ollama_messages,
             "stream": False,
-            "options": Options(**params["options"]),
+            "options": Options(**options),
             "keep_alive": params["keep_alive"],
             "format": params["format"],
         }
