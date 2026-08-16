@@ -14,7 +14,7 @@
   "short_desc": "Code Console is a multi-user AI coding workspace built on Next.js and Prisma. It provides a focused surface for chat, co",
   "author": "https://github.com/ianras77/web-rassy.app.git",
   "source": "https://github.com/ianras77/web-rassy.app",
-  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
+  "form_fields": [{"type":"password","label":"RassyMind API key","required":true,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
   "supported_architectures": [
     "amd64"
   ],

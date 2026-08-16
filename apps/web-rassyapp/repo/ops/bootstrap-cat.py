@@ -188,23 +188,24 @@ def _ensure_core_user(items: dict, username: str, password: str) -> str | None:
     return user_id
 
 
-def _available_models(base_url: str) -> list[str]:
-    response = requests.get(f"{base_url.rstrip('/')}/api/tags", timeout=10)
+def _available_models(base_url: str, api_key: str = "") -> list[str]:
+    headers = {"Authorization": f"Bearer {api_key.strip()}"} if api_key.strip() else {}
+    response = requests.get(f"{base_url.rstrip('/')}/api/tags", headers=headers, timeout=10)
     response.raise_for_status()
     payload = response.json()
     models = payload.get("models", [])
     return [model.get("name", "") for model in models if isinstance(model, dict)]
 
 
-def _pick_model(base_url: str, configured: str) -> str:
+def _pick_model(base_url: str, configured: str, api_key: str = "") -> str:
     configured = configured.strip()
     if not configured:
         return configured
 
     try:
-        available = _available_models(base_url)
-    except Exception as exc:  # noqa: BLE001
-        print(f"[cat-bootstrap] unable to query {base_url}: {exc}", file=sys.stderr)
+        available = _available_models(base_url, api_key)
+    except Exception:  # noqa: BLE001
+        print(f"[cat-bootstrap] model discovery unavailable for {base_url}; using configured alias", file=sys.stderr)
         return configured
 
     if configured in available:
@@ -227,15 +228,15 @@ def main() -> int:
     llm_base = _env("OLLAMA_BASE_URL", "http://host.docker.internal:8844")
     embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844")
     apply_embedder = _env_flag("OLLAMA_APPLY_EMBEDDER", True)
-    llm_model = _pick_model(llm_base, _env("OLLAMA_LLM_MODEL", "rassy-fast"))
+    cat_api_key = os.getenv("CAT_OLLAMA_API_KEY", "")
+    llm_model = _pick_model(llm_base, _env("OLLAMA_LLM_MODEL", "rassy-fast"), cat_api_key)
     embed_model = (
-        _pick_model(embed_base, _env("OLLAMA_EMBED_MODEL", "rassy-embed"))
+        _pick_model(embed_base, _env("OLLAMA_EMBED_MODEL", "rassy-embed"), cat_api_key)
         if apply_embedder
         else _env("OLLAMA_EMBED_MODEL", "rassy-embed")
     )
     admin_username = _env("CAT_ADMIN_USERNAME", "admin")
     admin_password = _env("CAT_ADMIN_PASSWORD", "admin")
-    cat_api_key = os.getenv("CAT_OLLAMA_API_KEY", "")
     _patch_cat_embedder_auth(cat_api_key)
     _patch_cat_llm_auth(cat_api_key)
 
