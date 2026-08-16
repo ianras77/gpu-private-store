@@ -43,7 +43,7 @@ def _patch_cat_llm_auth(api_key: str) -> bool:
     marker = "from typing import Optional, List, Any, Mapping, Dict\n"
     if marker not in source or "        super().__init__(**kwargs)" not in source:
         return False
-    source = source.replace(marker, f"{marker}import os\n", 1)
+    source = source.replace(marker, f"{marker}import os\nfrom ollama import Options\n", 1)
     source = source.replace(
         "        super().__init__(**kwargs)",
         """        def _rassyapp_gateway_client_kwargs():
@@ -56,7 +56,48 @@ def _patch_cat_llm_auth(api_key: str) -> bool:
             **kwargs.get("client_kwargs", {}),
             **_rassyapp_gateway_client_kwargs(),
         }
-        super().__init__(**kwargs)""",
+        super().__init__(**kwargs)
+
+    def _create_chat_stream(self, messages, stop=None, **kwargs):
+        ollama_messages = self._convert_messages_to_ollama_messages(messages)
+        stop = stop if stop is not None else self.stop
+        params = self._default_params
+        for key in self._default_params:
+            if key in kwargs:
+                params[key] = kwargs[key]
+        params["options"]["stop"] = stop
+        request = {
+            "model": params["model"],
+            "messages": ollama_messages,
+            "stream": False,
+            "options": Options(**params["options"]),
+            "keep_alive": params["keep_alive"],
+            "format": params["format"],
+        }
+        if "tools" in kwargs:
+            request["tools"] = kwargs["tools"]
+        yield self._client.chat(**request)
+
+    async def _acreate_chat_stream(self, messages, stop=None, **kwargs):
+        ollama_messages = self._convert_messages_to_ollama_messages(messages)
+        stop = stop if stop is not None else self.stop
+        params = self._default_params
+        for key in self._default_params:
+            if key in kwargs:
+                params[key] = kwargs[key]
+        params["options"]["stop"] = stop
+        request = {
+            "model": params["model"],
+            "messages": ollama_messages,
+            "stream": False,
+            "options": Options(**params["options"]),
+            "keep_alive": params["keep_alive"],
+            "format": params["format"],
+        }
+        if "tools" in kwargs:
+            request["tools"] = kwargs["tools"]
+        yield await self._async_client.chat(**request)
+""",
         1,
     )
     source_path.write_text(source)
