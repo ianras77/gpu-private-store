@@ -17,7 +17,7 @@ afterEach(() => {
 describe("RassyMind mode mapping", () => {
   test("publishes the exact ordered chat modes", () => {
     expect(CHAT_MODES).toEqual([
-      { id: "general", label: "Talk", model: "rassy-smart", description: "Broad assistant chat, thinking, and synthesis." },
+      { id: "general", label: "Talk", model: "rassy-mind", description: "Broad assistant chat, thinking, and synthesis." },
       { id: "deep-coding", label: "Deep Code", model: "rassy-code", description: "High-context coding, systems reasoning, and operator work." },
       { id: "fast-coding", label: "Fast Code", model: "rassy-fast", description: "Fast coding loops, implementation passes, and focused edits." },
       { id: "quick", label: "Spark", model: "rassy-utility", description: "Short answers, titles, summaries, and quick transforms." },
@@ -26,7 +26,7 @@ describe("RassyMind mode mapping", () => {
   });
 
   test("maps friendly modes to exact RassyMind model ids", () => {
-    expect(getChatMode("general").model).toBe("rassy-smart");
+    expect(getChatMode("general").model).toBe("rassy-mind");
     expect(getChatMode("deep-coding").model).toBe("rassy-code");
     expect(getChatMode("fast-coding").model).toBe("rassy-fast");
     expect(getChatMode("quick").model).toBe("rassy-utility");

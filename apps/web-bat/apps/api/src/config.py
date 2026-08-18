@@ -99,10 +99,10 @@ class Settings(BaseSettings):
     cat_secondary_memory_recall_limit: int = 12
     cat_secondary_memory_max_chars: int = 2400
 
-    llm_api_url: str = "http://host.docker.internal:8844/v1/chat/completions"
+    llm_api_url: str = "http://host.docker.internal:8844/api/chat"
     llm_api_key: str = ""
-    llm_model: str = "rassy-smart"
-    llm_challenger_model: str = "rassy-smart"
+    llm_model: str = "rassy-mind"
+    llm_challenger_model: str = "rassy-mind"
     llm_request_timeout_seconds: float = 180.0
     llm_retry_backoff_seconds: float = 3.0
     llm_readiness_inference_probe_enabled: bool = True
@@ -111,7 +111,7 @@ class Settings(BaseSettings):
     ollama_repeat_penalty: float = 1.12
     ollama_keep_alive: str = "15m"
 
-    embedding_api_url: str = "http://host.docker.internal:8844/v1/embeddings"
+    embedding_api_url: str = "http://host.docker.internal:8844/api/embed"
     embedding_api_key: str = ""
     embedding_model: str = "rassy-embed"
     embedding_allow_fallback: bool = False

@@ -32,7 +32,7 @@ services:
         condition: service_started
     environment:
       LOCALAGI_MODEL: ${RASSYAGI_MODEL:-rassy-fast}
-      LOCALAGI_MULTIMODAL_MODEL: ${RASSYAGI_MULTIMODAL_MODEL:-rassy-smart}
+      LOCALAGI_MULTIMODAL_MODEL: ${RASSYAGI_MULTIMODAL_MODEL:-rassy-mind}
       LOCALAGI_IMAGE_MODEL: ${RASSYAGI_IMAGE_MODEL:-rassy-image}
       LOCALAGI_LLM_API_URL: ${RASSYAGI_RASSYGPT_OPENAI_BASE_URL:-http://rassygpt-gateway:8080/v1}
       LOCALAGI_LLM_API_KEY: ${RASSYAGI_RASSYGPT_API_KEY}

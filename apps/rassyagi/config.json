@@ -93,7 +93,7 @@
       "type": "text",
       "label": "Multimodal model",
       "env_variable": "RASSYAGI_MULTIMODAL_MODEL",
-      "default": "rassy-smart",
+      "default": "rassy-mind",
       "required": true
     },
     {

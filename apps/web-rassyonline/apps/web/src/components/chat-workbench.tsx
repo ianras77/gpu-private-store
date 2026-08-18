@@ -234,7 +234,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <div className="route-status" aria-label="Active RassyMind route">
           <span>{activeLane.glyph}</span>
           <div>
-            <strong>{activeMode?.model ?? "rassy-smart"}</strong>
+            <strong>{activeMode?.model ?? "rassy-mind"}</strong>
             <small>{activeLane.capability} · {sending ? "streaming" : "ready"}</small>
           </div>
         </div>
@@ -302,7 +302,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <div className="route-readout" aria-label="Active RassyMind route">
           <div>
             <span>{activeLane.glyph}</span>
-            <strong>{activeMode?.model ?? "rassy-smart"}</strong>
+            <strong>{activeMode?.model ?? "rassy-mind"}</strong>
           </div>
           <p>{webSearchLabel}</p>
           <p>{activeDocuments.length ? `${activeDocuments.length} memory sources` : "thread memory off"}</p>

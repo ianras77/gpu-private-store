@@ -8,7 +8,7 @@ export type ChatMode = {
 };
 
 export const CHAT_MODES: ChatMode[] = [
-  { id: "general", label: "Talk", model: "rassy-smart", description: "Broad assistant chat, thinking, and synthesis." },
+  { id: "general", label: "Talk", model: "rassy-mind", description: "Broad assistant chat, thinking, and synthesis." },
   { id: "deep-coding", label: "Deep Code", model: "rassy-code", description: "High-context coding, systems reasoning, and operator work." },
   { id: "fast-coding", label: "Fast Code", model: "rassy-fast", description: "Fast coding loops, implementation passes, and focused edits." },
   { id: "quick", label: "Spark", model: "rassy-utility", description: "Short answers, titles, summaries, and quick transforms." },

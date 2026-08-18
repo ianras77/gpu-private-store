@@ -265,6 +265,12 @@ async def publish_ready_backlog(
             )
             published_social.append(post)
 
+    # Persist the release before homepage generation. Homepage generation may
+    # call an external model and must not be able to roll back a valid release
+    # if that slower, optional step times out.
+    if published_editorials or published_social:
+        await db.commit()
+
     homepage_snapshot = None
     if refresh_homepage and published_editorials:
         homepage_snapshot = await generate_homepage_snapshot(db, publish_now=True)

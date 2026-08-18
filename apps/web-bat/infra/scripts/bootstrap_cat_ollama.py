@@ -110,7 +110,7 @@ def main() -> int:
     metadata_path = Path(_env("CAT_METADATA_PATH", "/data/metadata.json"))
     llm_base = _env("CAT_OLLAMA_GENERAL_BASE_URL", _env("OLLAMA_GENERAL_BASE_URL", "http://host.docker.internal:8844"))
     embed_base = _env("CAT_OLLAMA_EMBED_BASE_URL", _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844"))
-    llm_model = _env("CAT_OLLAMA_GENERAL_MODEL", _env("OLLAMA_GENERAL_MODEL", "rassy-smart"))
+    llm_model = _env("CAT_OLLAMA_GENERAL_MODEL", _env("OLLAMA_GENERAL_MODEL", "rassy-mind"))
     embed_model = _env("CAT_OLLAMA_EMBED_MODEL", _env("OLLAMA_EMBED_MODEL", "rassy-embed"))
     ollama_api_key = (
         os.getenv("CAT_OLLAMA_API_KEY")

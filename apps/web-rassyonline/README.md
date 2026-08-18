@@ -11,7 +11,7 @@ The app includes:
 - Private Postgres and Qdrant services.
 - App-data mounts for persistent uploads, database state, and vector state.
 - RassyMind container routing through `host.docker.internal:8844`.
-- Canonical model aliases: `rassy-smart`, `rassy-code`, `rassy-fast`, `rassy-utility`, `rassy-mind`, and `rassy-embed`.
+- Canonical model aliases: `rassy-mind`, `rassy-code`, `rassy-fast`, `rassy-utility`, and `rassy-embed`.
 - Optional on-demand web context through `search.rasies.com`.
 - `/api/health` for Runtipi and Docker health checks.
 

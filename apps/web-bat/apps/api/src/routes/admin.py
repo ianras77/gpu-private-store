@@ -246,7 +246,9 @@ async def publish_ready(
     rework_drafts: bool = True,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    return await publish_ready_backlog(db, limit=limit, publish_social=publish_social, rework_drafts=rework_drafts)
+    result = await publish_ready_backlog(db, limit=limit, publish_social=publish_social, rework_drafts=rework_drafts)
+    await db.commit()
+    return result
 
 
 @router.get("/system-settings")

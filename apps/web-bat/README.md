@@ -47,12 +47,12 @@ docker compose up -d --build
 - Cheshire Cat: `http://localhost:1866`
 
 Cheshire Cat now auto-selects the host RassyMind gateway through Docker host-gateway DNS on startup:
-- chat/general: `rassy-smart` via `http://host.docker.internal:8844`
+- chat/general: `rassy-mind` via the native Ollama-compatible `/api/chat` route at `http://host.docker.internal:8844`
 - embeddings: `rassy-embed` via `http://host.docker.internal:8844`
 
 The local compose stack is wired around RassyMind and Qdrant-backed Cheshire Cat memory:
-- the direct writer path uses `rassy-smart` at `/api/chat`
-- readiness verifies that `rassy-smart` can answer through the current gateway route, not only that the alias is listed
+- the direct writer path uses `rassy-mind` at `/api/chat`
+- readiness verifies that `rassy-mind` can answer through the current gateway route, not only that the alias is listed
 - embeddings and Cat memory use `rassy-embed` at `/api/embed` for batched vectors
 
 `CAT_PRIMARY_ENABLED=false` remains the default so long-form publication quality continues to come from the stronger direct writer stack, while Cheshire Cat stays live and testable as an integrated sidecar.

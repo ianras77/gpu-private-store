@@ -68,7 +68,7 @@ services:
       CRACKSTACK_AUTO_MIGRATE_ON_STARTUP: ${CRACKSTACK_AUTO_MIGRATE_ON_STARTUP:-1}
       CRACKSTACK_DATA_DIR: /app/data
       LOCALAI_BASE_URL: ${CRACKSTACK_LLM_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
-      LOCALAI_MODEL: ${CRACKSTACK_LLM_MODEL:-rassy-smart}
+      LOCALAI_MODEL: ${CRACKSTACK_LLM_MODEL:-rassy-mind}
       LOCALAI_API_KEY: ${RASSYMIND_API_KEY:-${CRACKSTACK_LLM_API_KEY:-}}
     extra_hosts:
       - host.docker.internal:host-gateway

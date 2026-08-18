@@ -7,7 +7,7 @@
   "id": "web-rassyonline",
   "description": "A magical Runtipi-native RassyMind web app with public chat, accounts, per-user vector workspaces, document toggles, and admin controls.",
   "tipi_version": 4,
-  "version": "0.1.5",
+  "version": "0.1.6",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
