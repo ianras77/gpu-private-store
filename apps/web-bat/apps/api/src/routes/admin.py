@@ -244,9 +244,16 @@ async def publish_ready(
     limit: int = 12,
     publish_social: bool = True,
     rework_drafts: bool = True,
+    refresh_homepage: bool = True,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    result = await publish_ready_backlog(db, limit=limit, publish_social=publish_social, rework_drafts=rework_drafts)
+    result = await publish_ready_backlog(
+        db,
+        limit=limit,
+        publish_social=publish_social,
+        rework_drafts=rework_drafts,
+        refresh_homepage=refresh_homepage,
+    )
     await db.commit()
     return result
 
