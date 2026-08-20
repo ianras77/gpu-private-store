@@ -466,11 +466,14 @@ STORY_FORM_WORD_FLOORS = {
     "notebook_entry": 560,
 }
 EDITORIAL_MAX_TOKENS_BY_FORM = {
-    "lead_analysis": 2400,
-    "lead_update": 1800,
-    "theme_column": 2100,
-    "theme_update": 1500,
-    "notebook_entry": 1900,
+    # Keep one editorial pass inside a practical request budget. A second
+    # full-length challenger pass was making otherwise good pieces wait
+    # several minutes, then fall back to the thin deterministic template.
+    "lead_analysis": 1800,
+    "lead_update": 1400,
+    "theme_column": 1700,
+    "theme_update": 1200,
+    "notebook_entry": 1500,
 }
 
 
@@ -5275,7 +5278,10 @@ async def _run_editorial_generation_pass(
                 style_report = grounding_style_report
                 generation_path = "model_grounding_repair"
 
-        if body and str(settings.llm_challenger_model or "").strip():
+        # A passing primary is publishable; do not spend another full model
+        # request challenging it. Reserve the challenger for drafts that need
+        # substantive rescue, keeping the release loop bounded and live.
+        if body and not style_report.get("passes") and str(settings.llm_challenger_model or "").strip():
             reroll_count = max(reroll_count, 1)
             champion_style_report = style_report
             challenger_raw_body = await generate_with_cat(

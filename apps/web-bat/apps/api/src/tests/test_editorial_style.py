@@ -45,7 +45,7 @@ from services.trend_engine import _change_type
 
 
 class EditorialStyleTests(unittest.TestCase):
-    def test_editorial_generation_runs_challenger_pass_with_smaller_model(self) -> None:
+    def test_editorial_generation_skips_challenger_when_primary_passes(self) -> None:
         calls: list[dict[str, object]] = []
 
         async def fake_generate(_task_prompt, _context, **kwargs):
@@ -105,11 +105,11 @@ class EditorialStyleTests(unittest.TestCase):
                 )
             )
 
-        self.assertEqual(calls[1]["model_override"], settings.llm_challenger_model)
-        self.assertIn("Challenger draft", result["body"])
-        self.assertGreaterEqual(result["reroll_count"], 1)
-        self.assertTrue(result["dialectic_review"]["selected"])
-        self.assertEqual(result["dialectic_review"]["model"], settings.llm_challenger_model)
+        self.assertEqual(len(calls), 1)
+        self.assertIsNone(calls[0].get("model_override"))
+        self.assertIn("Champion draft", result["body"])
+        self.assertEqual(result["generation_path"], "model_primary")
+        self.assertFalse(result["dialectic_review"]["attempted"])
 
     def test_homepage_story_fingerprint_dedupes_timestamped_slugs_by_title(self) -> None:
         first = SimpleNamespace(
