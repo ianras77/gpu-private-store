@@ -194,7 +194,18 @@ async def worker_loop() -> None:
                     now = datetime.now(timezone.utc)
                     if str(settings.worker_phase).strip().lower() == "split":
                         if _research_due_now(now):
-                            cycle_summary = await asyncio.wait_for(run_research_phase(db), timeout=max_cycle_seconds)
+                            research_summary = await asyncio.wait_for(run_research_phase(db), timeout=max_cycle_seconds)
+                            editorial_runs = []
+                            for _ in range(max(1, min(8, int(settings.editorial_loops_per_research)))):
+                                editorial_runs.append(
+                                    await asyncio.wait_for(run_editorial_phase(db), timeout=max_cycle_seconds)
+                                )
+                            cycle_summary = {
+                                "phase": "research_then_editorial_burst",
+                                "research": research_summary,
+                                "editorial_loop_count": len(editorial_runs),
+                                "editorial_runs": editorial_runs,
+                            }
                         else:
                             cycle_summary = await asyncio.wait_for(run_editorial_phase(db), timeout=max_cycle_seconds)
                     else:

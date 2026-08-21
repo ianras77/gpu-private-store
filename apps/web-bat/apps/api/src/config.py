@@ -131,6 +131,7 @@ class Settings(BaseSettings):
     worker_cycle_minutes: int = 15
     worker_phase: str = "split"
     research_schedule_utc: str = "00:00,06:00,12:00,18:00"
+    editorial_loops_per_research: int = 3
     worker_min_cycle_seconds: int = 30
     worker_max_cycle_seconds: int = 7200
     worker_heartbeat_ttl_seconds: int = 9000
