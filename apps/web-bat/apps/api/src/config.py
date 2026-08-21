@@ -141,7 +141,10 @@ class Settings(BaseSettings):
     analysis_theme_concurrency: int = 4
     writer_theme_concurrency: int = 2
     social_dispatch_concurrency: int = 4
-    writer_theme_take_limit: int = 12
+    # Keep the writer stage small enough to reach Princess/Queen in one cycle;
+    # each long-form model call is expensive and an oversized batch starves
+    # publication indefinitely.
+    writer_theme_take_limit: int = 4
     queen_curation_limit: int = 12
 
     x_enabled: bool = False

@@ -47,7 +47,7 @@ class IngestionFilterTests(unittest.TestCase):
 
     def test_default_daily_publish_target_is_five_articles(self) -> None:
         self.assertEqual(settings.daily_publish_target, 5)
-        self.assertGreaterEqual(settings.writer_theme_take_limit, 12)
+        self.assertEqual(settings.writer_theme_take_limit, 4)
         self.assertGreaterEqual(settings.editorial_rework_queue_limit, 6)
 
     def test_accepts_political_content_with_signals(self) -> None:

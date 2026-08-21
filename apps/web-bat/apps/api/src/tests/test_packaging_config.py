@@ -37,7 +37,7 @@ def test_medium_term_content_machine_compose_defaults() -> None:
     assert "LLM_READINESS_INFERENCE_PROBE_ENABLED: ${LLM_READINESS_INFERENCE_PROBE_ENABLED:-true}" in compose_text
     assert "RESEARCH_QUERY_CONCURRENCY: ${RESEARCH_QUERY_CONCURRENCY:-8}" in compose_text
     assert "WRITER_THEME_CONCURRENCY: ${WRITER_THEME_CONCURRENCY:-2}" in compose_text
-    assert "WRITER_THEME_TAKE_LIMIT: ${WRITER_THEME_TAKE_LIMIT:-12}" in compose_text
+    assert "WRITER_THEME_TAKE_LIMIT: ${WRITER_THEME_TAKE_LIMIT:-4}" in compose_text
     assert "QUEEN_CURATION_LIMIT: ${QUEEN_CURATION_LIMIT:-12}" in compose_text
     assert "BACKLOG_PUBLISH_WINDOW_HOURS: ${BACKLOG_PUBLISH_WINDOW_HOURS:-120}" in compose_text
     assert "DAILY_PUBLISH_TARGET: ${DAILY_PUBLISH_TARGET:-5}" in compose_text
@@ -91,7 +91,7 @@ def test_medium_term_content_machine_api_defaults(monkeypatch) -> None:
     assert settings.analysis_theme_limit == 8
     assert settings.analysis_max_briefs == 18
     assert settings.writer_theme_concurrency == 2
-    assert settings.writer_theme_take_limit == 12
+    assert settings.writer_theme_take_limit == 4
     assert settings.queen_curation_limit == 12
     assert settings.backlog_publish_window_hours == 120
     assert settings.daily_publish_target == 5
