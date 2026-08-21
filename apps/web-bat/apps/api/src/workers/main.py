@@ -11,7 +11,7 @@ import redis.asyncio as redis
 from config import settings
 from db import SessionLocal
 from services.structured_logging import get_logger, log_event
-from workers.jobs import PIPELINE_LOCK_KEY, _log_pipeline_event, run_pipeline_cycle
+from workers.jobs import PIPELINE_LOCK_KEY, _log_pipeline_event, run_pipeline_cycle, run_research_phase, run_editorial_phase
 
 logger = get_logger("bat-worker")
 
@@ -30,6 +30,11 @@ def _heartbeat_ttl_seconds(cycle_interval_seconds: int) -> int:
 
 def _progress_heartbeat_interval_seconds(cycle_interval_seconds: int) -> int:
     return max(30, min(300, int(cycle_interval_seconds) // 3))
+
+
+def _research_due_now(now: datetime) -> bool:
+    slots = {item.strip() for item in str(settings.research_schedule_utc).split(",") if item.strip()}
+    return now.strftime("%H:%M") in slots
 
 
 def _heartbeat_payload(
@@ -186,7 +191,14 @@ async def worker_loop() -> None:
             )
             try:
                 async with SessionLocal() as db:
-                    cycle_summary = await asyncio.wait_for(run_pipeline_cycle(db), timeout=max_cycle_seconds)
+                    now = datetime.now(timezone.utc)
+                    if str(settings.worker_phase).strip().lower() == "split":
+                        if _research_due_now(now):
+                            cycle_summary = await asyncio.wait_for(run_research_phase(db), timeout=max_cycle_seconds)
+                        else:
+                            cycle_summary = await asyncio.wait_for(run_editorial_phase(db), timeout=max_cycle_seconds)
+                    else:
+                        cycle_summary = await asyncio.wait_for(run_pipeline_cycle(db), timeout=max_cycle_seconds)
             finally:
                 progress_heartbeat.cancel()
                 with suppress(asyncio.CancelledError):

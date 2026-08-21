@@ -1531,6 +1531,39 @@ async def run_queen_cycle(db: AsyncSession, *, writer_summary: dict, princess_su
     }
 
 
+async def _run_phase(db: AsyncSession, *, phase: str, stages: list[str]) -> dict:
+    phase_id = uuid.uuid4()
+    started_at = datetime.utcnow()
+    acquired, client, token = await _acquire_pipeline_lock(phase_id, f"worker-{phase}")
+    if not acquired:
+        return {"phase": phase, "status": "skipped", "reason": "pipeline_already_running"}
+    results: dict[str, dict] = {}
+    try:
+        await _log_pipeline_event(db, cycle_id=phase_id, action="phase_started", actor=phase, snapshot={"phase": phase, "started_at": started_at})
+        if phase == "research":
+            results["researcher"] = await run_researcher_cycle(db)
+            results["analyst"] = await run_analyst_cycle(db)
+        else:
+            writer = await run_writer_cycle(db)
+            results["writer"] = writer
+            princess = await run_princess_cycle(db, writer_summary=writer)
+            results["princess"] = princess
+            results["queen"] = await run_queen_cycle(db, writer_summary=writer, princess_summary=princess)
+        completed_at = datetime.utcnow()
+        await _log_pipeline_event(db, cycle_id=phase_id, action="phase_completed", actor=phase, snapshot={"phase": phase, "completed_at": completed_at, "stage_results": results})
+        return {"phase": phase, "status": "completed", "phase_id": str(phase_id), "started_at": started_at.isoformat(), "completed_at": completed_at.isoformat(), "stage_results": results}
+    finally:
+        await _release_pipeline_lock(client, token)
+
+
+async def run_research_phase(db: AsyncSession) -> dict:
+    return await _run_phase(db, phase="research", stages=["researcher", "analyst"])
+
+
+async def run_editorial_phase(db: AsyncSession) -> dict:
+    return await _run_phase(db, phase="editorial", stages=["writer", "princess", "queen"])
+
+
 async def run_pipeline_cycle(db: AsyncSession, *, actor: str = "worker") -> dict:
     cycle_id = uuid.uuid4()
     cycle_started_at = datetime.utcnow()

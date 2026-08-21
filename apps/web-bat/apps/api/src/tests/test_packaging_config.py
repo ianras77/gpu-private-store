@@ -31,6 +31,8 @@ def test_medium_term_content_machine_compose_defaults() -> None:
     compose_text = (APP_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
 
     assert "WORKER_CYCLE_MINUTES: ${WORKER_CYCLE_MINUTES:-15}" in compose_text
+    assert "WORKER_PHASE: ${WORKER_PHASE:-split}" in compose_text
+    assert "RESEARCH_SCHEDULE_UTC: ${RESEARCH_SCHEDULE_UTC:-00:00,06:00,12:00,18:00}" in compose_text
     assert "WORKER_MAX_CYCLE_SECONDS: ${WORKER_MAX_CYCLE_SECONDS:-7200}" in compose_text
     assert "PIPELINE_LOCK_TTL_SECONDS: ${PIPELINE_LOCK_TTL_SECONDS:-7200}" in compose_text
     assert "LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-180}" in compose_text
