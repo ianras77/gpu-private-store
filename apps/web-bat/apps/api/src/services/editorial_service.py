@@ -5182,7 +5182,7 @@ async def _run_editorial_generation_pass(
                 style_report = retry_style_report
                 generation_path = "model_retry"
 
-        if not style_report.get("passes") and _needs_editorial_expansion(style_report, story_brief):
+        if reroll_count < 2 and not style_report.get("passes") and _needs_editorial_expansion(style_report, story_brief):
             reroll_count = max(reroll_count, 2)
             expansion_raw_body = await generate_with_cat(
                 f"{editorial_task_prompt}\n\n{_build_editorial_expansion_prompt(style_report, story_brief)}",
@@ -5214,7 +5214,7 @@ async def _run_editorial_generation_pass(
                 style_report = expansion_style_report
                 generation_path = "model_expansion"
 
-        if not style_report.get("passes") and _should_attempt_editorial_revision(style_report):
+        if reroll_count < 2 and not style_report.get("passes") and _should_attempt_editorial_revision(style_report):
             reroll_count = max(reroll_count, 3)
             revision_raw_body = await generate_with_cat(
                 f"{editorial_task_prompt}\n\n{_build_editorial_revision_prompt(style_report, story_brief)}",
@@ -5246,7 +5246,7 @@ async def _run_editorial_generation_pass(
                 style_report = revision_style_report
                 generation_path = "model_revision"
 
-        if not bool((style_report.get("grounding_report") or {}).get("passes", True)):
+        if reroll_count < 2 and not bool((style_report.get("grounding_report") or {}).get("passes", True)):
             reroll_count = max(reroll_count, 4)
             grounding_raw_body = await generate_with_cat(
                 f"{editorial_task_prompt}\n\n{_build_grounding_repair_prompt(style_report.get('grounding_report') or {}, story_brief)}",
@@ -6046,6 +6046,16 @@ async def rework_editorial_backlog(
             continue
         if bool(metadata.get("needs_research")):
             skipped.append({"id": str(row.id), "reason": "needs_more_grounding"})
+            continue
+        if bool(metadata.get("fallback_selected")) or str(metadata.get("generation_path") or "") == "fallback_grounded":
+            skipped.append(
+                await _block_editorial_rework(
+                    db,
+                    row,
+                    reason="fallback_generation",
+                    detail="quarantined deterministic fallback output instead of retrying it indefinitely",
+                )
+            )
             continue
         if freshness_age is not None and int(freshness_age or 0) > int(settings.current_news_max_age_days) + 1:
             skipped.append({"id": str(row.id), "reason": "outside_current_news_window"})
