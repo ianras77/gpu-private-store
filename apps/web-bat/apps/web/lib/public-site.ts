@@ -291,12 +291,14 @@ export type PipelineCycle = {
   started_at?: string;
   completed_at?: string;
   stages?: PipelineStage[];
+  phase?: string;
 };
 
 export type PipelineTelemetry = {
   cycle_interval_minutes?: number;
   roles?: PipelineRole[];
   latest_cycle?: PipelineCycle | null;
+  latest_by_phase?: Record<string, PipelineCycle>;
 };
 
 type Storyish = Partial<StoryCard> & Partial<Editorial>;
@@ -560,11 +562,13 @@ export async function getPublicSiteData(): Promise<PublicSiteData> {
       : publishedLeadStory ?? publishedStories[0] ?? null;
 
   const latestCycle = pipeline.latest_cycle ?? null;
+  const researchCycle = pipeline.latest_by_phase?.research ?? latestCycle;
+  const editorialCycle = pipeline.latest_by_phase?.editorial ?? latestCycle;
   const pipelineRoles = pipeline.roles ?? [];
-  const researcherResult = pickStageResult<ResearcherResult>(latestCycle?.stages, "researcher");
-  const analystResult = pickStageResult<AnalystResult>(latestCycle?.stages, "analyst");
-  const writerResult = pickStageResult<WriterResult>(latestCycle?.stages, "writer");
-  const queenResult = pickStageResult<QueenResult>(latestCycle?.stages, "queen");
+  const researcherResult = pickStageResult<ResearcherResult>(researchCycle?.stages, "researcher");
+  const analystResult = pickStageResult<AnalystResult>(researchCycle?.stages, "analyst");
+  const writerResult = pickStageResult<WriterResult>(editorialCycle?.stages, "writer");
+  const queenResult = pickStageResult<QueenResult>(editorialCycle?.stages, "queen");
 
   const opportunityBoard = researcherResult?.opportunity_board ?? [];
   const queryPlan = researcherResult?.query_plan ?? [];

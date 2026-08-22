@@ -235,11 +235,17 @@ async def admin_pipeline(limit: int = 80, db: AsyncSession = Depends(get_db)) ->
 
     cycle_list = sorted(cycle_events.values(), key=lambda item: item.get("last_event_at"), reverse=True)
     latest_cycle = cycle_list[0] if cycle_list else None
+    latest_by_phase = {}
+    for cycle in cycle_list:
+        phase = cycle.get("phase")
+        if phase and phase not in latest_by_phase:
+            latest_by_phase[phase] = cycle
 
     return {
         "cycle_interval_minutes": int(settings.worker_cycle_minutes),
         "roles": get_role_pipeline(),
         "latest_cycle": latest_cycle,
+        "latest_by_phase": latest_by_phase,
         "recent_cycles": cycle_list[:5],
     }
 
