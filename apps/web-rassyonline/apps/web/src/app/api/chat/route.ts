@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
   const baseUrl = process.env.RASSYMIND_BASE_URL ?? "http://host.docker.internal:8844";
   const upstream = await fetch(getRassyMindChatUrl(baseUrl), {
     method: "POST",
+    signal: AbortSignal.timeout(10 * 60 * 1000),
     headers: {
       "content-type": "application/json",
       ...(process.env.RASSYMIND_API_KEY ? { authorization: `Bearer ${process.env.RASSYMIND_API_KEY}` } : {})
@@ -115,12 +116,18 @@ export async function POST(request: NextRequest) {
       model: mode.model,
       messages: upstreamMessages,
       stream: true,
-      temperature: 0.7
+      temperature: 0.7,
+      max_tokens: mode.maxTokens,
+      max_completion_tokens: mode.maxTokens,
+      think: mode.thinking,
+      reasoning_effort: mode.thinking ? "medium" : "none"
     })
   });
 
   if (!upstream.ok || !upstream.body) {
-    return new Response(getRassyMindRequestError(upstream.status).message, { status: 502 });
+    const retryable = upstream.status === 429 || upstream.status === 503;
+    const headers = retryable && upstream.headers.get("retry-after") ? { "retry-after": upstream.headers.get("retry-after")! } : undefined;
+    return new Response(getRassyMindRequestError(upstream.status).message, { status: retryable ? 429 : 502, headers });
   }
 
   const decoder = new TextDecoder();

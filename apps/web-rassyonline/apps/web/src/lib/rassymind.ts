@@ -4,15 +4,17 @@ export type ChatMode = {
   id: ChatModeId;
   label: string;
   model: string;
+  maxTokens: number;
+  thinking: boolean;
   description: string;
 };
 
 export const CHAT_MODES: ChatMode[] = [
-  { id: "general", label: "Talk", model: "rassy-mind", description: "Broad assistant chat, thinking, and synthesis." },
-  { id: "deep-coding", label: "Deep Code", model: "rassy-code", description: "High-context coding, systems reasoning, and operator work." },
-  { id: "fast-coding", label: "Fast Code", model: "rassy-fast", description: "Fast coding loops, implementation passes, and focused edits." },
-  { id: "quick", label: "Spark", model: "rassy-utility", description: "Short answers, titles, summaries, and quick transforms." },
-  { id: "knowledge", label: "Memory", model: "rassy-mind", description: "Document-grounded chat with enabled workspace memory." }
+  { id: "general", label: "Talk", model: "rassy-fast", maxTokens: 512, thinking: false, description: "Fast everyday conversation and synthesis." },
+  { id: "deep-coding", label: "Deep Code", model: "rassy-code", maxTokens: 2048, thinking: true, description: "High-context coding, systems reasoning, and operator work." },
+  { id: "fast-coding", label: "Fast Code", model: "rassy-fast", maxTokens: 768, thinking: false, description: "Fast coding loops, implementation passes, and focused edits." },
+  { id: "quick", label: "Spark", model: "rassy-utility", maxTokens: 256, thinking: false, description: "Short answers, titles, summaries, and quick transforms." },
+  { id: "knowledge", label: "Memory", model: "rassy-mind", maxTokens: 2048, thinking: true, description: "Document-grounded chat with enabled workspace memory." }
 ];
 
 export function getChatMode(value: string | null | undefined): ChatMode {
