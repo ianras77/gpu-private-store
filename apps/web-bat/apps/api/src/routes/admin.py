@@ -155,7 +155,7 @@ async def admin_summary(db: AsyncSession = Depends(get_db)) -> dict:
                     .where(
                         and_(
                             RevisionHistory.object_table == "pipeline_cycle",
-                            RevisionHistory.action.in_(["cycle_completed", "cycle_failed"]),
+                            RevisionHistory.action.in_(["cycle_completed", "cycle_failed", "phase_completed", "phase_failed"]),
                         )
                     )
                 )
@@ -188,13 +188,28 @@ async def admin_pipeline(limit: int = 80, db: AsyncSession = Depends(get_db)) ->
         cycle["cycle_id"] = cycle_id
         cycle["last_event_at"] = row.created_at
 
-        if row.action == "cycle_started":
+        if row.action in ("cycle_started", "phase_started"):
             cycle["started_at"] = snapshot.get("started_at") or row.created_at
-        elif row.action == "cycle_completed":
+            if row.action == "phase_started":
+                cycle["phase"] = snapshot.get("phase") or row.actor
+        elif row.action in ("cycle_completed", "phase_completed"):
             cycle["status"] = "completed"
             cycle["completed_at"] = snapshot.get("completed_at") or row.created_at
             cycle["result"] = snapshot.get("stage_results", {})
-        elif row.action == "cycle_failed":
+            if row.action == "phase_completed":
+                cycle["phase"] = snapshot.get("phase") or row.actor
+                cycle["stages"].extend(
+                    {
+                        "stage": stage_name,
+                        "event": "stage_completed",
+                        "at": row.created_at,
+                        "plugins": [],
+                        "result": result,
+                        "error": None,
+                    }
+                    for stage_name, result in (snapshot.get("stage_results") or {}).items()
+                )
+        elif row.action in ("cycle_failed", "phase_failed"):
             cycle["status"] = "failed"
             cycle["completed_at"] = snapshot.get("failed_at") or row.created_at
             cycle["error"] = snapshot.get("error")
