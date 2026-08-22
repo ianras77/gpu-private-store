@@ -207,11 +207,10 @@ export default async function HomePage() {
               <span>{editionLabel}</span>
               <span>{latestCycle?.status ? `Cycle ${latestCycle.status}` : "Cycle warming"}</span>
             </div>
-            <h1>One woman, sharp politics, receipts in reach.</h1>
+            <h1>Anti-Trump politics, reported with a long memory.</h1>
             <p className="hero-dek">{heroLine}</p>
             <p className="hero-note">
-              This is woman-owned anti-Trump work: one woman reading the room, keeping the receipts close, and refusing
-              to let Trump-world make exhaustion look like inevitability.
+              Reporting, analysis, and essays on the decisions shaping the present.
             </p>
             <div className="hero-actions">
               <Link href={leadHref} className="button-link">
@@ -237,7 +236,7 @@ export default async function HomePage() {
           </aside>
         </section>
 
-        <section className="data-strip" aria-label="Live site data">
+        <section className="data-strip homepage-stats" aria-label="Live site data">
           {dataCards.map((card) => (
             <article key={card.label} className="data-card">
               <span>{card.label}</span>
@@ -247,7 +246,7 @@ export default async function HomePage() {
           ))}
         </section>
 
-        <section className="cycle-pulse" aria-label="Live cycle pulse">
+        <section className="cycle-pulse homepage-process" aria-label="Live cycle pulse">
           <div className="section-heading section-heading-wide">
             <p className="section-kicker">Cycle pulse</p>
             <h2>Tonight's desk has a pulse.</h2>
@@ -268,7 +267,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="research-workbench">
+        <section className="research-workbench homepage-process">
           <div className="research-workbench-copy">
             <p className="section-kicker">Research lanes</p>
             <h2>The front page starts where the receipts start.</h2>
@@ -289,7 +288,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="analysis-radar">
+        <section className="analysis-radar homepage-process">
           <article className="radar-panel">
             <div className="section-heading">
               <p className="section-kicker">Analysis radar</p>
@@ -352,7 +351,7 @@ export default async function HomePage() {
           </aside>
         </section>
 
-        <section className="writing-queue">
+        <section className="writing-queue homepage-writing">
           <div className="section-heading section-heading-wide">
             <p className="section-kicker">Writing queue</p>
             <h2>What is sharp enough to survive the draft.</h2>
@@ -377,7 +376,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="blog-and-heat">
+        <section className="blog-and-heat homepage-content">
           <article className="story-panel latest-blog-list">
             <div className="section-heading">
               <p className="section-kicker">Fresh writing</p>
@@ -428,7 +427,7 @@ export default async function HomePage() {
           </aside>
         </section>
 
-        <section className="channel-showcase">
+        <section className="channel-showcase homepage-process">
           <div className="section-heading section-heading-wide">
             <p className="section-kicker">Channels</p>
             <h2>The beats that keep proving themselves.</h2>
@@ -453,7 +452,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="reading-room-grid">
+        <section className="reading-room-grid homepage-process">
           <article className="story-panel receipts-panel">
             <div className="section-heading">
               <p className="section-kicker">Reading table</p>
@@ -498,12 +497,11 @@ export default async function HomePage() {
           </article>
         </section>
 
-        <section className="home-closing-note">
+        <section className="home-closing-note homepage-footer-note">
           <p>
-            BAT is one woman keeping the shelf current, the memory intact, the style alive, and the receipts close enough
-            for anyone to check.
+            A running editorial desk for the stories and patterns that deserve another look.
           </p>
-          <p className="closing-signoff">Search wide. Narrow hard. Publish only when the receipt bites.</p>
+          <p className="closing-signoff">Read the archive, or follow the work as it develops.</p>
           <div className="hero-actions">
             <Link href="/archive" className="button-link">
               Read the archive

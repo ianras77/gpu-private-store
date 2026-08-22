@@ -2163,9 +2163,21 @@ button,
 }
 
 .redesigned-home {
+  display: flex;
+  flex-direction: column;
   gap: 1.25rem;
   padding-top: 1.2rem;
 }
+
+.redesigned-home .live-desk-hero { order: 1; }
+.redesigned-home .homepage-content { order: 2; margin-top: 1rem; }
+.redesigned-home .homepage-writing { order: 3; }
+.redesigned-home .homepage-stats { order: 4; margin-top: 3rem; opacity: 0.9; }
+.redesigned-home .homepage-footer-note { order: 5; }
+.redesigned-home .homepage-process { display: none; }
+.redesigned-home .latest-blog-list { grid-column: 1 / -1; }
+.redesigned-home .latest-blog-list .post-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.redesigned-home .latest-blog-list .post-row { min-height: 12rem; padding: 1.35rem; }
 
 .hero-board {
   display: grid;
@@ -2537,6 +2549,8 @@ button,
   .reading-room-grid {
     grid-template-columns: 1fr;
   }
+
+  .redesigned-home .latest-blog-list .post-list { grid-template-columns: 1fr; }
 
   .masthead-art {
     display: none;
