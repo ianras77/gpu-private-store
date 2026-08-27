@@ -1,12 +1,13 @@
 import { describe, expect, test } from "vitest";
 import { getLaneDisplay } from "./chat-presentation";
 
-describe("RassyMind lane display", () => {
-  test("describes each selectable lane without inventing a gateway capability", () => {
-    expect(getLaneDisplay("general")).toMatchObject({ glyph: "ASK", capability: "Conversation and synthesis" });
-    expect(getLaneDisplay("deep-coding")).toMatchObject({ glyph: "CODE", capability: "High-context coding" });
-    expect(getLaneDisplay("fast-coding")).toMatchObject({ glyph: "FAST", capability: "Focused coding loops" });
-    expect(getLaneDisplay("quick")).toMatchObject({ glyph: "SNAP", capability: "Short, low-latency turns" });
-    expect(getLaneDisplay("knowledge")).toMatchObject({ glyph: "KNOW", capability: "Selected document context" });
+describe("RassyMind channel display", () => {
+  test("describes each selectable channel without inventing a gateway capability", () => {
+    expect(getLaneDisplay("general")).toMatchObject({ glyph: "MIND", capability: "Reasoning + synthesis" });
+    expect(getLaneDisplay("deep-coding")).toMatchObject({ glyph: "CODE", capability: "Systems + high-context code" });
+    expect(getLaneDisplay("fast-coding")).toMatchObject({ glyph: "FAST", capability: "Focused code loops" });
+    expect(getLaneDisplay("quick")).toMatchObject({ glyph: "UTIL", capability: "Short utility turns" });
+    expect(getLaneDisplay("spark")).toMatchObject({ glyph: "SPRK", capability: "Low-latency transforms" });
+    expect(getLaneDisplay("knowledge")).toMatchObject({ glyph: "KNOW", capability: "Mind + selected vectors" });
   });
 });

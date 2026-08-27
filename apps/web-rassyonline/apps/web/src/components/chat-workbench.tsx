@@ -52,7 +52,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "RassyMind is on the line. Pick a lane, bring your documents if you are signed in, and start the thread."
+      content: "RassyMind is ready. Choose a channel, bring your documents if you are signed in, and start the thread."
     }
   ]);
   const [input, setInput] = useState("");
@@ -61,13 +61,16 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [uploading, setUploading] = useState(false);
   const [documentNotice, setDocumentNotice] = useState<string | null>(null);
   const [themeId, setThemeId] = useState<ThemeId>("aurora");
+  const [temperature, setTemperature] = useState(0.7);
+  const [maxTokens, setMaxTokens] = useState(modes[0]?.maxTokens ?? 2048);
+  const [showTuning, setShowTuning] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
   const activeLane = getLaneDisplay(mode);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
   const activeTheme = getTheme(themeId);
-  const webSearchLabel = webSearch === "on" ? "web lit" : webSearch === "off" ? "local only" : "auto web";
+  const webSearchLabel = webSearch === "on" ? "web search on" : webSearch === "off" ? "local only" : "web search auto";
 
   useEffect(() => {
     if (!signedIn) return;
@@ -84,6 +87,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     window.localStorage.setItem("rassy-online-theme", themeId);
   }, [themeId]);
 
+  useEffect(() => {
+    setMaxTokens(activeMode?.maxTokens ?? 2048);
+  }, [activeMode?.id, activeMode?.maxTokens]);
+
   async function refreshDocuments() {
     const response = await fetch("/api/documents", { cache: "no-store" });
     if (!response.ok) return;
@@ -92,22 +99,21 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   }
 
   async function uploadDocument(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
     setUploading(true);
-    setDocumentNotice("Indexing document...");
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", file.name);
 
     try {
-      const response = await fetch("/api/documents", {
-        method: "POST",
-        body: formData
-      });
-      const data = (await response.json()) as { error?: string };
-      if (!response.ok) throw new Error(data.error ?? "upload_failed");
-      setDocumentNotice("Document indexed and ready.");
+      setDocumentNotice(`Indexing ${files.length} source${files.length === 1 ? "" : "s"} through rassy-embed...`);
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("title", file.name);
+        const response = await fetch("/api/documents", { method: "POST", body: formData });
+        const data = (await response.json()) as { error?: string };
+        if (!response.ok) throw new Error(`${file.name}: ${data.error ?? "upload_failed"}`);
+      }
+      setDocumentNotice(`${files.length} source${files.length === 1 ? "" : "s"} indexed and ready.`);
       await refreshDocuments();
     } catch (error) {
       setDocumentNotice(error instanceof Error ? error.message : "Upload failed");
@@ -138,10 +144,14 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     if (!prompt || sending) return;
     let intentNotice: ChatMessage | null = null;
     let requestWebSearch = webSearch;
+    let requestMode = mode;
 
     const localIntent = applyLocalChatIntent(prompt);
     if (localIntent) {
-      if (localIntent.updates.mode) setMode(localIntent.updates.mode);
+      if (localIntent.updates.mode) {
+        requestMode = localIntent.updates.mode;
+        setMode(localIntent.updates.mode);
+      }
       if (localIntent.updates.themeId) setThemeId(localIntent.updates.themeId);
       if (localIntent.updates.webSearch) {
         requestWebSearch = localIntent.updates.webSearch;
@@ -176,10 +186,12 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         headers: { "content-type": "application/json" },
         signal: abort.signal,
         body: JSON.stringify({
-          mode,
+          mode: requestMode,
           threadId,
           activeDocumentIds: activeDocuments.map((document) => document.id),
           webSearch: requestWebSearch,
+          temperature,
+          maxTokens,
           messages: nextMessages.map((message) => ({ role: message.role, content: message.content }))
         })
       });
@@ -222,7 +234,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   return (
     <section className="chat-workbench" aria-label="RassyMind chat">
       <div className="routing-ribbon" aria-label="RassyMind controls">
-        <div className="lane-switcher" aria-label="RassyMind lane">
+        <div className="lane-switcher" aria-label="RassyMind channel">
           {modes.map((item) => (
             <button className={item.id === mode ? "lane-button active" : "lane-button"} key={item.id} onClick={() => setMode(item.id)} type="button">
               <span>{getLaneDisplay(item.id).glyph}</span>
@@ -231,7 +243,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           ))}
         </div>
 
-        <div className="route-status" aria-label="Active RassyMind route">
+        <div className="route-status" aria-label="Active RassyMind channel">
           <span>{activeLane.glyph}</span>
           <div>
             <strong>{activeMode?.model ?? "rassy-mind"}</strong>
@@ -262,7 +274,17 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
               </button>
             ))}
           </div>
+          <button className={showTuning ? "tuning-toggle active" : "tuning-toggle"} type="button" onClick={() => setShowTuning((value) => !value)} aria-expanded={showTuning}>
+            Tune <span>{showTuning ? "−" : "+"}</span>
+          </button>
         </div>
+
+        {showTuning ? (
+          <div className="tuning-panel" aria-label="RassyMind tuning controls">
+            <label><span>Creativity <output>{temperature.toFixed(1)}</output></span><input type="range" min="0" max="1.5" step="0.1" value={temperature} onChange={(event) => setTemperature(Number(event.target.value))} /><small>Precision ← · exploratory →</small></label>
+            <label><span>Response budget <output>{maxTokens} tokens</output></span><input type="range" min="256" max="8192" step="256" value={maxTokens} onChange={(event) => setMaxTokens(Number(event.target.value))} /><small>{activeMode?.model} · {activeMode?.contextWindow}</small></label>
+          </div>
+        ) : null}
 
         <section className="memory-source-tray" aria-label="Document memory">
           <div className="memory-head">
@@ -271,7 +293,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
             {signedIn ? (
               <label className={uploading ? "upload-button disabled" : "upload-button"}>
                 {uploading ? "Indexing" : "Upload"}
-                <input type="file" accept=".txt,.md,.markdown,.json,.csv,.log,.yaml,.yml,text/*,application/json" onChange={uploadDocument} disabled={uploading} />
+                <input type="file" multiple accept=".txt,.md,.markdown,.rst,.adoc,.json,.jsonl,.csv,.tsv,.log,.yaml,.yml,.toml,.ini,.conf,.env,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.kt,.swift,.c,.h,.cpp,.hpp,.cs,.php,.sh,.bash,.zsh,.sql,.html,.css,.scss,.xml,.graphql,.proto,.dockerfile,text/*,application/json" onChange={uploadDocument} disabled={uploading} />
               </label>
             ) : null}
           </div>
@@ -299,7 +321,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       </div>
 
       <div className="transcript-shell">
-        <div className="route-readout" aria-label="Active RassyMind route">
+        <div className="route-readout" aria-label="Active RassyMind channel">
           <div>
             <span>{activeLane.glyph}</span>
             <strong>{activeMode?.model ?? "rassy-mind"}</strong>
@@ -312,7 +334,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <div className="message-list">
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <span>{message.role === "user" ? "You" : "RassyMind"}</span>
+              <div className="message-meta"><span>{message.role === "user" ? "You" : "RassyMind"}</span>{message.role === "assistant" && message.content ? <CopyButton text={message.content} label="Copy Markdown" /> : null}</div>
               <MarkdownMessage content={message.content || (sending ? "..." : "")} />
             </article>
           ))}
@@ -397,16 +419,21 @@ function MarkdownMessage({ content }: { content: string }) {
           );
         }
         if (block.type === "code") {
-          return (
-            <pre key={index}>
-              <code>{block.text}</code>
-            </pre>
-          );
+          return <CodeBlock key={index} language={block.language} text={block.text} />;
         }
         return <p key={index}>{renderInline(block.text)}</p>;
       })}
     </div>
   );
+}
+
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  return <button className="copy-button" type="button" onClick={() => { void navigator.clipboard.writeText(text).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1400); }); }}>{copied ? "Copied" : label}</button>;
+}
+
+function CodeBlock({ language, text }: { language: string | null; text: string }) {
+  return <div className="code-block"><div className="code-toolbar"><span>{language ?? "code"}</span><CopyButton text={text} label="Copy code" /></div><pre><code>{text}</code></pre></div>;
 }
 
 function renderInline(text: string) {

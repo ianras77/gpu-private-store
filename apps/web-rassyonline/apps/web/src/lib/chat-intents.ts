@@ -14,7 +14,7 @@ export type LocalChatIntent = {
   notice: string;
 };
 
-const MODES = new Set<ChatModeId>(["general", "deep-coding", "fast-coding", "quick", "knowledge"]);
+const MODES = new Set<ChatModeId>(["general", "deep-coding", "fast-coding", "quick", "spark", "knowledge"]);
 const THEMES = new Set<ThemeId>(["aurora", "ember", "verdant"]);
 
 export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null {
@@ -35,8 +35,8 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
     return {
       kind: value ? "send" : "local",
       ...(value ? { prompt: value } : {}),
-      updates: { mode: "quick" },
-      notice: "Spark lane is active for quick turns."
+      updates: { mode: "fast-coding" },
+      notice: "Fast Code channel is active for focused implementation."
     };
   }
 
@@ -45,7 +45,7 @@ export function applyLocalChatIntent(rawPrompt: string): LocalChatIntent | null 
       kind: value ? "send" : "local",
       ...(value ? { prompt: value } : {}),
       updates: { mode: "knowledge" },
-      notice: "Memory lane is active; enabled documents can shape the answer."
+      notice: "Knowledge channel is active; enabled documents can shape the answer."
     };
   }
 

@@ -11,7 +11,8 @@ import {
   extractDeltaFromSseLine,
   getChatMode,
   getRassyMindChatUrl,
-  getRassyMindRequestError
+  getRassyMindRequestError,
+  rerankTexts
 } from "@/lib/rassymind";
 import { buildSearchContextMessage, searchWebResources, shouldUseWebSearch } from "@/lib/web-search";
 
@@ -27,7 +28,9 @@ const chatRequestSchema = z.object({
   threadId: z.string().optional().nullable(),
   messages: z.array(chatMessageSchema).min(1).max(60),
   activeDocumentIds: z.array(z.string()).max(50).optional(),
-  webSearch: z.enum(["auto", "on", "off"]).optional()
+  webSearch: z.enum(["auto", "on", "off"]).optional(),
+  temperature: z.number().min(0).max(1.5).optional(),
+  maxTokens: z.number().int().min(256).max(8192).optional()
 });
 
 export async function POST(request: NextRequest) {
@@ -68,8 +71,15 @@ export async function POST(request: NextRequest) {
         vector: queryVector,
         limit: 6
       });
+      let ranked = retrieved;
+      try {
+        const order = await rerankTexts(latestUserMessage.content, retrieved.map((item) => item.payload?.text ?? ""));
+        if (order.length) ranked = order.map((index) => retrieved[index]).filter(Boolean);
+      } catch {
+        // Vector similarity remains a useful, bounded fallback when the optional rerank lane is busy.
+      }
       const contextMessage = buildDocumentContextMessage(
-        retrieved
+        ranked
           .filter((item) => item.payload?.text && item.payload.document_title)
           .map((item) => ({
             documentTitle: item.payload?.document_title ?? "Document",
@@ -116,9 +126,9 @@ export async function POST(request: NextRequest) {
       model: mode.model,
       messages: upstreamMessages,
       stream: true,
-      temperature: 0.7,
-      max_tokens: mode.maxTokens,
-      max_completion_tokens: mode.maxTokens,
+      temperature: parsed.temperature ?? 0.7,
+      max_tokens: parsed.maxTokens ?? mode.maxTokens,
+      max_completion_tokens: parsed.maxTokens ?? mode.maxTokens,
       think: mode.thinking,
       reasoning_effort: mode.thinking ? "medium" : "none"
     })

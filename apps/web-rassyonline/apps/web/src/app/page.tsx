@@ -11,13 +11,11 @@ export default async function Home() {
       <div className="ambient-field" aria-hidden="true" />
 
       <header className="topbar">
-        <div className="brand-mark" aria-hidden="true">
-          R
-        </div>
+        <div className="brand-mark" aria-hidden="true"><span>R</span><i /></div>
         <div>
-          <p className="system-label">Rassy Online</p>
-          <h1>The conversation is the instrument.</h1>
-          <p className="topbar-subtitle">RassyMind routes code, local memory, and optional web context through one live thread.</p>
+          <p className="system-label">RASSY // ONLINE <span className="live-dot" /> LIVE WORKBENCH</p>
+          <h1>One mind. Every lane.</h1>
+          <p className="topbar-subtitle">A user-owned RassyMind instrument for reasoning, code, vectors, and live web context.</p>
         </div>
         <div className="top-actions">
           {user ? (

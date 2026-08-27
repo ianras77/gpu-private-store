@@ -72,10 +72,10 @@ The app should expose RassyCodex capabilities through understandable modes while
 
 Initial modes:
 
-- `Deep Coding`: `rassy-codex`, long coding/operator work, high-context reasoning.
-- `Fast Coding`: `rassy-codex-lite`, normal coding loops and faster agent-style tasks.
-- `General`: `rassy-general`, broad assistant chat and analysis.
-- `Quick`: `rassy-fast`, short answers, titles, summaries, and lightweight utility chat.
+- `Deep Coding`: `rassy-code`, long coding/operator work, high-context reasoning.
+- `Fast Coding`: `rassy-code`, normal coding loops with a smaller response budget.
+- `General`: `rassy-mind`, broad assistant chat and analysis.
+- `Quick`: `rassy-utility`, short answers, titles, summaries, and lightweight utility chat.
 - `Knowledge`: chat plus enabled document retrieval, embeddings through `rassy-embed`, rerank through `rassy-rerank`.
 - `Image`: `rassy-image`, exposed after endpoint proof.
 - `Audio`: `rassy-audio`, exposed after endpoint proof.

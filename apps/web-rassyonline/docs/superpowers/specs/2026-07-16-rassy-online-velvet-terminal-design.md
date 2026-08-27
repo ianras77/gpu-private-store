@@ -8,11 +8,11 @@ Recast Rassy Online as a single-screen, desktop-first RassyCodex chat instrument
 
 The interface exposes existing, real capabilities without inventing new gateway features:
 
-- **Talk** routes to `rassy-general` for broad conversation and synthesis.
-- **Deep Codex** routes to `rassy-codex` for high-context coding and systems work.
-- **Fast Codex** routes to `rassy-codex-lite` for focused implementation loops.
+- **Talk** routes to `rassy-mind` for broad conversation and synthesis.
+- **Deep Codex** routes to `rassy-code` for high-context coding and systems work.
+- **Fast Codex** routes to `rassy-code` with a smaller response budget for focused implementation loops.
 - **Spark** routes to `rassy-fast` for short, low-latency transforms.
-- **Memory** routes to `rassy-general` and makes the selected, authenticated user's documents available through existing Qdrant retrieval.
+- **Memory** routes to `rassy-mind` and makes the selected, authenticated user's documents available through `rassy-embed`, Qdrant retrieval, and optional `rassy-rerank`.
 - Search remains intentionally separate from RassyCodex retrieval: `auto`, `search`, and `local` control the existing optional `search.rasies.com` context route.
 - Existing slash commands, streaming, stop control, persisted threads, document uploads, and theme intent handling remain functional.
 

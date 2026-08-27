@@ -3,14 +3,16 @@ import type { ChatModeId } from "./rassymind";
 type LaneDisplay = {
   glyph: string;
   capability: string;
+  accent: string;
 };
 
 const LANE_DISPLAY: Record<ChatModeId, LaneDisplay> = {
-  general: { glyph: "ASK", capability: "Conversation and synthesis" },
-  "deep-coding": { glyph: "CODE", capability: "High-context coding" },
-  "fast-coding": { glyph: "FAST", capability: "Focused coding loops" },
-  quick: { glyph: "SNAP", capability: "Short, low-latency turns" },
-  knowledge: { glyph: "KNOW", capability: "Selected document context" }
+  general: { glyph: "MIND", capability: "Reasoning + synthesis", accent: "cyan" },
+  "deep-coding": { glyph: "CODE", capability: "Systems + high-context code", accent: "gold" },
+  "fast-coding": { glyph: "FAST", capability: "Focused code loops", accent: "violet" },
+  quick: { glyph: "UTIL", capability: "Short utility turns", accent: "rose" },
+  spark: { glyph: "SPRK", capability: "Low-latency transforms", accent: "gold" },
+  knowledge: { glyph: "KNOW", capability: "Mind + selected vectors", accent: "cyan" }
 };
 
 export function getLaneDisplay(mode: ChatModeId): LaneDisplay {

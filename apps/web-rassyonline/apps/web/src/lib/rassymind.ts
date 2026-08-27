@@ -1,4 +1,4 @@
-export type ChatModeId = "general" | "deep-coding" | "fast-coding" | "quick" | "knowledge";
+export type ChatModeId = "general" | "deep-coding" | "fast-coding" | "quick" | "spark" | "knowledge";
 
 export type ChatMode = {
   id: ChatModeId;
@@ -7,14 +7,16 @@ export type ChatMode = {
   maxTokens: number;
   thinking: boolean;
   description: string;
+  contextWindow: string;
 };
 
 export const CHAT_MODES: ChatMode[] = [
-  { id: "general", label: "Talk", model: "rassy-fast", maxTokens: 512, thinking: false, description: "Fast everyday conversation and synthesis." },
-  { id: "deep-coding", label: "Deep Code", model: "rassy-code", maxTokens: 2048, thinking: true, description: "High-context coding, systems reasoning, and operator work." },
-  { id: "fast-coding", label: "Fast Code", model: "rassy-fast", maxTokens: 768, thinking: false, description: "Fast coding loops, implementation passes, and focused edits." },
-  { id: "quick", label: "Spark", model: "rassy-utility", maxTokens: 256, thinking: false, description: "Short answers, titles, summaries, and quick transforms." },
-  { id: "knowledge", label: "Memory", model: "rassy-mind", maxTokens: 2048, thinking: true, description: "Document-grounded chat with enabled workspace memory." }
+  { id: "general", label: "Talk", model: "rassy-mind", maxTokens: 2048, thinking: true, contextWindow: "Mind lane", description: "Reasoning, conversation, and synthesis through the general RassyMind lane." },
+  { id: "deep-coding", label: "Deep Code", model: "rassy-code", maxTokens: 4096, thinking: true, contextWindow: "Code lane", description: "High-context coding, systems reasoning, and operator work." },
+  { id: "fast-coding", label: "Fast Code", model: "rassy-code", maxTokens: 1536, thinking: false, contextWindow: "Code lane", description: "Focused implementation loops through the same canonical code lane." },
+  { id: "quick", label: "Utility", model: "rassy-utility", maxTokens: 768, thinking: false, contextWindow: "Utility lane", description: "Short answers, titles, summaries, and quick transforms." },
+  { id: "spark", label: "Spark", model: "rassy-fast", maxTokens: 512, thinking: false, contextWindow: "Fast lane", description: "Low-latency transforms when speed matters more than depth." },
+  { id: "knowledge", label: "Knowledge", model: "rassy-mind", maxTokens: 3072, thinking: true, contextWindow: "Mind + vectors", description: "RassyMind reasoning grounded with your selected document vectors." }
 ];
 
 export function getChatMode(value: string | null | undefined): ChatMode {
@@ -55,6 +57,25 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
     throw new Error("RassyMind embeddings response was incomplete");
   }
   return embeddings;
+}
+
+export async function rerankTexts(query: string, documents: string[]): Promise<number[]> {
+  if (!documents.length) return [];
+  const baseUrl = process.env.RASSYMIND_BASE_URL ?? "http://host.docker.internal:8844";
+  const response = await fetch(`${baseUrl.replace(/\/+$/, "")}/v1/rerank`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      ...(process.env.RASSYMIND_API_KEY ? { authorization: `Bearer ${process.env.RASSYMIND_API_KEY}` } : {})
+    },
+    body: JSON.stringify({ model: "rassy-rerank", query, documents, top_n: documents.length })
+  });
+  if (!response.ok) throw getRassyMindRequestError(response.status);
+  const parsed = (await response.json()) as { results?: Array<{ index?: number; relevance_score?: number; score?: number }> };
+  return (parsed.results ?? [])
+    .filter((item) => typeof item.index === "number")
+    .sort((left, right) => (right.relevance_score ?? right.score ?? 0) - (left.relevance_score ?? left.score ?? 0))
+    .map((item) => item.index as number);
 }
 
 export function extractDeltaFromSseLine(line: string): string | null {

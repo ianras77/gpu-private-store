@@ -30,7 +30,7 @@ describe("applyLocalChatIntent", () => {
     });
   });
 
-  it("supports short RassyMind lane aliases", () => {
+  it("supports short RassyMind channel aliases", () => {
     expect(applyLocalChatIntent("/code")).toEqual({
       kind: "local",
       updates: { mode: "deep-coding" },
@@ -38,17 +38,17 @@ describe("applyLocalChatIntent", () => {
     });
     expect(applyLocalChatIntent("/fast")).toEqual({
       kind: "local",
-      updates: { mode: "quick" },
-      notice: "Spark lane is active for quick turns."
+      updates: { mode: "fast-coding" },
+      notice: "Fast Code channel is active for focused implementation."
     });
     expect(applyLocalChatIntent("/know")).toEqual({
       kind: "local",
       updates: { mode: "knowledge" },
-      notice: "Memory lane is active; enabled documents can shape the answer."
+      notice: "Knowledge channel is active; enabled documents can shape the answer."
     });
   });
 
-  it("uses lane aliases as send commands when a prompt follows", () => {
+  it("uses channel aliases as send commands when a prompt follows", () => {
     expect(applyLocalChatIntent("/code draft a patch")).toEqual({
       kind: "send",
       prompt: "draft a patch",
@@ -59,7 +59,7 @@ describe("applyLocalChatIntent", () => {
       kind: "send",
       prompt: "compare these notes",
       updates: { mode: "knowledge" },
-      notice: "Memory lane is active; enabled documents can shape the answer."
+      notice: "Knowledge channel is active; enabled documents can shape the answer."
     });
   });
 });

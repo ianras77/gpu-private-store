@@ -14,13 +14,24 @@ export type DocumentContextMessage = {
   content: string;
 };
 
-const SUPPORTED_EXTENSIONS = new Set([".txt", ".md", ".markdown", ".json", ".csv", ".log", ".yaml", ".yml"]);
+const SUPPORTED_EXTENSIONS = new Set([
+  ".txt", ".md", ".markdown", ".rst", ".adoc", ".csv", ".tsv", ".json", ".jsonl", ".ndjson", ".yaml", ".yml", ".toml", ".ini", ".conf", ".env", ".log",
+  ".js", ".jsx", ".ts", ".tsx", ".py", ".rb", ".go", ".rs", ".java", ".kt", ".swift", ".c", ".h", ".cpp", ".hpp", ".cs", ".php", ".sh", ".bash", ".zsh", ".sql", ".html", ".css", ".scss", ".xml", ".graphql", ".proto", ".dockerfile"
+]);
 const SUPPORTED_MIME_TYPES = new Set([
   "text/plain",
   "text/markdown",
+  "text/html",
+  "text/css",
+  "text/csv",
+  "text/xml",
   "text/csv",
   "application/json",
-  "application/x-yaml"
+  "application/x-ndjson",
+  "application/x-yaml",
+  "application/yaml",
+  "application/toml",
+  "application/xml"
 ]);
 
 export function sanitizeFilename(filename: string): string {

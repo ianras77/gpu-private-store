@@ -6,7 +6,8 @@ import {
   getChatMode,
   getRassyMindChatUrl,
   getRassyMindEmbeddingsUrl,
-  getRassyMindRequestError
+  getRassyMindRequestError,
+  rerankTexts
 } from "./rassymind";
 
 afterEach(() => {
@@ -17,18 +18,19 @@ afterEach(() => {
 describe("RassyMind mode mapping", () => {
   test("publishes the exact ordered chat modes", () => {
     expect(CHAT_MODES).toEqual([
-      { id: "general", label: "Talk", model: "rassy-fast", maxTokens: 512, thinking: false, description: "Fast everyday conversation and synthesis." },
-      { id: "deep-coding", label: "Deep Code", model: "rassy-code", maxTokens: 2048, thinking: true, description: "High-context coding, systems reasoning, and operator work." },
-      { id: "fast-coding", label: "Fast Code", model: "rassy-fast", maxTokens: 768, thinking: false, description: "Fast coding loops, implementation passes, and focused edits." },
-      { id: "quick", label: "Spark", model: "rassy-utility", maxTokens: 256, thinking: false, description: "Short answers, titles, summaries, and quick transforms." },
-      { id: "knowledge", label: "Memory", model: "rassy-mind", maxTokens: 2048, thinking: true, description: "Document-grounded chat with enabled workspace memory." }
+      { id: "general", label: "Talk", model: "rassy-mind", maxTokens: 2048, thinking: true, contextWindow: "Mind lane", description: "Reasoning, conversation, and synthesis through the general RassyMind lane." },
+      { id: "deep-coding", label: "Deep Code", model: "rassy-code", maxTokens: 4096, thinking: true, contextWindow: "Code lane", description: "High-context coding, systems reasoning, and operator work." },
+      { id: "fast-coding", label: "Fast Code", model: "rassy-code", maxTokens: 1536, thinking: false, contextWindow: "Code lane", description: "Focused implementation loops through the same canonical code lane." },
+      { id: "quick", label: "Utility", model: "rassy-utility", maxTokens: 768, thinking: false, contextWindow: "Utility lane", description: "Short answers, titles, summaries, and quick transforms." },
+      { id: "spark", label: "Spark", model: "rassy-fast", maxTokens: 512, thinking: false, contextWindow: "Fast lane", description: "Low-latency transforms when speed matters more than depth." },
+      { id: "knowledge", label: "Knowledge", model: "rassy-mind", maxTokens: 3072, thinking: true, contextWindow: "Mind + vectors", description: "RassyMind reasoning grounded with your selected document vectors." }
     ]);
   });
 
   test("maps friendly modes to exact RassyMind model ids", () => {
-    expect(getChatMode("general").model).toBe("rassy-fast");
+    expect(getChatMode("general").model).toBe("rassy-mind");
     expect(getChatMode("deep-coding").model).toBe("rassy-code");
-    expect(getChatMode("fast-coding").model).toBe("rassy-fast");
+    expect(getChatMode("fast-coding").model).toBe("rassy-code");
     expect(getChatMode("quick").model).toBe("rassy-utility");
     expect(getChatMode("knowledge").model).toBe("rassy-mind");
   });
@@ -90,6 +92,17 @@ describe("RassyMind request errors", () => {
     const error = getRassyMindRequestError(502);
     expect(error.message).toBe("RassyMind request failed with status 502");
     expect(error.message).not.toContain("mind-secret");
+  });
+});
+
+describe("RassyMind reranking", () => {
+  test("uses the canonical rerank lane and returns relevance order", async () => {
+    vi.stubEnv("RASSYMIND_BASE_URL", "http://rassymind.test:9000");
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ results: [
+      { index: 1, relevance_score: 0.9 }, { index: 0, relevance_score: 0.2 }
+    ] }), { status: 200 }));
+    await expect(rerankTexts("query", ["one", "two"])).resolves.toEqual([1, 0]);
+    expect(fetchMock).toHaveBeenCalledWith("http://rassymind.test:9000/v1/rerank", expect.objectContaining({ method: "POST" }));
   });
 });
 
