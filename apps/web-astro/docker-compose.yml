@@ -81,6 +81,7 @@ services:
       READING_RATE_LIMIT_WINDOW_MS: ${ASTRO_READING_RATE_LIMIT_WINDOW_MS:-60000}
     command: >
       sh -c "corepack enable
+      && corepack prepare pnpm@9.15.0 --activate
       && pnpm --store-dir $$PNPM_STORE_DIR install
       && pnpm --store-dir $$PNPM_STORE_DIR --filter @astro/astro-engine-swiss rebuild swisseph
       && pnpm --filter @astro/api exec prisma generate
