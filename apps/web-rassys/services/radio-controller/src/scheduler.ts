@@ -43,6 +43,7 @@ const RECENT_SNIPPETS_KEY = "station:recent_snippets";
 const LAST_SNIPPET_AT_KEY = "station:last_snippet_at";
 const LAST_SPECIAL_AT_KEY = "station:last_special_at";
 const TRANSITION_COUNTDOWN_KEY = "station:transition:countdown";
+const QUEUE_FILL_LOCK_KEY = "station:queue:fill:lock";
 const DJ_SCRIPT_TTL_SECONDS = 3 * 60 * 60;
 const FEEDBACK_PERSISTENCE_LOOKBACK_DAYS = 180;
 const FEEDBACK_PERSISTENCE_CACHE_MS = 5 * 60 * 1000;
@@ -2460,6 +2461,9 @@ export const startScheduler = async () => {
             queueRerunRequested = true;
             return;
         }
+        const lockToken = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+        const acquired = await redis.set(QUEUE_FILL_LOCK_KEY, lockToken, "EX", 45, "NX");
+        if (acquired !== "OK") return;
         fillingQueue = true;
         try {
             const liquidsoapReady = await isLiquidsoapReady();
@@ -2594,6 +2598,12 @@ export const startScheduler = async () => {
         }
         finally {
             fillingQueue = false;
+            await redis.eval(
+                "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
+                1,
+                QUEUE_FILL_LOCK_KEY,
+                lockToken
+            );
         }
     };
     let scanningLibrary = false;
