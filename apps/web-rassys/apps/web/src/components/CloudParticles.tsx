@@ -39,7 +39,8 @@ export function CloudParticles() {
 
     let particles = createParticles(PARTICLE_COUNT, width, height);
     let visitor: { pattern: readonly string[]; x: number; y: number; born: number; phase: number; direction: number } | null = null;
-    let nextVisitor = performance.now() + 4500;
+    let nextVisitor = performance.now() + 1800;
+    let animationFrame = 0;
 
     const resize = () => {
       width = canvas.clientWidth;
@@ -83,10 +84,12 @@ export function CloudParticles() {
         if (!visitor && performance.now() > nextVisitor) {
           const choice = VISITORS[Math.floor(Math.random() * VISITORS.length)];
           visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 20, born: performance.now(), phase: Math.random() * Math.PI * 2, direction: Math.random() > 0.5 ? 1 : -1 };
-          nextVisitor = performance.now() + 16000;
+          // Keep the ambient layer continuously inhabited: the next visitor is
+          // ready before the current one can leave even on a short viewport.
+          nextVisitor = performance.now() + 3500;
         }
         if (visitor) {
-          visitor.y -= 0.16;
+          visitor.y -= 0.72;
           visitor.phase += 0.008;
           visitor.x += visitor.direction * (0.055 + Math.sin(visitor.phase) * 0.08);
           const age = performance.now() - visitor.born;
@@ -94,22 +97,22 @@ export function CloudParticles() {
           ctx.save();
           ctx.translate(visitor.x + 15, visitor.y + 15);
           ctx.rotate(Math.sin(visitor.phase) * 0.08);
-          ctx.fillStyle = `rgba(255,230,109,${0.34 * fade})`;
+          ctx.fillStyle = `rgba(255,230,109,${0.58 * fade})`;
           visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
-            if (cell === "1") ctx.fillRect(colIndex * 6 - 15, rowIndex * 6 - 15, 4, 4);
+            if (cell === "1") ctx.fillRect(colIndex * 6 - 15, rowIndex * 6 - 15, 5, 5);
           }));
           ctx.restore();
           if (visitor.y < -50) visitor = null;
         }
       }
 
-      requestAnimationFrame(tick);
+      animationFrame = requestAnimationFrame(tick);
     };
 
-    const handle = requestAnimationFrame(tick);
+    animationFrame = requestAnimationFrame(tick);
     window.addEventListener("resize", resize);
     return () => {
-      cancelAnimationFrame(handle);
+      cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resize);
     };
   }, []);

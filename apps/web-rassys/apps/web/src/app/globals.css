@@ -145,6 +145,11 @@ li {
 
 .hero-dot { color: var(--accent-2); text-shadow: 0 0 18px rgba(66, 245, 255, .8); font-size: .62em; vertical-align: .15em; margin: 0 .12em; }
 .hero-wordmark-dot { color: var(--accent-2); text-shadow: 0 0 18px rgba(66, 245, 255, .8); font-size: .46em; letter-spacing: .02em; vertical-align: .12em; }
+@keyframes boothMaterialize { 0% { opacity: 0; transform: translateY(18px) scale(.985); filter: blur(12px) saturate(1.5); } 55% { opacity: 1; filter: blur(0) saturate(1.2); } 100% { opacity: 1; transform: translateY(0) scale(1); filter: none; } }
+@keyframes boothStamp { 0% { opacity: 0; transform: translateX(-12px); letter-spacing: .36em; } 100% { opacity: 1; transform: translateX(0); letter-spacing: .2em; } }
+.booth-materialize { animation: boothMaterialize .8s cubic-bezier(.2,.8,.2,1) both; }
+.booth-materialize-stamp { animation: boothStamp .55s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .booth-materialize, .booth-materialize-stamp { animation: none; } }
 
 .station-deck { display: grid; grid-template-columns: minmax(280px, .9fr) minmax(0, 1.1fr); gap: 1.25rem; padding: 1.1rem; border: 1px solid rgba(255,255,255,.12); border-radius: 2rem; background: radial-gradient(circle at 14% 14%, rgba(255,230,109,.12), transparent 30%), linear-gradient(135deg, rgba(8,12,30,.96), rgba(31,7,43,.92)); box-shadow: 0 32px 100px rgba(0,0,0,.34); }
 .station-deck-art { position: relative; min-height: 440px; overflow: hidden; border-radius: 1.5rem; background: #100b24; }

@@ -349,6 +349,9 @@ export default async function RadioNotesPage({
   const notes = await listRadioNotes(120);
   const catalog = buildRadioNotesCatalog(notes);
   const filteredNotes = filterNotes(catalog.notes, filters);
+  const materializedNote = filteredNotes.length > 0
+    ? filteredNotes[Math.floor(Math.random() * filteredNotes.length)]
+    : null;
   const hasFilters = Object.values(filters).some(Boolean);
 
   return (
@@ -358,10 +361,10 @@ export default async function RadioNotesPage({
           <div className="absolute inset-0 noise opacity-50" aria-hidden="true" />
           <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_320px] xl:items-end">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.42em] text-cloud/58">Booth notebook</div>
-              <h1 className="section-title mt-4 text-4xl md:text-5xl">Session notes from the booth.</h1>
+              <div className="text-[11px] uppercase tracking-[0.42em] text-cloud/58">Mr Rassy // found signals</div>
+              <h1 className="section-title mt-4 text-4xl md:text-5xl">Open one and see what happens.</h1>
               <p className="mt-4 max-w-2xl text-base leading-8 text-cloud/82">
-                The lineup logic, the song notes, and the things I want you to hear, saved one session at a time.
+                These are not filing cabinets. They are little pieces of the station’s mind — a record, a feeling, a turn, a reason to stay.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button asChild>
@@ -522,13 +525,16 @@ export default async function RadioNotesPage({
           <div className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="text-[11px] uppercase tracking-[0.32em] text-cloud/58">
-                {filteredNotes.length} saved turn{filteredNotes.length === 1 ? "" : "s"}
+                {filteredNotes.length} possible signal{filteredNotes.length === 1 ? "" : "s"}
               </div>
-              <div className="text-sm text-cloud/68">Lineup logic first. Song notes right behind it.</div>
+              <div className="text-sm text-cloud/68">One note materialized from the current trail.</div>
             </div>
 
-            {filteredNotes.length > 0 ? (
-              filteredNotes.map((note) => <NoteCard key={note.id} note={note} />)
+            {materializedNote ? (
+              <>
+                <div className="booth-materialize-stamp rounded-[24px] border border-glow/25 bg-glow/[0.06] px-4 py-3 text-xs uppercase tracking-[0.2em] text-glow">Found in the static · {formatRadioNoteDate(materializedNote.createdAt)} · follow the thread below</div>
+                <div className="booth-materialize"><NoteCard key={materializedNote.id} note={materializedNote} /></div>
+              </>
             ) : (
               <div className="rounded-[30px] border border-white/10 bg-black/20 p-6 text-sm text-cloud/72">
                 Nothing in the notebook matches that filter yet.
