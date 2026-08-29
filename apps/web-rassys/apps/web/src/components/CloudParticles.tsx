@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react";
 
 const palette = ["255, 79, 216", "66, 245, 255", "255, 230, 109"];
 const PARTICLE_COUNT = 56;
-const PIXEL_SIZE = 3;
-const PIXEL_STEP = 3;
-const PIXEL_OFFSET = 22.5;
+const PIXEL_SIZE = 2;
+const PIXEL_STEP = 2.35;
+const PIXEL_OFFSET = 17.625;
 const VISITORS = [
   ["unicorn", [
     "000000002000000", "000000012000000", "000000111000000", "000001111100000",
@@ -169,7 +169,7 @@ export function CloudParticles() {
           ctx.rotate(Math.sin(visitor.phase) * 0.06);
           ctx.globalAlpha = fade * shimmer;
           // Keep the sprite grid crisp; the second pass supplies the haze.
-          ctx.shadowBlur = 7;
+          ctx.shadowBlur = 5;
           visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
             if (cell !== "0") {
               ctx.fillStyle = cell === "2" ? `rgba(${ink.highlight},0.9)` : cell === "3" ? "rgba(8,0,17,0.95)" : `rgba(${ink.body},0.86)`;
