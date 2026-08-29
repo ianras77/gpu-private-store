@@ -160,7 +160,7 @@ export function MrRassyRadioApp() {
     : "Fresh";
 
   return (
-    <div className="min-h-screen px-3 pb-6 pt-4 md:px-6 md:py-10">
+    <div className="mr-rassy-hud min-h-screen px-3 pb-6 pt-4 md:px-6 md:py-10">
       <main className="mx-auto max-w-[460px]">
         <div className="relative overflow-hidden rounded-[42px] border border-white/12 bg-[radial-gradient(circle_at_top_left,rgba(255,230,109,0.14),transparent_26%),radial-gradient(circle_at_82%_18%,rgba(66,245,255,0.2),transparent_30%),radial-gradient(circle_at_50%_100%,rgba(255,79,216,0.22),transparent_38%),linear-gradient(160deg,rgba(6,10,26,0.98),rgba(28,7,42,0.94))] shadow-[0_32px_100px_rgba(0,0,0,0.44)]">
           <div

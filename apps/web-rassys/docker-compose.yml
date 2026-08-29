@@ -94,7 +94,7 @@ services:
       MINECRAFT_TROUPE_BOT_PORT: ${MINECRAFT_TROUPE_BOT_PORT:-3000}
       MINECRAFT_TROUPE_STATUS_TIMEOUT_MS: ${MINECRAFT_TROUPE_STATUS_TIMEOUT_MS:-2500}
       MINECRAFT_TROUPE_BOT_NAMES: ${MINECRAFT_TROUPE_BOT_NAMES:-}
-      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/thoughts}
+      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/var/lib/rassys/thoughts}
     depends_on:
       redis:
         condition: service_healthy
@@ -103,7 +103,9 @@ services:
     networks:
       - internal
     volumes:
-      - ${ROOT_FOLDER_HOST}/media/data/web-rassys:${BLOG_STORAGE_PATH:-/media/thoughts}
+      # Durable authored content belongs in Runtipi app-data; media remains a separate host mount.
+      - ${APP_DATA_DIR:-./.runtipi-data}/app-data/web-rassys/named/thoughts:${BLOG_STORAGE_PATH:-/var/lib/rassys/thoughts}
+      - ${ROOT_FOLDER_HOST:-.}/media/data/web-rassys:/media/thoughts:ro
     restart: unless-stopped
     healthcheck:
       test:
