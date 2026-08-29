@@ -4,6 +4,12 @@ import { useEffect, useRef } from "react";
 
 const palette = ["255, 79, 216", "66, 245, 255", "255, 230, 109"];
 const PARTICLE_COUNT = 56;
+const VISITORS = [
+  ["unicorn", ["00100", "01110", "10101", "01110", "00100"]],
+  ["whaleshark", ["00100", "01110", "11111", "01110", "00100"]],
+  ["flower", ["00100", "10101", "01110", "10101", "00100"]],
+  ["trout", ["01000", "11110", "01111", "11110", "01000"]]
+] as const;
 
 const createParticles = (count: number, width: number, height: number) =>
   Array.from({ length: count }, () => ({
@@ -32,6 +38,8 @@ export function CloudParticles() {
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
     let particles = createParticles(PARTICLE_COUNT, width, height);
+    let visitor: { pattern: readonly string[]; x: number; y: number; born: number } | null = null;
+    let nextVisitor = performance.now() + 9000;
 
     const resize = () => {
       width = canvas.clientWidth;
@@ -70,6 +78,24 @@ export function CloudParticles() {
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
       });
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches === false) {
+        if (!visitor && performance.now() > nextVisitor) {
+          const choice = VISITORS[Math.floor(Math.random() * VISITORS.length)];
+          visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 20, born: performance.now() };
+          nextVisitor = performance.now() + 22000;
+        }
+        if (visitor) {
+          visitor.y -= 0.16;
+          const age = performance.now() - visitor.born;
+          const fade = Math.min(1, age / 1400, Math.max(0, (height - visitor.y) / 90));
+          ctx.fillStyle = `rgba(255,230,109,${0.16 * fade})`;
+          visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
+            if (cell === "1") ctx.fillRect(visitor!.x + colIndex * 6, visitor!.y + rowIndex * 6, 3, 3);
+          }));
+          if (visitor.y < -50) visitor = null;
+        }
+      }
 
       requestAnimationFrame(tick);
     };
