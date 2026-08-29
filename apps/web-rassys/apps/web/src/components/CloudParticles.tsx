@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react";
 
 const palette = ["255, 79, 216", "66, 245, 255", "255, 230, 109"];
 const PARTICLE_COUNT = 56;
-const PIXEL_SIZE = 4;
-const PIXEL_STEP = 4.25;
-const PIXEL_OFFSET = 29.75;
+const PIXEL_SIZE = 3;
+const PIXEL_STEP = 3;
+const PIXEL_OFFSET = 22.5;
 const VISITORS = [
   ["unicorn", [
     "000000002000000", "000000012000000", "000000111000000", "000001111100000",
@@ -155,11 +155,12 @@ export function CloudParticles() {
           ctx.translate(visitor.x + PIXEL_OFFSET, visitor.y + PIXEL_OFFSET);
           ctx.rotate(Math.sin(visitor.phase) * 0.06);
           ctx.globalAlpha = fade * shimmer;
-          ctx.shadowBlur = 16;
+          // Keep the sprite grid crisp; the second pass supplies the haze.
+          ctx.shadowBlur = 7;
           visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
             if (cell !== "0") {
               ctx.fillStyle = cell === "2" ? `rgba(${ink.highlight},0.9)` : cell === "3" ? "rgba(8,0,17,0.95)" : `rgba(${ink.body},0.86)`;
-              ctx.fillRect(colIndex * PIXEL_STEP - PIXEL_OFFSET, rowIndex * PIXEL_STEP - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
+              ctx.fillRect(Math.round(colIndex * PIXEL_STEP - PIXEL_OFFSET), Math.round(rowIndex * PIXEL_STEP - PIXEL_OFFSET), PIXEL_SIZE, PIXEL_SIZE);
             }
           }));
           ctx.shadowBlur = 28;
