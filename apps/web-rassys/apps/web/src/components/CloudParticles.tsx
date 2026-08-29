@@ -5,10 +5,22 @@ import { useEffect, useRef } from "react";
 const palette = ["255, 79, 216", "66, 245, 255", "255, 230, 109"];
 const PARTICLE_COUNT = 56;
 const VISITORS = [
-  ["unicorn", ["00100", "01110", "10101", "01110", "00100"]],
-  ["whaleshark", ["00100", "01110", "11111", "01110", "00100"]],
-  ["flower", ["00100", "10101", "01110", "10101", "00100"]],
-  ["trout", ["01000", "11110", "01111", "11110", "01000"]]
+  ["unicorn", [
+    "00000100000", "00001100000", "00001010000", "00011111000",
+    "00110101100", "01111111110", "00111111000", "00100100100", "00100100100"
+  ]],
+  ["whaleshark", [
+    "00001000000", "00011100000", "00111110000", "01111111110",
+    "11111111111", "01111111110", "00111111000", "00011000000", "00010000000"
+  ]],
+  ["flower", [
+    "00001000000", "01001100100", "00111111000", "01111111110",
+    "00111111000", "00001100000", "00001100000", "00001100000", "00011110000"
+  ]],
+  ["trout", [
+    "00000100000", "00001110000", "00011111000", "01111111110",
+    "11111111111", "01111111110", "00111111000", "00011000000", "00001000000"
+  ]]
 ] as const;
 
 const createParticles = (count: number, width: number, height: number) =>
@@ -80,7 +92,10 @@ export function CloudParticles() {
         ctx.fill();
       });
 
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches === false) {
+      // Reduced-motion mode still gets the artwork; it only receives a calmer
+      // drift so the ambient station never feels empty in Firefox.
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      {
         if (!visitor && performance.now() > nextVisitor) {
           const choice = VISITORS[Math.floor(Math.random() * VISITORS.length)];
           visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 20, born: performance.now(), phase: Math.random() * Math.PI * 2, direction: Math.random() > 0.5 ? 1 : -1 };
@@ -89,17 +104,27 @@ export function CloudParticles() {
           nextVisitor = performance.now() + 3500;
         }
         if (visitor) {
-          visitor.y -= 0.72;
-          visitor.phase += 0.008;
-          visitor.x += visitor.direction * (0.055 + Math.sin(visitor.phase) * 0.08);
+          visitor.y -= reducedMotion ? 0.12 : 0.28;
+          visitor.phase += reducedMotion ? 0.002 : 0.006;
+          visitor.x += visitor.direction * (reducedMotion ? 0.02 : 0.04) + Math.sin(visitor.phase) * (reducedMotion ? 0.04 : 0.11);
           const age = performance.now() - visitor.born;
           const fade = Math.min(1, age / 1400, Math.max(0, (height - visitor.y) / 90));
+          const shimmer = 0.82 + Math.sin(visitor.phase * 2.5) * 0.18;
           ctx.save();
-          ctx.translate(visitor.x + 15, visitor.y + 15);
-          ctx.rotate(Math.sin(visitor.phase) * 0.08);
-          ctx.fillStyle = `rgba(255,230,109,${0.58 * fade})`;
+          ctx.translate(visitor.x + 27.5, visitor.y + 22.5);
+          ctx.rotate(Math.sin(visitor.phase) * 0.06);
+          ctx.globalAlpha = fade * shimmer;
+          ctx.globalCompositeOperation = "lighter";
+          ctx.shadowColor = "rgba(66,245,255,0.9)";
+          ctx.shadowBlur = 14;
+          ctx.fillStyle = "rgba(255,230,109,0.82)";
           visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
-            if (cell === "1") ctx.fillRect(colIndex * 6 - 15, rowIndex * 6 - 15, 5, 5);
+            if (cell === "1") ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 22.5, 4, 4);
+          }));
+          ctx.shadowBlur = 28;
+          ctx.globalAlpha = fade * 0.12;
+          visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
+            if (cell === "1") ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 22.5, 4, 4);
           }));
           ctx.restore();
           if (visitor.y < -50) visitor = null;
