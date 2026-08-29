@@ -5,16 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { usePersistentRadioPlayer } from "./PersistentRadioPlayerProvider";
 import { Button } from "./ui/button";
-
-const primaryLinks = [
-  { href: "/radio", label: "Radio" },
-  { href: "/listening-room", label: "Room" },
-  { href: "/radio/notes", label: "Notes" },
-  { href: "/photos", label: "Photos" },
-  { href: "/dungeon-master", label: "DM" },
-  { href: "/thoughts", label: "Thoughts" },
-  { href: "/real-life-bedtime-stories", label: "Stories" },
-] as const;
+import { publicRassysApps } from "../config/apps";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -66,10 +57,7 @@ export function SiteHeader() {
           >
             <span className="glow-dot h-2.5 w-2.5 rounded-full" />
             <span className="text-sm font-semibold tracking-[0.04em] text-white sm:text-[15px]">
-              Rassy
-            </span>
-            <span className="hidden text-[8px] uppercase tracking-[0.34em] text-cloud/46 sm:inline">
-              home signal
+              RASSY’S <span className="text-glow">·</span> COM
             </span>
           </Link>
 
@@ -78,7 +66,7 @@ export function SiteHeader() {
                 aria-label="Primary"
                 className="flex min-w-0 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-1 shadow-[0_14px_34px_rgba(0,0,0,0.16)]"
               >
-                {primaryLinks.map((link) => (
+                {publicRassysApps.map((link) => (
                   <Link
                     key={link.href}
                     className={`rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] transition ${
@@ -87,7 +75,7 @@ export function SiteHeader() {
                         : "text-cloud/62 hover:bg-white/[0.05] hover:text-white"
                     }`}
                     href={link.href}
-                    title={link.label}
+                    title={link.description}
                   >
                     {link.label}
                   </Link>
@@ -132,7 +120,7 @@ export function SiteHeader() {
               aria-label="Quick links"
               className="flex gap-1 overflow-x-auto rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-1 text-[9px] uppercase tracking-[0.2em] text-cloud/64 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              {primaryLinks.map((link) => (
+              {publicRassysApps.map((link) => (
                 <Link
                   key={link.href}
                   className={`shrink-0 rounded-full px-3 py-1.5 transition ${
