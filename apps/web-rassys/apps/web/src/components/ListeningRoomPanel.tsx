@@ -84,7 +84,7 @@ const pickStarterShelf = (items: ListeningTrack[], limit: number) => {
 
 export function ListeningRoomPanel() {
   const { data, error } = useSWR<ListeningRoomPayload>(
-    "/api/library?limit=5000",
+    "/api/library?limit=100&offset=0",
     fetcher,
     {
       refreshInterval: 30000,

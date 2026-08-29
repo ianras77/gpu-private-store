@@ -783,6 +783,18 @@ export function PersistentRadioPlayerProvider({
   }, []);
 
   useEffect(() => {
+    const stopForLibraryPlayback = () => {
+      if (!audioRef.current || audioRef.current.paused) return;
+      audioRef.current.pause();
+      setPlaying(false);
+      setBuffering(false);
+      setPlayStatus("paused");
+    };
+    window.addEventListener("rassy:library-play", stopForLibraryPlayback);
+    return () => window.removeEventListener("rassy:library-play", stopForLibraryPlayback);
+  }, []);
+
+  useEffect(() => {
     if (!losslessSupported) {
       if (preferLosslessPlayback) {
         setPreferLosslessPlayback(false);

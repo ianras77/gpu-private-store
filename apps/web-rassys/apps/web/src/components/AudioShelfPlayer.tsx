@@ -181,6 +181,7 @@ export function AudioShelfPlayer({
   const playCurrent = async () => {
     if (!audioRef.current || !activeItem?.streamUrl) return;
     try {
+      window.dispatchEvent(new Event("rassy:library-play"));
       setError(null);
       await audioRef.current.play();
       setPlaying(true);
@@ -197,6 +198,7 @@ export function AudioShelfPlayer({
       setPlaying(false);
       return;
     }
+    window.dispatchEvent(new Event("rassy:library-play"));
     await playCurrent();
   };
 
