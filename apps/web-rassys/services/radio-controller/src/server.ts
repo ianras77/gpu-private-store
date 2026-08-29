@@ -2596,14 +2596,19 @@ export const buildServer = () => {
               );
         const requestTrackIds = trackIds.filter((trackId) => !liveTrackIds.has(trackId));
 
-        if (recommendationStatus !== "none" && recommendationSummary) {
+        if (recommendationIntent) {
+          const persistedRecommendation =
+            recommendationSummary ??
+            nonEmptyText(generatedReply.recommendationSummary) ??
+            sanitizeRequest(safeMessage);
+          const persistedStatus = recommendationStatus === "none" ? "considering" : recommendationStatus;
           await prisma.requestLog.create({
             data: {
-              request: sanitizeRequest(recommendationSummary),
-              status: recommendationStatus
+              request: sanitizeRequest(persistedRecommendation),
+              status: persistedStatus
             }
           });
-          if (recommendationStatus !== "rejected" && requestTrackIds.length > 0) {
+          if (recommendationStatus !== "none" && recommendationStatus !== "rejected" && requestTrackIds.length > 0 && recommendationSummary) {
             await enqueueStationRequest({
               kind: "track",
               summary: recommendationSummary,
