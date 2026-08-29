@@ -6,8 +6,10 @@ if [ -z "${DATABASE_URL:-}" ]; then
   exit 1
 fi
 
-# Force Next.js to bind on all interfaces when the container joins multiple networks.
-export HOSTNAME="${HOSTNAME:-0.0.0.0}"
+# Force Next.js to bind on all interfaces. Docker supplies HOSTNAME by default,
+# but preserving that value makes Next bind to a container-name address and can
+# leave loopback and published-port probes unable to connect.
+export HOSTNAME="0.0.0.0"
 
 echo "Running Prisma db push..."
 npx prisma db push
