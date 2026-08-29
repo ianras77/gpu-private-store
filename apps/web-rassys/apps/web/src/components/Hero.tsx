@@ -25,7 +25,10 @@ const shorten = (value?: string | null, maxLength = 118) => {
 export function Hero() {
   const { data } = useRadioHome();
   const dj = data?.dj;
-  const moodLabel = formatRadioMood(dj?.mood, { lowercaseFallback: true });
+  const stationAtmosphere = [data?.status?.dayPart, data?.status?.emotionalWeather]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(" / ");
+  const moodLabel = formatRadioMood(stationAtmosphere || dj?.mood, { lowercaseFallback: true });
   const mrRassyLine =
     shorten(firstSentence(dj?.script) || firstSentence(dj?.reason), 110) ||
     `Mr Rassy is holding a ${moodLabel} line tonight.`;
@@ -73,7 +76,7 @@ export function Hero() {
                       Mr Rassy
                     </span>
                     <span className="rave-chip rounded-full px-3 py-2">
-                      {formatRadioMood(dj?.mood)}
+                      {formatRadioMood(stationAtmosphere || dj?.mood)}
                     </span>
                   </div>
                 </div>

@@ -4,26 +4,33 @@ import { useEffect, useRef } from "react";
 
 const palette = ["255, 79, 216", "66, 245, 255", "255, 230, 109"];
 const PARTICLE_COUNT = 56;
+const PIXEL_SIZE = 4;
+const PIXEL_STEP = 4.25;
+const PIXEL_OFFSET = 29.75;
 const VISITORS = [
   ["unicorn", [
-    "0000000200000", "0000001200000", "0000011100000", "0000111110000",
-    "0001111011000", "0011111111100", "0111111111110", "0011121111000",
-    "0001111110000", "0000111100000", "0000100100000", "0000100100000", "0001100110000"
+    "000000002000000", "000000012000000", "000000111000000", "000001111100000",
+    "000011110110000", "000111111111000", "001111111111100", "011111311111110",
+    "001111111111000", "000111111110000", "000011111100000", "000010011000000",
+    "000010011000000", "000110011000000", "000110011000000"
   ]],
   ["whaleshark", [
-    "0000000100000", "0000001110000", "0000011111000", "0000111111100",
-    "0001111111110", "0011113111111", "0111111111110", "1111111111110",
-    "0111111111100", "0011111111000", "0001111110000", "0000111100000", "0000011000000"
+    "000000001000000", "000000011100000", "000000111110000", "000001111111000",
+    "000011111111100", "000111111111110", "001111111111111", "011111311111111",
+    "111111111111110", "011111111111100", "001111111111000", "000111111110000",
+    "000011111100000", "000001111000000", "000000110000000"
   ]],
   ["flower", [
-    "0000011100000", "0000111210000", "0001111111000", "0011113111100",
-    "0111111111110", "0011111111100", "0000111110000", "0000011200000",
-    "0000011100000", "0000011100000", "0000111100000", "0001100110000", "0001000010000"
+    "000000011100000", "000001112110000", "000011111111000", "000111111111100",
+    "001111131111110", "011111111111111", "001111111111100", "000011111110000",
+    "000001112100000", "000001111100000", "000001111100000", "000011111110000",
+    "000111001110000", "000110000110000", "000100000010000"
   ]],
   ["trout", [
-    "0000001000000", "0000011100000", "0000111110000", "0001111111000",
-    "0011111311110", "0111111111111", "1111111111110", "0111121111100",
-    "0011111111000", "0001111110000", "0000110100000", "0000011100000", "0000001000000"
+    "000000010000000", "000000111000000", "000001111100000", "000011111110000",
+    "000111111111000", "001111131111110", "011111111111111", "111111111111110",
+    "011111211111100", "001111111111000", "000111111110000", "000011101100000",
+    "000001111000000", "000000110000000", "000000010000000"
   ]]
 ] as const;
 
@@ -136,29 +143,29 @@ export function CloudParticles() {
           ctx.shadowBlur = 22;
           visitor.trail.slice(2).forEach((ghost, trailIndex) => {
             ctx.save();
-            ctx.translate(ghost.x + 32.5, ghost.y + 32.5);
+            ctx.translate(ghost.x + PIXEL_OFFSET, ghost.y + PIXEL_OFFSET);
             ctx.rotate(Math.sin(ghost.phase) * 0.06);
             ctx.globalAlpha = fade * Math.max(0.015, 0.1 - trailIndex * 0.009);
             ctx.fillStyle = `rgba(${ink.glow},0.7)`;
             visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
-              if (cell !== "0") ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 32.5, 4, 4);
+              if (cell !== "0") ctx.fillRect(colIndex * PIXEL_STEP - PIXEL_OFFSET, rowIndex * PIXEL_STEP - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
             }));
             ctx.restore();
           });
-          ctx.translate(visitor.x + 32.5, visitor.y + 32.5);
+          ctx.translate(visitor.x + PIXEL_OFFSET, visitor.y + PIXEL_OFFSET);
           ctx.rotate(Math.sin(visitor.phase) * 0.06);
           ctx.globalAlpha = fade * shimmer;
           ctx.shadowBlur = 16;
           visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
             if (cell !== "0") {
               ctx.fillStyle = cell === "2" ? `rgba(${ink.highlight},0.9)` : cell === "3" ? "rgba(8,0,17,0.95)" : `rgba(${ink.body},0.86)`;
-              ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 32.5, 4, 4);
+              ctx.fillRect(colIndex * PIXEL_STEP - PIXEL_OFFSET, rowIndex * PIXEL_STEP - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
             }
           }));
           ctx.shadowBlur = 28;
           ctx.globalAlpha = fade * 0.12;
           visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
-            if (cell !== "0") ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 32.5, 4, 4);
+            if (cell !== "0") ctx.fillRect(colIndex * PIXEL_STEP - PIXEL_OFFSET, rowIndex * PIXEL_STEP - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
           }));
           ctx.restore();
           if (visitor.y < -50) visitor = null;

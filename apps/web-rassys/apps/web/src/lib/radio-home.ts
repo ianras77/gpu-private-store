@@ -27,6 +27,9 @@ export type RadioHomeStatus = {
   playCount?: number | null;
   plays?: number | null;
   mood?: string | null;
+  dayPart?: string | null;
+  emotionalWeather?: string | null;
+  timeOfDay?: string | null;
   queueDepth?: number;
   nowPlaying?: {
     id?: string;

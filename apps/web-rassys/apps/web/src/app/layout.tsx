@@ -4,6 +4,7 @@ import "./globals.css";
 import { EasterEggs } from "../components/EasterEggs";
 import { PersistentRadioPlayerProvider } from "../components/PersistentRadioPlayerProvider";
 import { SiteHeader } from "../components/SiteHeader";
+import { CloudParticles } from "../components/CloudParticles";
 
 export const metadata: Metadata = {
   title: "Ian Rasmussen // Rassy // Mr Rassy Radio",
@@ -35,6 +36,9 @@ export default function RootLayout({
       <body className="antialiased relative">
         <UmamiAnalytics />
         <div className="rave-backdrop" aria-hidden="true" />
+        <div className="pointer-events-none fixed inset-0 z-[5]" aria-hidden="true">
+          <CloudParticles />
+        </div>
         <PersistentRadioPlayerProvider>
           <div className="relative z-10">
             <SiteHeader />
