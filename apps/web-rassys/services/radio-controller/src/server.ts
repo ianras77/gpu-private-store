@@ -2344,6 +2344,24 @@ export const buildServer = () => {
     };
   });
 
+  app.get("/public/stats", async (_request, reply) => {
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const [total, recent, tracks, artists, minutes] = await Promise.all([
+        prisma.playLog.count(),
+        prisma.playLog.count({ where: { playedAt: { gte: thirtyDaysAgo } } }),
+        prisma.playLog.groupBy({ by: ["trackId", "title", "artist"], _count: { trackId: true }, _sum: { duration: true }, orderBy: { _count: { trackId: "desc" } }, take: 5 }),
+        prisma.playLog.groupBy({ by: ["artist"], _count: { artist: true }, orderBy: { _count: { artist: "desc" } }, take: 5 }),
+        prisma.playLog.aggregate({ _sum: { duration: true } })
+      ]);
+      return { totalPlays: total, recentPlays: recent, totalMinutes: Math.round((minutes._sum.duration ?? 0) / 60), topTracks: tracks.map((track) => ({ trackId: track.trackId, title: track.title, artist: track.artist, plays: track._count.trackId, minutes: Math.round((track._sum.duration ?? 0) / 60) })), topArtists: artists.map((artist) => ({ artist: artist.artist, plays: artist._count.artist })) };
+    } catch (error) {
+      logger.error({ error }, "Failed to build public play statistics");
+      reply.code(503);
+      return { error: "stats_unavailable" };
+    }
+  });
+
   app.post("/public/chat", async (request, reply) => {
     const bodySchema = z.object({
       message: z.string().min(2).max(360),
