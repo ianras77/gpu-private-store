@@ -686,7 +686,7 @@ const toPublicUser = (user: UserRecord): PublicUser => ({
 });
 
 const hashInviteToken = (token: string) =>
-  crypto.createHash("sha256").update(`${token}:${process.env.DM_JWT_SECRET ?? "dm-secret"}`).digest("hex");
+  crypto.createHash("sha256").update(`${token}:${process.env.DM_JWT_SECRET ?? "development-only-dm-secret"}`).digest("hex");
 
 const assertMembership = async (campaignId: string, userId: string): Promise<DmRole> => {
   const role = await loadMembershipRole(campaignId, userId);

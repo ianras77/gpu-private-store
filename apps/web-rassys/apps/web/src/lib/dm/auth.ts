@@ -5,9 +5,15 @@ import { SignJWT, jwtVerify } from "jose";
 const cookieName = "rassy_dm";
 const keyLength = 64;
 
-const secret = new TextEncoder().encode(
-  process.env.DM_JWT_SECRET || process.env.ADMIN_JWT_SECRET || "unsafe-dm-secret"
-);
+const getSecret = () => {
+  const configured = process.env.DM_JWT_SECRET || process.env.ADMIN_JWT_SECRET;
+  if (process.env.NODE_ENV === "production") {
+    if (!configured || configured.length < 32 || /^(hackme|change-me|unsafe-dm-secret|dm-secret|password)/i.test(configured)) {
+      throw new Error("DM_JWT_SECRET must be a strong production secret");
+    }
+  }
+  return new TextEncoder().encode(configured || "development-only-dm-secret");
+};
 
 export type DmSession = {
   userId: string;
@@ -62,7 +68,7 @@ export const issueDmToken = async (session: DmSession, request?: Request) => {
     .setSubject(session.userId)
     .setIssuedAt()
     .setExpirationTime("30d")
-    .sign(secret);
+    .sign(getSecret());
 
   const cookieStore = await cookies();
   cookieStore.set(cookieName, token, {
@@ -90,7 +96,7 @@ export const getDmSession = async (): Promise<DmSession | null> => {
   if (!token) return null;
 
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, getSecret());
     if (payload.scope !== "dm-user") return null;
     const userId = typeof payload.sub === "string" ? payload.sub : "";
     const email = typeof payload.email === "string" ? payload.email : "";
