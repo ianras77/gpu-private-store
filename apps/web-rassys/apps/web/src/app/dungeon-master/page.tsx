@@ -8,6 +8,7 @@ import { cn } from "../../lib/utils";
 import { NewWorldWizard, type NewWorldSeed } from "../../components/NewWorldWizard";
 import { RulesLookup } from "../../components/RulesLookup";
 import dmLibrary from "../../data/dm-library-summary.json";
+import { getCharacterSignal, getConditionLabel, getLatestChange, getPartyPressure } from "../../lib/dm/play-state";
 
 type DmViewer = {
   id: string;
@@ -334,6 +335,8 @@ export default function DungeonMasterPage() {
   );
 
   const primaryObjective = objectiveRows[0]?.text ?? "Awaiting the next party decision.";
+  const partyPressure = snapshot ? getPartyPressure(snapshot) : "The table is assembling";
+  const latestChange = snapshot ? getLatestChange(snapshot.events) : "Create a campaign to begin the story.";
 
   const contextStats = useMemo(() => {
     const meta = contextPreview?.contextMeta;
@@ -845,7 +848,7 @@ export default function DungeonMasterPage() {
       setInviteLink(link);
       await navigator.clipboard?.writeText(link);
     } catch {
-      setInviteLink("Invite could not be created. Check that you are the campaign DM.");
+      setInviteLink("Invite could not be created. Check that you own this campaign.");
     } finally {
       setInvitePending(false);
     }
@@ -898,7 +901,7 @@ export default function DungeonMasterPage() {
           hpMax,
           hpTemp: 0,
           status: "Ready",
-          notes: "Created via DM console"
+          notes: "Created by the player through the campaign setup"
         })
       });
 
@@ -1465,7 +1468,7 @@ export default function DungeonMasterPage() {
                         void sendPrompt();
                       }
                     }}
-                    placeholder="Command the DM..."
+                    placeholder="Tell the Dungeon Master what your character does..."
                     rows={2}
                   />
                   <Button variant="primary" onClick={sendPrompt} disabled={promptPending || !promptText.trim()}>
@@ -1512,6 +1515,23 @@ export default function DungeonMasterPage() {
                   </div>
                   <div className="mt-5 text-sm text-cloud/80">{snapshot.campaign.worldState.sceneSummary}</div>
                   <div className="mt-2 text-xs text-cloud/60">Story beat: {snapshot.campaign.worldState.storyBeat}</div>
+                  <div className="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-black/20 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[10px] uppercase tracking-[0.25em] text-cloud/55">Latest consequence</span>
+                      <span className="text-xs text-glow">{partyPressure}</span>
+                    </div>
+                    <p className="text-sm leading-6 text-white/85">{latestChange}</p>
+                  </div>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    {snapshot.characters.map((character) => {
+                      const signal = getCharacterSignal(character);
+                      return <button key={character.id} type="button" onClick={() => setSelectedActorId(character.id)} className={cn("rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:border-white/25", selectedActorId === character.id && "border-glow bg-glow/10")}>
+                        <div className="flex items-center justify-between gap-2"><span className="font-semibold text-white">{character.name}</span><span className="text-[10px] uppercase tracking-[0.16em] text-white/75">{getConditionLabel(character)}</span></div>
+                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(100, (character.hpCurrent / Math.max(1, character.hpMax)) * 100))}%`, backgroundColor: signal.color === "red" ? "#fb7185" : signal.color === "pink" ? "#ff4fd8" : signal.color === "yellow" ? "#ffe66d" : "#42f5ff" }} /></div>
+                        <p className="mt-2 text-[11px] text-cloud/60">{signal.message} · {character.hpCurrent}/{character.hpMax} HP</p>
+                      </button>;
+                    })}
+                  </div>
                   <div className="mt-5">
                     <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Objectives</div>
                     <ul className="mt-3 grid gap-2 text-sm text-cloud/80">
@@ -1623,7 +1643,7 @@ export default function DungeonMasterPage() {
                                 </div>
                                 <textarea
                                   className="rave-input h-16 resize-none rounded-2xl px-3 py-2 text-sm"
-                                  placeholder="Append DM note..."
+                                  placeholder="Add a private care note for this character..."
                                   value={characterDrafts[member.id]?.notesAppend ?? ""}
                                   onChange={(event) =>
                                     updateCharacterDraft(member.id, { notesAppend: event.target.value })

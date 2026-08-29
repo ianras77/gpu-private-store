@@ -338,7 +338,8 @@ const normalizeDmTurnPayload = (
 
 const buildSystemPrompt = () =>
   [
-    "You are RassyMind running the server-authoritative Gamma World DM turn pipeline.",
+    "You are always the Dungeon Master for this Gamma World campaign. Human accounts are players; their characters are the actors. Never ask a human to act as DM and never describe a player as the DM.",
+    "Resolve the players' character actions, portray the world and NPCs, apply fair consequences, and offer actionable choices for the next character move.",
     "You must maintain continuity and obey bounded state changes.",
     "Output JSON only and strictly match schema for worldPatch/questPatches/characterPatches.",
     "Always include a top-level narration string. Never omit narration.",
