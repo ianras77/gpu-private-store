@@ -6,7 +6,7 @@ import { MessageCircleMore, NotebookText, Radio } from "lucide-react";
 import { HeaderSignalVisualizer } from "./HeaderSignalVisualizer";
 import { useRadioHome } from "../lib/radio-home";
 import { Button } from "./ui/button";
-import { formatRadioMood } from "../lib/radio-mood";
+import { formatHomepageAtmosphere } from "../lib/radio-mood";
 
 const firstSentence = (value?: string | null) => {
   const cleaned = value?.replace(/\s+/g, " ").trim();
@@ -28,7 +28,11 @@ export function Hero() {
   const stationAtmosphere = [data?.status?.dayPart, data?.status?.emotionalWeather]
     .filter((value): value is string => Boolean(value?.trim()))
     .join(" / ");
-  const moodLabel = formatRadioMood(stationAtmosphere || dj?.mood, { lowercaseFallback: true });
+  const moodLabel = formatHomepageAtmosphere({
+    mood: stationAtmosphere || dj?.mood,
+    artist: data?.status?.nowPlaying?.artist,
+    title: data?.status?.nowPlaying?.title,
+  }).toLowerCase();
   const mrRassyLine =
     shorten(firstSentence(dj?.script) || firstSentence(dj?.reason), 110) ||
     `Mr Rassy is holding a ${moodLabel} line tonight.`;
@@ -76,7 +80,11 @@ export function Hero() {
                       Mr Rassy
                     </span>
                     <span className="rave-chip rounded-full px-3 py-2">
-                      {formatRadioMood(stationAtmosphere || dj?.mood)}
+                      {formatHomepageAtmosphere({
+                        mood: stationAtmosphere || dj?.mood,
+                        artist: data?.status?.nowPlaying?.artist,
+                        title: data?.status?.nowPlaying?.title,
+                      })}
                     </span>
                   </div>
                 </div>
