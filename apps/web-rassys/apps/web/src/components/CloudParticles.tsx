@@ -128,7 +128,8 @@ export function CloudParticles() {
           const age = now - visitor.born;
           const fade = Math.min(1, age / 1400, Math.max(0, (height - visitor.y) / 90));
           const shimmer = 0.82 + Math.sin(visitor.phase * 2.5) * 0.18;
-          const ink = visitorInk[visitor.pattern === VISITORS[0][1] ? "unicorn" : visitor.pattern === VISITORS[1][1] ? "whaleshark" : visitor.pattern === VISITORS[2][1] ? "flower" : "trout"];
+          const visitorPattern = visitor.pattern;
+          const ink = visitorInk[visitorPattern === VISITORS[0][1] ? "unicorn" : visitorPattern === VISITORS[1][1] ? "whaleshark" : visitorPattern === VISITORS[2][1] ? "flower" : "trout"];
           ctx.save();
           ctx.globalCompositeOperation = "lighter";
           ctx.shadowColor = `rgba(${ink.glow},0.7)`;
@@ -139,7 +140,7 @@ export function CloudParticles() {
             ctx.rotate(Math.sin(ghost.phase) * 0.06);
             ctx.globalAlpha = fade * Math.max(0.015, 0.1 - trailIndex * 0.009);
             ctx.fillStyle = `rgba(${ink.glow},0.7)`;
-            visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
+            visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
               if (cell !== "0") ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 32.5, 4, 4);
             }));
             ctx.restore();
@@ -148,7 +149,7 @@ export function CloudParticles() {
           ctx.rotate(Math.sin(visitor.phase) * 0.06);
           ctx.globalAlpha = fade * shimmer;
           ctx.shadowBlur = 16;
-          visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
+          visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
             if (cell !== "0") {
               ctx.fillStyle = cell === "2" ? `rgba(${ink.highlight},0.9)` : cell === "3" ? "rgba(8,0,17,0.95)" : `rgba(${ink.body},0.86)`;
               ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 32.5, 4, 4);
@@ -156,7 +157,7 @@ export function CloudParticles() {
           }));
           ctx.shadowBlur = 28;
           ctx.globalAlpha = fade * 0.12;
-          visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
+          visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
             if (cell !== "0") ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 32.5, 4, 4);
           }));
           ctx.restore();
