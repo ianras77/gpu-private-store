@@ -95,7 +95,7 @@ def main() -> int:
 
     llm_base = _env("OLLAMA_GENERAL_BASE_URL", "http://host.docker.internal:8844")
     embed_base = _env("OLLAMA_EMBED_BASE_URL", "http://host.docker.internal:8844")
-    llm_model = _env("OLLAMA_GENERAL_MODEL", "rassy-smart")
+    llm_model = _env("OLLAMA_GENERAL_MODEL", "rassy-fast")
     embed_model = _env("OLLAMA_EMBED_MODEL", "rassy-embed")
     api_key = os.getenv("CAT_OLLAMA_API_KEY", "").strip()
     if _patch_cat_embedder_auth(api_key):

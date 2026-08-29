@@ -73,7 +73,7 @@ describe("cat routes", () => {
         CAT_API_KEY: "legacy-key",
         RASSYMIND_BASE_URL: "http://rassymind.local:8844",
         RASSYMIND_CHAT_PATH: "/v1/chat/completions",
-        RASSYMIND_MODEL: "rassy-smart",
+        RASSYMIND_MODEL: "rassy-fast",
         RASSYMIND_API_KEY: "rassymind-test-key",
         RASSYMIND_TIMEOUT_MS: 4321,
       } as Partial<ReturnType<typeof loadEnv>>),
@@ -98,7 +98,7 @@ describe("cat routes", () => {
           authorization: "Bearer rassymind-test-key",
         }),
         body: JSON.stringify({
-          model: "rassy-smart",
+          model: "rassy-fast",
           messages: [
             { role: "user", content: "Say the gateway is connected." },
           ],

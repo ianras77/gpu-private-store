@@ -28,7 +28,7 @@ const EnvSchema = z.object({
   CAT_PUBLIC_URL: z.string().optional(),
   CAT_CHAT_PATH: z.string().default("/v1/chat/completions"),
   CAT_TIMEOUT_MS: z.coerce.number().default(60000),
-  CAT_MODEL: z.string().default("rassy-smart"),
+  CAT_MODEL: z.string().default("rassy-fast"),
   CAT_API_KEY: z.string().default(""),
 
   STATUS_TIMEOUT_MS: z.coerce.number().default(4000),
