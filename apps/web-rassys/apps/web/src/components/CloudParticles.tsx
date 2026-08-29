@@ -38,7 +38,7 @@ export function CloudParticles() {
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
     let particles = createParticles(PARTICLE_COUNT, width, height);
-    let visitor: { pattern: readonly string[]; x: number; y: number; born: number } | null = null;
+    let visitor: { pattern: readonly string[]; x: number; y: number; born: number; phase: number; direction: number } | null = null;
     let nextVisitor = performance.now() + 9000;
 
     const resize = () => {
@@ -82,17 +82,23 @@ export function CloudParticles() {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches === false) {
         if (!visitor && performance.now() > nextVisitor) {
           const choice = VISITORS[Math.floor(Math.random() * VISITORS.length)];
-          visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 20, born: performance.now() };
+          visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 20, born: performance.now(), phase: Math.random() * Math.PI * 2, direction: Math.random() > 0.5 ? 1 : -1 };
           nextVisitor = performance.now() + 22000;
         }
         if (visitor) {
           visitor.y -= 0.16;
+          visitor.phase += 0.008;
+          visitor.x += visitor.direction * (0.055 + Math.sin(visitor.phase) * 0.08);
           const age = performance.now() - visitor.born;
           const fade = Math.min(1, age / 1400, Math.max(0, (height - visitor.y) / 90));
+          ctx.save();
+          ctx.translate(visitor.x + 15, visitor.y + 15);
+          ctx.rotate(Math.sin(visitor.phase) * 0.08);
           ctx.fillStyle = `rgba(255,230,109,${0.16 * fade})`;
           visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
-            if (cell === "1") ctx.fillRect(visitor!.x + colIndex * 6, visitor!.y + rowIndex * 6, 3, 3);
+            if (cell === "1") ctx.fillRect(colIndex * 6 - 15, rowIndex * 6 - 15, 3, 3);
           }));
+          ctx.restore();
           if (visitor.y < -50) visitor = null;
         }
       }
