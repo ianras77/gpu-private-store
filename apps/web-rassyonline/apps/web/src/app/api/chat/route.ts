@@ -8,7 +8,7 @@ import { getReadyDocumentIdsForUser } from "@/lib/documents";
 import { searchUserDocuments } from "@/lib/qdrant";
 import {
   embedTexts,
-  extractDeltaFromSseLine,
+  extractDeltaPayloadFromSseLine,
   getChatMode,
   getRassyMindChatUrl,
   getRassyMindRequestError,
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
   const latestUserMessage = [...parsed.messages].reverse().find((message) => message.role === "user");
   let upstreamMessages = parsed.messages;
   let usedWebSearch = false;
+  let searchResults: Awaited<ReturnType<typeof searchWebResources>> = [];
 
   let threadId: string | null = null;
   if (user && latestUserMessage) {
@@ -98,7 +99,8 @@ export async function POST(request: NextRequest) {
     const shouldSearch = searchMode === "on" || (searchMode === "auto" && shouldUseWebSearch(latestUserMessage.content));
     if (shouldSearch) {
       try {
-        const searchContext = buildSearchContextMessage(await searchWebResources(latestUserMessage.content));
+        searchResults = await searchWebResources(latestUserMessage.content);
+        const searchContext = buildSearchContextMessage(searchResults);
         if (searchContext) {
           upstreamMessages = [searchContext, ...upstreamMessages];
           usedWebSearch = true;
@@ -157,10 +159,11 @@ export async function POST(request: NextRequest) {
           buffer = lines.pop() ?? "";
 
           for (const line of lines) {
-            const delta = extractDeltaFromSseLine(line);
-            if (delta) {
-              assistantText += delta;
-              controller.enqueue(encoder.encode(delta));
+            const payload = extractDeltaPayloadFromSseLine(line);
+            if (payload?.reasoning) controller.enqueue(encoder.encode(`<think>${payload.reasoning}</think>`));
+            if (payload?.content) {
+              assistantText += payload.content;
+              controller.enqueue(encoder.encode(payload.content));
             }
           }
         }
@@ -188,7 +191,8 @@ export async function POST(request: NextRequest) {
       ...(threadId ? { "x-thread-id": threadId } : {}),
       "x-rassy-mode": mode.id,
       "x-rassy-model": mode.model,
-      "x-rassy-web-search": usedWebSearch ? "used" : "not-used"
+      "x-rassy-web-search": usedWebSearch ? "used" : "not-used",
+      ...(searchResults.length ? { "x-rassy-search-results": encodeURIComponent(JSON.stringify(searchResults.map((result) => ({ ...result, snippet: result.snippet.slice(0, 220) })))) } : {})
     }
   });
 }

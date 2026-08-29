@@ -11,11 +11,18 @@ export default async function Home() {
       <div className="ambient-field" aria-hidden="true" />
 
       <header className="topbar">
-        <div className="brand-mark" aria-hidden="true"><span>R</span><i /></div>
-        <div>
-          <p className="system-label">RASSY // ONLINE <span className="live-dot" /> LIVE WORKBENCH</p>
-          <h1>One mind. Every lane.</h1>
-          <p className="topbar-subtitle">A user-owned RassyMind instrument for reasoning, code, vectors, and live web context.</p>
+        <Link className="brand-lockup" href="/" aria-label="Rassy Online home">
+          <span className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" role="presentation">
+              <path className="signal-line" d="M7 33h13l5-14 8 27 7-19h17" />
+              <circle className="signal" cx="55" cy="27" r="2.5" />
+            </svg>
+          </span>
+          <span className="brand-type"><strong>RASSY</strong><small>PRIVATE / LIVE</small></span>
+        </Link>
+        <div className="header-copy">
+          <p className="system-label"><span className="live-dot" /> LOCAL SIGNAL / PRIVATE INTELLIGENCE</p>
+          <h1>Ask better questions.</h1>
         </div>
         <div className="top-actions">
           {user ? (

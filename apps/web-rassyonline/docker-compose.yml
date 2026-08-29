@@ -44,6 +44,19 @@ services:
       start_period: 30s
     ports:
       - ${APP_PORT}:3000
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: runtipi_tipi_main_network
+      traefik.http.routers.rassy-online-http.rule: Host(`rassy.online`)
+      traefik.http.routers.rassy-online-http.entrypoints: web
+      traefik.http.routers.rassy-online-http.middlewares: rassy-online-https-redirect
+      traefik.http.routers.rassy-online-http.service: rassy-online
+      traefik.http.routers.rassy-online.rule: Host(`rassy.online`)
+      traefik.http.routers.rassy-online.entrypoints: websecure
+      traefik.http.routers.rassy-online.tls.certresolver: myresolver
+      traefik.http.routers.rassy-online.service: rassy-online
+      traefik.http.services.rassy-online.loadbalancer.server.port: "3000"
+      traefik.http.middlewares.rassy-online-https-redirect.redirectscheme.scheme: https
     x-runtipi:
       is_main: true
       internal_port: 3000

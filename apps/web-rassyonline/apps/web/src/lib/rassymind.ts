@@ -79,15 +79,23 @@ export async function rerankTexts(query: string, documents: string[]): Promise<n
 }
 
 export function extractDeltaFromSseLine(line: string): string | null {
+  return extractDeltaPayloadFromSseLine(line)?.content ?? null;
+}
+
+export function extractDeltaPayloadFromSseLine(line: string): { content: string | null; reasoning: string | null } | null {
   if (!line.startsWith("data:")) return null;
   const data = line.slice("data:".length).trim();
   if (!data || data === "[DONE]") return null;
 
   try {
     const parsed = JSON.parse(data) as {
-      choices?: Array<{ delta?: { content?: string }; message?: { content?: string }; text?: string }>;
+      choices?: Array<{ delta?: { content?: string; reasoning_content?: string; reasoning?: string }; message?: { content?: string; reasoning_content?: string; reasoning?: string }; text?: string }>;
     };
-    return parsed.choices?.[0]?.delta?.content ?? parsed.choices?.[0]?.message?.content ?? parsed.choices?.[0]?.text ?? null;
+    const choice = parsed.choices?.[0];
+    return {
+      content: choice?.delta?.content ?? choice?.message?.content ?? choice?.text ?? null,
+      reasoning: choice?.delta?.reasoning_content ?? choice?.delta?.reasoning ?? choice?.message?.reasoning_content ?? choice?.message?.reasoning ?? null
+    };
   } catch {
     return null;
   }

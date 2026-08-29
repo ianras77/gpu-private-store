@@ -12,7 +12,7 @@ describe("Rassy Online package metadata", () => {
     const packageLock = readJson(new URL("../../package-lock.json", import.meta.url));
     const lockPackages = packageLock.packages as Record<string, { version?: string }>;
 
-    expect(config.version).toBe("0.1.7");
+    expect(config.version).toBe("0.1.8");
     expect(config.tipi_version).toBe(4);
     expect(packageJson.version).toBe(config.version);
     expect(packageLock.version).toBe(config.version);

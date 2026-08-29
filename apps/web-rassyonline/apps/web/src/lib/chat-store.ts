@@ -82,6 +82,18 @@ export async function listThreadsForUser(userId: string): Promise<StoredThread[]
   return result.rows.map(mapThread);
 }
 
+export async function listMessagesForThread(threadId: string, userId: string): Promise<StoredMessage[]> {
+  await ensureChatSchema();
+  const result = await getPool().query(
+    `select m.id, m.thread_id, m.role, m.content, m.mode, m.model, m.created_at
+     from messages m join threads t on t.id = m.thread_id
+     where m.thread_id = $1 and t.user_id = $2
+     order by m.created_at asc`,
+    [threadId, userId]
+  );
+  return result.rows.map(mapMessage);
+}
+
 export async function appendMessage(input: {
   threadId: string;
   role: StoredMessage["role"];

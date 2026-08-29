@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { NextRequest } from "next/server";
 import { SESSION_COOKIE } from "@/lib/auth/sessions";
@@ -52,22 +52,21 @@ export async function POST(request: NextRequest) {
   const documentId = randomUUID();
   const userDir = path.join(uploadRoot, user.id);
   const storagePath = path.join(userDir, `${documentId}-${safeFilename}`);
-  await mkdir(userDir, { recursive: true });
-  await writeFile(storagePath, buffer);
-
-  const document = await createPendingDocument({
-    userId: user.id,
-    title,
-    filename: safeFilename,
-    mimeType: file.type || "text/plain",
-    sizeBytes: file.size,
-    storagePath,
-    checksum: createHash("sha256").update(buffer).digest("hex")
-  });
-
+  let document: Awaited<ReturnType<typeof createPendingDocument>> | null = null;
   const chunkRecords = chunks.map((chunk) => ({ ...chunk, id: randomUUID() }));
 
   try {
+    await mkdir(userDir, { recursive: true });
+    await writeFile(storagePath, buffer, { flag: "wx" });
+    document = await createPendingDocument({
+      userId: user.id,
+      title,
+      filename: safeFilename,
+      mimeType: file.type || "text/plain",
+      sizeBytes: file.size,
+      storagePath,
+      checksum: createHash("sha256").update(buffer).digest("hex")
+    });
     const embeddings = await embedTexts(chunkRecords.map((chunk) => chunk.text));
     await upsertDocumentChunks({
       userId: user.id,
@@ -81,9 +80,12 @@ export async function POST(request: NextRequest) {
     await writeAuditEvent(user.id, "document.upload", document.id, { chunks: chunkRecords.length });
     return json({ ok: true, document: readyDocument }, { status: 201 });
   } catch (error) {
-    await deleteDocumentVectors(user.id, document.id).catch(() => undefined);
+    if (document) {
+      await deleteDocumentVectors(user.id, document.id).catch(() => undefined);
+    }
+    if (!document) await unlink(storagePath).catch(() => undefined);
     const message = error instanceof Error ? error.message : "indexing_failed";
-    const failedDocument = await markDocumentFailed(user.id, document.id, message);
+    const failedDocument = document ? await markDocumentFailed(user.id, document.id, message) : null;
     return json({ ok: false, error: "indexing_failed", document: failedDocument }, { status: 502 });
   }
 }

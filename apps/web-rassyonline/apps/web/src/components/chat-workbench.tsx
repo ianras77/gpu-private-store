@@ -10,6 +10,9 @@ import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
+  reasoning?: string;
+  searched?: boolean;
+  sources?: Array<{ title: string; url: string; snippet: string }>;
 };
 
 type UserDocument = {
@@ -21,29 +24,7 @@ type UserDocument = {
   error: string | null;
   chunkCount: number;
 };
-
-const PROMPT_RUNES = [
-  {
-    label: "Ask",
-    prompt: "Help me think through "
-  },
-  {
-    label: "Search",
-    prompt: "/search find current sources and summarize what matters for "
-  },
-  {
-    label: "Code",
-    prompt: "/code draft the smallest safe patch for: "
-  },
-  {
-    label: "Memory",
-    prompt: "/know compare this against my active documents: "
-  },
-  {
-    label: "Tune",
-    prompt: "Make the room feel more aurora while we work on "
-  }
-];
+type ThreadSummary = { id: string; title: string; updatedAt: string };
 
 export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn: boolean }) {
   const [mode, setMode] = useState(modes[0]?.id ?? "general");
@@ -52,7 +33,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "RassyMind is ready. Choose a channel, bring your documents if you are signed in, and start the thread."
+      content: "I’m Rassy — ready when you are. Ask naturally and I’ll take care of the rest. Turn on Search when freshness or sources matter."
     }
   ]);
   const [input, setInput] = useState("");
@@ -64,17 +45,20 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(modes[0]?.maxTokens ?? 2048);
   const [showTuning, setShowTuning] = useState(false);
+  const [showReasoning, setShowReasoning] = useState(true);
+  const [threads, setThreads] = useState<ThreadSummary[]>([]);
+  const [activity, setActivity] = useState(0.16);
+  const [activityKind, setActivityKind] = useState<"idle" | "thinking" | "searching" | "answering">("idle");
   const abortRef = useRef<AbortController | null>(null);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
-  const activeLane = getLaneDisplay(mode);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
   const activeTheme = getTheme(themeId);
-  const webSearchLabel = webSearch === "on" ? "web search on" : webSearch === "off" ? "local only" : "web search auto";
 
   useEffect(() => {
     if (!signedIn) return;
     void refreshDocuments();
+    void refreshThreads();
   }, [signedIn]);
 
   useEffect(() => {
@@ -98,22 +82,45 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     setDocuments(data.documents ?? []);
   }
 
+  async function refreshThreads() {
+    const response = await fetch("/api/threads", { cache: "no-store" });
+    if (!response.ok) return;
+    const data = (await response.json()) as { threads?: ThreadSummary[] };
+    setThreads(data.threads ?? []);
+  }
+
+  function startNewThread() {
+    setThreadId(null);
+    setMessages([{ role: "assistant", content: "I’m Rassy — ready when you are. Ask naturally and I’ll take care of the rest. Turn on Search when freshness or sources matter." }]);
+  }
+
+  async function openThread(id: string) {
+    const response = await fetch(`/api/threads/${id}`, { cache: "no-store" });
+    if (!response.ok) return;
+    const data = (await response.json()) as { messages?: Array<{ role: "user" | "assistant" | "system"; content: string }> };
+    setThreadId(id);
+    setMessages((data.messages ?? []).filter((message) => message.role === "user" || message.role === "assistant").map((message) => ({ role: message.role as "user" | "assistant", content: message.content })));
+  }
+
   async function uploadDocument(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
     setUploading(true);
 
     try {
-      setDocumentNotice(`Indexing ${files.length} source${files.length === 1 ? "" : "s"} through rassy-embed...`);
+      let completed = 0;
+      setDocumentNotice(`Reading ${files.length} source${files.length === 1 ? "" : "s"}…`);
       for (const file of files) {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("title", file.name);
         const response = await fetch("/api/documents", { method: "POST", body: formData });
-        const data = (await response.json()) as { error?: string };
+        const data = (await response.json().catch(() => ({}))) as { error?: string; document?: UserDocument };
         if (!response.ok) throw new Error(`${file.name}: ${data.error ?? "upload_failed"}`);
+        completed += 1;
+        setDocumentNotice(`Ingested ${completed}/${files.length} source${files.length === 1 ? "" : "s"} through rassy-embed.`);
       }
-      setDocumentNotice(`${files.length} source${files.length === 1 ? "" : "s"} indexed and ready.`);
+      setDocumentNotice(`${files.length} source${files.length === 1 ? "" : "s"} indexed, embedded, and ready for Knowledge mode.`);
       await refreshDocuments();
     } catch (error) {
       setDocumentNotice(error instanceof Error ? error.message : "Upload failed");
@@ -176,6 +183,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     setMessages([...nextMessages, { role: "assistant", content: "" }]);
     setInput("");
     setSending(true);
+    setActivity(0.72);
+    setActivityKind(requestWebSearch === "on" || (requestWebSearch === "auto" && prompt.match(/\b(current|latest|search|web|source|today)\b/i)) ? "searching" : "thinking");
 
     const abort = new AbortController();
     abortRef.current = abort;
@@ -198,6 +207,12 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
       const nextThreadId = response.headers.get("x-thread-id");
       if (nextThreadId) setThreadId(nextThreadId);
+      const searched = response.headers.get("x-rassy-web-search") === "used";
+      let sources: ChatMessage["sources"];
+      const encodedSources = response.headers.get("x-rassy-search-results");
+      if (encodedSources) {
+        try { sources = JSON.parse(decodeURIComponent(encodedSources)) as ChatMessage["sources"]; } catch { sources = undefined; }
+      }
 
       if (!response.ok || !response.body) {
         const text = await response.text();
@@ -206,17 +221,45 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let streamText = "";
+      let reasoning = "";
+      let inReasoning = false;
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        streamText += chunk;
+        const reasoningStart = streamText.indexOf("<think>");
+        if (reasoningStart >= 0) {
+          const reasoningEnd = streamText.indexOf("</think>", reasoningStart + 7);
+          if (reasoningEnd >= 0) {
+            reasoning += streamText.slice(reasoningStart + 7, reasoningEnd);
+            streamText = streamText.slice(0, reasoningStart) + streamText.slice(reasoningEnd + 8);
+          } else {
+            reasoning += streamText.slice(reasoningStart + 7);
+            streamText = streamText.slice(0, reasoningStart);
+            inReasoning = true;
+          }
+        } else if (inReasoning) {
+          const reasoningEnd = streamText.indexOf("</think>");
+          if (reasoningEnd >= 0) {
+            reasoning += streamText.slice(0, reasoningEnd);
+            streamText = streamText.slice(reasoningEnd + 8);
+            inReasoning = false;
+          } else {
+            reasoning += streamText;
+            streamText = "";
+          }
+        }
         setMessages((current) => {
           const copy = [...current];
           const last = copy[copy.length - 1];
-          copy[copy.length - 1] = { ...last, content: last.content + chunk };
+          copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, sources };
           return copy;
         });
+        setActivity((value) => Math.min(1, value * 0.72 + Math.min(.3, chunk.length / 180)));
+        setActivityKind(reasoning ? "thinking" : "answering");
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Chat request failed";
@@ -227,28 +270,25 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       });
     } finally {
       setSending(false);
+      setActivity(0.24);
+      setActivityKind("idle");
+      if (signedIn) void refreshThreads();
       abortRef.current = null;
     }
   }
 
   return (
-    <section className="chat-workbench" aria-label="RassyMind chat">
-      <div className="routing-ribbon" aria-label="RassyMind controls">
-        <div className="lane-switcher" aria-label="RassyMind channel">
-          {modes.map((item) => (
-            <button className={item.id === mode ? "lane-button active" : "lane-button"} key={item.id} onClick={() => setMode(item.id)} type="button">
-              <span>{getLaneDisplay(item.id).glyph}</span>
-              <strong>{item.label}</strong>
-            </button>
-          ))}
-        </div>
-
-        <div className="route-status" aria-label="Active RassyMind channel">
-          <span>{activeLane.glyph}</span>
-          <div>
-            <strong>{activeMode?.model ?? "rassy-mind"}</strong>
-            <small>{activeLane.capability} · {sending ? "streaming" : "ready"}</small>
-          </div>
+    <div className="rassy-chat-layout">
+      {signedIn ? <aside className="chat-history" aria-label="Chat history"><div className="history-heading"><span>RASSY / HISTORY</span><button type="button" onClick={startNewThread}>New</button></div><div className="history-list">{threads.length ? threads.map((thread) => <button className={thread.id === threadId ? "history-item active" : "history-item"} key={thread.id} type="button" onClick={() => void openThread(thread.id)}>{thread.title}<small>{new Date(thread.updatedAt).toLocaleDateString()}</small></button>) : <p>No saved chats yet.</p>}</div></aside> : null}
+      <section className="chat-workbench" aria-label="Rassy chat">
+      <div className="routing-ribbon" aria-label="Rassy controls">
+        <div className="lane-switcher autopilot-control" aria-label="Rassy automatic routing">
+          <label className="preference-select">
+              <select aria-label="Optional capability preference" value={mode} onChange={(event) => setMode(event.target.value as ChatMode["id"]) }>
+              <option value="general">Let Rassy choose</option>
+              {modes.filter((item) => item.id !== "general").map((item) => <option key={item.id} value={item.id}>{item.label} · {getLaneDisplay(item.id).capability}</option>)}
+            </select>
+          </label>
         </div>
 
         <div className="ribbon-tools">
@@ -280,7 +320,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         </div>
 
         {showTuning ? (
-          <div className="tuning-panel" aria-label="RassyMind tuning controls">
+          <div className="tuning-panel" aria-label="Rassy tuning controls">
             <label><span>Creativity <output>{temperature.toFixed(1)}</output></span><input type="range" min="0" max="1.5" step="0.1" value={temperature} onChange={(event) => setTemperature(Number(event.target.value))} /><small>Precision ← · exploratory →</small></label>
             <label><span>Response budget <output>{maxTokens} tokens</output></span><input type="range" min="256" max="8192" step="256" value={maxTokens} onChange={(event) => setMaxTokens(Number(event.target.value))} /><small>{activeMode?.model} · {activeMode?.contextWindow}</small></label>
           </div>
@@ -300,7 +340,6 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           {documentNotice ? <p className="document-notice">{documentNotice}</p> : null}
           {signedIn ? (
             <div className="document-list memory-source-list">
-              {documents.length === 0 ? <p className="empty-documents">No sources loaded. Upload notes, specs, logs, or research.</p> : null}
               {documents.map((document) => (
                 <button
                   className={document.active ? "document-pill active" : "document-pill"}
@@ -314,27 +353,18 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
                 </button>
               ))}
             </div>
-          ) : (
-            <p className="empty-documents">This is a live anonymous thread. Sign in to add your own document memory.</p>
-          )}
+          ) : null}
         </section>
       </div>
 
       <div className="transcript-shell">
-        <div className="route-readout" aria-label="Active RassyMind channel">
-          <div>
-            <span>{activeLane.glyph}</span>
-            <strong>{activeMode?.model ?? "rassy-mind"}</strong>
-          </div>
-          <p>{webSearchLabel}</p>
-          <p>{activeDocuments.length ? `${activeDocuments.length} memory sources` : "thread memory off"}</p>
-          <p>{sending ? "streaming" : "ready"}</p>
-        </div>
-
+        <Mindfield activity={activity} kind={activityKind} />
         <div className="message-list">
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <div className="message-meta"><span>{message.role === "user" ? "You" : "RassyMind"}</span>{message.role === "assistant" && message.content ? <CopyButton text={message.content} label="Copy Markdown" /> : null}</div>
+              <div className="message-meta"><span>{message.role === "user" ? "You" : "Rassy"}</span><div className="message-actions">{message.searched ? <span className="evidence-badge">WEB SOURCES</span> : null}{message.role === "assistant" && message.content ? <CopyButton text={message.content} label="Copy Markdown" /> : null}</div></div>
+              {message.sources?.length ? <details className="search-sources"><summary>Search signal <span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noreferrer"><strong>{sourceIndex + 1}. {source.title}</strong><small>{source.snippet || source.url}</small></a>)}</div></details> : null}
+              {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide reasoning trace" : "Show reasoning trace"}<span>RASSYMIND / TRANSPARENT</span></summary><p>{message.reasoning.trim()}</p></details> : null}
               <MarkdownMessage content={message.content || (sending ? "..." : "")} />
             </article>
           ))}
@@ -345,17 +375,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <textarea
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Start the thread. /code, /fast, /know, /search, /local..."
-          aria-label="Message RassyMind"
+          placeholder="Message Rassy"
+          aria-label="Message Rassy"
           rows={1}
         />
-        <div className="prompt-runes" aria-label="Prompt shortcuts">
-          {PROMPT_RUNES.map((rune) => (
-            <button key={rune.label} onClick={() => setInput(rune.prompt)} type="button">
-              {rune.label}
-            </button>
-          ))}
-        </div>
         {sending ? (
           <button type="button" onClick={() => abortRef.current?.abort()}>
             Stop
@@ -365,10 +388,23 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         )}
       </form>
 
-      <div className="persistence-note">
-        {signedIn ? "Signed in. This thread can become part of your workspace." : "Anonymous session. The room is live, but memory becomes durable after login."}
-      </div>
-    </section>
+      </section>
+    </div>
+  );
+}
+
+function Mindfield({ activity, kind }: { activity: number; kind: "idle" | "thinking" | "searching" | "answering" }) {
+  return (
+    <div className={`mindfield mindfield-${kind}`} style={{ "--activity": activity } as React.CSSProperties} aria-label={`Rassy activity: ${kind}`} role="img">
+      <svg className="mindfield-art" viewBox="0 0 1200 64" preserveAspectRatio="none" aria-hidden="true">
+        <path className="trace trace-a" d="M0 34h92l20-2 18-20 15 40 18-29 14 11h100l20-2 18-20 15 40 18-29 14 11h100l20-2 18-20 15 40 18-29 14 11h100l20-2 18-20 15 40 18-29 14 11h100l20-2 18-20 15 40 18-29 14 11h100l20-2 18-20 15 40 18-29 14 11h140" />
+        <path className="trace trace-b" d="M0 32h130l16 7 16-10 18 3h110l18 11 18-24 18 28 18-12h112l16 7 16-10 18 3h110l18 11 18-24 18 28 18-12h112l16 7 16-10 18 3h110l18 11 18-24 18 28 18-12h120" />
+        <path className="trace trace-c" d="M0 32h1200" />
+        <circle className="trace-node node-a" cx="270" cy="23" r="2" />
+        <circle className="trace-node node-b" cx="706" cy="41" r="2" />
+        <circle className="trace-node node-c" cx="1032" cy="25" r="2" />
+      </svg>
+    </div>
   );
 }
 
@@ -427,9 +463,25 @@ function MarkdownMessage({ content }: { content: string }) {
   );
 }
 
+async function copyText(text: string) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
 function CopyButton({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
-  return <button className="copy-button" type="button" onClick={() => { void navigator.clipboard.writeText(text).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1400); }); }}>{copied ? "Copied" : label}</button>;
+  return <button className="copy-button" type="button" onClick={() => { void copyText(text).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1400); }); }}>{copied ? "Copied" : label}</button>;
 }
 
 function CodeBlock({ language, text }: { language: string | null; text: string }) {

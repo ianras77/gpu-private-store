@@ -10,12 +10,19 @@ export default async function LoginPage({
   return (
     <main className="auth-shell">
       <section className="auth-panel">
-        <Link className="back-link" href="/">
-          Rassy Online
+        <Link className="auth-brand" href="/" aria-label="Return to Rassy Online">
+          <span className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" role="presentation">
+              <path className="signal-line" d="M7 33h13l5-14 8 27 7-19h17" />
+              <circle className="signal" cx="55" cy="27" r="2.5" />
+            </svg>
+          </span>
+          <span className="brand-type"><strong>RASSY</strong><small>PRIVATE / LIVE</small></span>
         </Link>
         <div>
-          <p className="system-label">Account Portal</p>
-          <h1>Keep your threads, documents, and magic.</h1>
+          <p className="system-label"><span className="live-dot" /> PRIVATE WORKSPACE / AUTH GATE</p>
+          <h1>Bring your context with you.</h1>
+          <p className="auth-intro">Sign in to keep threads, documents, and your RassyMind workspace connected.</p>
         </div>
 
         {params.error ? <p className="form-error">{params.error.replaceAll("_", " ")}</p> : null}

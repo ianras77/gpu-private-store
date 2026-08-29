@@ -4,15 +4,16 @@ export type RassyMindAdminSnapshot = {
     id: string;
     ownedBy?: string;
     capabilities: string[];
+    status?: string;
   }>;
   checkedAt: string;
 };
 
 const EXPECTED_LANES = [
-  { id: "rassy-mind", capabilities: ["streaming", "tools", "structured output: experimental"] },
-  { id: "rassy-code", capabilities: ["streaming", "tools", "structured output: experimental"] },
-  { id: "rassy-fast", capabilities: ["streaming", "tools", "parallel tools", "structured output: experimental"] },
-  { id: "rassy-utility", capabilities: ["streaming", "tools", "structured output: experimental"] },
+  { id: "rassy-mind", capabilities: ["chat", "streaming", "reasoning"] },
+  { id: "rassy-code", capabilities: ["chat", "streaming", "reasoning"] },
+  { id: "rassy-fast", capabilities: ["chat", "streaming", "qualified"] },
+  { id: "rassy-utility", capabilities: ["chat", "streaming"] },
   { id: "rassy-embed", capabilities: ["4096-dimensional embeddings"] },
   { id: "rassy-rerank", capabilities: ["dedicated reranking"] }
 ];
@@ -23,17 +24,23 @@ export async function getRassyMindAdminSnapshot(): Promise<RassyMindAdminSnapsho
   const checkedAt = new Date().toISOString();
 
   try {
-    const response = await fetch(`${baseUrl}/v1/models`, {
+    const response = await fetch(`${baseUrl}/v1/capabilities`, {
       headers,
       cache: "no-store",
       signal: AbortSignal.timeout(4000)
     });
     if (!response.ok) return { gateway: "degraded", models: EXPECTED_LANES, checkedAt };
-    const payload = (await response.json()) as { data?: Array<{ id?: string; owned_by?: string }> };
-    const models = (payload.data ?? []).map((model) => ({
+    const payload = (await response.json()) as { models?: Array<{ id?: string; status?: string; chat?: boolean; embeddings?: boolean; rerank?: boolean; stt?: boolean; tts?: boolean }> };
+    const models = (payload.models ?? []).map((model) => ({
       id: model.id ?? "unknown",
-      ownedBy: model.owned_by,
-      capabilities: EXPECTED_LANES.find((lane) => lane.id === model.id)?.capabilities ?? ["catalogued"]
+      capabilities: [
+        ...(model.chat ? ["chat", "streaming"] : []),
+        ...(model.embeddings ? ["embeddings"] : []),
+        ...(model.rerank ? ["rerank"] : []),
+        ...(model.stt ? ["speech to text"] : []),
+        ...(model.tts ? ["text to speech"] : [])
+      ].concat(model.status === "qualified" ? ["qualified"] : []),
+      status: model.status
     }));
     return { gateway: "healthy", models: models.length ? models : EXPECTED_LANES, checkedAt };
   } catch {
