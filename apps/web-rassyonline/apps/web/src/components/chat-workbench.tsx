@@ -26,6 +26,14 @@ type UserDocument = {
 };
 type ThreadSummary = { id: string; title: string; updatedAt: string };
 
+const OPENING_LINES = [
+  "I’m Rassy. Go on then—give me something interesting.",
+  "Rassy online. I’m listening, judging only a little.",
+  "Ask me anything. I’ll bring the useful answers and one raised eyebrow.",
+  "Ready when you are. Make it weird, difficult, or both.",
+  "I’m here. Your move, chief."
+];
+
 export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn: boolean }) {
   const [mode, setMode] = useState(modes[0]?.id ?? "general");
   const [webSearch, setWebSearch] = useState<WebSearchMode>("auto");
@@ -33,7 +41,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "I’m Rassy — ready when you are. Ask naturally and I’ll take care of the rest. Turn on Search when freshness or sources matter."
+      content: OPENING_LINES[0]
     }
   ]);
   const [input, setInput] = useState("");
@@ -54,6 +62,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
   const activeTheme = getTheme(themeId);
+
+  useEffect(() => {
+    setMessages((current) => current.length === 1 && current[0]?.role === "assistant" ? [{ role: "assistant", content: OPENING_LINES[Math.floor(Math.random() * OPENING_LINES.length)] }] : current);
+  }, []);
 
   useEffect(() => {
     if (!signedIn) return;
@@ -91,7 +103,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
   function startNewThread() {
     setThreadId(null);
-    setMessages([{ role: "assistant", content: "I’m Rassy — ready when you are. Ask naturally and I’ll take care of the rest. Turn on Search when freshness or sources matter." }]);
+    setMessages([{ role: "assistant", content: OPENING_LINES[Math.floor(Math.random() * OPENING_LINES.length)] }]);
   }
 
   async function openThread(id: string) {

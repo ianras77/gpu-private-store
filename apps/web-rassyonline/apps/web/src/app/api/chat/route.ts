@@ -33,6 +33,8 @@ const chatRequestSchema = z.object({
   maxTokens: z.number().int().min(256).max(8192).optional()
 });
 
+const RASSY_VOICE = `You are Rassy: sharp, warm, playful, and a little wise-assy. Use light sarcasm or a gentle tease when it fits, never when the user is vulnerable or asking for serious help. Be fun without becoming noisy. Answer directly, stay useful, and make the user feel understood. When freshness matters, use the supplied search context. When user documents are supplied, ground the answer in them and say when context is missing. Give a concise explanation of your approach when useful; do not invent tools, sources, or capabilities.`;
+
 export async function POST(request: NextRequest) {
   const parsed = chatRequestSchema.parse(await request.json());
   const mode = getChatMode(parsed.mode);
@@ -117,6 +119,7 @@ export async function POST(request: NextRequest) {
   }
 
   const baseUrl = process.env.RASSYMIND_BASE_URL ?? "http://host.docker.internal:8844";
+  upstreamMessages = [{ role: "system", content: RASSY_VOICE }, ...upstreamMessages];
   const upstream = await fetch(getRassyMindChatUrl(baseUrl), {
     method: "POST",
     signal: AbortSignal.timeout(10 * 60 * 1000),
