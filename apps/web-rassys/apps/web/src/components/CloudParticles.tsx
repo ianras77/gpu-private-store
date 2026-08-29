@@ -31,6 +31,12 @@ const VISITORS = [
     "000111111111000", "001111131111110", "011111111111111", "111111111111110",
     "011111211111100", "001111111111000", "000111111110000", "000011101100000",
     "000001111000000", "000000110000000", "000000010000000"
+  ]],
+  ["jellyfish", [
+    "000001111100000", "000011111110000", "000111111111000", "001111311111100",
+    "011111111111110", "001111111111100", "000111111111000", "000011111110000",
+    "000001111100000", "000001111100000", "000101110100000", "001001110010000",
+    "000001110000000", "000101110100000", "001001110010000"
   ]]
 ] as const;
 
@@ -38,7 +44,8 @@ const visitorInk: Record<string, { body: string; glow: string; highlight: string
   unicorn: { body: "255,230,109", glow: "255,79,216", highlight: "255,255,255" },
   whaleshark: { body: "66,245,255", glow: "104,128,255", highlight: "220,255,255" },
   flower: { body: "255,79,216", glow: "255,230,109", highlight: "255,190,245" },
-  trout: { body: "255,145,76", glow: "66,245,255", highlight: "255,230,109" }
+  trout: { body: "255,145,76", glow: "66,245,255", highlight: "255,230,109" },
+  jellyfish: { body: "190,120,255", glow: "66,245,255", highlight: "255,210,255" }
 };
 
 const createParticles = (count: number, width: number, height: number) =>
@@ -72,6 +79,7 @@ export function CloudParticles() {
     let nextVisitor = performance.now() + 1800;
     let animationFrame = 0;
     let previousFrame = performance.now();
+    let lastVisitorIndex = -1;
 
     const resize = () => {
       width = canvas.clientWidth;
@@ -120,7 +128,12 @@ export function CloudParticles() {
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       {
         if (!visitor && now > nextVisitor) {
-          const choice = VISITORS[Math.floor(Math.random() * VISITORS.length)];
+          let choiceIndex = Math.floor(Math.random() * VISITORS.length);
+          if (VISITORS.length > 1 && choiceIndex === lastVisitorIndex) {
+            choiceIndex = (choiceIndex + 1) % VISITORS.length;
+          }
+          lastVisitorIndex = choiceIndex;
+          const choice = VISITORS[choiceIndex];
           visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 30, born: now, phase: Math.random() * Math.PI * 2, direction: Math.random() > 0.5 ? 1 : -1, trail: [] };
           // Keep the ambient layer continuously inhabited: the next visitor is
           // ready before the current one can leave even on a short viewport.
@@ -136,7 +149,7 @@ export function CloudParticles() {
           const fade = Math.min(1, age / 1400, Math.max(0, (height - visitor.y) / 90));
           const shimmer = 0.82 + Math.sin(visitor.phase * 2.5) * 0.18;
           const visitorPattern = visitor.pattern;
-          const ink = visitorInk[visitorPattern === VISITORS[0][1] ? "unicorn" : visitorPattern === VISITORS[1][1] ? "whaleshark" : visitorPattern === VISITORS[2][1] ? "flower" : "trout"];
+          const ink = visitorInk[visitorPattern === VISITORS[0][1] ? "unicorn" : visitorPattern === VISITORS[1][1] ? "whaleshark" : visitorPattern === VISITORS[2][1] ? "flower" : visitorPattern === VISITORS[3][1] ? "trout" : "jellyfish"];
           ctx.save();
           ctx.globalCompositeOperation = "lighter";
           ctx.shadowColor = `rgba(${ink.glow},0.7)`;
