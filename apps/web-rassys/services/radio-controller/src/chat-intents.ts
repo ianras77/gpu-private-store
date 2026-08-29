@@ -43,6 +43,19 @@ const DIRECT_REQUEST_PATTERNS = [
   /\bi (?:want|need) to hear\b/
 ];
 
+const RECOMMENDATION_QUESTION_PATTERNS = [
+  /\bwhat would you recommend\b/,
+  /\bwhat do you recommend\b/,
+  /\bwhat should i listen to\b/,
+  /\bwhat should i hear\b/,
+  /\bgot a recommendation\b/,
+  /\bmake me a recommendation\b/,
+  /\bpick (?:a|me a|something)\b/,
+  /\bsurprise me\b/,
+  /\bput me onto\b/,
+  /\bpoint me at\b/
+];
+
 const DIRECT_SKIP_PATTERNS = [
   /\bskip\b/,
   /\bpass on\b/,
@@ -91,6 +104,7 @@ export const looksLikeRecommendationRequest = (message: string) => {
   }
   return (
     DIRECT_REQUEST_PATTERNS.some((pattern) => pattern.test(normalized)) ||
+    RECOMMENDATION_QUESTION_PATTERNS.some((pattern) => pattern.test(normalized)) ||
     looksLikeBroadLaneRequest(normalized)
   );
 };

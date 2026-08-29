@@ -1424,7 +1424,7 @@ const buildFallbackListenerReply = async (
             artist: now.artist ?? "Unknown Artist",
             album: now.album,
             year: now.year
-          })} is sitting at the center of this turn.`,
+          })} is the record in front of us.`,
           `I've got ${buildTrackLabel({
             title: now.title,
             artist: now.artist ?? "Unknown Artist",
@@ -2500,6 +2500,21 @@ export const buildServer = () => {
             liveSnapshot,
             requestCandidates
           ));
+        if (
+          recommendationIntent &&
+          requestCandidates.length > 0 &&
+          !generatedReply.matchedTrackId &&
+          (!Array.isArray(generatedReply.trackIds) || generatedReply.trackIds.length === 0)
+        ) {
+          replySource = "fallback";
+          generatedReply = await buildFallbackListenerReply(
+            context,
+            safeMessage,
+            requestMatches,
+            liveSnapshot,
+            requestCandidates
+          );
+        }
         if (
           recommendationIntent &&
           requestCandidates.length > 0 &&

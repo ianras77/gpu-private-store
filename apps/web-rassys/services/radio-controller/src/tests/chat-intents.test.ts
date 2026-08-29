@@ -52,6 +52,12 @@ describe("looksLikeRecommendationRequest", () => {
       true
     );
   });
+
+  it("recognizes natural recommendation questions", () => {
+    expect(looksLikeRecommendationRequest("What should I listen to tonight?")).toBe(true);
+    expect(looksLikeRecommendationRequest("Pick something strange for me.")).toBe(true);
+    expect(looksLikeRecommendationRequest("Surprise me with a record.")).toBe(true);
+  });
 });
 
 describe("hasStrongSkipReason", () => {
