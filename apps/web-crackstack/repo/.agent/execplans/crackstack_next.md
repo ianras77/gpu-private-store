@@ -96,3 +96,4 @@ Rollback checkpoint is commit `86d8bd0c79a06054f2b7f28a6a20d2e040bcd4fb`, record
 - [ ] M6 Visual Crack Canvas.
 - [ ] M7 Crack Flows.
 - [ ] M8 brand specialization and hardening.
+- [x] 2026-08-29 closeout: committed as `25ee0f7d`, pushed to `origin/codex/rassys-2.0`, and deployed through Runtipi as `web-crackstack:gpu-private-store`. Live probes passed: backend `/health` 200, XLCRACK `3212` 200, TAPECRACK `3213` 200; Postgres healthy and Temporal running. The Temporal SDK worker/recovery implementation remains intentionally unfinished.
