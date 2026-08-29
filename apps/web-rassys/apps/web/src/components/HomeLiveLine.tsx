@@ -550,3 +550,5 @@ export function HomeLiveLine() {
     </section>
   );
 }
+
+export default HomeLiveLine;
