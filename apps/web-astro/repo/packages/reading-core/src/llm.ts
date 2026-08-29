@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { createHash } from "node:crypto";
 
 type LLMOptions = {
   maxTokens?: number;
@@ -28,9 +29,12 @@ export const callLLM = async (
   prompt: string,
   options: LLMOptions = {}
 ): Promise<LLMResponse> => {
-  const baseURL = process.env.OPENAI_BASE_URL || process.env.LLM_BASE_URL || undefined;
-  const apiKey = process.env.OPENAI_API_KEY || (baseURL ? "rassymind-internal" : undefined);
-  const model = process.env.OPENAI_MODEL ?? "rassy-smart";
+  const useRassyMind = process.env.RASSYMIND_ENABLED === "1";
+  const baseURL = useRassyMind
+    ? (process.env.RASSYMIND_BASE_URL || "http://host.docker.internal:8844/v1")
+    : (process.env.OPENAI_BASE_URL || process.env.LLM_BASE_URL || undefined);
+  const apiKey = useRassyMind ? process.env.RASSYMIND_API_KEY : process.env.OPENAI_API_KEY;
+  const model = useRassyMind ? (process.env.RASSYMIND_MODEL || "rassy-fast") : (process.env.OPENAI_MODEL ?? "gpt-4o");
   const provider =
     process.env.OPENAI_PROVIDER_NAME ??
     (baseURL?.toLowerCase().includes("cheshire")
@@ -48,10 +52,16 @@ export const callLLM = async (
     };
   }
 
+  const headers = parseHeaders() || {};
+  if (useRassyMind) {
+    headers["X-Rassy-Session-ID"] = createHash("sha256").update(process.env.RASSYMIND_SESSION_ID || "astro:anonymous").digest("hex").slice(0, 32);
+    headers["X-Rassy-Workload"] = "interactive";
+    headers["X-Rassy-Deadline-Ms"] = process.env.RASSYMIND_DEADLINE_MS || "60000";
+  }
   const client = new OpenAI({
     apiKey,
     baseURL,
-    defaultHeaders: parseHeaders()
+    defaultHeaders: headers
   });
 
   try {
