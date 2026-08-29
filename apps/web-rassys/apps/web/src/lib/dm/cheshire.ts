@@ -40,6 +40,12 @@ export type DmLlmCallResult = {
 const dmTurnSchema: z.ZodType<DmTurnPatch> = z.object({
   narration: z.string().min(1),
   shortSummary: z.string().min(1).optional(),
+  resolution: z.object({
+    kind: z.enum(["automatic", "roll_required", "consequence", "choice"]),
+    reason: z.string().max(1000).optional(),
+    roll: z.object({ expression: z.string().min(2).max(24), actorCharacterId: z.string().optional(), difficulty: z.number().int().min(0).max(100).optional(), reason: z.string().max(600).optional() }).optional(),
+    newChoices: z.array(z.string().min(1).max(300)).max(6).optional()
+  }).optional(),
   worldPatch: z
     .object({
       location: z.string().min(1).optional(),
@@ -325,11 +331,18 @@ const normalizeDmTurnPayload = (
     synthesizedNarration;
 
   const shortSummary = pickString(source, ["shortSummary", "short_summary", "summary"]);
+  const rawResolution = isRecord(source.resolution) ? source.resolution : undefined;
+  const resolution = rawResolution ? {
+    kind: ["automatic", "roll_required", "consequence", "choice"].includes(String(rawResolution.kind)) ? rawResolution.kind : "automatic",
+    ...(pickString(rawResolution, ["reason", "why"]) ? { reason: pickString(rawResolution, ["reason", "why"]) } : {}),
+    ...(Array.isArray(rawResolution.newChoices) ? { newChoices: toStringArray(rawResolution.newChoices).slice(0, 6) } : {})
+  } : undefined;
 
   const normalized: Record<string, unknown> = {
     narration
   };
   if (shortSummary) normalized.shortSummary = shortSummary;
+  if (resolution) normalized.resolution = resolution;
   if (worldPatch) normalized.worldPatch = worldPatch;
   if (questPatches) normalized.questPatches = questPatches;
   if (characterPatches) normalized.characterPatches = characterPatches;
@@ -339,6 +352,7 @@ const normalizeDmTurnPayload = (
 const buildSystemPrompt = () =>
   [
     "You are always the Dungeon Master for this Gamma World campaign. Human accounts are players; their characters are the actors. Never ask a human to act as DM and never describe a player as the DM.",
+    "You control the whole game probabilistically. Do not follow a fixed adventure graph or force every action into a menu. Decide whether an action resolves automatically, needs a roll, creates a consequence, or opens new choices. Return resolution.kind and explain the immediate stakes. If a roll is required, return a roll expression and difficulty; the server will generate the authoritative dice and you will interpret the result on the next turn.",
     "Resolve the players' character actions, portray the world and NPCs, apply fair consequences, and offer actionable choices for the next character move.",
     "You must maintain continuity and obey bounded state changes.",
     "Output JSON only and strictly match schema for worldPatch/questPatches/characterPatches.",
@@ -350,7 +364,7 @@ const buildSystemPrompt = () =>
     "Use compendiumContext to ground mechanics, items, mutations, and entities when relevant.",
     "Use stateVector as source-of-truth for version and turn progression continuity.",
     "If context conflicts, prioritize pinned facts > summaries > recent turns.",
-    'JSON shape example: {"narration":"...", "shortSummary":"...", "worldPatch":{}, "questPatches":[], "characterPatches":[]}',
+    'JSON shape example: {"narration":"...", "shortSummary":"...", "resolution":{"kind":"automatic|roll_required|consequence|choice","reason":"...","roll":{"expression":"d20","difficulty":13}}, "worldPatch":{}, "questPatches":[], "characterPatches":[]}',
     "No markdown fencing."
   ].join("\n");
 

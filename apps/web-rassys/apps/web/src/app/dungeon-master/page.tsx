@@ -1285,7 +1285,7 @@ export default function DungeonMasterPage() {
                         Sign Out ({viewer.displayName})
                       </Button>
                     </div>
-                    {activeCampaignId && snapshot?.campaign.createdByUserId === viewer.id && (
+                    {activeCampaignId && snapshot?.role === "dm" && (
                       <div className="grid gap-2 border-t border-white/10 pt-3">
                         <Button type="button" variant="secondary" onClick={() => void createInvite()} disabled={invitePending}>
                           {invitePending ? "Making invite..." : "Invite a friend to play"}
@@ -1515,6 +1515,11 @@ export default function DungeonMasterPage() {
                   </div>
                   <div className="mt-5 text-sm text-cloud/80">{snapshot.campaign.worldState.sceneSummary}</div>
                   <div className="mt-2 text-xs text-cloud/60">Story beat: {snapshot.campaign.worldState.storyBeat}</div>
+                  {snapshot.events.find((event) => event.type === "dm_response")?.payload?.patch ? (() => {
+                    const resolution = snapshot.events.find((event) => event.type === "dm_response")?.payload?.patch as { resolution?: { kind?: string; reason?: string; newChoices?: string[] } } | undefined;
+                    if (!resolution?.resolution) return null;
+                    return <div className="mt-4 rounded-2xl border border-glow/20 bg-glow/[0.06] p-4"><div className="text-[10px] uppercase tracking-[0.24em] text-glow">Dungeon Master decision · {String(resolution.resolution.kind ?? "response").replaceAll("_", " ")}</div><p className="mt-2 text-sm text-white/80">{resolution.resolution.reason ?? "The world responds to the party."}</p>{resolution.resolution.newChoices?.length ? <div className="mt-3 flex flex-wrap gap-2">{resolution.resolution.newChoices.map((choice) => <button key={choice} type="button" className="rave-chip rounded-full px-3 py-1 text-xs text-cloud/80" onClick={() => setPromptText(choice)}>{choice}</button>)}</div> : null}</div>;
+                  })() : null}
                   <div className="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-black/20 p-4">
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-[10px] uppercase tracking-[0.25em] text-cloud/55">Latest consequence</span>

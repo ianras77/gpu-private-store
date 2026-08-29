@@ -211,4 +211,10 @@ export type DmTurnPatch = {
   questPatches?: QuestPatch[];
   characterPatches?: CharacterPatch[];
   shortSummary?: string;
+  resolution?: {
+    kind: "automatic" | "roll_required" | "consequence" | "choice";
+    reason?: string;
+    roll?: { expression: string; actorCharacterId?: string; difficulty?: number; reason?: string };
+    newChoices?: string[];
+  };
 };
