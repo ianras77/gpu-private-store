@@ -334,7 +334,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
     const isCheshire = config.chatPath.includes("/message");
     const target = isCheshire
       ? new URL("/", config.baseUrl).toString()
-      : new URL("/health", config.baseUrl).toString();
+      : new URL("/v1/models", config.baseUrl).toString();
     const started = Date.now();
 
     try {

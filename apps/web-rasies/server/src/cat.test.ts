@@ -114,7 +114,7 @@ describe("cat routes", () => {
     expect(health.statusCode).toBe(200);
     expect(health.json()).toMatchObject({
       ok: true,
-      target: "http://rassymind.local:8844/health",
+      target: "http://rassymind.local:8844/v1/models",
       upstreamStatus: 200,
     });
   });
