@@ -253,6 +253,8 @@ export default function DungeonMasterPage() {
   );
   const [createCampaignPending, setCreateCampaignPending] = useState(false);
   const [createCampaignError, setCreateCampaignError] = useState<string | null>(null);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [invitePending, setInvitePending] = useState(false);
 
   const [newCharacterName, setNewCharacterName] = useState("");
   const [newCharacterArchetype, setNewCharacterArchetype] = useState("");
@@ -828,6 +830,27 @@ export default function DungeonMasterPage() {
     });
   };
 
+  const createInvite = async () => {
+    if (!activeCampaignId || invitePending) return;
+    setInvitePending(true);
+    try {
+      const response = await fetch(`/api/dm/campaigns/${activeCampaignId}/invites`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Idempotency-Key": makeIdempotencyKey() },
+        body: JSON.stringify({ role: "player", expiresInHours: 72 })
+      });
+      const payload = (await response.json()) as { invite?: { token: string }; error?: string };
+      if (!response.ok || !payload.invite?.token) throw new Error(payload.error ?? "invite_failed");
+      const link = `${window.location.origin}/dungeon-master/invite/${payload.invite.token}`;
+      setInviteLink(link);
+      await navigator.clipboard?.writeText(link);
+    } catch {
+      setInviteLink("Invite could not be created. Check that you are the campaign DM.");
+    } finally {
+      setInvitePending(false);
+    }
+  };
+
   const updateCharacterDraft = (characterId: string, patch: Partial<CharacterDraft>) => {
     setCharacterDrafts((prev) => ({
       ...prev,
@@ -1017,23 +1040,27 @@ export default function DungeonMasterPage() {
     return "rolled";
   };
 
-  const rollDie = (die: string) => {
-    const sides = Number.parseInt(die.slice(1), 10);
-    const value = Math.floor(Math.random() * sides) + 1;
-    const verdict = getVerdict(sides, value);
-
-    setLastRoll((prev) => ({ die, value, verdict, id: prev.id + 1 }));
+  const rollDie = async (die: string) => {
+    if (!activeCampaignId || rollingDie) return;
     setRollingDie(die);
-
-    const entry: LogEntry = {
-      id: `roll-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      text: `Rolled ${die} and got ${value} (${verdict}).`,
-      tone: "roll",
-      createdAt: Date.now()
-    };
-
-    setLogEntries((prev) => [entry, ...prev].slice(0, 30));
-    setTimeout(() => setRollingDie(null), 520);
+    try {
+      const response = await fetch(`/api/dm/campaigns/${activeCampaignId}/roll`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Idempotency-Key": makeIdempotencyKey() },
+        body: JSON.stringify({ expression: die, actorCharacterId: selectedActorId || undefined, reason: "Table dice tray" })
+      });
+      const payload = (await response.json()) as { roll?: { total?: number; expression?: string }; error?: string };
+      if (!response.ok || !payload.roll) throw new Error(payload.error ?? "roll_failed");
+      const value = payload.roll.total ?? 0;
+      const sides = Number.parseInt(die.slice(1), 10);
+      const verdict = getVerdict(sides, value);
+      setLastRoll((prev) => ({ die, value, verdict, id: prev.id + 1 }));
+      scheduleSnapshotRefresh(activeCampaignId);
+    } catch {
+      setPromptError("The table could not roll right now. Try again.");
+    } finally {
+      window.setTimeout(() => setRollingDie(null), 520);
+    }
   };
 
   if (authLoading) {
@@ -1255,6 +1282,15 @@ export default function DungeonMasterPage() {
                         Sign Out ({viewer.displayName})
                       </Button>
                     </div>
+                    {activeCampaignId && snapshot?.campaign.createdByUserId === viewer.id && (
+                      <div className="grid gap-2 border-t border-white/10 pt-3">
+                        <Button type="button" variant="secondary" onClick={() => void createInvite()} disabled={invitePending}>
+                          {invitePending ? "Making invite..." : "Invite a friend to play"}
+                        </Button>
+                        {inviteLink && <input readOnly aria-label="Campaign invite link" className="rave-input rounded-2xl px-3 py-2 text-xs" value={inviteLink} onFocus={(event) => event.currentTarget.select()} />}
+                        <p className="text-[11px] leading-5 text-cloud/55">Creates a player invite valid for 72 hours and copies it to your clipboard.</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 

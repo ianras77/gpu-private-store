@@ -338,7 +338,7 @@ const normalizeDmTurnPayload = (
 
 const buildSystemPrompt = () =>
   [
-    "You are Cheshire Cat running the server-authoritative DM turn pipeline.",
+    "You are RassyMind running the server-authoritative Gamma World DM turn pipeline.",
     "You must maintain continuity and obey bounded state changes.",
     "Output JSON only and strictly match schema for worldPatch/questPatches/characterPatches.",
     "Always include a top-level narration string. Never omit narration.",
@@ -354,7 +354,7 @@ const buildSystemPrompt = () =>
   ].join("\n");
 
 export const runContextAwareDmTurn = async (context: DmContextPacket): Promise<DmLlmCallResult> => {
-  const model = process.env.CHESHIRE_MODEL ?? "rassy-fast";
+  const model = process.env.AI_DM_MODEL ?? process.env.RASSYMIND_MODEL ?? process.env.CHESHIRE_MODEL ?? "rassy-fast";
   const messages: Array<{ role: "system" | "user"; content: string }> = [
     { role: "system", content: buildSystemPrompt() },
     {

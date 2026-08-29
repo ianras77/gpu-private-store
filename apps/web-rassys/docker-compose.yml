@@ -41,6 +41,10 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       DATABASE_URL: ${DATABASE_URL:-postgresql://rassy:password@postgres:5432/rassy}
       RASSYMIND_BASE_URL: ${RASSYMIND_PROXY_URL:-http://cheshire:1865}
+      AI_BASE_URL: ${AI_BASE_URL:-${RASSYMIND_PROXY_URL:-http://cheshire:1865}}
+      AI_DM_MODEL: ${AI_DM_MODEL:-${RASSYMIND_MODEL:-rassy-mind}}
+      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-45000}
+      AI_API_KEY: ${AI_API_KEY:-${RASSYMIND_API_KEY:-}}
       RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
       RASSYMIND_MODEL: ${RASSYMIND_MODEL:-rassy-mind}
       RASSYMIND_LISTENER_MODEL: ${RASSYMIND_LISTENER_MODEL:-rassy-fast}

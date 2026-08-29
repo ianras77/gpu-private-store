@@ -64,20 +64,21 @@ const readNumber = (value: string | undefined, fallback: number) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
-const getBaseUrl = () => (process.env.CHESHIRE_BASE_URL ?? "").trim();
+const getBaseUrl = () => (process.env.AI_BASE_URL ?? process.env.RASSYMIND_BASE_URL ?? process.env.CHESHIRE_BASE_URL ?? "").trim();
 
 const getHeaders = () => {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (process.env.CHESHIRE_API_KEY) {
-    headers.Authorization = `Bearer ${process.env.CHESHIRE_API_KEY}`;
+  const apiKey = process.env.AI_API_KEY ?? process.env.RASSYMIND_API_KEY ?? process.env.CHESHIRE_API_KEY;
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
   }
   return headers;
 };
 
 const getRequestOptions = (control?: CheshireRequestControl) => {
-  const timeoutMs = Math.max(1000, control?.timeoutMs ?? readNumber(process.env.CHESHIRE_REQUEST_TIMEOUT_MS, 60000));
+  const timeoutMs = Math.max(1000, control?.timeoutMs ?? readNumber(process.env.AI_TIMEOUT_MS ?? process.env.CHESHIRE_REQUEST_TIMEOUT_MS, 60000));
   return {
     timeoutMs,
     retries: Math.max(0, control?.retries ?? 0),
@@ -135,7 +136,7 @@ export const requestCheshireChat = async (
     throw new Error("cheshire_unconfigured");
   }
 
-  const model = input.model ?? process.env.CHESHIRE_MODEL ?? "rassy-fast";
+  const model = input.model ?? process.env.AI_DM_MODEL ?? process.env.RASSYMIND_MODEL ?? process.env.CHESHIRE_MODEL ?? "rassy-fast";
   const payload: Record<string, unknown> = {
     model,
     messages: input.messages,
