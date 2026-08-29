@@ -56,7 +56,7 @@ const recommendationLabel = (status?: RadioChatRecommendationStatus) => {
   return null;
 };
 
-export default function HomeLiveLine() {
+export function HomeLiveLine() {
   const chatFeedRef = useRef<HTMLDivElement | null>(null);
   const sendLockRef = useRef(false);
   const lastSubmittedRef = useRef<{

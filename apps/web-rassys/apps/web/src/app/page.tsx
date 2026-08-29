@@ -2,7 +2,7 @@ import { CloudParticles } from "../components/CloudParticles";
 import { Hero } from "../components/Hero";
 import { publicRassysApps } from "../config/apps";
 import { Footer } from "../components/Footer";
-import HomeLiveLine from "../components/HomeLiveLine";
+import { HomeLiveLine } from "../components/HomeLiveLine";
 import { ThoughtsPanel } from "../components/ThoughtsPanel";
 import { HomeFamilyStrip } from "../components/HomeFamilyStrip";
 
