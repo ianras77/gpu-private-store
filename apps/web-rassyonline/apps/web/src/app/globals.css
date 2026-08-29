@@ -222,6 +222,17 @@ body { overflow-x: hidden; overflow-y: auto; }
 .composer-preview { position: sticky; bottom: 0; z-index: 4; background: rgba(0,0,0,.96); }
 @media (max-width: 800px) { .app-shell { height: auto; }.rassy-chat-layout { min-height: 0; }.chat-workbench { min-height: 0; }.message-list { padding-bottom: 24px; }.composer-preview { position: static; }.chat-history { max-height: none; } }
 
+/* CHAT GEOMETRY: fixed workbench, scrollable transcript, reachable composer. */
+body:has(.app-shell) { height: 100dvh; overflow: hidden; }
+.app-shell { height: 100dvh; min-height: 0; overflow: hidden; }
+.workspace-grid { display: flex; min-height: 0; height: auto; flex: 1 1 auto; }
+.rassy-chat-layout { height: 100%; min-height: 0; }
+.chat-workbench { height: 100% !important; min-height: 0; overflow: hidden; grid-template-rows: auto minmax(0, 1fr) auto; }
+.transcript-shell { display: grid; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
+.message-list { min-height: 0; max-height: none; overflow-y: auto; }
+.composer-preview { position: static; }
+@media (max-width: 800px) { body:has(.app-shell) { height: auto; overflow-y: auto; }.app-shell { height: auto; min-height: 100dvh; overflow: visible; }.workspace-grid, .rassy-chat-layout { display: block; height: auto; }.chat-workbench { height: auto !important; min-height: calc(100dvh - 82px); overflow: visible; }.transcript-shell { display: block; }.message-list { overflow: visible; }.composer-preview { position: static; } }
+
 /* HOME MINIMUM: only the mark, account action, and conversation remain. */
 .topbar { grid-template-columns: auto 1fr; }.top-actions { grid-column: 2; }
 @media (max-width: 800px) { .topbar { grid-template-columns: auto 1fr; }.top-actions { grid-column: 2; justify-content: flex-end; } }
