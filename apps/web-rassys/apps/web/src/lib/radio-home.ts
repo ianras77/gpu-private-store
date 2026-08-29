@@ -24,6 +24,8 @@ export type RadioHomeRequestLineItem = {
 };
 
 export type RadioHomeStatus = {
+  playCount?: number | null;
+  plays?: number | null;
   mood?: string | null;
   queueDepth?: number;
   nowPlaying?: {
