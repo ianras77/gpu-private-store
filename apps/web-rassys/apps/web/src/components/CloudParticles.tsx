@@ -53,6 +53,7 @@ export function CloudParticles() {
     let visitor: { pattern: readonly string[]; x: number; y: number; born: number; phase: number; direction: number } | null = null;
     let nextVisitor = performance.now() + 1800;
     let animationFrame = 0;
+    let previousFrame = performance.now();
 
     const resize = () => {
       width = canvas.clientWidth;
@@ -63,7 +64,11 @@ export function CloudParticles() {
       particles = createParticles(PARTICLE_COUNT, width, height);
     };
 
-    const tick = () => {
+    const tick = (now: number) => {
+      // Normalize movement to elapsed time so 60Hz, 120Hz, throttled tabs, and
+      // Firefox power-saving all produce the same gentle float.
+      const frameScale = Math.min(2.5, Math.max(0.25, (now - previousFrame) / 16.67));
+      previousFrame = now;
       ctx.clearRect(0, 0, width, height);
       const gradient = ctx.createRadialGradient(
         width * 0.5,
@@ -96,18 +101,18 @@ export function CloudParticles() {
       // drift so the ambient station never feels empty in Firefox.
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       {
-        if (!visitor && performance.now() > nextVisitor) {
+        if (!visitor && now > nextVisitor) {
           const choice = VISITORS[Math.floor(Math.random() * VISITORS.length)];
-          visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 20, born: performance.now(), phase: Math.random() * Math.PI * 2, direction: Math.random() > 0.5 ? 1 : -1 };
+          visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 30, born: now, phase: Math.random() * Math.PI * 2, direction: Math.random() > 0.5 ? 1 : -1 };
           // Keep the ambient layer continuously inhabited: the next visitor is
           // ready before the current one can leave even on a short viewport.
-          nextVisitor = performance.now() + 3500;
+          nextVisitor = now + 3500;
         }
         if (visitor) {
-          visitor.y -= reducedMotion ? 0.12 : 0.28;
-          visitor.phase += reducedMotion ? 0.002 : 0.006;
-          visitor.x += visitor.direction * (reducedMotion ? 0.02 : 0.04) + Math.sin(visitor.phase) * (reducedMotion ? 0.04 : 0.11);
-          const age = performance.now() - visitor.born;
+          visitor.y -= (reducedMotion ? 0.12 : 0.28) * frameScale;
+          visitor.phase += (reducedMotion ? 0.002 : 0.006) * frameScale;
+          visitor.x += (visitor.direction * (reducedMotion ? 0.02 : 0.04) + Math.sin(visitor.phase) * (reducedMotion ? 0.04 : 0.11)) * frameScale;
+          const age = now - visitor.born;
           const fade = Math.min(1, age / 1400, Math.max(0, (height - visitor.y) / 90));
           const shimmer = 0.82 + Math.sin(visitor.phase * 2.5) * 0.18;
           ctx.save();
