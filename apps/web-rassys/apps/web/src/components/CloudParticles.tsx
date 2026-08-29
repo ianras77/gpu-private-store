@@ -6,22 +6,33 @@ const palette = ["255, 79, 216", "66, 245, 255", "255, 230, 109"];
 const PARTICLE_COUNT = 56;
 const VISITORS = [
   ["unicorn", [
-    "00000100000", "00001100000", "00001010000", "00011111000",
-    "00110101100", "01111111110", "00111111000", "00100100100", "00100100100"
+    "0000000200000", "0000001200000", "0000011100000", "0000111110000",
+    "0001111011000", "0011111111100", "0111111111110", "0011121111000",
+    "0001111110000", "0000111100000", "0000100100000", "0000100100000", "0001100110000"
   ]],
   ["whaleshark", [
-    "00001000000", "00011100000", "00111110000", "01111111110",
-    "11111111111", "01111111110", "00111111000", "00011000000", "00010000000"
+    "0000000100000", "0000001110000", "0000011111000", "0000111111100",
+    "0001111111110", "0011113111111", "0111111111110", "1111111111110",
+    "0111111111100", "0011111111000", "0001111110000", "0000111100000", "0000011000000"
   ]],
   ["flower", [
-    "00001000000", "01001100100", "00111111000", "01111111110",
-    "00111111000", "00001100000", "00001100000", "00001100000", "00011110000"
+    "0000011100000", "0000111210000", "0001111111000", "0011113111100",
+    "0111111111110", "0011111111100", "0000111110000", "0000011200000",
+    "0000011100000", "0000011100000", "0000111100000", "0001100110000", "0001000010000"
   ]],
   ["trout", [
-    "00000100000", "00001110000", "00011111000", "01111111110",
-    "11111111111", "01111111110", "00111111000", "00011000000", "00001000000"
+    "0000001000000", "0000011100000", "0000111110000", "0001111111000",
+    "0011111311110", "0111111111111", "1111111111110", "0111121111100",
+    "0011111111000", "0001111110000", "0000110100000", "0000011100000", "0000001000000"
   ]]
 ] as const;
+
+const visitorInk: Record<string, { body: string; glow: string; highlight: string }> = {
+  unicorn: { body: "255,230,109", glow: "255,79,216", highlight: "255,255,255" },
+  whaleshark: { body: "66,245,255", glow: "104,128,255", highlight: "220,255,255" },
+  flower: { body: "255,79,216", glow: "255,230,109", highlight: "255,190,245" },
+  trout: { body: "255,145,76", glow: "66,245,255", highlight: "255,230,109" }
+};
 
 const createParticles = (count: number, width: number, height: number) =>
   Array.from({ length: count }, () => ({
@@ -116,20 +127,23 @@ export function CloudParticles() {
           const fade = Math.min(1, age / 1400, Math.max(0, (height - visitor.y) / 90));
           const shimmer = 0.82 + Math.sin(visitor.phase * 2.5) * 0.18;
           ctx.save();
-          ctx.translate(visitor.x + 27.5, visitor.y + 22.5);
+          ctx.translate(visitor.x + 32.5, visitor.y + 32.5);
           ctx.rotate(Math.sin(visitor.phase) * 0.06);
           ctx.globalAlpha = fade * shimmer;
           ctx.globalCompositeOperation = "lighter";
-          ctx.shadowColor = "rgba(66,245,255,0.9)";
-          ctx.shadowBlur = 14;
-          ctx.fillStyle = "rgba(255,230,109,0.82)";
+          const ink = visitorInk[visitor.pattern === VISITORS[0][1] ? "unicorn" : visitor.pattern === VISITORS[1][1] ? "whaleshark" : visitor.pattern === VISITORS[2][1] ? "flower" : "trout"];
+          ctx.shadowColor = `rgba(${ink.glow},0.9)`;
+          ctx.shadowBlur = 16;
           visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
-            if (cell === "1") ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 22.5, 4, 4);
+            if (cell !== "0") {
+              ctx.fillStyle = cell === "2" ? `rgba(${ink.highlight},0.9)` : cell === "3" ? "rgba(8,0,17,0.95)" : `rgba(${ink.body},0.86)`;
+              ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 32.5, 4, 4);
+            }
           }));
           ctx.shadowBlur = 28;
           ctx.globalAlpha = fade * 0.12;
           visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
-            if (cell === "1") ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 22.5, 4, 4);
+            if (cell !== "0") ctx.fillRect(colIndex * 5 - 27.5, rowIndex * 5 - 32.5, 4, 4);
           }));
           ctx.restore();
           if (visitor.y < -50) visitor = null;
