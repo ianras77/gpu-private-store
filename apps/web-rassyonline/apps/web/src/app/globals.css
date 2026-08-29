@@ -221,3 +221,15 @@ body { overflow-x: hidden; overflow-y: auto; }
 .message-list { max-height: none; overflow: visible; }
 .composer-preview { position: sticky; bottom: 0; z-index: 4; background: rgba(0,0,0,.96); }
 @media (max-width: 800px) { .app-shell { height: auto; }.rassy-chat-layout { min-height: 0; }.chat-workbench { min-height: 0; }.message-list { padding-bottom: 24px; }.composer-preview { position: static; }.chat-history { max-height: none; } }
+
+/* SIGNAL POLISH: make the useful surfaces feel alive without adding chrome. */
+.brand-lockup:hover .signal-line { animation: brand-current .7s steps(2, end) infinite; }.brand-lockup:hover .signal { fill: var(--aqua); }
+@keyframes brand-current { 0%, 100% { opacity: 1; } 45% { opacity: .35; } }
+.chat-workbench { box-shadow: 0 0 10px rgba(125,255,224,.62), 0 0 38px rgba(125,255,224,.16), inset 0 0 14px rgba(125,255,224,.06); }
+.message-list { scrollbar-color: var(--aqua) #000; scrollbar-width: thin; }
+.chat-message.assistant { position: relative; border-bottom-color: rgba(219,255,247,.72); }.chat-message.assistant::after { position: absolute; bottom: -1px; left: 0; width: 28%; height: 1px; background: var(--paper); box-shadow: 0 0 4px var(--paper), 0 0 12px var(--aqua); content: ""; }
+.message-meta > span::before { display: inline-block; width: 4px; height: 4px; margin: 0 7px 2px 0; border-radius: 50%; background: currentColor; box-shadow: 0 0 7px currentColor; content: ""; }
+.markdown-body strong { color: var(--paper); text-shadow: 0 0 5px rgba(251,255,253,.25); }.markdown-body li::marker { color: var(--aqua); }.markdown-body ::selection { background: var(--aqua); color: #000; }
+.composer-preview { box-shadow: 0 -4px 18px rgba(125,255,224,.08); }.composer-preview:focus-within { border-top-color: var(--paper); box-shadow: 0 -4px 22px rgba(125,255,224,.24); }.composer-preview textarea::placeholder { color: rgba(219,255,247,.48); }.composer-preview textarea:focus { text-shadow: 0 0 9px rgba(251,255,253,.22); }
+.auth-shell { background: #000; }.auth-panel { border-color: var(--wire); background: #020404; box-shadow: 0 0 18px rgba(125,255,224,.16); }.auth-grid { border-color: var(--wire); background: var(--wire); }.auth-form, .auth-form + .auth-form { background: #000; }.auth-form h2 { text-shadow: 0 0 7px var(--aqua); }.auth-form button { box-shadow: 0 0 10px rgba(125,255,224,.45); }.auth-form + .auth-form button { background: var(--pink); box-shadow: 0 0 10px rgba(255,139,220,.4); }
+.admin-shell { background: #000; }.admin-header, .admin-section-heading, .user-table { border-color: var(--wire); }.admin-grid, .lane-health-grid { background: var(--wire); }.admin-tile, .lane-health-card { background: #000; }.admin-tile:hover, .lane-health-card:hover { box-shadow: inset 0 0 16px rgba(125,255,224,.08); }.capability-list span { border-color: var(--wire); }

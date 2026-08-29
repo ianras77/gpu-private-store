@@ -375,6 +375,12 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <textarea
           value={input}
           onChange={(event) => setInput(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+              event.preventDefault();
+              if (!sending && input.trim()) event.currentTarget.form?.requestSubmit();
+            }
+          }}
           placeholder="Message Rassy"
           aria-label="Message Rassy"
           rows={1}
