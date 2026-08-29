@@ -39,7 +39,7 @@ export function CloudParticles() {
 
     let particles = createParticles(PARTICLE_COUNT, width, height);
     let visitor: { pattern: readonly string[]; x: number; y: number; born: number; phase: number; direction: number } | null = null;
-    let nextVisitor = performance.now() + 9000;
+    let nextVisitor = performance.now() + 4500;
 
     const resize = () => {
       width = canvas.clientWidth;
@@ -83,7 +83,7 @@ export function CloudParticles() {
         if (!visitor && performance.now() > nextVisitor) {
           const choice = VISITORS[Math.floor(Math.random() * VISITORS.length)];
           visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 20, born: performance.now(), phase: Math.random() * Math.PI * 2, direction: Math.random() > 0.5 ? 1 : -1 };
-          nextVisitor = performance.now() + 22000;
+          nextVisitor = performance.now() + 16000;
         }
         if (visitor) {
           visitor.y -= 0.16;
@@ -94,9 +94,9 @@ export function CloudParticles() {
           ctx.save();
           ctx.translate(visitor.x + 15, visitor.y + 15);
           ctx.rotate(Math.sin(visitor.phase) * 0.08);
-          ctx.fillStyle = `rgba(255,230,109,${0.16 * fade})`;
+          ctx.fillStyle = `rgba(255,230,109,${0.34 * fade})`;
           visitor.pattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
-            if (cell === "1") ctx.fillRect(colIndex * 6 - 15, rowIndex * 6 - 15, 3, 3);
+            if (cell === "1") ctx.fillRect(colIndex * 6 - 15, rowIndex * 6 - 15, 4, 4);
           }));
           ctx.restore();
           if (visitor.y < -50) visitor = null;

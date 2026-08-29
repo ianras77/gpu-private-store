@@ -57,7 +57,7 @@ export function Hero() {
                 Welcome to my world
               </div>
               <h1 className="section-title mt-3 text-5xl md:text-7xl lg:text-[7rem]">
-                Rassy’s
+                Rassy’s <span className="hero-wordmark-dot">dot</span> Com
               </h1>
               <div className="relative mt-4 max-w-3xl overflow-hidden rounded-[26px] border border-white/10 bg-black/18 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
                 <HeaderSignalVisualizer />
