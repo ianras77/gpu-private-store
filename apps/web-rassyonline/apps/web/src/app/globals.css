@@ -222,6 +222,10 @@ body { overflow-x: hidden; overflow-y: auto; }
 .composer-preview { position: sticky; bottom: 0; z-index: 4; background: rgba(0,0,0,.96); }
 @media (max-width: 800px) { .app-shell { height: auto; }.rassy-chat-layout { min-height: 0; }.chat-workbench { min-height: 0; }.message-list { padding-bottom: 24px; }.composer-preview { position: static; }.chat-history { max-height: none; } }
 
+/* HOME MINIMUM: only the mark, account action, and conversation remain. */
+.topbar { grid-template-columns: auto 1fr; }.top-actions { grid-column: 2; }
+@media (max-width: 800px) { .topbar { grid-template-columns: auto 1fr; }.top-actions { grid-column: 2; justify-content: flex-end; } }
+
 /* SIGNAL POLISH: make the useful surfaces feel alive without adding chrome. */
 .brand-lockup:hover .signal-line { animation: brand-current .7s steps(2, end) infinite; }.brand-lockup:hover .signal { fill: var(--aqua); }
 @keyframes brand-current { 0%, 100% { opacity: 1; } 45% { opacity: .35; } }

@@ -20,10 +20,6 @@ export default async function Home() {
           </span>
           <span className="brand-type"><strong>RASSY</strong><small>PRIVATE / LIVE</small></span>
         </Link>
-        <div className="header-copy">
-          <p className="system-label"><span className="live-dot" /> LOCAL SIGNAL / PRIVATE INTELLIGENCE</p>
-          <h1>Ask better questions.</h1>
-        </div>
         <div className="top-actions">
           {user ? (
             <>
