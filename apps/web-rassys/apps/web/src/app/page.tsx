@@ -2,7 +2,7 @@ import { CloudParticles } from "../components/CloudParticles";
 import { Hero } from "../components/Hero";
 import { publicRassysApps } from "../config/apps";
 import { Footer } from "../components/Footer";
-import { HomeLiveLine } from "../components/HomeLiveLine";
+import { HomeRassyOpeningPanel } from "../components/HomeRassyOpeningPanel";
 import { ThoughtsPanel } from "../components/ThoughtsPanel";
 import { HomeFamilyStrip } from "../components/HomeFamilyStrip";
 
@@ -15,7 +15,7 @@ export default function HomePage() {
         <div className="absolute left-1/2 top-56 hidden h-[72%] w-px -translate-x-1/2 bg-gradient-to-b from-white/14 via-white/0 to-transparent lg:block" />
       </div>
       <Hero />
-      <HomeLiveLine />
+      <HomeRassyOpeningPanel />
       <section className="mx-auto w-full max-w-6xl px-4 pb-7 sm:px-6">
         <div className="mb-4 flex items-end justify-between gap-4">
           <div><div className="eyebrow">The app constellation</div><h2 className="section-title mt-2 text-2xl sm:text-3xl">Small doors. Big rooms.</h2></div>

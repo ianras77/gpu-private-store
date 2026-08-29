@@ -138,6 +138,13 @@ li {
   backdrop-filter: blur(18px) saturate(140%);
 }
 
+.home-rassy-opening {
+  background: radial-gradient(circle at 8% 10%, rgba(255, 230, 109, .18), transparent 28%), radial-gradient(circle at 88% 20%, rgba(66, 245, 255, .16), transparent 30%), linear-gradient(135deg, rgba(15, 8, 32, .92), rgba(35, 7, 43, .84));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .24);
+}
+
+.hero-dot { color: var(--accent-2); text-shadow: 0 0 18px rgba(66, 245, 255, .8); font-size: .62em; vertical-align: .15em; margin: 0 .12em; }
+
 .glass-panel::after {
   content: "";
   position: absolute;
