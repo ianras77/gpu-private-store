@@ -21,12 +21,9 @@ describe("Runtipi packaging", () => {
     expect(compose).toContain(
       "RASSYMIND_API_KEY=${RASSYMIND_API_KEY:-${RASIES_CAT_API_KEY:-}}",
     );
-    expect(compose).toContain(
-      "OLLAMA_GENERAL_BASE_URL=${RASIES_OLLAMA_GENERAL_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}",
-    );
-    expect(compose).toContain(
-      "OLLAMA_EMBED_BASE_URL=${RASIES_OLLAMA_EMBED_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}",
-    );
+    expect(compose).toContain("/data/mastra");
+    expect(compose).not.toContain("rasies-cheshire-cat");
+    expect(compose).not.toContain("OLLAMA_GENERAL_BASE_URL");
   });
 
   it("maps host.docker.internal for every service that calls the host LLM", () => {
@@ -36,6 +33,6 @@ describe("Runtipi packaging", () => {
       /host\.docker\.internal:host-gateway/g,
     );
 
-    expect(hostGatewayMappings).toHaveLength(2);
+    expect(hostGatewayMappings).toHaveLength(1);
   });
 });

@@ -1,5 +1,5 @@
 # ---------- build web ----------
-FROM node:20-alpine AS webbuild
+FROM node:22-alpine AS webbuild
 WORKDIR /app/web
 ARG VITE_UMAMI_SCRIPT_URL="https://umami.rasies.com/script.js"
 ARG VITE_UMAMI_WEBSITE_ID=""
@@ -13,7 +13,7 @@ COPY web/ ./
 RUN npm run build
 
 # ---------- build server ----------
-FROM node:20-alpine AS serverbuild
+FROM node:22-alpine AS serverbuild
 WORKDIR /app/server
 COPY server/package.json server/package-lock.json ./
 RUN npm ci
@@ -21,7 +21,7 @@ COPY server/ ./
 RUN npm run build && npm prune --omit=dev
 
 # ---------- runtime ----------
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production

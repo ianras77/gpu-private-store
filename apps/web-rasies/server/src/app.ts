@@ -14,6 +14,7 @@ import { registerThoughtsRoutes } from "./thoughts.js";
 import { registerMrRassySoundsRoutes } from "./mrRassySounds.js";
 import { registerMusicLibraryRoutes } from "./musicLibrary.js";
 import { registerSignupRoutes } from "./signup.js";
+import { registerHouseRoutes } from "./house.js";
 
 function normalizeOrigin(value: string) {
   return value.trim().replace(/\/$/, "");
@@ -174,6 +175,7 @@ export async function createApp(
   await registerMrRassySoundsRoutes(app, env);
   await registerMusicLibraryRoutes(app, env);
   await registerSignupRoutes(app, env);
+  await registerHouseRoutes(app, env);
 
   app.get("/api/config", async () => {
     const mcTroupBlueMapUrl = resolveBlueMapBaseUrl(

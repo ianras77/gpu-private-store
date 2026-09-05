@@ -10,6 +10,8 @@ services:
         VITE_UMAMI_WEBSITE_ID: ${RASIES_UMAMI_WEBSITE_ID:-${VITE_UMAMI_WEBSITE_ID:-}}
         VITE_UMAMI_DOMAINS: ${RASIES_UMAMI_DOMAINS:-${VITE_UMAMI_DOMAINS:-}}
     restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3186}:3000"
     environment:
       - PORT=3000
       - VITE_UMAMI_SCRIPT_URL=${VITE_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
@@ -61,6 +63,7 @@ services:
       - MUSIC_LIBRARY_ROOT=/music-library
       - ALLOWED_ORIGINS=https://www.rasies.com,https://rassys.com,https://www.rassys.com,http://${APP_HOST}:${APP_PORT},http://localhost:5173,http://127.0.0.1:5173
     volumes:
+      - ${APP_DATA_DIR}/app-data/web-rasies/named/mastra:/data/mastra
       - ${ROOT_FOLDER_HOST}/media/data/podcasts:/stories:ro
       - ${ROOT_FOLDER_HOST}/media/data/web-rasies:/thoughts:ro
       - ${ROOT_FOLDER_HOST}/media/data/dj:/mr-rassy-sounds:ro
@@ -78,40 +81,6 @@ services:
     x-runtipi:
       is_main: true
       internal_port: 3000
-
-  rasies-cheshire-cat:
-    image: ghcr.io/cheshire-cat-ai/core:latest
-    restart: unless-stopped
-    environment:
-      - CCAT_DEBUG=false
-      - CAT_METADATA_PATH=/data/metadata.json
-      - CCAT_METADATA_FILE=/data/metadata.json
-      - OLLAMA_GENERAL_BASE_URL=${RASIES_OLLAMA_GENERAL_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
-      - OLLAMA_EMBED_BASE_URL=${RASIES_OLLAMA_EMBED_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
-      - OLLAMA_GENERAL_MODEL=${RASIES_OLLAMA_GENERAL_MODEL:-rassy-fast}
-      - OLLAMA_EMBED_MODEL=${RASIES_OLLAMA_EMBED_MODEL:-rassy-embed}
-      - CAT_OLLAMA_API_KEY=${RASSYMIND_API_KEY:-${RASIES_CAT_API_KEY:-}}
-    volumes:
-      - ${APP_DATA_DIR}/app-data/web-rasies/named/rasies-cat-data:/data
-      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rasies/bootstrap_cat_ollama.py:/app/cat/bootstrap/bootstrap_cat_ollama.py:ro
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    command:
-      - /bin/sh
-      - -lc
-      - python3 /app/cat/bootstrap/bootstrap_cat_ollama.py || true; exec python3 -m cat.main
-    healthcheck:
-      test:
-        - CMD
-        - python3
-        - -c
-        - import urllib.request; urllib.request.urlopen('http://127.0.0.1', timeout=5)
-      interval: 20s
-      timeout: 10s
-      retries: 15
-      start_period: 40s
-    x-runtipi:
-      add_to_main_network: true
 
 x-runtipi:
   schema_version: 2
