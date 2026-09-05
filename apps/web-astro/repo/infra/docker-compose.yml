@@ -20,7 +20,7 @@ services:
       - astro_redis:/data
 
   qdrant:
-    image: qdrant/qdrant:v1.12.5
+    image: qdrant/qdrant:v1.13.6
     restart: unless-stopped
     ports:
       - "${ASTRO_QDRANT_PORT:-4028}:6333"
