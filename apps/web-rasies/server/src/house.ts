@@ -9,6 +9,7 @@ import { normalizeHouseContext } from "./mastra/policy.js";
 
 const Body = z.object({
   messages: z.array(z.object({ role: z.enum(["user", "assistant", "system"]), content: z.string().max(20000) })).min(1).max(24),
+  files: z.array(z.object({ name: z.string().max(160), size: z.number().int().nonnegative().max(200_000), type: z.string().max(120).optional(), content: z.string().max(20_000).optional() })).max(4).optional(),
   threadId: z.string().optional(),
   sessionId: z.string().optional(),
   mode: z.string().optional(),
@@ -17,11 +18,26 @@ const Body = z.object({
 
 export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
   let agent: ReturnType<typeof createHouseAgent> | undefined;
+  const windows = new Map<string, { startedAt: number; count: number }>();
   const getAgent = () => (agent ??= createHouseAgent(env));
+
+  const allow = (key: string) => {
+    const now = Date.now();
+    const current = windows.get(key);
+    if (!current || now - current.startedAt >= 60_000) {
+      windows.set(key, { startedAt: now, count: 1 });
+      return true;
+    }
+    if (current.count >= 30) return false;
+    current.count += 1;
+    return true;
+  };
 
   app.post("/api/house/chat", async (request, reply) => {
     const parsed = Body.safeParse(request.body);
     if (!parsed.success) return reply.code(400).send({ error: "Invalid House Chat request" });
+    const rateKey = typeof request.headers["x-forwarded-for"] === "string" ? request.headers["x-forwarded-for"].split(",")[0].trim() : request.ip;
+    if (!allow(rateKey)) return reply.code(429).header("retry-after", "60").send({ error: "House Chat rate limit reached" });
     const context = normalizeHouseContext(parsed.data);
     const latest = parsed.data.messages.at(-1)?.content.toLowerCase() ?? "";
     const direct = latest.includes("big file") || latest.includes("large file")
@@ -49,6 +65,8 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
   app.post("/api/house/chat/stream", async (request, reply) => {
     const parsed = Body.safeParse(request.body);
     if (!parsed.success) return reply.code(400).send({ error: "Invalid House Chat request" });
+    const rateKey = typeof request.headers["x-forwarded-for"] === "string" ? request.headers["x-forwarded-for"].split(",")[0].trim() : request.ip;
+    if (!allow(rateKey)) return reply.code(429).send({ error: "House Chat rate limit reached" });
     const context = normalizeHouseContext(parsed.data);
     reply.hijack();
     reply.raw.writeHead(200, {
