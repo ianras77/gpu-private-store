@@ -474,13 +474,13 @@ describe("App", () => {
           );
         }
 
-        if (url.includes("/api/cat/health")) {
+        if (url.includes("/api/house/health")) {
           return Promise.resolve(
             new Response(JSON.stringify({ ok: true, upstreamStatus: 200 })),
           );
         }
 
-        if (url.includes("/api/cat/spotlight")) {
+        if (url.includes("/api/house/spotlight")) {
           return Promise.resolve(
             new Response(
               JSON.stringify({

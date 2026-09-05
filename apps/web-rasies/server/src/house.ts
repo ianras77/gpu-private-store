@@ -16,6 +16,13 @@ const Body = z.object({
   webSearchPolicy: z.enum(["auto", "on", "off"]).optional(),
 });
 
+const HOUSE_SPOTLIGHT = {
+  mood: "The house is open, the lights are on, and House Chat is ready to help.",
+  mission: "Pick one useful thing that would make today easier.",
+  surprise: "A small, calm plan often beats a heroic one.",
+  prompts: ["Plan today", "Find something in the family archive", "Write a family note", "Check the house"],
+};
+
 export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
   let agent: ReturnType<typeof createHouseAgent> | undefined;
   const windows = new Map<string, { startedAt: number; count: number }>();
@@ -107,4 +114,6 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
       return reply.code(503).send({ ok: false, provider: "rassymind" });
     }
   });
+
+  app.get("/api/house/spotlight", async () => ({ source: "fallback", ...HOUSE_SPOTLIGHT }));
 }

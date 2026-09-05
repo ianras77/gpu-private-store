@@ -921,7 +921,7 @@ async function requestCatReply(
 }
 
 async function fetchCatHealthState() {
-  const res = await fetch("/api/cat/health", { cache: "no-store" });
+  const res = await fetch("/api/house/health", { cache: "no-store" });
   const data = (await res.json().catch(() => null)) as {
     ok?: boolean;
     upstreamStatus?: number;
@@ -950,7 +950,7 @@ export function SmartQuickChat() {
     if (manual) setSpotlightRefreshing(true);
 
     try {
-      const res = await fetch("/api/cat/spotlight", { cache: "no-store" });
+      const res = await fetch("/api/house/spotlight", { cache: "no-store" });
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
