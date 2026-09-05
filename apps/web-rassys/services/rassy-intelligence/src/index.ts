@@ -85,7 +85,7 @@ app.post("/v1/agents/:agentId/generate", async (request, reply) => {
   const agent = agents[agentId];
   if (!agent) return reply.code(404).send({ error: "agent_not_found" });
   const body = request.body as { prompt?: unknown; context?: unknown };
-  if (typeof body?.prompt !== "string" || body.prompt.trim().length < 1 || body.prompt.length > 12000) {
+  if (typeof body?.prompt !== "string" || body.prompt.trim().length < 1 || body.prompt.length > 50000) {
     return reply.code(400).send({ error: "prompt_required" });
   }
   const context = body.context === undefined ? undefined : rassyRequestContextSchema.safeParse(body.context);
@@ -106,7 +106,7 @@ app.post("/v1/channels/:channelId/chat", async (request, reply) => {
   const channel = resolveRassyChannel(channelId);
   if (!channel) return reply.code(404).send({ error: "channel_not_found" });
   const body = request.body as { message?: unknown; context?: unknown };
-  if (typeof body?.message !== "string" || body.message.trim().length < 1 || body.message.length > 12000) return reply.code(400).send({ error: "message_required" });
+  if (typeof body?.message !== "string" || body.message.trim().length < 1 || body.message.length > 50000) return reply.code(400).send({ error: "message_required" });
   const context = body.context === undefined ? undefined : rassyRequestContextSchema.safeParse(body.context);
   if (context && !context.success) return reply.code(400).send({ error: "invalid_request_context" });
   if (channel.visibility !== "public" && !context?.success) return reply.code(401).send({ error: "request_context_required" });

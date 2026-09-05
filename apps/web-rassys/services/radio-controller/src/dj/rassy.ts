@@ -2244,13 +2244,15 @@ const callRassyIntelligenceListener = async (systemPrompt, userPrompt, schema, t
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), Math.max(1000, timeoutMs));
     try {
-        const response = await fetch(`${base}/v1/channels/mr-rassy/chat`, {
+        const response = await fetch(`${base}/v1/agents/radio-listener/generate`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${config.RASSY_INTELLIGENCE_INTERNAL_TOKEN}`
             },
-            body: JSON.stringify({ message: `${systemPrompt}\n\nListener context and request:\n${userPrompt}` }),
+            body: JSON.stringify({
+                prompt: `${systemPrompt}\n\nListener response contract (mandatory): return exactly one JSON object and no prose outside it. Use this shape: {"reply":"string","mood":"string or null","recommendationStatus":"accepted|rejected|considering|none","recommendationSummary":"string or null","matchedTrackId":"track id or null","skipDecision":"approved|rejected|none","reason":"string or null","trackIds":["real supplied track id"]}. Never invent trackIds.\n\nListener context and request:\n${userPrompt}`
+            }),
             signal: controller.signal
         });
         if (!response.ok)
@@ -2259,7 +2261,30 @@ const callRassyIntelligenceListener = async (systemPrompt, userPrompt, schema, t
         const content = typeof payload?.text === "string" ? payload.text : "";
         if (!content)
             return null;
-        const parsed = schema.safeParse(JSON.parse(extractJson(content)));
+        let parsed;
+        try {
+            parsed = schema.safeParse(JSON.parse(extractJson(content)));
+        }
+        catch {
+            parsed = { success: false };
+        }
+        // A local lane may return a natural-language answer even after the
+        // structured contract was requested. Preserve that real answer rather
+        // than replacing it with the station's canned fallback; deterministic
+        // validation still controls any requested track/action IDs.
+        if (!parsed.success && schema === listenerReplySchema) {
+            const embeddedReply = content.match(/\"reply\"\s*:\s*\"((?:\\\\.|[^\"])*)\"/i)?.[1];
+            let reply = content;
+            if (embeddedReply) {
+                try {
+                    reply = JSON.parse(`\"${embeddedReply}\"`);
+                }
+                catch {
+                    reply = embeddedReply;
+                }
+            }
+            return { reply, mood: null, recommendationStatus: "none", matchedTrackId: null, skipDecision: "none", reason: null, trackIds: [] };
+        }
         return parsed.success ? parsed.data : null;
     }
     catch {

@@ -10,7 +10,6 @@ const storage = databaseUrl
       id: "rassy-mastra-postgres",
       connectionString: databaseUrl,
       schemaName: process.env.RASSY_MASTRA_SCHEMA ?? "rassy_mastra",
-      disableInit: true,
     })
   : undefined;
 const conversationalMemory = storage ? new Memory({ storage }) : undefined;
@@ -28,7 +27,7 @@ export const agents = {
   "radio-listener": new Agent({
     id: "radio-listener",
     name: "Radio Listener Host",
-    instructions: `${constitution}\nYou are the listener-facing radio host. Be concise, music-aware, and grounded in supplied station data. Do not claim a request was queued without controller confirmation.`,
+    instructions: `${constitution}\nYou are the listener-facing radio host. Be concise, music-aware, and grounded in supplied station data. Do not claim a request was queued without controller confirmation. When the request includes a required JSON schema, return only one valid JSON object matching that schema, with no markdown fences or surrounding commentary.`,
     model: rassyModel(process.env.RASSYMIND_LISTENER_MODEL ?? "rassy-fast"),
     ...(conversationalMemory ? { memory: conversationalMemory } : {}),
   }),

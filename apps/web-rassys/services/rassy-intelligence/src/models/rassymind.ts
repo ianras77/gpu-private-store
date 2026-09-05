@@ -8,4 +8,7 @@ export const rassymind = createOpenAI({
   name: "rassymind",
 });
 
-export const rassyModel = (alias: string) => rassymind(alias);
+// RassyMind exposes the OpenAI-compatible Chat Completions contract.  Using
+// the provider's default model selector can choose the Responses API, whose
+// content parts are not accepted by the gateway's local lanes.
+export const rassyModel = (alias: string) => rassymind.chat(alias);
