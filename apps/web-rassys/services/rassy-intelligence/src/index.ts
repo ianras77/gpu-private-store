@@ -43,6 +43,25 @@ app.get("/v1/registry/consistency", async (_request, reply) => {
 });
 app.get("/v1/tools", async () => ({ tools: RASSY_TOOLS }));
 app.get("/v1/artifacts/kinds", async () => ({ kinds: RASSY_ARTIFACT_KINDS }));
+// OpenAI-compatible compatibility surface for existing server-side callers.
+// It remains inside Mastra: no caller may bypass the shared Mr Rassy runtime.
+app.post("/v1/chat/completions", async (request, reply) => {
+  const body = request.body as { model?: unknown; messages?: unknown };
+  if (!Array.isArray(body?.messages)) return reply.code(400).send({ error: "messages_required" });
+  const prompt = body.messages
+    .filter((message): message is { role?: string; content?: unknown } => Boolean(message && typeof message === "object"))
+    .map((message) => `${message.role ?? "user"}: ${typeof message.content === "string" ? message.content : JSON.stringify(message.content)}`)
+    .join("\n\n");
+  if (!prompt.trim() || prompt.length > 50000) return reply.code(400).send({ error: "prompt_required" });
+  const purpose = request.headers["x-cheshire-purpose"] ?? request.headers["x-rassy-purpose"];
+  const agentId = String(purpose ?? "").includes("dm") ? "dungeon-master" : "mr-rassy-host";
+  try {
+    const result = await agents[agentId].generate(prompt, { maxSteps: 1 });
+    return { id: `rassy-${Date.now()}`, object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content: result.text }, finish_reason: "stop" }], model: typeof body.model === "string" ? body.model : "rassy-mind" };
+  } catch {
+    return reply.code(503).send({ error: "rassymind_unavailable" });
+  }
+});
 app.post("/v1/embeddings", async (request, reply) => {
   const body = request.body as { input?: unknown; model?: unknown };
   const input = typeof body?.input === "string" ? body.input.trim() : "";
