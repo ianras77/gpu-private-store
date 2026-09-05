@@ -891,7 +891,7 @@ async function requestCatReply(
   messages: ChatMessage[],
   files: CatApiFile[] = [],
 ) {
-  const res = await fetch("/api/house/chat", {
+  const res = await fetch("/api/house/chat/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -917,6 +917,15 @@ async function requestCatReply(
     );
   }
 
+  if (res.headers.get("content-type")?.includes("text/event-stream")) {
+    const chunks: string[] = [];
+    for (const line of raw.split(/\r?\n/)) {
+      if (!line.startsWith("data: ")) continue;
+      const event = safeJsonParse(line.slice(6));
+      if (isRecord(event) && typeof event.text === "string") chunks.push(event.text);
+    }
+    if (chunks.length > 0) return chunks.join("");
+  }
   return parseChatReply(payload, raw);
 }
 

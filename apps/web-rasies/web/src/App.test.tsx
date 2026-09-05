@@ -756,7 +756,7 @@ describe("App", () => {
 
     const chatRequest = vi
       .mocked(globalThis.fetch)
-      .mock.calls.find(([input]) => String(input).includes("/api/house/chat"));
+      .mock.calls.find(([input]) => String(input).includes("/api/house/chat/stream"));
 
     expect(JSON.parse(String(chatRequest?.[1]?.body))).toMatchObject({
       files: [
