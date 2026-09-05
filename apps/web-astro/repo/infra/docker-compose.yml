@@ -86,6 +86,8 @@ services:
       && pnpm --store-dir $$PNPM_STORE_DIR --filter @astro/astro-engine-swiss rebuild swisseph
       && pnpm --filter @astro/api exec prisma generate
       && pnpm --filter @astro/api exec prisma migrate deploy
+      && pnpm --filter @astro/astro-analysis build
+      && pnpm --filter @astro/astro-intelligence build
       && pnpm --filter @astro/api exec tsx src/server.ts"
     depends_on:
       - db
