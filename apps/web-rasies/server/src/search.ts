@@ -129,34 +129,11 @@ export async function registerSearchRoutes(app: FastifyInstance, env: Env) {
 
     const { q, categories, language } = parsed.data;
 
-    const url = new URL(env.SEARXNG_PATH, env.SEARXNG_BASE_URL);
-    url.searchParams.set("q", q);
-    url.searchParams.set("format", "json");
-    if (categories) url.searchParams.set("categories", categories);
-    if (language) url.searchParams.set("language", language);
+    const { statusCode, body } = await searchWeb(env, { q, categories, language });
 
-    const res = await request(url.toString(), {
-      method: "GET",
-      headers: { accept: "application/json" },
-      maxRedirections: 2,
-      headersTimeout: env.SEARXNG_TIMEOUT_MS,
-      bodyTimeout: env.SEARXNG_TIMEOUT_MS,
-    });
-
-    const text = await res.body.text();
-    const parsedBody = safeJsonParse(text);
-    if (!parsedBody) {
-      reply.code(502);
-      reply.header("content-type", "application/json; charset=utf-8");
-      return {
-        error: "Search upstream returned non-JSON response",
-        statusCode: res.statusCode,
-      };
-    }
-
-    reply.code(res.statusCode);
+    reply.code(statusCode);
     reply.header("content-type", "application/json; charset=utf-8");
-    return parsedBody;
+    return body;
   });
 
   app.get("/api/search/suggestions", async (_req, reply) => {
@@ -198,4 +175,18 @@ export async function registerSearchRoutes(app: FastifyInstance, env: Env) {
       };
     }
   });
+}
+
+export async function searchWeb(env: Env, input: { q: string; categories?: string; language?: string }) {
+  const url = new URL(env.SEARXNG_PATH, env.SEARXNG_BASE_URL);
+  url.searchParams.set("q", input.q.slice(0, 500));
+  url.searchParams.set("format", "json");
+  if (input.categories) url.searchParams.set("categories", input.categories.slice(0, 80));
+  if (input.language) url.searchParams.set("language", input.language.slice(0, 20));
+  const res = await request(url.toString(), {
+    method: "GET", headers: { accept: "application/json" }, maxRedirections: 2,
+    headersTimeout: env.SEARXNG_TIMEOUT_MS, bodyTimeout: env.SEARXNG_TIMEOUT_MS,
+  });
+  const parsedBody = safeJsonParse((await res.body.text()).slice(0, 2_000_000));
+  return { statusCode: res.statusCode, body: parsedBody ?? { error: "Search upstream returned non-JSON response", statusCode: res.statusCode } };
 }

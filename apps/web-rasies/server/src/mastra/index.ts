@@ -6,6 +6,7 @@ import { createHouseDirectoryTool } from "./tools/house-directory.js";
 import { createArchiveTool } from "./tools/archive.js";
 import { createHouseStatusTool } from "./tools/status.js";
 import { createSignupTools } from "./tools/signup.js";
+import { createSearchWebTool } from "./tools/search-web.js";
 
 export function createHouseAgent(env: Env) {
   const signupTools = createSignupTools(env);
@@ -14,7 +15,7 @@ export function createHouseAgent(env: Env) {
     name: "House Chat",
     instructions: HOUSE_CONSTITUTION,
     model: rassymindModel(env),
-    tools: { houseDirectory: createHouseDirectoryTool(env), searchHouseArchive: createArchiveTool(env), getHouseStatus: createHouseStatusTool(env), ...signupTools },
+    tools: { houseDirectory: createHouseDirectoryTool(env), searchHouseArchive: createArchiveTool(env), getHouseStatus: createHouseStatusTool(env), searchWeb: createSearchWebTool(env), ...signupTools },
   });
 }
 
