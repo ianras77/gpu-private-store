@@ -21,12 +21,28 @@ const Body = z.object({
 });
 const FeedbackBody = z.object({ runId: z.string().max(120), threadId: z.string().max(120), mode: z.string().max(40), rating: z.enum(["up", "down"]) });
 
+function modeInstructions(mode: string, webSearchPolicy: string) {
+  const modeText = {
+    auto: "Choose the smallest useful approach.", checklist: "Answer as a calm, practical checklist.", explain: "Explain simply for a nontechnical family member.", plan: "Make a bounded plan with clear next steps.", write: "Write the requested family message directly.", compare: "Compare options with concise tradeoffs.", research: "Use web search for current evidence and cite returned sources.", "home-lab": "Explain home services without suggesting infrastructure mutations.",
+  }[mode] ?? "Choose the smallest useful approach.";
+  return `${modeText} Web search policy is ${webSearchPolicy}; obey it and prefer local Rasies tools first.`;
+}
+
 const HOUSE_SPOTLIGHT = {
   mood: "The house is open, the lights are on, and House Chat is ready to help.",
   mission: "Pick one useful thing that would make today easier.",
   surprise: "A small, calm plan often beats a heroic one.",
   prompts: ["Plan today", "Find something in the family archive", "Write a family note", "Check the house"],
 };
+
+function directHouseAnswer(latest: string, env: Env) {
+  if (latest.includes("big file") || latest.includes("large file")) return `For sending a big file, use Send: ${env.SEND_URL}`;
+  if (latest.includes("photos")) return `Photos are here: ${env.PHOTOS_URL}`;
+  if (latest.includes("plex")) return `Plex is here: ${env.PLEX_URL}. Family access starts at ${env.SIGNUP_URL}`;
+  if (latest.includes("sign up") || latest.includes("signup")) return `Family signup is here: ${env.SIGNUP_URL}`;
+  if (latest.includes("minecraft")) return `The Minecraft server is ${env.MC_TROUP_SERVER_HOST}; the map is ${env.MC_TROUP_BLUEMAP_URL}`;
+  return undefined;
+}
 
 export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
   let agent: ReturnType<typeof createHouseAgent> | undefined;
@@ -52,21 +68,11 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
     if (!allow(rateKey)) return reply.code(429).header("retry-after", "60").send({ error: "House Chat rate limit reached" });
     const context = normalizeHouseContext(parsed.data);
     const latest = parsed.data.messages.at(-1)?.content.toLowerCase() ?? "";
-    const direct = latest.includes("big file") || latest.includes("large file")
-      ? `For sending a big file, use Send: ${env.SEND_URL}`
-      : latest.includes("photos")
-        ? `Photos are here: ${env.PHOTOS_URL}`
-        : latest.includes("plex")
-          ? `Plex is here: ${env.PLEX_URL}. Family access starts at ${env.SIGNUP_URL}`
-          : latest.includes("sign up") || latest.includes("signup")
-            ? `Family signup is here: ${env.SIGNUP_URL}`
-            : latest.includes("minecraft")
-              ? `The Minecraft server is ${env.MC_TROUP_SERVER_HOST}; the map is ${env.MC_TROUP_BLUEMAP_URL}`
-              : undefined;
+    const direct = directHouseAnswer(latest, env);
     if (direct) return { runId: crypto.randomUUID(), threadId: context.threadId, text: direct, sources: [{ type: "house-directory", title: "Rasies service directory" }] };
     try {
       const messages = [...await loadThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId), ...parsed.data.messages] as ModelMessage[];
-      const result = await getAgent().generate(messages, { maxSteps: 5 });
+      const result = await getAgent().generate(messages, { maxSteps: 5, instructions: modeInstructions(context.mode, context.webSearchPolicy) });
       await saveThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId, [...messages, { role: "assistant", content: result.text } as ModelMessage]);
       return { runId: crypto.randomUUID(), threadId: context.threadId, text: result.text, sources: [] };
     } catch (error) {
@@ -89,13 +95,21 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
     });
     const send = (event: string, data: unknown) => reply.raw.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
     try {
-      send("message_start", { runId: crypto.randomUUID(), threadId: context.threadId });
+      const runId = crypto.randomUUID();
+      send("message_start", { runId, threadId: context.threadId });
+      const direct = directHouseAnswer(parsed.data.messages.at(-1)?.content.toLowerCase() ?? "", env);
+      if (direct) {
+        send("source", { type: "house-directory", title: "Rasies service directory" });
+        send("text_delta", { text: direct });
+        send("message_end", { runId, threadId: context.threadId });
+        return reply.raw.end();
+      }
       const messages = [...await loadThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId), ...parsed.data.messages] as ModelMessage[];
-      const result = await getAgent().stream(messages, { maxSteps: 5 });
+      const result = await getAgent().stream(messages, { maxSteps: 5, instructions: modeInstructions(context.mode, context.webSearchPolicy) });
       let fullText = "";
       for await (const delta of result.textStream) { fullText += delta; send("text_delta", { text: delta }); }
       await saveThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId, [...messages, { role: "assistant", content: fullText } as ModelMessage]);
-      send("message_end", { threadId: context.threadId });
+      send("message_end", { runId, threadId: context.threadId });
     } catch (error) {
       request.log.warn({ err: error }, "House Chat stream unavailable");
       send("error", { error: "House Chat unavailable" });
