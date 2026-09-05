@@ -95,6 +95,7 @@ services:
       && pnpm --filter @astro/api exec prisma migrate deploy
       && pnpm --filter @astro/astro-core build
       && pnpm --filter @astro/astro-analysis build
+      && pnpm --filter @astro/reading-core build
       && pnpm --filter @astro/astro-intelligence build
       && pnpm --filter @astro/api exec tsx src/server.ts"
     depends_on:
