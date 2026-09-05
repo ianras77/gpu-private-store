@@ -44,7 +44,7 @@ export function Hero() {
       <div className="absolute left-10 top-24 h-40 w-40 rounded-full bg-comet/18 blur-3xl animate-drift" />
       <div className="absolute bottom-8 right-1/4 h-44 w-44 rounded-full bg-glow/14 blur-3xl animate-pulseGlow" />
 
-      <div className="relative mx-auto max-w-6xl px-6 pb-8">
+      <div className="relative mx-auto w-full max-w-6xl px-4 pb-8 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
@@ -63,7 +63,7 @@ export function Hero() {
               <div className="text-[11px] uppercase tracking-[0.5em] text-cloud/55">
                 Welcome to my world
               </div>
-              <h1 className="section-title mt-3 whitespace-nowrap text-[clamp(2.65rem,7.2vw,6rem)] tracking-[-0.055em]">
+              <h1 className="section-title mt-3 text-[clamp(2.35rem,10vw,6rem)] leading-[.98] tracking-[-0.055em]">
                 Rassy’s <span className="hero-wordmark-dot">dot</span> Com
               </h1>
               <div className="relative mt-4 max-w-3xl overflow-hidden rounded-[26px] border border-white/10 bg-black/18 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
