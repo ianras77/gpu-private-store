@@ -2094,6 +2094,7 @@ export const processCampaignAction = async (
     );
 
     let llmPatch: DmTurnPatch;
+    let llmProvider = "cheshire";
     let llmModel = process.env.CHESHIRE_MODEL ?? "unknown";
     let promptHash = "";
     let llmResponseText = "";
@@ -2102,10 +2103,12 @@ export const processCampaignAction = async (
     let llmLatencyMs = 0;
     let llmSuccess = true;
     let llmError: string | null = null;
+    const dmRequestContext = { userId, campaignId, sessionId: session.id };
 
     try {
-      const llm = await runContextAwareDmTurn(context);
+      const llm = await runContextAwareDmTurn(context, dmRequestContext);
       llmPatch = llm.patch;
+      llmProvider = llm.provider;
       llmModel = llm.model;
       promptHash = llm.promptHash;
       llmResponseText = llm.responseText;
@@ -2116,8 +2119,9 @@ export const processCampaignAction = async (
       const firstError = error instanceof Error ? error.message : "unknown_llm_error";
       try {
         const compactContext = compactContextForRetry(context);
-        const llm = await runContextAwareDmTurn(compactContext);
+        const llm = await runContextAwareDmTurn(compactContext, dmRequestContext);
         llmPatch = llm.patch;
+        llmProvider = llm.provider;
         llmModel = llm.model;
         promptHash = llm.promptHash;
         llmResponseText = llm.responseText;
@@ -2130,6 +2134,7 @@ export const processCampaignAction = async (
         llmLatencyMs = llm.latencyMs;
       } catch (retryError) {
         llmSuccess = false;
+        llmProvider = "fallback";
         const retryMessage =
           retryError instanceof Error ? retryError.message : "unknown_llm_retry_error";
         llmError = `${firstError};retry:${retryMessage}`;
@@ -2269,11 +2274,12 @@ export const processCampaignAction = async (
       await client.query(
         `INSERT INTO dm_llm_calls (
           id, campaign_id, turn_id, provider, model, prompt, response_text, response_json, latency_ms, success, error_text, created_at
-        ) VALUES ($1, $2, $3, 'cheshire', $4, $5::jsonb, $6, $7::jsonb, $8, $9, $10, now())`,
+        ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8::jsonb, $9, $10, $11, now())`,
         [
           createId("llm"),
           campaignId,
           turnId,
+          llmProvider,
           llmModel,
           toJson(llmPromptPayload),
           llmResponseText,

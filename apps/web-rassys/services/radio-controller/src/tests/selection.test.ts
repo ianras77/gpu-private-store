@@ -102,6 +102,7 @@ describe("pickTrack", () => {
   });
 
   it("normalizes file-derived artist and title metadata for cooldowns", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0);
     const tracks = [
       {
         ...makeTrack("heart-live", "17", 0.44),

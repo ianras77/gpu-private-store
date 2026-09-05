@@ -210,7 +210,7 @@ export function SignalOverviewPanel() {
             </div>
             <p className="mt-2 text-sm leading-6 text-cloud/74">
               {llmActive
-                ? "Mr Rassy is using the live LLM stack to shape turns, answer the line, and keep the notes sharp."
+                ? "Mr Rassy is using the shared intelligence runtime to shape turns, answer the line, and keep the notes sharp."
                 : "The booth is still holding together by hand while the live director catches up."}
             </p>
           </div>

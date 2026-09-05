@@ -1,4 +1,29 @@
 services:
+  rassy-intelligence:
+    build:
+      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
+      dockerfile: services/rassy-intelligence/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 1866
+      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
+      RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
+      RASSY_INTELLIGENCE_INTERNAL_TOKEN: ${RASSY_INTELLIGENCE_INTERNAL_TOKEN:-}
+      DATABASE_URL: ${DATABASE_URL:-}
+      RASSY_MASTRA_SCHEMA: ${RASSY_MASTRA_SCHEMA:-rassy_mastra}
+    networks:
+      - internal
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:1866/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    image: runtipi-local-web-rassys-rassy-intelligence:latest
+    pull_policy: build
+
   web:
     build:
       context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
@@ -15,7 +40,7 @@ services:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYS_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
         NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYS_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
-        DATABASE_URL: ${DATABASE_URL:-postgresql://rassy:password@postgres:5432/rassy}
+        DATABASE_URL: ${DATABASE_URL:-}
     environment:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
@@ -39,13 +64,16 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-}
       RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://rassy:password@postgres:5432/rassy}
-      RASSYMIND_BASE_URL: ${RASSYMIND_PROXY_URL:-http://cheshire:1865}
+      DATABASE_URL: ${DATABASE_URL:-}
+      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
       AI_BASE_URL: ${AI_BASE_URL:-${RASSYMIND_PROXY_URL:-http://cheshire:1865}}
       AI_DM_MODEL: ${AI_DM_MODEL:-${RASSYMIND_MODEL:-rassy-mind}}
       AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-45000}
       AI_API_KEY: ${AI_API_KEY:-${RASSYMIND_API_KEY:-}}
       RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
+      RASSY_INTELLIGENCE_URL: ${RASSY_INTELLIGENCE_URL:-http://rassy-intelligence:1866}
+      RASSY_INTELLIGENCE_INTERNAL_TOKEN: ${RASSY_INTELLIGENCE_INTERNAL_TOKEN:-}
+      RASSY_INTELLIGENCE_REQUIRE_CANONICAL: ${RASSY_INTELLIGENCE_REQUIRE_CANONICAL:-true}
       RASSYMIND_MODEL: ${RASSYMIND_MODEL:-rassy-mind}
       RASSYMIND_LISTENER_MODEL: ${RASSYMIND_LISTENER_MODEL:-rassy-fast}
       RASSYMIND_REQUEST_RETRIES: ${RASSYMIND_REQUEST_RETRIES:-0}
@@ -128,10 +156,13 @@ services:
       NODE_ENV: production
       PORT: 4000
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://rassy:password@postgres:5432/rassy}
+      DATABASE_URL: ${DATABASE_URL:-}
       RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-}
-      RASSYMIND_BASE_URL: ${RASSYMIND_PROXY_URL:-http://cheshire:1865}
+      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
       RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
+      RASSY_INTELLIGENCE_URL: ${RASSY_INTELLIGENCE_URL:-http://rassy-intelligence:1866}
+      RASSY_INTELLIGENCE_INTERNAL_TOKEN: ${RASSY_INTELLIGENCE_INTERNAL_TOKEN:-}
+      RASSY_INTELLIGENCE_REQUIRE_CANONICAL: ${RASSY_INTELLIGENCE_REQUIRE_CANONICAL:-true}
       RASSYMIND_MODEL: ${RASSYMIND_MODEL:-rassy-mind}
       RASSYMIND_LISTENER_MODEL: ${RASSYMIND_LISTENER_MODEL:-rassy-fast}
       RASSYMIND_REQUEST_RETRIES: ${RASSYMIND_REQUEST_RETRIES:-0}
@@ -172,7 +203,10 @@ services:
       RADIO_TRACK_COOLDOWN_DAYS: ${RADIO_TRACK_COOLDOWN_DAYS:-7}
       RADIO_ARTIST_COOLDOWN_TRACKS: ${RADIO_ARTIST_COOLDOWN_TRACKS:-10}
       RADIO_QUEUE_TARGET: ${RADIO_QUEUE_TARGET:-6}
-      RADIO_SET_TARGET_SIZE: ${RADIO_SET_TARGET_SIZE:-5}
+      RADIO_LOCKED_QUEUE_TRACKS: "7"
+      RADIO_SET_TARGET_SIZE: "7"
+      RADIO_SET_MIN_SIZE: "7"
+      RADIO_DECISION_BATCH_SIZE: "7"
       RADIO_TRANSITIONS_ENABLED: ${RADIO_TRANSITIONS_ENABLED:-true}
       RADIO_TRANSITION_MIN_SONGS: ${RADIO_TRANSITION_MIN_SONGS:-2}
       RADIO_TRANSITION_MAX_SONGS: ${RADIO_TRANSITION_MAX_SONGS:-5}
@@ -204,8 +238,6 @@ services:
       TTS_PROVIDER: ${TTS_PROVIDER:-piper}
       TTS_ENDPOINT: ${TTS_ENDPOINT:-}
     depends_on:
-      cheshire:
-        condition: service_healthy
       redis:
         condition: service_healthy
       postgres:
@@ -269,48 +301,6 @@ services:
     image: runtipi-local-web-rassys-minecraft-bridge:latest
     pull_policy: build
 
-  cheshire:
-    build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
-      dockerfile: services/cheshire-proxy/Dockerfile
-    environment:
-      PORT: 1865
-      LLM_BASE_URL: ${CHESHIRE_LLM_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/v1}
-      LLM_MODE: ${RASSYMIND_LLM_MODE:-openai}
-      LLM_MODEL: ${CHESHIRE_MODEL:-${RASSYMIND_GENERIC_MODEL:-rassy-fast}}
-      LLM_PROGRAMMING_MODEL: ${CHESHIRE_PROGRAMMING_MODEL:-rassy-code}
-      LLM_ADMIN_MODEL: ${CHESHIRE_ADMIN_MODEL:-rassy-mind}
-      LLM_API_KEY: ${RASSYMIND_API_KEY:-}
-      REQUEST_TIMEOUT_MS: ${RASSYMIND_REQUEST_TIMEOUT_MS:-45000}
-      REQUEST_RETRIES: ${RASSYMIND_REQUEST_RETRIES:-0}
-      RETRY_DELAY_MS: ${RASSYMIND_RETRY_DELAY_MS:-0}
-      EMBED_BASE_URL: ${RASSYMIND_EMBED_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/v1}
-      EMBED_MODE: ${CHESHIRE_EMBED_MODE:-openai}
-      EMBED_MODEL: ${RASSYMIND_EMBED_MODEL:-rassy-embed}
-      EMBED_API_KEY: ${RASSYMIND_API_KEY:-}
-      RERANK_BASE_URL: ${RASSYMIND_RERANK_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/v1}
-      RERANK_MODEL: ${RASSYMIND_RERANK_MODEL:-rassy-rerank}
-      RERANK_API_KEY: ${RASSYMIND_API_KEY:-}
-      QUEUE_RESERVED_LISTENER_SLOTS: ${RASSYMIND_QUEUE_RESERVED_LISTENER_SLOTS:-1}
-      QUEUE_MAX_WAIT_MS: ${RASSYMIND_QUEUE_MAX_WAIT_MS:-10000}
-    networks:
-      - internal
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    restart: unless-stopped
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - wget -q -O - http://127.0.0.1:1865/healthz || exit 1
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 20s
-    image: runtipi-local-web-rassys-cheshire:latest
-    pull_policy: build
-    x-runtipi:
-      add_to_main_network: true
-
   liquidsoap:
     image: savonet/liquidsoap:v2.2.5
     volumes:
@@ -339,7 +329,7 @@ services:
       STATION_NAME: ${STATION_NAME:-Mr Rassy Radio}
       STATION_DESCRIPTION: ${STATION_DESCRIPTION:-Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.}
       STATION_GENRE: ${STATION_GENRE:-eclectic}
-      RADIO_TRANSITION_DEFAULT_SECONDS: ${RADIO_TRANSITION_DEFAULT_SECONDS:-1.2}
+      RADIO_TRANSITION_DEFAULT_SECONDS: ${RADIO_TRANSITION_DEFAULT_SECONDS:-4.5}
       RADIO_TRANSITION_FADE_IN_SECONDS: ${RADIO_TRANSITION_FADE_IN_SECONDS:-3.0}
       RADIO_TRANSITION_FADE_OUT_SECONDS: ${RADIO_TRANSITION_FADE_OUT_SECONDS:-3.0}
       RADIO_PROCESSING_ENABLED: ${RADIO_PROCESSING_ENABLED:-true}
@@ -415,7 +405,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: rassy
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       POSTGRES_DB: rassy
     volumes:
       - ${APP_DATA_DIR}/app-data/web-rassys/named/pg-data:/var/lib/postgresql/data

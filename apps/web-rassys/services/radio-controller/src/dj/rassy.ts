@@ -2237,6 +2237,38 @@ const isActionableDecision = (decision, intent) => {
     }
     return hasTalkScript || hasSnippetSlot;
 };
+const callRassyIntelligenceListener = async (systemPrompt, userPrompt, schema, timeoutMs) => {
+    const base = config.RASSY_INTELLIGENCE_URL?.replace(/\/$/, "");
+    if (!base || !config.RASSY_INTELLIGENCE_INTERNAL_TOKEN)
+        return null;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), Math.max(1000, timeoutMs));
+    try {
+        const response = await fetch(`${base}/v1/channels/mr-rassy/chat`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${config.RASSY_INTELLIGENCE_INTERNAL_TOKEN}`
+            },
+            body: JSON.stringify({ message: `${systemPrompt}\n\nListener context and request:\n${userPrompt}` }),
+            signal: controller.signal
+        });
+        if (!response.ok)
+            return null;
+        const payload = await response.json();
+        const content = typeof payload?.text === "string" ? payload.text : "";
+        if (!content)
+            return null;
+        const parsed = schema.safeParse(JSON.parse(extractJson(content)));
+        return parsed.success ? parsed.data : null;
+    }
+    catch {
+        return null;
+    }
+    finally {
+        clearTimeout(timeoutId);
+    }
+};
 const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, options) => {
     if (!config.RASSYMIND_BASE_URL)
         return null;
@@ -2244,6 +2276,15 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
     if (llmCircuit.shouldSkip(label)) {
         return null;
     }
+    if (label === "listener-reply") {
+        const intelligenceReply = await callRassyIntelligenceListener(systemPrompt, userPrompt, schema, options?.timeoutMs ?? 8000);
+        if (intelligenceReply) {
+            llmCircuit.noteSuccess(label);
+            return intelligenceReply;
+        }
+    }
+    if (config.RASSY_INTELLIGENCE_REQUIRE_CANONICAL)
+        return null;
     const endpoint = `${config.RASSYMIND_BASE_URL.replace(/\/$/, "")}/v1/chat/completions`;
     const buildPayload = (jsonMode = "prompt") => ({
         model: options?.model ?? config.RASSYMIND_MODEL,
@@ -2252,6 +2293,11 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
             { role: "user", content: userPrompt }
         ],
         temperature,
+        // Qwen 3.6's hidden reasoning can consume a short radio decision's
+        // entire completion budget. Radio needs the visible, bounded answer;
+        // without this the 27B lane often returns an empty message and the
+        // scheduler falls back to a canned/local selection.
+        think: false,
         ...(jsonMode === "json_object"
             ? {
                 response_format: {
@@ -2443,12 +2489,12 @@ const buildDecisionCallSpec = (intent, mode = "full") => {
             ? {
                 temperature: 0.46,
                 options: {
-                    maxTokens: 220,
-                    timeoutMs: 52000,
+                    maxTokens: 320,
+                    timeoutMs: 12000,
                     label: "playlist-rescue",
                     retries: 0,
                     priority: "high",
-                    queueWaitMs: 20000,
+                    queueWaitMs: 5000,
                     lane: "programming",
                     model: MR_RASSY_MODEL
                 }
@@ -2485,8 +2531,8 @@ const buildDecisionCallSpec = (intent, mode = "full") => {
         ? {
             temperature: 0.56,
             options: {
-                maxTokens: 560,
-                timeoutMs: 55000,
+                maxTokens: 420,
+                timeoutMs: 20000,
                 label: "playlist",
                 retries: 0,
                 priority: "high",
@@ -2539,12 +2585,6 @@ const callCheshireDecision = async (context, intent, playlistSize) => {
             .map(({ track }) => toInsightTrack(track))
             .filter(Boolean);
         let decisionInsightMap = await getTrackInsightMap(decisionInsightTracks);
-        void syncTrackInsights(decisionInsightTracks.slice(0, Math.min(6, decisionInsightTracks.length)), {
-            embed: true,
-            analyze: true,
-            analysisLimit: 2,
-            limit: Math.min(6, decisionInsightTracks.length)
-        });
         let capacityFailure = false;
         let callSpec = buildDecisionCallSpec(intent, "full");
         let rawDecision = await callCheshireJson(boothSystemPrompt, buildUserPrompt(context, intent, playlistSize, {
@@ -2568,18 +2608,12 @@ const callCheshireDecision = async (context, intent, playlistSize) => {
                 .map(({ track }) => toInsightTrack(track))
                 .filter(Boolean);
             decisionInsightMap = await getTrackInsightMap(decisionInsightTracks);
-            void syncTrackInsights(decisionInsightTracks.slice(0, Math.min(4, decisionInsightTracks.length)), {
-                embed: true,
-                analyze: true,
-                analysisLimit: 1,
-                limit: Math.min(4, decisionInsightTracks.length)
-            });
             callSpec = buildDecisionCallSpec(intent, "rescue");
             rawDecision = await callCheshireJson(boothRescueSystemPrompt, buildUserPrompt(context, intent, playlistSize, {
                 tracks: plan.trackCandidates,
                 snippets: plan.snippetCandidates,
                 sequenceSketches: plan.sequenceSketches
-            }, plan.frame, "rescue", decisionInsightMap), decisionSchema, {
+            }, plan.frame, "rescue", decisionInsightMap), decisionSchema, callSpec.temperature, {
                 ...callSpec.options,
                 onCapacityFailure: () => {
                     capacityFailure = true;
@@ -2638,6 +2672,13 @@ const callCheshireDecision = async (context, intent, playlistSize) => {
                 : {}),
             ...(rawDecision.reason ? { reason: rawDecision.reason } : {})
         };
+        // A playlist decision is authoritative only when it names at least one
+        // real catalog track. Mood or commentary alone must not be allowed to
+        // masquerade as an LLM-selected set and then drive fallback music.
+        if (intent === "playlist" && !resolvedDecision.playlist?.length && !resolvedDecision.trackId) {
+            logger.warn({ intent, rawDecision }, "Discarding Cheshire playlist without a catalog track");
+            return null;
+        }
         storeCachedDecisionResult(cacheKey, resolvedDecision);
         return resolvedDecision;
     })()
@@ -2650,15 +2691,14 @@ const callCheshireDecision = async (context, intent, playlistSize) => {
 const callCheshireListenerReply = async (context, input) => {
     return callCheshireJson(listenerSystemPrompt, await buildListenerPrompt(context, input), listenerReplySchema, 0.84, {
         maxTokens: 220,
-        timeoutMs: 45000,
+        timeoutMs: 18000,
         label: "listener-reply",
         retries: 0,
         retryDelayMs: 0,
         priority: "high",
-        queueWaitMs: 10000,
+        queueWaitMs: 5000,
         lane: "listener",
-        model: MR_RASSY_LISTENER_MODEL,
-        jsonMode: "json_object"
+        model: MR_RASSY_LISTENER_MODEL
     });
 };
 const callCheshireLongFormPlans = async (context, tracks) => {
@@ -2674,7 +2714,7 @@ const callCheshireLongFormPlans = async (context, tracks) => {
         retries: 0,
         priority: "low",
         queueWaitMs: 8000,
-        lane: "programming",
+        lane: "notes",
         model: MR_RASSY_MODEL
     });
     if (!rawPlans)
@@ -2725,8 +2765,7 @@ export const buildBoothDossier = async (context, input) => {
         priority: "low",
         queueWaitMs: 24000,
         lane: "notes",
-        model: MR_RASSY_MODEL,
-        jsonMode: "json_object"
+        model: MR_RASSY_MODEL
     });
     if (generated && isBoothDossierGrounded(context, generated)) {
         return generated;
@@ -2740,8 +2779,7 @@ export const buildBoothDossier = async (context, input) => {
         priority: "low",
         queueWaitMs: 30000,
         lane: "notes",
-        model: MR_RASSY_MODEL,
-        jsonMode: "json_object"
+        model: MR_RASSY_MODEL
     });
     if (!recovered)
         return null;

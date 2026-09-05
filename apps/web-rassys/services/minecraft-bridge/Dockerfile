@@ -1,6 +1,6 @@
 FROM node:18-alpine AS deps
 WORKDIR /app
-COPY services/minecraft-bridge/package.json services/minecraft-bridge/package-lock.json* ./
+COPY services/minecraft-bridge/package.json ./
 RUN npm install --no-audit --no-fund
 
 FROM node:18-alpine AS builder

@@ -6,6 +6,7 @@ import {
   fetchPodcastShow,
 } from "../../../lib/media-controller";
 import { requestCheshireJson } from "../../../lib/cheshire-client";
+import { requestRassyChannelText } from "../../../lib/rassy-intelligence-client";
 import { fetchRadio } from "../../../lib/radio-api";
 import { rateLimit } from "../../../lib/rate-limit";
 import { getClientIp } from "../../../lib/request";
@@ -530,6 +531,27 @@ const requestCheshireCurio = async (input: {
   extraGuidance?: string;
   previousAttempt?: CurioPayload | null;
 }) => {
+  try {
+    const prompt = JSON.stringify({
+      identity: "You are Mr Rassy, the warm, strange, grounded host of Ian Rasmussen's live site.",
+      rules: "Return only JSON with badge,title,body,cta,hint,href,sigil. Use href exactly from routeTargets or siteTargets. Avoid generic marketing copy and invented destinations.",
+      input: {
+        seed: input.seed,
+        requestContext: input.requestContext,
+        routeSignal: input.routeSignal,
+        currentSignal: input.siteContext,
+        routeTargets: input.routeTargets,
+        siteTargets,
+        guidance: input.extraGuidance,
+        previousAttempt: input.previousAttempt,
+      },
+    });
+    const intelligenceResult = JSON.parse(await requestRassyChannelText("home", prompt));
+    const intelligenceParsed = responseSchema.safeParse(intelligenceResult);
+    if (intelligenceParsed.success) return intelligenceParsed.data;
+  } catch {
+    // Fall through to the existing compatibility path during rollout.
+  }
   try {
     const response = await requestCheshireJson(
       {

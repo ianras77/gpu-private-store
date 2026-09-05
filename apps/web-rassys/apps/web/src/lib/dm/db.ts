@@ -686,7 +686,25 @@ const schemaStatements = [
   `CREATE INDEX IF NOT EXISTS dm_inventory_compendium_idx ON dm_inventory_items(compendium_entry_id)`,
   `CREATE INDEX IF NOT EXISTS dm_character_actions_compendium_idx ON dm_character_actions(compendium_entry_id)`,
   `CREATE INDEX IF NOT EXISTS dm_world_npcs_campaign_idx ON dm_world_npcs(campaign_id, updated_at DESC)`,
-  `CREATE INDEX IF NOT EXISTS dm_auth_events_user_created_idx ON dm_auth_events(user_id, created_at DESC)`
+  `CREATE INDEX IF NOT EXISTS dm_auth_events_user_created_idx ON dm_auth_events(user_id, created_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS rassy_artifacts (
+      id TEXT PRIMARY KEY,
+      channel_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      status TEXT NOT NULL CHECK (status IN ('draft', 'review', 'published', 'private', 'archived')),
+      owner_resource_id TEXT,
+      title TEXT NOT NULL,
+      summary TEXT,
+      body_markdown TEXT,
+      body_json JSONB,
+      source_refs JSONB NOT NULL DEFAULT '[]'::jsonb,
+      run_id TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      published_at TIMESTAMPTZ
+    )`,
+  `CREATE INDEX IF NOT EXISTS rassy_artifacts_channel_status_idx ON rassy_artifacts(channel_id, status, updated_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS rassy_artifacts_owner_idx ON rassy_artifacts(owner_resource_id, updated_at DESC)`
 ];
 
 const ensureSchemaInternal = async () => {

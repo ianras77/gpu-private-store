@@ -1,6 +1,6 @@
 FROM node:18-alpine AS deps
 WORKDIR /app
-COPY services/cheshire-proxy/package.json services/cheshire-proxy/package-lock.json* ./
+COPY services/cheshire-proxy/package.json ./
 RUN npm install --no-audit --no-fund
 
 FROM node:18-alpine AS builder

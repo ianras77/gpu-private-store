@@ -2,7 +2,7 @@ import { Card } from "./ui/card";
 
 const foundations = [
   "The source material is real: my own library, folders, photos, and ongoing projects.",
-  "Mr Rassy uses the live LLM stack to keep the booth responsive, curious, and in motion.",
+  "Mr Rassy carries one shared intelligence through the booth, the shelves, and every room that needs him.",
   "Photos and bedtime stories keep the whole place close to home.",
   "Nothing here is meant to feel frozen; the rooms keep changing as life changes.",
 ] as const;

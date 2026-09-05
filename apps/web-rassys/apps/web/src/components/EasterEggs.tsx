@@ -27,7 +27,7 @@ const fallbackCurios: EasterEggPayload[] = [
   {
     badge: "Cat Signal",
     title: "A fresh corner just blinked.",
-    body: "Somewhere on the site, Cheshire is trying to turn a practical surface into a delightful one.",
+    body: "Somewhere on the site, Mr Rassy is turning a practical surface into a delightful one.",
     cta: "Enter the booth",
     hint: "The loudest room is still the radio tower. Start there and listen for the next turn.",
     href: "/radio",
@@ -283,7 +283,7 @@ export function EasterEggs() {
                 <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-cloud/55">
                   <span>{curio.badge}</span>
                   <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 tracking-[0.2em] text-cloud/45">
-                    {curio.source === "cheshire" ? "LLM live" : "Site whisper"}
+                    {curio.source === "cheshire" ? "Mr Rassy live" : "Site whisper"}
                   </span>
                 </div>
                 <div className="mt-3 text-xl font-semibold text-white">

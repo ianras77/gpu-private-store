@@ -1,5 +1,28 @@
-// @ts-nocheck
-const moodEnergy = {
+export type SelectionTrack = {
+    id: string;
+    path: string;
+    title: string;
+    artist: string;
+    album?: string;
+    energy: number;
+    moodTags: string[];
+    genres?: string[];
+};
+export type SelectionContext = {
+    mood: string;
+    dayPart?: string;
+    dayOfWeek?: string;
+    emotionalWeather?: string;
+    bannedTrackIds: Set<string>;
+    bannedArtists: Set<string>;
+    recentTrackIds: Set<string>;
+    recentTrackSignatures?: Set<string>;
+    recentArtists: Set<string>;
+    feedbackScores?: Map<string, number>;
+    feedbackWeight?: number;
+};
+
+const moodEnergy: Record<string, number> = {
     "late-night": 0.2,
     focus: 0.34,
     dreamy: 0.28,
@@ -18,7 +41,7 @@ const moodEnergy = {
     golden: 0.62,
     velvet: 0.3
 };
-const dayPartProfiles = {
+const dayPartProfiles: Record<string, { energy: number; tokens: string[] }> = {
     "deep night": {
         energy: 0.2,
         tokens: ["night", "midnight", "afterhours", "drift", "ambient", "dub", "shadow", "hush"]
@@ -52,7 +75,7 @@ const dayPartProfiles = {
         tokens: ["neon", "velvet", "smoke", "late", "pulse", "club", "afterhours"]
     }
 };
-const dayOfWeekProfiles = {
+const dayOfWeekProfiles: Record<string, { energyAdjust: number; tokens: string[] }> = {
     monday: {
         energyAdjust: -0.05,
         tokens: ["focus", "steady", "clean", "line", "engine", "intent"]
@@ -82,7 +105,7 @@ const dayOfWeekProfiles = {
         tokens: ["home", "gentle", "tender", "soul", "acoustic", "ease"]
     }
 };
-const semanticBundles = [
+const semanticBundles: Array<{ match: RegExp; tokens: string[]; energy?: number }> = [
     { match: /\bnight|midnight|moon|after\s*hours|nocturnal\b/i, tokens: ["night", "midnight", "velvet", "shadow"] },
     { match: /\bmorning|sunrise|daybreak|dawn\b/i, tokens: ["morning", "sunrise", "breeze", "clear"], energy: 0.5 },
     { match: /\bafternoon|golden|sunlit|summer\b/i, tokens: ["gold", "groove", "summer", "warm"], energy: 0.64 },
@@ -93,10 +116,10 @@ const semanticBundles = [
     { match: /\bglow|warm|honey|velvet\b/i, tokens: ["glow", "warm", "velvet", "honey"], energy: 0.46 },
     { match: /\bfocus|study|deep|heads?-down\b/i, tokens: ["focus", "steady", "deep", "line"], energy: 0.36 }
 ];
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 const TRACK_TITLE_DECORATION_PATTERN = /[\[(][^\])]*(?:remaster(?:ed)?|mono|stereo|edit|mix|version|radio|single|album|deluxe|bonus|clean|explicit)[^\])]*[\])]/gi;
 const TRACK_TITLE_TAIL_PATTERN = /\s+-\s+(?:\d{4}\s+)?(?:remaster(?:ed)?|mono|stereo|edit|mix|version|radio edit|single version|album version|clean|explicit)\b.*$/gi;
-const normalizeTrackIdentityText = (value) => (value ?? "")
+const normalizeTrackIdentityText = (value: unknown) => (value ?? "")
     .toString()
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -105,7 +128,7 @@ const normalizeTrackIdentityText = (value) => (value ?? "")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-const buildTrackCooldownSignature = (track) => {
+const buildTrackCooldownSignature = (track: Partial<SelectionTrack>) => {
     const rawTitle = (track?.title ?? "")
         .replace(TRACK_TITLE_DECORATION_PATTERN, " ")
         .replace(TRACK_TITLE_TAIL_PATTERN, " ");
@@ -125,29 +148,29 @@ const buildTrackCooldownSignature = (track) => {
         return "";
     return `${normalizedArtist}::${normalizedTitle}`;
 };
-const tokenize = (value) => (value ?? "")
+const tokenize = (value: unknown) => String(value ?? "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .split(" ")
     .map((token) => token.trim())
     .filter((token) => token.length >= 3);
-const addTokenWeight = (weights, token, weight) => {
+const addTokenWeight = (weights: Map<string, number>, token: string, weight: number) => {
     if (!token)
         return;
     weights.set(token, (weights.get(token) ?? 0) + weight);
 };
-const normalizeFeedback = (score) => {
+const normalizeFeedback = (score: number) => {
     if (!Number.isFinite(score) || score === 0)
         return 0;
     return Math.tanh(score / 5);
 };
-const buildMoodTarget = (context) => {
+const buildMoodTarget = (context: SelectionContext) => {
     const moodTokens = tokenize(context.mood);
     const matchedMoodValues = moodTokens
-        .map((token) => moodEnergy[token])
-        .filter((value) => typeof value === "number");
+        .map((token: string) => moodEnergy[token])
+        .filter((value: number | undefined): value is number => typeof value === "number");
     const moodTarget = matchedMoodValues.length > 0
-        ? matchedMoodValues.reduce((total, value) => total + value, 0) / matchedMoodValues.length
+        ? matchedMoodValues.reduce((total: number, value: number) => total + value, 0) / matchedMoodValues.length
         : 0.52;
     const dayPartProfile = context.dayPart ? dayPartProfiles[context.dayPart.toLowerCase()] : undefined;
     const dayProfile = context.dayOfWeek ? dayOfWeekProfiles[context.dayOfWeek.toLowerCase()] : undefined;
@@ -167,9 +190,9 @@ const buildMoodTarget = (context) => {
     }
     return clamp(target, 0.14, 0.92);
 };
-const buildContextTokenWeights = (context) => {
-    const weights = new Map();
-    const addTokens = (value, weight) => {
+const buildContextTokenWeights = (context: SelectionContext) => {
+    const weights = new Map<string, number>();
+    const addTokens = (value: unknown, weight: number) => {
         for (const token of tokenize(value)) {
             addTokenWeight(weights, token, weight);
         }
@@ -196,7 +219,7 @@ const buildContextTokenWeights = (context) => {
     }
     return weights;
 };
-const buildTrackTokenSet = (track) => new Set([
+const buildTrackTokenSet = (track: SelectionTrack) => new Set([
     ...track.moodTags,
     ...(track.genres ?? []),
     track.title,
@@ -205,7 +228,7 @@ const buildTrackTokenSet = (track) => new Set([
 ]
     .flatMap((value) => tokenize(value))
     .filter(Boolean));
-export const scoreTrack = (track, context, feedbackScores, feedbackWeight = 0.2) => {
+export const scoreTrack = (track: SelectionTrack, context: SelectionContext, feedbackScores?: Map<string, number>, feedbackWeight = 0.2) => {
     const targetEnergy = buildMoodTarget(context);
     const energyScore = 1 - Math.abs(track.energy - targetEnergy) * 1.08;
     const tokenWeights = buildContextTokenWeights(context);
@@ -220,7 +243,7 @@ export const scoreTrack = (track, context, feedbackScores, feedbackWeight = 0.2)
     const voteScore = normalizeFeedback(feedbackScores?.get(track.id) ?? 0) * feedbackWeight;
     return energyScore + tokenScore + moodBoost + voteScore;
 };
-export const rankTracks = (tracks, context) => {
+export const rankTracks = (tracks: SelectionTrack[], context: SelectionContext) => {
     const candidates = tracks.filter((track) => {
         if (context.bannedTrackIds.has(track.id))
             return false;
@@ -242,11 +265,11 @@ export const rankTracks = (tracks, context) => {
     scored.sort((a, b) => b.score - a.score);
     return scored;
 };
-export const pickTrack = (tracks, context) => {
+export const pickTrack = (tracks: SelectionTrack[], context: SelectionContext) => {
     const scored = rankTracks(tracks, context);
     return scored[0]?.track;
 };
-export const sanitizeRequest = (value) => {
+export const sanitizeRequest = (value: string) => {
     const trimmed = value.trim().slice(0, 120);
     const safe = trimmed.replace(/[^\w\s\-.'",!?()&:]/g, "");
     return safe;

@@ -27,7 +27,7 @@ lossless_mount = env("STREAM_LOSSLESS_MOUNT", "/live-lossless.ogg")
 station_name = env("STATION_NAME", "Mr Rassy Radio")
 station_desc = env("STATION_DESCRIPTION", "Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.")
 station_genre = env("STATION_GENRE", "eclectic")
-transition_default_seconds = float_of_string(env("RADIO_TRANSITION_DEFAULT_SECONDS", "1.2"))
+transition_default_seconds = float_of_string(env("RADIO_TRANSITION_DEFAULT_SECONDS", "4.5"))
 transition_fade_in_seconds = float_of_string(env("RADIO_TRANSITION_FADE_IN_SECONDS", "3.0"))
 transition_fade_out_seconds = float_of_string(env("RADIO_TRANSITION_FADE_OUT_SECONDS", "3.0"))
 processing_enabled = env_bool("RADIO_PROCESSING_ENABLED", "true")
@@ -135,8 +135,8 @@ output.icecast(
   user=lossless_icecast_user,
   password=icecast_password,
   mount=lossless_mount,
-  name=station_name,
-  description=station_desc,
+  name="#{station_name} · Lossless HD",
+  description="#{station_desc} Lossless / HD channel.",
   genre=station_genre,
   public=true,
   lossless_radio

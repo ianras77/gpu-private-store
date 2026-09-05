@@ -115,16 +115,19 @@ export async function GET(request: Request) {
   const quality = qualityParam === "lossless" ? "lossless" : "mp3";
   const streamUrl = await buildPublicStreamUrl(request, quality);
   const artworkUrl = await buildPublicArtworkUrl(request);
+  const qualityLabel = quality === "lossless" ? "Lossless / HD" : "MP3 / Standard";
+  const channelName = `${stationName} · ${qualityLabel}`;
 
   let trackLabel = stationName;
   try {
-    const now = await fetchRadio<{ title?: string; artist?: string }>(
+    const now = await fetchRadio<{ title?: string; artist?: string; album?: string }>(
       "/public/now",
     );
     const title = now?.title?.trim();
     const artist = now?.artist?.trim();
+    const album = now?.album?.trim();
     if (title) {
-      trackLabel = artist ? `${artist} - ${title}` : title;
+      trackLabel = `${artist ? `${artist} - ` : ""}${title}${album ? ` · ${album}` : ""}`;
     }
   } catch {
     // Fall back to the station title when the controller is unavailable.
@@ -134,13 +137,13 @@ export async function GET(request: Request) {
     const body = [
       '<?xml version="1.0" encoding="UTF-8"?>',
       '<playlist version="1" xmlns="http://xspf.org/ns/0/">',
-      `  <title>${escapeXml(stationName)}</title>`,
-      `  <annotation>${escapeXml(stationDescription)}</annotation>`,
+      `  <title>${escapeXml(channelName)}</title>`,
+      `  <annotation>${escapeXml(`${stationDescription} ${qualityLabel} channel.`)}</annotation>`,
       "  <trackList>",
       "    <track>",
       `      <location>${escapeXml(streamUrl)}</location>`,
       `      <title>${escapeXml(trackLabel)}</title>`,
-      `      <annotation>${escapeXml(stationDescription)}</annotation>`,
+      `      <annotation>${escapeXml(`${stationDescription} ${qualityLabel} channel.`)}</annotation>`,
       `      <image>${escapeXml(artworkUrl)}</image>`,
       "    </track>",
       "  </trackList>",
@@ -162,7 +165,7 @@ export async function GET(request: Request) {
       "[playlist]",
       "NumberOfEntries=1",
       `File1=${streamUrl}`,
-      `Title1=${trackLabel}`,
+      `Title1=${channelName} · ${trackLabel}`,
       `Image1=${artworkUrl}`,
       "Length1=-1",
       "Version=2",
@@ -181,8 +184,8 @@ export async function GET(request: Request) {
   const body = [
     "#EXTM3U",
     "#EXTENC:utf-8",
-    `#EXTINF:-1 tvg-name="${escapeM3uAttribute(stationName)}" tvg-id="mr-rassy-live-radio" tvg-logo="${escapeM3uAttribute(artworkUrl)}" group-title="Mr Rassy Radio",${trackLabel}`,
-    `#PLAYLIST:${stationDescription}`,
+    `#EXTINF:-1 tvg-name="${escapeM3uAttribute(channelName)}" tvg-id="mr-rassy-live-radio-${quality}" tvg-logo="${escapeM3uAttribute(artworkUrl)}" group-title="Mr Rassy Radio · ${qualityLabel}",${trackLabel}`,
+    `#PLAYLIST:${stationDescription} ${qualityLabel} channel.`,
     `#EXTIMG:${artworkUrl}`,
     streamUrl,
   ].join("\n");

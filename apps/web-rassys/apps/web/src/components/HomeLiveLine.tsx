@@ -294,7 +294,7 @@ export function HomeLiveLine() {
               className="mt-5 flex h-[380px] flex-col gap-3 overflow-y-auto rounded-[28px] border border-white/10 bg-black/25 p-4"
               aria-live="polite"
             >
-              {chatMessages.slice(-10).map((message) => {
+              {chatMessages.map((message) => {
                 const matchedTrack = message.matchedTrackId
                   ? knownTracks.get(message.matchedTrackId)
                   : null;
@@ -331,7 +331,7 @@ export function HomeLiveLine() {
                           </span>
                         )}
                       </div>
-                      <p className="mt-3 text-sm leading-7">{message.text}</p>
+                      <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7">{message.text}</p>
                       {matchedTrack && (
                         <div className="mt-3 rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-xs text-cloud/70">
                           {formatTrackStamp(matchedTrack)}

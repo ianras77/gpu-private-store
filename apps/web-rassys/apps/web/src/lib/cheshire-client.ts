@@ -128,9 +128,16 @@ export const extractJsonPayload = (content: string) => {
 
 export const isCheshireConfigured = () => Boolean(getBaseUrl());
 
+const assertLegacyCompatibilityEnabled = () => {
+  if (process.env.RASSY_INTELLIGENCE_REQUIRE_CANONICAL === "true") {
+    throw new Error("cheshire_compatibility_disabled");
+  }
+};
+
 export const requestCheshireChat = async (
   input: CheshireChatRequest,
 ): Promise<CheshireChatResponse> => {
+  assertLegacyCompatibilityEnabled();
   const base = getBaseUrl();
   if (!base) {
     throw new Error("cheshire_unconfigured");
@@ -216,6 +223,7 @@ export const requestCheshireEmbedding = async (
   model = process.env.CHESHIRE_EMBED_MODEL ?? "rassy-embed",
   control?: CheshireRequestControl,
 ) => {
+  assertLegacyCompatibilityEnabled();
   const base = getBaseUrl();
   if (!base) {
     throw new Error("cheshire_unconfigured");

@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { z } from "zod";
 import { requestCheshireChat, requestCheshireEmbedding } from "../cheshire-client";
+import { requestRassyChannelText, requestRassyEmbedding } from "../rassy-intelligence-client";
 import type { DmTurnPatch } from "./types";
 
 export type DmContextPacket = {
@@ -29,12 +30,17 @@ export type DmContextPacket = {
 export type DmLlmCallResult = {
   patch: DmTurnPatch;
   model: string;
-  provider: "cheshire";
+  provider: "cheshire" | "rassy-intelligence";
   latencyMs: number;
   promptPayload: Record<string, unknown>;
   responseText: string;
   responseJson?: Record<string, unknown>;
   promptHash: string;
+};
+export type DmRassyRequestContext = {
+  userId: string;
+  campaignId: string;
+  sessionId: string;
 };
 
 const dmTurnSchema: z.ZodType<DmTurnPatch> = z.object({
@@ -368,7 +374,7 @@ const buildSystemPrompt = () =>
     "No markdown fencing."
   ].join("\n");
 
-export const runContextAwareDmTurn = async (context: DmContextPacket): Promise<DmLlmCallResult> => {
+export const runContextAwareDmTurn = async (context: DmContextPacket, requestContext: DmRassyRequestContext): Promise<DmLlmCallResult> => {
   const model = process.env.AI_DM_MODEL ?? process.env.RASSYMIND_MODEL ?? process.env.CHESHIRE_MODEL ?? "rassy-fast";
   const messages: Array<{ role: "system" | "user"; content: string }> = [
     { role: "system", content: buildSystemPrompt() },
@@ -385,6 +391,37 @@ export const runContextAwareDmTurn = async (context: DmContextPacket): Promise<D
   };
 
   const promptHash = crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+  const intelligenceStarted = Date.now();
+  try {
+    const intelligenceText = await requestRassyChannelText("dungeon-master", `${buildSystemPrompt()}\n\nAuthoritative campaign context:\n${JSON.stringify(context)}`, {
+      requestId: promptHash,
+      channelId: "dungeon-master",
+      viewer: { kind: "user", id: requestContext.userId, roles: ["player"] },
+      sessionId: requestContext.sessionId,
+      campaignId: requestContext.campaignId,
+      permissions: ["dm:play"],
+      locale: "en",
+      timeZone: "UTC",
+      modelPolicy: { allowedAliases: ["rassy-mind"], maxCalls: 1, deadlineMs: 45000, priority: "interactive" }
+    });
+    const intelligenceJson = parseJsonObjectFromText(intelligenceText);
+    const normalizedIntelligence = normalizeDmTurnPayload(intelligenceJson, context);
+    const intelligenceParsed = dmTurnSchema.safeParse(normalizedIntelligence);
+    if (intelligenceParsed.success) {
+      return {
+        patch: intelligenceParsed.data,
+        model: process.env.RASSYMIND_MODEL ?? "rassy-mind",
+        provider: "rassy-intelligence",
+        latencyMs: Date.now() - intelligenceStarted,
+        promptPayload: { ...payload, provider: "rassy-intelligence" },
+        responseText: intelligenceText,
+        responseJson: intelligenceJson,
+        promptHash
+      };
+    }
+  } catch {
+    // Compatibility fallback below preserves the existing DM transport while the new path qualifies.
+  }
   const response = await requestCheshireChat({
     model,
     temperature: 0.35,
@@ -436,6 +473,12 @@ export const createFallbackTurn = (actionText: string): DmTurnPatch => {
 export const embedTextWithCheshire = async (text: string): Promise<number[] | null> => {
   const trimmed = text.trim();
   if (!trimmed) return null;
+
+  try {
+    return await requestRassyEmbedding(trimmed);
+  } catch {
+    // Existing embedding compatibility path below remains during rollout.
+  }
 
   try {
     const response = await requestCheshireEmbedding(trimmed, undefined, {

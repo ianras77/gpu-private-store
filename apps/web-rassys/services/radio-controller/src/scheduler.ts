@@ -1,4 +1,8 @@
 // @ts-nocheck
+// TODO(typed-radio-split): split lease, queue-fill, transitions, and lifecycle
+// modules before removing this boundary; the legacy file has broad implicit
+// shapes that require behavior-preserving domain interfaces.
+
 import { Prisma } from "@prisma/client";
 import { config } from "./config";
 import { redis } from "./redis";
@@ -1886,13 +1890,19 @@ const maybeEnqueueSnippet = async (context, pendingSnippet, usedSnippets, allowR
             pickedSnippet = djSnippet;
         }
     }
-    const clusterCount = planSnippetBumperCluster({
+    const lastSnippetValue = await redis.get(LAST_SNIPPET_AT_KEY);
+    const lastSnippetAt = lastSnippetValue ? Number(lastSnippetValue) : Number.NaN;
+    const forcedByCadence = !Number.isFinite(lastSnippetAt) ||
+        Date.now() - lastSnippetAt >= Math.max(1, config.RADIO_SNIPPET_MAX_GAP_MINUTES) * 60 * 1000;
+    const clusterCount = forcedByCadence && !pickedSnippet
+        ? 1
+        : planSnippetBumperCluster({
         hasPrimarySnippet: Boolean(pickedSnippet),
         allowRandomFallback,
         snippetChance: config.RADIO_SNIPPET_CHANCE,
         clusterChance: config.RADIO_SNIPPET_CLUSTER_CHANCE,
         maxCluster: config.RADIO_SNIPPET_CLUSTER_MAX
-    });
+        });
     if (clusterCount <= 0)
         return;
     let enqueuedCount = 0;
@@ -2018,21 +2028,6 @@ const selectNextTracks = async (count, options = {}) => {
         }
         return true;
     };
-    for (const request of pendingTrackRequests.slice(0, 6)) {
-        if (pickedTracks.length >= count)
-            break;
-        const candidateTrackIds = Array.isArray(request.trackIds) && request.trackIds.length > 0
-            ? request.trackIds
-            : request.trackId
-                ? [request.trackId]
-                : [];
-        for (const requestTrackId of candidateTrackIds) {
-            if (pickedTracks.length >= count)
-                break;
-            const requestedTrack = library.getTrackById(requestTrackId);
-            tryAddTrack(requestedTrack, "request");
-        }
-    }
     for (const id of decidedIds) {
         if (!id)
             continue;
@@ -2046,6 +2041,25 @@ const selectNextTracks = async (count, options = {}) => {
             if (pickedTracks.length >= count)
                 break;
             tryAddTrack(library.getTrackById(trackId), "programming");
+        }
+    }
+    // Listener requests are context for Mr Rassy's decision, not a bypass of
+    // it. Only honor a request when the LLM selects it; if the LLM is
+    // unavailable, the request line remains the explicit continuity fallback.
+    if (!decision) {
+        for (const request of pendingTrackRequests.slice(0, 6)) {
+            if (pickedTracks.length >= count)
+                break;
+            const candidateTrackIds = Array.isArray(request.trackIds) && request.trackIds.length > 0
+                ? request.trackIds
+                : request.trackId
+                    ? [request.trackId]
+                    : [];
+            for (const requestTrackId of candidateTrackIds) {
+                if (pickedTracks.length >= count)
+                    break;
+                tryAddTrack(library.getTrackById(requestTrackId), "request");
+            }
         }
     }
     while (pickedTracks.length < count) {
@@ -2462,9 +2476,17 @@ export const startScheduler = async () => {
             return;
         }
         const lockToken = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
-        const acquired = await redis.set(QUEUE_FILL_LOCK_KEY, lockToken, "EX", 45, "NX");
+        const acquired = await redis.set(QUEUE_FILL_LOCK_KEY, lockToken, "EX", 180, "NX");
         if (acquired !== "OK") return;
         fillingQueue = true;
+        const lockRenewal = setInterval(() => {
+            void redis.eval(
+                "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('expire', KEYS[1], 180) else return 0 end",
+                1,
+                QUEUE_FILL_LOCK_KEY,
+                lockToken
+            ).catch(() => undefined);
+        }, 30_000);
         try {
             const liquidsoapReady = await isLiquidsoapReady();
             if (!liquidsoapReady) {
@@ -2597,6 +2619,7 @@ export const startScheduler = async () => {
             } while (queueRerunRequested);
         }
         finally {
+            clearInterval(lockRenewal);
             fillingQueue = false;
             await redis.eval(
                 "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",

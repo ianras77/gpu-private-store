@@ -77,7 +77,7 @@ type EasterEggPayload = {
 const fallbackCurio: Required<EasterEggPayload> = {
   badge: "Cat Signal",
   title: "Fresh room tone",
-  body: "Cheshire is still prowling the booth, leaving new odd little delights in the margins.",
+  body: "Mr Rassy is still prowling the booth, leaving new odd little delights in the margins.",
   cta: "Keep listening",
 };
 

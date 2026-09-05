@@ -86,19 +86,23 @@ export async function GET(request: Request) {
     );
   }
 
-  const cheshireBase = (process.env.CHESHIRE_BASE_URL ?? "http://cheshire:1865").replace(/\/$/, "");
+  const intelligenceBase = (process.env.RASSY_INTELLIGENCE_URL ?? "http://rassy-intelligence:1866").replace(/\/$/, "");
   const radioBase = serverConfig.RADIO_CONTROLLER_URL.replace(/\/$/, "");
   const minecraftBase = serverConfig.MINECRAFT_BRIDGE_URL.replace(/\/$/, "");
 
-  const [database, cheshire, radioController, minecraftBridge] = await Promise.all([
+  const [database, intelligence, radioController, minecraftBridge] = await Promise.all([
     checkDatabase(),
-    checkHttp(`${cheshireBase}/healthz?deep=1`, 5000),
+    checkHttp(`${intelligenceBase}/readyz`, 5000),
     checkHttp(`${radioBase}/readyz`, 4000),
     checkHttp(`${minecraftBase}/readyz`, 4000)
   ]);
 
-  const requiredChecks = [database, cheshire, radioController, minecraftBridge];
-  const ok = requiredChecks.every((check) => check.ok);
+  const aiRuntime = {
+    ok: intelligence.ok,
+    mode: intelligence.ok ? "rassy-intelligence" : "unavailable",
+    latencyMs: intelligence.latencyMs,
+  };
+  const ok = [database, radioController, minecraftBridge, aiRuntime].every((check) => check.ok);
 
   return NextResponse.json(
     {
@@ -107,7 +111,8 @@ export async function GET(request: Request) {
       mode: "deep",
       checks: {
         database,
-        cheshire,
+        intelligence,
+        aiRuntime,
         radioController,
         minecraftBridge
       }

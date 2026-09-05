@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdmin } from "../../../../lib/admin-auth";
 import { requestCheshireJson } from "../../../../lib/cheshire-client";
+import { requestRassyChannelText } from "../../../../lib/rassy-intelligence-client";
+import { saveRassyArtifact } from "../../../../lib/artifacts";
 import {
   createThought,
   isSupportedThoughtImageFile,
@@ -26,6 +28,28 @@ const responseSchema = z.object({
 });
 
 const callCheshire = async (seed: string, title?: string) => {
+  try {
+    const text = await requestRassyChannelText("notebook", JSON.stringify({
+      task: "Expand this approved admin seed into a draft notebook/blog post.",
+      seed,
+      title,
+      output: 'Return ONLY strict JSON: {"title":"...","body":"...","excerpt":"..."}.',
+    }), {
+      requestId: `admin-notebook-${Date.now()}`,
+      channelId: "notebook",
+      viewer: { kind: "admin", id: "admin", roles: ["admin"] },
+      permissions: ["admin", "notebook:write"],
+      locale: "en",
+      timeZone: "UTC",
+      modelPolicy: { allowedAliases: ["rassy-mind"], maxCalls: 1, deadlineMs: 35000, priority: "interactive" },
+    });
+    const clean = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+    const start = clean.indexOf("{");
+    const end = clean.lastIndexOf("}");
+    return responseSchema.parse(JSON.parse(start >= 0 && end > start ? clean.slice(start, end + 1) : clean));
+  } catch {
+    // Compatibility fallback remains until the intelligence path is fully qualified.
+  }
   try {
     const response = await requestCheshireJson(
       {
@@ -172,6 +196,21 @@ export async function POST(request: Request) {
     source,
     images,
   });
+
+  if (source === "editor") {
+    await saveRassyArtifact({
+      channelId: "notebook",
+      kind: "notebook-draft",
+      status: "draft",
+      ownerResourceId: "admin",
+      title: thought.title,
+      summary: thought.excerpt ?? undefined,
+      bodyMarkdown: thought.body,
+      sourceRefs: [{ type: "thought", id: thought.id }],
+    }).catch((error) => {
+      console.warn("Failed to persist notebook draft artifact", error);
+    });
+  }
 
   return NextResponse.json(thought);
 }

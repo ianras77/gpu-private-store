@@ -1034,6 +1034,31 @@ const requestTrackInsightAnalysis = async (
   insight: TrackInsight
 ): Promise<TrackInsightAnalysis | null> => {
   if (!config.RASSYMIND_BASE_URL) return null;
+  const intelligenceBase = config.RASSY_INTELLIGENCE_URL?.replace(/\/$/, "");
+  if (intelligenceBase && config.RASSY_INTELLIGENCE_INTERNAL_TOKEN) {
+    const intelligenceController = new AbortController();
+    const intelligenceTimeout = setTimeout(() => intelligenceController.abort(), config.RADIO_TRACK_ANALYSIS_TIMEOUT_MS);
+    try {
+      const response = await fetch(`${intelligenceBase}/v1/agents/music-librarian/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.RASSY_INTELLIGENCE_INTERNAL_TOKEN}` },
+        body: JSON.stringify({ prompt: `${TRACK_INSIGHT_ANALYSIS_SYSTEM_PROMPT}\nReturn only the requested JSON.\n${buildTrackInsightAnalysisPrompt(track, insight)}` }),
+        signal: intelligenceController.signal,
+      });
+      if (response.ok) {
+        const payload = (await response.json()) as { text?: unknown };
+        if (typeof payload.text === "string" && payload.text.trim()) {
+          const parsed = TRACK_INSIGHT_ANALYSIS_SCHEMA.safeParse(JSON.parse(extractJsonPayload(payload.text)));
+          if (parsed.success) return parsed.data;
+        }
+      }
+    } catch {
+      // Existing direct gateway path below remains the compatibility fallback.
+    } finally {
+      clearTimeout(intelligenceTimeout);
+    }
+  }
+  if (config.RASSY_INTELLIGENCE_REQUIRE_CANONICAL) return null;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), config.RADIO_TRACK_ANALYSIS_TIMEOUT_MS);
   try {
@@ -1244,8 +1269,39 @@ const mapWithConcurrency = async <T>(
   await Promise.all(active);
 };
 
+const fetchIntelligenceJson = async <T>(path: string, body: Record<string, unknown>, timeoutMs: number): Promise<T | null> => {
+  const base = config.RASSY_INTELLIGENCE_URL?.replace(/\/$/, "");
+  if (!base || !config.RASSY_INTELLIGENCE_INTERNAL_TOKEN) return null;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${base}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.RASSY_INTELLIGENCE_INTERNAL_TOKEN}` },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as T;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
 const fetchEmbeddings = async (input: string[]) => {
   if (!config.RASSYMIND_BASE_URL || input.length === 0) return null;
+  const intelligencePayload = await fetchIntelligenceJson<{ data?: Array<{ embedding?: number[] }> }>(
+    "/v1/embeddings", { model: config.RADIO_EMBED_MODEL, input }, 4500,
+  );
+  if (intelligencePayload?.data?.length) {
+    const vectors = intelligencePayload.data.map((entry) =>
+      Array.isArray(entry.embedding) ? entry.embedding.filter((item): item is number => typeof item === "number" && Number.isFinite(item)) : [],
+    ).filter((entry) => entry.length > 0);
+    if (vectors.length) return vectors;
+  }
+  if (config.RASSY_INTELLIGENCE_REQUIRE_CANONICAL) return null;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 4_500);
   try {
@@ -1326,6 +1382,22 @@ const fetchRerankScores = async (
   if (!config.RADIO_RERANK_ENABLED || !config.RASSYMIND_BASE_URL || documents.length === 0) {
     return null;
   }
+  const intelligencePayload = await fetchIntelligenceJson<{ results?: Array<{ index?: number; relevance_score?: number; score?: number }> }>(
+    "/v1/rerank",
+    { model: config.RADIO_RERANK_MODEL, query, documents: documents.map((document) => document.text), top_n: documents.length },
+    9000,
+  );
+  if (intelligencePayload?.results) {
+    const scores = new Map<string, number>();
+    for (const result of intelligencePayload.results) {
+      const document = documents[typeof result.index === "number" ? result.index : -1];
+      const score = typeof result.relevance_score === "number" ? result.relevance_score : result.score;
+      if (!document || typeof score !== "number" || !Number.isFinite(score)) continue;
+      scores.set(document.trackId, clamp(score, -1, 1));
+    }
+    if (scores.size > 0) return scores;
+  }
+  if (config.RASSY_INTELLIGENCE_REQUIRE_CANONICAL) return null;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 9_000);
   try {

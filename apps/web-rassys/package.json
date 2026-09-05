@@ -1,0 +1,20 @@
+{
+  "name": "web-rassys",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.23",
+      "sharp": "0.35.0"
+    }
+  },
+  "scripts": {
+    "install:workspace": "pnpm install --frozen-lockfile",
+    "build:web": "pnpm --filter web build",
+    "build:intelligence": "pnpm --filter rassy-intelligence build",
+    "build:radio": "pnpm --filter radio-controller build",
+    "test:radio": "pnpm --filter radio-controller test",
+    "lint:web": "pnpm --filter web lint",
+    "qualify": "pnpm install --frozen-lockfile && pnpm audit --prod && pnpm run build:intelligence && pnpm run build:radio && pnpm run test:radio && pnpm --filter minecraft-bridge build && pnpm --filter cheshire-proxy build && pnpm run lint:web && pnpm run build:web"
+  }
+}

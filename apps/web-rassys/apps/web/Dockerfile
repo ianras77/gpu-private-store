@@ -1,10 +1,13 @@
-FROM node:20-bullseye-slim AS deps
+FROM node:22-bookworm-slim AS deps
 WORKDIR /app
-COPY apps/web/package.json apps/web/package-lock.json* ./
-RUN npm install --no-audit --no-fund
+RUN corepack enable
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json ./apps/web/package.json
+RUN pnpm install --frozen-lockfile --filter web...
 
-FROM node:20-bullseye-slim AS builder
+FROM node:22-bookworm-slim AS builder
 WORKDIR /app
+RUN corepack enable
 ARG NEXT_PUBLIC_STREAM_URL
 ARG NEXT_PUBLIC_STREAM_LOSSLESS_URL
 ARG NEXT_PUBLIC_SITE_URL
@@ -30,10 +33,12 @@ ENV NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
 ENV NEXT_PUBLIC_UMAMI_DOMAINS=${NEXT_PUBLIC_UMAMI_DOMAINS}
 ENV DATABASE_URL=${DATABASE_URL}
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/web/ ./
-RUN mkdir -p public && npm run build
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=deps /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY apps/web/ ./apps/web/
+RUN mkdir -p apps/web/public && pnpm --dir apps/web build
 
-FROM node:20-bullseye-slim AS runner
+FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
@@ -41,8 +46,8 @@ ENV PORT=3000
 RUN apt-get update \
   && apt-get install -y --no-install-recommends wget libheif-examples \
   && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /app/.next-usr-a/standalone ./
-COPY --from=builder /app/.next-usr-a/static ./.next-usr-a/static
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/apps/web/.next-usr-a/standalone ./
+COPY --from=builder /app/apps/web/.next-usr-a/static ./.next-usr-a/static
+COPY --from=builder /app/apps/web/public ./public
 EXPOSE 3000
 CMD ["node", "server.js"]

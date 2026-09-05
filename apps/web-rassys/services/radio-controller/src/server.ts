@@ -2771,20 +2771,20 @@ export const buildServer = () => {
         dayPart: context.dayPart,
         dayOfWeek: context.dayOfWeek,
         emotionalWeather: context.emotionalWeather,
-        bannedTrackIds: new Set(context.bans.trackIds),
-        bannedArtists: new Set(context.bans.artists.map((artist) => artist.toLowerCase())),
-        recentTrackIds: new Set([
+        bannedTrackIds: new Set<string>(context.bans.trackIds),
+        bannedArtists: new Set<string>(context.bans.artists.map((artist) => artist.toLowerCase())),
+        recentTrackIds: new Set<string>([
           ...(context.nowPlaying?.id ? [context.nowPlaying.id] : []),
           ...context.queuePreview.map((track: Track) => track.id),
           ...context.recentTrackCooldownIds
         ]),
-        recentTrackSignatures: new Set(context.recentTrackCooldownSignatures ?? []),
-        recentArtists: new Set(context.recentArtistCooldownSet ?? []),
+        recentTrackSignatures: new Set<string>(Array.from(context.recentTrackCooldownSignatures ?? []) as string[]),
+        recentArtists: new Set<string>(Array.from(context.recentArtistCooldownSet ?? []) as string[]),
         feedbackScores: context.feedbackScoreMap,
         feedbackWeight: config.RADIO_FEEDBACK_WEIGHT
       })
         .slice(0, 8)
-        .map(({ track }: { track: Track }) => toPublicTrack(track));
+        .map(({ track }) => toPublicTrack(track));
     } catch (error) {
       logger.warn({ error }, "Featured fallback could not use live context");
     }

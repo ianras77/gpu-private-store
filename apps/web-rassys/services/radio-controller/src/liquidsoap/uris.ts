@@ -176,6 +176,10 @@ export const buildTrackQueueUri = (
   pushMetadata(metadata, "album", track.album ?? "");
   pushMetadata(metadata, "song", song);
   pushMetadata(metadata, "url", track.albumArtUrl);
+  // Keep the legacy StreamUrl-style field, but also publish explicit artwork
+  // names for clients that preserve Liquidsoap/Icecast metadata verbatim.
+  pushMetadata(metadata, "album_art_url", track.albumArtUrl);
+  pushMetadata(metadata, "artwork_url", track.albumArtUrl);
   if (plan.trimmed) {
     pushMetadata(metadata, "liq_cue_in", formatCueValue(plan.cueInSeconds));
     pushMetadata(metadata, "liq_cue_out", formatCueValue(plan.cueOutSeconds ?? plan.cueInSeconds));
