@@ -222,3 +222,9 @@ export async function registerStatusRoutes(app: FastifyInstance, env: Env) {
     return { checkedAt, items };
   });
 }
+
+export async function getHouseStatus(env: Env) {
+  const checkedAt = new Date().toISOString();
+  const items = await Promise.all(buildTargets(env).map((target) => probeTarget(target, env)));
+  return { checkedAt, items };
+}

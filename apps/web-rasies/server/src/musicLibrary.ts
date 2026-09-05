@@ -300,3 +300,7 @@ export async function registerMusicLibraryRoutes(app: FastifyInstance, env: Env)
     return reply.sendFile(resolved.relative, env.MUSIC_LIBRARY_ROOT);
   });
 }
+
+export async function getMusicForHouse(env: Env) {
+  return readMusicDirectory(env, '');
+}

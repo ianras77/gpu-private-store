@@ -401,6 +401,20 @@ async function getThoughtsCache(env: Env) {
   return thoughtsCache;
 }
 
+export async function getThoughtsForHouse(env: Env) {
+  return (await getThoughtsCache(env)).thoughts.map((thought) => ({
+    slug: thought.slug,
+    title: thought.title,
+    summary: thought.summary,
+    publishedAt: thought.publishedAt,
+    readingMinutes: thought.readingMinutes,
+    featured: thought.featured,
+    tags: thought.tags,
+    pageUrl: thought.pageUrl,
+    pageAbsoluteUrl: thought.pageAbsoluteUrl,
+  }));
+}
+
 function resolveThoughtsMediaPath(root: string, rawPath: string) {
   const normalized = path.normalize(rawPath).replace(/^(\.\.(\/|\\|$))+/, '').trim();
   if (!normalized) return null;

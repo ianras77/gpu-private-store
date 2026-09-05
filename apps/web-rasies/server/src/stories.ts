@@ -583,6 +583,10 @@ async function getStoriesCache(env: Env) {
   return storiesCache;
 }
 
+export async function getStoriesForHouse(env: Env) {
+  return (await getStoriesCache(env)).value;
+}
+
 function renderFeed(library: StoriesLibrary, books: StoryBook[], selectedBook?: StoryBook) {
   const feedTitle = selectedBook ? `${library.show.title} - ${selectedBook.title}` : library.show.title;
   const feedDescription = selectedBook ? selectedBook.description : library.show.description;
