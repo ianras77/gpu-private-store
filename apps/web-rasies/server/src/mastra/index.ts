@@ -5,14 +5,16 @@ import { rassymindModel } from "./models/rassymind.js";
 import { createHouseDirectoryTool } from "./tools/house-directory.js";
 import { createArchiveTool } from "./tools/archive.js";
 import { createHouseStatusTool } from "./tools/status.js";
+import { createSignupTools } from "./tools/signup.js";
 
 export function createHouseAgent(env: Env) {
+  const signupTools = createSignupTools(env);
   return new Agent({
     id: "house-agent",
     name: "House Chat",
     instructions: HOUSE_CONSTITUTION,
     model: rassymindModel(env),
-    tools: { houseDirectory: createHouseDirectoryTool(env), searchHouseArchive: createArchiveTool(env), getHouseStatus: createHouseStatusTool(env) },
+    tools: { houseDirectory: createHouseDirectoryTool(env), searchHouseArchive: createArchiveTool(env), getHouseStatus: createHouseStatusTool(env), ...signupTools },
   });
 }
 
