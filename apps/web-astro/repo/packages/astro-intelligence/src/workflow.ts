@@ -1,7 +1,7 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 import { ChartFactGraphSchema } from "@astro/astro-analysis";
-import { AstrologyReportArtifactSchema, LifeHandbookPlanSchema, type AstrologyReportArtifact, type LifeHandbookSection } from "./index";
+import { AstrologyReportArtifactSchema, LifeHandbookPlanSchema, type AstrologyReportArtifact, type LifeHandbookSection } from "./workflow-schemas";
 import { callRassyMind } from "./rassymind";
 import { SectionDraftSchema, validateSectionDraft } from "./grounding";
 
