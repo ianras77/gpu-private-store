@@ -14,6 +14,9 @@ RUN pnpm install --frozen-lockfile --filter rassy-intelligence... \
 FROM node:22-bookworm-slim
 WORKDIR /app/services/rassy-intelligence
 ENV NODE_ENV=production
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends wget \
+  && rm -rf /var/lib/apt/lists/*
 COPY --from=build /out/node_modules ./node_modules
 COPY --from=build /out/dist ./dist
 USER node

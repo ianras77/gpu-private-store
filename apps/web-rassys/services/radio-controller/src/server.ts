@@ -1,4 +1,6 @@
-import { Prisma } from "@prisma/client";
+import prismaClient, { type Prisma as PrismaTypes } from "@prisma/client";
+
+const { Prisma } = prismaClient;
 import Fastify, { type FastifyReply, type FastifyRequest } from "fastify";
 import cors from "@fastify/cors";
 import { createReadStream, promises as fs } from "fs";
@@ -990,7 +992,7 @@ const syncBoothDossierNotes = async (signature: string, payload: BoothDossierSna
         boothSignature: signature
       },
       data: {
-        boothDossier: payload as Prisma.InputJsonValue
+        boothDossier: payload as PrismaTypes.InputJsonValue
       }
     });
   } catch (error) {

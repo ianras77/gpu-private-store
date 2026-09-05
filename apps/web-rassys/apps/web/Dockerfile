@@ -50,4 +50,4 @@ COPY --from=builder /app/apps/web/.next-usr-a/standalone ./
 COPY --from=builder /app/apps/web/.next-usr-a/static ./.next-usr-a/static
 COPY --from=builder /app/apps/web/public ./public
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "apps/web/server.js"]

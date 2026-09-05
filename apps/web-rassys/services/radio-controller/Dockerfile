@@ -18,6 +18,8 @@ COPY --from=deps /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml 
 COPY services/radio-controller/ ./services/radio-controller/
 RUN pnpm --dir services/radio-controller prisma:generate && pnpm --dir services/radio-controller build \
   && pnpm deploy --legacy --filter radio-controller --prod /out
+RUN mkdir -p /out/node_modules/.prisma \
+  && find /app/node_modules -path '*/node_modules/.prisma/client' -type d -exec cp -r {} /out/node_modules/.prisma/ \;
 
 FROM node:22-bookworm-slim AS runner
 WORKDIR /app/services/radio-controller
@@ -29,6 +31,7 @@ COPY --from=builder /out/dist ./dist
 COPY --from=builder /out/prisma ./prisma
 COPY --from=builder /out/package.json ./package.json
 COPY --from=builder /out/node_modules ./node_modules
+COPY --from=builder /out/node_modules/.prisma ./node_modules/.prisma
 COPY services/radio-controller/docker-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 EXPOSE 4000

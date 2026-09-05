@@ -1,4 +1,6 @@
-import { Prisma, type LibraryTrackInsight as LibraryTrackInsightRow } from "@prisma/client";
+import prismaClient, { type LibraryTrackInsight as LibraryTrackInsightRow, type Prisma as PrismaTypes } from "@prisma/client";
+
+const { Prisma } = prismaClient;
 import { createHash } from "crypto";
 import { z } from "zod";
 import type { BoothDossierSnapshot, BoothDossierSessionTrack } from "../booth-dossier";
@@ -856,7 +858,7 @@ export const buildTrackKnowledgeCard = (
   };
 };
 
-const parseEmbedding = (value: Prisma.JsonValue | null) => {
+const parseEmbedding = (value: PrismaTypes.JsonValue | null) => {
   if (!Array.isArray(value)) return null;
   const vector = value.filter((item): item is number => typeof item === "number" && Number.isFinite(item));
   return vector.length > 0 ? vector : null;
@@ -1841,7 +1843,7 @@ export const syncTrackInsights = async (
         where: { canonicalKey: row.canonicalKey },
         data: {
           embeddingModel: config.RADIO_EMBED_MODEL,
-          embedding: embedding as Prisma.InputJsonValue
+          embedding: embedding as PrismaTypes.InputJsonValue
         }
       });
     });

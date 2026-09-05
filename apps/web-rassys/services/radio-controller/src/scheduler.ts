@@ -3,7 +3,9 @@
 // modules before removing this boundary; the legacy file has broad implicit
 // shapes that require behavior-preserving domain interfaces.
 
-import { Prisma } from "@prisma/client";
+import prismaClient from "@prisma/client";
+
+const { Prisma } = prismaClient;
 import { config } from "./config";
 import { redis } from "./redis";
 import { prisma } from "./db";
