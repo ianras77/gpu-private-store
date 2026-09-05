@@ -494,7 +494,7 @@ describe("App", () => {
           );
         }
 
-        if (url.includes("/api/cat/chat")) {
+        if (url.includes("/api/house/chat")) {
           return Promise.resolve(
             new Response(
               JSON.stringify({
@@ -756,7 +756,7 @@ describe("App", () => {
 
     const chatRequest = vi
       .mocked(globalThis.fetch)
-      .mock.calls.find(([input]) => String(input).includes("/api/cat/chat"));
+      .mock.calls.find(([input]) => String(input).includes("/api/house/chat"));
 
     expect(JSON.parse(String(chatRequest?.[1]?.body))).toMatchObject({
       files: [

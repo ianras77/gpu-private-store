@@ -891,7 +891,7 @@ async function requestCatReply(
   messages: ChatMessage[],
   files: CatApiFile[] = [],
 ) {
-  const res = await fetch("/api/cat/chat", {
+  const res = await fetch("/api/house/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
