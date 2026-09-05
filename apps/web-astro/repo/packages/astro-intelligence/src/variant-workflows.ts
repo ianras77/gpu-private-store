@@ -1,7 +1,7 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 import { SynastryFactGraphSchema, TimingFactGraphSchema } from "@astro/astro-analysis";
-import { AstrologyReportArtifactSchema, type AstrologyReportArtifact } from "./index";
+import { AstrologyReportArtifactSchema, type AstrologyReportArtifact } from "./workflow-schemas";
 import { callRassyMind } from "./rassymind";
 
 const BaseInput = z.object({ reportId: z.string(), runId: z.string(), brandId: z.string(), sessionId: z.string(), chartHash: z.string(), astrologyProfile: z.string().default("modern-reflective") });
