@@ -48,6 +48,9 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/apps/web/.next-usr-a/standalone ./
 COPY --from=builder /app/apps/web/.next-usr-a/static ./.next-usr-a/static
+COPY --from=builder /app/apps/web/.next-usr-a/static ./.next/static
+COPY --from=builder /app/apps/web/.next-usr-a/static ./apps/web/.next-usr-a/static
+COPY --from=builder /app/apps/web/.next-usr-a/static ./apps/web/.next/static
 COPY --from=builder /app/apps/web/public ./public
 EXPOSE 3000
 CMD ["node", "apps/web/server.js"]
