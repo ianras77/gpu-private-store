@@ -31,7 +31,13 @@ const proxyArtwork = async (request: Request) => {
     }
 
     const artworkUrl = now?.albumArtUrl?.trim();
-    if (!artworkUrl) return emptyArtwork();
+    if (!artworkUrl) {
+      const params = new URLSearchParams({ title: now?.title ?? "Current record", artist: now?.artist ?? "Mr Rassy Radio" });
+      return new Response(null, {
+        status: 302,
+        headers: { ...baseHeaders, Location: `/api/library/artwork/placeholder?${params.toString()}` },
+      });
+    }
 
     const response = await fetchUpstream(
       artworkUrl,

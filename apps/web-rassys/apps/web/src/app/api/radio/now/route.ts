@@ -10,7 +10,12 @@ export async function GET() {
   if (!allowed) return NextResponse.json({ error: "rate limit" }, { status: 429 });
   try {
     const data = await fetchRadio<LibraryTrack | null>("/public/now");
-    return NextResponse.json(enrichTrack(data) ?? {});
+    const track = enrichTrack(data);
+    if (track && !track.albumArtUrl) {
+      const params = new URLSearchParams({ title: track.title ?? "Current record", artist: track.artist ?? "Mr Rassy Radio" });
+      return NextResponse.json({ ...track, albumArtUrl: `/api/library/artwork/placeholder?${params.toString()}`, hasArtwork: true });
+    }
+    return NextResponse.json(track ?? {});
   } catch {
     return NextResponse.json({ error: "radio_unavailable" }, { status: 502 });
   }
