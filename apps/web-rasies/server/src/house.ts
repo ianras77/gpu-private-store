@@ -7,6 +7,7 @@ import { getRassyMindConfig } from "./env.js";
 import { createHouseAgent } from "./mastra/index.js";
 import { normalizeHouseContext } from "./mastra/policy.js";
 import { loadThreadMemory, saveThreadMemory } from "./mastra/memory.js";
+import { runHouseBriefWorkflow } from "./mastra/workflows/house-brief.js";
 
 const Body = z.object({
   messages: z.array(z.object({ role: z.enum(["user", "assistant", "system"]), content: z.string().max(20000) })).min(1).max(24),
@@ -120,5 +121,8 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
     }
   });
 
-  app.get("/api/house/spotlight", async () => ({ source: "fallback", ...HOUSE_SPOTLIGHT }));
+  app.get("/api/house/spotlight", async () => {
+    try { return { source: "house-brief", ...(await runHouseBriefWorkflow(env)) }; }
+    catch { return { source: "fallback", ...HOUSE_SPOTLIGHT }; }
+  });
 }
