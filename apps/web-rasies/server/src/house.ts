@@ -6,6 +6,7 @@ import type { Env } from "./env.js";
 import { getRassyMindConfig } from "./env.js";
 import { createHouseAgent } from "./mastra/index.js";
 import { normalizeHouseContext } from "./mastra/policy.js";
+import { loadThreadMemory, saveThreadMemory } from "./mastra/memory.js";
 
 const Body = z.object({
   messages: z.array(z.object({ role: z.enum(["user", "assistant", "system"]), content: z.string().max(20000) })).min(1).max(24),
@@ -60,8 +61,9 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
               : undefined;
     if (direct) return { runId: crypto.randomUUID(), threadId: context.threadId, text: direct, sources: [{ type: "house-directory", title: "Rasies service directory" }] };
     try {
-      const messages = parsed.data.messages as ModelMessage[];
+      const messages = [...await loadThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId), ...parsed.data.messages] as ModelMessage[];
       const result = await getAgent().generate(messages, { maxSteps: 5 });
+      await saveThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId, [...messages, { role: "assistant", content: result.text } as ModelMessage]);
       return { runId: crypto.randomUUID(), threadId: context.threadId, text: result.text, sources: [] };
     } catch (error) {
       request.log.warn({ err: error }, "House Chat unavailable");
@@ -84,8 +86,11 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
     const send = (event: string, data: unknown) => reply.raw.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
     try {
       send("message_start", { runId: crypto.randomUUID(), threadId: context.threadId });
-      const result = await getAgent().stream(parsed.data.messages as ModelMessage[], { maxSteps: 5 });
-      for await (const delta of result.textStream) send("text_delta", { text: delta });
+      const messages = [...await loadThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId), ...parsed.data.messages] as ModelMessage[];
+      const result = await getAgent().stream(messages, { maxSteps: 5 });
+      let fullText = "";
+      for await (const delta of result.textStream) { fullText += delta; send("text_delta", { text: delta }); }
+      await saveThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId, [...messages, { role: "assistant", content: fullText } as ModelMessage]);
       send("message_end", { threadId: context.threadId });
     } catch (error) {
       request.log.warn({ err: error }, "House Chat stream unavailable");

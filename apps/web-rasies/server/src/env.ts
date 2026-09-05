@@ -22,6 +22,7 @@ const EnvSchema = z.object({
   RASSYMIND_TIMEOUT_MS: z.coerce.number().optional(),
   RASSYMIND_MODEL: z.string().optional(),
   RASSYMIND_API_KEY: z.string().optional(),
+  MASTRA_DATA_DIR: z.string().optional(),
 
   // Deprecated compatibility names. Existing deployed env files may still use these.
   CAT_BASE_URL: z.string().default("http://host.docker.internal:8844"),
