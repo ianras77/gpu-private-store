@@ -1,0 +1,10 @@
+{
+  "name": "@astro/web-experience",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -p tsconfig.build.json", "lint": "echo 'lint not configured'", "test": "vitest --run --config ../../vitest.config.ts" },
+  "dependencies": { "@astro/brands": "workspace:*", "@astro/ui": "workspace:*", "next": "^14.2.35", "react": "^18.3.1" },
+  "devDependencies": { "@types/react": "19.2.14", "@types/node": "22.15.0", "typescript": "^5.8.3" }
+}

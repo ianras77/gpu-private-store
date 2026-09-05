@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext } from "react";
 import type { BrandConfig } from "@astro/brands";
 import { deriveTokens } from "./theme-utils";
 
@@ -42,13 +42,6 @@ export const BrandThemeProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ brand, children }) => {
   const vars = buildCssVars(brand);
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    Object.entries(vars).forEach(([key, value]) => {
-      document.documentElement.style.setProperty(key, String(value));
-    });
-  }, [brand]);
-
   return (
     <ThemeContext.Provider value={brand}>
       <div style={vars as React.CSSProperties} data-brand-id={brand.id}>

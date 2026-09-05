@@ -42,6 +42,17 @@ export interface BrandConfig {
   tabooList: string[];
   tokens: BrandTokens;
   focusModules: FocusModule[];
+  experience: {
+    archetype: string;
+    mood: string;
+    tagline: string;
+    heroVariant: "atlas" | "observatory" | "stage" | "fracture" | "veil";
+    cardVariant: "atmospheric" | "architectural" | "editorial" | "hard" | "layered";
+    chapterStyle: "atlas" | "record" | "stage" | "edgework" | "manuscript";
+    motion: "expansive" | "measured" | "spotlight" | "snap" | "veil";
+    navigation: "horizon" | "grid" | "editorial" | "fracture" | "threshold";
+    palette: { surface: string; surfaceElevated: string; accentSecondary: string; line: string; glow: string };
+  };
   assets: {
     icon: string;
     splash: string;
@@ -95,6 +106,7 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
         promptKey: "quest_prompts"
       }
     ],
+    experience: { archetype: "Celestial atlas", mood: "expansive and intelligent", tagline: "Find the opening.", heroVariant: "atlas", cardVariant: "atmospheric", chapterStyle: "atlas", motion: "expansive", navigation: "horizon", palette: { surface: "#fffdf8", surfaceElevated: "#ffffff", accentSecondary: "#385c99", line: "#d8d2c5", glow: "#d8e5ff" } },
     assets: {
       icon: "packages/brands/assets/jupiterseek/icon.png",
       splash: "packages/brands/assets/jupiterseek/splash.png",
@@ -132,6 +144,7 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
         promptKey: "structure_plans"
       }
     ],
+    experience: { archetype: "Architectural observatory", mood: "quiet and exact", tagline: "Build what lasts.", heroVariant: "observatory", cardVariant: "architectural", chapterStyle: "record", motion: "measured", navigation: "grid", palette: { surface: "#fbfbf8", surfaceElevated: "#ffffff", accentSecondary: "#8b9bad", line: "#cbd0d5", glow: "#e4e9ee" } },
     assets: {
       icon: "packages/brands/assets/saturnseer/icon.png",
       splash: "packages/brands/assets/saturnseer/splash.png",
@@ -169,6 +182,7 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
         promptKey: "stagecraft"
       }
     ],
+    experience: { archetype: "Solar editorial", mood: "warm creative authority", tagline: "Authority with a pulse.", heroVariant: "stage", cardVariant: "editorial", chapterStyle: "stage", motion: "spotlight", navigation: "editorial", palette: { surface: "#fffaf4", surfaceElevated: "#ffffff", accentSecondary: "#7b2427", line: "#d7c3b5", glow: "#f3d1a7" } },
     assets: {
       icon: "packages/brands/assets/saturnleo/icon.png",
       splash: "packages/brands/assets/saturnleo/splash.png",
@@ -206,6 +220,7 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
         promptKey: "transmute"
       }
     ],
+    experience: { archetype: "Alchemical brutalism", mood: "candid and transformative", tagline: "Find the pressure point.", heroVariant: "fracture", cardVariant: "hard", chapterStyle: "edgework", motion: "snap", navigation: "fracture", palette: { surface: "#151211", surfaceElevated: "#201b19", accentSecondary: "#f0b34d", line: "#493c36", glow: "#5b1717" } },
     assets: {
       icon: "packages/brands/assets/maleficme/icon.png",
       splash: "packages/brands/assets/maleficme/splash.png",
@@ -243,6 +258,7 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
         promptKey: "sigilcraft"
       }
     ],
+    experience: { archetype: "Lunar manuscript", mood: "intimate and signal-rich", tagline: "What keeps returning?", heroVariant: "veil", cardVariant: "layered", chapterStyle: "manuscript", motion: "veil", navigation: "threshold", palette: { surface: "#fbf7f0", surfaceElevated: "#ffffff", accentSecondary: "#8b7db4", line: "#d7cabe", glow: "#c7e8e4" } },
     assets: {
       icon: "packages/brands/assets/oracleveil/icon.png",
       splash: "packages/brands/assets/oracleveil/splash.png",
