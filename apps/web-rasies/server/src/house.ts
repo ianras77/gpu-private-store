@@ -8,6 +8,8 @@ import { createHouseAgent } from "./mastra/index.js";
 import { normalizeHouseContext } from "./mastra/policy.js";
 import { loadThreadMemory, saveThreadMemory } from "./mastra/memory.js";
 import { runHouseBriefWorkflow } from "./mastra/workflows/house-brief.js";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 const Body = z.object({
   messages: z.array(z.object({ role: z.enum(["user", "assistant", "system"]), content: z.string().max(20000) })).min(1).max(24),
@@ -17,6 +19,7 @@ const Body = z.object({
   mode: z.string().optional(),
   webSearchPolicy: z.enum(["auto", "on", "off"]).optional(),
 });
+const FeedbackBody = z.object({ runId: z.string().max(120), threadId: z.string().max(120), mode: z.string().max(40), rating: z.enum(["up", "down"]) });
 
 const HOUSE_SPOTLIGHT = {
   mood: "The house is open, the lights are on, and House Chat is ready to help.",
@@ -124,5 +127,16 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
   app.get("/api/house/spotlight", async () => {
     try { return { source: "house-brief", ...(await runHouseBriefWorkflow(env)) }; }
     catch { return { source: "fallback", ...HOUSE_SPOTLIGHT }; }
+  });
+
+  app.post("/api/house/feedback", async (request, reply) => {
+    const parsed = FeedbackBody.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: "Invalid feedback" });
+    try {
+      const root = env.MASTRA_DATA_DIR ?? "/data/mastra";
+      await fs.mkdir(root, { recursive: true });
+      await fs.appendFile(path.join(root, "feedback.jsonl"), `${JSON.stringify({ ...parsed.data, createdAt: new Date().toISOString() })}\n`, { mode: 0o600 });
+    } catch { /* feedback must never affect the chat path */ }
+    return { ok: true };
   });
 }
