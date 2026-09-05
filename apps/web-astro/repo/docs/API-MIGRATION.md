@@ -1,0 +1,9 @@
+# API migration
+
+Existing `/v1/chart/natal`, `/v1/reading/natal`, compatibility, content, account, and saved-chart contracts remain unchanged. Additive intelligence surfaces include `POST /v1/report-plans/life-handbook`, `POST /v1/report-runs`, `GET /v1/report-runs/:id`, `GET /v1/report-runs/:id/stream`, `POST /v1/report-runs/:id/execute`, `POST /v1/report-runs/:id/cancel`, and `POST /v1/report-runs/:id/retry`. Model-backed runs use durable ownership, reconnectable progress, idempotency, cancellation, retry classification, and `ReportRun` persistence.
+
+`ReportRunCreateInput.kind` now selects the canonical workflow: `natal` uses `natal-report-v2`, `compatibility` requires `chartAJson` and `chartBJson` and uses `compatibility-v1`, and `weekly` requires a validated deterministic `timingGraph` plus `weekLabel` and uses `weekly-transit-v1`. The older public compatibility and content routes remain legacy adapters until their response parity and live qualification are complete.
+
+Completed artifacts are available through ownership-checked `GET /v1/reports/:id` and `GET /v1/reports/:id/sections/:key`. Repeated execution of a completed run returns the persisted artifact idempotently; concurrent execution is rejected with `REPORT_ALREADY_RUNNING`.
+
+Chart Companion is available under `/v1/chart-companion/threads`. Thread creation requires authentication and maps `resourceId` to the application user; message execution rechecks chart ownership, supplies only the deterministic fact graph to RassyMind, and returns fact references plus bounded provider metadata. `GET /threads`, `PATCH /threads/:id/memory`, and `DELETE /threads/:id` provide listing, memory toggle, and clear/delete controls. Conversation message bodies are not persisted by the application until durable Mastra memory storage is qualified.

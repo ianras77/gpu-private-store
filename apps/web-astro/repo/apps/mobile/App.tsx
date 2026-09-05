@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { ScrollView, View, Share, TouchableOpacity, Animated, Easing, Dimensions, StyleSheet, Text as RNText } from "react-native";
 import Constants from "expo-constants";
 import { BRANDS, BRAND_COPY } from "@astro/brands";
-import { BrandThemeProvider, PageShell, Section, Heading, Text, Input, Button, Card, ChartWheel } from "@astro/ui";
+import { BrandThemeProvider, PageShell, Section, Heading, Text, Input, Button, Card, ChartWheel } from "../../packages/ui/src/index.native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Svg, { Circle, Line, Text as SvgText, Defs, RadialGradient, Stop } from "react-native-svg";
 
@@ -12,11 +12,8 @@ const brandId = extras?.brandId ?? "jupiterseek";
 const resolveApiBase = () => {
   if (extras?.apiBase) return extras.apiBase;
   const hostUri =
-    // @ts-expect-error - hostUri exists in dev on some Expo runtimes
     Constants.expoConfig?.hostUri ||
-    // @ts-expect-error - manifest2 is runtime-dependent
     Constants.manifest2?.extra?.expoClient?.hostUri ||
-    // @ts-expect-error - manifest is runtime-dependent
     Constants.manifest?.hostUri;
   if (hostUri && typeof hostUri === "string") {
     const host = hostUri.split(":")[0];
@@ -248,6 +245,7 @@ export default function App() {
   const [searchingLocation, setSearchingLocation] = useState(false);
   const [chart, setChart] = useState<any | null>(null);
   const [reading, setReading] = useState<any | null>(null);
+  const [handbookPlan, setHandbookPlan] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [focusKey, setFocusKey] = useState("Sun");
@@ -398,6 +396,18 @@ export default function App() {
     setReading(data.reading);
     setScreen("reading");
     setLoading(false);
+  };
+
+  const planHandbook = async () => {
+    if (!chart) return;
+    setLoading(true);
+    try {
+      const response = await fetch(`${apiBase}/v1/report-plans/life-handbook`, { method: "POST", headers: { "Content-Type": "application/json", "X-Brand-Id": brand.id }, body: JSON.stringify({ chartJson: chart }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "Unable to plan handbook.");
+      setHandbookPlan(data.plan);
+      setScreen("reading");
+    } catch (err: any) { setError(err.message ?? "Unable to plan handbook."); } finally { setLoading(false); }
   };
 
   const shareReading = async () => {
@@ -668,7 +678,7 @@ export default function App() {
               <Text>Location</Text>
               <Input
                 value={locationQuery}
-                onChangeText={(value) => {
+                onChangeText={(value: string) => {
                   setError(null);
                   setLocationQuery(value);
                   if (selectedLocation && value !== selectedLocation.name) {
@@ -956,6 +966,9 @@ export default function App() {
                 <Button onPress={() => generateReading("deep")} disabled={loading}>
                   View Long Form
                 </Button>
+                <Button variant="ghost" onPress={planHandbook} disabled={loading}>
+                  Plan Life Handbook
+                </Button>
               </Section>
             </>
           )}
@@ -1075,6 +1088,19 @@ export default function App() {
               ))}
               <Text muted>{reading.disclaimer}</Text>
               <Button onPress={shareReading}>Share</Button>
+            </Section>
+          )}
+
+          {screen === "reading" && handbookPlan && !reading && (
+            <Section title="Life Handbook Plan">
+              <Text muted>A handbook is assembled from deterministic chart facts and only approved context or supplied frameworks.</Text>
+              {handbookPlan.sections?.map((section: any) => (
+                <Card key={section.key}>
+                  <Heading level={3}>{section.title}</Heading>
+                  <Text muted>{section.group} · {section.requiredFactCategories?.join(", ") || "narrative synthesis"}</Text>
+                </Card>
+              ))}
+              {handbookPlan.omissions?.length ? <Text muted>Held back until qualified sources are supplied: {handbookPlan.omissions.join("; ")}</Text> : null}
             </Section>
           )}
 

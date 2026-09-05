@@ -10,7 +10,7 @@ export const chartRoutes = async (app: FastifyInstance) => {
       return reply.status(400).send({ error: parsed.error.flatten() });
     }
 
-    const { birthDate, birthTime, timeUnknown, lat, lon, timezone, houseSystem } = parsed.data;
+    const { birthDate, birthTime, timeUnknown, lat, lon, timezone, houseSystem, includePoints } = parsed.data;
     const tz = timezone ?? resolveTimezoneFromLatLon(lat, lon);
 
     const engine = getEngine();
@@ -21,7 +21,7 @@ export const chartRoutes = async (app: FastifyInstance) => {
       latitude: lat,
       longitude: lon,
       timezone: tz
-    }, { houseSystem });
+    }, { houseSystem, includePoints });
 
     return { chart };
   });

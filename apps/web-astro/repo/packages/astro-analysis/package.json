@@ -1,0 +1,9 @@
+{
+  "name": "@astro/astro-analysis",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -p tsconfig.build.json", "lint": "echo 'lint not configured'", "test": "vitest --run --config ../../vitest.config.ts" },
+  "dependencies": { "@astro/astro-core": "workspace:*", "zod": "^3.23.8" }
+}

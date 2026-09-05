@@ -6,7 +6,7 @@ import {
   TextInput,
   StyleSheet
 } from "react-native";
-import { useBrand } from "./theme";
+import { useBrand } from "./theme.native";
 import { deriveTokens } from "./theme-utils";
 
 export const PageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -69,7 +69,7 @@ export const Heading: React.FC<{ children: React.ReactNode; level?: 1 | 2 | 3 }>
   );
 };
 
-export const Text: React.FC<{ children: React.ReactNode; muted?: boolean }> = ({
+export const Text: React.FC<{ children: React.ReactNode; muted?: boolean; key?: React.Key }> = ({
   children,
   muted
 }) => {
@@ -132,7 +132,7 @@ export const Input: React.FC<React.ComponentProps<typeof TextInput>> = (props) =
   );
 };
 
-export const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const Card: React.FC<{ children: React.ReactNode; key?: React.Key }> = ({ children }) => {
   const brand = useBrand();
   const derived = deriveTokens(brand.tokens);
   return (

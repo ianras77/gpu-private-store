@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { PageShell, Section, Heading, Text, Button, Card } from "@astro/ui";
+import { PageShell, Section, Heading, Text, Button, Card, ReportAtlas } from "@astro/ui";
 import { apiRequest } from "../../lib/api";
 import { brand, brandCopy } from "../../lib/brand";
 import { loadAuthSession, loadChart } from "../../lib/storage";
@@ -16,6 +16,7 @@ const formatChartKey = (point: any): string => {
 export default function ReadingPage() {
   const [chart, setChart] = useState<any | null>(null);
   const [reading, setReading] = useState<any | null>(null);
+  const [reportArtifact, setReportArtifact] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [shareCard, setShareCard] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -104,6 +105,16 @@ export default function ReadingPage() {
     setShareCard(canvas.toDataURL("image/png"));
   };
 
+  const requestHandbook = async () => {
+    if (!authToken) { setError("Sign in to generate and save a life handbook."); return; }
+    setLoading(true); setError(null);
+    try {
+      const created = await apiRequest<any>("/v1/report-runs", { method: "POST", token: authToken, body: { chartJson: chart, chartProfileId: chart.chartProfileId, brandId: brand.id, kind: "natal", depth: "handbook", idempotencyKey: crypto.randomUUID(), workflowVersion: "natal-report-v2" } });
+      const result = await apiRequest<any>(`/v1/report-runs/${created.run.id}/execute`, { method: "POST", token: authToken });
+      setReportArtifact(result.artifact);
+    } catch (err: any) { setError(err.message ?? "Unable to generate the handbook."); } finally { setLoading(false); }
+  };
+
   return (
     <PageShell>
       <Section title="Your Reading">
@@ -129,6 +140,7 @@ export default function ReadingPage() {
             <Button variant="ghost" onClick={() => requestReading("deep")} disabled={loading}>
               Deep Dive
             </Button>
+            <Button variant="ghost" onClick={requestHandbook} disabled={loading}>Life Handbook</Button>
           </div>
 
           <div className="astro-note-strip">
@@ -177,7 +189,7 @@ export default function ReadingPage() {
         </div>
       </Section>
 
-      {reading ? (
+      {reportArtifact ? <ReportAtlas artifact={reportArtifact} companion={authToken && chart.chartProfileId ? { token: authToken, chartProfileId: chart.chartProfileId, brandId: brand.id } : undefined} /> : reading ? (
         <Section>
           {reading.title ? <Heading level={2}>{reading.title}</Heading> : null}
           {reading.subtitle ? <Text muted>{reading.subtitle}</Text> : null}

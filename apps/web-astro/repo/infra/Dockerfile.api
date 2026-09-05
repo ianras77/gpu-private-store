@@ -1,0 +1,19 @@
+# Immutable API image. Runtime containers do not install packages or rebuild native code.
+FROM node:20-bookworm AS build
+WORKDIR /repo
+RUN corepack enable
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json tsconfig.build.base.json ./
+COPY apps/api/package.json apps/api/package.json
+COPY packages packages
+RUN pnpm install --frozen-lockfile
+COPY apps/api apps/api
+RUN pnpm --filter @astro/astro-engine-swiss rebuild swisseph && pnpm --filter @astro/api build && pnpm --filter @astro/api exec prisma generate
+
+FROM node:20-bookworm-slim AS runtime
+WORKDIR /repo
+ENV NODE_ENV=production
+RUN useradd --create-home --uid 10001 astro
+COPY --from=build --chown=astro:astro /repo /repo
+USER astro
+EXPOSE 4020
+CMD ["node", "apps/api/dist/server.js"]

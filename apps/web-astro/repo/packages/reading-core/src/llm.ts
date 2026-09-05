@@ -6,6 +6,14 @@ type LLMOptions = {
   temperature?: number;
 };
 
+export type LegacyLLMRoute = {
+  useRassyMind: boolean;
+  baseURL?: string;
+  apiKey?: string;
+  model: string;
+  provider: string;
+};
+
 export interface LLMResponse {
   content: string | null;
   provider: string;
@@ -24,24 +32,25 @@ const parseHeaders = (): Record<string, string> | undefined => {
   }
 };
 
+export const resolveLLMRoute = (env: NodeJS.ProcessEnv = process.env): LegacyLLMRoute => {
+  const useRassyMind = env.ASTRO_RASSYMIND_ENABLED === "1" || env.RASSYMIND_ENABLED === "1";
+  const legacyEnabled = env.ASTRO_LEGACY_LLM_ENABLED === "1";
+  const baseURL = useRassyMind
+    ? (env.RASSYMIND_BASE_URL || "http://host.docker.internal:8844/v1").replace(/\/+$/, "")
+    : legacyEnabled ? (env.OPENAI_BASE_URL || env.LLM_BASE_URL || undefined) : undefined;
+  const apiKey = useRassyMind ? env.RASSYMIND_API_KEY : legacyEnabled ? env.OPENAI_API_KEY : undefined;
+  const model = useRassyMind ? (env.ASTRO_RASSYMIND_FAST_MODEL || env.RASSYMIND_MODEL || "rassy-fast") : (env.OPENAI_MODEL ?? "gpt-4o");
+  const provider = useRassyMind ? "rassymind" : legacyEnabled ? (env.OPENAI_PROVIDER_NAME ?? "legacy-openai-compatible") : "unconfigured";
+  return { useRassyMind, baseURL, apiKey, model, provider };
+};
+
 export const callLLM = async (
   system: string,
   prompt: string,
   options: LLMOptions = {}
 ): Promise<LLMResponse> => {
-  const useRassyMind = process.env.RASSYMIND_ENABLED === "1";
-  const baseURL = useRassyMind
-    ? (process.env.RASSYMIND_BASE_URL || "http://host.docker.internal:8844/v1")
-    : (process.env.OPENAI_BASE_URL || process.env.LLM_BASE_URL || undefined);
-  const apiKey = useRassyMind ? process.env.RASSYMIND_API_KEY : process.env.OPENAI_API_KEY;
-  const model = useRassyMind ? (process.env.RASSYMIND_MODEL || "rassy-fast") : (process.env.OPENAI_MODEL ?? "gpt-4o");
-  const provider =
-    process.env.OPENAI_PROVIDER_NAME ??
-    (baseURL?.toLowerCase().includes("cheshire")
-      ? "cheshire-cat"
-      : baseURL
-      ? "openai-compatible"
-      : "openai");
+  const route = resolveLLMRoute();
+  const { useRassyMind, baseURL, apiKey, model, provider } = route;
 
   if (!apiKey) {
     return {

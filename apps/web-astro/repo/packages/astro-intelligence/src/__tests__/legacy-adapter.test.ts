@@ -1,0 +1,6 @@
+import { describe, expect, it } from "vitest";
+import { toLegacyReadingOutput } from "../legacy-adapter";
+
+const artifact = { schemaVersion: "1.0.0", reportVersion: "natal-report-v2", reportId: "r", runId: "r", kind: "natal", depth: "deep", brandId: "jupiterseek", chart: { chartHash: "c", calculationVersion: "0.2.0", analysisVersion: "1.0.0", astrologyProfile: "modern-reflective", timeConfidence: "exact" }, cover: { title: "Atlas", subtitle: "Subtitle", excerpt: "Excerpt" }, navigation: [], sections: Array.from({ length: 6 }, (_, index) => ({ key: `section-${index}`, title: `Section ${index}`, body: [`Body ${index}`], claims: [], factRefs: [], loreRefs: [], confidence: "conditional", uncertaintyNotes: [], status: "complete" })), practicalIntegration: { reflections: ["Reflect"], practices: ["Practice"], questions: ["Question"] }, provenance: { chartFactGraphVersion: "1.0.0", workflowVersion: "natal-report-v2", brandVoiceVersion: "1.0.0", generatedAt: "2026-01-01T00:00:00.000Z", models: [] }, disclaimer: "For reflection" } as any;
+
+describe("legacy report adapter", () => { it("keeps the saved ReadingOutput contract parseable", () => { const output = toLegacyReadingOutput(artifact); expect(output.title).toBe("Atlas"); expect(output.planets.length).toBeGreaterThanOrEqual(5); expect(output.aspects.length).toBeGreaterThanOrEqual(3); }); });

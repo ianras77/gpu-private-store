@@ -14,6 +14,10 @@ import { loreRoutes } from "./routes/lore";
 import { humanGuideRoutes } from "./routes/human-guide";
 import { authRoutes } from "./routes/auth";
 import { contentRoutes } from "./routes/content";
+import { reportPlanRoutes } from "./routes/report-plans";
+import { reportRunRoutes } from "./routes/report-runs";
+import { reportRoutes } from "./routes/reports";
+import { chartCompanionRoutes } from "./routes/chart-companion";
 import { inferBrandId } from "./lib/brand";
 import { sendApiError } from "./lib/http-errors";
 import { getGeoProviderHealth } from "./lib/geo";
@@ -114,6 +118,10 @@ export const buildServer = () => {
   app.register(humanGuideRoutes, { prefix: "/v1/human-guide" });
   app.register(authRoutes, { prefix: "/v1" });
   app.register(contentRoutes, { prefix: "/v1" });
+  app.register(reportPlanRoutes, { prefix: "/v1/report-plans" });
+  app.register(reportRunRoutes, { prefix: "/v1/report-runs" });
+  app.register(reportRoutes, { prefix: "/v1/reports" });
+  app.register(chartCompanionRoutes, { prefix: "/v1/chart-companion" });
 
   app.get("/health", async (request) => ({
     ok: true,

@@ -11,7 +11,9 @@
     "db:seed": "pnpm --filter @astro/api db:seed",
     "db:studio": "pnpm --filter @astro/api db:studio",
     "format": "turbo run format",
-    "test:pw": "playwright test"
+    "test:pw": "playwright test",
+    "verify:source-sync": "node scripts/verify-source-sync.mjs",
+    "export:runtipi": "node scripts/export-runtipi-package.mjs"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

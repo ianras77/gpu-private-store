@@ -19,6 +19,9 @@ model User {
   sessions     AuthSession[]
   content      ContentEntry[]
   jobs         ContentJob[]
+  reportRuns   ReportRun[]
+  conversations AstroConversation[]
+  feedback     AstroFeedback[]
 }
 
 model AuthSession {
@@ -58,6 +61,7 @@ model ChartProfile {
   readings      Reading[]
   content       ContentEntry[]
   jobs          ContentJob[]
+  reportRuns    ReportRun[]
 
   @@index([userId])
   @@index([userId, brandId])
@@ -134,4 +138,94 @@ model ContentJob {
 
   @@index([status, createdAt])
   @@index([brandId, kind, createdAt])
+}
+
+model ReportRun {
+  id             String   @id @default(uuid())
+  userId         String?  @db.Uuid
+  chartProfileId String?
+  brandId        String
+  kind           String
+  depth          String
+  status         String   @default("queued")
+  idempotencyKey String?
+  inputHash      String
+  inputJson      Json
+  workflowVersion String
+  traceId        String?
+  errorClass     String?
+  errorMessage   String?
+  cancelledAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  chartProfile   ChartProfile? @relation(fields: [chartProfileId], references: [id], onDelete: SetNull)
+  sections       ReportSection[]
+  artifact       ReportArtifact?
+  feedback       AstroFeedback[]
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+model ReportSection {
+  id             String   @id @default(uuid())
+  reportRunId    String
+  sectionKey     String
+  position       Int
+  status         String   @default("queued")
+  payload        Json?
+  factRefs       Json?
+  loreRefs       Json?
+  modelProfile   String?
+  attemptCount   Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  reportRun      ReportRun @relation(fields: [reportRunId], references: [id], onDelete: Cascade)
+  @@unique([reportRunId, sectionKey])
+  @@index([reportRunId, position])
+}
+
+model ReportArtifact {
+  id             String   @id @default(uuid())
+  reportRunId    String   @unique
+  schemaVersion  String
+  reportVersion  String
+  title          String
+  excerpt        String?
+  payload        Json
+  provenance     Json?
+  legacyReadingId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  reportRun      ReportRun @relation(fields: [reportRunId], references: [id], onDelete: Cascade)
+}
+
+model AstroConversation {
+  id              String   @id @default(uuid())
+  userId          String   @db.Uuid
+  chartProfileId  String?
+  brandId         String
+  resourceId      String
+  threadId        String   @unique
+  memoryEnabled   Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
+}
+
+model AstroFeedback {
+  id          String   @id @default(uuid())
+  userId      String?  @db.Uuid
+  reportRunId String?
+  sectionKey  String?
+  rating      String
+  comment     String?
+  workflowVersion String?
+  brandId     String?
+  createdAt   DateTime @default(now())
+  user        User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  reportRun   ReportRun? @relation(fields: [reportRunId], references: [id], onDelete: SetNull)
+  @@index([reportRunId, createdAt])
 }

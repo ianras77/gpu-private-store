@@ -93,7 +93,27 @@ export const ChartRequestInput = z.object({
   lat: z.number().min(-90).max(90),
   lon: z.number().min(-180).max(180),
   timezone: z.string().optional(),
-  houseSystem: z.enum(["placidus", "whole-sign"]).optional()
+  houseSystem: z.enum(["placidus", "whole-sign"]).optional(),
+  includePoints: z
+    .object({ northNode: z.boolean().optional(), chiron: z.boolean().optional() })
+    .optional()
+});
+
+export const LifeHandbookPlanRequestInput = z.object({
+  chartJson: z.unknown(),
+  context: z.array(z.object({ id: z.string().min(1), text: z.string().min(1).max(10_000), source: z.enum(["user-provided", "uploaded-document", "application-record"]), sensitivity: z.enum(["ordinary", "sensitive", "highly-sensitive"]).optional(), approvedForSynthesis: z.boolean().default(false) })).default([]),
+  frameworks: z.array(z.object({ id: z.string().min(1), name: z.string().min(1), status: z.enum(["astronomical", "symbolic-reflective", "user-supplied"]), version: z.string(), claims: z.array(z.string()).default([]) })).default([])
+});
+
+export const ReportRunCreateInput = z.object({
+  chartJson: z.unknown().optional(), chartAJson: z.unknown().optional(), chartBJson: z.unknown().optional(), timingGraph: z.unknown().optional(), weekLabel: z.string().optional(), chartProfileId: z.string().optional(), brandId: BrandIdSchema,
+  kind: z.enum(["natal", "compatibility", "weekly", "focused"]), depth: z.enum(["quick", "standard", "deep", "handbook"]),
+  idempotencyKey: z.string().min(8).max(200), workflowVersion: z.string().min(1).max(80).default("life-handbook-v1"),
+  context: LifeHandbookPlanRequestInput.shape.context.default([]), frameworks: LifeHandbookPlanRequestInput.shape.frameworks.default([])
+}).superRefine((value, ctx) => {
+  if (value.kind === "compatibility" && (value.chartAJson === undefined || value.chartBJson === undefined)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Compatibility runs require chartAJson and chartBJson." });
+  if (value.kind !== "compatibility" && value.chartJson === undefined) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "This report kind requires chartJson." });
+  if (value.kind === "weekly" && (value.timingGraph === undefined || !value.weekLabel)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Weekly runs require timingGraph and weekLabel." });
 });
 
 export const ReadingRequestInput = z.object({

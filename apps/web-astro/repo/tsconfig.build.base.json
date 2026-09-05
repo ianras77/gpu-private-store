@@ -2,6 +2,8 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "declaration": true,
+    "declarationMap": true,
     "paths": {
       "@astro/astro-core": ["packages/astro-core/dist"],
       "@astro/astro-engine-astro": ["packages/astro-engine-astro/dist"],
@@ -10,6 +12,8 @@
       "@astro/ui": ["packages/ui/dist"],
       "@astro/brands": ["packages/brands/dist"],
       "@astro/utils": ["packages/utils/dist"]
+      ,"@astro/astro-analysis": ["packages/astro-analysis/dist"]
+      ,"@astro/astro-intelligence": ["packages/astro-intelligence/dist"]
     }
   }
 }

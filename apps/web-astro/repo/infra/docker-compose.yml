@@ -20,7 +20,7 @@ services:
       - astro_redis:/data
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.12.5
     restart: unless-stopped
     ports:
       - "${ASTRO_QDRANT_PORT:-4028}:6333"
@@ -59,9 +59,16 @@ services:
       ESOTERICA_STRICT_BRAND_FILTER: "0"
       ALLOW_DEV_AUTH: "true"
       DEV_USER_EMAIL: dev@example.com
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-localai}
-      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-http://host.docker.internal:8844/v1}
-      OPENAI_MODEL: ${OPENAI_MODEL:-rassy-smart}
+      ASTRO_RASSYMIND_ENABLED: ${ASTRO_RASSYMIND_ENABLED:-0}
+      ASTRO_LEGACY_LLM_ENABLED: ${ASTRO_LEGACY_LLM_ENABLED:-0}
+      RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
+      RASSYMIND_CAPABILITIES_JSON: ${RASSYMIND_CAPABILITIES_JSON:-}
+      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844/v1}
+      ASTRO_RASSYMIND_FAST_MODEL: ${ASTRO_RASSYMIND_FAST_MODEL:-rassy-fast}
+      ASTRO_RASSYMIND_MIND_MODEL: ${ASTRO_RASSYMIND_MIND_MODEL:-rassy-mind}
+      ASTRO_REPORT_MAX_PARALLEL_STEPS: ${ASTRO_REPORT_MAX_PARALLEL_STEPS:-2}
+      ASTRO_REPORT_MAX_MODEL_CALLS: ${ASTRO_REPORT_MAX_MODEL_CALLS:-24}
+      ASTRO_REPORT_MAX_TOOL_CALLS: ${ASTRO_REPORT_MAX_TOOL_CALLS:-48}
       MAPBOX_TOKEN: ${MAPBOX_TOKEN:-}
       OPENCAGE_KEY: ${OPENCAGE_KEY:-}
       NOMINATIM_BASE_URL: ${NOMINATIM_BASE_URL:-https://nominatim.openstreetmap.org}
@@ -78,7 +85,7 @@ services:
       && pnpm --store-dir $$PNPM_STORE_DIR install
       && pnpm --store-dir $$PNPM_STORE_DIR --filter @astro/astro-engine-swiss rebuild swisseph
       && pnpm --filter @astro/api exec prisma generate
-      && pnpm --filter @astro/api exec prisma db push --accept-data-loss
+      && pnpm --filter @astro/api exec prisma migrate deploy
       && pnpm --filter @astro/api exec tsx src/server.ts"
     depends_on:
       - db

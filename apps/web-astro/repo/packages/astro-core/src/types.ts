@@ -76,6 +76,7 @@ export interface NatalChart {
     houseSystem?: HouseSystem;
     engineId?: string;
     engineVersion?: string;
+    optionalPoints?: { northNode: boolean; chiron: boolean };
     ephemerisSource?: string;
     calculationConfidence?: CalculationConfidence;
     zodiacMode?: ZodiacMode;

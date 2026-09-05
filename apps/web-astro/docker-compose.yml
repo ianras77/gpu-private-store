@@ -24,7 +24,7 @@ services:
       - ${APP_DATA_DIR}/app-data/web-astro/named/astro-redis:/data
 
   astro-qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.12.5
     restart: unless-stopped
     volumes:
       - ${APP_DATA_DIR}/app-data/web-astro/named/astro-qdrant:/qdrant/storage
@@ -63,9 +63,16 @@ services:
       ALLOW_DEV_AUTH: ${ASTRO_ALLOW_DEV_AUTH:-true}
       DEV_USER_EMAIL: ${ASTRO_DEV_USER_EMAIL:-ian@rasies.com}
       DEV_USER_NAME: ${ASTRO_DEV_USER_NAME:-Ian}
-      OPENAI_API_KEY: ${ASTRO_RASSYMIND_API_KEY:-${RASSYMIND_API_KEY:-${ASTRO_OPENAI_API_KEY:-}}}
-      OPENAI_BASE_URL: ${ASTRO_RASSYMIND_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/v1}
-      OPENAI_MODEL: ${ASTRO_OPENAI_MODEL:-rassy-mind}
+      ASTRO_RASSYMIND_ENABLED: ${ASTRO_RASSYMIND_ENABLED:-1}
+      ASTRO_LEGACY_LLM_ENABLED: ${ASTRO_LEGACY_LLM_ENABLED:-0}
+      RASSYMIND_API_KEY: ${ASTRO_RASSYMIND_API_KEY:-${RASSYMIND_API_KEY:-}}
+      RASSYMIND_CAPABILITIES_JSON: ${RASSYMIND_CAPABILITIES_JSON:-}
+      RASSYMIND_BASE_URL: ${ASTRO_RASSYMIND_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844/v1}}
+      ASTRO_RASSYMIND_FAST_MODEL: ${ASTRO_RASSYMIND_FAST_MODEL:-rassy-fast}
+      ASTRO_RASSYMIND_MIND_MODEL: ${ASTRO_RASSYMIND_MIND_MODEL:-rassy-mind}
+      ASTRO_REPORT_MAX_PARALLEL_STEPS: ${ASTRO_REPORT_MAX_PARALLEL_STEPS:-2}
+      ASTRO_REPORT_MAX_MODEL_CALLS: ${ASTRO_REPORT_MAX_MODEL_CALLS:-24}
+      ASTRO_REPORT_MAX_TOOL_CALLS: ${ASTRO_REPORT_MAX_TOOL_CALLS:-48}
       ESOTERICA_EMBED_BASE_URL: ${ASTRO_RASSYMIND_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/v1}
       ESOTERICA_EMBED_MODEL: ${ASTRO_EMBED_MODEL:-rassy-embed}
       MAPBOX_TOKEN: ${ASTRO_MAPBOX_TOKEN:-}
@@ -85,7 +92,7 @@ services:
       && pnpm --store-dir $$PNPM_STORE_DIR install
       && pnpm --store-dir $$PNPM_STORE_DIR --filter @astro/astro-engine-swiss rebuild swisseph
       && pnpm --filter @astro/api exec prisma generate
-      && pnpm --filter @astro/api exec prisma db push --accept-data-loss
+      && pnpm --filter @astro/api exec prisma migrate deploy
       && pnpm --filter @astro/api exec tsx src/server.ts"
     depends_on:
       astro-postgres:

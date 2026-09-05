@@ -122,4 +122,10 @@ describe("NatalChartSchema", () => {
       timezoneSource: "request"
     });
   });
+
+  it("preserves explicit optional-point provenance", async () => {
+    const { NatalChartSchema: SourceNatalChartSchema } = await loadSourceSchema();
+    const parsed = SourceNatalChartSchema.parse({ ...sample, meta: { ...sample.meta, optionalPoints: { northNode: true, chiron: false } } });
+    expect(parsed.meta.optionalPoints).toEqual({ northNode: true, chiron: false });
+  });
 });

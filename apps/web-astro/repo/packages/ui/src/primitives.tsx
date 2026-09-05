@@ -6,7 +6,7 @@ export const PageShell: React.FC<{ children: React.ReactNode }> = ({ children })
   return <div className="page-shell">{children}</div>;
 };
 
-export const Section: React.FC<{ title?: string; children: React.ReactNode }> = ({
+export const Section: React.FC<{ title?: string; children: React.ReactNode; key?: React.Key }> = ({
   title,
   children
 }) => {
@@ -73,6 +73,6 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({
   />
 );
 
-export const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const Card: React.FC<{ children: React.ReactNode; key?: React.Key }> = ({ children }) => (
   <div className="astro-card">{children}</div>
 );

@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "@astro/astro-core": "workspace:*",
+    "@astro/astro-analysis": "workspace:*",
+    "@astro/astro-intelligence": "workspace:*",
     "@astro/astro-engine-astro": "workspace:*",
     "@astro/astro-engine-swiss": "workspace:*",
     "@astro/reading-core": "workspace:*",

@@ -40,6 +40,7 @@ export const NatalChartSchema = z.object({
     houseSystem: z.enum(["placidus", "whole-sign"]).optional(),
     engineId: z.string().optional(),
     engineVersion: z.string().optional(),
+    optionalPoints: z.object({ northNode: z.boolean(), chiron: z.boolean() }).optional(),
     ephemerisSource: z.string().optional(),
     calculationConfidence: z.enum(["canonical", "approximate", "degraded"]).optional(),
     zodiacMode: z.enum(["tropical"]).optional(),

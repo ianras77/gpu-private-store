@@ -1,0 +1,5 @@
+# RassyMind integration
+
+Production model infrastructure is server-side and lane-based. `readRassyMindConfig` normalizes the base URL, requires the server key, and defaults semantic work to `rassy-fast`, `rassy-mind`, `rassy-utility`, `rassy-embed`, and `rassy-rerank`. Capability qualification and exact provider package selection remain a release gate; no browser bundle receives the key.
+Structured report generation passes `structuredOutput: true` and fails closed unless `RASSYMIND_CAPABILITIES_JSON` explicitly qualifies the selected model lane. The catalog contract is intentionally server-side and status-only; a missing or negative capability does not silently downgrade a schema-bound request.
+The legacy `packages/reading-core` adapter now routes through RassyMind when `ASTRO_RASSYMIND_ENABLED=1` (the deprecated `RASSYMIND_ENABLED=1` alias is still accepted). Direct OpenAI-compatible routing is disabled by default and requires the explicit, temporary `ASTRO_LEGACY_LLM_ENABLED=1` switch. This switch is a migration escape hatch, not a production provider.

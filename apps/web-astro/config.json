@@ -16,7 +16,7 @@
   "short_desc": "Five branded astrology experiences on one shared API and data stack.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-astrology",
-  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
+  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844/v1"}],
   "supported_architectures": [
     "amd64"
   ],
