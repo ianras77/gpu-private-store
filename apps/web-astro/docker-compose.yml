@@ -24,7 +24,7 @@ services:
       - ${APP_DATA_DIR}/app-data/web-astro/named/astro-redis:/data
 
   astro-qdrant:
-    image: qdrant/qdrant:v1.13.6
+    image: qdrant/qdrant:v1.18.3
     restart: unless-stopped
     volumes:
       - ${APP_DATA_DIR}/app-data/web-astro/named/astro-qdrant:/qdrant/storage
