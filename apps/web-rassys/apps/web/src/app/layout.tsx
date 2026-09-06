@@ -5,6 +5,7 @@ import { EasterEggs } from "../components/EasterEggs";
 import { PersistentRadioPlayerProvider } from "../components/PersistentRadioPlayerProvider";
 import { SiteHeader } from "../components/SiteHeader";
 import { CloudParticles } from "../components/CloudParticles";
+import { RadioAtmosphere } from "../components/RadioAtmosphere";
 
 export const metadata: Metadata = {
   title: "Ian Rasmussen // Rassy // Mr Rassy Radio",
@@ -40,6 +41,7 @@ export default function RootLayout({
           <CloudParticles />
         </div>
         <PersistentRadioPlayerProvider>
+          <RadioAtmosphere />
           <div className="relative z-10">
             <SiteHeader />
             {children}

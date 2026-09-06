@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { z } from "zod";
 import {
   fetchListeningRoom,
@@ -97,6 +98,7 @@ type EasterEggRequestContext = {
   path: string;
   trigger: z.infer<typeof triggerSchema>;
   trail: string[];
+  sessionId: string;
 };
 
 type RouteSignal = {
@@ -179,6 +181,7 @@ const readRequestContext = (request: Request): EasterEggRequestContext => {
   const url = new URL(request.url);
   const parsedTrigger = triggerSchema.safeParse(url.searchParams.get("trigger"));
 
+  const sessionId = request.headers.get("cookie")?.match(/(?:^|;\s*)rassy_visitor=([^;]+)/)?.[1] ?? randomUUID();
   return {
     path: normalizePath(url.searchParams.get("path")),
     trigger: parsedTrigger.success ? parsedTrigger.data : "route",
@@ -187,6 +190,7 @@ const readRequestContext = (request: Request): EasterEggRequestContext => {
       .map((item) => item.replace(/\s+/g, " ").trim())
       .filter(Boolean)
       .slice(0, 6),
+    sessionId,
   };
 };
 
@@ -630,6 +634,7 @@ export async function GET(request: Request) {
       headers: {
         "Cache-Control": "no-store",
         "X-Robots-Tag": "noindex",
+        "Set-Cookie": `rassy_visitor=${requestContext.sessionId}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`,
       },
     },
   );

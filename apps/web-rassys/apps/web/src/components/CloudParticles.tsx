@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react";
 
 const palette = ["255, 79, 216", "66, 245, 255", "255, 230, 109"];
 const PARTICLE_COUNT = 56;
-const PIXEL_SIZE = 2;
-const PIXEL_STEP = 2.35;
-const PIXEL_OFFSET = 17.625;
+const PIXEL_SIZE = 3;
+const PIXEL_STEP = 3.35;
+const PIXEL_OFFSET = 25.125;
 const VISITORS = [
   ["unicorn", [
     "000000002000000", "000000012000000", "000000111000000", "000001111100000",
@@ -40,12 +40,12 @@ const VISITORS = [
   ]]
 ] as const;
 
-const visitorInk: Record<string, { body: string; glow: string; highlight: string }> = {
-  unicorn: { body: "255,230,109", glow: "255,79,216", highlight: "255,255,255" },
-  whaleshark: { body: "66,245,255", glow: "104,128,255", highlight: "220,255,255" },
-  flower: { body: "255,79,216", glow: "255,230,109", highlight: "255,190,245" },
-  trout: { body: "255,145,76", glow: "66,245,255", highlight: "255,230,109" },
-  jellyfish: { body: "190,120,255", glow: "66,245,255", highlight: "255,210,255" }
+const visitorInk: Record<string, { body: string; glow: string; highlight: string; label: string }> = {
+  unicorn: { body: "255,230,109", glow: "255,79,216", highlight: "255,255,255", label: "UNICORN" },
+  whaleshark: { body: "66,245,255", glow: "104,128,255", highlight: "220,255,255", label: "WHALESHARK" },
+  flower: { body: "255,79,216", glow: "255,230,109", highlight: "255,190,245", label: "NIGHT FLOWER" },
+  trout: { body: "255,145,76", glow: "66,245,255", highlight: "255,230,109", label: "TROUT" },
+  jellyfish: { body: "190,120,255", glow: "66,245,255", highlight: "255,210,255", label: "JELLYFISH" }
 };
 
 const createParticles = (count: number, width: number, height: number) =>
@@ -75,7 +75,7 @@ export function CloudParticles() {
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
     let particles = createParticles(PARTICLE_COUNT, width, height);
-    let visitor: { pattern: readonly string[]; x: number; y: number; born: number; phase: number; direction: number; trail: Array<{ x: number; y: number; phase: number }> } | null = null;
+    let visitor: { name: string; pattern: readonly string[]; x: number; y: number; born: number; phase: number; direction: number; trail: Array<{ x: number; y: number; phase: number }> } | null = null;
     let nextVisitor = performance.now() + 1800;
     let animationFrame = 0;
     let previousFrame = performance.now();
@@ -134,7 +134,7 @@ export function CloudParticles() {
           }
           lastVisitorIndex = choiceIndex;
           const choice = VISITORS[choiceIndex];
-          visitor = { pattern: choice[1], x: Math.random() * Math.max(40, width - 90), y: height + 30, born: now, phase: Math.random() * Math.PI * 2, direction: Math.random() > 0.5 ? 1 : -1, trail: [] };
+          visitor = { name: choice[0], pattern: choice[1], x: Math.random() * Math.max(60, width - 110), y: height + 36, born: now, phase: Math.random() * Math.PI * 2, direction: Math.random() > 0.5 ? 1 : -1, trail: [] };
           // Keep the ambient layer continuously inhabited: the next visitor is
           // ready before the current one can leave even on a short viewport.
           nextVisitor = now + 3500;
@@ -149,7 +149,7 @@ export function CloudParticles() {
           const fade = Math.min(1, age / 1400, Math.max(0, (height - visitor.y) / 90));
           const shimmer = 0.82 + Math.sin(visitor.phase * 2.5) * 0.18;
           const visitorPattern = visitor.pattern;
-          const ink = visitorInk[visitorPattern === VISITORS[0][1] ? "unicorn" : visitorPattern === VISITORS[1][1] ? "whaleshark" : visitorPattern === VISITORS[2][1] ? "flower" : visitorPattern === VISITORS[3][1] ? "trout" : "jellyfish"];
+          const ink = visitorInk[visitor.name];
           ctx.save();
           ctx.globalCompositeOperation = "lighter";
           ctx.shadowColor = `rgba(${ink.glow},0.7)`;
@@ -169,18 +169,24 @@ export function CloudParticles() {
           ctx.rotate(Math.sin(visitor.phase) * 0.06);
           ctx.globalAlpha = fade * shimmer;
           // Keep the sprite grid crisp; the second pass supplies the haze.
-          ctx.shadowBlur = 5;
+          ctx.shadowBlur = 3;
           visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
             if (cell !== "0") {
               ctx.fillStyle = cell === "2" ? `rgba(${ink.highlight},0.9)` : cell === "3" ? "rgba(8,0,17,0.95)" : `rgba(${ink.body},0.86)`;
               ctx.fillRect(Math.round(colIndex * PIXEL_STEP - PIXEL_OFFSET), Math.round(rowIndex * PIXEL_STEP - PIXEL_OFFSET), PIXEL_SIZE, PIXEL_SIZE);
             }
           }));
-          ctx.shadowBlur = 28;
-          ctx.globalAlpha = fade * 0.12;
+          ctx.shadowBlur = 18;
+          ctx.globalAlpha = fade * 0.08;
           visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
             if (cell !== "0") ctx.fillRect(colIndex * PIXEL_STEP - PIXEL_OFFSET, rowIndex * PIXEL_STEP - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
           }));
+          ctx.globalCompositeOperation = "source-over";
+          ctx.shadowBlur = 0;
+          ctx.globalAlpha = fade * 0.72;
+          ctx.font = "600 9px ui-monospace, SFMono-Regular, Menlo, monospace";
+          ctx.fillStyle = `rgba(${ink.highlight},0.78)`;
+          ctx.fillText(ink.label, -PIXEL_OFFSET, -PIXEL_OFFSET - 8);
           ctx.restore();
           if (visitor.y < -50) visitor = null;
         }

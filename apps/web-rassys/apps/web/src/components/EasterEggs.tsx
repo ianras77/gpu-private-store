@@ -14,24 +14,24 @@ type EasterEggPayload = {
   hint?: string;
   href?: string;
   sigil?: string;
-  source?: "cheshire" | "fallback";
+  source?: "mastra" | "fallback";
   at?: string;
 };
 
 type EasterEggTrigger = "route" | "interval" | "manual" | "secret-word";
 
-const TRAIL_STORAGE_KEY = "rassy-cat-signal-trail";
+const TRAIL_STORAGE_KEY = "rassy-signal-desk-trail";
 const MAX_TRAIL_ENTRIES = 6;
 
 const fallbackCurios: EasterEggPayload[] = [
   {
-    badge: "Cat Signal",
+    badge: "Signal Desk",
     title: "A fresh corner just blinked.",
     body: "Somewhere on the site, Mr Rassy is turning a practical surface into a delightful one.",
     cta: "Enter the booth",
     hint: "The loudest room is still the radio tower. Start there and listen for the next turn.",
     href: "/radio",
-    sigil: "gold paw",
+    sigil: "gold spark",
     source: "fallback",
   },
   {
@@ -98,7 +98,7 @@ const normalizePayload = (
       typeof input?.sigil === "string" && input.sigil.trim()
         ? input.sigil.trim()
         : fallback.sigil,
-    source: input?.source === "cheshire" ? "cheshire" : fallback.source,
+    source: input?.source === "mastra" ? "mastra" : fallback.source,
     at: typeof input?.at === "string" && input.at ? input.at : undefined,
   };
 };
@@ -227,7 +227,7 @@ export function EasterEggs() {
       sequenceRef.current.push(event.key.toLowerCase());
       if (sequenceRef.current.length > 5) sequenceRef.current.shift();
       const signal = sequenceRef.current.join("");
-      if (signal.endsWith("cat") || signal.endsWith("rassy")) {
+      if (signal.endsWith("signal") || signal.endsWith("rassy")) {
         void fetchCurio(true, "secret-word");
       }
     };
@@ -260,7 +260,7 @@ export function EasterEggs() {
         </span>
         <span className="flex min-w-0 flex-col">
           <span className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">
-            Cat Signal
+            Signal Desk
           </span>
           <span className="truncate text-sm font-semibold text-white group-hover:text-glow">
             {curio.badge}
@@ -283,7 +283,7 @@ export function EasterEggs() {
                 <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.32em] text-cloud/55">
                   <span>{curio.badge}</span>
                   <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 tracking-[0.2em] text-cloud/45">
-                    {curio.source === "cheshire" ? "Mr Rassy live" : "Site whisper"}
+                    {curio.source === "mastra" ? "Mastra live" : "Site whisper"}
                   </span>
                 </div>
                 <div className="mt-3 text-xl font-semibold text-white">
@@ -294,7 +294,7 @@ export function EasterEggs() {
                 type="button"
                 className="rounded-full border border-white/10 bg-black/20 p-2 text-cloud/65 transition hover:border-white/20 hover:text-white"
                 onClick={() => setOpen(false)}
-                aria-label="Dismiss cat signal"
+                aria-label="Dismiss signal desk"
               >
                 <X size={14} />
               </button>
@@ -338,7 +338,7 @@ export function EasterEggs() {
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase tracking-[0.22em] text-cloud/45">
               <div>
-                Type <span className="text-cloud/70">cat</span> or{" "}
+                Type <span className="text-cloud/70">signal</span> or{" "}
                 <span className="text-cloud/70">rassy</span> to pull a fresh
                 live whisper.
               </div>
