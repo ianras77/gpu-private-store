@@ -130,6 +130,15 @@ services:
         condition: service_healthy
     networks:
       - internal
+      - tipi_main_network
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=runtipi_tipi_main_network
+      - traefik.http.routers.web-rassys.rule=Host(`rassys.com`) || Host(`www.rassys.com`)
+      - traefik.http.routers.web-rassys.entrypoints=websecure
+      - traefik.http.routers.web-rassys.tls=true
+      - traefik.http.routers.web-rassys.tls.certresolver=myresolver
+      - traefik.http.services.web-rassys.loadbalancer.server.port=3000
     volumes:
       # Authored thoughts intentionally live in the Runtipi media data area.
       - ${ROOT_FOLDER_HOST:-.}/media/data/web-rassys:${BLOG_STORAGE_PATH:-/media/web-rassys}
@@ -430,3 +439,6 @@ x-runtipi:
 
 networks:
   internal: null
+  tipi_main_network:
+    external: true
+    name: runtipi_tipi_main_network
