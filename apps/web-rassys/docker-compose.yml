@@ -153,6 +153,8 @@ services:
       start_period: 30s
     image: runtipi-local-web-rassys-web:latest
     pull_policy: build
+    ports:
+      - "3187:3000"
     x-runtipi:
       is_main: true
       internal_port: 3000
