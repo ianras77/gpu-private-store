@@ -56,8 +56,8 @@ export function SiteHeader() {
             className="group relative flex min-w-0 items-center gap-2.5 rounded-xl px-1 py-1 text-white transition hover:text-glow"
           >
             <span className="glow-dot h-2.5 w-2.5 rounded-full" />
-            <span className="text-sm font-semibold tracking-[0.04em] text-white sm:text-[15px]">
-              RASSY’S <span className="text-glow">·</span> LITTLE UNIVERSE
+            <span className="whitespace-nowrap text-[clamp(.7rem,2.4vw,.94rem)] font-semibold tracking-[0.04em] text-white">
+              Rassy’s <span className="text-glow">dot</span> Com
             </span>
           </Link>
 
