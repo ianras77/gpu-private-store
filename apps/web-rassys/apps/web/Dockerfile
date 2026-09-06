@@ -44,7 +44,7 @@ ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends wget libheif-examples \
+  && apt-get install -y --no-install-recommends wget \
   && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/apps/web/.next-usr-a/standalone ./
 COPY --from=builder /app/apps/web/.next-usr-a/static ./.next-usr-a/static

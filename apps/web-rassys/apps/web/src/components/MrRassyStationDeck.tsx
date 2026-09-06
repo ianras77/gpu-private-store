@@ -13,8 +13,32 @@ export function MrRassyStationDeck({ compact = false }: { compact?: boolean }) {
   const [reply, setReply] = useState("");
   const [status, setStatus] = useState("");
   const [sending, setSending] = useState(false);
+  const [pendingSince, setPendingSince] = useState<number | null>(null);
   const clientIdRef = useRef<string | null>(null);
   useEffect(() => { clientIdRef.current = ensureRadioChatClientId(); }, []);
+  useEffect(() => {
+    if (!pendingSince || !clientIdRef.current) return;
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/radio/chat?clientId=${encodeURIComponent(clientIdRef.current!)}`);
+        const payload = await response.json().catch(() => null);
+        const messages = Array.isArray(payload?.messages) ? payload.messages : [];
+        const answer = messages.find((item: { role?: string; createdAt?: number; text?: string }) =>
+          item.role === "dj" && Number(item.createdAt) >= pendingSince,
+        );
+        if (answer?.text) {
+          setReply(answer.text);
+          setStatus("Back on the mic.");
+          setPendingSince(null);
+        }
+      } catch {
+        // The next interval will retry without interrupting the player.
+      }
+    };
+    void poll();
+    const timer = window.setInterval(() => void poll(), 1500);
+    return () => window.clearInterval(timer);
+  }, [pendingSince]);
   const send = async () => {
     const text = message.trim();
     if (!text || sending) return;
@@ -29,6 +53,12 @@ export function MrRassyStationDeck({ compact = false }: { compact?: boolean }) {
       if (!response.ok) throw new Error(payload?.error ?? "radio_unavailable");
       setReply(payload?.reply?.message ?? payload?.reply?.text ?? (payload?.pending ? "Mr Rassy heard you. He’s shaping a reply — stay on the line." : "Mr Rassy heard you."));
       setStatus(payload?.pending ? "The booth is thinking…" : "Back on the mic.");
+      if (payload?.pending) {
+        const latestListener = Array.isArray(payload?.messages)
+          ? payload.messages.filter((item: { role?: string }) => item.role === "listener").at(-1)
+          : null;
+        setPendingSince(Number(latestListener?.createdAt ?? Date.now()));
+      }
       setMessage("");
     } catch { setStatus("The booth is temporarily off-air. Try again in a moment."); }
     finally { setSending(false); }
