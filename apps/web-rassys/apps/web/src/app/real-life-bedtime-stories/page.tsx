@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BedtimeStoriesHero } from "../../components/BedtimeStoriesHero";
 import { Footer } from "../../components/Footer";
 import { BedtimeStoriesPanel } from "../../components/BedtimeStoriesPanel";
+import { RoomShell } from "../../components/RoomShell";
 
 export const metadata: Metadata = {
   title: "Real Life Bedtime Stories // Ian Rasmussen",
@@ -11,10 +12,10 @@ export const metadata: Metadata = {
 
 export default function RealLifeBedtimeStoriesPage() {
   return (
-    <main className="min-h-screen pb-6">
+    <RoomShell theme="stories" channel="stories" agent="storyteller"><main className="min-h-screen pb-6">
       <BedtimeStoriesHero />
       <BedtimeStoriesPanel />
       <Footer />
-    </main>
+    </main></RoomShell>
   );
 }

@@ -35,7 +35,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="relative overflow-hidden border-b border-white/8 bg-[#05010d]/72 shadow-[0_14px_36px_rgba(0,0,0,0.22)] backdrop-blur-2xl">
+      <div className="relative overflow-hidden border-b border-white/10 bg-[#090313]/88 shadow-[0_14px_36px_rgba(0,0,0,0.22)] backdrop-blur-2xl">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(255,230,109,0.14),transparent_26%),radial-gradient(circle_at_82%_12%,rgba(66,245,255,0.12),transparent_28%),linear-gradient(90deg,rgba(255,79,216,0.06),transparent_32%,transparent_68%,rgba(66,245,255,0.06))]"
           aria-hidden="true"
@@ -50,10 +50,10 @@ export function SiteHeader() {
         />
 
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-          <div className="flex min-h-[52px] items-center gap-3 py-1.5 sm:min-h-[56px]">
+          <div className="flex min-h-[58px] items-center gap-4 py-2 sm:min-h-[64px]">
           <Link
             href="/"
-            className="group relative flex min-w-0 items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-white shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-white/16 hover:bg-white/[0.06]"
+            className="group relative flex min-w-0 items-center gap-2.5 rounded-xl px-1 py-1 text-white transition hover:text-glow"
           >
             <span className="glow-dot h-2.5 w-2.5 rounded-full" />
             <span className="text-sm font-semibold tracking-[0.04em] text-white sm:text-[15px]">
@@ -64,12 +64,12 @@ export function SiteHeader() {
             <div className="hidden min-w-0 flex-1 justify-center md:flex">
               <nav
                 aria-label="Primary"
-                className="flex min-w-0 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-1 shadow-[0_14px_34px_rgba(0,0,0,0.16)]"
+                className="flex min-w-0 items-center gap-0.5 rounded-2xl border border-white/10 bg-black/20 px-1.5 py-1 shadow-[0_14px_34px_rgba(0,0,0,0.16)]"
               >
                 {publicRassysApps.map((link) => (
                   <Link
                     key={link.href}
-                    className={`rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] transition ${
+                      className={`rounded-xl px-3 py-2 text-[10px] uppercase tracking-[0.18em] transition ${
                       isActiveLink(link.href)
                         ? "bg-[linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,79,216,0.12))] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_8px_18px_rgba(0,0,0,0.16)]"
                         : "text-cloud/62 hover:bg-white/[0.05] hover:text-white"
@@ -118,7 +118,7 @@ export function SiteHeader() {
           <div className="pb-2 md:hidden">
             <nav
               aria-label="Quick links"
-              className="flex gap-1 overflow-x-auto rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-1 text-[9px] uppercase tracking-[0.2em] text-cloud/64 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="flex gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-black/20 px-1.5 py-1 text-[9px] uppercase tracking-[0.18em] text-cloud/64 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {publicRassysApps.map((link) => (
                 <Link

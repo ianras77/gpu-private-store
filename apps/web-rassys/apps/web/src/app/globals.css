@@ -47,6 +47,13 @@ html {
   scroll-behavior: smooth;
 }
 
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 420ms; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
+::view-transition-old(root) { animation-name: room-out; }
+::view-transition-new(root) { animation-name: room-in; }
+@keyframes room-in { from { opacity: 0; transform: translateY(12px) scale(.99); } to { opacity: 1; transform: none; } }
+@keyframes room-out { from { opacity: 1; } to { opacity: 0; transform: translateY(-8px); } }
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -158,6 +165,17 @@ li {
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), 0 0 35px rgba(255, 79, 216, 0.2);
   backdrop-filter: blur(18px) saturate(140%);
 }
+
+.room-shell { --room-accent: 66,245,255; --room-secondary: 255,79,216; position: relative; min-height: calc(100vh - 64px); isolation: isolate; container-type: inline-size; }
+.room-shell-content { position: relative; z-index: 1; }
+.room-shell-glow { position: fixed; inset: 64px 0 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 12% 8%, rgba(var(--room-accent),.14), transparent 30%), radial-gradient(circle at 88% 18%, rgba(var(--room-secondary),.12), transparent 32%); opacity: .8; }
+.room-shell-radio { --room-accent: 255,230,109; --room-secondary: 255,79,216; }
+.room-shell-table { --room-accent: 255,79,216; --room-secondary: 140,91,255; }
+.room-shell-observatory { --room-accent: 66,245,255; --room-secondary: 120,255,150; }
+.room-shell-stories { --room-accent: 190,120,255; --room-secondary: 66,245,255; }
+.room-shell-archive { --room-accent: 255,190,120; --room-secondary: 255,230,109; }
+.room-shell-notebook { --room-accent: 120,180,255; --room-secondary: 66,245,255; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } ::view-transition-old(root), ::view-transition-new(root) { animation: none; } }
 
 .home-rassy-opening {
   background: radial-gradient(circle at 8% 10%, rgba(255, 230, 109, .18), transparent 28%), radial-gradient(circle at 88% 20%, rgba(66, 245, 255, .16), transparent 30%), linear-gradient(135deg, rgba(15, 8, 32, .92), rgba(35, 7, 43, .84));

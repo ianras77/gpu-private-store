@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Footer } from "../../components/Footer";
 import { PhotosGalleryPage } from "../../components/PhotosGalleryPage";
+import { RoomShell } from "../../components/RoomShell";
 
 export const metadata: Metadata = {
   title: "Family Photos // Ian Rasmussen",
@@ -10,9 +11,9 @@ export const metadata: Metadata = {
 
 export default function PhotosPage() {
   return (
-    <main className="min-h-screen">
+    <RoomShell theme="archive" channel="family" agent="family-archivist"><main className="min-h-screen">
       <PhotosGalleryPage />
       <Footer />
-    </main>
+    </main></RoomShell>
   );
 }

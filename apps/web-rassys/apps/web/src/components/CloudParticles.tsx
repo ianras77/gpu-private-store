@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react";
 
 const palette = ["255, 79, 216", "66, 245, 255", "255, 230, 109"];
-const PARTICLE_COUNT = 56;
-const PIXEL_SIZE = 3;
-const PIXEL_STEP = 3.35;
-const PIXEL_OFFSET = 25.125;
+const PARTICLE_COUNT = 42;
+const PIXEL_SIZE = 4;
+const PIXEL_STEP = 4.35;
+const PIXEL_OFFSET = 32.625;
 const VISITORS = [
   ["unicorn", [
     "000000002000000", "000000012000000", "000000111000000", "000001111100000",
@@ -183,10 +183,6 @@ export function CloudParticles() {
           }));
           ctx.globalCompositeOperation = "source-over";
           ctx.shadowBlur = 0;
-          ctx.globalAlpha = fade * 0.72;
-          ctx.font = "600 9px ui-monospace, SFMono-Regular, Menlo, monospace";
-          ctx.fillStyle = `rgba(${ink.highlight},0.78)`;
-          ctx.fillText(ink.label, -PIXEL_OFFSET, -PIXEL_OFFSET - 8);
           ctx.restore();
           if (visitor.y < -50) visitor = null;
         }

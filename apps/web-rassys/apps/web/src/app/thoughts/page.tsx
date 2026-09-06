@@ -4,6 +4,7 @@ import remarkGfm from "remark-gfm";
 import { ThoughtImageSurface } from "../../components/ThoughtImageSurface";
 import { listThoughts } from "../../lib/thoughts";
 import { Footer } from "../../components/Footer";
+import { RoomShell } from "../../components/RoomShell";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -42,7 +43,7 @@ export default async function ThoughtsPage() {
   const thoughts = await listThoughts();
 
   return (
-    <main className="min-h-screen overflow-hidden">
+    <RoomShell theme="notebook" channel="notebook" agent="notebook-editor"><main className="min-h-screen overflow-hidden">
       <section className="relative mx-auto max-w-6xl px-6 pb-12 pt-12 sm:pt-20">
         <div className="pointer-events-none absolute -right-24 -top-20 h-80 w-80 rounded-full bg-glow/10 blur-3xl" />
         <div className="relative grid gap-8 lg:grid-cols-[1.15fr_.85fr] lg:items-end">
@@ -234,6 +235,6 @@ export default async function ThoughtsPage() {
         )}
       </div>
       <Footer />
-    </main>
+    </main></RoomShell>
   );
 }
