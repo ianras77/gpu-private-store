@@ -326,6 +326,7 @@ services:
       ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-}
       STREAM_MOUNT: ${STREAM_MOUNT:-/live.mp3}
       STREAM_LOSSLESS_MOUNT: ${STREAM_LOSSLESS_MOUNT:-/live-lossless.ogg}
+      STREAM_HIRES_MOUNT: ${STREAM_HIRES_MOUNT:-/live-hires.ogg}
       STATION_NAME: ${STATION_NAME:-Mr Rassy Radio}
       STATION_DESCRIPTION: ${STATION_DESCRIPTION:-Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.}
       STATION_GENRE: ${STATION_GENRE:-eclectic}
@@ -364,6 +365,7 @@ services:
       ICECAST_LOSSLESS_USERNAME: ${ICECAST_LOSSLESS_USERNAME:-source-lossless}
       STREAM_MOUNT: ${STREAM_MOUNT:-/live.mp3}
       STREAM_LOSSLESS_MOUNT: ${STREAM_LOSSLESS_MOUNT:-/live-lossless.ogg}
+      STREAM_HIRES_MOUNT: ${STREAM_HIRES_MOUNT:-/live-hires.ogg}
     networks:
       - internal
     ports:

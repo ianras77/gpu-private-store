@@ -10,6 +10,11 @@ const losslessUpstreamStreamUrl =
   process.env.STREAM_LOSSLESS_URL ||
   process.env.NEXT_PUBLIC_STREAM_LOSSLESS_URL ||
   "http://icecast:8000/live-lossless.ogg";
+const hiresUpstreamStreamUrl =
+  process.env.STREAM_HIRES_PROXY_URL ||
+  process.env.STREAM_HIRES_URL ||
+  process.env.NEXT_PUBLIC_STREAM_HIRES_URL ||
+  "http://icecast:8000/live-hires.ogg";
 
 const requestHeaderAllowlist = ["range", "icy-metadata", "user-agent"];
 const responseHeaderAllowlist = [
@@ -40,7 +45,7 @@ const copyHeaders = (source: Headers, target: Headers, names: string[]) => {
 const resolveUpstreamStreamUrl = (request: Request) => {
   const url = new URL(request.url);
   const quality = url.searchParams.get("quality")?.toLowerCase();
-  return quality === "lossless" ? losslessUpstreamStreamUrl : mp3UpstreamStreamUrl;
+  return quality === "hires" ? hiresUpstreamStreamUrl : quality === "lossless" ? losslessUpstreamStreamUrl : mp3UpstreamStreamUrl;
 };
 
 const proxyStream = async (request: Request, method: "GET" | "HEAD") => {
@@ -48,7 +53,9 @@ const proxyStream = async (request: Request, method: "GET" | "HEAD") => {
   copyHeaders(request.headers, upstreamHeaders, requestHeaderAllowlist);
   const upstreamStreamUrl = resolveUpstreamStreamUrl(request);
   const quality =
-    new URL(request.url).searchParams.get("quality")?.toLowerCase() === "lossless"
+    new URL(request.url).searchParams.get("quality")?.toLowerCase() === "hires"
+      ? "hires"
+      : new URL(request.url).searchParams.get("quality")?.toLowerCase() === "lossless"
       ? "lossless"
       : "mp3";
 

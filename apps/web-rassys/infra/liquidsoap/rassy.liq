@@ -24,6 +24,7 @@ lossless_icecast_user = env("ICECAST_LOSSLESS_USERNAME", "source-lossless")
 icecast_password = env("ICECAST_SOURCE_PASSWORD", "hackme")
 mount = env("STREAM_MOUNT", "/live.mp3")
 lossless_mount = env("STREAM_LOSSLESS_MOUNT", "/live-lossless.ogg")
+hires_mount = env("STREAM_HIRES_MOUNT", "/live-hires.ogg")
 station_name = env("STATION_NAME", "Mr Rassy Radio")
 station_desc = env("STATION_DESCRIPTION", "Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.")
 station_genre = env("STATION_GENRE", "eclectic")
@@ -101,6 +102,7 @@ processed_radio =
 
 radio = mksafe(processed_radio)
 lossless_radio = mksafe(processed_radio)
+hires_radio = mksafe(processed_radio)
 
 # Register a skip command for telnet
 
@@ -140,4 +142,18 @@ output.icecast(
   genre=station_genre,
   public=true,
   lossless_radio
+)
+
+output.icecast(
+  %ogg(%flac, channels=2, samplerate=96000),
+  host=icecast_host,
+  port=icecast_port,
+  user=lossless_icecast_user,
+  password=icecast_password,
+  mount=hires_mount,
+  name="#{station_name} · Native Hi-Res",
+  description="#{station_desc} Native 24-bit / 96 kHz lane.",
+  genre=station_genre,
+  public=true,
+  hires_radio
 )

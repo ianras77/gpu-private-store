@@ -12,6 +12,11 @@ const losslessStreamUrl =
   process.env.STREAM_LOSSLESS_URL ||
   process.env.NEXT_PUBLIC_STREAM_LOSSLESS_URL ||
   "http://icecast:8000/live-lossless.ogg";
+const hiresStreamUrl =
+  process.env.STREAM_HIRES_PROXY_URL ||
+  process.env.STREAM_HIRES_URL ||
+  process.env.NEXT_PUBLIC_STREAM_HIRES_URL ||
+  "http://icecast:8000/live-hires.ogg";
 
 const radioBaseUrl = serverConfig.RADIO_CONTROLLER_URL.replace(/\/$/, "");
 
@@ -160,9 +165,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const [mp3, lossless, controller] = await Promise.all([
+  const [mp3, lossless, hires, controller] = await Promise.all([
     probeStream(mp3StreamUrl),
     probeStream(losslessStreamUrl),
+    probeStream(hiresStreamUrl),
     probeController(),
   ]);
 
@@ -192,6 +198,10 @@ export async function GET() {
         lossless: {
           ...lossless,
           ok: losslessOk,
+        },
+        hires: {
+          ...hires,
+          ok: hires.ok,
         },
       },
     },
