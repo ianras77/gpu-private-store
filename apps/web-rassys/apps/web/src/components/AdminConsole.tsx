@@ -47,6 +47,7 @@ export function AdminConsole() {
   const [imageAlt, setImageAlt] = useState("");
   const [imageCaption, setImageCaption] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedAssets, setSelectedAssets] = useState<File[]>([]);
   const [thoughtMessage, setThoughtMessage] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
 
@@ -110,6 +111,7 @@ export function AdminConsole() {
     for (const image of selectedImages) {
       formData.append("images", image);
     }
+    for (const asset of selectedAssets) formData.append("assets", asset);
 
     const res = await fetch("/api/admin/thoughts", {
       method: "POST",
@@ -123,6 +125,7 @@ export function AdminConsole() {
       setImageAlt("");
       setImageCaption("");
       setSelectedImages([]);
+      setSelectedAssets([]);
     } else {
       const payload = await res.json().catch(() => null);
       setThoughtMessage(
@@ -224,7 +227,7 @@ export function AdminConsole() {
       <Card className="w-full">
         <h2 className="section-title text-2xl">Thoughts Studio</h2>
         <p className="mt-2 text-sm text-cloud/80">
-          Write the thought, attach images if you want them, then either polish
+          Write the thought, attach images, audio, video, PDFs, or other files, then either polish
           it or ship it exactly as written.
         </p>
         <div className="mt-6 flex flex-col gap-4">
@@ -313,6 +316,14 @@ export function AdminConsole() {
                 No images attached yet.
               </div>
             )}
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-black/20 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div><div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Linked project files</div><div className="mt-1 text-sm text-cloud/75">Voice notes, recordings, PDFs, Markdown, and reference files stay attached to this post.</div></div>
+              <label className="rave-chip cursor-pointer rounded-full px-4 py-2 text-xs uppercase tracking-[0.25em] text-cloud/80">Attach files<input type="file" multiple className="hidden" onChange={(event) => setSelectedAssets((current) => [...current, ...Array.from(event.target.files ?? [])])} /></label>
+            </div>
+            {selectedAssets.length ? <div className="mt-4 flex flex-wrap gap-2">{selectedAssets.map((file) => <span key={`${file.name}-${file.size}`} className="rounded-full border border-white/10 px-3 py-2 text-xs text-cloud/75">{file.name}</span>)}</div> : <div className="mt-4 text-sm text-cloud/60">No extra files attached yet.</div>}
           </div>
 
           <div className="flex flex-wrap gap-3">

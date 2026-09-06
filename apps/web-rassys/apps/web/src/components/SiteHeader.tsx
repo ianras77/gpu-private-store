@@ -57,7 +57,7 @@ export function SiteHeader() {
           >
             <span className="glow-dot h-2.5 w-2.5 rounded-full" />
             <span className="text-sm font-semibold tracking-[0.04em] text-white sm:text-[15px]">
-              RASSY’S <span className="text-glow">·</span> COM
+              RASSY’S <span className="text-glow">·</span> LITTLE UNIVERSE
             </span>
           </Link>
 
@@ -90,7 +90,7 @@ export function SiteHeader() {
                 rel="noreferrer"
                 className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[9px] uppercase tracking-[0.2em] text-cloud/64 transition hover:border-white/16 hover:text-white lg:inline-flex"
               >
-                Rasies
+                Visit Rasies
                 <ArrowUpRight size={12} />
               </a>
 

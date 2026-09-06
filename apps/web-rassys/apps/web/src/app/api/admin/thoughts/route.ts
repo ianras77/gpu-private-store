@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdmin } from "../../../../lib/admin-auth";
-import { requestCheshireJson } from "../../../../lib/cheshire-client";
 import { requestRassyChannelText } from "../../../../lib/rassy-intelligence-client";
 import { saveRassyArtifact } from "../../../../lib/artifacts";
 import {
   createThought,
   isSupportedThoughtImageFile,
   saveThoughtImages,
+  isSupportedThoughtAssetFile,
+  saveThoughtAssets,
 } from "../../../../lib/thoughts";
 
 export const runtime = "nodejs";
@@ -27,7 +28,7 @@ const responseSchema = z.object({
   excerpt: z.string().min(20).max(220).optional(),
 });
 
-const callCheshire = async (seed: string, title?: string) => {
+const callNotebookEditor = async (seed: string, title?: string) => {
   try {
     const text = await requestRassyChannelText("notebook", JSON.stringify({
       task: "Expand this approved admin seed into a draft notebook/blog post.",
@@ -47,40 +48,6 @@ const callCheshire = async (seed: string, title?: string) => {
     const start = clean.indexOf("{");
     const end = clean.lastIndexOf("}");
     return responseSchema.parse(JSON.parse(start >= 0 && end > start ? clean.slice(start, end + 1) : clean));
-  } catch {
-    // Compatibility fallback remains until the intelligence path is fully qualified.
-  }
-  try {
-    const response = await requestCheshireJson(
-      {
-        model: process.env.CHESHIRE_MODEL ?? "rassy-mind",
-        temperature: 0.5,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are the editor for Ian Rasmussen's site. " +
-              "Expand the seed into a clear, personal blog post. " +
-              'Return ONLY strict JSON: {"title":"...","body":"...","excerpt":"..."}.',
-          },
-          {
-            role: "user",
-            content: JSON.stringify({
-              seed,
-              title,
-              guidance: "Keep it honest, specific, and punchy.",
-            }),
-          },
-        ],
-        lane: "admin",
-        priority: "low",
-        purpose: "admin-thought",
-        queueWaitMs: 8000,
-        timeoutMs: 35000,
-      },
-      responseSchema,
-    );
-    return response.data;
   } catch {
     return null;
   }
@@ -121,15 +88,17 @@ const parseRequestBody = async (request: Request) => {
         (value): value is File => value instanceof File && value.size > 0,
       );
 
-    return { parsed, files };
+    const assets = form.getAll("assets").filter((value): value is File => value instanceof File && value.size > 0);
+
+    return { parsed, files, assets };
   }
 
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") {
-    return { parsed: null, files: [] as File[] };
+    return { parsed: null, files: [] as File[], assets: [] as File[] };
   }
 
-  return { parsed: bodySchema.safeParse(body), files: [] as File[] };
+  return { parsed: bodySchema.safeParse(body), files: [] as File[], assets: [] as File[] };
 };
 
 export async function POST(request: Request) {
@@ -137,7 +106,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const { parsed, files } = await parseRequestBody(request);
+  const { parsed, files, assets } = await parseRequestBody(request);
   if (!parsed) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
@@ -154,6 +123,9 @@ export async function POST(request: Request) {
   if (files.some((file) => !isSupportedThoughtImageFile(file))) {
     return NextResponse.json({ error: "invalid_image" }, { status: 400 });
   }
+  if (assets.length > 16 || assets.some((file) => file.size > 32 * 1024 * 1024 || !isSupportedThoughtAssetFile(file))) {
+    return NextResponse.json({ error: "invalid_asset" }, { status: 400 });
+  }
 
   const { seed, title, mode, imageAlt, imageCaption } = parsed.data;
   let finalTitle = title?.trim();
@@ -162,7 +134,7 @@ export async function POST(request: Request) {
   let source = "manual";
 
   if (mode !== "raw") {
-    const generated = await callCheshire(finalBody, finalTitle);
+    const generated = await callNotebookEditor(finalBody, finalTitle);
     if (generated) {
       finalTitle = generated.title;
       finalBody = generated.body;
@@ -172,6 +144,7 @@ export async function POST(request: Request) {
   }
 
   let images = [] as Awaited<ReturnType<typeof saveThoughtImages>>;
+  let linkedAssets = [] as Awaited<ReturnType<typeof saveThoughtAssets>>;
   if (files.length) {
     try {
       images = await saveThoughtImages(files, {
@@ -188,6 +161,13 @@ export async function POST(request: Request) {
       );
     }
   }
+  if (assets.length) {
+    try {
+      linkedAssets = await saveThoughtAssets(assets, finalTitle ?? title ?? "Notebook post");
+    } catch (error) {
+      return NextResponse.json({ error: "asset_processing_failed", detail: error instanceof Error ? error.message : "Asset processing failed." }, { status: 400 });
+    }
+  }
 
   const thought = await createThought({
     title: finalTitle ?? "Untitled Thought",
@@ -195,6 +175,7 @@ export async function POST(request: Request) {
     excerpt: finalExcerpt,
     source,
     images,
+    assets: linkedAssets,
   });
 
   if (source === "editor") {

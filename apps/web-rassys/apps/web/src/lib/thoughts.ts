@@ -8,6 +8,12 @@ const thoughtImageSchema = z.object({
   alt: z.string(),
   caption: z.string().optional(),
 });
+const thoughtAssetSchema = z.object({
+  src: z.string(),
+  name: z.string(),
+  type: z.string(),
+  kind: z.enum(["image", "audio", "video", "document", "file"]),
+});
 
 const thoughtSchema = z.object({
   id: z.string(),
@@ -18,11 +24,13 @@ const thoughtSchema = z.object({
   updatedAt: z.string().optional(),
   source: z.string().optional(),
   images: z.array(thoughtImageSchema).optional(),
+  assets: z.array(thoughtAssetSchema).optional(),
   assetBasePath: z.string().optional(),
 });
 
 export type Thought = z.infer<typeof thoughtSchema>;
 export type ThoughtImage = z.infer<typeof thoughtImageSchema>;
+export type ThoughtAsset = z.infer<typeof thoughtAssetSchema>;
 
 type ThoughtFrontMatter = {
   title?: string;
@@ -83,6 +91,10 @@ const supportedUploadExtensions = new Set([
   ".avif",
   ".heic",
   ".heif",
+]);
+const supportedAssetExtensions = new Set([
+  ...thoughtAssetExtensions,
+  ".txt", ".md", ".markdown", ".json", ".csv", ".doc", ".docx",
 ]);
 
 const ensureStorage = async () => {
@@ -423,6 +435,7 @@ export const createThought = async (input: {
   excerpt?: string;
   source?: string;
   images?: ThoughtImage[];
+  assets?: ThoughtAsset[];
 }) => {
   await ensureStorage();
   const now = new Date();
@@ -437,6 +450,7 @@ export const createThought = async (input: {
     createdAt: now.toISOString(),
     source: input.source,
     images: input.images ?? [],
+    assets: input.assets ?? [],
   };
   await fs.writeFile(
     path.join(storagePath, `${id}.json`),
@@ -467,6 +481,31 @@ export const isSupportedThoughtImageFile = (
     heicImageExtensionByMime[file.type] ||
     supportedUploadExtensions.has(ext),
   );
+};
+
+export const isSupportedThoughtAssetFile = (file: Pick<File, "name">) =>
+  supportedAssetExtensions.has(path.extname(file.name || "").toLowerCase());
+
+const assetKind = (file: File): ThoughtAsset["kind"] => {
+  if (file.type.startsWith("image/")) return "image";
+  if (file.type.startsWith("audio/")) return "audio";
+  if (file.type.startsWith("video/")) return "video";
+  if (file.type === "application/pdf" || /document|word|text|json|csv|markdown/.test(file.type)) return "document";
+  return "file";
+};
+
+export const saveThoughtAssets = async (files: File[], title?: string) => {
+  await ensureStorage();
+  const assets: ThoughtAsset[] = [];
+  for (const [index, file] of files.entries()) {
+    if (!isSupportedThoughtAssetFile(file)) throw new Error(`Unsupported asset type for ${file.name || `asset-${index + 1}`}`);
+    const base = sanitizeAssetBaseName(file.name || title || "thought-asset");
+    const ext = path.extname(file.name || "").toLowerCase();
+    const filename = `${base}-${randomUUID().slice(0, 8)}${ext}`;
+    await fs.writeFile(path.join(mediaPath, filename), Buffer.from(await file.arrayBuffer()));
+    assets.push({ src: `/api/thoughts/assets/${filename}`, name: file.name || filename, type: file.type || "application/octet-stream", kind: assetKind(file) });
+  }
+  return assets;
 };
 
 const extensionFromFile = (file: File) => {

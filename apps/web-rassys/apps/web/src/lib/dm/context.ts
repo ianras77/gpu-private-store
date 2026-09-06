@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import type { PoolClient } from "pg";
 import { dmQuery } from "./db";
-import { cosineSimilarity, embedTextWithCheshire, type DmContextPacket } from "./cheshire";
+import { cosineSimilarity, embedTextWithRassyIntelligence, type DmContextPacket } from "./intelligence";
 import { getSystemPlugin } from "./systems";
 import type {
   CampaignRecord,
@@ -492,7 +492,7 @@ const mapRecentEvents = async (campaignId: string, limit = 100): Promise<EventRe
 };
 
 const getSemanticMemory = async (campaignId: string, queryText: string): Promise<SemanticMemoryRecord[]> => {
-  const embedding = await embedTextWithCheshire(queryText);
+  const embedding = await embedTextWithRassyIntelligence(queryText);
   if (!embedding) return [];
 
   const result = await dmQuery<{

@@ -6,6 +6,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 1866
+      # Mastra is the application gateway; this private hop is used only by
+      # its model adapter and must not be pointed back at Mastra.
       RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
       RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
       RASSY_INTELLIGENCE_INTERNAL_TOKEN: ${RASSY_INTELLIGENCE_INTERNAL_TOKEN:-}
@@ -65,7 +67,9 @@ services:
       RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       DATABASE_URL: ${DATABASE_URL:-}
-      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
+      # Keep the compatibility surface on the Mastra service as well. This
+      # prevents old controller code from silently talking to the legacy edge.
+      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://rassy-intelligence:1866}
       AI_BASE_URL: ${AI_BASE_URL:-http://rassy-intelligence:1866}
       AI_DM_MODEL: ${AI_DM_MODEL:-${RASSYMIND_MODEL:-rassy-mind}}
       AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-45000}
@@ -76,13 +80,9 @@ services:
       RASSY_INTELLIGENCE_REQUIRE_CANONICAL: ${RASSY_INTELLIGENCE_REQUIRE_CANONICAL:-true}
       RASSYMIND_MODEL: ${RASSYMIND_MODEL:-rassy-mind}
       RASSYMIND_LISTENER_MODEL: ${RASSYMIND_LISTENER_MODEL:-rassy-fast}
+      RADIO_CHAT_LLM_TIMEOUT_MS: ${RADIO_CHAT_LLM_TIMEOUT_MS:-20000}
       RASSYMIND_REQUEST_RETRIES: ${RASSYMIND_REQUEST_RETRIES:-0}
       RASSYMIND_RETRY_DELAY_MS: ${RASSYMIND_RETRY_DELAY_MS:-0}
-      CHESHIRE_BASE_URL: ${AI_BASE_URL:-http://rassy-intelligence:1866}
-      CHESHIRE_API_KEY: ${RASSYMIND_API_KEY:-}
-      CHESHIRE_MODEL: ${CHESHIRE_MODEL:-${RASSYMIND_GENERIC_MODEL:-rassy-fast}}
-      CHESHIRE_EMBED_MODEL: ${RASSYMIND_EMBED_MODEL:-rassy-embed}
-      CHESHIRE_REQUEST_TIMEOUT_MS: ${RASSYMIND_REQUEST_TIMEOUT_MS:-45000}
       STATION_DESCRIPTION: ${STATION_DESCRIPTION:-}
       STATION_NAME: ${STATION_NAME:-Mr Rassy Radio}
       ICECAST_PUBLIC_URL: ${ICECAST_PUBLIC_URL:-}
@@ -122,7 +122,7 @@ services:
       MINECRAFT_TROUPE_BOT_PORT: ${MINECRAFT_TROUPE_BOT_PORT:-3000}
       MINECRAFT_TROUPE_STATUS_TIMEOUT_MS: ${MINECRAFT_TROUPE_STATUS_TIMEOUT_MS:-2500}
       MINECRAFT_TROUPE_BOT_NAMES: ${MINECRAFT_TROUPE_BOT_NAMES:-}
-      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/thoughts}
+      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/web-rassys}
     depends_on:
       redis:
         condition: service_healthy
@@ -132,7 +132,7 @@ services:
       - internal
     volumes:
       # Authored thoughts intentionally live in the Runtipi media data area.
-      - ${ROOT_FOLDER_HOST:-.}/media/data/thoughts:${BLOG_STORAGE_PATH:-/media/thoughts}
+      - ${ROOT_FOLDER_HOST:-.}/media/data/web-rassys:${BLOG_STORAGE_PATH:-/media/web-rassys}
     restart: unless-stopped
     healthcheck:
       test:
@@ -158,13 +158,15 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       DATABASE_URL: ${DATABASE_URL:-}
       RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-}
-      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
+      # Legacy-compatible controller calls also terminate at Mastra.
+      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://rassy-intelligence:1866}
       RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
       RASSY_INTELLIGENCE_URL: ${RASSY_INTELLIGENCE_URL:-http://rassy-intelligence:1866}
       RASSY_INTELLIGENCE_INTERNAL_TOKEN: ${RASSY_INTELLIGENCE_INTERNAL_TOKEN:-}
       RASSY_INTELLIGENCE_REQUIRE_CANONICAL: ${RASSY_INTELLIGENCE_REQUIRE_CANONICAL:-true}
       RASSYMIND_MODEL: ${RASSYMIND_MODEL:-rassy-mind}
       RASSYMIND_LISTENER_MODEL: ${RASSYMIND_LISTENER_MODEL:-rassy-fast}
+      RADIO_CHAT_LLM_TIMEOUT_MS: ${RADIO_CHAT_LLM_TIMEOUT_MS:-20000}
       RASSYMIND_REQUEST_RETRIES: ${RASSYMIND_REQUEST_RETRIES:-0}
       RASSYMIND_RETRY_DELAY_MS: ${RASSYMIND_RETRY_DELAY_MS:-0}
       RADIO_EMBED_MODEL: ${RASSYMIND_EMBED_MODEL:-rassy-embed}

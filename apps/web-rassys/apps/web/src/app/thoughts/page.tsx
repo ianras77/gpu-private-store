@@ -7,7 +7,7 @@ import { Footer } from "../../components/Footer";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Thoughts // Ian Rasmussen",
+  title: "The Year Before Fifty // Ian Rasmussen",
   description:
     "Longer notes, drafts, and pieces of writing I wanted to keep close.",
 };
@@ -45,11 +45,10 @@ export default async function ThoughtsPage() {
     <main className="min-h-screen">
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-6 py-12">
         <h1 className="section-title text-4xl">
-          <span className="magical-text">Thoughts</span> I wanted to keep
+          <span className="magical-text">The year before fifty</span>
         </h1>
         <p className="text-cloud/80">
-          Longer notes, drafts, and the pieces of writing I was not ready to
-          let go of.
+          A twelve-month notebook for exploring the year I was born through notes, images, voice, music, and whatever else belongs beside the story.
         </p>
       </div>
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-12 px-6 pb-16">
@@ -90,6 +89,17 @@ export default async function ThoughtsPage() {
                 ))}
               </div>
             )}
+
+            {thought.assets?.length ? (
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {thought.assets.map((asset) => (
+                  <a key={asset.src} href={asset.src} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-cloud/80 transition hover:border-glow/50 hover:text-white" target={asset.kind === "document" ? "_blank" : undefined} rel={asset.kind === "document" ? "noreferrer" : undefined}>
+                    <span className="text-glow">{asset.kind === "audio" ? "♪" : asset.kind === "video" ? "▶" : asset.kind === "image" ? "▧" : "↗"}</span>
+                    <span className="min-w-0 truncate">{asset.name}</span>
+                  </a>
+                ))}
+              </div>
+            ) : null}
 
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}

@@ -2786,7 +2786,7 @@ export const buildServer = () => {
         feedbackWeight: config.RADIO_FEEDBACK_WEIGHT
       })
         .slice(0, 8)
-        .map(({ track }) => toPublicTrack(track));
+        .map(({ track }: { track: Track }) => toPublicTrack(track));
     } catch (error) {
       logger.warn({ error }, "Featured fallback could not use live context");
     }

@@ -18,6 +18,7 @@ type Thought = {
   excerpt: string;
   createdAt: string;
   images?: ThoughtImage[];
+  assets?: { src: string; name: string; kind: string }[];
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -30,7 +31,7 @@ const shorten = (value?: string, maxLength = 180) => {
 };
 
 export function ThoughtsPanel() {
-  const { data } = useSWR<Thought[]>("/api/thoughts?limit=3", fetcher, {
+  const { data } = useSWR<Thought[]>("/api/thoughts?limit=1", fetcher, {
     refreshInterval: 30000,
   });
 
@@ -43,7 +44,8 @@ export function ThoughtsPanel() {
         <div className="text-[11px] uppercase tracking-[0.38em] text-cloud/58">
           Thoughts
         </div>
-        <h2 className="section-title text-3xl">A few things I wanted to keep.</h2>
+        <h2 className="section-title text-3xl">The year before fifty.</h2>
+        <p className="max-w-2xl text-sm leading-6 text-cloud/68">A twelve-month notebook for looking back at the year I arrived, and forward from here.</p>
       </div>
       <div className="grid gap-6 md:grid-cols-3">
         {(data ?? []).map((thought, index) => {
@@ -64,10 +66,10 @@ export function ThoughtsPanel() {
                   </p>
                   <div className="flex flex-wrap items-center gap-3 text-xs text-cloud/60">
                     <span>{formatTimeAgo(thought.createdAt) || "recent"}</span>
-                    {leadImage && (
+                    {(leadImage || thought.assets?.length) && (
                       <span>
-                        {thought.images?.length} image
-                        {thought.images?.length === 1 ? "" : "s"}
+                        {(thought.images?.length ?? 0) + (thought.assets?.length ?? 0)} piece
+                        {(thought.images?.length ?? 0) + (thought.assets?.length ?? 0) === 1 ? "" : "s"} attached
                       </span>
                     )}
                   </div>
@@ -112,9 +114,7 @@ export function ThoughtsPanel() {
                 {shorten(thought.excerpt, 150)}
               </p>
               <div className="mt-auto text-xs text-cloud/60">
-                {leadImage
-                  ? `${thought.images?.length ?? 0} images`
-                  : "Words only"}
+                {thought.assets?.length ? `${thought.assets.length} linked assets` : leadImage ? `${thought.images?.length ?? 0} images` : "Words only"}
               </div>
             </Card>
           );
@@ -130,7 +130,7 @@ export function ThoughtsPanel() {
       </div>
       <div className="mt-6">
         <Button variant="secondary" asChild>
-          <a href="/thoughts">Open the full notebook</a>
+          <a href="/notebook">Open the year notebook</a>
         </Button>
       </div>
     </section>

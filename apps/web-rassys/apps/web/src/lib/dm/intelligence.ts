@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import { z } from "zod";
-import { requestCheshireChat, requestCheshireEmbedding } from "../cheshire-client";
 import { requestRassyChannelText, requestRassyEmbedding } from "../rassy-intelligence-client";
 import type { DmTurnPatch } from "./types";
 
@@ -30,7 +29,7 @@ export type DmContextPacket = {
 export type DmLlmCallResult = {
   patch: DmTurnPatch;
   model: string;
-  provider: "cheshire" | "rassy-intelligence";
+  provider: "rassy-intelligence";
   latencyMs: number;
   promptPayload: Record<string, unknown>;
   responseText: string;
@@ -375,7 +374,7 @@ const buildSystemPrompt = () =>
   ].join("\n");
 
 export const runContextAwareDmTurn = async (context: DmContextPacket, requestContext: DmRassyRequestContext): Promise<DmLlmCallResult> => {
-  const model = process.env.AI_DM_MODEL ?? process.env.RASSYMIND_MODEL ?? process.env.CHESHIRE_MODEL ?? "rassy-fast";
+  const model = process.env.AI_DM_MODEL ?? process.env.RASSYMIND_MODEL ?? "rassy-fast";
   const messages: Array<{ role: "system" | "user"; content: string }> = [
     { role: "system", content: buildSystemPrompt() },
     {
@@ -383,12 +382,7 @@ export const runContextAwareDmTurn = async (context: DmContextPacket, requestCon
       content: JSON.stringify(context)
     }
   ];
-  const payload = {
-    model,
-    temperature: 0.35,
-    response_format: { type: "json_object" },
-    messages
-  };
+  const payload = { model, temperature: 0.35, response_format: { type: "json_object" }, messages };
 
   const promptHash = crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
   const intelligenceStarted = Date.now();
@@ -419,39 +413,10 @@ export const runContextAwareDmTurn = async (context: DmContextPacket, requestCon
         promptHash
       };
     }
-  } catch {
-    // Compatibility fallback below preserves the existing DM transport while the new path qualifies.
+    throw new Error("rassy_intelligence_dm_invalid_response");
+  } catch (error) {
+    throw new Error(`rassy_intelligence_dm_failed:${error instanceof Error ? error.message : "unknown"}`);
   }
-  const response = await requestCheshireChat({
-    model,
-    temperature: 0.35,
-    responseFormat: { type: "json_object" },
-    messages,
-    lane: "dm",
-    priority: "high",
-    purpose: "dm-turn",
-    queueWaitMs: 15000,
-    timeoutMs: 45000
-  });
-
-  const text = response.content;
-  const parsedJson = parseJsonObjectFromText(text);
-  const normalizedJson = normalizeDmTurnPayload(parsedJson, context);
-  const parsed = dmTurnSchema.safeParse(normalizedJson);
-  if (!parsed.success) {
-    throw new Error(`cheshire_payload_invalid:${parsed.error.message}`);
-  }
-
-  return {
-    patch: parsed.data,
-    model: response.model,
-    provider: "cheshire",
-    latencyMs: response.latencyMs,
-    promptPayload: payload,
-    responseText: text,
-    responseJson: parsedJson,
-    promptHash
-  };
 };
 
 export const createFallbackTurn = (actionText: string): DmTurnPatch => {
@@ -470,25 +435,12 @@ export const createFallbackTurn = (actionText: string): DmTurnPatch => {
   };
 };
 
-export const embedTextWithCheshire = async (text: string): Promise<number[] | null> => {
+export const embedTextWithRassyIntelligence = async (text: string): Promise<number[] | null> => {
   const trimmed = text.trim();
   if (!trimmed) return null;
 
   try {
     return await requestRassyEmbedding(trimmed);
-  } catch {
-    // Existing embedding compatibility path below remains during rollout.
-  }
-
-  try {
-    const response = await requestCheshireEmbedding(trimmed, undefined, {
-      lane: "embeddings",
-      priority: "low",
-      purpose: "dm-embedding",
-      queueWaitMs: 4000,
-      timeoutMs: 15000
-    });
-    return response.embedding;
   } catch {
     return null;
   }

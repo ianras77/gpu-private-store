@@ -54,7 +54,12 @@ app.post("/v1/chat/completions", async (request, reply) => {
     .join("\n\n");
   if (!prompt.trim() || prompt.length > 50000) return reply.code(400).send({ error: "prompt_required" });
   const purpose = request.headers["x-cheshire-purpose"] ?? request.headers["x-rassy-purpose"];
-  const agentId = String(purpose ?? "").includes("dm") ? "dungeon-master" : "mr-rassy-host";
+  const purposeText = String(purpose ?? "").toLowerCase();
+  const agentId = purposeText.includes("dm")
+    ? "dungeon-master"
+    : purposeText.includes("listener") || purposeText.includes("radio") || purposeText.includes("track-intelligence")
+      ? "radio-listener"
+      : "mr-rassy-host";
   try {
     const result = await agents[agentId].generate(prompt, { maxSteps: 1 });
     return { id: `rassy-${Date.now()}`, object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content: result.text }, finish_reason: "stop" }], model: typeof body.model === "string" ? body.model : "rassy-mind" };

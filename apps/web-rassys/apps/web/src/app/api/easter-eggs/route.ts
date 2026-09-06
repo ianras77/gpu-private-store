@@ -5,7 +5,6 @@ import {
   fetchPhotoShelf,
   fetchPodcastShow,
 } from "../../../lib/media-controller";
-import { requestCheshireJson } from "../../../lib/cheshire-client";
 import { requestRassyChannelText } from "../../../lib/rassy-intelligence-client";
 import { fetchRadio } from "../../../lib/radio-api";
 import { rateLimit } from "../../../lib/rate-limit";
@@ -522,7 +521,7 @@ const pickFallback = (preferredTargets: string[], seed: string) => {
   };
 };
 
-const requestCheshireCurio = async (input: {
+const requestMastraCurio = async (input: {
   seed: string;
   requestContext: EasterEggRequestContext;
   routeSignal: RouteSignal | null;
@@ -550,65 +549,11 @@ const requestCheshireCurio = async (input: {
     const intelligenceParsed = responseSchema.safeParse(intelligenceResult);
     if (intelligenceParsed.success) return intelligenceParsed.data;
   } catch {
-    // Fall through to the existing compatibility path during rollout.
-  }
-  try {
-    const response = await requestCheshireJson(
-      {
-        model: process.env.CHESHIRE_MODEL ?? "rassy-mind",
-        temperature: 1,
-        maxTokens: 120,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are Cheshire, generating a fully dynamic easter egg inside Ian Rasmussen's live site at rassys.com. " +
-              "Return ONLY strict JSON with keys badge, title, body, cta, hint, href, sigil. " +
-              "This is not canned copy. React to requestContext, currentSignal, routeSignal, and recentTrail every time. " +
-              "Write like the site itself: authored, warm, strange in a good way, and specific to Ian Rasmussen and Mr Rassy. " +
-              "Prefer routeTargets before jumping to unrelated rooms, especially when the visitor is already inside a strong surface. " +
-              "Never sound like generic UI copy, marketing copy, or app onboarding. " +
-              "Never use phrases like Easter Egg, curious note, playful surprise, click here, read it now, discover, or learn more. " +
-              "Avoid exclamation marks, generic praise, and broad placeholders like unique collection or family fun. " +
-              "Reference Ian Rasmussen, Mr Rassy, the radio booth, the notebook, the listening room, the family shelf, the stories, the thoughts log, the observatory, or the control room when it helps. " +
-              "Avoid repeating badges, titles, sigils, ctas, or destinations from recentTrail. " +
-              "Choose href EXACTLY from routeTargets or siteTargets. " +
-              "badge must be 1-3 words, title under 8 words, body under 28 words, hint under 18 words, cta under 4 words, sigil must be 1-2 lowercase words and not an emoji.",
-          },
-          {
-            role: "user",
-            content: JSON.stringify({
-              seed: input.seed,
-              requestContext: input.requestContext,
-              routeSignal: input.routeSignal,
-              currentSignal: input.siteContext,
-              routeTargets: input.routeTargets,
-              siteTargets,
-              guidance:
-                input.extraGuidance ??
-                "Make one whisper that feels alive right now, rewards the current page, and still points to a real clickable place on the site.",
-              previousAttempt: input.previousAttempt,
-            }),
-          },
-        ],
-        lane: "curio",
-        priority: "low",
-        purpose: "site-curio",
-        queueWaitMs: 2500,
-        timeoutMs: 12000,
-      },
-      responseSchema,
-    );
-    return response.data;
-  } catch {
     return null;
   }
 };
 
-const callCheshire = async (requestContext: EasterEggRequestContext) => {
-  const base = process.env.CHESHIRE_BASE_URL?.trim();
-  if (!base) return null;
-
+const callMastra = async (requestContext: EasterEggRequestContext) => {
   const [siteContext, routeSignal] = await Promise.all([
     buildSiteContext().catch(() => null),
     buildRouteSignal(requestContext.path).catch(() => null),
@@ -618,7 +563,7 @@ const callCheshire = async (requestContext: EasterEggRequestContext) => {
   const preferredTargets = routeSignal?.preferredTargets ?? [];
   const routeTargets = selectTargetPool(preferredTargets);
 
-  const firstAttempt = await requestCheshireCurio({
+  const firstAttempt = await requestMastraCurio({
     seed,
     requestContext,
     routeSignal,
@@ -628,7 +573,7 @@ const callCheshire = async (requestContext: EasterEggRequestContext) => {
 
   const secondAttempt =
     !firstAttempt || isWeakCurio(firstAttempt)
-      ? await requestCheshireCurio({
+      ? await requestMastraCurio({
           seed,
           requestContext,
           routeSignal,
@@ -657,7 +602,7 @@ const callCheshire = async (requestContext: EasterEggRequestContext) => {
     cta: target.cta,
     hint: target.hint,
     sigil: chosenAttempt.sigil.trim(),
-    source: "cheshire" as const,
+    source: "mastra" as const,
   };
 };
 
@@ -672,7 +617,7 @@ export async function GET(request: Request) {
   const seed = `${new Date().toISOString()}::${requestContext.path}::${requestContext.trigger}`;
   const routeSignal = await buildRouteSignal(requestContext.path).catch(() => null);
   const payload =
-    (await callCheshire(requestContext).catch(() => null)) ??
+    (await callMastra(requestContext).catch(() => null)) ??
     pickFallback(routeSignal?.preferredTargets ?? [], seed);
 
   return NextResponse.json(

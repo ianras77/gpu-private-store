@@ -13,7 +13,7 @@ export function Footer() {
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <div className="section-title text-2xl text-white">Rassy’s <span className="text-glow">dot</span> Com</div>
-              <p className="mt-1 text-xs text-cloud/58">A radio station, a game table, and the life around them.</p>
+              <p className="mt-1 max-w-md text-xs leading-5 text-cloud/58">A small, glowing corner of the internet for good records, strange worlds, family stories, and the people I love.</p>
             </div>
             <DJStatusBadge />
           </div>
@@ -21,7 +21,7 @@ export function Footer() {
             {publicRassysApps.map((app) => <Link key={app.id} href={app.href} className="text-xs text-cloud/62 transition hover:text-white">{app.id === "family" ? "Family Photo Book" : app.label}</Link>)}
           </nav>
           <div className="flex flex-col justify-between gap-3 border-t border-white/10 pt-4 text-[11px] text-cloud/45 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-2"><Radio size={13} className="text-glow" /> Keep the station nearby:</div>
+            <div className="flex items-center gap-2"><Radio size={13} className="text-glow" /> Take a little signal with you:</div>
             <div className="flex flex-wrap gap-3"><a href={radioApiLinks.stream.mp3} className="transition hover:text-white">MP3 stream</a><a href={radioApiLinks.stream.lossless} className="transition hover:text-white">Lossless stream</a><Link href="/real-life-bedtime-stories/feed.xml" className="transition hover:text-white">Podcast feed</Link><span>Ian Rasmussen</span></div>
           </div>
         </div>

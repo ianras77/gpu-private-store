@@ -11,10 +11,10 @@ import {
 } from "./context";
 import {
   createFallbackTurn,
-  embedTextWithCheshire,
+  embedTextWithRassyIntelligence,
   runContextAwareDmTurn,
   type DmContextPacket
-} from "./cheshire";
+} from "./intelligence";
 import { dmQuery, ensureDmSchema, toJson, withCampaignLock, withDmTransaction } from "./db";
 import { getSystemPlugin, type SeedResult } from "./systems";
 import type {
@@ -1402,7 +1402,7 @@ const upsertEmbedding = async (
   textChunk: string,
   model: string
 ) => {
-  const embedding = await embedTextWithCheshire(textChunk);
+  const embedding = await embedTextWithRassyIntelligence(textChunk);
   if (!embedding) return;
 
   await dmQuery(
@@ -2094,8 +2094,8 @@ export const processCampaignAction = async (
     );
 
     let llmPatch: DmTurnPatch;
-    let llmProvider = "cheshire";
-    let llmModel = process.env.CHESHIRE_MODEL ?? "unknown";
+    let llmProvider = "rassy-intelligence";
+    let llmModel = process.env.RASSYMIND_MODEL ?? "unknown";
     let promptHash = "";
     let llmResponseText = "";
     let llmPromptPayload: Record<string, unknown> = {};
@@ -2837,7 +2837,7 @@ export const addPinnedFactToCampaign = async (
     [createId("event"), campaignId, userId, "Pinned fact added", toJson({ factId, kind: input.kind })]
   );
 
-  void upsertEmbedding(campaignId, "pinned_fact", factId, input.factText, process.env.CHESHIRE_EMBED_MODEL ?? "embed");
+  void upsertEmbedding(campaignId, "pinned_fact", factId, input.factText, process.env.RASSYMIND_EMBED_MODEL ?? "rassy-embed");
 
   return {
     id: factId,
