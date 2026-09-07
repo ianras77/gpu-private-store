@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
                 searchStatus = output?.status === "ok" ? "used" : output?.status === "failed" ? "failed" : "empty";
                 for (const source of output?.results ?? []) returnedUrls.add(source.url);
                 send("search", { status: searchStatus, results: output?.results ?? [] });
+                if (searchStatus === "used") send("artifact", { kind: "source-board", status: "ready", sources: output?.results ?? [] });
               }
             } else if (part.type === "text-delta" && part.textDelta) {
               answerText += part.textDelta;

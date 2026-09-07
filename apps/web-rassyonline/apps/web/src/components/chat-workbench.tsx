@@ -283,6 +283,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
             const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; citationStatus?: ChatMessage["citationStatus"] };
             if (event === "activity" && data.tool === "web-search") { searched = true; setActivityKind("searching"); }
             if (event === "search") { searched = true; searchStatus = data.status ?? "empty"; sources = data.results ?? []; setActivityKind("thinking"); }
+            if (event === "artifact" && data.results?.length) sources = data.results;
             if (event === "complete") { citationStatus = data.citationStatus; }
             if (event === "citation-warning") { citationStatus = "unsupported"; }
             if (event === "text" && data.delta) streamText += data.delta;
