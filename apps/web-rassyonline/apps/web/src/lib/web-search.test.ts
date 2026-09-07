@@ -1,5 +1,7 @@
-import { describe, expect, it } from "vitest";
-import { buildSearchContextMessage, normalizeSearchQuery, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { buildSearchContextMessage, executeWebSearch, normalizeSearchQuery, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
+
+afterEach(() => vi.restoreAllMocks());
 
 describe("shouldUseWebSearch", () => {
   it("detects natural requests for current web resources", () => {
@@ -51,5 +53,18 @@ describe("normalizeSearchQuery", () => {
 describe("citation provenance", () => {
   it("rejects URLs that were not returned by the search tool", () => {
     expect(unsupportedCitationUrls("See https://example.com/ok and https://fake.example/nope.", ["https://example.com/ok"])).toEqual(["https://fake.example/nope"]);
+  });
+});
+
+describe("Mastra web-search execution contract", () => {
+  it("returns structured source metadata on success", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [{ title: "Docs", url: "https://mastra.ai/docs", content: "Useful passage", publishedDate: "2026-01-01" }] }), { status: 200 })));
+    await expect(executeWebSearch({ query: "Mastra docs", max_results: 1 })).resolves.toEqual({ status: "ok", results: [{ title: "Docs", url: "https://mastra.ai/docs", source: "mastra.ai", publishedAt: "2026-01-01", snippet: "Useful passage", status: "ok" }] });
+  });
+
+  it("distinguishes empty and failed searches", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ results: [] }), { status: 200 })).mockRejectedValueOnce(new Error("offline")));
+    await expect(executeWebSearch({ query: "nothing" })).resolves.toEqual({ status: "empty", results: [] });
+    await expect(executeWebSearch({ query: "offline" })).resolves.toEqual({ status: "failed", results: [] });
   });
 });
