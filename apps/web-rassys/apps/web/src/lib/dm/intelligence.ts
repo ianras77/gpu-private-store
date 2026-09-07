@@ -396,7 +396,7 @@ export const runContextAwareDmTurn = async (context: DmContextPacket, requestCon
       permissions: ["dm:play"],
       locale: "en",
       timeZone: "UTC",
-      modelPolicy: { allowedAliases: ["rassy-mind"], maxCalls: 1, deadlineMs: 45000, priority: "interactive" }
+      modelPolicy: { allowedAliases: ["rassy-mind", "rassy-fast"], maxCalls: 3, deadlineMs: 45000, priority: "interactive" }
     });
     const intelligenceJson = parseJsonObjectFromText(intelligenceText);
     const normalizedIntelligence = normalizeDmTurnPayload(intelligenceJson, context);
