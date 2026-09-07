@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
           }
           const unsupported = searched ? unsupportedCitationUrls(answerText, [...returnedUrls]) : [];
           if (unsupported.length) send("citation-warning", { status: "unsupported", count: unsupported.length });
-          send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searched ? "verified" : "not-applicable" });
+          send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searchStatus === "used" ? "verified" : "not-applicable" });
           controller.close();
         } catch {
           send("error", { message: "Mastra execution failed" });
