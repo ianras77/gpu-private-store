@@ -6,7 +6,10 @@ type ChatSystemMessage = {
 export type WebSearchResult = {
   title: string;
   url: string;
+  source?: string;
+  publishedAt?: string;
   snippet: string;
+  status?: "ok";
 };
 
 type SearchResponse = {
@@ -15,6 +18,8 @@ type SearchResponse = {
     url?: string;
     content?: string;
     snippet?: string;
+    publishedDate?: string;
+    published_at?: string;
   }>;
 };
 
@@ -55,13 +60,15 @@ export function buildSearchContextMessage(results: WebSearchResult[]): ChatSyste
   };
 }
 
-export async function searchWebResources(query: string): Promise<WebSearchResult[]> {
+export async function searchWebResources(query: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> = {}): Promise<WebSearchResult[]> {
   const baseUrl = process.env.RASSY_ONLINE_SEARCH_URL ?? "https://search.rasies.com";
   const url = new URL("/search", baseUrl);
   url.searchParams.set("q", normalizeSearchQuery(query));
   url.searchParams.set("format", "json");
   url.searchParams.set("language", "en");
   url.searchParams.set("safesearch", "1");
+  if (options.recency) url.searchParams.set("time_range", options.recency);
+  if (options.domains?.length) url.searchParams.set("indices", options.domains.join(","));
 
   const response = await fetch(url, {
     headers: { accept: "application/json" },
@@ -79,8 +86,22 @@ export async function searchWebResources(query: string): Promise<WebSearchResult
     .map((result) => ({
       title: result.title?.trim() ?? "",
       url: result.url?.trim() ?? "",
-      snippet: (result.content ?? result.snippet ?? "").replace(/\s+/g, " ").trim()
+      source: (() => { try { return new URL(result.url ?? "").hostname; } catch { return ""; } })(),
+      publishedAt: result.publishedDate ?? result.published_at,
+      snippet: (result.content ?? result.snippet ?? "").replace(/\s+/g, " ").trim(),
+      status: "ok" as const
     }))
     .filter((result) => result.title && result.url)
-    .slice(0, 5);
+    .slice(0, Math.min(options.max_results ?? 5, 8));
+}
+
+export type WebSearchInput = { query: string; recency?: string; domains?: string[]; max_results?: number };
+
+export async function executeWebSearch(input: WebSearchInput): Promise<{ status: "ok" | "empty" | "failed"; results: WebSearchResult[] }> {
+  try {
+    const results = await searchWebResources(input.query, input);
+    return { status: results.length ? "ok" : "empty", results };
+  } catch {
+    return { status: "failed", results: [] };
+  }
 }

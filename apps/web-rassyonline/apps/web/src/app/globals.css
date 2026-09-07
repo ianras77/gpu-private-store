@@ -357,3 +357,36 @@ html { -webkit-text-size-adjust: 100%; }
   .composer-preview textarea { width: 100%; min-width: 0; max-width: 100%; resize: none; }
   .composer-preview > button { width: auto; min-width: 58px; }
 }
+
+.desk-signal { display: flex; min-width: 0; gap: 8px; align-items: center; padding: 7px 16px; border-bottom: 1px solid var(--wire); color: var(--muted); font-size: .68rem; }
+.desk-signal strong { color: var(--paper); font-weight: 650; }
+.desk-signal small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.desk-signal-pulse { width: 6px; height: 6px; flex: 0 0 auto; border-radius: 50%; background: var(--aqua); box-shadow: 0 0 9px var(--aqua); }
+.desk-signal:has(+ .message-list) { background: rgba(157,245,216,.025); }
+@media (max-width: 520px) { .desk-signal { padding-inline: 12px; }.desk-signal small { display: none; } }
+
+/* AUTHORITATIVE VIEWPORT GEOMETRY
+   Keep the shell responsible for the viewport and the transcript responsible
+   for desktop scrolling. This intentionally supersedes the historical height
+   overrides above and avoids Firefox grid/flex min-content clipping. */
+@media (min-width: 801px) {
+  body:has(.app-shell) { height: 100%; min-height: 100%; overflow: hidden; }
+  .app-shell { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100dvh; min-height: 0; overflow: hidden; }
+  .workspace-grid { display: grid; grid-template-rows: minmax(0, 1fr); min-height: 0; height: auto; }
+  .rassy-chat-layout { min-height: 0; height: 100%; grid-template-rows: minmax(0, 1fr); }
+  .rassy-chat-layout:not(:has(.chat-history)) { grid-template-columns: minmax(0, 1fr); }
+  .chat-history, .chat-workbench { min-height: 0; }
+  .chat-workbench { height: 100% !important; min-height: 0; overflow: hidden; }
+  .transcript-shell { min-height: 0; overflow: hidden; }
+  .message-list { min-height: 0; overflow-y: auto; overflow-x: hidden; }
+  .markdown-table-wrap, .code-block { max-width: 100%; overflow-x: auto; }
+}
+
+@media (max-width: 800px) {
+  body:has(.app-shell) { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
+  .app-shell { display: block; width: 100%; height: auto !important; min-height: 100svh; overflow: visible; }
+  .workspace-grid, .rassy-chat-layout { display: block; width: 100%; height: auto !important; min-height: 0; }
+  .chat-workbench { width: 100%; height: auto !important; min-height: calc(100svh - 68px); overflow: visible; }
+  .transcript-shell, .message-list { height: auto !important; min-height: 0; overflow: visible; }
+  .composer-preview { position: sticky; bottom: 0; max-width: 100%; }
+}

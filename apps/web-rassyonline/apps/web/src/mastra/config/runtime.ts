@@ -6,3 +6,5 @@ export function rassymindProvider() {
     apiKey: process.env.RASSYMIND_API_KEY ?? "runtipi-server-key"
   });
 }
+
+export const RASSY_AGENT_MODEL = "rassy-agent";

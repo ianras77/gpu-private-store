@@ -14,18 +14,18 @@ service topology are preserved. No physical model names or credentials are expos
 ## Validation
 
 - `npm run lint`: passed
-- `npm test -- --run`: 40 tests passed
+- `npm test -- --run`: 44 tests passed
 - `npm run build`: passed
 - Runtipi Compose topology and persistent mounts: retained unchanged
 
-## Explicit migration boundary
+## Current migration boundary
 
-The existing chat route remains the compatibility implementation for streaming, legacy thread
-persistence, and current UI behavior. It has not yet been replaced by an agent stream because
-Mastra memory and route streaming parity need an additive schema migration and dedicated
-integration tests before enabling them against existing production data. Mastra PostgreSQL
-storage, dynamic workflow persistence, Studio, user activity UI, and live deployment are not
-claimed by this phase.
+Authenticated chat now uses the Mastra agent stream route. Mastra PostgreSQL storage was
+initialized additively in the live Rassy Online database; legacy threads/messages remain
+available for history compatibility and are not destructively migrated. The route owns
+authentication, bounded search/document context assembly, semantic agent selection, streaming,
+and Mastra thread/resource identity. Studio, dynamic workflow persistence, and a full
+authenticated browser qualification remain separate follow-up gates.
 
 ## Security and operations
 
@@ -36,6 +36,5 @@ recreation as deployment steps separate from source/build qualification.
 
 ## Next extensions
 
-Add an agent-stream adapter with abort/error tests, perform an additive Mastra Postgres schema
-migration, dual-read then migrate thread memory, and expose agent/tool/workflow/activity
-catalogs in the existing authenticated UI before switching the default chat path.
+Next: add authenticated route integration coverage, dual-read legacy history where needed, and
+expose richer agent/tool/workflow/activity catalogs in the authenticated UI.

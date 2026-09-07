@@ -3,7 +3,6 @@
 import { ChangeEvent, FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { applyLocalChatIntent, type WebSearchMode } from "@/lib/chat-intents";
 import { parseMarkdownBlocks } from "@/lib/markdown";
-import { getLaneDisplay } from "@/lib/chat-presentation";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
 
@@ -58,6 +57,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [threads, setThreads] = useState<ThreadSummary[]>([]);
   const [activity, setActivity] = useState(0.16);
   const [activityKind, setActivityKind] = useState<"idle" | "thinking" | "searching" | "answering">("idle");
+  const [activeAgent, setActiveAgent] = useState("rassy");
   const abortRef = useRef<AbortController | null>(null);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
@@ -133,7 +133,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         completed += 1;
         setDocumentNotice(`Ingested ${completed}/${files.length} source${files.length === 1 ? "" : "s"} through rassy-embed.`);
       }
-      setDocumentNotice(`${files.length} source${files.length === 1 ? "" : "s"} indexed, embedded, and ready for Knowledge mode.`);
+        setDocumentNotice(`${files.length} source${files.length === 1 ? "" : "s"} indexed, embedded, and ready for this working set.`);
       await refreshDocuments();
     } catch (error) {
       setDocumentNotice(error instanceof Error ? error.message : "Upload failed");
@@ -197,19 +197,22 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     setInput("");
     setSending(true);
     setActivity(0.72);
-    setActivityKind(requestWebSearch === "on" || (requestWebSearch === "auto" && prompt.match(/\b(current|latest|search|web|source|today)\b/i)) ? "searching" : "thinking");
+    setActivityKind("thinking");
 
     const abort = new AbortController();
     abortRef.current = abort;
 
     try {
-      const response = await fetch("/api/chat", {
+      const mastraThreadId = threadId ?? (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `rassy-${Date.now()}`);
+      if (!threadId && signedIn) setThreadId(mastraThreadId);
+      const response = await fetch(signedIn ? "/api/mastra/chat" : "/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
         signal: abort.signal,
         body: JSON.stringify({
+          agent: "rassy",
           mode: requestMode,
-          threadId,
+          threadId: signedIn ? mastraThreadId : threadId,
           activeDocumentIds: activeDocuments.map((document) => document.id),
           webSearch: requestWebSearch,
           temperature,
@@ -220,13 +223,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
       const nextThreadId = response.headers.get("x-thread-id");
       if (nextThreadId) setThreadId(nextThreadId);
-      const searched = response.headers.get("x-rassy-web-search") === "used";
-      const searchStatus = (response.headers.get("x-rassy-web-search") ?? "not-used") as ChatMessage["searchStatus"];
-      let sources: ChatMessage["sources"];
-      const encodedSources = response.headers.get("x-rassy-search-results");
-      if (encodedSources) {
-        try { sources = JSON.parse(decodeURIComponent(encodedSources)) as ChatMessage["sources"]; } catch { sources = undefined; }
-      }
+      setActiveAgent(response.headers.get("x-rassy-agent") ?? "rassy");
+      let searched = false;
+      let searchStatus: ChatMessage["searchStatus"] = "not-used";
+      let sources: ChatMessage["sources"] = [];
 
       if (!response.ok || !response.body) {
         const text = await response.text();
@@ -239,12 +239,27 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       let streamText = "";
       let reasoning = "";
       let inReasoning = false;
+      let eventBuffer = "";
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        streamText += chunk;
+        eventBuffer += chunk;
+        const records = eventBuffer.split("\n\n");
+        eventBuffer = records.pop() ?? "";
+        for (const record of records) {
+          const dataLine = record.split("\n").find((line) => line.startsWith("data: "));
+          const event = record.split("\n").find((line) => line.startsWith("event: "))?.slice(7);
+          if (!dataLine) continue;
+          try {
+            const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string };
+            if (event === "activity" && data.tool === "web-search") { searched = true; setActivityKind("searching"); }
+            if (event === "search") { searched = true; searchStatus = data.status ?? "empty"; sources = data.results ?? []; setActivityKind("thinking"); }
+            if (event === "text" && data.delta) streamText += data.delta;
+            if (event === "error") throw new Error(data.message ?? "Mastra execution failed");
+          } catch (error) { if (error instanceof Error && error.message === "Mastra execution failed") throw error; }
+        }
         const reasoningStart = streamText.indexOf("<think>");
         if (reasoningStart >= 0) {
           const reasoningEnd = streamText.indexOf("</think>", reasoningStart + 7);
@@ -300,9 +315,9 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       <div className="routing-ribbon" aria-label="Rassy controls">
         <div className="lane-switcher autopilot-control" aria-label="Rassy automatic routing">
           <label className="preference-select">
-              <select aria-label="Optional capability preference" value={mode} onChange={(event) => setMode(event.target.value as ChatMode["id"]) }>
-              <option value="general">Let Rassy choose</option>
-              {modes.filter((item) => item.id !== "general").map((item) => <option key={item.id} value={item.id}>{item.id === "spark" ? "Fast chat" : item.label} · {getLaneDisplay(item.id).capability}</option>)}
+              <select aria-label="Optional focus preference" value={mode} onChange={(event) => setMode(event.target.value as ChatMode["id"]) }>
+              <option value="general">Rassy decides</option>
+              {modes.filter((item) => item.id !== "general").map((item) => <option key={item.id} value={item.id}>{item.id === "spark" ? "Faster response" : item.label} · optional focus</option>)}
             </select>
           </label>
         </div>
@@ -338,7 +353,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         {showTuning ? (
           <div className="tuning-panel" aria-label="Rassy tuning controls">
             <label><span>Creativity <output>{temperature.toFixed(1)}</output></span><input type="range" min="0" max="1.5" step="0.1" value={temperature} onChange={(event) => setTemperature(Number(event.target.value))} /><small>Precision ← · exploratory →</small></label>
-            <label><span>Response budget <output>{maxTokens} tokens</output></span><input type="range" min="256" max="8192" step="256" value={maxTokens} onChange={(event) => setMaxTokens(Number(event.target.value))} /><small>{activeMode?.model} · {activeMode?.contextWindow}</small></label>
+            <label><span>Response budget <output>{maxTokens} tokens</output></span><input type="range" min="256" max="8192" step="256" value={maxTokens} onChange={(event) => setMaxTokens(Number(event.target.value))} /><small>{activeMode?.contextWindow}</small></label>
           </div>
         ) : null}
 
@@ -374,6 +389,11 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       </div>
 
       <div className="transcript-shell">
+        <div className="desk-signal" aria-live="polite">
+          <span className="desk-signal-pulse" />
+          <strong>{sending ? (activityKind === "searching" ? "Rassy is researching" : "Rassy is working") : "Rassy is ready"}</strong>
+          <small>{activeAgent === "researcher" ? "source-aware" : activeAgent === "coder" ? "build-aware" : activeAgent === "knowledge" ? "document-aware" : "automatic capability routing"}</small>
+        </div>
         <div className="message-list">
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
