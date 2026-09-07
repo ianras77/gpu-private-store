@@ -17,16 +17,23 @@ function chooseDungeonMasterSpecialists(message: string): AgentId[] {
 
 async function runDungeonMasterOrchestration(message: string, contextPrompt: string) {
   const specialistIds = chooseDungeonMasterSpecialists(message);
-  const specialistResults = await Promise.allSettled(specialistIds.map(async (specialistId) => {
-    const specialist = agents[specialistId];
-    const result = await specialist.generate([
-      "You are an advisory specialist supporting the Dungeon Master.",
-      "Return concise grounded notes only. Do not narrate the final turn, mutate state, invent facts, or override the authoritative campaign context.",
-      contextPrompt,
-      `Player request:\n${message}`,
-    ].join("\n\n"), { maxSteps: 1 });
-    return { agentId: specialistId, text: result.text };
-  }));
+  // Keep specialist calls sequential. RassyMind uses bounded admission and a
+  // parallel fan-out turns one DM request into a burst that can self-reject.
+  const specialistResults: Array<PromiseSettledResult<{ agentId: AgentId; text: string }>> = [];
+  for (const specialistId of specialistIds) {
+    try {
+      const specialist = agents[specialistId];
+      const result = await specialist.generate([
+        "You are an advisory specialist supporting the Dungeon Master.",
+        "Return concise grounded notes only. Do not narrate the final turn, mutate state, invent facts, or override the authoritative campaign context.",
+        contextPrompt,
+        `Player request:\n${message}`,
+      ].join("\n\n"), { maxSteps: 1 });
+      specialistResults.push({ status: "fulfilled", value: { agentId: specialistId, text: result.text } });
+    } catch (reason) {
+      specialistResults.push({ status: "rejected", reason });
+    }
+  }
   const advice = specialistResults
     .filter((result): result is PromiseFulfilledResult<{ agentId: AgentId; text: string }> => result.status === "fulfilled")
     .map((result) => `ADVISORY ${result.value.agentId}:\n${result.value.text}`)
