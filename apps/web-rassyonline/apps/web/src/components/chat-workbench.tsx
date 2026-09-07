@@ -83,7 +83,20 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   useEffect(() => {
     const storedThread = window.localStorage.getItem("rassy-online-thread-id");
     if (storedThread) setThreadId(storedThread);
+    const storedMessages = window.localStorage.getItem("rassy-online-transcript");
+    if (storedMessages) {
+      try {
+        const restored = JSON.parse(storedMessages) as ChatMessage[];
+        if (Array.isArray(restored) && restored.length) setMessages(restored.slice(-60));
+      } catch {
+        window.localStorage.removeItem("rassy-online-transcript");
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    if (messages.length > 1) window.localStorage.setItem("rassy-online-transcript", JSON.stringify(messages.slice(-60)));
+  }, [messages]);
 
   useEffect(() => {
     document.documentElement.dataset.rassyTheme = themeId;
@@ -111,6 +124,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   function startNewThread() {
     setThreadId(null);
     window.localStorage.removeItem("rassy-online-thread-id");
+    window.localStorage.removeItem("rassy-online-transcript");
     document.cookie = "rassy_online_thread=; Max-Age=0; Path=/; SameSite=Lax";
     setMessages([{ role: "assistant", content: OPENING_LINES[Math.floor(Math.random() * OPENING_LINES.length)] }]);
   }
