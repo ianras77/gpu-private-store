@@ -54,7 +54,7 @@ const internalToken = process.env.RASSY_INTELLIGENCE_INTERNAL_TOKEN?.trim();
 const app = Fastify({ logger: true });
 
 app.get("/livez", async () => ({ ok: true, service: "rassy-intelligence" }));
-app.get("/healthz", async () => ({ ok: true, service: "rassy-intelligence", mode: "compatibility-seam" }));
+app.get("/healthz", async () => ({ ok: true, service: "rassy-intelligence", mode: "mastra-multi-agent" }));
 app.get("/readyz", async (_request, reply) => {
   const base = (process.env.RASSYMIND_BASE_URL ?? "").replace(/\/$/, "");
   if (!base) return reply.code(503).send({ ok: false, reason: "RASSYMIND_BASE_URL is not configured" });
@@ -87,6 +87,18 @@ app.get("/v1/registry/consistency", async (_request, reply) => {
 });
 app.get("/v1/tools", async () => ({ tools: RASSY_TOOLS }));
 app.get("/v1/artifacts/kinds", async () => ({ kinds: RASSY_ARTIFACT_KINDS }));
+app.get("/v1/dungeon-master/capabilities", async () => ({
+  channelId: "dungeon-master",
+  orchestration: {
+    finalAgent: "dungeon-master",
+    advisoryAgents: ["rules-scholar", "world-keeper"],
+    specialistExecution: "sequential",
+    specialistWrites: false,
+    campaignStateAuthority: "deterministic-dm-service",
+  },
+  tools: RASSY_TOOLS.filter((tool) => tool.channel === "dungeon-master"),
+  memory: { policy: "campaign-scoped", storage: process.env.DATABASE_URL ? "configured" : "unconfigured" },
+}));
 // OpenAI-compatible compatibility surface for existing server-side callers.
 // It remains inside Mastra: no caller may bypass the shared Mr Rassy runtime.
 app.post("/v1/chat/completions", async (request, reply) => {
