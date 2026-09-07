@@ -57,9 +57,11 @@ export async function POST(request: NextRequest) {
         let searchStatus: "used" | "failed" | "empty" | "not-used" = searchRequested ? "empty" : "not-used";
         let answerText = "";
         const returnedUrls = new Set<string>();
+        const observedTypes = new Set<string>();
         const send = (event: string, data: unknown) => controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
         try {
           for await (const part of result.fullStream as AsyncIterable<{ type: string; textDelta?: string; toolName?: string; toolCallId?: string; output?: unknown; error?: unknown }>) {
+            observedTypes.add(part.type);
             if (part.type === "tool-call" || part.type === "tool-call-streaming-start" || part.type === "tool-call-delta") {
               if (part.toolName === "webSearch" || part.toolName === "web-search") { searched = true; send("activity", { status: "searching", tool: "web-search", toolCallId: part.toolCallId }); }
             } else if (part.type === "tool-result") {
@@ -78,7 +80,7 @@ export async function POST(request: NextRequest) {
           }
           const unsupported = searched ? unsupportedCitationUrls(answerText, [...returnedUrls]) : [];
           if (unsupported.length) send("citation-warning", { status: "unsupported", count: unsupported.length });
-          send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searched ? "verified" : "not-applicable" });
+          send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searched ? "verified" : "not-applicable", observedTypes: [...observedTypes] });
           controller.close();
         } catch {
           send("error", { message: "Mastra execution failed" });
