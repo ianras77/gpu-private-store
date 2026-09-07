@@ -689,6 +689,9 @@ const buildPhotoSourceSummary = (items: PhotoMedia[]) => {
       total: scopedItems.length,
       images: scopedItems.filter((item) => item.kind === "image").length,
       videos: scopedItems.filter((item) => item.kind === "video").length
+      ,libraries: source === "immich"
+        ? Array.from(new Set(scopedItems.map((item) => item.collection).filter(Boolean)))
+        : undefined
     };
   };
 

@@ -67,6 +67,13 @@ const normalizeText = (value?: string | null) => {
   return trimmed ? trimmed : undefined;
 };
 
+const displayLibraryName = (value?: string | null) => {
+  const name = normalizeText(value) ?? "Immich album";
+  if (!name.toLowerCase().startsWith("web-rassy-")) return name;
+  const suffix = name.slice("web-rassy-".length).replace(/[-_]+/g, " ").trim();
+  return suffix ? suffix.replace(/\b\w/g, (letter) => letter.toUpperCase()) : "Rassy photos";
+};
+
 const normalizeIsoDate = (...values: Array<string | null | undefined>) => {
   for (const value of values) {
     const trimmed = value?.trim();
@@ -192,7 +199,7 @@ const mapAlbumAsset = (album: ImmichAlbumDetail, asset: ImmichAsset): PhotoMedia
 
   const originalName = normalizeText(asset.originalFileName) ?? path.basename(asset.originalPath ?? asset.id);
   const extension = path.extname(originalName).toLowerCase() || mimeToExtension(asset.originalMimeType);
-  const albumName = normalizeText(album.albumName) ?? "Immich album";
+  const albumName = displayLibraryName(album.albumName);
   const exif = asset.exifInfo ?? null;
   const description = normalizeText(exif?.description) ?? normalizeText(album.description);
 
@@ -265,3 +272,39 @@ export const scanImmichAlbumQuick = async (args: {
   albumName?: string;
   timeoutMs?: number;
 }) => scanImmichAlbum(args);
+
+/**
+ * Public web libraries are opt-in by name. This keeps private Immich albums
+ * private while allowing the site to grow beyond one configured album.
+ */
+export const scanImmichLibraries = async (args: {
+  baseUrl: string;
+  apiKey: string;
+  timeoutMs?: number;
+}) => {
+  const baseUrl = trimSlash(args.baseUrl);
+  const apiKey = args.apiKey.trim();
+  const timeoutMs = Math.max(1000, args.timeoutMs ?? 12000);
+  if (!baseUrl || !apiKey) throw new Error("immich_not_configured");
+
+  const albums = await fetchImmichJson<ImmichAlbumSummary[]>(
+    `${baseUrl}/api/albums`, apiKey, timeoutMs
+  );
+  const publicAlbums = albums.filter((album) => {
+    const name = album.albumName?.trim().toLowerCase() ?? "";
+    return name.startsWith("web-rassy-") && Boolean(album.id);
+  });
+  const results = await Promise.all(publicAlbums.map(async (summary) => {
+    const detail = await fetchImmichJson<ImmichAlbumDetail>(
+      `${baseUrl}/api/albums/${summary.id}`, apiKey, timeoutMs
+    );
+    return (detail.assets ?? [])
+      .map((asset) => mapAlbumAsset({ ...detail, albumName: summary.albumName ?? detail.albumName }, asset))
+      .filter((item): item is PhotoMedia => Boolean(item));
+  }));
+
+  return results.flat().sort((left, right) => {
+    const updatedDiff = new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
+    return updatedDiff !== 0 ? updatedDiff : left.relativePath.localeCompare(right.relativePath);
+  });
+};

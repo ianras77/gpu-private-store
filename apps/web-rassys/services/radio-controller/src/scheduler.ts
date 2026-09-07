@@ -10,7 +10,7 @@ import { config } from "./config";
 import { redis } from "./redis";
 import { prisma } from "./db";
 import { LibraryStore, mergeQuickPodcasts, mergeQuickSnippets, mergeQuickTracks, scanLibrary, scanLibraryQuick, scanPodcasts, scanPodcastsQuick, scanPhotos, scanPhotosQuick, scanSnippets, scanSnippetsQuick } from "./library";
-import { scanImmichAlbum, scanImmichAlbumQuick } from "./library/immich";
+import { scanImmichLibraries } from "./library/immich";
 import { loadLibraryCatalog, persistLibraryCatalog } from "./library/catalog";
 import { scanMstreamLibrary } from "./library/mstream";
 import { pickTrack, rankTracks } from "./utils/selection";
@@ -187,21 +187,11 @@ const loadPhotoSources = async (mode) => {
     let anyPhotoSourceUpdated = false;
     if (hasImmichPhotoSource()) {
         try {
-            const immichPhotos = mode === "full"
-                ? await scanImmichAlbum({
-                    baseUrl: config.IMMICH_BASE_URL,
-                    apiKey: config.IMMICH_API_KEY,
-                    albumId: config.IMMICH_ALBUM_ID,
-                    albumName: config.IMMICH_ALBUM_NAME,
-                    timeoutMs: config.IMMICH_REQUEST_TIMEOUT_MS
-                })
-                : await scanImmichAlbumQuick({
-                    baseUrl: config.IMMICH_BASE_URL,
-                    apiKey: config.IMMICH_API_KEY,
-                    albumId: config.IMMICH_ALBUM_ID,
-                    albumName: config.IMMICH_ALBUM_NAME,
-                    timeoutMs: config.IMMICH_REQUEST_TIMEOUT_MS
-                });
+            const immichPhotos = await scanImmichLibraries({
+                baseUrl: config.IMMICH_BASE_URL,
+                apiKey: config.IMMICH_API_KEY,
+                timeoutMs: config.IMMICH_REQUEST_TIMEOUT_MS
+            });
             nextPhotos.push(...immichPhotos);
             anyPhotoSourceUpdated = true;
         }

@@ -120,6 +120,7 @@ export type PhotoSourceSummary = {
   total: number;
   images: number;
   videos: number;
+  libraries?: string[];
 };
 
 export type PhotoShelfPayload = {
