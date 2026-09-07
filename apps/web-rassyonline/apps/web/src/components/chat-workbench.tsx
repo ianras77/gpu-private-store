@@ -81,6 +81,11 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   }, []);
 
   useEffect(() => {
+    const storedThread = window.localStorage.getItem("rassy-online-thread-id");
+    if (storedThread) setThreadId(storedThread);
+  }, []);
+
+  useEffect(() => {
     document.documentElement.dataset.rassyTheme = themeId;
     window.localStorage.setItem("rassy-online-theme", themeId);
   }, [themeId]);
@@ -105,6 +110,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
   function startNewThread() {
     setThreadId(null);
+    window.localStorage.removeItem("rassy-online-thread-id");
+    document.cookie = "rassy_online_thread=; Max-Age=0; Path=/; SameSite=Lax";
     setMessages([{ role: "assistant", content: OPENING_LINES[Math.floor(Math.random() * OPENING_LINES.length)] }]);
   }
 
@@ -113,6 +120,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     if (!response.ok) return;
     const data = (await response.json()) as { messages?: Array<{ role: "user" | "assistant" | "system"; content: string }> };
     setThreadId(id);
+    window.localStorage.setItem("rassy-online-thread-id", id);
+    document.cookie = `rassy_online_thread=${encodeURIComponent(id)}; Max-Age=31536000; Path=/; SameSite=Lax`;
     setMessages((data.messages ?? []).filter((message) => message.role === "user" || message.role === "assistant").map((message) => ({ role: message.role as "user" | "assistant", content: message.content })));
   }
 
@@ -205,7 +214,9 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
     try {
       const mastraThreadId = threadId ?? (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `rassy-${Date.now()}`);
-      if (!threadId && signedIn) setThreadId(mastraThreadId);
+      if (!threadId) setThreadId(mastraThreadId);
+      window.localStorage.setItem("rassy-online-thread-id", mastraThreadId);
+      document.cookie = `rassy_online_thread=${encodeURIComponent(mastraThreadId)}; Max-Age=31536000; Path=/; SameSite=Lax`;
       const response = await fetch("/api/mastra/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
