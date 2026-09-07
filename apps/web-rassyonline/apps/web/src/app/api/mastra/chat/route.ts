@@ -57,21 +57,20 @@ export async function POST(request: NextRequest) {
         let searchStatus: "used" | "failed" | "empty" | "not-used" = searchRequested ? "empty" : "not-used";
         let answerText = "";
         const returnedUrls = new Set<string>();
-        const observedTypes = new Set<string>();
-        const observedTools = new Set<string>();
-        const observedFields = new Set<string>();
+        const announcedToolCalls = new Set<string>();
         const isWebSearch = (name?: string) => Boolean(name && name.toLowerCase().replace(/[-_]/g, "") === "websearch");
         const send = (event: string, data: unknown) => controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
         try {
           for await (const part of result.fullStream as AsyncIterable<{ type: string; textDelta?: string; toolName?: string; toolCallId?: string; output?: unknown; result?: unknown; payload?: Record<string, unknown>; error?: unknown }>) {
-            observedTypes.add(part.type);
-            for (const key of Object.keys(part)) observedFields.add(`${part.type}:${key}`);
             const payload = part.payload;
             const toolName = part.toolName ?? (typeof payload?.toolName === "string" ? payload.toolName : typeof payload?.name === "string" ? payload.name : undefined);
             const toolCallId = part.toolCallId ?? (typeof payload?.toolCallId === "string" ? payload.toolCallId : undefined);
-            if (toolName) observedTools.add(toolName);
             if (part.type === "tool-call" || part.type === "tool-call-input-streaming-start" || part.type === "tool-call-delta") {
-              if (isWebSearch(toolName)) { searched = true; send("activity", { status: "searching", tool: "web-search", toolCallId }); }
+              if (isWebSearch(toolName)) {
+                searched = true;
+                const activityId = toolCallId ?? `${part.type}:${announcedToolCalls.size}`;
+                if (!announcedToolCalls.has(activityId)) { announcedToolCalls.add(activityId); send("activity", { status: "searching", tool: "web-search", toolCallId }); }
+              }
             } else if (part.type === "tool-result") {
               if (isWebSearch(toolName)) {
                 const output = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { status?: string; results?: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }> } | undefined;
@@ -88,7 +87,7 @@ export async function POST(request: NextRequest) {
           }
           const unsupported = searched ? unsupportedCitationUrls(answerText, [...returnedUrls]) : [];
           if (unsupported.length) send("citation-warning", { status: "unsupported", count: unsupported.length });
-          send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searched ? "verified" : "not-applicable", observedTypes: [...observedTypes], observedTools: [...observedTools], observedFields: [...observedFields] });
+          send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searched ? "verified" : "not-applicable" });
           controller.close();
         } catch {
           send("error", { message: "Mastra execution failed" });
