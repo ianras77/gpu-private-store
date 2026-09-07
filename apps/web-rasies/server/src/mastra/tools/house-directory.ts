@@ -1,9 +1,10 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
+import { request } from "undici";
 import type { Env } from "../../env.js";
 
 export function createHouseDirectoryTool(env: Env) {
-  return createTool({
+  const getHouseDirectory = createTool({
     id: "get-house-directory",
     description: "Find the authoritative Rasies family service URL and purpose.",
     inputSchema: z.object({ query: z.string().max(200).optional() }),
@@ -23,4 +24,21 @@ export function createHouseDirectoryTool(env: Env) {
         .map(([name, url, purpose]) => ({ name, url, purpose }));
     },
   });
+
+  const checkFamilyAccountPath = createTool({
+    id: "check-family-account-path",
+    description: "Verify that the public Authentik family-account enrollment path is reachable. Never submit or change account data.",
+    inputSchema: z.object({}),
+    execute: async () => {
+      const url = new URL("if/flow/runtipi-waitlist-enrollment/", env.AUTHENTIK_URL).toString();
+      try {
+        const response = await request(url, { method: "GET", headersTimeout: 5000, bodyTimeout: 5000 });
+        return { url, ok: response.statusCode >= 200 && response.statusCode < 400, status: response.statusCode, purpose: "family account request and sign-in" };
+      } catch {
+        return { url, ok: false, status: 0, purpose: "family account request and sign-in" };
+      }
+    },
+  });
+
+  return { getHouseDirectory, checkFamilyAccountPath };
 }

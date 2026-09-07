@@ -16,7 +16,7 @@ export function createHouseAgent(env: Env) {
     name: "House Chat",
     instructions: HOUSE_CONSTITUTION,
     model: rassymindModel(env),
-    tools: { houseDirectory: createHouseDirectoryTool(env), searchHouseArchive: createArchiveTool(env), getHouseStatus: createHouseStatusTool(env), searchWeb: createSearchWebTool(env), ...signupTools },
+    tools: { ...createHouseDirectoryTool(env), searchHouseArchive: createArchiveTool(env), getHouseStatus: createHouseStatusTool(env), searchWeb: createSearchWebTool(env), ...signupTools },
   });
 }
 

@@ -78,6 +78,19 @@ type ParsedInviteRequest = {
 
 const INVITE_REUSE_WINDOW_MS = 1000 * 60 * 15;
 const inviteCache = new Map<string, InviteCacheEntry>();
+const inviteWriteWindows = new Map<string, { startedAt: number; count: number }>();
+
+function allowInviteWrite(key: string) {
+  const now = Date.now();
+  const current = inviteWriteWindows.get(key);
+  if (!current || now - current.startedAt >= 60_000) {
+    inviteWriteWindows.set(key, { startedAt: now, count: 1 });
+    return true;
+  }
+  if (current.count >= 5) return false;
+  current.count += 1;
+  return true;
+}
 
 function safeJsonParse(text: string) {
   try {
@@ -639,7 +652,7 @@ function buildInviteStatusHandler(env: Env) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return reply.code(getInviteErrorStatus(message)).send({
         error: "Could not load invite status right now.",
-        detail: message,
+        detail: "The media signup service did not return a usable invite status.",
       });
     }
   };
@@ -647,6 +660,9 @@ function buildInviteStatusHandler(env: Env) {
 
 function buildInviteCreateHandler(env: Env) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
+    if (!allowInviteWrite(req.ip)) {
+      return reply.code(429).header("retry-after", "60").send({ error: "Invite creation rate limit reached." });
+    }
     const { serviceIds } = parseRequestedServiceIds(req.body);
     if (serviceIds && serviceIds.length === 0) {
       return reply
@@ -694,7 +710,7 @@ function buildInviteCreateHandler(env: Env) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return reply.code(getInviteErrorStatus(message)).send({
         error: "Could not create a media invite right now.",
-        detail: message,
+        detail: "The media signup service did not accept the invite request.",
       });
     }
   };
@@ -710,7 +726,7 @@ export async function registerSignupRoutes(app: FastifyInstance, env: Env) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return reply.code(getInviteErrorStatus(message)).send({
         error: "Could not load media services right now.",
-        detail: message,
+        detail: "The media signup service is temporarily unavailable.",
       });
     }
   });

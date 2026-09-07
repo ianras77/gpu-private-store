@@ -141,13 +141,13 @@ type SpotlightPayload = {
 
 const CHAT_STARTERS = [
   "Turn tonight’s chores, dinner, and downtime into a calm little plan.",
-  "Help me explain our self-hosted family site to a relative in plain language.",
-  "What should we back up every week so family memories stay safe?",
-  "Plan a cozy Rasies night with one practical task, one meal, and one fun thing.",
-  "Give me three small ideas that would make this family site feel even more like home.",
-  "Help me sort a messy to-do list into what matters tonight and what can wait.",
-  "Make a simple weekend reset routine for the house and the home server.",
-  "Draft a warm note I can send to the family without making it sound stiff.",
+  "Make me a five-minute backup check so our photos and important files are safe.",
+  "Help me plan a low-stress school-night dinner from what we already have.",
+  "Sort my messy to-do list into tonight, this week, and not-now.",
+  "Make a simple weekend reset for laundry, groceries, and the house.",
+  "Draft a warm message I can send to family without making it sound stiff.",
+  "Help me make a gentle morning routine that we might actually keep.",
+  "Give me a cozy family-night plan with one useful thing and one silly thing.",
 ];
 
 const BIRTHDAY_UNLOCK_SEQUENCE = [...KONAMI_SEQUENCE, "select", "start"];
@@ -191,19 +191,19 @@ const CHAT_MODES = [
 ];
 
 const CHAT_SYSTEM_PROMPT =
-  "You are House Chat, the friendly assistant on the Rasies family site. Help with everyday questions, planning, writing, research prep, and gentle guidance around the family's self-hosted tools. Keep replies concise, practical, warm, and clear.";
+  "You are House Chat, Ian's warm, slightly playful helper on the Rasies family site. Talk like a thoughtful note from him to the people he loves: human, specific, lightly witty, never corporate. Help with ordinary life first: meals, chores, school nights, routines, family messages, packing, decisions, backups, and keeping important photos and files safe. Visitors cannot change or administer the site, so do not suggest editing settings, managing servers, or fixing infrastructure themselves. When home technology comes up, explain the safe next step in plain language and suggest asking Ian when an admin action is needed. Keep replies concise, practical, warm, and clear.";
 
 const DEFAULT_SPOTLIGHT: SpotlightPayload = {
-  mood: "The house is open, the lights are on, and House Chat is ready to help.",
+  mood: "The house is open, the kettle is thinking about it, and I’m here.",
   mission:
-    "Pick one thing that would make today feel easier and let House Chat help you do it cleanly.",
+    "Bring me one small snag from today and I’ll help turn it into the next easy step.",
   surprise:
-    "Try one useful question, one fun question, or one small self-hosting idea you have been meaning to chase.",
+    "Ask for something useful, oddly specific, or a little silly. Those are usually the good ones.",
   prompts: [
-    "Help me plan the rest of today without overcomplicating it.",
-    "Tell me one surprising thing worth sharing at dinner.",
-    "Draft a short note I can send to the family tonight.",
-    "Give me one small idea that would make this site feel even more like ours.",
+    "Help me rescue the next two hours without overcomplicating them.",
+    "What is one tiny thing I can do now that future-me will appreciate?",
+    "Draft a short, kind note I can send to the family tonight.",
+    "Give me a five-minute backup habit for this week.",
   ],
 };
 
@@ -1228,7 +1228,7 @@ export function SmartQuickChat() {
 const CHAT_PREVIEW_CARDS = [
   {
     label: "Plan",
-    description: "Untangle the evening, the week, or the next practical step.",
+    description: "Untangle dinner, chores, errands, or the next practical step.",
   },
   {
     label: "Write",
@@ -1236,7 +1236,7 @@ const CHAT_PREVIEW_CARDS = [
   },
   {
     label: "Decide",
-    description: "Compare options clearly and figure out what matters first.",
+    description: "Compare the options without making a small choice feel huge.",
   },
 ];
 
@@ -2988,7 +2988,7 @@ export function SearchPanel() {
                   <button
                     type="button"
                     onClick={() => {
-                      trackUsage("search.ask_cheshire");
+                      trackUsage("search.ask_house");
                       openChatWithPrompt(
                         `Help me improve this web search query and suggest 3 alternatives: "${query.trim()}".`,
                       );

@@ -107,16 +107,16 @@ type SpotlightPayload = {
 };
 
 const DEFAULT_SPOTLIGHT: SpotlightPayload = {
-  mood: "The house is open, the lights are on, and House Chat is ready to help.",
+  mood: "The house is open, the kettle is thinking about it, and I’m here.",
   mission:
-    "Pick one thing that would make today easier and let House Chat help you do it cleanly.",
+    "Bring me one small snag from today and I’ll help turn it into the next easy step.",
   surprise:
-    "Try one useful question, one fun question, or one small self-hosting idea you have been meaning to chase.",
+    "Ask for something useful, oddly specific, or a little silly. Those are usually the good ones.",
   prompts: [
-    "Help me plan the rest of today without overcomplicating it.",
-    "Tell me one surprising thing worth sharing at dinner.",
-    "Draft a short note I can send to the family tonight.",
-    "Give me one small idea that would make this site feel even more like ours.",
+    "Help me rescue the next two hours without overcomplicating them.",
+    "What is one tiny thing I can do now that future-me will appreciate?",
+    "Draft a short, kind note I can send to the family tonight.",
+    "Give me a five-minute backup habit for this week.",
   ],
 };
 
@@ -166,7 +166,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
       const endpoint = new URL(config.chatPath, config.baseUrl).toString();
       const isCheshire = config.chatPath.includes("/message");
       const prompt =
-        "Return ONLY valid JSON with keys mood, mission, surprise, prompts. prompts must be an array of exactly 4 short prompt strings. Make the set feel warm, curious, and family-friendly for a self-hosted family site: include one practical life prompt, one fun prompt, one family note prompt, and one small self-hosting idea.";
+        "Return ONLY valid JSON with keys mood, mission, surprise, prompts. prompts must be an array of exactly 4 short prompt strings. Make it sound like Ian talking warmly to family: human, lightly playful, and useful in ordinary life. Include practical life, family note, backup or memory-safety guidance, and one fun prompt. Visitors cannot administer the site, so never suggest editing settings, managing servers, or changing the website.";
 
       const payload = isCheshire
         ? { text: prompt, user_id: "spotlight" }
@@ -177,7 +177,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
               {
                 role: "system",
                 content:
-                  "You produce concise spotlight content for a warm family self-hosted site. Output strict JSON only, no markdown.",
+                  "You produce concise spotlight content for a warm family home. Sound human and lightly playful, prioritize ordinary life, backups, and family memories, and never suggest visitor administration of the website. Output strict JSON only, no markdown.",
               },
               { role: "user", content: prompt },
             ],
@@ -211,7 +211,7 @@ export async function registerCatRoutes(app: FastifyInstance, env: Env) {
       };
 
       return {
-        source: normalizeSpotlight(parsed) ? "cheshire-cat" : "fallback",
+        source: normalizeSpotlight(parsed) ? "mastra-rassymind" : "fallback",
         ...normalized,
       };
     } catch (err: unknown) {

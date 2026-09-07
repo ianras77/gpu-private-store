@@ -1230,6 +1230,42 @@ export default function App() {
         </header>
 
         <section
+          id="media-home"
+          className="media-home-section reveal reveal-2"
+          aria-labelledby="media-home-heading"
+        >
+          <div className="media-home-heading">
+            <p className="card-kicker">Family media</p>
+            <h2 id="media-home-heading">Watch, listen, or read.</h2>
+            <p>
+              New here? Start with media setup. Plex may appear first during
+              signup; keep going to finish all three services.
+            </p>
+          </div>
+          <div className="media-home-cards">
+            <a className="media-home-card media-home-card-watch" href="https://plex.rasies.com" target="_blank" rel="noreferrer">
+              <span className="media-home-card-icon"><Compass className="h-7 w-7" aria-hidden /></span>
+              <span><strong>Watch</strong><small>Movies &amp; TV</small></span>
+              <ExternalLink className="media-home-card-arrow h-5 w-5" aria-hidden />
+            </a>
+            <a className="media-home-card media-home-card-listen" href="https://audio.rasies.com" target="_blank" rel="noreferrer">
+              <span className="media-home-card-icon"><Headphones className="h-7 w-7" aria-hidden /></span>
+              <span><strong>Listen</strong><small>Audiobooks &amp; podcasts</small></span>
+              <ExternalLink className="media-home-card-arrow h-5 w-5" aria-hidden />
+            </a>
+            <a className="media-home-card media-home-card-read" href="https://books.rasies.com" target="_blank" rel="noreferrer">
+              <span className="media-home-card-icon"><BookOpen className="h-7 w-7" aria-hidden /></span>
+              <span><strong>Read</strong><small>Books &amp; reading</small></span>
+              <ExternalLink className="media-home-card-arrow h-5 w-5" aria-hidden />
+            </a>
+          </div>
+          <a className="btn btn-primary media-home-setup" href={MEDIA_SIGNUP_DIRECT_URL} target="_blank" rel="noreferrer">
+            <Sparkles className="h-4 w-4" aria-hidden />
+            Set up media access
+          </a>
+        </section>
+
+        <section
           id="helpful-services"
           className="helpful-service-bar reveal reveal-2"
           aria-labelledby="helpful-services-heading"

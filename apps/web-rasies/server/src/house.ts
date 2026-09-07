@@ -36,10 +36,10 @@ function houseDirectoryInstructions(env: Env) {
 }
 
 const HOUSE_SPOTLIGHT = {
-  mood: "The house is open, the lights are on, and House Chat is ready to help.",
-  mission: "Pick one useful thing that would make today easier.",
-  surprise: "A small, calm plan often beats a heroic one.",
-  prompts: ["Plan today", "Find something in the family archive", "Write a family note", "Check the house"],
+  mood: "The house is open, the kettle is thinking about it, and I’m here.",
+  mission: "Bring me one small snag from today and I’ll help turn it into the next easy step.",
+  surprise: "Ask for something useful, oddly specific, or a little silly. Those are usually the good ones.",
+  prompts: ["Rescue the next two hours", "Make a five-minute backup habit", "Write a family note", "Plan an easy dinner"],
 };
 
 export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
