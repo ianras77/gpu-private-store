@@ -10,6 +10,10 @@ describe("Mastra automatic routing", () => {
     expect(selectMastraAgent({ mode: "general", searchRequested: true })).toBe("researcher");
   });
 
+  it("keeps research capability selection separate from plain chat", () => {
+    expect(selectMastraAgent({ mode: "general", searchRequested: false })).not.toBe("researcher");
+  });
+
   it("keeps explicit coding focus as a secondary preference", () => {
     expect(agentForMode("deep-coding")).toBe("coder");
     expect(selectMastraAgent({ mode: "deep-coding", searchRequested: true })).toBe("coder");
