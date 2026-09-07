@@ -38,9 +38,6 @@ const formatDuration = (seconds?: number) => {
   return `${minutes}:${String(remainder).padStart(2, "0")}`;
 };
 
-const itemMeta = (item?: PhotoItem | null) =>
-  [item?.collection, item?.location, item?.camera].filter(Boolean).slice(0, 2).join(" · ");
-
 type PhotoSectionProps = {
   title: string;
   eyebrow: string;
@@ -81,8 +78,8 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
                 isLarge ? "md:col-span-2 xl:col-span-2" : ""
               }`}
             >
-              <button type="button" onClick={() => onSelect(item.id)} className="block w-full text-left">
-                <div className={`relative ${isLarge ? "aspect-[16/10]" : "aspect-[4/3]"}`}>
+              <button type="button" onClick={() => onSelect(item.id)} aria-label={`Open ${item.title}`} className="block w-full text-left">
+                <div className={`relative ${isLarge ? "aspect-[16/10]" : index % 3 === 0 ? "aspect-[4/5]" : "aspect-[5/6]"}`}>
                   {item.kind === "video" ? (
                     <>
                       <Image
@@ -113,24 +110,8 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
                     />
                   )}
 
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(7,11,26,0.82))]" />
-                  <div className="absolute inset-x-0 bottom-0 p-5">
-                    <div className="rounded-[24px] border border-white/10 bg-black/40 p-4 backdrop-blur-sm">
-                      <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-cloud/58">
-                        <span>{formatDate(item.capturedAt)}</span>
-                        <span className="h-1 w-1 rounded-full bg-cloud/45" />
-                        <span>{item.collection ?? item.sourceLabel ?? item.source}</span>
-                        {durationLabel && (
-                          <>
-                            <span className="h-1 w-1 rounded-full bg-cloud/45" />
-                            <span>{durationLabel}</span>
-                          </>
-                        )}
-                      </div>
-                      <div className="mt-3 text-xl font-semibold text-white md:text-2xl">{item.title}</div>
-                      {itemMeta(item) && <div className="mt-2 text-xs leading-6 text-cloud/72">{itemMeta(item)}</div>}
-                    </div>
-                  </div>
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-100" />
+                  {durationLabel && <div className="pointer-events-none absolute bottom-4 left-4 rounded-full border border-white/15 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-white/85">{durationLabel}</div>}
                 </div>
               </button>
             </motion.article>
@@ -179,30 +160,13 @@ export function PhotosGalleryPage() {
           <div className="absolute -left-10 top-8 h-32 w-32 rounded-full bg-glow/15 blur-3xl" />
           <div className="absolute right-8 top-8 h-32 w-32 rounded-full bg-aurora/12 blur-3xl" />
 
-          <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_320px]">
+          <div className="relative flex flex-col gap-5">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.36em] text-cloud/60">From home</div>
-              <h1 className="mt-4 text-4xl font-semibold text-white md:text-5xl">Around home.</h1>
+              <div className="text-[10px] uppercase tracking-[0.36em] text-cloud/60">The photo wall</div>
+              <h1 className="mt-3 text-4xl font-semibold text-white md:text-6xl">Around home.</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-cloud/68">A living wall of moments. Tap a frame when you want the story behind it.</p>
             </div>
-
-            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-              <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">Immich</div>
-                <div className="mt-2 text-3xl font-semibold text-white">
-                  {data?.sources?.immich?.total ?? immichItems.length}
-                </div>
-              </div>
-              <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">Local</div>
-                <div className="mt-2 text-3xl font-semibold text-white">
-                  {data?.sources?.local?.total ?? localItems.length}
-                </div>
-              </div>
-              <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">Latest</div>
-                <div className="mt-2 text-sm font-semibold text-white">{formatDate(data?.updatedAt)}</div>
-              </div>
-            </div>
+            <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.22em] text-cloud/55"><span className="rave-chip rounded-full px-3 py-2">{primaryItems.length} frames in view</span><span className="rave-chip rounded-full px-3 py-2">Tap to open details</span></div>
           </div>
         </div>
       </section>
