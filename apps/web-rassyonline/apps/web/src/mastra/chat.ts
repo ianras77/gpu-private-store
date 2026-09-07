@@ -19,10 +19,9 @@ export async function streamMastraChat(input: MastraChatInput) {
   const latest = [...input.messages].reverse().find((message) => message.role === "user")?.content ?? "";
   const context = input.messages.filter((message) => message.role === "system").map((message) => ({ role: "system" as const, content: message.content }));
   return input.agent.stream(latest, {
-    context,
+    ...(context.length ? { context } : {}),
     memory: { thread: input.threadId, resource: input.resourceId },
     maxSteps: input.maxSteps ?? 8,
     abortSignal: input.signal,
-    disableBackgroundTasks: true
   });
 }
