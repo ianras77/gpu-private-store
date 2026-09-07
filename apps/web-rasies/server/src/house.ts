@@ -18,6 +18,9 @@ const Body = z.object({
   sessionId: z.string().optional(),
   mode: z.string().optional(),
   webSearchPolicy: z.enum(["auto", "on", "off"]).optional(),
+  locale: z.string().max(32).optional(),
+  accessLevel: z.enum(["anonymous", "family"]).optional(),
+  source: z.enum(["web", "capacitor"]).optional(),
 });
 const FeedbackBody = z.object({ runId: z.string().max(120), threadId: z.string().max(120), mode: z.string().max(40), rating: z.enum(["up", "down"]) });
 
@@ -28,21 +31,16 @@ function modeInstructions(mode: string, webSearchPolicy: string) {
   return `${modeText} Web search policy is ${webSearchPolicy}; obey it and prefer local Rasies tools first.`;
 }
 
+function houseDirectoryInstructions(env: Env) {
+  return `Authoritative Rasies links for orientation (use these exact links when relevant): media signup ${env.SIGNUP_URL}; family account request ${env.AUTHENTIK_URL}if/flow/runtipi-waitlist-enrollment/; existing family sign-in and app library ${env.HEIMDALL_URL}; search ${env.SEARXNG_BASE_URL}; photos ${env.PHOTOS_URL}; large files ${env.SEND_URL}; Plex ${env.PLEX_URL}. Media signup and family-account sign-in are different paths. If the signup service tool is unavailable or returns an empty list, still explain these paths and say that live media availability could not be confirmed. Never ask an anonymous visitor to identify themselves before explaining these public paths.`;
+}
+
 const HOUSE_SPOTLIGHT = {
   mood: "The house is open, the lights are on, and House Chat is ready to help.",
   mission: "Pick one useful thing that would make today easier.",
   surprise: "A small, calm plan often beats a heroic one.",
   prompts: ["Plan today", "Find something in the family archive", "Write a family note", "Check the house"],
 };
-
-function directHouseAnswer(latest: string, env: Env) {
-  if (latest.includes("big file") || latest.includes("large file")) return `For sending a big file, use Send: ${env.SEND_URL}`;
-  if (latest.includes("photos")) return `Photos are here: ${env.PHOTOS_URL}`;
-  if (latest.includes("plex")) return `Plex is here: ${env.PLEX_URL}. Family access starts at ${env.SIGNUP_URL}`;
-  if (latest.includes("sign up") || latest.includes("signup")) return `Family signup is here: ${env.SIGNUP_URL}`;
-  if (latest.includes("minecraft")) return `The Minecraft server is ${env.MC_TROUP_SERVER_HOST}; the map is ${env.MC_TROUP_BLUEMAP_URL}`;
-  return undefined;
-}
 
 export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
   let agent: ReturnType<typeof createHouseAgent> | undefined;
@@ -67,12 +65,9 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
     const rateKey = typeof request.headers["x-forwarded-for"] === "string" ? request.headers["x-forwarded-for"].split(",")[0].trim() : request.ip;
     if (!allow(rateKey)) return reply.code(429).header("retry-after", "60").send({ error: "House Chat rate limit reached" });
     const context = normalizeHouseContext(parsed.data);
-    const latest = parsed.data.messages.at(-1)?.content.toLowerCase() ?? "";
-    const direct = directHouseAnswer(latest, env);
-    if (direct) return { runId: crypto.randomUUID(), threadId: context.threadId, text: direct, sources: [{ type: "house-directory", title: "Rasies service directory" }] };
     try {
       const messages = [...await loadThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId), ...parsed.data.messages] as ModelMessage[];
-      const result = await getAgent().generate(messages, { maxSteps: 5, instructions: modeInstructions(context.mode, context.webSearchPolicy) });
+      const result = await getAgent().generate(messages, { maxSteps: 5, instructions: `${modeInstructions(context.mode, context.webSearchPolicy)} ${houseDirectoryInstructions(env)} Session: ${context.sessionId}. Access level: ${context.accessLevel}. Locale: ${context.locale}. Use the signup tools and house directory for live account help; never invent links.` });
       await saveThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId, [...messages, { role: "assistant", content: result.text } as ModelMessage]);
       return { runId: crypto.randomUUID(), threadId: context.threadId, text: result.text, sources: [] };
     } catch (error) {
@@ -97,15 +92,8 @@ export async function registerHouseRoutes(app: FastifyInstance, env: Env) {
     try {
       const runId = crypto.randomUUID();
       send("message_start", { runId, threadId: context.threadId });
-      const direct = directHouseAnswer(parsed.data.messages.at(-1)?.content.toLowerCase() ?? "", env);
-      if (direct) {
-        send("source", { type: "house-directory", title: "Rasies service directory" });
-        send("text_delta", { text: direct });
-        send("message_end", { runId, threadId: context.threadId });
-        return reply.raw.end();
-      }
       const messages = [...await loadThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId), ...parsed.data.messages] as ModelMessage[];
-      const result = await getAgent().stream(messages, { maxSteps: 5, instructions: modeInstructions(context.mode, context.webSearchPolicy) });
+      const result = await getAgent().stream(messages, { maxSteps: 5, instructions: `${modeInstructions(context.mode, context.webSearchPolicy)} ${houseDirectoryInstructions(env)} Session: ${context.sessionId}. Access level: ${context.accessLevel}. Locale: ${context.locale}. Use the signup tools and house directory for live account help; never invent links.` });
       let fullText = "";
       for await (const delta of result.textStream) { fullText += delta; send("text_delta", { text: delta }); }
       await saveThreadMemory(env.MASTRA_DATA_DIR ?? "/data/mastra", context.threadId, [...messages, { role: "assistant", content: fullText } as ModelMessage]);

@@ -1,0 +1,4 @@
+Core workflow registration is intentionally added after the first API adapter is
+qualified. The service foundation, typed tools, capability discovery, and
+Runtipi lifecycle are live; existing Python routes remain the compatibility
+facade until workflow parity tests pass.

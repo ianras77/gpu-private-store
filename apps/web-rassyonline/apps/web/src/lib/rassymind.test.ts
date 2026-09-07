@@ -18,12 +18,12 @@ afterEach(() => {
 describe("RassyMind mode mapping", () => {
   test("publishes the exact ordered chat modes", () => {
     expect(CHAT_MODES).toEqual([
-      { id: "general", label: "Talk", model: "rassy-mind", maxTokens: 2048, thinking: true, contextWindow: "Mind lane", description: "Reasoning, conversation, and synthesis through the general RassyMind lane." },
-      { id: "deep-coding", label: "Deep Code", model: "rassy-code", maxTokens: 4096, thinking: true, contextWindow: "Code lane", description: "High-context coding, systems reasoning, and operator work." },
-      { id: "fast-coding", label: "Fast Code", model: "rassy-code", maxTokens: 1536, thinking: false, contextWindow: "Code lane", description: "Focused implementation loops through the same canonical code lane." },
-      { id: "quick", label: "Utility", model: "rassy-utility", maxTokens: 768, thinking: false, contextWindow: "Utility lane", description: "Short answers, titles, summaries, and quick transforms." },
-      { id: "spark", label: "Spark", model: "rassy-fast", maxTokens: 512, thinking: false, contextWindow: "Fast lane", description: "Low-latency transforms when speed matters more than depth." },
-      { id: "knowledge", label: "Knowledge", model: "rassy-mind", maxTokens: 3072, thinking: true, contextWindow: "Mind + vectors", description: "RassyMind reasoning grounded with your selected document vectors." }
+      { id: "general", label: "Talk", model: "rassy-mind", maxTokens: 2048, thinking: true, reasoningEffort: "medium", contextWindow: "Mind lane", description: "Reasoning, conversation, and synthesis through the general RassyMind lane." },
+      { id: "deep-coding", label: "Deep Code", model: "rassy-code", maxTokens: 4096, thinking: true, reasoningEffort: "high", contextWindow: "Code lane", description: "High-context coding, systems reasoning, and operator work." },
+      { id: "fast-coding", label: "Fast Code", model: "rassy-code", maxTokens: 1536, thinking: false, reasoningEffort: "none", contextWindow: "Code lane", description: "Focused implementation loops through the same canonical code lane." },
+      { id: "quick", label: "Utility", model: "rassy-utility", maxTokens: 768, thinking: false, reasoningEffort: "none", contextWindow: "Utility lane", description: "Short answers, titles, summaries, and quick transforms." },
+      { id: "spark", label: "Spark", model: "rassy-fast", maxTokens: 512, thinking: false, reasoningEffort: "none", contextWindow: "Fast lane", description: "Low-latency transforms when speed matters more than depth." },
+      { id: "knowledge", label: "Knowledge", model: "rassy-mind", maxTokens: 3072, thinking: true, reasoningEffort: "medium", contextWindow: "Mind + vectors", description: "RassyMind reasoning grounded with your selected document vectors." }
     ]);
   });
 

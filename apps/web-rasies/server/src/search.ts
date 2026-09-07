@@ -158,7 +158,7 @@ export async function registerSearchRoutes(app: FastifyInstance, env: Env) {
       };
 
       return {
-        source: generated.length >= 5 ? "cheshire-cat" : "fallback",
+        source: generated.length >= 5 ? "mastra-rassymind" : "mastra-rassymind-fallback",
         suggestions,
       };
     } catch (err: unknown) {
@@ -169,7 +169,7 @@ export async function registerSearchRoutes(app: FastifyInstance, env: Env) {
         expiresAt: now + 1000 * 60 * 3,
       };
       return {
-        source: "fallback",
+        source: "mastra-rassymind-fallback",
         suggestions: fallback,
         detail: errorMessage(err),
       };

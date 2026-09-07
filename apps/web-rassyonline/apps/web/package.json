@@ -11,11 +11,17 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.51",
+    "@mastra/core": "^1.63.2",
+    "@mastra/memory": "^1.28.1",
+    "@mastra/pg": "^1.22.2",
+    "ai": "^7.0.84",
     "bcryptjs": "^3.0.3",
     "next": "15.5.18",
     "pg": "^8.22.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "supports-color": "^11.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

@@ -38,20 +38,20 @@ export function Hero() {
     `Mr Rassy is holding a ${moodLabel} line tonight.`;
 
   return (
-    <section className="relative overflow-hidden pt-12 sm:pt-14">
+    <section className="relative overflow-hidden pt-6 sm:pt-8">
       <div className="absolute inset-0 noise" />
       <div className="absolute -top-24 right-8 h-64 w-64 rounded-full bg-aurora/22 blur-3xl animate-float" />
       <div className="absolute left-10 top-24 h-40 w-40 rounded-full bg-comet/18 blur-3xl animate-drift" />
       <div className="absolute bottom-8 right-1/4 h-44 w-44 rounded-full bg-glow/14 blur-3xl animate-pulseGlow" />
 
-      <div className="relative mx-auto w-full max-w-6xl px-4 pb-8 sm:px-6">
+      <div className="relative mx-auto w-full max-w-6xl px-4 pb-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="glass-panel rounded-[32px] p-5 md:p-6 lg:px-8 lg:py-7"
+          className="glass-panel rounded-[28px] p-4 md:p-5 lg:px-7 lg:py-5"
         >
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.34em] text-cloud/58">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="glow-dot h-2.5 w-2.5 rounded-full" />
@@ -63,19 +63,19 @@ export function Hero() {
               <div className="text-[11px] uppercase tracking-[0.5em] text-cloud/55">
                 Welcome to my world
               </div>
-              <h1 className="section-title mt-3 text-[clamp(2.35rem,10vw,6rem)] leading-[.98] tracking-[-0.055em]">
+              <h1 className="section-title mt-2 whitespace-nowrap text-[clamp(2rem,9.5vw,6rem)] leading-[.98] tracking-[-0.055em]">
                 Rassy’s <span className="hero-wordmark-dot">dot</span> Com
               </h1>
-              <div className="relative mt-4 max-w-3xl overflow-hidden rounded-[26px] border border-white/10 bg-black/18 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+              <div className="relative mt-3 max-w-3xl overflow-hidden rounded-[24px] border border-white/10 bg-black/18 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
                 <HeaderSignalVisualizer />
-                <div className="relative px-4 py-4 md:px-5 md:py-4">
+                <div className="relative px-4 py-3 md:px-5 md:py-3">
                   <div className="text-base leading-7 text-cloud/90 md:text-lg">
                     Come on in.
                   </div>
                   <p className="mt-2 max-w-2xl text-sm leading-7 text-cloud/84 md:text-[15px]">
                     {mrRassyLine}
                   </p>
-                  <div className="mt-4 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-cloud/58">
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-cloud/58">
                     <span className="rave-chip rounded-full px-3 py-2">
                       Mr Rassy
                     </span>
@@ -90,7 +90,7 @@ export function Hero() {
                 </div>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-2.5">
+              <div className="mt-4 flex flex-wrap gap-2.5">
                 <Button asChild>
                   <Link href="/radio">
                     <Radio size={16} />

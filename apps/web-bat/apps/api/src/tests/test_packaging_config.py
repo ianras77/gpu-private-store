@@ -13,28 +13,22 @@ def test_compose_defaults_use_reachable_rassymind_host_gateway() -> None:
     assert "rassymind-gateway:8080" not in compose_text
     assert "${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/api/chat" in compose_text
     assert "${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/api/embed" in compose_text
-    assert compose_text.count("http://host.docker.internal:8844") >= 4
-    assert compose_text.count("extra_hosts: *bat-host-gateway") >= 3
+    assert compose_text.count("http://host.docker.internal:8844") >= 3
+    assert compose_text.count("extra_hosts: *bat-host-gateway") >= 2
 
 
-def test_worker_service_has_healthcheck() -> None:
+def test_mastra_is_the_only_editorial_orchestrator() -> None:
     compose_text = (APP_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
-    start = compose_text.index("  bat-worker:")
-    end = compose_text.index("\n\nnetworks:", start)
-    worker_section = compose_text[start:end]
-
-    assert "healthcheck:" in worker_section
-    assert "python -m workers.healthcheck" in worker_section
+    assert "EDITORIAL_ORCHESTRATOR: ${EDITORIAL_ORCHESTRATOR:-mastra}" in compose_text
+    assert "bat-worker:" not in compose_text
+    assert "workers.main" not in compose_text
 
 
 def test_medium_term_content_machine_compose_defaults() -> None:
     compose_text = (APP_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
 
-    assert "WORKER_CYCLE_MINUTES: ${WORKER_CYCLE_MINUTES:-15}" in compose_text
-    assert "WORKER_PHASE: ${WORKER_PHASE:-split}" in compose_text
     assert "RESEARCH_SCHEDULE_UTC: ${RESEARCH_SCHEDULE_UTC:-00:00,06:00,12:00,18:00}" in compose_text
     assert "EDITORIAL_LOOPS_PER_RESEARCH: ${EDITORIAL_LOOPS_PER_RESEARCH:-3}" in compose_text
-    assert "WORKER_MAX_CYCLE_SECONDS: ${WORKER_MAX_CYCLE_SECONDS:-7200}" in compose_text
     assert "PIPELINE_LOCK_TTL_SECONDS: ${PIPELINE_LOCK_TTL_SECONDS:-7200}" in compose_text
     assert "LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-180}" in compose_text
     assert "LLM_READINESS_INFERENCE_PROBE_ENABLED: ${LLM_READINESS_INFERENCE_PROBE_ENABLED:-true}" in compose_text
@@ -48,8 +42,7 @@ def test_medium_term_content_machine_compose_defaults() -> None:
     assert "ANALYSIS_SOURCE_LIMIT: ${ANALYSIS_SOURCE_LIMIT:-10}" in compose_text
     assert "ANALYSIS_THEME_LIMIT: ${ANALYSIS_THEME_LIMIT:-8}" in compose_text
     assert "ANALYSIS_MAX_BRIEFS: ${ANALYSIS_MAX_BRIEFS:-18}" in compose_text
-    assert "CAT_SECONDARY_MEMORY_RECALL_LIMIT: ${CAT_SECONDARY_MEMORY_RECALL_LIMIT:-12}" in compose_text
-    assert "CAT_SECONDARY_MEMORY_MAX_CHARS: ${CAT_SECONDARY_MEMORY_MAX_CHARS:-2400}" in compose_text
+    assert 'CAT_SECONDARY_MEMORY_ENABLED: "false"' in compose_text
 
 
 def test_medium_term_content_machine_api_defaults(monkeypatch) -> None:
@@ -103,7 +96,7 @@ def test_medium_term_content_machine_api_defaults(monkeypatch) -> None:
     assert settings.editorial_rework_max_attempts == 4
     assert settings.editorial_rework_passes_per_cycle == 3
     assert settings.editorial_backlog_prune_limit == 500
-    assert settings.cat_secondary_memory_recall_limit == 12
+    assert settings.cat_secondary_memory_enabled is False
     assert settings.cat_secondary_memory_max_chars == 2400
 
 

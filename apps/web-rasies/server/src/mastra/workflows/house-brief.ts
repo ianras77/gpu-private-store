@@ -14,6 +14,6 @@ export async function runHouseBriefWorkflow(env: Env): Promise<HouseBrief> {
     mood: up > 0 ? "The house is open and ready." : "The house is taking a quiet moment.",
     mission: latestThought ? `Have a look at “${latestThought}”.` : "Pick one small thing that would make today easier.",
     surprise: latestStory ? `A bedtime story is waiting: “${latestStory}”.` : "A small, calm plan often beats a heroic one.",
-    prompts: ["Plan today", "Check the house", "Find something in the archive", "Write a family note"],
+    prompts: ["Help me sign in", "What can my family account do?", "Find something in the archive", "Write a family note"],
   };
 }

@@ -64,6 +64,7 @@ async def list_sources(limit: int = 50, db: AsyncSession = Depends(get_db)) -> l
             "source_url": row.source_url,
             "canonical_url": row.canonical_url,
             "fetched_at": row.fetched_at,
+            "evidence": (row.raw_text or "")[:2400],
             "metadata": row.meta,
         }
         for row in rows

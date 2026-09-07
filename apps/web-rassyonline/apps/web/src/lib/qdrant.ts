@@ -44,6 +44,7 @@ function getQdrantUrl(path: string): string {
 async function qdrantFetch(path: string, init: RequestInit): Promise<Response> {
   return fetch(getQdrantUrl(path), {
     ...init,
+    signal: init.signal ?? AbortSignal.timeout(15_000),
     headers: {
       "content-type": "application/json",
       ...(process.env.QDRANT_API_KEY ? { "api-key": process.env.QDRANT_API_KEY } : {}),
@@ -114,12 +115,13 @@ export async function searchUserDocuments(input: {
   limit?: number;
 }): Promise<QdrantSearchResult[]> {
   if (input.documentIds.length === 0) return [];
+  const limit = Math.max(1, Math.min(input.limit ?? 6, 20));
   const collection = getUserCollectionName(input.userId);
   const response = await qdrantFetch(`/collections/${collection}/points/search`, {
     method: "POST",
     body: JSON.stringify({
       vector: input.vector,
-      limit: input.limit ?? 6,
+      limit,
       with_payload: true,
       filter: buildQdrantFilter(input.userId, input.documentIds)
     })

@@ -1,1 +1,1 @@
-{"version":"2.1.9","results":[[":src/__tests__/schema.test.ts",{"duration":106.62236499786377,"failed":false}],[":src/__tests__/aspects.test.ts",{"duration":13.4719919860363,"failed":false}]]}
+{"version":"2.1.9","results":[[":src/__tests__/schema.test.ts",{"duration":41.14627200000007,"failed":false}],[":src/__tests__/aspects.test.ts",{"duration":4.630155999999943,"failed":false}]]}

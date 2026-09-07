@@ -2,9 +2,9 @@ x-bat-runtime-env: &bat-runtime-env
   DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://bat:bat_password_change_me@bat-postgres:5432/bat}
   REDIS_URL: ${REDIS_URL:-redis://bat-redis:6379/0}
   QDRANT_URL: ${QDRANT_URL:-http://bat-qdrant:6333}
-  CHESHIRE_CAT_URL: ${CHESHIRE_CAT_URL:-http://bat-cheshire-cat:80}
-  CHESHIRE_CAT_API_KEY: ${CHESHIRE_CAT_API_KEY:-change_me}
   SOCIAL_PUBLISHER_URL: ${SOCIAL_PUBLISHER_URL:-http://bat-social-publisher:8100}
+  BAT_INTERNAL_SERVICE_TOKEN: ${BAT_INTERNAL_SERVICE_TOKEN:?BAT_INTERNAL_SERVICE_TOKEN must be set}
+  EDITORIAL_ORCHESTRATOR: ${EDITORIAL_ORCHESTRATOR:-mastra}
   SEARXNG_BASE_URL: ${SEARXNG_BASE_URL:-https://search.rasies.com}
   LLM_API_URL: ${LLM_API_URL_CONTAINER:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/api/chat}
   LLM_API_KEY: ${RASSYMIND_API_KEY:-${LLM_API_KEY:-}}
@@ -13,36 +13,22 @@ x-bat-runtime-env: &bat-runtime-env
   LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-180}
   LLM_RETRY_BACKOFF_SECONDS: ${LLM_RETRY_BACKOFF_SECONDS:-3}
   LLM_READINESS_INFERENCE_PROBE_ENABLED: ${LLM_READINESS_INFERENCE_PROBE_ENABLED:-true}
-  OLLAMA_NUM_CTX: ${OLLAMA_NUM_CTX:-8192}
-  OLLAMA_REPEAT_LAST_N: ${OLLAMA_REPEAT_LAST_N:-96}
-  OLLAMA_REPEAT_PENALTY: ${OLLAMA_REPEAT_PENALTY:-1.12}
-  OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-15m}
   EMBEDDING_API_URL: ${EMBEDDING_API_URL_CONTAINER:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}/api/embed}
   EMBEDDING_API_KEY: ${RASSYMIND_API_KEY:-${EMBEDDING_API_KEY:-}}
   EMBEDDING_MODEL: ${EMBEDDING_MODEL_CONTAINER:-rassy-embed}
-  EMBEDDING_ALLOW_FALLBACK: ${EMBEDDING_ALLOW_FALLBACK:-false}
+  EMBEDDING_ALLOW_FALLBACK: "false"
+  CAT_PRIMARY_ENABLED: "false"
+  CAT_SECONDARY_MEMORY_ENABLED: "false"
   EMBEDDING_REQUEST_TIMEOUT_SECONDS: ${EMBEDDING_REQUEST_TIMEOUT_SECONDS:-12}
   EMBEDDING_REQUEST_RETRIES: ${EMBEDDING_REQUEST_RETRIES:-1}
   EMBEDDING_BATCH_SIZE: ${EMBEDDING_BATCH_SIZE:-8}
-  CAT_PRIMARY_ENABLED: ${CAT_PRIMARY_ENABLED:-false}
-  CAT_SECONDARY_MEMORY_ENABLED: ${CAT_SECONDARY_MEMORY_ENABLED:-true}
-  CAT_SECONDARY_MEMORY_MIN_QUALITY: ${CAT_SECONDARY_MEMORY_MIN_QUALITY:-4.8}
-  CAT_SECONDARY_MEMORY_RECALL_LIMIT: ${CAT_SECONDARY_MEMORY_RECALL_LIMIT:-12}
-  CAT_SECONDARY_MEMORY_MAX_CHARS: ${CAT_SECONDARY_MEMORY_MAX_CHARS:-2400}
-  CAT_REQUEST_TIMEOUT_SECONDS: ${CAT_REQUEST_TIMEOUT_SECONDS:-45}
-  CAT_HEALTH_TIMEOUT_SECONDS: ${CAT_HEALTH_TIMEOUT_SECONDS:-12}
   ENABLE_MANUAL_REVIEW: ${ENABLE_MANUAL_REVIEW:-true}
   AUTO_PUBLISH: ${AUTO_PUBLISH:-false}
   AUTO_PUBLISH_SOCIAL: ${AUTO_PUBLISH_SOCIAL:-false}
   DIRECT_PUBLISH_DEFAULT: ${DIRECT_PUBLISH_DEFAULT:-false}
-  WORKER_CYCLE_MINUTES: ${WORKER_CYCLE_MINUTES:-15}
-  WORKER_PHASE: ${WORKER_PHASE:-split}
   RESEARCH_SCHEDULE_UTC: ${RESEARCH_SCHEDULE_UTC:-00:00,06:00,12:00,18:00}
   EDITORIAL_LOOPS_PER_RESEARCH: ${EDITORIAL_LOOPS_PER_RESEARCH:-3}
-  WORKER_MIN_CYCLE_SECONDS: ${WORKER_MIN_CYCLE_SECONDS:-30}
-  WORKER_MAX_CYCLE_SECONDS: ${WORKER_MAX_CYCLE_SECONDS:-7200}
-  WORKER_HEARTBEAT_TTL_SECONDS: ${WORKER_HEARTBEAT_TTL_SECONDS:-9000}
-  WORKER_HEARTBEAT_KEY: ${WORKER_HEARTBEAT_KEY:-bat:worker:heartbeat}
+  MASTRA_URL: ${MASTRA_URL:-http://bat-mastra:8090}
   PIPELINE_LOCK_TTL_SECONDS: ${PIPELINE_LOCK_TTL_SECONDS:-7200}
   PIPELINE_STALE_AFTER_SECONDS: ${PIPELINE_STALE_AFTER_SECONDS:-7200}
   RESEARCH_QUERY_CONCURRENCY: ${RESEARCH_QUERY_CONCURRENCY:-8}
@@ -116,41 +102,32 @@ services:
     x-runtipi:
       add_to_main_network: true
 
-  bat-cheshire-cat:
-    image: ghcr.io/cheshire-cat-ai/core:latest
+  bat-mastra:
+    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/mastra
     environment:
-      CCAT_DEBUG: "false"
-      CAT_METADATA_PATH: /data/metadata.json
-      CCAT_METADATA_FILE: /data/metadata.json
-      CCAT_QDRANT_HOST: bat-qdrant
-      CCAT_QDRANT_PORT: "6333"
-      OLLAMA_GENERAL_BASE_URL: ${CAT_OLLAMA_GENERAL_BASE_URL:-${OLLAMA_GENERAL_BASE_URL_CONTAINER:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}}
-      OLLAMA_EMBED_BASE_URL: ${CAT_OLLAMA_EMBED_BASE_URL:-${OLLAMA_EMBED_BASE_URL_CONTAINER:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}}
-      OLLAMA_GENERAL_MODEL: ${CAT_OLLAMA_GENERAL_MODEL:-${OLLAMA_GENERAL_MODEL_CONTAINER:-rassy-mind}}
-      OLLAMA_EMBED_MODEL: ${CAT_OLLAMA_EMBED_MODEL:-${OLLAMA_EMBED_MODEL_CONTAINER:-rassy-embed}}
-      CAT_OLLAMA_API_KEY: ${RASSYMIND_API_KEY:-${CAT_OLLAMA_API_KEY:-}}
-      LLM_API_KEY: ${RASSYMIND_API_KEY:-${LLM_API_KEY:-}}
+      MASTRA_PORT: 8090
+      BAT_API_URL: http://bat-api:8000
+      BAT_INTERNAL_SERVICE_TOKEN: ${BAT_INTERNAL_SERVICE_TOKEN:?BAT_INTERNAL_SERVICE_TOKEN must be set}
+      MASTRA_PERSIST_REPORTS: ${MASTRA_PERSIST_REPORTS:-true}
+      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
+      RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
+      RASSYMIND_MODEL: ${RASSYMIND_MODEL:-rassy-mind}
+      RASSYMIND_EDITORIAL_MODEL: ${RASSYMIND_EDITORIAL_MODEL:-rassy-fast}
+      MASTRA_SCHEDULE_ENABLED: ${MASTRA_SCHEDULE_ENABLED:-true}
+      MASTRA_SCHEDULE_INTERVAL_SECONDS: ${MASTRA_SCHEDULE_INTERVAL_SECONDS:-21600}
+      MASTRA_SCHEDULE_DIRECTIVE: ${MASTRA_SCHEDULE_DIRECTIVE:-Trump executive overreach latest 2026}
     extra_hosts: *bat-host-gateway
-    volumes:
-      - ${APP_DATA_DIR:-./.docker-data}/app-data/web-bat/named/bat-cat-data:/data
-      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/scripts/bootstrap_cat_ollama.py:/app/cat/bootstrap/bootstrap_cat_ollama.py:ro
-    command:
-      - /bin/sh
-      - -lc
-      - python3 /app/cat/bootstrap/bootstrap_cat_ollama.py || true; exec python3 -m cat.main
-    healthcheck:
-      test:
-        - CMD
-        - python3
-        - -c
-        - import urllib.request; urllib.request.urlopen('http://127.0.0.1', timeout=5)
-      interval: 20s
-      timeout: 10s
-      retries: 15
-      start_period: 90s
+    expose:
+      - "8090"
     depends_on:
-      bat-qdrant:
+      bat-api:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8090/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     restart: unless-stopped
     networks:
       - default
@@ -163,12 +140,14 @@ services:
     environment:
       POSTGRES_DB: bat
       POSTGRES_USER: bat
-      POSTGRES_PASSWORD: bat_password_change_me
+      POSTGRES_PASSWORD: ${BAT_POSTGRES_PASSWORD:?BAT_POSTGRES_PASSWORD must be set}
     volumes:
       - ${APP_DATA_DIR:-./.docker-data}/app-data/web-bat/named/bat-postgres-data:/var/lib/postgresql/data
       - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
       - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/002_seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
       - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/003_trend_observation_uniqueness.sql:/docker-entrypoint-initdb.d/003_trend_observation_uniqueness.sql:ro
+      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/004_reports.sql:/docker-entrypoint-initdb.d/004_reports.sql:ro
+      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/005_report_runtime.sql:/docker-entrypoint-initdb.d/005_report_runtime.sql:ro
     healthcheck:
       test:
         - CMD-SHELL
@@ -194,7 +173,7 @@ services:
     restart: unless-stopped
 
   bat-redis:
-    image: redis:7
+    image: redis:7.4.2-alpine
     healthcheck:
       test:
         - CMD
@@ -232,6 +211,8 @@ services:
         NEXT_PUBLIC_UMAMI_DOMAINS: ${WEB_BAT_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
     environment:
       API_INTERNAL_BASE_URL: ${API_INTERNAL_BASE_URL:-http://bat-api:8000}
+      MASTRA_URL: http://bat-mastra:8090
+      BAT_INTERNAL_SERVICE_TOKEN: ${BAT_INTERNAL_SERVICE_TOKEN:?BAT_INTERNAL_SERVICE_TOKEN must be set}
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
       NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
       NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${WEB_BAT_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
@@ -241,6 +222,8 @@ services:
       NEXT_TELEMETRY_DISABLED: "1"
     depends_on:
       bat-api:
+        condition: service_healthy
+      bat-mastra:
         condition: service_healthy
     ports:
       - ${APP_PORT:-3197}:3000
@@ -259,38 +242,6 @@ services:
     x-runtipi:
       is_main: true
       internal_port: 3000
-
-  bat-worker:
-    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/api
-    extra_hosts: *bat-host-gateway
-    command:
-      - python
-      - -m
-      - workers.main
-    environment:
-      <<: *bat-runtime-env
-    depends_on:
-      bat-postgres:
-        condition: service_healthy
-      bat-redis:
-        condition: service_healthy
-      bat-qdrant:
-        condition: service_healthy
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - python -m workers.healthcheck
-      interval: 30s
-      timeout: 10s
-      retries: 6
-      start_period: 90s
-    restart: unless-stopped
-    image: runtipi-local-web-bat-worker:latest
-    networks:
-      - default
-      - tipi_main
-    x-runtipi:
-      add_to_main_network: true
 
 networks:
   tipi_main:

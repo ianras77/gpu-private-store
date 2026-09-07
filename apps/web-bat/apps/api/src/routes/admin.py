@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 import re
+import httpx
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import and_, func, select
@@ -15,7 +16,6 @@ from services.editorial_service import get_runtime_controls, update_runtime_cont
 from services.publishing_service import publish_ready_backlog
 from services.source_policy import source_current_news_assessment
 from services.pipeline_blueprint import get_role_pipeline
-from workers.jobs import run_pipeline_cycle
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -252,7 +252,19 @@ async def admin_pipeline(limit: int = 80, db: AsyncSession = Depends(get_db)) ->
 
 @router.post("/pipeline/run-now")
 async def run_pipeline_now(db: AsyncSession = Depends(get_db)) -> dict:
-    return await run_pipeline_cycle(db, actor="admin")
+    directive = "Trump executive overreach latest 2026"
+    async with httpx.AsyncClient(timeout=180) as client:
+        response = await client.post(
+            f"{settings.mastra_url.rstrip('/')}/v1/workflows/story",
+            headers={"Authorization": f"Bearer {settings.bat_internal_service_token}"},
+            json={"directive": directive, "maxSources": 8},
+        )
+    if response.status_code >= 400:
+        raise RuntimeError(f"Mastra story workflow failed ({response.status_code})")
+    story = response.json()
+    if not story.get("runId"):
+        raise RuntimeError("Mastra story workflow returned no run id")
+    return {"status": "completed", "orchestrator": "mastra", **story}
 
 
 @router.get("/analysis")

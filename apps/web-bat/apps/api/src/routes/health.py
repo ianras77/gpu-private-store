@@ -445,6 +445,9 @@ async def _qdrant_vector_check(expected_vector_size: int) -> dict[str, Any]:
 
 
 async def _cat_check() -> dict[str, Any]:
+    # Cheshire is retired from the active topology. Compatibility modules may remain
+    # for historical data reads, but readiness must never probe or depend on it.
+    return {"ok": True, "status": "retired", "provider": "mastra"}
     started = datetime.utcnow()
     base_url = settings.cheshire_cat_url.rstrip("/")
     timeout_seconds = max(4.0, float(settings.cat_health_timeout_seconds))

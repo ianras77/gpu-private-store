@@ -67,6 +67,9 @@ class Settings(BaseSettings):
     database_max_overflow: int = 20
     redis_url: str = "redis://localhost:6387/0"
     qdrant_url: str = "http://localhost:6337"
+    bat_internal_service_token: str = "change_me"
+    mastra_url: str = "http://bat-mastra:8090"
+    editorial_orchestrator: str = "mastra"
 
     searxng_base_url: str = "https://search.rasies.com"
     searxng_search_path: str = "/search"
@@ -88,13 +91,14 @@ class Settings(BaseSettings):
     )
     searxng_blocked_file_extensions: str = ".pdf|.doc|.docx|.ppt|.pptx"
 
-    cheshire_cat_url: str = "http://localhost:1866"
-    cheshire_cat_api_key: str = "change_me"
+    # Retained only for data-compatibility imports; the active runtime is Mastra.
+    cheshire_cat_url: str = ""
+    cheshire_cat_api_key: str = ""
     cat_primary_enabled: bool = False
     cat_service_user_id: str = "bat-secondary-memory"
     cat_request_timeout_seconds: float = 45.0
     cat_health_timeout_seconds: float = 12.0
-    cat_secondary_memory_enabled: bool = True
+    cat_secondary_memory_enabled: bool = False
     cat_secondary_memory_min_quality: float = 4.8
     cat_secondary_memory_recall_limit: int = 12
     cat_secondary_memory_max_chars: int = 2400

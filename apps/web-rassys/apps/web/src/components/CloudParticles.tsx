@@ -170,6 +170,7 @@ export function CloudParticles() {
             ctx.save();
             ctx.translate(ghost.x + PIXEL_OFFSET, ghost.y + PIXEL_OFFSET);
             ctx.rotate(Math.sin(ghost.phase) * 0.06);
+            ctx.scale(0.5, 0.5);
             ctx.globalAlpha = fade * Math.max(0.015, 0.1 - trailIndex * 0.009);
             ctx.fillStyle = `rgba(${ink.glow},0.7)`;
             visitorPattern.forEach((row, rowIndex) => [...row].forEach((cell, colIndex) => {
@@ -179,6 +180,7 @@ export function CloudParticles() {
           });
           ctx.translate(visitor.x + PIXEL_OFFSET, visitor.y + PIXEL_OFFSET);
           ctx.rotate(Math.sin(visitor.phase) * 0.06);
+          ctx.scale(0.5, 0.5);
           ctx.globalAlpha = fade * shimmer;
           // Keep the sprite grid crisp; the second pass supplies the haze.
           ctx.shadowBlur = 3;

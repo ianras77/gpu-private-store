@@ -12,6 +12,7 @@ type ChatMessage = {
   content: string;
   reasoning?: string;
   searched?: boolean;
+  searchStatus?: "used" | "failed" | "empty" | "not-used";
   sources?: Array<{ title: string; url: string; snippet: string }>;
 };
 
@@ -35,7 +36,7 @@ const OPENING_LINES = [
 ];
 
 export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn: boolean }) {
-  const [mode, setMode] = useState(modes[0]?.id ?? "general");
+  const [mode, setMode] = useState(modes.find((item) => item.id === "spark")?.id ?? modes[0]?.id ?? "general");
   const [webSearch, setWebSearch] = useState<WebSearchMode>("auto");
   const [threadId, setThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -220,6 +221,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       const nextThreadId = response.headers.get("x-thread-id");
       if (nextThreadId) setThreadId(nextThreadId);
       const searched = response.headers.get("x-rassy-web-search") === "used";
+      const searchStatus = (response.headers.get("x-rassy-web-search") ?? "not-used") as ChatMessage["searchStatus"];
       let sources: ChatMessage["sources"];
       const encodedSources = response.headers.get("x-rassy-search-results");
       if (encodedSources) {
@@ -228,7 +230,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
       if (!response.ok || !response.body) {
         const text = await response.text();
-        throw new Error(text || "Chat request failed");
+        if (response.status === 429) throw new Error("RassyMind is busy. Try again in a moment.");
+        throw new Error(text || "RassyMind could not answer this request.");
       }
 
       const reader = response.body.getReader();
@@ -267,13 +270,14 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         setMessages((current) => {
           const copy = [...current];
           const last = copy[copy.length - 1];
-          copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, sources };
+          copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, searchStatus, sources };
           return copy;
         });
         setActivity((value) => Math.min(1, value * 0.72 + Math.min(.3, chunk.length / 180)));
         setActivityKind(reasoning ? "thinking" : "answering");
       }
     } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
       const message = error instanceof Error ? error.message : "Chat request failed";
       setMessages((current) => {
         const copy = [...current];
@@ -298,7 +302,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           <label className="preference-select">
               <select aria-label="Optional capability preference" value={mode} onChange={(event) => setMode(event.target.value as ChatMode["id"]) }>
               <option value="general">Let Rassy choose</option>
-              {modes.filter((item) => item.id !== "general").map((item) => <option key={item.id} value={item.id}>{item.label} · {getLaneDisplay(item.id).capability}</option>)}
+              {modes.filter((item) => item.id !== "general").map((item) => <option key={item.id} value={item.id}>{item.id === "spark" ? "Fast chat" : item.label} · {getLaneDisplay(item.id).capability}</option>)}
             </select>
           </label>
         </div>
@@ -370,14 +374,13 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       </div>
 
       <div className="transcript-shell">
-        <Mindfield activity={activity} kind={activityKind} />
         <div className="message-list">
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <div className="message-meta"><span>{message.role === "user" ? "You" : "Rassy"}</span><div className="message-actions">{message.searched ? <span className="evidence-badge">WEB SOURCES</span> : null}{message.role === "assistant" && message.content ? <CopyButton text={message.content} label="Copy Markdown" /> : null}</div></div>
+              <div className="message-meta"><div className="message-actions">{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" || message.searchStatus === "empty" ? <span className="search-warning">Search unavailable</span> : null}{message.role === "assistant" && message.content ? <CopyButton text={message.content} label="Copy" /> : null}</div></div>
               {message.sources?.length ? <details className="search-sources"><summary>Search signal <span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noreferrer"><strong>{sourceIndex + 1}. {source.title}</strong><small>{source.snippet || source.url}</small></a>)}</div></details> : null}
               {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide reasoning trace" : "Show reasoning trace"}<span>RASSYMIND / TRANSPARENT</span></summary><p>{message.reasoning.trim()}</p></details> : null}
-              <MarkdownMessage content={message.content || (sending ? "..." : "")} />
+              {message.role === "assistant" && !message.content && sending ? <ThinkingState /> : <MarkdownMessage content={message.content || ""} />}
             </article>
           ))}
         </div>
@@ -422,6 +425,15 @@ function Mindfield({ activity, kind }: { activity: number; kind: "idle" | "think
         <circle className="trace-node node-b" cx="706" cy="41" r="2" />
         <circle className="trace-node node-c" cx="1032" cy="25" r="2" />
       </svg>
+    </div>
+  );
+}
+
+function ThinkingState() {
+  return (
+    <div className="thinking-state" role="status" aria-label="Rassy is thinking">
+      <span className="thinking-orbit" aria-hidden="true"><i /><i /><i /></span>
+      <span>Rassy is thinking</span>
     </div>
   );
 }

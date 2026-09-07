@@ -58,3 +58,8 @@ The web container expects:
 The web search lane is controlled by the chat UI and defaults to `auto`, so normal local chats stay internet-blind unless the prompt asks for fresh resources or search is forced on.
 
 The workbench exposes the complete text-lane selection, temperature and response-budget dials, multi-file text/source/config uploads, user-scoped `rassy-embed` vectors, optional `rassy-rerank`, and copyable Markdown/code output. Binary PDF/DOCX parsing is intentionally not advertised because the RassyMind embedding contract accepts text input here.
+# Rassy Online
+
+Runtipi-native RassyMind workbench. The server includes a Mastra application layer for
+semantic agents, safe tools, workflow contracts, skills, and opt-in MCP extensions. See
+`docs/MASTRA-PLATFORM-QUALIFICATION.md` for the current migration boundary and validation.

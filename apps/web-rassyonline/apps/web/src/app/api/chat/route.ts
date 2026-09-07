@@ -33,7 +33,7 @@ const chatRequestSchema = z.object({
   maxTokens: z.number().int().min(256).max(8192).optional()
 });
 
-const RASSY_VOICE = `You are Rassy: sharp, warm, playful, and a little wise-assy. Use light sarcasm or a gentle tease when it fits, never when the user is vulnerable or asking for serious help. Be fun without becoming noisy. Answer directly, stay useful, and make the user feel understood. When freshness matters, use the supplied search context. When user documents are supplied, ground the answer in them and say when context is missing. Give a concise explanation of your approach when useful; do not invent tools, sources, or capabilities.`;
+const RASSY_VOICE = `You are Rassy: fast, professional, warm, and direct, with a little personality. Use light humor only when it helps. Answer clearly and avoid filler. When fresh facts may have changed, the supplied web context is the result of a real search: use it, cite its URLs naturally, and never say you cannot browse when results are present. When the supplied web context is empty or marked unavailable, say so plainly. When user documents are supplied, ground the answer in them and say when context is missing. Do not invent tools, sources, or capabilities.`;
 
 export async function POST(request: NextRequest) {
   const parsed = chatRequestSchema.parse(await request.json());
@@ -41,7 +41,9 @@ export async function POST(request: NextRequest) {
   const user = await getUserForSessionToken(request.cookies.get(SESSION_COOKIE)?.value);
   const latestUserMessage = [...parsed.messages].reverse().find((message) => message.role === "user");
   let upstreamMessages = parsed.messages;
+  let attemptedWebSearch = false;
   let usedWebSearch = false;
+  let webSearchFailed = false;
   let searchResults: Awaited<ReturnType<typeof searchWebResources>> = [];
 
   let threadId: string | null = null;
@@ -100,14 +102,19 @@ export async function POST(request: NextRequest) {
     const searchMode = parsed.webSearch ?? "auto";
     const shouldSearch = searchMode === "on" || (searchMode === "auto" && shouldUseWebSearch(latestUserMessage.content));
     if (shouldSearch) {
+      attemptedWebSearch = true;
       try {
         searchResults = await searchWebResources(latestUserMessage.content);
         const searchContext = buildSearchContextMessage(searchResults);
         if (searchContext) {
           upstreamMessages = [searchContext, ...upstreamMessages];
           usedWebSearch = true;
+        } else {
+          webSearchFailed = true;
+          upstreamMessages = [{ role: "system", content: "Live web search returned no usable results for this request. Do not claim that you searched; answer only from known context and clearly state that no usable web results were found." }, ...upstreamMessages];
         }
       } catch {
+        webSearchFailed = true;
         const searchFailed = {
           role: "system" as const,
           content:
@@ -119,7 +126,18 @@ export async function POST(request: NextRequest) {
   }
 
   const baseUrl = process.env.RASSYMIND_BASE_URL ?? "http://host.docker.internal:8844";
-  upstreamMessages = [{ role: "system", content: RASSY_VOICE }, ...upstreamMessages];
+  // Qwen's chat template accepts a single system message, and it must be first.
+  // Search, document memory, and the Rassy voice are all system context, so merge
+  // them instead of placing additional system messages after the conversation.
+  const systemContext = upstreamMessages
+    .filter((message) => message.role === "system")
+    .map((message) => message.content.trim())
+    .filter(Boolean);
+  const conversationMessages = upstreamMessages.filter((message) => message.role !== "system");
+  upstreamMessages = [
+    { role: "system", content: [RASSY_VOICE, ...systemContext].join("\n\n") },
+    ...conversationMessages
+  ];
   const upstream = await fetch(getRassyMindChatUrl(baseUrl), {
     method: "POST",
     signal: AbortSignal.timeout(10 * 60 * 1000),
@@ -133,16 +151,15 @@ export async function POST(request: NextRequest) {
       stream: true,
       temperature: parsed.temperature ?? 0.7,
       max_tokens: parsed.maxTokens ?? mode.maxTokens,
-      max_completion_tokens: parsed.maxTokens ?? mode.maxTokens,
-      think: mode.thinking,
-      reasoning_effort: mode.thinking ? "medium" : "none"
+      reasoning_effort: mode.reasoningEffort
     })
   });
 
   if (!upstream.ok || !upstream.body) {
     const retryable = upstream.status === 429 || upstream.status === 503;
     const headers = retryable && upstream.headers.get("retry-after") ? { "retry-after": upstream.headers.get("retry-after")! } : undefined;
-    return new Response(getRassyMindRequestError(upstream.status).message, { status: retryable ? 429 : 502, headers });
+    const detail = (await upstream.text()).trim();
+    return new Response(detail || getRassyMindRequestError(upstream.status).message, { status: retryable ? 429 : 502, headers });
   }
 
   const decoder = new TextDecoder();
@@ -154,6 +171,14 @@ export async function POST(request: NextRequest) {
     async start(controller) {
       const reader = upstream.body!.getReader();
       try {
+        const consumeLine = (line: string) => {
+          const payload = extractDeltaPayloadFromSseLine(line);
+          if (payload?.reasoning) controller.enqueue(encoder.encode(`<think>${payload.reasoning}</think>`));
+          if (payload?.content) {
+            assistantText += payload.content;
+            controller.enqueue(encoder.encode(payload.content));
+          }
+        };
         while (true) {
           const { value, done } = await reader.read();
           if (done) break;
@@ -161,15 +186,10 @@ export async function POST(request: NextRequest) {
           const lines = buffer.split(/\r?\n/);
           buffer = lines.pop() ?? "";
 
-          for (const line of lines) {
-            const payload = extractDeltaPayloadFromSseLine(line);
-            if (payload?.reasoning) controller.enqueue(encoder.encode(`<think>${payload.reasoning}</think>`));
-            if (payload?.content) {
-              assistantText += payload.content;
-              controller.enqueue(encoder.encode(payload.content));
-            }
-          }
+          for (const line of lines) consumeLine(line);
         }
+        buffer += decoder.decode();
+        if (buffer.trim()) consumeLine(buffer);
 
         if (threadId && assistantText.trim()) {
           await appendMessage({
@@ -194,8 +214,11 @@ export async function POST(request: NextRequest) {
       ...(threadId ? { "x-thread-id": threadId } : {}),
       "x-rassy-mode": mode.id,
       "x-rassy-model": mode.model,
-      "x-rassy-web-search": usedWebSearch ? "used" : "not-used",
-      ...(searchResults.length ? { "x-rassy-search-results": encodeURIComponent(JSON.stringify(searchResults.map((result) => ({ ...result, snippet: result.snippet.slice(0, 220) })))) } : {})
+      "x-rassy-web-search": usedWebSearch ? "used" : webSearchFailed ? "failed" : attemptedWebSearch ? "empty" : "not-used",
+      ...(searchResults.length ? {
+        // Keep transport metadata small; full snippets stay in the model context.
+        "x-rassy-search-results": encodeURIComponent(JSON.stringify(searchResults.map(({ title, url }) => ({ title, url }))))
+      } : {})
     }
   });
 }

@@ -9,6 +9,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const navItems = [
     { href: "/admin", label: "Mission" },
     { href: "/admin/inbox", label: "Inbox" },
+    { href: "/admin/research", label: "Research" },
+    { href: "/admin/reports", label: "Reports" },
     { href: "/admin/analysis", label: "Analysis" },
     { href: "/admin/trends", label: "Trends" },
     { href: "/admin/themes", label: "Themes" },

@@ -890,12 +890,16 @@ async function copyText(text: string) {
 async function requestCatReply(
   messages: ChatMessage[],
   files: CatApiFile[] = [],
+  context: { sessionId: string; threadId: string },
 ) {
   const res = await fetch("/api/house/chat/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       messages: toApiMessages(messages),
+      sessionId: context.sessionId,
+      threadId: context.threadId,
+      source: "web",
       ...(files.length > 0 ? { files } : {}),
     }),
   });
@@ -1032,7 +1036,7 @@ export function SmartQuickChat() {
     if (isCommand) trackUsage("dj.prompt");
 
     try {
-      const replyText = await requestCatReply(nextMessages);
+      const replyText = await requestCatReply(nextMessages, [], { sessionId: "quick-chat", threadId: "quick-chat" });
       setMessages([
         ...nextMessages,
         {
@@ -3126,6 +3130,21 @@ export function ChatPanel({
 }: { variant?: "full" | "minimal" } = {}) {
   const storage = useMemo(() => getSafeStorage(), []);
   const threadKey = "rasies_family_chat_thread_v1";
+  const sessionKey = "rasies_family_chat_session_v1";
+  const sessionId = useMemo(() => {
+    const existing = storage?.getItem(sessionKey);
+    if (existing) return existing;
+    const created = crypto.randomUUID();
+    storage?.setItem(sessionKey, created);
+    return created;
+  }, [storage]);
+  const threadId = useMemo(() => {
+    const existing = storage?.getItem(threadKey + "_id");
+    if (existing) return existing;
+    const created = crypto.randomUUID();
+    storage?.setItem(threadKey + "_id", created);
+    return created;
+  }, [storage]);
   const draftKey = "rasies_family_chat_draft_v1";
   const logRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -3285,7 +3304,7 @@ ${current.trim()}`
     trackUsage("chat.send");
 
     try {
-      const assistantReply = await requestCatReply(nextMessages, apiFiles);
+      const assistantReply = await requestCatReply(nextMessages, apiFiles, { sessionId, threadId });
       const assistantMessage: ChatMessage = {
         id: createId("assistant"),
         role: "assistant",
@@ -3319,6 +3338,7 @@ ${current.trim()}`
     setAttachments([]);
     setError(null);
     storage?.removeItem(threadKey);
+    storage?.removeItem(threadKey + "_id");
     storage?.removeItem(draftKey);
     inputRef.current?.focus();
   }

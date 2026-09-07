@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
-from routes import admin, analysis, editorial, health, homepage, social, sources, themes, trends, voice_memory
+from routes import admin, analysis, editorial, health, homepage, integration, reports, social, sources, themes, trends, voice_memory
 
 app = FastAPI(
     title=f"{settings.app_name} API",
@@ -28,6 +28,8 @@ app.include_router(editorial.router, prefix=api_prefix)
 app.include_router(homepage.router, prefix=api_prefix)
 app.include_router(social.router, prefix=api_prefix)
 app.include_router(voice_memory.router, prefix=api_prefix)
+app.include_router(reports.router, prefix=api_prefix)
+app.include_router(integration.router, prefix=api_prefix)
 app.include_router(admin.router, prefix=api_prefix)
 
 
