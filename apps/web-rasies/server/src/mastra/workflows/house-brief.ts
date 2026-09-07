@@ -11,9 +11,9 @@ export async function runHouseBriefWorkflow(env: Env): Promise<HouseBrief> {
   const latestThought = thoughts.status === "fulfilled" ? thoughts.value[0]?.title : undefined;
   const latestStory = stories.status === "fulfilled" ? stories.value.books?.[0]?.title : undefined;
   return {
-    mood: up > 0 ? "The house is open and ready." : "The house is taking a quiet moment.",
-    mission: latestThought ? `Have a look at “${latestThought}”.` : "Pick one small thing that would make today easier.",
-    surprise: latestStory ? `A bedtime story is waiting: “${latestStory}”.` : "A small, calm plan often beats a heroic one.",
-    prompts: ["Help me sign in", "What can my family account do?", "Find something in the archive", "Write a family note"],
+    mood: up > 0 ? "The house is open, the kettle is thinking about it, and I’m here." : "The house is taking a quiet moment; no need to rush it.",
+    mission: latestThought ? `If you have a minute, there’s a little note waiting: “${latestThought}”.` : "Bring me one small snag from today and I’ll help turn it into the next easy step.",
+    surprise: latestStory ? `A bedtime story is waiting for later: “${latestStory}”.` : "Ask for something useful, oddly specific, or a little silly.",
+    prompts: ["Rescue the next two hours", "Make a five-minute backup habit", "Plan an easy dinner", "Write a family note"],
   };
 }
