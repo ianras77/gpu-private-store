@@ -13,6 +13,7 @@ type ChatMessage = {
   searched?: boolean;
   searchStatus?: "used" | "failed" | "empty" | "not-used";
   sources?: Array<{ title: string; url: string; snippet: string }>;
+  citationStatus?: "verified" | "unsupported" | "not-applicable";
 };
 
 type UserDocument = {
@@ -205,7 +206,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     try {
       const mastraThreadId = threadId ?? (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `rassy-${Date.now()}`);
       if (!threadId && signedIn) setThreadId(mastraThreadId);
-      const response = await fetch(signedIn ? "/api/mastra/chat" : "/api/chat", {
+      const response = await fetch("/api/mastra/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
         signal: abort.signal,
@@ -227,6 +228,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       let searched = false;
       let searchStatus: ChatMessage["searchStatus"] = "not-used";
       let sources: ChatMessage["sources"] = [];
+      let citationStatus: ChatMessage["citationStatus"] = "not-applicable";
 
       if (!response.ok || !response.body) {
         const text = await response.text();
@@ -253,9 +255,11 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           const event = record.split("\n").find((line) => line.startsWith("event: "))?.slice(7);
           if (!dataLine) continue;
           try {
-            const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string };
+            const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; citationStatus?: ChatMessage["citationStatus"] };
             if (event === "activity" && data.tool === "web-search") { searched = true; setActivityKind("searching"); }
             if (event === "search") { searched = true; searchStatus = data.status ?? "empty"; sources = data.results ?? []; setActivityKind("thinking"); }
+            if (event === "complete") { citationStatus = data.citationStatus; }
+            if (event === "citation-warning") { citationStatus = "unsupported"; }
             if (event === "text" && data.delta) streamText += data.delta;
             if (event === "error") throw new Error(data.message ?? "Mastra execution failed");
           } catch (error) { if (error instanceof Error && error.message === "Mastra execution failed") throw error; }
@@ -285,7 +289,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         setMessages((current) => {
           const copy = [...current];
           const last = copy[copy.length - 1];
-          copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, searchStatus, sources };
+          copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, searchStatus, sources, citationStatus };
           return copy;
         });
         setActivity((value) => Math.min(1, value * 0.72 + Math.min(.3, chunk.length / 180)));
@@ -397,7 +401,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <div className="message-list">
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <div className="message-meta"><div className="message-actions">{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" || message.searchStatus === "empty" ? <span className="search-warning">Search unavailable</span> : null}{message.role === "assistant" && message.content ? <CopyButton text={message.content} label="Copy" /> : null}</div></div>
+              <div className="message-meta"><div className="message-actions">{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <CopyButton text={message.content} label="Copy" /> : null}</div></div>
               {message.sources?.length ? <details className="search-sources"><summary>Search signal <span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noreferrer"><strong>{sourceIndex + 1}. {source.title}</strong><small>{source.snippet || source.url}</small></a>)}</div></details> : null}
               {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide reasoning trace" : "Show reasoning trace"}<span>RASSYMIND / TRANSPARENT</span></summary><p>{message.reasoning.trim()}</p></details> : null}
               {message.role === "assistant" && !message.content && sending ? <ThinkingState /> : <MarkdownMessage content={message.content || ""} />}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSearchContextMessage, normalizeSearchQuery, shouldUseWebSearch } from "./web-search";
+import { buildSearchContextMessage, normalizeSearchQuery, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
 
 describe("shouldUseWebSearch", () => {
   it("detects natural requests for current web resources", () => {
@@ -45,5 +45,11 @@ describe("normalizeSearchQuery", () => {
   it("removes chat instructions before querying the web", () => {
     expect(normalizeSearchQuery("Please search the web for the latest Python release")).toBe("the latest Python release");
     expect(normalizeSearchQuery("latest Python release")).toBe("latest Python release");
+  });
+});
+
+describe("citation provenance", () => {
+  it("rejects URLs that were not returned by the search tool", () => {
+    expect(unsupportedCitationUrls("See https://example.com/ok and https://fake.example/nope.", ["https://example.com/ok"])).toEqual(["https://fake.example/nope"]);
   });
 });
