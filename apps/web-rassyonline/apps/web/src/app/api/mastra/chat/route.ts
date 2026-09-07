@@ -58,15 +58,18 @@ export async function POST(request: NextRequest) {
         let answerText = "";
         const returnedUrls = new Set<string>();
         const observedTypes = new Set<string>();
+        const observedTools = new Set<string>();
+        const isWebSearch = (name?: string) => Boolean(name && name.toLowerCase().replace(/[-_]/g, "") === "websearch");
         const send = (event: string, data: unknown) => controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
         try {
-          for await (const part of result.fullStream as AsyncIterable<{ type: string; textDelta?: string; toolName?: string; toolCallId?: string; output?: unknown; error?: unknown }>) {
+          for await (const part of result.fullStream as AsyncIterable<{ type: string; textDelta?: string; toolName?: string; toolCallId?: string; output?: unknown; result?: unknown; error?: unknown }>) {
             observedTypes.add(part.type);
-            if (part.type === "tool-call" || part.type === "tool-call-streaming-start" || part.type === "tool-call-delta") {
-              if (part.toolName === "webSearch" || part.toolName === "web-search") { searched = true; send("activity", { status: "searching", tool: "web-search", toolCallId: part.toolCallId }); }
+            if (part.toolName) observedTools.add(part.toolName);
+            if (part.type === "tool-call" || part.type === "tool-call-input-streaming-start" || part.type === "tool-call-delta") {
+              if (isWebSearch(part.toolName)) { searched = true; send("activity", { status: "searching", tool: "web-search", toolCallId: part.toolCallId }); }
             } else if (part.type === "tool-result") {
-              if (part.toolName === "webSearch" || part.toolName === "web-search") {
-                const output = part.output as { status?: string; results?: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }> } | undefined;
+              if (isWebSearch(part.toolName)) {
+                const output = (part.output ?? part.result) as { status?: string; results?: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }> } | undefined;
                 searchStatus = output?.status === "ok" ? "used" : output?.status === "failed" ? "failed" : "empty";
                 for (const source of output?.results ?? []) returnedUrls.add(source.url);
                 send("search", { status: searchStatus, results: output?.results ?? [] });
@@ -80,7 +83,7 @@ export async function POST(request: NextRequest) {
           }
           const unsupported = searched ? unsupportedCitationUrls(answerText, [...returnedUrls]) : [];
           if (unsupported.length) send("citation-warning", { status: "unsupported", count: unsupported.length });
-          send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searched ? "verified" : "not-applicable", observedTypes: [...observedTypes] });
+          send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searched ? "verified" : "not-applicable", observedTypes: [...observedTypes], observedTools: [...observedTools] });
           controller.close();
         } catch {
           send("error", { message: "Mastra execution failed" });
