@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { z } from "zod";
-import { requestRassyChannelText, requestRassyEmbedding } from "../rassy-intelligence-client";
+import { requestRassyChannel, requestRassyEmbedding } from "../rassy-intelligence-client";
 import type { DmTurnPatch } from "./types";
 
 export type DmContextPacket = {
@@ -387,7 +387,7 @@ export const runContextAwareDmTurn = async (context: DmContextPacket, requestCon
   const promptHash = crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
   const intelligenceStarted = Date.now();
   try {
-    const intelligenceText = await requestRassyChannelText("dungeon-master", `${buildSystemPrompt()}\n\nAuthoritative campaign context:\n${JSON.stringify(context)}`, {
+    const intelligence = await requestRassyChannel("dungeon-master", `${buildSystemPrompt()}\n\nAuthoritative campaign context:\n${JSON.stringify(context)}`, {
       requestId: promptHash,
       channelId: "dungeon-master",
       viewer: { kind: "user", id: requestContext.userId, roles: ["player"] },
@@ -398,6 +398,7 @@ export const runContextAwareDmTurn = async (context: DmContextPacket, requestCon
       timeZone: "UTC",
       modelPolicy: { allowedAliases: ["rassy-mind", "rassy-fast"], maxCalls: 3, deadlineMs: 45000, priority: "interactive" }
     });
+    const intelligenceText = intelligence.text;
     const intelligenceJson = parseJsonObjectFromText(intelligenceText);
     const normalizedIntelligence = normalizeDmTurnPayload(intelligenceJson, context);
     const intelligenceParsed = dmTurnSchema.safeParse(normalizedIntelligence);
@@ -407,7 +408,7 @@ export const runContextAwareDmTurn = async (context: DmContextPacket, requestCon
         model: process.env.RASSYMIND_MODEL ?? "rassy-mind",
         provider: "rassy-intelligence",
         latencyMs: Date.now() - intelligenceStarted,
-        promptPayload: { ...payload, provider: "rassy-intelligence" },
+        promptPayload: { ...payload, provider: "rassy-intelligence", ...(intelligence.delegations ? { delegations: intelligence.delegations } : {}) },
         responseText: intelligenceText,
         responseJson: intelligenceJson,
         promptHash

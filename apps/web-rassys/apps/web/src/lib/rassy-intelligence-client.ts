@@ -26,11 +26,13 @@ export const requestRassyAgentText = async (agentId: string, prompt: string): Pr
   return response.text;
 };
 
-export const requestRassyChannelText = async (channelId: string, message: string, context?: unknown): Promise<string> => {
+export type RassyChannelResponse = { text: string; delegations?: Array<{ agentId: string; ok: boolean }> };
+
+export const requestRassyChannel = async (channelId: string, message: string, context?: unknown): Promise<RassyChannelResponse> => {
   const base = endpoint();
   if (!base) throw new Error("rassy_intelligence_unconfigured");
   const token = process.env.RASSY_INTELLIGENCE_INTERNAL_TOKEN;
-  const response = await fetchUpstreamJson<{ text?: string }>(
+  const response = await fetchUpstreamJson<{ text?: string; delegations?: Array<{ agentId?: unknown; ok?: unknown }> }>(
     `${base}/v1/channels/${encodeURIComponent(channelId)}/chat`,
     {
       method: "POST",
@@ -40,8 +42,14 @@ export const requestRassyChannelText = async (channelId: string, message: string
     { timeoutMs: 35000, retries: 0 },
   );
   if (typeof response.text !== "string" || !response.text.trim()) throw new Error("rassy_intelligence_empty_response");
-  return response.text;
+  const delegations = Array.isArray(response.delegations)
+    ? response.delegations.filter((entry): entry is { agentId: string; ok: boolean } => typeof entry?.agentId === "string" && typeof entry.ok === "boolean")
+    : undefined;
+  return { text: response.text, ...(delegations ? { delegations } : {}) };
 };
+
+export const requestRassyChannelText = async (channelId: string, message: string, context?: unknown): Promise<string> =>
+  (await requestRassyChannel(channelId, message, context)).text;
 
 export const requestRassyAgentJson = async <T>(agentId: string, prompt: string): Promise<T> =>
   JSON.parse(extractJson(await requestRassyAgentText(agentId, prompt))) as T;
