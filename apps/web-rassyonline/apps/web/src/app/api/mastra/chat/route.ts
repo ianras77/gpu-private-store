@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
     const searchRequested = parsed.data.webSearch === "on" || (parsed.data.webSearch === "auto" && Boolean(latestUserMessage && shouldUseWebSearch(latestUserMessage.content)));
     const selectedAgent = selectMastraAgent({ requestedAgent: parsed.data.agent as MastraAgentId, mode: parsed.data.mode, searchRequested });
-    const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId: parsed.data.threadId, resourceId: user?.id ?? `guest:${parsed.data.threadId}`, signal: request.signal });
+    const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId: parsed.data.threadId, resourceId: user?.id ?? `guest:${parsed.data.threadId}`, signal: request.signal, toolChoice: selectedAgent === "researcher" ? "required" : undefined });
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {

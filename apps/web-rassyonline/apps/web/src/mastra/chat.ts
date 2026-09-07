@@ -7,6 +7,7 @@ export type MastraChatInput = {
   resourceId: string;
   signal?: AbortSignal;
   maxSteps?: number;
+  toolChoice?: "auto" | "none" | "required";
 };
 
 /** Native Mastra stream seam. IDs are mandatory so memory cannot accidentally become global. */
@@ -22,6 +23,7 @@ export async function streamMastraChat(input: MastraChatInput) {
     ...(context.length ? { context } : {}),
     memory: { thread: input.threadId, resource: input.resourceId },
     maxSteps: input.maxSteps ?? 8,
+    ...(input.toolChoice ? { toolChoice: input.toolChoice } : {}),
     abortSignal: input.signal,
   });
 }
