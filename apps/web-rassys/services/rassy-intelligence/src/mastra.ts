@@ -35,7 +35,7 @@ export const agents = {
     id: "dungeon-master",
     name: "Dungeon Master",
     instructions: `${constitution}\nYou narrate the campaign, but never commit authoritative state or manufacture dice. Return proposals for deterministic validation.`,
-    model: rassyModel(process.env.RASSYMIND_MODEL ?? "rassy-mind"),
+    model: rassyModel(process.env.RASSYMIND_DM_MODEL ?? process.env.RASSYMIND_LISTENER_MODEL ?? "rassy-fast"),
     ...(conversationalMemory ? { memory: conversationalMemory } : {}),
   }),
   "notebook-editor": new Agent({
