@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         let answerText = "";
         const returnedUrls = new Set<string>();
         const announcedToolCalls = new Set<string>();
-        const isWebSearch = (name?: string) => Boolean(name && name.toLowerCase().replace(/[-_]/g, "") === "websearch");
+        const isResearchTool = (name?: string) => Boolean(name && ["websearch", "parallelresearch"].includes(name.toLowerCase().replace(/[-_]/g, "")));
         const send = (event: string, data: unknown) => controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
         try {
           for await (const part of result.fullStream as AsyncIterable<{ type: string; textDelta?: string; toolName?: string; toolCallId?: string; output?: unknown; result?: unknown; payload?: Record<string, unknown>; error?: unknown }>) {
@@ -66,18 +66,20 @@ export async function POST(request: NextRequest) {
             const toolName = part.toolName ?? (typeof payload?.toolName === "string" ? payload.toolName : typeof payload?.name === "string" ? payload.name : undefined);
             const toolCallId = part.toolCallId ?? (typeof payload?.toolCallId === "string" ? payload.toolCallId : undefined);
             if (part.type === "tool-call" || part.type === "tool-call-input-streaming-start" || part.type === "tool-call-delta") {
-              if (isWebSearch(toolName)) {
+              if (isResearchTool(toolName)) {
                 searched = true;
                 const activityId = toolCallId ?? `${part.type}:${announcedToolCalls.size}`;
                 if (!announcedToolCalls.has(activityId)) { announcedToolCalls.add(activityId); send("activity", { status: "searching", tool: "web-search", toolCallId }); }
               }
             } else if (part.type === "tool-result") {
-              if (isWebSearch(toolName)) {
-                const output = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { status?: string; results?: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }> } | undefined;
-                searchStatus = output?.status === "ok" ? "used" : output?.status === "failed" ? "failed" : "empty";
-                for (const source of output?.results ?? []) returnedUrls.add(source.url);
-                send("search", { status: searchStatus, results: output?.results ?? [] });
-                if (searchStatus === "used") send("artifact", { kind: "source-board", status: "ready", sources: output?.results ?? [] });
+              if (isResearchTool(toolName)) {
+                const output = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { status?: string; results?: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }>; searches?: Array<{ status: string; results: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }> }> } | undefined;
+                const results = output?.searches?.flatMap((search) => search.results) ?? output?.results ?? [];
+                const statuses = output?.searches?.map((search) => search.status) ?? [output?.status];
+                searchStatus = results.length ? "used" : statuses.includes("failed") ? "failed" : "empty";
+                for (const source of results) returnedUrls.add(source.url);
+                send("search", { status: searchStatus, results });
+                if (searchStatus === "used") send("artifact", { kind: "source-board", status: "ready", sources: results });
               }
             } else if (part.type === "text-delta" && part.textDelta) {
               answerText += part.textDelta;
