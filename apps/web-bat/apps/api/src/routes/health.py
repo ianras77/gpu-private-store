@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config import settings
 from db import get_db
 from models import EditorialObject, HomepageSnapshot, RevisionHistory, SocialPost, Source, SourceEmbedding, Theme
-from services.cat_client import _extract_chat_completion_text, _extract_text_from_payload
+from services.cat_client import _extract_chat_completion_text
 from services.http_clients import get_shared_async_client
 from services.qdrant_service import COLLECTION as QDRANT_COLLECTION
 from services.qdrant_service import _extract_vector_size
@@ -143,22 +143,6 @@ def _build_embedding_probe_payload(endpoint_url: str, model: str) -> dict[str, A
     if endpoint_url.rstrip("/").endswith("/api/embed"):
         return {"model": model, "input": "healthcheck"}
     return {"model": model, "prompt": "healthcheck"}
-
-
-def _build_cat_message_probe_payload(text: str, *, user_id: str) -> dict[str, Any]:
-    return {
-        "text": text,
-        "user_id": user_id,
-    }
-
-
-def _build_cat_memory_probe_payload(*, query_text: str, user_id: str) -> dict[str, Any]:
-    return {
-        "text": query_text,
-        "k": 1,
-        "metadata": {"kind": "source_dossier"},
-        "user_id": user_id,
-    }
 
 
 def _extract_embedding_vector(payload: Any) -> list[float] | None:
@@ -444,103 +428,6 @@ async def _qdrant_vector_check(expected_vector_size: int) -> dict[str, Any]:
         }
 
 
-async def _cat_check() -> dict[str, Any]:
-    # Cheshire is retired from the active topology. Compatibility modules may remain
-    # for historical data reads, but readiness must never probe or depend on it.
-    return {"ok": True, "status": "retired", "provider": "mastra"}
-    started = datetime.utcnow()
-    base_url = settings.cheshire_cat_url.rstrip("/")
-    timeout_seconds = max(4.0, float(settings.cat_health_timeout_seconds))
-    headers = {"Authorization": f"Bearer {settings.cheshire_cat_api_key}"}
-    probe_user_id = f"{settings.cat_service_user_id}:health"
-
-    try:
-        client = get_shared_async_client()
-        root_response = await client.get(f"{base_url}/", timeout=timeout_seconds)
-        root_response.raise_for_status()
-
-        llm_response = await client.get(f"{base_url}/llm/settings", headers=headers, timeout=timeout_seconds)
-        llm_response.raise_for_status()
-        llm_payload = llm_response.json()
-        llm_settings = llm_payload if isinstance(llm_payload, dict) else {}
-        llm_selected = str(llm_settings.get("selected_configuration") or "").strip()
-        if llm_selected != "LLMOllamaConfig":
-            return {
-                "ok": False,
-                "method": "GET",
-                "status_code": llm_response.status_code,
-                "error": f"Cat LLM not selected: {llm_selected or 'missing'}",
-            }
-
-        embed_response = await client.get(f"{base_url}/embedder/settings", headers=headers, timeout=timeout_seconds)
-        embed_response.raise_for_status()
-        embed_payload = embed_response.json()
-        embed_settings = embed_payload if isinstance(embed_payload, dict) else {}
-        embed_selected = str(embed_settings.get("selected_configuration") or "").strip()
-        if embed_selected != "EmbedderOllamaConfig":
-            return {
-                "ok": False,
-                "method": "GET",
-                "status_code": embed_response.status_code,
-                "error": f"Cat embedder not selected: {embed_selected or 'missing'}",
-            }
-
-        if settings.cat_primary_enabled:
-            probe_response = await client.post(
-                f"{base_url}/message",
-                json=_build_cat_message_probe_payload("Reply with exactly CAT_READY", user_id=probe_user_id),
-                headers=headers,
-                timeout=timeout_seconds,
-            )
-            probe_response.raise_for_status()
-            probe_payload = probe_response.json()
-            probe_text = _extract_text_from_payload(probe_payload)
-            if not probe_text or "cat_ready" not in probe_text.lower():
-                return {
-                    "ok": False,
-                    "method": "POST",
-                    "status_code": probe_response.status_code,
-                    "probe": "message",
-                    "error": "Cat probe returned an unexpected response.",
-                    "response_excerpt": (probe_text or "")[:160],
-                }
-
-            return {
-                "ok": True,
-                "method": "POST",
-                "status_code": 200,
-                "probe": "message",
-                "latency_ms": int((datetime.utcnow() - started).total_seconds() * 1000),
-                "llm_selected": llm_selected,
-                "embedder_selected": embed_selected,
-            }
-
-        probe_response = await client.post(
-            f"{base_url}/memory/recall",
-            json=_build_cat_memory_probe_payload(query_text="Trump docket update", user_id=probe_user_id),
-            headers=headers,
-            timeout=timeout_seconds,
-        )
-        probe_response.raise_for_status()
-        probe_payload = probe_response.json()
-        collections = ((probe_payload.get("vectors") or {}).get("collections") or {}) if isinstance(probe_payload, dict) else {}
-        declarative_hits = collections.get("declarative") if isinstance(collections, dict) else []
-
-        return {
-            "ok": True,
-            "method": "POST",
-            "status_code": 200,
-            "probe": "memory_recall",
-            "latency_ms": int((datetime.utcnow() - started).total_seconds() * 1000),
-            "llm_selected": llm_selected,
-            "embedder_selected": embed_selected,
-            "recall_hits": len(declarative_hits or []),
-        }
-    except Exception as exc:  # noqa: BLE001
-        detail = str(exc).strip() or exc.__class__.__name__
-        return {"ok": False, "method": "POST", "error": detail}
-
-
 @router.get("")
 async def health_live() -> dict[str, Any]:
     return {"status": "ok", "service": settings.app_name, "timestamp": datetime.utcnow().isoformat()}
@@ -606,7 +493,7 @@ async def health_ready(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             "collection": QDRANT_COLLECTION,
             "reason": "embedding_probe_unavailable",
         }
-    cat_check = await _cat_check()
+    cat_check = {"ok": True, "status": "retired", "provider": "mastra"}
 
     checks = {
         "database": db_check,

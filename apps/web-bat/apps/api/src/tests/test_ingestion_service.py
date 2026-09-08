@@ -101,8 +101,6 @@ class IngestionEmbeddingSyncTests(unittest.IsolatedAsyncioTestCase):
             {"source_id": source_id, "chunk_index": 1, "chunk_text": "second chunk", "metadata": {"lane": "b"}},
         ]
         db = _FakeDB([SimpleNamespace(embedding_ref="old-1"), SimpleNamespace(embedding_ref="old-2")])
-        sync_memory = AsyncMock(return_value={"status": "synced"})
-
         with (
             patch(
                 "services.ingestion_service.prepare_chunk_points",
@@ -118,7 +116,6 @@ class IngestionEmbeddingSyncTests(unittest.IsolatedAsyncioTestCase):
             ),
             patch("services.ingestion_service.index_prepared_points", new=AsyncMock(return_value=True)),
             patch("services.ingestion_service.delete_points", new=AsyncMock(return_value=True)) as delete_points,
-            patch("services.ingestion_service.sync_source_memory", new=sync_memory),
         ):
             result = await _sync_source_embeddings(
                 db,
@@ -137,8 +134,6 @@ class IngestionEmbeddingSyncTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(source.meta["embedding_status"], "embedded")
         self.assertFalse(source.meta["embedding_needs_refresh"])
         delete_points.assert_awaited_once_with(["old-1", "old-2"])
-        sync_memory.assert_awaited_once()
-        self.assertTrue(sync_memory.await_args.kwargs["allow_sync"])
 
     async def test_ingest_query_skips_hosts_under_domain_backoff(self) -> None:
         db = _ScalarOnlyDB()

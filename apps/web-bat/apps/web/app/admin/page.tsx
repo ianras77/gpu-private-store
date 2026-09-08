@@ -14,6 +14,7 @@ type MissionControl = {
     themes: number;
     analysis_briefs: number;
     editorial_drafts: number;
+    published_editorial?: number;
     homepage_drafts: number;
     social_drafts: number;
     pipeline_cycles: number;
@@ -220,6 +221,10 @@ export default async function AdminPage() {
             <div className="metric-card">
               <span>Editorial drafts</span>
               <strong>{mission.summary.editorial_drafts}</strong>
+            </div>
+            <div className="metric-card">
+              <span>Published stories</span>
+              <strong>{mission.summary.published_editorial ?? 0}</strong>
             </div>
             <div className="metric-card">
               <span>Social drafts</span>

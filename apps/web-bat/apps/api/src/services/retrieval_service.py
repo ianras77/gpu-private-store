@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from models import Source, Theme, ThemeMember, TrendObservation
-from services.cat_memory_service import recall_source_ids
 from services.embedding_service import embed_text
 from services.source_policy import has_bat_focus, source_current_news_assessment
 from services.structured_logging import get_logger, log_event
@@ -462,8 +461,6 @@ async def build_retrieval_bundle(
     diagnostics = {
         "vector_candidates": len(vector_source_ids),
         "vector_rejected": 0,
-        "cat_candidates": 0,
-        "cat_rejected": 0,
         "recent_candidates": 0,
         "recent_rejected": 0,
         "theme_candidates": 0,
@@ -479,20 +476,6 @@ async def build_retrieval_bundle(
                 continue
             if not _source_is_retrieval_eligible(row):
                 diagnostics["vector_rejected"] += 1
-                continue
-            candidate_sources.append(row)
-
-    cat_source_ids = await recall_source_ids(query_text, limit=max_sources * 2)
-    diagnostics["cat_candidates"] = len(cat_source_ids)
-    if cat_source_ids:
-        rows = (await db.execute(select(Source).where(Source.id.in_(cat_source_ids)))).scalars().all()
-        by_id = {str(row.id): row for row in rows}
-        for source_id in cat_source_ids:
-            row = by_id.get(str(source_id))
-            if not row:
-                continue
-            if not _source_is_retrieval_eligible(row):
-                diagnostics["cat_rejected"] += 1
                 continue
             candidate_sources.append(row)
 

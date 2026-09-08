@@ -459,11 +459,14 @@ STORY_FORM_PROFILES: dict[str, dict[str, object]] = {
     },
 }
 STORY_FORM_WORD_FLOORS = {
-    "lead_analysis": 760,
-    "lead_update": 520,
-    "theme_column": 620,
-    "theme_update": 380,
-    "notebook_entry": 560,
+    # These are minimum body lengths, not assignments.  The previous floors
+    # made a good short dispatch impossible to publish and pushed the writer
+    # into thin deterministic fallback copy instead.
+    "lead_analysis": 600,
+    "lead_update": 420,
+    "theme_column": 420,
+    "theme_update": 300,
+    "notebook_entry": 420,
 }
 EDITORIAL_MAX_TOKENS_BY_FORM = {
     # Keep one editorial pass inside a practical request budget. A second
@@ -5799,7 +5802,13 @@ async def rework_editorial_object(
     editorial.summary = _build_summary(body)
     editorial.primary_source_ids = [source["id"] for source in retrieval_bundle.get("raw_sources", [])[:6]]
     editorial.updated_at = now
-    editorial.status = "approved" if publish_recommendation.get("recommended") else "draft"
+    # A rework must never retract a story that is already public.  Previously
+    # the editor overwrote published -> approved/draft, making the homepage
+    # and metrics drop to zero after a later pipeline pass.
+    if editorial.status == "published":
+        editorial.status = "published"
+    else:
+        editorial.status = "approved" if publish_recommendation.get("recommended") else "draft"
     editorial.meta = {
         **metadata,
         "grounding_note": PUBLIC_GROUNDING_NOTE,

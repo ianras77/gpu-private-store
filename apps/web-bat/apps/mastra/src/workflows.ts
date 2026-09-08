@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { researchRequest, researchPacket, type ResearchPacket } from './schemas.js';
 import { listSourcesTool } from './tools.js';
-import { generateEditorial } from './agents.js';
+import { editor, factChecker, publisher, writer } from './agents.js';
 import { config } from './config.js';
 import { reportArtifact, type ReportArtifact } from './report.js';
 import { completeEditorialRun, loadPersonaContext, recordEditorialStage, startEditorialRun } from './integration.js';
@@ -42,8 +42,6 @@ export async function reportWorkflow(input: unknown): Promise<ReportArtifact> {
   }
   return artifact;
 }
-
-export type WorkflowResult = { workflow: string; status: 'ready'; researchPacketId: string; stages: string[] };
 
 export type StoryWorkflowResult = {
   workflow: 'story'; status: 'ready'; runId: string; title: string; dek: string; body: string;
@@ -95,24 +93,28 @@ export async function editorialStoryWorkflow(input: unknown): Promise<StoryWorkf
     if (sources.length < 3) throw new Error('story workflow requires at least three approved sources');
     await recordEditorialStage(run.id, 'research', 'bat-researcher', { directive: request.directive, source_count: sources.length }, sources.map(source => source.id));
     const evidence = sources.map(source => `${source.id} | ${source.title} | ${source.url}\nRECEIPT:\n${source.evidence.slice(0, 900)}`).join('\n');
-    const writerResult = await generateEditorial(`Return JSON with title, dek, and body_markdown. Write a short, specific personal-blogger editorial about: ${request.directive}. Use only facts explicitly present in RECEIPT text. Every factual sentence must end with the exact source ID that supports it in [source_id="..."] form. Quote or closely paraphrase the receipts; do not invent context, names, numbers, events, or source IDs. Clearly label any opinion as opinion. If evidence is weak, write a narrower piece.\nPERSONA CONTEXT:\n${JSON.stringify(persona)}\nAPPROVED SOURCES:\n${evidence}`);
+    const voiceContext = { constitution: persona.constitution, voice_memory: persona.voice_memory };
+    const writerResult = await writer.generate(`Return JSON with title, dek, and body_markdown. Write a short, specific personal-blogger editorial about: ${request.directive}. Use only facts explicitly present in RECEIPT text. Every factual sentence must end with the exact source ID that supports it in [source_id="..."] form. Quote or closely paraphrase the receipts; do not invent context, names, numbers, events, or source IDs. Clearly label any opinion as opinion. If evidence is weak, write a narrower piece.\nVOICE CONTEXT (style only; never use IDs from it):\n${JSON.stringify(voiceContext)}\nAPPROVED SOURCES (the only legal evidence and source IDs):\n${evidence}`);
     const draft = extractJson(writerResult.text);
     const sourceIds = sources.map(source => source.id);
     await recordEditorialStage(run.id, 'writer', 'bat-writer', { ...draft }, sourceIds);
-    let finalDraft = draft;
-    let fact = extractJson((await generateEditorial(`Return JSON with passed (boolean) and notes (string array). Check the draft for factual claims, quotations, numbers, dates, named events, and source attributions that are unsupported by the receipts. Clearly signaled opinion, metaphor, satire, and editorial analysis are allowed, but must not introduce new factual assertions. Set passed true when factual claims are grounded and the analysis is visibly framed as analysis.\nSOURCES:\n${evidence}\nDRAFT:\n${writerResult.text}`)).text);
+    const editedResult = await editor.generate(`Return JSON with title, dek, and body_markdown. Edit this draft into a concise, personal BAT blog post with one clear thesis, concrete receipts, short paragraphs, and an earned ending. Do not add facts, sources, names, dates, or numbers. Remove repetition and internal instructions.\nAPPROVED SOURCES:\n${evidence}\nDRAFT:\n${JSON.stringify(draft)}`);
+    const editedDraft = extractJson(editedResult.text);
+    await recordEditorialStage(run.id, 'editor', 'bat-editor', { ...editedDraft }, sourceIds);
+    let finalDraft = editedDraft;
+    let fact = extractJson((await factChecker.generate(`Return JSON with passed (boolean) and notes (string array). Check the draft for factual claims, quotations, numbers, dates, named events, and source attributions that are unsupported by the receipts. Clearly signaled opinion, metaphor, satire, and editorial analysis are allowed, but must not introduce new factual assertions. Set passed true when factual claims are grounded and the analysis is visibly framed as analysis.\nSOURCES:\n${evidence}\nDRAFT:\n${JSON.stringify(editedDraft)}`)).text);
     await recordEditorialStage(run.id, 'fact-check', 'bat-fact-checker', { ...fact }, sourceIds);
     if (fact.passed !== true) {
-      const revision = await generateEditorial(`Return JSON with title, dek, and body_markdown. Revise this draft to remove unsupported factual claims identified by the fact checker. Keep clearly signaled opinion, metaphor, satire, and editorial analysis. Use only the exact source IDs in APPROVED SOURCES; never invent or reuse any other source ID.\nAPPROVED SOURCES:\n${evidence}\nFACT CHECK NOTES:\n${JSON.stringify(fact)}\nDRAFT:\n${writerResult.text}`);
+      const revision = await writer.generate(`Return JSON with title, dek, and body_markdown. Revise this draft to remove unsupported factual claims identified by the fact checker. Keep clearly signaled opinion, metaphor, satire, and editorial analysis. Use only the exact source IDs in APPROVED SOURCES; never invent or reuse any other source ID.\nAPPROVED SOURCES:\n${evidence}\nFACT CHECK NOTES:\n${JSON.stringify(fact)}\nDRAFT:\n${JSON.stringify(editedDraft)}`);
       finalDraft = extractJson(revision.text);
       await recordEditorialStage(run.id, 'writer-rework', 'bat-writer', { ...finalDraft }, sourceIds);
-      fact = extractJson((await generateEditorial(`Return JSON with passed (boolean) and notes (string array). Check factual claims, quotations, numbers, dates, named events, and source attributions against the exact APPROVED SOURCES. Clearly signaled opinion, metaphor, satire, and editorial analysis are allowed.\nAPPROVED SOURCES:\n${evidence}\nREVISED DRAFT:\n${revision.text}`)).text);
+      fact = extractJson((await factChecker.generate(`Return JSON with passed (boolean) and notes (string array). Check factual claims, quotations, numbers, dates, named events, and source attributions against the exact APPROVED SOURCES. Clearly signaled opinion, metaphor, satire, and editorial analysis are allowed.\nAPPROVED SOURCES:\n${evidence}\nREVISED DRAFT:\n${revision.text}`)).text);
       await recordEditorialStage(run.id, 'fact-check-rework', 'bat-fact-checker', { ...fact }, sourceIds);
     }
     if (fact.passed !== true) throw new Error('fact-check rejected the story after one revision');
-    const queenResult = await generateEditorial(`Return JSON with title, dek, and body_markdown. Polish this fact-checked draft into a distinctive, concise personal-blogger post. Do not add claims or sources.\n${JSON.stringify(finalDraft)}`);
-    const final = extractJson(queenResult.text);
-    await recordEditorialStage(run.id, 'queen', 'bat-queen', { ...final }, sourceIds);
+    const publisherResult = await publisher.generate(`Return JSON with title, dek, and body_markdown. Prepare this fact-checked draft for publication. Preserve every factual claim and source attribution, remove any remaining internal/editorial instructions, and keep the article concise and distinctly authored. Do not add claims or sources.\n${JSON.stringify(finalDraft)}`);
+    const final = extractJson(publisherResult.text);
+    await recordEditorialStage(run.id, 'publisher', 'bat-publisher', { ...final }, sourceIds);
     await completeEditorialRun(run.id, 'completed');
     return { workflow: 'story', status: 'ready', runId: run.id, title: String(final.title ?? finalDraft.title ?? ''), dek: String(final.dek ?? finalDraft.dek ?? ''), body: String(final.body_markdown ?? finalDraft.body_markdown ?? ''), sourceIds, factCheck: { passed: true, notes: Array.isArray(fact.notes) ? fact.notes.map(String) : [] } };
   } catch (error) {
@@ -121,13 +123,4 @@ export async function editorialStoryWorkflow(input: unknown): Promise<StoryWorkf
   }
 }
 
-async function stagedWorkflow(input: unknown, workflow: string, stages: string[]): Promise<WorkflowResult> {
-  const packet = await researchWorkflow(input);
-  return { workflow, status: 'ready', researchPacketId: packet.id, stages };
-}
-
 export const storyWorkflow = editorialStoryWorkflow;
-export const themeTakeWorkflow = (input: unknown) => stagedWorkflow(input, 'theme-take', ['research', 'analysis', 'writer', 'fact-check', 'queen']);
-export const homepageWorkflow = (input: unknown) => stagedWorkflow(input, 'homepage', ['research', 'curation', 'layout']);
-export const socialWorkflow = (input: unknown) => stagedWorkflow(input, 'social', ['source', 'social-editor', 'approval']);
-export const fullEditorialCycleWorkflow = (input: unknown) => stagedWorkflow(input, 'full-editorial-cycle', ['research', 'analysis', 'story', 'theme-take', 'report', 'fact-check', 'queen', 'homepage', 'social']);

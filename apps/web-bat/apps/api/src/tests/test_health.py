@@ -4,8 +4,6 @@ from unittest.mock import AsyncMock, patch
 
 from routes.admin import _finalize_pipeline_cycle_status
 from routes.health import (
-    _build_cat_memory_probe_payload,
-    _build_cat_message_probe_payload,
     _build_embedding_probe_headers,
     _build_embedding_probe_payload,
     _extract_embedding_vector,
@@ -58,20 +56,6 @@ class HealthRouteTests(unittest.TestCase):
         self.assertEqual(payload["max_tokens"], 256)
         self.assertEqual(payload["reasoning_effort"], "none")
         self.assertEqual(payload["messages"][0]["content"], "Reply with exactly READY")
-
-    def test_cat_message_probe_payload_includes_service_user(self) -> None:
-        payload = _build_cat_message_probe_payload("Reply with exactly CAT_READY", user_id="bat-health")
-
-        self.assertEqual(payload["text"], "Reply with exactly CAT_READY")
-        self.assertEqual(payload["user_id"], "bat-health")
-
-    def test_cat_memory_probe_payload_targets_source_dossiers(self) -> None:
-        payload = _build_cat_memory_probe_payload(query_text="Trump docket update", user_id="bat-health")
-
-        self.assertEqual(payload["text"], "Trump docket update")
-        self.assertEqual(payload["k"], 1)
-        self.assertEqual(payload["metadata"]["kind"], "source_dossier")
-        self.assertEqual(payload["user_id"], "bat-health")
 
     def test_embedding_probe_payload_uses_prompt_for_embeddings_endpoint(self) -> None:
         payload = _build_embedding_probe_payload("http://localhost:11435/api/embeddings", "qwen3-embedding:8b")

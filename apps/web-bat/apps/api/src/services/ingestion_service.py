@@ -13,7 +13,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from models import Source, SourceEmbedding
-from services.cat_memory_service import sync_source_memory
 from services.embedding_service import index_prepared_points, prepare_chunk_points, upsert_chunk_vectors
 from services.fetcher import fetch_page, get_domain_backoff
 from services.qdrant_service import COLLECTION, delete_points
@@ -787,19 +786,12 @@ async def _sync_source_embeddings(
         "vector_indexed": bool(available_count),
     }
 
-    cat_result = await sync_source_memory(
-        source,
-        query_text=normalized_query,
-        allow_sync=bool(available_count and not needs_refresh),
-    )
-
     return {
         "available_count": available_count,
         "stored_count": stored_count,
         "failed_count": failed_count,
         "needs_refresh": needs_refresh,
         "status": embedding_status,
-        "cat_status": str(cat_result.get("status") or ""),
     }
 
 

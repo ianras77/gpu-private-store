@@ -8,23 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config import settings
 from db import get_db
 from models import HomepageSnapshot
-from services.editorial_service import generate_homepage_snapshot, get_runtime_controls
 from services.revision_service import record_revision
 
 router = APIRouter(prefix="/homepage", tags=["homepage"])
-
-
-@router.post("/generate")
-async def generate_homepage(publish_now: bool = False, db: AsyncSession = Depends(get_db)) -> dict:
-    controls = await get_runtime_controls(db)
-    snapshot = await generate_homepage_snapshot(db, publish_now=bool(publish_now or controls["direct_publish"]))
-    return {"id": snapshot.id, "status": snapshot.status, "layout_json": snapshot.layout_json}
-
-
-@router.post("/generate-and-publish")
-async def generate_and_publish_homepage(db: AsyncSession = Depends(get_db)) -> dict:
-    snapshot = await generate_homepage_snapshot(db, publish_now=True)
-    return {"id": snapshot.id, "status": snapshot.status, "layout_json": snapshot.layout_json, "published_at": snapshot.published_at}
 
 
 @router.get("/snapshots")

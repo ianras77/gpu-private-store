@@ -3,7 +3,7 @@ from datetime import datetime
 import re
 import httpx
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,7 +13,6 @@ from models import EditorialObject, HomepageSnapshot, RevisionHistory, SocialPos
 from schemas import SystemSettingsUpdateIn
 from services.analysis_engine import build_analysis_dashboard, count_analysis_briefs, get_analysis_overview
 from services.editorial_service import get_runtime_controls, update_runtime_controls
-from services.publishing_service import publish_ready_backlog
 from services.source_policy import source_current_news_assessment
 from services.pipeline_blueprint import get_role_pipeline
 
@@ -138,6 +137,9 @@ async def admin_summary(db: AsyncSession = Depends(get_db)) -> dict:
         "embedding_coverage_pct": embedding_coverage_pct,
         "themes": int((await db.scalar(select(func.count()).select_from(Theme))) or 0),
         "analysis_briefs": await count_analysis_briefs(db),
+        "published_editorial": int(
+            (await db.scalar(select(func.count()).select_from(EditorialObject).where(EditorialObject.status == "published"))) or 0
+        ),
         "editorial_drafts": int(
             (await db.scalar(select(func.count()).select_from(EditorialObject).where(EditorialObject.status == "draft"))) or 0
         ),
@@ -251,44 +253,36 @@ async def admin_pipeline(limit: int = 80, db: AsyncSession = Depends(get_db)) ->
 
 
 @router.post("/pipeline/run-now")
-async def run_pipeline_now(db: AsyncSession = Depends(get_db)) -> dict:
-    directive = "Trump executive overreach latest 2026"
+async def run_pipeline_now(payload: dict | None = Body(default=None), db: AsyncSession = Depends(get_db)) -> dict:
+    directive = str((payload or {}).get("directive") or "Trump executive overreach latest 2026")[:4000]
+    max_sources = max(3, min(int((payload or {}).get("maxSources") or 8), 20))
     async with httpx.AsyncClient(timeout=180) as client:
         response = await client.post(
             f"{settings.mastra_url.rstrip('/')}/v1/workflows/story",
             headers={"Authorization": f"Bearer {settings.bat_internal_service_token}"},
-            json={"directive": directive, "maxSources": 8},
+            json={"directive": directive, "maxSources": max_sources},
         )
     if response.status_code >= 400:
         raise RuntimeError(f"Mastra story workflow failed ({response.status_code})")
     story = response.json()
     if not story.get("runId"):
         raise RuntimeError("Mastra story workflow returned no run id")
-    return {"status": "completed", "orchestrator": "mastra", **story}
+    publish_response = await client.post(
+        f"{settings.mastra_url.rstrip('/')}/v1/editorial/publish",
+        headers={"Authorization": f"Bearer {settings.bat_internal_service_token}", "content-type": "application/json"},
+        json={"runId": story["runId"], "title": story.get("title", ""), "dek": story.get("dek", ""),
+              "body": story.get("body", ""), "sourceIds": story.get("sourceIds", []),
+              "factCheck": story.get("factCheck", {})},
+    )
+    if publish_response.status_code >= 400:
+        raise RuntimeError(f"Mastra publication failed ({publish_response.status_code}): {publish_response.text[:240]}")
+    publication = publish_response.json()
+    return {"status": "published", "orchestrator": "mastra", "publication": publication, **story}
 
 
 @router.get("/analysis")
 async def admin_analysis(db: AsyncSession = Depends(get_db)) -> dict:
     return await build_analysis_dashboard(db, story_limit=4, memory_limit=8)
-
-
-@router.post("/publish-ready")
-async def publish_ready(
-    limit: int = 12,
-    publish_social: bool = True,
-    rework_drafts: bool = True,
-    refresh_homepage: bool = True,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    result = await publish_ready_backlog(
-        db,
-        limit=limit,
-        publish_social=publish_social,
-        rework_drafts=rework_drafts,
-        refresh_homepage=refresh_homepage,
-    )
-    await db.commit()
-    return result
 
 
 @router.get("/system-settings")
@@ -433,6 +427,9 @@ async def quality_report(db: AsyncSession = Depends(get_db)) -> dict:
             "recent_refresh_due_sources": refresh_due_sources,
         },
         "writing_state": {
+            "published_count": int(
+                (await db.scalar(select(func.count()).select_from(EditorialObject).where(EditorialObject.status == "published"))) or 0
+            ),
             "recent_story_sample_size": len(recent_editorial),
             "story_forms": dict(story_forms),
             "story_modes": dict(story_modes),

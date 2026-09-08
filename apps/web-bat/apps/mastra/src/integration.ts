@@ -19,7 +19,7 @@ export async function startEditorialRun(workflow: string, directive: string, per
 
 export async function recordEditorialStage(runId: string, stage: string, agent: string, output: Record<string, unknown>, sourceIds: string[] = []) {
   const response = await fetch(`${config.apiUrl}/api/v1/integration/runs/${runId}/stages`, {
-    method: 'POST', headers, body: JSON.stringify({ stage, agent, output, source_ids: sourceIds, provider: { orchestrator: 'mastra' } }),
+    method: 'POST', headers, body: JSON.stringify({ stage, agent, output, source_ids: sourceIds, provider: { orchestrator: 'mastra', contract_version: 'mastra-bat-2' } }),
     signal: AbortSignal.timeout(15000),
   });
   if (!response.ok) throw new Error(`editorial stage persistence failed: ${response.status}`);

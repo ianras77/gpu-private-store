@@ -56,7 +56,7 @@ async function getTheme(slug: string) {
     if (!theme) {
       return null;
     }
-    const stories = await apiGet<Editorial[]>("/api/v1/editorial/objects?limit=120");
+    const stories = await apiGet<Editorial[]>("/api/v1/editorial/objects?status=published&limit=120");
     return { theme, stories };
   } catch {
     return null;

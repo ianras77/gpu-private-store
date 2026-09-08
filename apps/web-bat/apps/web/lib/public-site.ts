@@ -525,7 +525,9 @@ export async function getPublicSiteData(): Promise<PublicSiteData> {
 
   const [snapshotResult, editorialResult, themesResult, pipelineResult] = await Promise.allSettled([
     apiGet<HomepageSnapshot[]>("/api/v1/homepage/snapshots"),
-    apiGet<Editorial[]>("/api/v1/editorial/objects?limit=120"),
+    // The editorial table contains a large rejected/draft backlog.  Limiting
+    // the mixed feed to the newest 120 hid the older published shelf entirely.
+    apiGet<Editorial[]>("/api/v1/editorial/objects?status=published&limit=120"),
     apiGet<Theme[]>("/api/v1/themes"),
     apiGet<PipelineTelemetry>("/api/v1/admin/pipeline"),
   ]);

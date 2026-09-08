@@ -2,24 +2,19 @@ from datetime import datetime
 import re
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from db import get_db
 from models import EditorialObject
-from schemas import EditorialGenerateRequest
 from services.editorial_service import (
     derive_editorial_title,
     evaluate_style_gate,
-    generate_editorial_object,
-    generate_social_posts,
-    get_runtime_controls,
     record_voice_learning_from_publication,
 )
 from services.revision_service import record_revision
-from services.social_dispatcher import dispatch_social_post
 
 router = APIRouter(prefix="/editorial", tags=["editorial"])
 
@@ -58,70 +53,16 @@ def _serialize_editorial(row: EditorialObject, *, include_body: bool = False) ->
     return payload
 
 
-@router.post("/generate")
-async def generate_editorial(payload: EditorialGenerateRequest, db: AsyncSession = Depends(get_db)) -> dict:
-    controls = await get_runtime_controls(db)
-    should_publish = bool(payload.publish_now or controls["direct_publish"])
-    obj = await generate_editorial_object(
-        db,
-        object_type=payload.object_type,
-        theme_slug=payload.theme_slug,
-        publish_now=should_publish,
-    )
-    response: dict = {
-        "id": obj.id,
-        "object_type": obj.object_type,
-        "status": obj.status,
-        "title": obj.title,
-        "slug": obj.slug,
-    }
-    if payload.immediate_social:
-        posts = await generate_social_posts(db, obj, publish_now=should_publish)
-        if should_publish:
-            for post in posts:
-                if post.status != "published":
-                    continue
-                publish_response = await dispatch_social_post(post, force_dry_run=not controls["x_live_posting"])
-                post.meta = {**(post.meta or {}), "publish_response": publish_response}
-            await db.commit()
-        response["social_post_ids"] = [post.id for post in posts]
-        response["social_generated"] = len(posts)
-    return response
-
-
-@router.post("/generate-and-publish")
-async def generate_and_publish_editorial(payload: EditorialGenerateRequest, db: AsyncSession = Depends(get_db)) -> dict:
-    controls = await get_runtime_controls(db)
-    obj = await generate_editorial_object(
-        db,
-        object_type=payload.object_type,
-        theme_slug=payload.theme_slug,
-        publish_now=True,
-    )
-    response: dict = {
-        "id": obj.id,
-        "object_type": obj.object_type,
-        "status": obj.status,
-        "title": obj.title,
-        "slug": obj.slug,
-        "published_at": obj.published_at,
-    }
-    if payload.immediate_social:
-        posts = await generate_social_posts(db, obj, publish_now=True)
-        for post in posts:
-            if post.status != "published":
-                continue
-            publish_response = await dispatch_social_post(post, force_dry_run=not controls["x_live_posting"])
-            post.meta = {**(post.meta or {}), "publish_response": publish_response}
-        await db.commit()
-        response["social_post_ids"] = [post.id for post in posts]
-        response["social_generated"] = len(posts)
-    return response
-
-
 @router.get("/objects")
-async def list_editorial(limit: int = 50, db: AsyncSession = Depends(get_db)) -> list[dict]:
-    rows = (await db.execute(select(EditorialObject).order_by(EditorialObject.created_at.desc()).limit(limit))).scalars().all()
+async def list_editorial(
+    limit: int = 50,
+    status: str | None = Query(default=None),
+    db: AsyncSession = Depends(get_db),
+) -> list[dict]:
+    query = select(EditorialObject).order_by(EditorialObject.created_at.desc()).limit(limit)
+    if status:
+        query = query.where(EditorialObject.status == status)
+    rows = (await db.execute(query)).scalars().all()
     return [_serialize_editorial(row) for row in rows]
 
 
@@ -195,21 +136,3 @@ async def publish_editorial(object_id: UUID, db: AsyncSession = Depends(get_db))
         launch_packet=metadata.get("launch_packet") if isinstance(metadata, dict) else None,
     )
     return {"id": row.id, "status": row.status, "published_at": row.published_at}
-
-
-@router.post("/objects/{object_id}/social/generate")
-async def generate_editorial_social(object_id: UUID, db: AsyncSession = Depends(get_db)) -> dict:
-    row = (await db.execute(select(EditorialObject).where(EditorialObject.id == object_id))).scalar_one_or_none()
-    if not row:
-        raise HTTPException(status_code=404, detail="Editorial object not found")
-
-    controls = await get_runtime_controls(db)
-    posts = await generate_social_posts(db, row, publish_now=controls["direct_publish"])
-    if controls["direct_publish"]:
-        for post in posts:
-            if post.status != "published":
-                continue
-            publish_response = await dispatch_social_post(post, force_dry_run=not controls["x_live_posting"])
-            post.meta = {**(post.meta or {}), "publish_response": publish_response}
-        await db.commit()
-    return {"editorial_object_id": object_id, "generated_posts": len(posts), "post_ids": [p.id for p in posts]}

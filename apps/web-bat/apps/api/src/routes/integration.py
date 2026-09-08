@@ -24,7 +24,7 @@ def _require_internal(authorization: str | None) -> None:
 class RunCreate(BaseModel):
     workflow: str = Field(min_length=1, max_length=100)
     directive: str = Field(min_length=1, max_length=4000)
-    workflow_version: str = Field(default="mastra-bat-1", max_length=80)
+    workflow_version: str = Field(default="mastra-bat-2", max_length=80)
     persona_snapshot: dict = Field(default_factory=dict)
     metadata: dict = Field(default_factory=dict)
 
@@ -62,13 +62,14 @@ async def integration_status(db: AsyncSession = Depends(get_db)) -> dict:
           (select count(*) from editorial_stage_runs) as stages,
           (select count(*) from persona_memory where active) as active_persona_memory,
           (select count(*) from publication_packages) as packages,
-          (select count(*) from publication_packages where status='published') as published_packages
+          (select count(*) from publication_packages where status='published') as published_packages,
+          (select count(*) from editorial_objects where status='published') as published_editorial
     """))).mappings().one()
     latest = (await db.execute(text("""
         select id, workflow, status, directive, created_at, started_at, completed_at, published_at
         from editorial_runs order by created_at desc limit 1
     """))).mappings().one_or_none()
-    return {"orchestrator": "mastra", "contract_version": "mastra-bat-1", "counts": dict(counts), "latest_run": dict(latest) if latest else None}
+    return {"orchestrator": "mastra", "contract_version": "mastra-bat-2", "counts": dict(counts), "latest_run": dict(latest) if latest else None}
 
 
 @router.get("/persona-context")

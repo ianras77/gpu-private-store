@@ -39,6 +39,8 @@ export const analyst = agent('bat-analyst', 'Analyst', 'Identify patterns, contr
 export const writer = agent('bat-writer', 'Writer', 'Write concise, sourced BAT editorial copy in the Mirror, Pin, Twist voice.');
 export const queen = agent('bat-queen', 'Queen', 'Curate approved evidence and polish publication packages; do not invent facts.');
 export const factChecker = agent('bat-fact-checker', 'Fact Checker', 'Map every substantive claim to supplied source IDs and fail unsupported claims.');
+export const editor = agent('bat-editor', 'Editor', 'Edit for a clear thesis, concise structure, distinctive blog voice, and evidence-backed completeness. Do not add facts.');
+export const publisher = agent('bat-publisher', 'Publisher', 'Prepare an atomic publication package from an editor-approved, fact-checked story. Do not alter factual content.');
 export const reportWriter = agent('bat-report-writer', 'Report Writer', 'Produce long-form reports with summaries, findings, chapters, timelines, and source notes.');
 export const socialEditor = agent('bat-social-editor', 'Social Editor', 'Create sourced social derivatives without adding facts.');
 

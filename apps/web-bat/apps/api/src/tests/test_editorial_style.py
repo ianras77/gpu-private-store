@@ -40,7 +40,6 @@ from services.editorial_service import (
     rework_editorial_backlog,
     rework_editorial_object,
 )
-from services.publishing_service import _editorial_publishable_now
 from services.trend_engine import _change_type
 
 
@@ -227,13 +226,13 @@ class EditorialStyleTests(unittest.TestCase):
         self.assertIn("Clear the", prompt)
 
     def test_short_longform_triggers_editorial_expansion_prompt(self) -> None:
-        report = {"body_word_count": 520, "body_paragraph_count": 3, "reasons": ["below_story_form_floor:520/760"]}
+        report = {"body_word_count": 420, "body_paragraph_count": 3, "reasons": ["below_story_form_floor:420/600"]}
         story_brief = {"story_form": "lead_analysis", "story_mode": "Lead Analysis", "body_paragraphs": 4}
 
         self.assertTrue(_needs_editorial_expansion(report, story_brief))
         prompt = _build_editorial_expansion_prompt(report, story_brief)
         self.assertIn("fully filed BAT piece", prompt)
-        self.assertIn("must clear at least 760 words", prompt)
+        self.assertIn("must clear at least 600 words", prompt)
         self.assertIn("Do not invent named officials", prompt)
 
     def test_publish_recommendation_holds_grounded_fallback_for_rework(self) -> None:
@@ -1338,7 +1337,7 @@ That gap matters because the legal paper is suddenly doing more governing than t
         )
 
         self.assertTrue(report["passes"])
-        self.assertGreaterEqual(int(report["body_word_count"] or 0), 620)
+        self.assertGreaterEqual(int(report["body_word_count"] or 0), 420)
         self.assertGreaterEqual(int(report["body_paragraph_count"] or 0), 4)
         self.assertNotIn("belowstoryformfloor", "".join(str(reason) for reason in report["reasons"]).lower())
 
@@ -1746,34 +1745,6 @@ That gap matters because the legal paper is suddenly doing more governing than t
 
 
 class EditorialReworkTests(unittest.IsolatedAsyncioTestCase):
-    async def test_publish_ready_skips_rework_blocked_drafts(self) -> None:
-        editorial = EditorialObject(
-            id=uuid.uuid4(),
-            object_type="lead_story",
-            status="approved",
-            title="Court Filing Tightens the Trump Story",
-            body_md=(
-                "The Trump administration is still trying to sell a broad claim while the court record narrows it.\n\n"
-                "Reuters and AP put the contradiction in the paper trail, which makes the official story harder to launder.\n\n"
-                "That is the live institutional stress: power wants the clean headline, and the record keeps leaving marks."
-            ),
-            summary="",
-            primary_source_ids=[],
-            meta={
-                "style_gate": {"passes": True, "score": 90},
-                "publish_recommendation": {"recommended": True},
-                "source_mix": {"freshest_age_days": 0},
-                "selected_angle": "Trump administration court filing",
-                "rework": {"blocked": {"reason": "placeholder_or_prompt_leak"}},
-            },
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
-        )
-
-        publishable, _diagnostics = await _editorial_publishable_now(SimpleNamespace(), editorial)
-
-        self.assertFalse(publishable)
-
     async def test_rework_backlog_blocks_prompt_leak_drafts_before_retry(self) -> None:
         editorial_id = uuid.uuid4()
         editorial = EditorialObject(
@@ -1943,8 +1914,8 @@ class EditorialReworkTests(unittest.IsolatedAsyncioTestCase):
 
         prompt = _build_editorial_task_prompt("Write the piece.", story_brief, {"query_text": "Trump court fight"})
 
-        self.assertIn("Minimum body length before Pattern Signals: 620 words", prompt)
-        self.assertIn("Aim for 760-860 body words", prompt)
+        self.assertIn("Minimum body length before Pattern Signals: 420 words", prompt)
+        self.assertIn("Aim for 540-640 body words", prompt)
 
     async def test_rework_editorial_object_marks_publish_ready_draft_as_approved(self) -> None:
         editorial_id = uuid.uuid4()

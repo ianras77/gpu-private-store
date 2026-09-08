@@ -3,7 +3,7 @@ import { apiGet, safeDate } from "@/lib/api";
 type IntegrationStatus = {
   orchestrator: string;
   contract_version: string;
-  counts: { runs: number; stages: number; active_persona_memory: number; packages: number; published_packages: number };
+  counts: { runs: number; stages: number; active_persona_memory: number; packages: number; published_packages: number; published_editorial?: number };
   latest_run?: { id: string; workflow: string; status: string; directive: string; created_at: string; completed_at?: string; published_at?: string };
 };
 
@@ -24,7 +24,7 @@ export default async function MastraOperatorPage() {
           <div className="admin-status-grid">
             <article className="mission-stat"><span>Orchestrator</span><strong>{status.orchestrator}</strong><p>{status.contract_version}</p></article>
             <article className="mission-stat"><span>Editorial runs</span><strong>{status.counts.runs}</strong><p>{status.counts.stages} persisted stages</p></article>
-            <article className="mission-stat"><span>Published packages</span><strong>{status.counts.published_packages}</strong><p>{status.counts.packages} total packages</p></article>
+            <article className="mission-stat"><span>Published stories</span><strong>{status.counts.published_editorial ?? status.counts.published_packages}</strong><p>{status.counts.published_packages} Mastra packages</p></article>
             <article className="mission-stat"><span>Persona memory</span><strong>{status.counts.active_persona_memory}</strong><p>active durable memories</p></article>
           </div>
           {status.latest_run ? <article className="story-panel">
