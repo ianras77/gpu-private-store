@@ -7,7 +7,7 @@ export type MastraChatInput = {
   resourceId: string;
   signal?: AbortSignal;
   maxSteps?: number;
-  toolChoice?: "auto" | "none" | "required";
+  toolChoice?: "auto" | "none" | "required" | { type: "tool"; toolName: string };
 };
 
 /** Native Mastra stream seam. IDs are mandatory so memory cannot accidentally become global. */

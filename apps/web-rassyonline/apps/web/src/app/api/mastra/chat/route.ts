@@ -48,8 +48,10 @@ export async function POST(request: NextRequest) {
       }
     }
     const searchRequested = parsed.data.webSearch === "on" || (parsed.data.webSearch === "auto" && Boolean(latestUserMessage && shouldUseWebSearch(latestUserMessage.content)));
+    const comparisonRequested = Boolean(latestUserMessage?.content.match(/\b(compare|comparison|versus|vs\.?|difference|differentiate)\b/i));
     const selectedAgent = selectMastraAgent({ requestedAgent: parsed.data.agent as MastraAgentId, mode: parsed.data.mode, searchRequested });
-    const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId: parsed.data.threadId, resourceId: user?.id ?? `guest:${parsed.data.threadId}`, signal: request.signal, toolChoice: selectedAgent === "researcher" ? "required" : undefined });
+    const toolChoice = selectedAgent === "researcher" ? comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required" : undefined;
+    const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId: parsed.data.threadId, resourceId: user?.id ?? `guest:${parsed.data.threadId}`, signal: request.signal, toolChoice });
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
