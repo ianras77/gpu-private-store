@@ -133,5 +133,20 @@ async function migrate(): Promise<void> {
       primary key (run_id, sequence)
     );
     create index if not exists agent_run_events_created_idx on agent_run_events(run_id, created_at);
+    create table if not exists agent_approvals (
+      id text primary key,
+      run_id text not null references agent_runs(id) on delete cascade,
+      user_id text not null references users(id) on delete cascade,
+      tool text not null,
+      target text not null,
+      arguments_hash text not null,
+      source_revision text not null,
+      status text not null check (status in ('pending','consumed','denied','expired')) default 'pending',
+      expires_at timestamptz not null,
+      nonce_hash text not null unique,
+      consumed_at timestamptz,
+      created_at timestamptz not null default now()
+    );
+    create index if not exists agent_approvals_run_idx on agent_approvals(run_id, user_id, status);
   `);
 }

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { getPool } from "./db";
 
 export const RUN_STATUSES = ["queued", "running", "waiting_for_tool", "awaiting_approval", "suspended", "succeeded", "failed", "cancelled", "interrupted"] as const;
@@ -21,9 +21,35 @@ export type AgentRun = {
 };
 
 export type RunEvent = { runId: string; sequence: number; type: string; payload: Record<string, unknown>; createdAt: string };
+export type RunApproval = { id: string; runId: string; userId: string; tool: string; target: string; argumentsHash: string; sourceRevision: string; status: "pending" | "consumed" | "denied" | "expired"; expiresAt: string; createdAt: string };
 
 function mapRun(row: Record<string, unknown>): AgentRun {
   return { id: String(row.id), userId: String(row.user_id), threadId: row.thread_id ? String(row.thread_id) : null, projectId: row.project_id ? String(row.project_id) : null, workflow: String(row.workflow), workflowVersion: String(row.workflow_version), status: row.status as RunStatus, currentStep: String(row.current_step), attempt: Number(row.attempt), leaseGeneration: Number(row.lease_generation), budget: (row.budget ?? {}) as Record<string, unknown>, errorCategory: row.error_category ? String(row.error_category) : null, createdAt: new Date(String(row.created_at)).toISOString(), updatedAt: new Date(String(row.updated_at)).toISOString(), finishedAt: row.finished_at ? new Date(String(row.finished_at)).toISOString() : null };
+}
+
+function mapApproval(row: Record<string, unknown>): RunApproval {
+  return { id: String(row.id), runId: String(row.run_id), userId: String(row.user_id), tool: String(row.tool), target: String(row.target), argumentsHash: String(row.arguments_hash), sourceRevision: String(row.source_revision), status: row.status as RunApproval["status"], expiresAt: new Date(String(row.expires_at)).toISOString(), createdAt: new Date(String(row.created_at)).toISOString() };
+}
+
+export function hashApprovalArguments(argumentsValue: unknown): string {
+  return createHash("sha256").update(JSON.stringify(argumentsValue, Object.keys(argumentsValue as object ?? {}).sort())).digest("hex");
+}
+
+export async function createApproval(input: { runId: string; userId: string; tool: string; target: string; argumentsHash: string; sourceRevision: string; expiresSeconds?: number }): Promise<RunApproval> {
+  const run = await findRunForUser(input.runId, input.userId);
+  if (!run) throw new Error("run_not_found");
+  if (!["running", "awaiting_approval", "suspended"].includes(run.status)) throw new Error("run_not_awaiting_approval");
+  const id = randomUUID();
+  const nonceHash = createHash("sha256").update(randomUUID()).digest("hex");
+  const seconds = Math.max(30, Math.min(input.expiresSeconds ?? 900, 86400));
+  const result = await getPool().query(`insert into agent_approvals(id,run_id,user_id,tool,target,arguments_hash,source_revision,expires_at,nonce_hash) values($1,$2,$3,$4,$5,$6,$7,now()+($8::text || ' seconds')::interval,$9) returning *`, [id, input.runId, input.userId, input.tool, input.target, input.argumentsHash, input.sourceRevision, seconds, nonceHash]);
+  return mapApproval(result.rows[0]);
+}
+
+export async function consumeApproval(id: string, userId: string, argumentsHash: string, sourceRevision: string): Promise<RunApproval> {
+  const result = await getPool().query("update agent_approvals set status='consumed',consumed_at=now() where id=$1 and user_id=$2 and status='pending' and expires_at>now() and arguments_hash=$3 and source_revision=$4 returning *", [id, userId, argumentsHash, sourceRevision]);
+  if (!result.rows[0]) throw new Error("approval_invalid_or_expired");
+  return mapApproval(result.rows[0]);
 }
 
 export async function createRun(input: { userId: string; threadId?: string; projectId?: string; workflow: string; workflowVersion?: string; budget?: Record<string, unknown> }): Promise<AgentRun> {
