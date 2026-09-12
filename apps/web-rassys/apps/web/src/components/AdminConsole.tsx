@@ -174,6 +174,24 @@ export function AdminConsole() {
 
   return (
     <div className="grid w-full gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <div className="xl:col-span-2 overflow-hidden rounded-[2rem] border border-cyan-300/20 bg-[radial-gradient(circle_at_85%_15%,rgba(66,245,255,.18),transparent_30%),linear-gradient(135deg,rgba(255,79,216,.16),rgba(10,4,22,.88))] p-6 shadow-[0_24px_80px_rgba(0,0,0,.25)] sm:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="max-w-2xl">
+            <div className="text-[10px] font-semibold uppercase tracking-[.3em] text-cyan-200/70">Rassy control room · live surface</div>
+            <h1 className="mt-3 font-display text-3xl leading-tight text-white sm:text-5xl">Make the house feel alive.</h1>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-cloud/75">A calmer command deck for the radio, the writing shelf, and the little moments that make Rasies worth opening. Every action below is explicit, reversible where possible, and visible when it lands.</p>
+          </div>
+          <div className="grid min-w-[12rem] gap-2 text-xs text-cloud/70">
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-3"><span className="block uppercase tracking-[.2em] text-cyan-200/60">mode</span><strong className="mt-1 block text-white">Operator / creator</strong></div>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-3"><span className="block uppercase tracking-[.2em] text-cyan-200/60">guardrail</span><strong className="mt-1 block text-white">Server-side admin gate</strong></div>
+          </div>
+        </div>
+        <div className="mt-7 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-4"><div className="text-2xl">◉</div><strong className="mt-2 block text-sm text-white">Direct the mood</strong><span className="mt-1 block text-xs leading-5 text-cloud/60">Shape the room without hunting through settings.</span></div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-4"><div className="text-2xl">✦</div><strong className="mt-2 block text-sm text-white">Make something lasting</strong><span className="mt-1 block text-xs leading-5 text-cloud/60">Turn a seed into a considered thought, with its media attached.</span></div>
+          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-4"><div className="text-2xl">↗</div><strong className="mt-2 block text-sm text-white">See what happened</strong><span className="mt-1 block text-xs leading-5 text-cloud/60">Feedback stays close to the action so the console never feels mysterious.</span></div>
+        </div>
+      </div>
       <Card className="w-full">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
