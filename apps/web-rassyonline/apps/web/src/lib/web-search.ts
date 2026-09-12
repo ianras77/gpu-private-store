@@ -33,7 +33,7 @@ const SEARCH_EXCLUSIONS = [/^what does .* mean\??$/i, /^explain\b/i, /^rewrite\b
 export function shouldUseWebSearch(prompt: string): boolean {
   const compact = prompt.trim();
   if (!compact) return false;
-  return !SEARCH_EXCLUSIONS.some((pattern) => pattern.test(compact)) && SEARCH_INTENT_PATTERNS.some((pattern) => pattern.test(compact));
+  return !SEARCH_EXCLUSIONS.some((pattern) => pattern.test(compact)) && !/\b(current date|today'?s date|what day is it|current time|what time is it)\b/i.test(compact) && SEARCH_INTENT_PATTERNS.some((pattern) => pattern.test(compact));
 }
 
 export function normalizeSearchQuery(query: string): string {

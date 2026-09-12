@@ -4,6 +4,8 @@ import { parallelResearchTool } from "./parallel-research";
 import { pageReaderTool } from "./page-reader";
 import { calculatorTool } from "./calculator";
 import { timeTool } from "./time";
+import { chartTool } from "./chart";
+import { asciiArtTool } from "./ascii-art";
 
 export const toolRegistry = {
   "document-search": { tool: documentSearchTool, category: "knowledge", risk: "read-only", enabled: true },
@@ -12,6 +14,8 @@ export const toolRegistry = {
   ,"page-reader": { tool: pageReaderTool, category: "web", risk: "read-only", enabled: true }
   ,"calculator": { tool: calculatorTool, category: "utility", risk: "read-only", enabled: true }
   ,"current-time": { tool: timeTool, category: "utility", risk: "read-only", enabled: true }
+  ,"chart": { tool: chartTool, category: "visualization", risk: "read-only", enabled: true }
+  ,"ascii-art": { tool: asciiArtTool, category: "visualization", risk: "read-only", enabled: true }
 } as const;
 
-export const rassyTools = { documentSearch: documentSearchTool, webSearch: webSearchTool, parallelResearch: parallelResearchTool, pageReader: pageReaderTool, calculator: calculatorTool, currentTime: timeTool };
+export const rassyTools = { documentSearch: documentSearchTool, webSearch: webSearchTool, parallelResearch: parallelResearchTool, pageReader: pageReaderTool, calculator: calculatorTool, currentTime: timeTool, chart: chartTool, asciiArt: asciiArtTool };

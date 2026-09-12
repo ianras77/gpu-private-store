@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculate } from "./calculator";
 import { readPublicPage } from "./page-reader";
-import { currentTime } from "./time";
+import { currentTime, isCurrentTimeQuestion } from "./time";
 
 describe("Mastra utility tools", () => {
   it("calculates arithmetic without code evaluation", async () => {
@@ -19,6 +19,11 @@ describe("Mastra utility tools", () => {
 
   it("returns a valid timezone result", async () => {
     expect(currentTime("UTC").iso).toMatch(/Z$/);
+  });
+
+  it("recognizes current date and time questions", () => {
+    expect(isCurrentTimeQuestion("What is the current date?" )).toBe(true);
+    expect(isCurrentTimeQuestion("Explain date formatting" )).toBe(false);
   });
 
   it("rejects private page targets", async () => {

@@ -332,6 +332,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
             if (event === "complete") { citationStatus = data.citationStatus; }
             if (event === "citation-warning") { citationStatus = "unsupported"; }
             if (event === "text" && data.delta) streamText += data.delta;
+            if (event === "reasoning" && data.delta) reasoning += data.delta;
             if (event === "error") throw new Error(data.message ?? "Mastra execution failed");
           } catch (error) { if (error instanceof Error && error.message === "Mastra execution failed") throw error; }
         }

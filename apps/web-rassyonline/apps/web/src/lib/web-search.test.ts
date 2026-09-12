@@ -19,6 +19,10 @@ describe("shouldUseWebSearch", () => {
     expect(shouldUseWebSearch("what is the latest price of this service?")).toBe(true);
   });
 
+  it("does not send the current date to web search", () => {
+    expect(shouldUseWebSearch("What is the current date?" )).toBe(false);
+  });
+
   it("cleans conversational search prompts", () => {
     expect(searchQueryForPrompt("Please look up the latest Next.js release notes")).toBe("the latest Next.js release notes");
   });
