@@ -148,5 +148,20 @@ async function migrate(): Promise<void> {
       created_at timestamptz not null default now()
     );
     create index if not exists agent_approvals_run_idx on agent_approvals(run_id, user_id, status);
+    create table if not exists agent_artifacts (
+      id text primary key,
+      user_id text not null references users(id) on delete cascade,
+      run_id text references agent_runs(id) on delete set null,
+      project_id text,
+      content_hash text not null,
+      mime_type text not null,
+      size_bytes bigint not null,
+      storage_path text not null,
+      classification text not null default 'private',
+      source_ids jsonb not null default '[]'::jsonb,
+      created_at timestamptz not null default now(),
+      expires_at timestamptz
+    );
+    create index if not exists agent_artifacts_owner_idx on agent_artifacts(user_id, created_at desc);
   `);
 }
