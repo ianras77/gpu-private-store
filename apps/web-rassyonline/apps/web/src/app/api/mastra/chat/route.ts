@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
         ? "none"
         : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
       : undefined;
-    const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId, resourceId: user?.id ?? `guest:${threadId}`, signal: request.signal, toolChoice });
+    const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId, resourceId: user?.id ?? `guest:${threadId}`, userId: user?.id, signal: request.signal, toolChoice });
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
