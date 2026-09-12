@@ -61,6 +61,23 @@ services:
       is_main: true
       internal_port: 3000
 
+  rassy-online-worker:
+    image: runtipi-local-web-rassyonline-web:latest
+    pull_policy: build
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    command: ["node", "worker.mjs"]
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      RUN_WORKER_ID: ${RUN_WORKER_ID:-rassy-online-worker}
+      RUN_WORKER_POLL_MS: ${RUN_WORKER_POLL_MS:-2000}
+      DATABASE_URL: postgresql://rassy_online:${RASSY_ONLINE_POSTGRES_PASSWORD}@rassy-online-postgres:5432/rassy_online
+    depends_on:
+      rassy-online-postgres:
+        condition: service_healthy
+
   rassy-online-postgres:
     image: postgres:16-alpine
     restart: unless-stopped
