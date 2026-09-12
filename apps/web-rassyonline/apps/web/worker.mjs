@@ -9,6 +9,46 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
 let stopping = false;
 for (const signal of ["SIGTERM", "SIGINT"]) process.on(signal, () => { stopping = true; });
 
+async function ensureRunSchema() {
+  await pool.query(`
+    create table if not exists agent_runs (
+      id text primary key,
+      user_id text not null references users(id) on delete cascade,
+      thread_id text,
+      project_id text,
+      workflow text not null,
+      workflow_version text not null,
+      status text not null check (status in ('queued','running','waiting_for_tool','awaiting_approval','suspended','succeeded','failed','cancelled','interrupted')),
+      current_step text not null default 'accepted',
+      input_ref text,
+      budget jsonb not null default '{}'::jsonb,
+      permission_snapshot jsonb not null default '{}'::jsonb,
+      artifact_ids jsonb not null default '[]'::jsonb,
+      approval_ids jsonb not null default '[]'::jsonb,
+      attempt integer not null default 0,
+      lease_generation bigint not null default 0,
+      lease_owner text,
+      lease_expires_at timestamptz,
+      error_category text,
+      result jsonb,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      started_at timestamptz,
+      finished_at timestamptz
+    );
+    create index if not exists agent_runs_status_idx on agent_runs(status, updated_at);
+    create table if not exists agent_run_events (
+      run_id text not null references agent_runs(id) on delete cascade,
+      sequence bigint not null,
+      type text not null,
+      payload jsonb not null default '{}'::jsonb,
+      created_at timestamptz not null default now(),
+      primary key (run_id, sequence)
+    );
+    create index if not exists agent_run_events_created_idx on agent_run_events(run_id, created_at);
+  `);
+}
+
 async function claim() {
   const result = await pool.query(`with candidate as (select id from agent_runs where status='queued' or (status='running' and lease_expires_at < now()) order by updated_at for update skip locked limit 1) update agent_runs r set status='running',lease_owner=$1,lease_generation=r.lease_generation+1,lease_expires_at=now() + interval '60 seconds',started_at=coalesce(started_at,now()),updated_at=now() from candidate where r.id=candidate.id returning r.*`, [workerId]);
   return result.rows[0] || null;
@@ -46,6 +86,7 @@ async function processRun(run) {
 
 while (!stopping) {
   try {
+    await ensureRunSchema();
     const run = await claim();
     if (run) await processRun(run);
     else await new Promise((resolve) => setTimeout(resolve, pollMs));
