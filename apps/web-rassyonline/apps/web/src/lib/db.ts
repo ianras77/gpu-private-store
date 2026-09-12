@@ -96,5 +96,31 @@ async function migrate(): Promise<void> {
 
     create index if not exists document_chunks_document_id_idx on document_chunks(document_id);
     create index if not exists document_chunks_user_id_idx on document_chunks(user_id);
+
+    create table if not exists agent_runs (
+      id text primary key,
+      user_id text not null references users(id) on delete cascade,
+      thread_id text,
+      project_id text,
+      workflow text not null,
+      workflow_version text not null,
+      status text not null check (status in ('queued','running','waiting_for_tool','awaiting_approval','suspended','succeeded','failed','cancelled','interrupted')),
+      current_step text not null default 'accepted',
+      input_ref text,
+      budget jsonb not null default '{}'::jsonb,
+      permission_snapshot jsonb not null default '{}'::jsonb,
+      artifact_ids jsonb not null default '[]'::jsonb,
+      approval_ids jsonb not null default '[]'::jsonb,
+      attempt integer not null default 0,
+      lease_generation bigint not null default 0,
+      error_category text,
+      result jsonb,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      started_at timestamptz,
+      finished_at timestamptz
+    );
+    create index if not exists agent_runs_user_updated_idx on agent_runs(user_id, updated_at desc);
+    create index if not exists agent_runs_status_idx on agent_runs(status, updated_at);
   `);
 }
