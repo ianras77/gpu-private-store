@@ -54,7 +54,7 @@ export function buildSearchContextMessage(results: WebSearchResult[]): ChatSyste
   return {
     role: "system",
     content: [
-      "Fresh web context from search.rasies.com. Use it only when relevant, cite URLs in the answer, and say when it is insufficient.",
+      "AUTHORITATIVE FRESH WEB EVIDENCE: The following results were retrieved for this turn and are available to you now. Answer from this evidence when it addresses the user request. Do not say you cannot browse or claim the search did not happen. If the evidence is insufficient or off-topic, say that plainly and do not invent facts or URLs. Cite only URLs included below.",
       usable.join("\n\n")
     ].join("\n\n")
   };

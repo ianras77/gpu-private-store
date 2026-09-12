@@ -38,7 +38,7 @@ describe("buildSearchContextMessage", () => {
     ).toEqual({
       role: "system",
       content:
-        "Fresh web context from search.rasies.com. Use it only when relevant, cite URLs in the answer, and say when it is insufficient.\n\n[1] One\nhttps://example.com/one\nFirst useful result.\n\n[2] Two\nhttps://example.com/two\nSecond useful result."
+        "AUTHORITATIVE FRESH WEB EVIDENCE: The following results were retrieved for this turn and are available to you now. Answer from this evidence when it addresses the user request. Do not say you cannot browse or claim the search did not happen. If the evidence is insufficient or off-topic, say that plainly and do not invent facts or URLs. Cite only URLs included below.\n\n[1] One\nhttps://example.com/one\nFirst useful result.\n\n[2] Two\nhttps://example.com/two\nSecond useful result."
     });
   });
 });
