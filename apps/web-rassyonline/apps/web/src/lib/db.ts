@@ -113,6 +113,8 @@ async function migrate(): Promise<void> {
       approval_ids jsonb not null default '[]'::jsonb,
       attempt integer not null default 0,
       lease_generation bigint not null default 0,
+      lease_owner text,
+      lease_expires_at timestamptz,
       error_category text,
       result jsonb,
       created_at timestamptz not null default now(),
@@ -122,5 +124,14 @@ async function migrate(): Promise<void> {
     );
     create index if not exists agent_runs_user_updated_idx on agent_runs(user_id, updated_at desc);
     create index if not exists agent_runs_status_idx on agent_runs(status, updated_at);
+    create table if not exists agent_run_events (
+      run_id text not null references agent_runs(id) on delete cascade,
+      sequence bigint not null,
+      type text not null,
+      payload jsonb not null default '{}'::jsonb,
+      created_at timestamptz not null default now(),
+      primary key (run_id, sequence)
+    );
+    create index if not exists agent_run_events_created_idx on agent_run_events(run_id, created_at);
   `);
 }
