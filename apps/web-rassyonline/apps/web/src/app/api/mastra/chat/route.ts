@@ -99,8 +99,10 @@ export async function POST(request: NextRequest) {
     // Preflight already executed the bounded search. Require a Mastra tool only
     // when it is the fallback path, otherwise let the selected specialist
     // synthesize the trusted evidence without duplicating the search.
-    const toolChoice = selectedAgent === "researcher" && !preflightResults.length
-      ? comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
+    const toolChoice = selectedAgent === "researcher"
+      ? preflightResults.length
+        ? "none"
+        : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
       : undefined;
     const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId, resourceId: user?.id ?? `guest:${threadId}`, signal: request.signal, toolChoice });
     const encoder = new TextEncoder();
