@@ -28,11 +28,12 @@ const SEARCH_INTENT_PATTERNS = [
   /\b(latest|recent|current|today|tonight|this week|breaking|news|release notes?|docs?|sources?|citations?)\b/i,
   /\b(weather|forecast|price|pricing|stock|score|schedule|availability|opening hours)\b/i
 ];
+const SEARCH_EXCLUSIONS = [/^what does .* mean\??$/i, /^explain\b/i, /^rewrite\b/i, /^summari[sz]e this\b/i];
 
 export function shouldUseWebSearch(prompt: string): boolean {
   const compact = prompt.trim();
   if (!compact) return false;
-  return SEARCH_INTENT_PATTERNS.some((pattern) => pattern.test(compact));
+  return !SEARCH_EXCLUSIONS.some((pattern) => pattern.test(compact)) && SEARCH_INTENT_PATTERNS.some((pattern) => pattern.test(compact));
 }
 
 export function normalizeSearchQuery(query: string): string {
@@ -41,6 +42,17 @@ export function normalizeSearchQuery(query: string): string {
     .replace(/^(please\s+)?(search|browse|look\s*up)\s+(the\s+)?(web|internet)\s+(for\s+)?/i, "")
     .replace(/^(please\s+)?(search|browse|look\s*up)\s+(for\s+)?/i, "")
     .trim() || trimmed;
+}
+
+export function searchQueryForPrompt(query: string): string {
+  return normalizeSearchQuery(query).replace(/\b(can you|could you|would you|please|tell me|i want to know)\b/gi, " ").replace(/\s+/g, " ").trim().slice(0, 500);
+}
+
+function searchRecencyForPrompt(prompt: string): string | undefined {
+  if (/\b(today|tonight|right now|currently|latest|breaking|live)\b/i.test(prompt)) return "day";
+  if (/\b(this week|recent|new)\b/i.test(prompt)) return "week";
+  if (/\b(this month)\b/i.test(prompt)) return "month";
+  return undefined;
 }
 
 export function buildSearchContextMessage(results: WebSearchResult[]): ChatSystemMessage | null {
@@ -63,7 +75,7 @@ export function buildSearchContextMessage(results: WebSearchResult[]): ChatSyste
 export async function searchWebResources(query: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> = {}): Promise<WebSearchResult[]> {
   const baseUrl = process.env.RASSY_ONLINE_SEARCH_URL ?? "https://search.rasies.com";
   const url = new URL("/search", baseUrl);
-  url.searchParams.set("q", normalizeSearchQuery(query));
+  url.searchParams.set("q", searchQueryForPrompt(query));
   url.searchParams.set("format", "json");
   url.searchParams.set("language", "en");
   url.searchParams.set("safesearch", "1");
@@ -104,7 +116,7 @@ export function unsupportedCitationUrls(answer: string, returnedUrls: string[]):
 
 export async function executeWebSearch(input: WebSearchInput): Promise<{ status: "ok" | "empty" | "failed"; results: WebSearchResult[] }> {
   try {
-    const results = await searchWebResources(input.query, input);
+    const results = await searchWebResources(input.query, { ...input, recency: input.recency ?? searchRecencyForPrompt(input.query) });
     return { status: results.length ? "ok" : "empty", results };
   } catch {
     return { status: "failed", results: [] };

@@ -32,6 +32,43 @@ export function getRassyMindEmbeddingsUrl(baseUrl: string): string {
   return `${baseUrl.replace(/\/+$/, "")}/v1/embeddings`;
 }
 
+export function getRassyMindTranscriptionsUrl(baseUrl: string): string {
+  return `${baseUrl.replace(/\/+$/, "")}/v1/audio/transcriptions`;
+}
+
+export function getRassyMindSpeechUrl(baseUrl: string): string {
+  return `${baseUrl.replace(/\/+$/, "")}/v1/audio/speech`;
+}
+
+export function rassymindHeaders(): Record<string, string> {
+  return process.env.RASSYMIND_API_KEY ? { authorization: `Bearer ${process.env.RASSYMIND_API_KEY}` } : {};
+}
+
+export async function transcribeAudio(file: File, language?: string): Promise<{ text: string }> {
+  const baseUrl = process.env.RASSYMIND_BASE_URL ?? "http://host.docker.internal:8844";
+  const form = new FormData();
+  form.append("model", "rassy-stt");
+  form.append("file", file, file.name || "recording.webm");
+  form.append("response_format", "json");
+  if (language) form.append("language", language);
+  const response = await fetch(getRassyMindTranscriptionsUrl(baseUrl), { method: "POST", headers: rassymindHeaders(), body: form, signal: AbortSignal.timeout(120_000) });
+  if (!response.ok) throw getRassyMindRequestError(response.status);
+  const parsed = (await response.json()) as { text?: string };
+  if (!parsed.text?.trim()) throw new Error("RassyMind returned an empty transcription");
+  return { text: parsed.text.trim() };
+}
+
+export async function synthesizeSpeech(input: string, voice = "aiden"): Promise<Response> {
+  const baseUrl = process.env.RASSYMIND_BASE_URL ?? "http://host.docker.internal:8844";
+  const response = await fetch(getRassyMindSpeechUrl(baseUrl), {
+    method: "POST", headers: { "content-type": "application/json", ...rassymindHeaders() },
+    body: JSON.stringify({ model: "rassy-tts", input: input.slice(0, 12000), voice, response_format: "wav" }),
+    signal: AbortSignal.timeout(120_000)
+  });
+  if (!response.ok) throw getRassyMindRequestError(response.status);
+  return response;
+}
+
 export function getRassyMindRequestError(status: number): Error {
   return new Error(`RassyMind request failed with status ${status}`);
 }

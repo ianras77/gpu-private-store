@@ -7,7 +7,9 @@ import {
   getRassyMindChatUrl,
   getRassyMindEmbeddingsUrl,
   getRassyMindRequestError,
-  rerankTexts
+  rerankTexts,
+  getRassyMindSpeechUrl,
+  getRassyMindTranscriptionsUrl
 } from "./rassymind";
 
 afterEach(() => {
@@ -84,6 +86,13 @@ describe("embedTexts", () => {
     const error = await embedTexts(["hello"]).catch((caught: unknown) => caught);
     expect(error).toEqual(new Error("RassyMind request failed with status 503"));
     expect(String(error)).not.toContain("mind-secret");
+  });
+});
+
+describe("audio channel URLs", () => {
+  test("uses the authenticated OpenAI-compatible audio routes", () => {
+    expect(getRassyMindTranscriptionsUrl("http://rassymind.test:9000/")).toBe("http://rassymind.test:9000/v1/audio/transcriptions");
+    expect(getRassyMindSpeechUrl("http://rassymind.test:9000/")).toBe("http://rassymind.test:9000/v1/audio/speech");
   });
 });
 

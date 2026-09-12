@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     let preflightResults: Awaited<ReturnType<typeof searchWebResources>> = [];
     if (searchRequested && latestUserMessage) {
       try {
-        preflightResults = await searchWebResources(latestUserMessage.content, { max_results: 6 });
+        preflightResults = await searchWebResources(latestUserMessage.content, { max_results: 8, recency: /\b(today|tonight|currently|latest|breaking|live)\b/i.test(latestUserMessage.content) ? "day" : undefined });
         const context = buildSearchContextMessage(preflightResults);
         if (context) messages = [context, ...messages];
         const pages = await Promise.all(preflightResults.slice(0, 3).map((result) => readPublicPage(result.url)));

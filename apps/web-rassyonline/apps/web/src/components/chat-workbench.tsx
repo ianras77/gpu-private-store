@@ -59,7 +59,11 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [activity, setActivity] = useState(0.16);
   const [activityKind, setActivityKind] = useState<"idle" | "thinking" | "searching" | "answering">("idle");
   const [activeAgent, setActiveAgent] = useState("rassy");
+  const [recording, setRecording] = useState(false);
+  const [audioBusy, setAudioBusy] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
@@ -183,6 +187,44 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       setDocuments((current) => current.map((item) => (item.id === document.id ? { ...item, active: document.active } : item)));
       setDocumentNotice("Could not update document toggle.");
     }
+  }
+
+  async function toggleRecording() {
+    if (recording) { recorderRef.current?.stop(); return; }
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) { setDocumentNotice("This browser does not support microphone recording."); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (event) => { if (event.data.size) audioChunksRef.current.push(event.data); };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setRecording(false); setAudioBusy(true);
+        try {
+          const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+          const form = new FormData(); form.append("file", blob, "rassy-recording.webm");
+          const response = await fetch("/api/audio/transcriptions", { method: "POST", body: form });
+          const data = await response.json().catch(() => ({})) as { text?: string; error?: string };
+          if (!response.ok || !data.text) throw new Error(data.error ?? "Transcription failed");
+          setInput((current) => current ? `${current} ${data.text}` : data.text!);
+        } catch (error) { setDocumentNotice(error instanceof Error ? error.message : "Transcription failed"); }
+        finally { setAudioBusy(false); }
+      };
+      recorderRef.current = recorder; recorder.start(); setRecording(true);
+    } catch { setDocumentNotice("Microphone permission was not granted."); }
+  }
+
+  async function readAloud(text: string) {
+    if (audioBusy || !text.trim()) return;
+    setAudioBusy(true);
+    try {
+      const response = await fetch("/api/audio/speech", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input: text }) });
+      if (!response.ok) throw new Error("Speech synthesis failed");
+      const audio = new Audio(URL.createObjectURL(await response.blob()));
+      audio.onended = () => URL.revokeObjectURL(audio.src);
+      await audio.play();
+    } catch (error) { setDocumentNotice(error instanceof Error ? error.message : "Speech synthesis failed"); }
+    finally { setAudioBusy(false); }
   }
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
@@ -430,7 +472,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <div className="message-list">
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <div className="message-meta"><div className="message-actions">{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <CopyButton text={message.content} label="Copy" /> : null}</div></div>
+              <div className="message-meta"><div className="message-actions">{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>Listen</button></> : null}</div></div>
               {message.sources?.length ? <details className="search-sources"><summary>Search signal <span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noreferrer"><strong>{sourceIndex + 1}. {source.title}</strong><small>{source.snippet || source.url}</small></a>)}</div></details> : null}
               {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide reasoning trace" : "Show reasoning trace"}<span>RASSYMIND / TRANSPARENT</span></summary><p>{message.reasoning.trim()}</p></details> : null}
               {message.role === "assistant" && !message.content && sending ? <ThinkingState /> : <MarkdownMessage content={message.content || ""} />}
@@ -453,6 +495,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           aria-label="Message Rassy"
           rows={1}
         />
+        <button type="button" onClick={() => void toggleRecording()} disabled={audioBusy} aria-label={recording ? "Stop recording" : "Dictate message"}>{recording ? "Stop mic" : audioBusy ? "Audio…" : "Mic"}</button>
         {sending ? <button type="button" onClick={() => abortRef.current?.abort()}>Stop</button> : null}
         <button type="button" onClick={startNewThread} aria-label="Clear chat">Clear chat</button>
         <button type="submit">Send</button>

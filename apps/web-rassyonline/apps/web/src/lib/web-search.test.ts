@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildSearchContextMessage, executeWebSearch, normalizeSearchQuery, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
+import { buildSearchContextMessage, executeWebSearch, normalizeSearchQuery, searchQueryForPrompt, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -17,6 +17,10 @@ describe("shouldUseWebSearch", () => {
   it("recognizes common freshness-sensitive questions", () => {
     expect(shouldUseWebSearch("what is the weather forecast for tomorrow?")).toBe(true);
     expect(shouldUseWebSearch("what is the latest price of this service?")).toBe(true);
+  });
+
+  it("cleans conversational search prompts", () => {
+    expect(searchQueryForPrompt("Please look up the latest Next.js release notes")).toBe("the latest Next.js release notes");
   });
 });
 
