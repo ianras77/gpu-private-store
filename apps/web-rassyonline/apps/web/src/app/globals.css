@@ -125,7 +125,7 @@ h1 { margin: 0; font-size: clamp(1.8rem, 3.4vw, 3.1rem); letter-spacing: -.055em
 .search-sources a { display: grid; gap: 2px; padding: 8px 6px; color: #273840; text-decoration: none; }
 .search-sources a:hover { background: rgba(125,106,70,.1); }
 .search-sources strong { font-size: .75rem; }
-.search-sources small { overflow: hidden; color: #6e7771; font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
+.search-sources small { display: -webkit-box; overflow: hidden; color: #6e7771; font-size: .72rem; line-height: 1.45; text-overflow: ellipsis; white-space: normal; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
 
 /* FINAL MATERIAL PASS: black glass / wire / punk signal. */
 :root { --black: #020303; --glass: rgba(5,8,9,.82); --wire: rgba(226,237,225,.2); --paper: #e8eee5; --muted: #78817d; --aqua: #6dffd1; --blue: #6e9cff; --sun: #f0e34d; --pink: #ff4fba; --red: #ff483c; }

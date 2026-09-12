@@ -122,6 +122,9 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   }
 
   function startNewThread() {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setSending(false);
     setThreadId(null);
     window.localStorage.removeItem("rassy-online-thread-id");
     window.localStorage.removeItem("rassy-online-transcript");
@@ -238,7 +241,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         body: JSON.stringify({
           agent: "rassy",
           mode: requestMode,
-          threadId: signedIn ? mastraThreadId : threadId,
+          threadId: mastraThreadId,
           activeDocumentIds: activeDocuments.map((document) => document.id),
           webSearch: requestWebSearch,
           temperature,
@@ -450,13 +453,9 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           aria-label="Message Rassy"
           rows={1}
         />
-        {sending ? (
-          <button type="button" onClick={() => abortRef.current?.abort()}>
-            Stop
-          </button>
-        ) : (
-          <button type="submit">Send</button>
-        )}
+        {sending ? <button type="button" onClick={() => abortRef.current?.abort()}>Stop</button> : null}
+        <button type="button" onClick={startNewThread} aria-label="Clear chat">Clear chat</button>
+        <button type="submit">Send</button>
       </form>
 
       </section>
