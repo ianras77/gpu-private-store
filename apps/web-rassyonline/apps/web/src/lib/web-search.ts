@@ -13,6 +13,18 @@ export type WebSearchResult = {
 };
 
 const SEARCH_RANGES = new Set(["day", "week", "month", "year"]);
+const SEARCH_STOP_WORDS = new Set(["the", "and", "for", "with", "from", "what", "when", "where", "which", "latest", "current", "please", "about"]);
+
+function searchTerms(query: string): string[] {
+  return [...new Set(query.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ").split(/\s+/).filter((term) => term.length >= 3 && !SEARCH_STOP_WORDS.has(term)))].slice(0, 12);
+}
+
+function relevanceScore(result: WebSearchResult, terms: string[]): number {
+  const title = result.title.toLowerCase();
+  const snippet = result.snippet.toLowerCase();
+  const url = result.url.toLowerCase();
+  return terms.reduce((score, term) => score + (title.includes(term) ? 5 : 0) + (snippet.includes(term) ? 2 : 0) + (url.includes(term) ? 1 : 0), 0);
+}
 
 type SearchResponse = {
   results?: Array<{
@@ -102,7 +114,7 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
   if (body.byteLength > 2 * 1024 * 1024) throw new Error("search response too large");
   const parsed = JSON.parse(new TextDecoder().decode(body)) as SearchResponse;
   const seen = new Set<string>();
-  return (Array.isArray(parsed.results) ? parsed.results : [])
+  const normalized = (Array.isArray(parsed.results) ? parsed.results : [])
     .map((result) => ({
       title: result.title?.trim() ?? "",
       url: result.url?.trim() ?? "",
@@ -119,7 +131,10 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
         return true;
       } catch { return false; }
     })
-    .slice(0, Math.min(options.max_results ?? 5, 8));
+    .sort((left, right) => relevanceScore(right, searchTerms(query)) - relevanceScore(left, searchTerms(query)));
+  const terms = searchTerms(query);
+  const relevant = terms.length ? normalized.filter((result) => relevanceScore(result, terms) > 0) : normalized;
+  return (relevant.length ? relevant : normalized).slice(0, Math.min(options.max_results ?? 5, 8));
 }
 
 export type WebSearchInput = { query: string; recency?: string; domains?: string[]; max_results?: number };

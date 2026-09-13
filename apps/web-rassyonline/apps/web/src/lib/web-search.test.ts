@@ -82,6 +82,15 @@ describe("Mastra web-search execution contract", () => {
     expect(result[0].snippet).toHaveLength(4000);
   });
 
+  it("ranks results by meaningful query-term overlap instead of backend order", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
+      { title: "Unrelated homepage", url: "https://noise.example", content: "general news" },
+      { title: "Next.js cache documentation", url: "https://nextjs.org/docs/cache", content: "Next.js 15 cache behavior and release notes" }
+    ] }), { status: 200 })));
+    const result = await searchWebResources("latest Next.js 15 cache docs", { max_results: 1 });
+    expect(result[0]?.title).toBe("Next.js cache documentation");
+  });
+
   it("distinguishes empty and failed searches", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ results: [] }), { status: 200 })).mockRejectedValueOnce(new Error("offline")));
     await expect(executeWebSearch({ query: "nothing" })).resolves.toEqual({ status: "empty", results: [] });
