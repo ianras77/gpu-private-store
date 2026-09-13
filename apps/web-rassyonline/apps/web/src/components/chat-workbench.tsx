@@ -6,7 +6,7 @@ import { parseMarkdownBlocks } from "@/lib/markdown";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
 
-type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string };
+type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string };
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -700,6 +700,7 @@ function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
   if (artifact.kind === "dot-matrix" && artifact.svg) return <figure className="visual-artifact dot-matrix-artifact"><div dangerouslySetInnerHTML={{ __html: artifact.svg }} /><figcaption>{artifact.title ?? "Dot-matrix artwork"} · {artifact.width ?? 500} × {artifact.height ?? 500}px</figcaption></figure>;
   if (artifact.kind === "ascii-art" && artifact.art) return <figure className="visual-artifact ascii-artifact"><pre>{artifact.art}</pre><figcaption>{artifact.title ?? "ASCII artwork"}</figcaption></figure>;
   if (artifact.kind === "chart" && artifact.labels && artifact.values) return <figure className="visual-artifact chart-artifact"><div className="chart-bars">{artifact.labels.map((label, index) => <div className="chart-bar" key={`${label}-${index}`}><span style={{ "--bar": `${Math.max(4, Math.min(100, Math.abs(artifact.values?.[index] ?? 0) / Math.max(...(artifact.values ?? [1])) * 100))}%` } as React.CSSProperties} /><b>{label}</b><small>{artifact.values?.[index]}</small></div>)}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
+  if (artifact.kind === "calculator") return <section className={`visual-artifact calculator-artifact ${artifact.status === "failed" ? "failed" : ""}`}><div className="calculator-expression"><code>{artifact.expression}</code><span>=</span><strong>{artifact.status === "ok" ? artifact.result : "Unable to calculate"}</strong></div>{artifact.error ? <p>{artifact.error}</p> : null}<small>Calculator · verified result</small></section>;
   return null;
 }
 
