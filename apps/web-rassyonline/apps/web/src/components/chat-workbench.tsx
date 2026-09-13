@@ -6,7 +6,7 @@ import { parseMarkdownBlocks } from "@/lib/markdown";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
 
-type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string };
+type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -700,8 +700,20 @@ function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
   if (artifact.kind === "dot-matrix" && artifact.svg) return <figure className="visual-artifact dot-matrix-artifact"><div dangerouslySetInnerHTML={{ __html: artifact.svg }} /><figcaption>{artifact.title ?? "Dot-matrix artwork"} · {artifact.width ?? 500} × {artifact.height ?? 500}px</figcaption></figure>;
   if (artifact.kind === "ascii-art" && artifact.art) return <figure className="visual-artifact ascii-artifact"><pre>{artifact.art}</pre><figcaption>{artifact.title ?? "ASCII artwork"}</figcaption></figure>;
   if (artifact.kind === "chart" && artifact.labels && artifact.values) return <figure className="visual-artifact chart-artifact"><div className="chart-bars">{artifact.labels.map((label, index) => <div className="chart-bar" key={`${label}-${index}`}><span style={{ "--bar": `${Math.max(4, Math.min(100, Math.abs(artifact.values?.[index] ?? 0) / Math.max(...(artifact.values ?? [1])) * 100))}%` } as React.CSSProperties} /><b>{label}</b><small>{artifact.values?.[index]}</small></div>)}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
-  if (artifact.kind === "calculator") return <section className={`visual-artifact calculator-artifact ${artifact.status === "failed" ? "failed" : ""}`}><div className="calculator-expression"><code>{artifact.expression}</code><span>=</span><strong>{artifact.status === "ok" ? artifact.result : "Unable to calculate"}</strong></div>{artifact.error ? <p>{artifact.error}</p> : null}<small>Calculator · verified result</small></section>;
+  if (artifact.kind === "calculator") return <section className={`visual-artifact calculator-artifact ${artifact.status === "failed" ? "failed" : ""}`}><header><span>RASSY GRAPHICS CALCULATOR</span><b>RUN / 01</b></header><div className="calculator-expression"><code>{artifact.expression}</code><span>=</span><strong>{artifact.status === "ok" ? artifact.result : "Unable to calculate"}</strong></div>{artifact.graph ? <CalculatorGraph graph={artifact.graph} /> : null}{artifact.error ? <p>{artifact.error}</p> : null}<small>Calculator · verified result{artifact.graph ? " · graph sampled from expression" : ""}</small></section>;
   return null;
+}
+
+function CalculatorGraph({ graph }: { graph: NonNullable<VisualArtifact["graph"]> }) {
+  const valid = graph.points.filter((point) => point.y !== null);
+  if (!valid.length) return null;
+  const minY = Math.min(...valid.map((point) => point.y as number), -1);
+  const maxY = Math.max(...valid.map((point) => point.y as number), 1);
+  const rangeY = maxY - minY || 1;
+  const points = valid.map((point) => `${((point.x - graph.xMin) / (graph.xMax - graph.xMin) * 100).toFixed(2)},${(100 - ((point.y as number - minY) / rangeY * 100)).toFixed(2)}`).join(" ");
+  const zeroX = graph.xMin <= 0 && graph.xMax >= 0 ? ((-graph.xMin) / (graph.xMax - graph.xMin) * 100) : null;
+  const zeroY = minY <= 0 && maxY >= 0 ? (100 - ((0 - minY) / rangeY * 100)) : null;
+  return <div className="calculator-graph"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Graph of calculator expression"><path className="graph-grid" d="M0 25H100M0 50H100M0 75H100M25 0V100M50 0V100M75 0V100" />{zeroX !== null ? <path className="graph-axis" d={`M${zeroX} 0V100`} /> : null}{zeroY !== null ? <path className="graph-axis" d={`M0 ${zeroY}H100`} /> : null}<polyline className="graph-line" points={points} /></svg><div className="graph-labels"><span>{graph.xMin}</span><span>0</span><span>{graph.xMax}</span></div></div>;
 }
 
 function renderInline(text: string) {

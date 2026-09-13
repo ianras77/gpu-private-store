@@ -38,10 +38,22 @@ export function calculate(expression: string): number {
   return result;
 }
 
+export function sampleGraph(expression: string, xMin = -10, xMax = 10, count = 161): Array<{ x: number; y: number | null }> {
+  const points: Array<{ x: number; y: number | null }> = [];
+  for (let index = 0; index < count; index += 1) {
+    const x = xMin + (xMax - xMin) * index / (count - 1);
+    try {
+      const y = calculate(expression.replace(/\bx\b/gi, `(${x})`));
+      points.push({ x: Number(x.toFixed(4)), y: Number.isFinite(y) ? Number(y.toFixed(4)) : null });
+    } catch { points.push({ x: Number(x.toFixed(4)), y: null }); }
+  }
+  return points;
+}
+
 export const calculatorTool = createTool({
   id: "calculator",
   description: "Evaluate safe numeric expressions. Supports +, -, *, /, %, ^, parentheses, constants pi/e, and functions sqrt, abs, round, floor, ceil, sin, cos, tan, asin, acos, atan, ln, log10, and exp. Use for every non-trivial calculation; never invent a result.",
   inputSchema: z.object({ expression: z.string().trim().min(1).max(200) }),
-  outputSchema: z.object({ status: z.enum(["ok", "failed"]), expression: z.string(), result: z.number().optional(), error: z.string().optional() }),
-  execute: async ({ expression }) => { try { return { status: "ok" as const, expression, result: calculate(expression) }; } catch (error) { return { status: "failed" as const, expression, error: error instanceof Error ? error.message : "calculation failed" }; } }
+  outputSchema: z.object({ status: z.enum(["ok", "failed"]), expression: z.string(), result: z.number().optional(), error: z.string().optional(), graph: z.object({ xMin: z.number(), xMax: z.number(), points: z.array(z.object({ x: z.number(), y: z.number().nullable() })) }).optional() }),
+  execute: async ({ expression }) => { try { const result = calculate(expression); return { status: "ok" as const, expression, result, graph: /\bx\b/i.test(expression) ? { xMin: -10, xMax: 10, points: sampleGraph(expression) } : undefined }; } catch (error) { return { status: "failed" as const, expression, error: error instanceof Error ? error.message : "calculation failed" }; } }
 });
