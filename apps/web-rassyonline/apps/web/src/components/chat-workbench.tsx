@@ -38,7 +38,7 @@ const OPENING_LINES = [
 ];
 
 export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn: boolean }) {
-  const [mode, setMode] = useState(modes.find((item) => item.id === "spark")?.id ?? modes[0]?.id ?? "general");
+  const [mode, setMode] = useState(modes.find((item) => item.id === "general")?.id ?? modes[0]?.id ?? "general");
   const [webSearch, setWebSearch] = useState<WebSearchMode>("auto");
   const [threadId, setThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([

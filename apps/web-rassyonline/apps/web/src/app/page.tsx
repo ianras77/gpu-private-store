@@ -8,8 +8,6 @@ export default async function Home() {
 
   return (
     <main className="app-shell">
-      <div className="ambient-field" aria-hidden="true" />
-
       <header className="topbar">
         <Link className="brand-lockup" href="/" aria-label="Rassy Online home">
           <span className="brand-mark" aria-hidden="true">
@@ -42,19 +40,6 @@ export default async function Home() {
           )}
         </div>
       </header>
-
-      <section className="home-intro" aria-labelledby="home-title">
-        <div>
-          <p className="system-label"><span className="live-dot" /> RassyMind / live appliance</p>
-          <h1 id="home-title">A useful place to think, make, and find the thread.</h1>
-          <p>Start in Auto. Rassy routes ordinary chat, research, code, documents, and voice to the capability that is actually available.</p>
-        </div>
-        <div className="home-facts" aria-label="Current service facts">
-          <span><strong>Qwen3.8</strong> deep chat + tools</span>
-          <span><strong>Rendered tokens</strong> counted before admission</span>
-          <span><strong>Private by default</strong> no prompt content in telemetry</span>
-        </div>
-      </section>
 
       <section className="workspace-grid">
         <ChatWorkbench modes={CHAT_MODES} signedIn={Boolean(user)} />

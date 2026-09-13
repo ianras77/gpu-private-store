@@ -366,6 +366,82 @@ html { -webkit-text-size-adjust: 100%; }
   .composer-preview > button { width: auto; min-width: 58px; }
 }
 
+/* Final cascade: keep the composer compact and remove explanatory chrome. */
+.composer-preview::after { content: none; }
+.composer-preview textarea { min-height: 52px; }
+.memory-source-tray { background: transparent; }
+.memory-head .system-label { color: var(--muted); }
+.chat-workbench { box-shadow: var(--shadow); }
+.message-list { scrollbar-color: rgba(157,232,206,.45) #0d1010; }
+
+/* RASSY ONLINE / QUIET WORKBENCH
+   One calm visual language. The interface should recede until it is needed. */
+:root {
+  --ink: #0b0d0d;
+  --ink-soft: #111515;
+  --paper: #edf1eb;
+  --muted: #87918b;
+  --aqua: #9de8ce;
+  --line: rgba(237, 241, 235, .11);
+  --wire: rgba(237, 241, 235, .11);
+  --shadow: 0 18px 60px rgba(0, 0, 0, .28);
+}
+html, body { background: var(--ink); }
+.app-shell { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100dvh; min-height: 0; padding: 14px 20px 20px; background: var(--ink); }
+.topbar, .workspace-grid { width: min(1120px, 100%); }
+.topbar { margin-bottom: 12px; }
+.brand-mark { width: 32px; height: 32px; }
+.brand-mark svg { width: 32px; height: 32px; }
+.brand-type strong { font-size: .72rem; letter-spacing: .16em; }
+.top-actions { gap: 6px; }
+.account-chip, .stage-chip, .ghost-button { min-height: 30px; padding-inline: 9px; border-color: var(--line); background: transparent; font-size: .68rem; }
+.stage-chip { color: var(--paper); }
+.workspace-grid { min-height: 0; }
+.rassy-chat-layout { gap: 12px; }
+.chat-history { border-color: var(--line); border-radius: 12px; background: #0d1010; }
+.history-heading { color: var(--muted); border-color: var(--line); }
+.history-heading button { border-color: var(--line); color: var(--aqua); }
+.history-item:hover, .history-item.active { border-color: var(--line); border-left-color: var(--aqua); background: rgba(157,232,206,.05); }
+.chat-workbench { border: 1px solid var(--line); border-radius: 14px; background: #0d1010; box-shadow: var(--shadow); }
+.chat-workbench::before, .chat-workbench::after { display: none; }
+.routing-ribbon { grid-template-columns: minmax(180px, 1fr) minmax(190px, .8fr) minmax(180px, 1fr); border-color: var(--line); }
+.lane-switcher, .ribbon-tools, .memory-source-tray { padding: 10px 12px; border-color: var(--line); }
+.preference-select select, .segmented-control, .tuning-toggle, .upload-button, .document-pill { border-color: var(--line); background: #111515; }
+.preference-select select { min-height: 32px; border-radius: 8px; color: var(--paper); }
+.segmented-control { background: #111515; }
+.segmented-control button.active { background: var(--paper); color: var(--ink); }
+.theme-options { display: none; }
+.tuning-toggle { color: var(--muted); }
+.memory-source-tray { background: transparent; }
+.memory-head .system-label { color: var(--muted); }
+.upload-button { color: var(--aqua); }
+.document-pill.active { border-color: rgba(157,232,206,.55); background: rgba(157,232,206,.07); }
+.desk-signal { padding: 7px 18px; border-color: var(--line); background: transparent; }
+.desk-signal-pulse { box-shadow: none; }
+.message-list { padding: clamp(28px, 6vw, 72px) clamp(18px, 12vw, 170px); background: #0d1010; }
+.chat-message { width: min(680px, 100%); margin-bottom: 32px; }
+.chat-message.assistant, .chat-message.user { border-radius: 0; background: transparent; box-shadow: none; font-family: inherit; }
+.chat-message.assistant { padding: 0; color: var(--paper); }
+.chat-message.user { max-width: 600px; padding: 12px 15px; border: 0; border-left: 2px solid var(--aqua); background: rgba(157,232,206,.055); }
+.chat-message.assistant::before, .chat-message.assistant::after { display: none; }
+.chat-message.assistant .markdown-body, .markdown-body { color: var(--paper); font-size: .98rem; line-height: 1.72; }
+.message-meta { margin-bottom: 5px; }
+.message-meta > span::before { display: none; }
+.message-actions { opacity: .72; }
+.copy-button { color: var(--muted); }
+.reasoning-panel, .search-sources { border-color: var(--line); background: rgba(157,232,206,.025); }
+.composer-preview { padding: 10px 12px 12px; border-color: var(--line); background: #0d1010; }
+.composer-preview textarea { min-height: 46px; padding: 12px 13px; border-color: var(--line); border-radius: 10px; background: #111515; }
+.composer-preview > button { min-height: 42px; border-radius: 9px; }
+.composer-preview > button[type="submit"] { background: var(--aqua); color: var(--ink); }
+.composer-preview::after { color: #64706a; }
+
+@media (max-width: 800px) {
+  .app-shell { padding: 10px; }
+  .chat-workbench { border-radius: 12px; }
+  .message-list { padding: 30px 16px; }
+}
+
 /* Stable composer geometry; this wins over the historical theme layers. */
 .composer-preview { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
 .composer-preview textarea { grid-column: 1 / -1; min-height: 72px; max-height: 240px; resize: none; overflow-y: auto; }
@@ -417,3 +493,11 @@ html { -webkit-text-size-adjust: 100%; }
   .transcript-shell, .message-list { height: auto !important; min-height: 0; overflow: visible; }
   .composer-preview { position: sticky; bottom: 0; max-width: 100%; }
 }
+
+/* Final cascade: keep the composer compact and remove explanatory chrome. */
+.composer-preview::after { content: none; }
+.composer-preview textarea { min-height: 52px; }
+.memory-source-tray { background: transparent; }
+.memory-head .system-label { color: var(--muted); }
+.chat-workbench { box-shadow: var(--shadow); }
+.message-list { scrollbar-color: rgba(157,232,206,.45) #0d1010; }
