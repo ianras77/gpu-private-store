@@ -374,6 +374,20 @@ html { -webkit-text-size-adjust: 100%; }
 .chat-workbench { box-shadow: var(--shadow); }
 .message-list { scrollbar-color: rgba(157,232,206,.45) #0d1010; }
 
+/* Content presentation: each information shape gets its own quiet surface. */
+.markdown-body hr { margin: 24px 0; border: 0; border-top: 1px solid var(--line); }
+.markdown-body del { color: var(--muted); }
+.markdown-figure { margin: 18px 0; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #111515; }
+.markdown-figure img { display: block; width: 100%; max-height: 560px; object-fit: contain; background: #080a0a; }
+.markdown-figure figcaption { padding: 8px 11px; color: var(--muted); font-size: .72rem; }
+.markdown-callout { display: grid; grid-template-columns: auto 1fr; gap: 10px; margin: 16px 0; padding: 12px 14px; border: 1px solid var(--line); border-left: 3px solid var(--aqua); border-radius: 8px; background: rgba(157,232,206,.045); font-size: .9rem; }
+.markdown-callout strong { color: var(--aqua); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; }
+.markdown-callout.warning { border-left-color: #e7c77e; background: rgba(231,199,126,.06); }.markdown-callout.warning strong { color: #e7c77e; }
+.markdown-callout.danger { border-left-color: #e99a8e; background: rgba(233,154,142,.06); }.markdown-callout.danger strong { color: #e99a8e; }
+.markdown-callout.tip { border-left-color: #b9a6f5; background: rgba(185,166,245,.06); }.markdown-callout.tip strong { color: #b9a6f5; }
+.markdown-table-wrap { border: 1px solid var(--line); border-radius: 9px; }.markdown-body th { position: sticky; top: 0; background: #161b19; }.markdown-body td, .markdown-body th { min-width: 110px; }
+.code-block { border-radius: 9px; }.code-toolbar { align-items: center; }.code-block pre { tab-size: 2; }
+
 /* RASSY ONLINE / QUIET WORKBENCH
    One calm visual language. The interface should recede until it is needed. */
 :root {

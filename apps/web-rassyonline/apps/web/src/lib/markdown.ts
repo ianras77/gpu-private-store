@@ -3,6 +3,9 @@ export type MarkdownBlock =
   | { type: "heading"; depth: 1 | 2 | 3; text: string }
   | { type: "list"; ordered: boolean; items: string[] }
   | { type: "quote"; text: string }
+  | { type: "rule" }
+  | { type: "image"; alt: string; url: string }
+  | { type: "callout"; tone: "note" | "tip" | "warning" | "danger"; text: string }
   | { type: "code"; language: string | null; text: string }
   | { type: "table"; headers: string[]; rows: string[][] };
 
@@ -20,6 +23,26 @@ export function parseMarkdownBlocks(markdown: string): MarkdownBlock[] {
       continue;
     }
 
+    if (/^(?:---|___|\*\s*\*\s*\*)$/.test(trimmed)) {
+      blocks.push({ type: "rule" });
+      index += 1;
+      continue;
+    }
+
+    const image = trimmed.match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/);
+    if (image) {
+      blocks.push({ type: "image", alt: image[1], url: image[2] });
+      index += 1;
+      continue;
+    }
+
+    const callout = trimmed.match(/^\[!(NOTE|TIP|WARNING|DANGER)\]\s*(.*)$/i);
+    if (callout) {
+      blocks.push({ type: "callout", tone: callout[1].toLowerCase() as "note" | "tip" | "warning" | "danger", text: callout[2] });
+      index += 1;
+      continue;
+    }
+
     if (isTableHeader(lines, index)) {
       const headers = parseTableRow(lines[index]);
       index += 2;
@@ -32,16 +55,16 @@ export function parseMarkdownBlocks(markdown: string): MarkdownBlock[] {
       continue;
     }
 
-    const fence = trimmed.match(/^```([a-zA-Z0-9_-]+)?\s*$/);
+    const fence = trimmed.match(/^(```|~~~)([a-zA-Z0-9_+-]+)?\s*$/);
     if (fence) {
       const codeLines: string[] = [];
       index += 1;
-      while (index < lines.length && !lines[index].trim().startsWith("```")) {
+      while (index < lines.length && !lines[index].trim().startsWith(fence[1])) {
         codeLines.push(lines[index]);
         index += 1;
       }
       if (index < lines.length) index += 1;
-      blocks.push({ type: "code", language: fence[1] ?? null, text: codeLines.join("\n") });
+      blocks.push({ type: "code", language: fence[2] ?? null, text: codeLines.join("\n") });
       continue;
     }
 
@@ -81,7 +104,10 @@ export function parseMarkdownBlocks(markdown: string): MarkdownBlock[] {
       const current = lines[index].trim();
       if (
         !current ||
-        /^```/.test(current) ||
+        /^```|^~~~/.test(current) ||
+        /^(?:---|___|\*\s*\*\s*\*)$/.test(current) ||
+        /^!\[[^\]]*\]\(https?:\/\/[^)\s]+\)$/.test(current) ||
+        /^\[!(?:NOTE|TIP|WARNING|DANGER)\]/i.test(current) ||
         /^#{1,3}\s+/.test(current) ||
         /^>\s?/.test(current) ||
         /^((?:[-*+])|\d+[.)])\s+/.test(current)

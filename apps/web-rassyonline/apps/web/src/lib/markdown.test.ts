@@ -46,4 +46,12 @@ describe("parseMarkdownBlocks", () => {
       }
     ]);
   });
+  it("parses presentation blocks and alternate code fences", () => {
+    expect(parseMarkdownBlocks(["[!WARNING] Check the boundary.", "", "---", "", "![A useful view](https://example.com/view.png)", "", "~~~json", "{\"ok\":true}", "~~~"].join("\n"))).toEqual([
+      { type: "callout", tone: "warning", text: "Check the boundary." },
+      { type: "rule" },
+      { type: "image", alt: "A useful view", url: "https://example.com/view.png" },
+      { type: "code", language: "json", text: "{\"ok\":true}" }
+    ]);
+  });
 });

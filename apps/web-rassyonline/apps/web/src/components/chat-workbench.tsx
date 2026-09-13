@@ -627,6 +627,9 @@ function MarkdownMessage({ content }: { content: string }) {
         if (block.type === "quote") {
           return <blockquote key={index}>{renderInline(block.text)}</blockquote>;
         }
+        if (block.type === "rule") return <hr key={index} />;
+        if (block.type === "image") return <figure className="markdown-figure" key={index}><img src={block.url} alt={block.alt || ""} loading="lazy" /><figcaption>{block.alt}</figcaption></figure>;
+        if (block.type === "callout") return <aside className={`markdown-callout ${block.tone}`} key={index}><strong>{block.tone}</strong><div>{renderInline(block.text)}</div></aside>;
         if (block.type === "table") {
           return (
             <div className="markdown-table-wrap" key={index}>
@@ -687,7 +690,7 @@ function CodeBlock({ language, text }: { language: string | null; text: string }
 
 function renderInline(text: string) {
   const nodes: ReactNode[] = [];
-  const pattern = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
+  const pattern = /(\*\*[^*]+\*\*|~~[^~]+~~|`[^`]+`|\[[^\]]+\]\((?:https?:\/\/|mailto:)[^)]+\))/g;
   let lastIndex = 0;
 
   for (const match of text.matchAll(pattern)) {
@@ -695,12 +698,14 @@ function renderInline(text: string) {
     const token = match[0];
     if (token.startsWith("**")) {
       nodes.push(<strong key={`${token}-${match.index}`}>{token.slice(2, -2)}</strong>);
+    } else if (token.startsWith("~~")) {
+      nodes.push(<del key={`${token}-${match.index}`}>{token.slice(2, -2)}</del>);
     } else if (token.startsWith("`")) {
       nodes.push(<code key={`${token}-${match.index}`}>{token.slice(1, -1)}</code>);
     } else {
       const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
       nodes.push(
-        <a key={`${token}-${match.index}`} href={link?.[2] ?? "#"} target="_blank" rel="noreferrer">
+        <a key={`${token}-${match.index}`} href={link?.[2] ?? "#"} target="_blank" rel="noreferrer noopener">
           {link?.[1] ?? token}
         </a>
       );
