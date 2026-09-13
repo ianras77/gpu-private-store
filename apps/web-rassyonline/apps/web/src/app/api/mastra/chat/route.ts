@@ -156,6 +156,9 @@ export async function POST(request: NextRequest) {
                 if (!announcedToolCalls.has(activityId)) { announcedToolCalls.add(activityId); send("activity", { status: "searching", tool: "web-search", toolCallId }); }
               }
             } else if (part.type === "tool-result") {
+              const visualOutput = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { kind?: string; title?: string; width?: number; height?: number; svg?: string; art?: string; type?: string; labels?: string[]; values?: number[]; series?: string } | undefined;
+              if (visualOutput?.kind === "dot-matrix" && visualOutput.svg) send("artifact", { kind: "dot-matrix", status: "ready", artifact: visualOutput });
+              if (visualOutput?.kind === "ascii-art" || visualOutput?.kind === "chart") send("artifact", { kind: visualOutput.kind, status: "ready", artifact: visualOutput });
               if (isResearchTool(toolName)) {
                 const output = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { status?: string; results?: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }>; searches?: Array<{ status: string; results: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }> }> } | undefined;
                 const results = output?.searches?.flatMap((search) => search.results) ?? output?.results ?? [];

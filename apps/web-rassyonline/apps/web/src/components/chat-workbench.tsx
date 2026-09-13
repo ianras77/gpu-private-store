@@ -6,6 +6,8 @@ import { parseMarkdownBlocks } from "@/lib/markdown";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
 
+type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string };
+
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
@@ -15,6 +17,7 @@ type ChatMessage = {
   sources?: Array<{ title: string; url: string; snippet: string }>;
   citationStatus?: "verified" | "source-linked" | "unsupported" | "not-applicable";
   status?: "streaming" | "complete" | "interrupted" | "failed";
+  artifacts?: VisualArtifact[];
 };
 
 type UserDocument = {
@@ -381,10 +384,14 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           const event = record.split("\n").find((line) => line.startsWith("event: "))?.slice(7);
           if (!dataLine) continue;
           try {
-            const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; citationStatus?: ChatMessage["citationStatus"] };
+            const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; citationStatus?: ChatMessage["citationStatus"]; artifact?: VisualArtifact; kind?: string };
             if (event === "activity" && data.tool === "web-search") { searched = true; setActivityKind("searching"); }
             if (event === "search") { searched = true; searchStatus = data.status ?? "empty"; sources = data.results ?? []; setActivityKind("thinking"); }
             if (event === "artifact" && data.results?.length) sources = data.results;
+            if (event === "artifact" && data.artifact?.kind) {
+              const artifact = data.artifact;
+              setMessages((current) => current.map((message, messageIndex) => messageIndex === current.length - 1 ? { ...message, artifacts: [...(message.artifacts ?? []), artifact] } : message));
+            }
             if (event === "complete") { citationStatus = data.citationStatus; }
             if (event === "citation-warning") { citationStatus = "unsupported"; }
             if (event === "text" && data.delta) streamText += data.delta;
@@ -417,7 +424,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         setMessages((current) => {
           const copy = [...current];
           const last = copy[copy.length - 1];
-          copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, searchStatus, sources, citationStatus, status: "streaming" };
+              copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, searchStatus, sources, citationStatus, status: "streaming" };
           return copy;
         });
         setActivity((value) => Math.min(1, value * 0.72 + Math.min(.3, chunk.length / 180)));
@@ -549,6 +556,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
               <div className="message-meta"><div className="message-actions">{message.status === "interrupted" ? <span className="search-warning">Stopped</span> : message.status === "failed" ? <span className="search-warning">Failed</span> : null}{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>▶ Listen</button></> : null}</div></div>
               {message.sources?.length ? <details className="search-sources"><summary>Search signal <span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noreferrer"><strong>{sourceIndex + 1}. {source.title}</strong><small>{source.snippet || source.url}</small></a>)}</div></details> : null}
               {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide reasoning trace" : "Show reasoning trace"}<span>RASSYMIND / TRANSPARENT</span></summary><p>{message.reasoning.trim()}</p></details> : null}
+              {message.artifacts?.map((artifact, artifactIndex) => <ArtifactView artifact={artifact} key={`${artifact.kind}-${artifactIndex}`} />)}
               {message.role === "assistant" && !message.content && sending ? <ThinkingState /> : <MarkdownMessage content={message.content || ""} />}
             </article>
           ))}
@@ -686,6 +694,13 @@ function CopyButton({ text, label }: { text: string; label: string }) {
 
 function CodeBlock({ language, text }: { language: string | null; text: string }) {
   return <div className="code-block"><div className="code-toolbar"><span>{language ?? "code"}</span><CopyButton text={text} label="Copy code" /></div><pre><code>{text}</code></pre></div>;
+}
+
+function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
+  if (artifact.kind === "dot-matrix" && artifact.svg) return <figure className="visual-artifact dot-matrix-artifact"><div dangerouslySetInnerHTML={{ __html: artifact.svg }} /><figcaption>{artifact.title ?? "Dot-matrix artwork"} · {artifact.width ?? 500} × {artifact.height ?? 500}px</figcaption></figure>;
+  if (artifact.kind === "ascii-art" && artifact.art) return <figure className="visual-artifact ascii-artifact"><pre>{artifact.art}</pre><figcaption>{artifact.title ?? "ASCII artwork"}</figcaption></figure>;
+  if (artifact.kind === "chart" && artifact.labels && artifact.values) return <figure className="visual-artifact chart-artifact"><div className="chart-bars">{artifact.labels.map((label, index) => <div className="chart-bar" key={`${label}-${index}`}><span style={{ "--bar": `${Math.max(4, Math.min(100, Math.abs(artifact.values?.[index] ?? 0) / Math.max(...(artifact.values ?? [1])) * 100))}%` } as React.CSSProperties} /><b>{label}</b><small>{artifact.values?.[index]}</small></div>)}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
+  return null;
 }
 
 function renderInline(text: string) {

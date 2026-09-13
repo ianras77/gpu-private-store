@@ -387,6 +387,11 @@ html { -webkit-text-size-adjust: 100%; }
 .markdown-callout.tip { border-left-color: #b9a6f5; background: rgba(185,166,245,.06); }.markdown-callout.tip strong { color: #b9a6f5; }
 .markdown-table-wrap { border: 1px solid var(--line); border-radius: 9px; }.markdown-body th { position: sticky; top: 0; background: #161b19; }.markdown-body td, .markdown-body th { min-width: 110px; }
 .code-block { border-radius: 9px; }.code-toolbar { align-items: center; }.code-block pre { tab-size: 2; }
+.visual-artifact { margin: 18px 0; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #111515; }
+.visual-artifact figcaption { padding: 9px 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: .7rem; }
+.dot-matrix-artifact { width: min(500px, 100%); background: #fff; }.dot-matrix-artifact > div { aspect-ratio: 1; padding: 12px; }.dot-matrix-artifact svg { display: block; width: 100%; height: 100%; }
+.ascii-artifact { background: #080a0a; }.ascii-artifact pre { overflow-x: auto; margin: 0; padding: 18px; color: var(--paper); font: .78rem/1.35 "IBM Plex Mono", ui-monospace, monospace; white-space: pre; }
+.chart-artifact { padding-top: 18px; }.chart-bars { display: flex; min-height: 170px; gap: 10px; align-items: end; padding: 0 18px; border-bottom: 1px solid var(--line); }.chart-bar { display: grid; flex: 1; min-width: 24px; gap: 5px; align-items: end; text-align: center; }.chart-bar span { display: block; height: var(--bar); min-height: 4px; border-radius: 4px 4px 0 0; background: var(--aqua); }.chart-bar b, .chart-bar small { overflow: hidden; color: var(--muted); font-size: .62rem; text-overflow: ellipsis; white-space: nowrap; }.chart-bar small { color: var(--paper); }
 
 /* RASSY ONLINE / QUIET WORKBENCH
    One calm visual language. The interface should recede until it is needed. */
