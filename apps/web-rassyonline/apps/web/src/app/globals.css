@@ -365,6 +365,13 @@ html { -webkit-text-size-adjust: 100%; }
 .composer-preview > button[type="button"] { background: transparent; color: var(--muted); box-shadow: none; }
 .composer-preview > button[aria-label="Dictate message"] { border-color: rgba(141,255,224,.5); color: var(--aqua); }
 .composer-preview > button[aria-label="Dictate message"].recording { border-color: #ff927d; background: rgba(255,146,125,.12); color: #ffb09e; box-shadow: 0 0 0 3px rgba(255,146,125,.1); }
+.memory-source-tray { padding: 12px 14px; background: rgba(141,255,224,.035); }
+.memory-head { min-height: 30px; }
+.memory-head .system-label { color: var(--aqua); font-size: .68rem; letter-spacing: .08em; }
+.memory-head strong { color: var(--paper); font-size: .68rem; }
+.document-notice { line-height: 1.45; }
+.session-document { cursor: default; }
+.composer-preview::after { grid-column: 1 / -1; content: "Speak to dictate · ▶ Listen reads answers aloud · Upload files above"; color: var(--muted); font: .58rem "Courier New", monospace; }
 .composer-preview > button[type="submit"] { border-color: var(--aqua); background: var(--aqua); color: #03100d; }
 .composer-preview > button:not(:disabled):hover { border-color: var(--aqua); color: var(--paper); }
 .composer-preview > button[type="submit"]:hover { color: #03100d; filter: brightness(1.08); }

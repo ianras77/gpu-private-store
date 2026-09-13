@@ -12,8 +12,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   if (!parsed.success) return NextResponse.json({ ok: false, error: "invalid_request" }, { status: 400 });
   try {
     const params = await context.params;
-    const approval = await consumeApproval(params.approvalId, user.id, parsed.data.argumentsHash, parsed.data.sourceRevision);
-    if (approval.runId !== params.id) return NextResponse.json({ ok: false, error: "approval_run_mismatch" }, { status: 409 });
+    const approval = await consumeApproval(params.approvalId, params.id, user.id, parsed.data.argumentsHash, parsed.data.sourceRevision);
     return NextResponse.json({ ok: true, approval }, { headers: { "cache-control": "no-store" } });
   } catch (error) { return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "approval_failed" }, { status: 409 }); }
 }

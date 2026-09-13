@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildSearchContextMessage, executeWebSearch, normalizeSearchQuery, searchQueryForPrompt, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
+import { buildSearchContextMessage, executeWebSearch, normalizeSearchQuery, searchQueryForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -68,6 +68,18 @@ describe("Mastra web-search execution contract", () => {
   it("returns structured source metadata on success", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [{ title: "Docs", url: "https://mastra.ai/docs", content: "Useful passage", publishedDate: "2026-01-01" }] }), { status: 200 })));
     await expect(executeWebSearch({ query: "Mastra docs", max_results: 1 })).resolves.toEqual({ status: "ok", results: [{ title: "Docs", url: "https://mastra.ai/docs", source: "mastra.ai", publishedAt: "2026-01-01", snippet: "Useful passage", status: "ok" }] });
+  });
+
+  it("filters unsafe URLs, removes duplicates, and bounds snippets", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
+      { title: "Good", url: "https://example.com/a", content: "x".repeat(5000) },
+      { title: "Duplicate", url: "https://example.com/a", content: "duplicate" },
+      { title: "Private", url: "file:///etc/passwd", content: "no" },
+      { title: "Bad", url: "not a url", content: "no" }
+    ] }), { status: 200 })));
+    const result = await searchWebResources("example", { max_results: 8 });
+    expect(result).toHaveLength(1);
+    expect(result[0].snippet).toHaveLength(4000);
   });
 
   it("distinguishes empty and failed searches", async () => {

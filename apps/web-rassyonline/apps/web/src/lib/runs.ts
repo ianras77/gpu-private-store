@@ -46,13 +46,13 @@ export async function createApproval(input: { runId: string; userId: string; too
   return mapApproval(result.rows[0]);
 }
 
-export async function consumeApproval(id: string, userId: string, argumentsHash: string, sourceRevision: string): Promise<RunApproval> {
+export async function consumeApproval(id: string, runId: string, userId: string, argumentsHash: string, sourceRevision: string): Promise<RunApproval> {
   const client = await getPool().connect();
   try {
     await client.query("begin");
-    const result = await client.query("update agent_approvals set status='consumed',consumed_at=now() where id=$1 and user_id=$2 and status='pending' and expires_at>now() and arguments_hash=$3 and source_revision=$4 returning *", [id, userId, argumentsHash, sourceRevision]);
+    const result = await client.query("update agent_approvals set status='consumed',consumed_at=now() where id=$1 and run_id=$2 and user_id=$3 and status='pending' and expires_at>now() and arguments_hash=$4 and source_revision=$5 returning *", [id, runId, userId, argumentsHash, sourceRevision]);
     if (!result.rows[0]) throw new Error("approval_invalid_or_expired");
-    const resumed = await client.query("update agent_runs set status='running',current_step='approved',lease_expires_at=now(),updated_at=now(),finished_at=null where id=$1 and user_id=$2 and status in ('awaiting_approval','suspended') returning id", [result.rows[0].run_id, userId]);
+    const resumed = await client.query("update agent_runs set status='running',current_step='approved',lease_expires_at=now(),updated_at=now(),finished_at=null where id=$1 and user_id=$2 and status in ('awaiting_approval','suspended') returning id", [runId, userId]);
     if (!resumed.rows[0]) throw new Error("run_not_resumable");
     await client.query("commit");
     return mapApproval(result.rows[0]);

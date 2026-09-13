@@ -3,16 +3,18 @@ import { z } from "zod";
 import { createGuestIdentity, GUEST_COOKIE, SESSION_COOKIE } from "@/lib/auth/sessions";
 import { getUserForSessionToken } from "@/lib/auth/users";
 import { agentRegistry } from "@/mastra";
+import { rassyLocal } from "@/mastra/agents";
 import { streamMastraChat } from "@/mastra/chat";
 import { buildSearchContextMessage, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "@/lib/web-search";
 import { buildDocumentContextMessage } from "@/lib/document-memory";
 import { getReadyDocumentIdsForUser } from "@/lib/documents";
 import { embedTexts, rerankTexts } from "@/lib/rassymind";
 import { searchUserDocuments } from "@/lib/qdrant";
-import { selectMastraAgent, type MastraAgentId } from "@/mastra/routing";
+import { maxStepsForMode, selectMastraAgent, type MastraAgentId } from "@/mastra/routing";
 import { checkAnonymousThrottle } from "@/lib/anonymous-throttle";
 import { readPublicPage } from "@/mastra/tools/page-reader";
 import { buildCurrentTimeContext, isCurrentTimeQuestion } from "@/mastra/tools/time";
+import { localOnlyExecution } from "@/mastra/local-policy";
 
 export const dynamic = "force-dynamic";
 type ServerMessage = { role: "user" | "assistant" | "system"; content: string };
@@ -21,6 +23,9 @@ const schema = z.object({
   mode: z.string().optional(),
   webSearch: z.enum(["auto", "on", "off"]).default("auto"),
   activeDocumentIds: z.array(z.string()).max(50).default([]),
+  sessionDocuments: z.array(z.object({ title: z.string().trim().min(1).max(180), text: z.string().min(1).max(40_000) })).max(8).default([]),
+  temperature: z.number().finite().min(0).max(1.5).default(0.7),
+  maxTokens: z.number().int().min(256).max(8192).default(2048),
   // A browser can retain an empty streaming placeholder after a reload or
   // interrupted request. It is not a message and must not invalidate the
   // next otherwise-valid prompt.
@@ -57,6 +62,10 @@ export async function POST(request: NextRequest) {
     const currentTimeRequested = Boolean(latestUserMessage && isCurrentTimeQuestion(latestUserMessage.content));
     if (currentTimeRequested) messages = [{ role: "system", content: buildCurrentTimeContext("UTC") }, ...messages];
     const knowledgeRequested = parsed.data.mode === "knowledge" || parsed.data.activeDocumentIds.length > 0;
+    if (parsed.data.sessionDocuments.length) {
+      const sessionContext = buildDocumentContextMessage(parsed.data.sessionDocuments.map((document) => ({ documentTitle: document.title, text: document.text, score: 1 })));
+      if (sessionContext) messages = [sessionContext, ...messages];
+    }
     if (latestUserMessage && knowledgeRequested && parsed.data.activeDocumentIds.length) {
       const documentIds = await getReadyDocumentIdsForUser(user!.id, parsed.data.activeDocumentIds);
       if (documentIds.length) {
@@ -100,6 +109,12 @@ export async function POST(request: NextRequest) {
     // Search evidence is context for the researcher; it must not demote the
     // request back to the generic agent after the specialist was selected.
     const selectedAgent = selectMastraAgent({ requestedAgent: parsed.data.agent as MastraAgentId, mode: parsed.data.mode, searchRequested });
+    // Local-only is an execution boundary, not a prompt convention. When the
+    // caller disables web access, use an agent whose tool registry contains no
+    // web/page/browser capability at all.
+    const executionAgent = localOnlyExecution(parsed.data.webSearch) && ["rassy", "researcher"].includes(selectedAgent)
+      ? rassyLocal
+      : agentRegistry[selectedAgent];
     // Preflight already executed the bounded search. Require a Mastra tool only
     // when it is the fallback path, otherwise let the selected specialist
     // synthesize the trusted evidence without duplicating the search.
@@ -108,7 +123,7 @@ export async function POST(request: NextRequest) {
         ? "none"
         : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
       : undefined;
-    const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId, resourceId: guestIdentity, userId: user?.id, signal: request.signal, toolChoice });
+    const result = await streamMastraChat({ agent: executionAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent), temperature: parsed.data.temperature, maxTokens: parsed.data.maxTokens, toolChoice: localOnlyExecution(parsed.data.webSearch) ? "none" : toolChoice });
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -171,7 +186,7 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-    const response = new NextResponse(stream, { headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", connection: "keep-alive", "x-rassy-agent": selectedAgent, "x-rassy-thread-id": threadId, "x-rassy-web-search": searchRequested ? "delegated-to-mastra" : "not-requested" } });
+    const response = new NextResponse(stream, { headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", connection: "keep-alive", "x-rassy-agent": executionAgent.id, "x-rassy-thread-id": threadId, "x-rassy-web-search": localOnlyExecution(parsed.data.webSearch) ? "disabled" : searchRequested ? "delegated-to-mastra" : "not-requested" } });
     if (!user && !request.cookies.get(GUEST_COOKIE)) response.cookies.set(GUEST_COOKIE, guestIdentity, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 7, path: "/" });
     return response;
   } catch (error) {

@@ -1,4 +1,5 @@
 import { createTool } from "@mastra/core/tools";
+import { isIP } from "node:net";
 import { z } from "zod";
 
 const MAX_BYTES = 1_500_000;
@@ -8,7 +9,12 @@ function isPublicHostname(hostname: string): boolean {
   const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
   if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host === "0.0.0.0" || host === "::1") return false;
   const ipv4 = host.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
-  if (!ipv4) return true;
+  if (!ipv4) {
+    if (isIP(host) !== 6) return true;
+    const normalized = host.replace(/^::ffff:/i, "");
+    if (/^\d+\.\d+\.\d+\.\d+$/.test(normalized)) return isPublicHostname(normalized);
+    return !(host === "::" || host === "::1" || host.startsWith("fc") || host.startsWith("fd") || host.startsWith("fe8") || host.startsWith("fe9") || host.startsWith("fea") || host.startsWith("feb"));
+  }
   const [a, b] = ipv4.slice(1, 3).map(Number);
   return !(a === 10 || a === 127 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a === 0);
 }
@@ -33,6 +39,8 @@ export async function readPublicPage(url: string) {
     const response = await fetch(parsed, { redirect: "manual", headers: { accept: "text/html,application/xhtml+xml", "user-agent": "RassyOnline/1.0 (+https://rassy.online)" }, signal: AbortSignal.timeout(8000) });
     if (response.status >= 300 && response.status < 400) throw new Error("redirects are not followed");
     if (!response.ok) throw new Error(`page returned ${response.status}`);
+    const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
+    if (contentType && !/(text\/html|application\/xhtml\+xml|text\/plain)/i.test(contentType)) throw new Error("unsupported content type");
     const reader = response.body?.getReader();
     if (!reader) throw new Error("empty response");
     const chunks: Uint8Array[] = [];

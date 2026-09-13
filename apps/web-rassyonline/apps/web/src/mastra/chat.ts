@@ -9,6 +9,8 @@ export type MastraChatInput = {
   userId?: string;
   signal?: AbortSignal;
   maxSteps?: number;
+  temperature?: number;
+  maxTokens?: number;
   toolChoice?: "auto" | "none" | "required" | { type: "tool"; toolName: string };
 };
 
@@ -27,6 +29,8 @@ export async function streamMastraChat(input: MastraChatInput) {
     ...(context.length ? { context } : {}),
     memory: { thread: input.threadId, resource: input.resourceId },
     maxSteps: input.maxSteps ?? 8,
+    ...(input.temperature === undefined ? {} : { temperature: input.temperature }),
+    ...(input.maxTokens === undefined ? {} : { maxOutputTokens: input.maxTokens }),
     ...(input.toolChoice ? { toolChoice: input.toolChoice } : {}),
     ...(requestContext ? { requestContext } : {}),
     abortSignal: input.signal,

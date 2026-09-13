@@ -12,6 +12,8 @@ export type WebSearchResult = {
   status?: "ok";
 };
 
+const SEARCH_RANGES = new Set(["day", "week", "month", "year"]);
+
 type SearchResponse = {
   results?: Array<{
     title?: string;
@@ -83,8 +85,9 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
   url.searchParams.set("format", "json");
   url.searchParams.set("language", "en");
   url.searchParams.set("safesearch", "1");
-  if (options.recency) url.searchParams.set("time_range", options.recency);
-  if (options.domains?.length) url.searchParams.set("indices", options.domains.join(","));
+  if (options.recency && SEARCH_RANGES.has(options.recency)) url.searchParams.set("time_range", options.recency);
+  const domains = [...new Set((options.domains ?? []).map((domain) => domain.trim().toLowerCase()).filter((domain) => /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain)))].slice(0, 10);
+  if (domains.length) url.searchParams.set("indices", domains.join(","));
 
   const response = await fetch(url, {
     headers: { accept: "application/json" },
@@ -98,16 +101,24 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
   const body = await response.arrayBuffer();
   if (body.byteLength > 2 * 1024 * 1024) throw new Error("search response too large");
   const parsed = JSON.parse(new TextDecoder().decode(body)) as SearchResponse;
+  const seen = new Set<string>();
   return (Array.isArray(parsed.results) ? parsed.results : [])
     .map((result) => ({
       title: result.title?.trim() ?? "",
       url: result.url?.trim() ?? "",
       source: (() => { try { return new URL(result.url ?? "").hostname; } catch { return ""; } })(),
       publishedAt: result.publishedDate ?? result.published_at,
-      snippet: (result.content ?? result.snippet ?? "").replace(/\s+/g, " ").trim(),
+      snippet: (result.content ?? result.snippet ?? "").replace(/\s+/g, " ").trim().slice(0, 4000),
       status: "ok" as const
     }))
-    .filter((result) => result.title && result.url)
+    .filter((result) => {
+      try {
+        const parsedUrl = new URL(result.url);
+        if (!["http:", "https:"].includes(parsedUrl.protocol) || !result.title || seen.has(parsedUrl.href)) return false;
+        seen.add(parsedUrl.href);
+        return true;
+      } catch { return false; }
+    })
     .slice(0, Math.min(options.max_results ?? 5, 8));
 }
 

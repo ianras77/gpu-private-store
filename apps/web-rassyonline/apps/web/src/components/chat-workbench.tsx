@@ -14,6 +14,7 @@ type ChatMessage = {
   searchStatus?: "used" | "failed" | "empty" | "not-used";
   sources?: Array<{ title: string; url: string; snippet: string }>;
   citationStatus?: "verified" | "source-linked" | "unsupported" | "not-applicable";
+  status?: "streaming" | "complete" | "interrupted" | "failed";
 };
 
 type UserDocument = {
@@ -25,6 +26,7 @@ type UserDocument = {
   error: string | null;
   chunkCount: number;
 };
+type SessionDocument = { id: string; title: string; text: string; sizeBytes: number };
 type ThreadSummary = { id: string; title: string; updatedAt: string };
 
 const OPENING_LINES = [
@@ -48,6 +50,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [documents, setDocuments] = useState<UserDocument[]>([]);
+  const [sessionDocuments, setSessionDocuments] = useState<SessionDocument[]>([]);
   const [uploading, setUploading] = useState(false);
   const [documentNotice, setDocumentNotice] = useState<string | null>(null);
   const [themeId, setThemeId] = useState<ThemeId>("aurora");
@@ -66,6 +69,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const recorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
+  const requestSequenceRef = useRef(0);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
@@ -150,6 +154,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   }
 
   function startNewThread() {
+    requestSequenceRef.current += 1;
     abortRef.current?.abort();
     abortRef.current = null;
     setSending(false);
@@ -162,6 +167,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   }
 
   async function openThread(id: string) {
+    requestSequenceRef.current += 1;
+    abortRef.current?.abort();
     const response = await fetch(`/api/threads/${id}`, { cache: "no-store" });
     if (!response.ok) return;
     const data = (await response.json()) as { messages?: Array<{ role: "user" | "assistant" | "system"; content: string }> };
@@ -177,6 +184,18 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     setUploading(true);
 
     try {
+      if (!signedIn) {
+        const next: SessionDocument[] = [];
+        for (const file of files) {
+          if (file.size > 5 * 1024 * 1024) throw new Error(`${file.name}: guest files are limited to 5 MB`);
+          const text = (await file.text()).replace(/\s+/g, " ").trim();
+          if (!text) throw new Error(`${file.name}: the file is empty`);
+          next.push({ id: `${file.name}-${file.lastModified}-${file.size}`, title: file.name, text: text.slice(0, 40_000), sizeBytes: file.size });
+        }
+        setSessionDocuments((current) => [...current, ...next].slice(-8));
+        setDocumentNotice(`${next.length} file${next.length === 1 ? "" : "s"} ready for this session only. Sign in to keep them.`);
+        return;
+      }
       let completed = 0;
       setDocumentNotice(`Reading ${files.length} source${files.length === 1 ? "" : "s"}…`);
       for (const file of files) {
@@ -296,7 +315,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
     const visibleMessages = intentNotice ? [...messages, intentNotice] : messages;
     const nextMessages = [...visibleMessages, { role: "user" as const, content: prompt }];
-    setMessages([...nextMessages, { role: "assistant", content: "" }]);
+    const requestSequence = ++requestSequenceRef.current;
+    setMessages([...nextMessages, { role: "assistant", content: "", status: "streaming" }]);
     setInput("");
     setSending(true);
     setActivity(0.72);
@@ -319,6 +339,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           mode: requestMode,
           threadId: mastraThreadId,
           activeDocumentIds: activeDocuments.map((document) => document.id),
+          sessionDocuments: sessionDocuments.map(({ title, text }) => ({ title, text })),
           webSearch: requestWebSearch,
           temperature,
           maxTokens,
@@ -350,6 +371,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
+        if (requestSequence !== requestSequenceRef.current) return;
         const chunk = decoder.decode(value, { stream: true });
         eventBuffer += chunk;
         const records = eventBuffer.split("\n\n");
@@ -395,21 +417,38 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         setMessages((current) => {
           const copy = [...current];
           const last = copy[copy.length - 1];
-          copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, searchStatus, sources, citationStatus };
+          copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, searchStatus, sources, citationStatus, status: "streaming" };
           return copy;
         });
         setActivity((value) => Math.min(1, value * 0.72 + Math.min(.3, chunk.length / 180)));
         setActivityKind(reasoning ? "thinking" : "answering");
       }
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
+      if (error instanceof DOMException && error.name === "AbortError") {
+        if (requestSequence === requestSequenceRef.current) {
+          setMessages((current) => {
+            const copy = [...current];
+            const last = copy[copy.length - 1];
+            if (last?.role === "assistant") copy[copy.length - 1] = { ...last, status: "interrupted", content: last.content || "Response stopped." };
+            return copy;
+          });
+        }
+        return;
+      }
       const message = error instanceof Error ? error.message : "Chat request failed";
       setMessages((current) => {
         const copy = [...current];
-        copy[copy.length - 1] = { role: "assistant", content: message };
+        copy[copy.length - 1] = { role: "assistant", content: message, status: "failed" };
         return copy;
       });
     } finally {
+      if (requestSequence !== requestSequenceRef.current) return;
+      setMessages((current) => {
+        const copy = [...current];
+        const last = copy[copy.length - 1];
+        if (last?.role === "assistant" && last.status === "streaming") copy[copy.length - 1] = { ...last, status: "complete" };
+        return copy;
+      });
       setSending(false);
       setActivity(0.24);
       setActivityKind("idle");
@@ -470,13 +509,13 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <section className="memory-source-tray" aria-label="Document memory">
           <div className="memory-head">
             <p className="system-label">Sources</p>
-            <strong>{signedIn ? `${activeDocuments.length} selected` : "sign in for durable memory"}</strong>
-            {signedIn ? (
+            <strong>{signedIn ? `${activeDocuments.length} stored sources` : `${sessionDocuments.length} session files`}</strong>
+            {
               <label className={uploading ? "upload-button disabled" : "upload-button"}>
                 {uploading ? "Indexing" : "Upload"}
                 <input type="file" multiple accept=".txt,.md,.markdown,.rst,.adoc,.json,.jsonl,.csv,.tsv,.log,.yaml,.yml,.toml,.ini,.conf,.env,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.kt,.swift,.c,.h,.cpp,.hpp,.cs,.php,.sh,.bash,.zsh,.sql,.html,.css,.scss,.xml,.graphql,.proto,.dockerfile,text/*,application/json" onChange={uploadDocument} disabled={uploading} />
               </label>
-            ) : null}
+            }
           </div>
           {documentNotice ? <p className="document-notice">{documentNotice}</p> : null}
           {signedIn ? (
@@ -494,7 +533,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
                 </button>
               ))}
             </div>
-          ) : null}
+          ) : sessionDocuments.length ? <div className="document-list memory-source-list">{sessionDocuments.map((document) => <div className="document-pill active session-document" key={document.id}><span>{document.title}</span><small>session only · {Math.ceil(document.sizeBytes / 1024)} KB</small></div>)}</div> : <p className="document-notice">Files stay in this browser session until you sign in.</p>}
         </section>
       </div>
 
@@ -507,7 +546,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <div className="message-list">
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <div className="message-meta"><div className="message-actions">{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>Listen</button></> : null}</div></div>
+              <div className="message-meta"><div className="message-actions">{message.status === "interrupted" ? <span className="search-warning">Stopped</span> : message.status === "failed" ? <span className="search-warning">Failed</span> : null}{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>▶ Listen</button></> : null}</div></div>
               {message.sources?.length ? <details className="search-sources"><summary>Search signal <span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noreferrer"><strong>{sourceIndex + 1}. {source.title}</strong><small>{source.snippet || source.url}</small></a>)}</div></details> : null}
               {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide reasoning trace" : "Show reasoning trace"}<span>RASSYMIND / TRANSPARENT</span></summary><p>{message.reasoning.trim()}</p></details> : null}
               {message.role === "assistant" && !message.content && sending ? <ThinkingState /> : <MarkdownMessage content={message.content || ""} />}
@@ -531,7 +570,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           aria-label="Message Rassy"
           rows={1}
         />
-        <button type="button" className={recording ? "recording" : ""} onClick={() => void toggleRecording()} disabled={audioBusy} aria-label={recording ? "Stop recording" : "Dictate message"}>{recording ? `Stop ${recordingSeconds}s` : audioBusy ? "Transcribing…" : "Mic"}</button>
+        <button type="button" className={recording ? "recording" : ""} onClick={() => void toggleRecording()} disabled={audioBusy} aria-label={recording ? "Stop recording" : "Dictate message"}>{recording ? `Stop ${recordingSeconds}s` : audioBusy ? "Transcribing…" : "Speak"}</button>
         {sending ? <button type="button" onClick={() => abortRef.current?.abort()}>Stop</button> : null}
         <button type="button" onClick={startNewThread} aria-label="Clear chat">Clear chat</button>
         <button type="submit">Send</button>

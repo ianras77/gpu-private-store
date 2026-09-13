@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { calculate } from "./calculator";
 import { readPublicPage } from "./page-reader";
 import { currentTime, isCurrentTimeQuestion } from "./time";
@@ -29,5 +29,11 @@ describe("Mastra utility tools", () => {
   it("rejects private page targets", async () => {
     const result = await readPublicPage("http://127.0.0.1/admin");
     expect(result).toMatchObject({ status: "failed", text: "" });
+  });
+
+  it("rejects IPv6 private targets and non-document content", async () => {
+    expect(await readPublicPage("http://[::1]/admin")).toMatchObject({ status: "failed", text: "" });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("PNG", { status: 200, headers: { "content-type": "image/png" } })));
+    expect(await readPublicPage("https://example.com/image")).toMatchObject({ status: "failed", text: "" });
   });
 });

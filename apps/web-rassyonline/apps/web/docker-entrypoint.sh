@@ -13,4 +13,8 @@ if [ "${1:-}" = "node" ] && [ "${2:-}" = "worker.mjs" ]; then
   exec node worker.mjs
 fi
 
+if [ "$(id -u)" != "0" ]; then
+  exec node server.js
+fi
+
 exec su nextjs -s /bin/sh -c "node server.js"

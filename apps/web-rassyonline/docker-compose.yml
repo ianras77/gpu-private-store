@@ -5,7 +5,15 @@ services:
     build:
       context: ./apps/web
       dockerfile: Dockerfile
+    user: "1001:1001"
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 768m
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
@@ -26,8 +34,6 @@ services:
     volumes:
       - ${APP_DATA_DIR}/app-data/web-rassyonline/uploads:/app-data/uploads
       - ${APP_DATA_DIR}/app-data/web-rassyonline/artifacts:/app-data/artifacts
-      - ${APP_DATA_DIR}/app-data/web-rassyonline/project-fix-fixtures:/app-data/project-fix-fixtures
-      - ${APP_DATA_DIR}/app-data/web-rassyonline/project-fix-workspaces:/app-data/project-fix-workspaces
     extra_hosts:
       - host.docker.internal:host-gateway
     depends_on:

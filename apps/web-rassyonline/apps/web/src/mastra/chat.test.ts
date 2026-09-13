@@ -25,4 +25,10 @@ describe("Mastra chat transport", () => {
     await streamMastraChat({ agent: { stream } as never, threadId: "t", resourceId: "r", toolChoice: "required", messages: [{ role: "user", content: "research this" }] });
     expect(stream).toHaveBeenCalledWith("research this", expect.objectContaining({ toolChoice: "required" }));
   });
+
+  it("forwards bounded applied generation settings to Mastra", async () => {
+    const stream = vi.fn().mockResolvedValue({ fullStream: (async function* () {})() });
+    await streamMastraChat({ agent: { stream } as never, threadId: "t", resourceId: "r", temperature: 0.4, maxTokens: 1024, messages: [{ role: "user", content: "hello" }] });
+    expect(stream).toHaveBeenCalledWith("hello", expect.objectContaining({ temperature: 0.4, maxOutputTokens: 1024 }));
+  });
 });
