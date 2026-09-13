@@ -21,7 +21,7 @@ export default async function AdminPage() {
         </Link>
         <div>
           <p className="system-label">Admin Console</p>
-          <h1>Control room for accounts, capabilities, and runtime health.</h1>
+          <h1>Control room for accounts, live capabilities, and runtime health.</h1>
         </div>
       </section>
 
@@ -44,8 +44,8 @@ export default async function AdminPage() {
         <article className="admin-tile">
           <p className="admin-kicker">CONTROLLED RELEASE</p>
           <h2>RassyMind</h2>
-          <p>Production topology locked</p>
-          <small>27B lanes remain one-slot and parallel-2 stays canary-only.</small>
+          <p>Qwen3.8 production topology</p>
+          <small>Two one-slot V100 lanes; tools and streaming qualified, JSON Schema fail-closed.</small>
         </article>
         <Link className="admin-tile action" href="/admin/users">
           <h2>Users</h2>
@@ -70,6 +70,7 @@ export default async function AdminPage() {
                 <h3>{mode.model}</h3>
                 <p>{mode.description}</p>
                 <div className="capability-list">{(model?.capabilities ?? ["not observed"]).map((capability) => <span key={capability}>{capability}</span>)}</div>
+                {model?.status ? <small className="lane-status">catalog status: {model.status}</small> : null}
               </article>
             );
           })}

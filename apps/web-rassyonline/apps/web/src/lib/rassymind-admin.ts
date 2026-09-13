@@ -5,13 +5,14 @@ export type RassyMindAdminSnapshot = {
     ownedBy?: string;
     capabilities: string[];
     status?: string;
+    featureStates?: Record<string, string>;
   }>;
   checkedAt: string;
 };
 
 const EXPECTED_LANES = [
-  { id: "rassy-mind", capabilities: ["chat", "streaming", "reasoning"] },
-  { id: "rassy-code", capabilities: ["chat", "streaming", "reasoning"] },
+  { id: "rassy-mind", capabilities: ["chat", "streaming", "tools", "JSON Schema: unqualified"] },
+  { id: "rassy-code", capabilities: ["chat", "streaming", "tools", "JSON Schema: unqualified"] },
   { id: "rassy-fast", capabilities: ["chat", "streaming", "qualified"] },
   { id: "rassy-utility", capabilities: ["chat", "streaming"] },
   { id: "rassy-embed", capabilities: ["4096-dimensional embeddings"] },
@@ -30,7 +31,7 @@ export async function getRassyMindAdminSnapshot(): Promise<RassyMindAdminSnapsho
       signal: AbortSignal.timeout(4000)
     });
     if (!response.ok) return { gateway: "degraded", models: EXPECTED_LANES, checkedAt };
-    const payload = (await response.json()) as { models?: Array<{ id?: string; status?: string; chat?: boolean; embeddings?: boolean; rerank?: boolean; stt?: boolean; tts?: boolean }> };
+    const payload = (await response.json()) as { models?: Array<{ id?: string; status?: string; chat?: boolean; embeddings?: boolean; rerank?: boolean; stt?: boolean; tts?: boolean; features?: Record<string, string> }> };
     const models = (payload.models ?? []).map((model) => ({
       id: model.id ?? "unknown",
       capabilities: [
@@ -39,7 +40,8 @@ export async function getRassyMindAdminSnapshot(): Promise<RassyMindAdminSnapsho
         ...(model.rerank ? ["rerank"] : []),
         ...(model.stt ? ["speech to text"] : []),
         ...(model.tts ? ["text to speech"] : [])
-      ].concat(model.status === "qualified" ? ["qualified"] : []),
+      ].concat(model.features?.tools === "qualified" ? ["tools"] : [], model.features?.json_schema === "pending" ? ["JSON Schema: unqualified"] : [], model.features?.parallel_tools === "unsupported" ? ["parallel tools: unsupported"] : [], model.status === "qualified" ? ["qualified"] : []),
+      featureStates: model.features,
       status: model.status
     }));
     return { gateway: "healthy", models: models.length ? models : EXPECTED_LANES, checkedAt };
