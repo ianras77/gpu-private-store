@@ -13,7 +13,7 @@ type ChatMessage = {
   searched?: boolean;
   searchStatus?: "used" | "failed" | "empty" | "not-used";
   sources?: Array<{ title: string; url: string; snippet: string }>;
-  citationStatus?: "verified" | "unsupported" | "not-applicable";
+  citationStatus?: "verified" | "source-linked" | "unsupported" | "not-applicable";
 };
 
 type UserDocument = {
@@ -60,10 +60,12 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [activityKind, setActivityKind] = useState<"idle" | "thinking" | "searching" | "answering">("idle");
   const [activeAgent, setActiveAgent] = useState("rassy");
   const [recording, setRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [audioBusy, setAudioBusy] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const composerRef = useRef<HTMLTextAreaElement | null>(null);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
@@ -103,6 +105,28 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   }, [messages]);
 
   useEffect(() => {
+    const storedDraft = window.localStorage.getItem("rassy-online-draft");
+    if (storedDraft) setInput(storedDraft);
+  }, []);
+
+  useEffect(() => {
+    if (input) window.localStorage.setItem("rassy-online-draft", input);
+    else window.localStorage.removeItem("rassy-online-draft");
+    const textarea = composerRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight, 72), 240)}px`;
+    }
+  }, [input]);
+
+  useEffect(() => {
+    if (!recording) { setRecordingSeconds(0); return; }
+    const started = Date.now();
+    const timer = window.setInterval(() => setRecordingSeconds(Math.floor((Date.now() - started) / 1000)), 250);
+    return () => window.clearInterval(timer);
+  }, [recording]);
+
+  useEffect(() => {
     document.documentElement.dataset.rassyTheme = themeId;
     window.localStorage.setItem("rassy-online-theme", themeId);
   }, [themeId]);
@@ -134,6 +158,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     window.localStorage.removeItem("rassy-online-transcript");
     document.cookie = "rassy_online_thread=; Max-Age=0; Path=/; SameSite=Lax";
     setMessages([{ role: "assistant", content: OPENING_LINES[Math.floor(Math.random() * OPENING_LINES.length)] }]);
+    setInput("");
   }
 
   async function openThread(id: string) {
@@ -194,15 +219,24 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) { setDocumentNotice("This browser does not support microphone recording."); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const mimeType = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"].find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       audioChunksRef.current = [];
       recorder.ondataavailable = (event) => { if (event.data.size) audioChunksRef.current.push(event.data); };
+      recorder.onerror = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setRecording(false); setAudioBusy(false);
+        setDocumentNotice("The microphone stopped before any audio was captured.");
+      };
       recorder.onstop = async () => {
         stream.getTracks().forEach((track) => track.stop());
         setRecording(false); setAudioBusy(true);
         try {
-          const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
-          const form = new FormData(); form.append("file", blob, "rassy-recording.webm");
+          const type = recorder.mimeType || "audio/webm";
+          const extension = type.includes("mp4") ? "m4a" : type.includes("ogg") ? "ogg" : "webm";
+          const blob = new Blob(audioChunksRef.current, { type });
+          if (!blob.size) throw new Error("No audio was captured. Hold the mic button while speaking, then stop.");
+          const form = new FormData(); form.append("file", blob, `rassy-recording.${extension}`);
           const response = await fetch("/api/audio/transcriptions", { method: "POST", body: form });
           const data = await response.json().catch(() => ({})) as { text?: string; error?: string };
           if (!response.ok || !data.text) throw new Error(data.error ?? "Transcription failed");
@@ -210,7 +244,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         } catch (error) { setDocumentNotice(error instanceof Error ? error.message : "Transcription failed"); }
         finally { setAudioBusy(false); }
       };
-      recorderRef.current = recorder; recorder.start(); setRecording(true);
+      recorderRef.current = recorder; recorder.start(250); setRecording(true); setDocumentNotice("Listening… speak naturally, then press Stop mic.");
     } catch { setDocumentNotice("Microphone permission was not granted."); }
   }
 
@@ -473,7 +507,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <div className="message-list">
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <div className="message-meta"><div className="message-actions">{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>Listen</button></> : null}</div></div>
+              <div className="message-meta"><div className="message-actions">{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>Listen</button></> : null}</div></div>
               {message.sources?.length ? <details className="search-sources"><summary>Search signal <span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noreferrer"><strong>{sourceIndex + 1}. {source.title}</strong><small>{source.snippet || source.url}</small></a>)}</div></details> : null}
               {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide reasoning trace" : "Show reasoning trace"}<span>RASSYMIND / TRANSPARENT</span></summary><p>{message.reasoning.trim()}</p></details> : null}
               {message.role === "assistant" && !message.content && sending ? <ThinkingState /> : <MarkdownMessage content={message.content || ""} />}
@@ -484,6 +518,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
       <form className="composer-preview live" onSubmit={sendMessage}>
         <textarea
+          ref={composerRef}
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={(event) => {
@@ -492,11 +527,11 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
               if (!sending && input.trim()) event.currentTarget.form?.requestSubmit();
             }
           }}
-          placeholder="Message Rassy"
+          placeholder="Talk to Rassy… (Shift + Enter for a new line)"
           aria-label="Message Rassy"
           rows={1}
         />
-        <button type="button" onClick={() => void toggleRecording()} disabled={audioBusy} aria-label={recording ? "Stop recording" : "Dictate message"}>{recording ? "Stop mic" : audioBusy ? "Audio…" : "Mic"}</button>
+        <button type="button" className={recording ? "recording" : ""} onClick={() => void toggleRecording()} disabled={audioBusy} aria-label={recording ? "Stop recording" : "Dictate message"}>{recording ? `Stop ${recordingSeconds}s` : audioBusy ? "Transcribing…" : "Mic"}</button>
         {sending ? <button type="button" onClick={() => abortRef.current?.abort()}>Stop</button> : null}
         <button type="button" onClick={startNewThread} aria-label="Clear chat">Clear chat</button>
         <button type="submit">Send</button>

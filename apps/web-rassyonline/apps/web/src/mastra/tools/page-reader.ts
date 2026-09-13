@@ -29,11 +29,24 @@ export async function readPublicPage(url: string) {
     const parsed = new URL(url);
     if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("unsupported protocol");
     if (!isPublicHostname(parsed.hostname)) throw new Error("private hosts are not allowed");
+    if (parsed.username || parsed.password || (parsed.port && parsed.port !== "80" && parsed.port !== "443")) throw new Error("unsupported destination");
     const response = await fetch(parsed, { redirect: "manual", headers: { accept: "text/html,application/xhtml+xml", "user-agent": "RassyOnline/1.0 (+https://rassy.online)" }, signal: AbortSignal.timeout(8000) });
     if (response.status >= 300 && response.status < 400) throw new Error("redirects are not followed");
     if (!response.ok) throw new Error(`page returned ${response.status}`);
-    const bytes = await response.arrayBuffer();
-    if (bytes.byteLength > MAX_BYTES) throw new Error("page too large");
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("empty response");
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    while (true) {
+      const next = await reader.read();
+      if (next.done) break;
+      total += next.value.byteLength;
+      if (total > MAX_BYTES) { await reader.cancel(); throw new Error("page too large"); }
+      chunks.push(next.value);
+    }
+    const bytes = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
     const html = new TextDecoder().decode(bytes);
     const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/\s+/g, " ").trim() ?? parsed.hostname;
     const text = extractText(html);

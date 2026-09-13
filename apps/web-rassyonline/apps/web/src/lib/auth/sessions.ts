@@ -1,10 +1,15 @@
 import { createHash, randomBytes } from "node:crypto";
 
 export const SESSION_COOKIE = "rassy_online_session";
+export const GUEST_COOKIE = "rassy_online_guest";
 export const SESSION_TTL_DAYS = 30;
 
 export function createSessionToken(): string {
   return randomBytes(32).toString("base64url");
+}
+
+export function createGuestIdentity(): string {
+  return `guest_${randomBytes(24).toString("base64url")}`;
 }
 
 export function hashSessionToken(token: string): string {

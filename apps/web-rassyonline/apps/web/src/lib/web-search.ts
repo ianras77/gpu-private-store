@@ -45,7 +45,11 @@ export function normalizeSearchQuery(query: string): string {
 }
 
 export function searchQueryForPrompt(query: string): string {
-  return normalizeSearchQuery(query).replace(/\b(can you|could you|would you|please|tell me|i want to know)\b/gi, " ").replace(/\s+/g, " ").trim().slice(0, 500);
+  const focused = normalizeSearchQuery(query)
+    .replace(/\b(can you|could you|would you|please|tell me|i want to know|i need to know|find out|give me|show me|look into)\b/gi, " ")
+    .replace(/\b(what is|what are|who is|where is|when is|how does|how do|why is|why are)\b/gi, " ")
+    .replace(/[?!]+$/g, "").replace(/\s+/g, " ").trim();
+  return (focused || normalizeSearchQuery(query)).slice(0, 500);
 }
 
 function searchRecencyForPrompt(prompt: string): string | undefined {

@@ -71,13 +71,22 @@ services:
       context: ./apps/web
       dockerfile: Dockerfile
     command: ["node", "worker.mjs"]
+    user: "1001:1001"
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 768m
     environment:
       NODE_ENV: production
       RUN_WORKER_ID: ${RUN_WORKER_ID:-rassy-online-worker}
       RUN_WORKER_POLL_MS: ${RUN_WORKER_POLL_MS:-2000}
       DATABASE_URL: postgresql://rassy_online:${RASSY_ONLINE_POSTGRES_PASSWORD}@rassy-online-postgres:5432/rassy_online
     volumes:
+      - ${APP_DATA_DIR}/app-data/web-rassyonline/uploads:/app-data/uploads
       - ${APP_DATA_DIR}/app-data/web-rassyonline/artifacts:/app-data/artifacts
       - ${APP_DATA_DIR}/app-data/web-rassyonline/project-fix-fixtures:/app-data/project-fix-fixtures
       - ${APP_DATA_DIR}/app-data/web-rassyonline/project-fix-workspaces:/app-data/project-fix-workspaces

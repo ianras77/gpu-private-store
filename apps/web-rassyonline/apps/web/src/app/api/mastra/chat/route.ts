@@ -1,6 +1,6 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { SESSION_COOKIE } from "@/lib/auth/sessions";
+import { createGuestIdentity, GUEST_COOKIE, SESSION_COOKIE } from "@/lib/auth/sessions";
 import { getUserForSessionToken } from "@/lib/auth/users";
 import { agentRegistry } from "@/mastra";
 import { streamMastraChat } from "@/mastra/chat";
@@ -15,6 +15,7 @@ import { readPublicPage } from "@/mastra/tools/page-reader";
 import { buildCurrentTimeContext, isCurrentTimeQuestion } from "@/mastra/tools/time";
 
 export const dynamic = "force-dynamic";
+type ServerMessage = { role: "user" | "assistant" | "system"; content: string };
 const schema = z.object({
   agent: z.enum(["rassy", "researcher", "knowledge", "coder", "utility"]).default("rassy"),
   mode: z.string().optional(),
@@ -26,7 +27,9 @@ const schema = z.object({
   threadId: z.string().trim().min(1).max(200).optional(),
   messages: z.preprocess(
     (value) => Array.isArray(value) ? value.filter((message) => !(message && typeof message === "object" && "content" in message && typeof message.content === "string" && !message.content.trim() && (message as { role?: string }).role === "assistant")) : value,
-    z.array(z.object({ role: z.enum(["user", "assistant", "system"]), content: z.string().trim().min(1).max(50000) })).min(1).max(60)
+    // System/developer/tool authority is server-owned. Legacy clients may
+    // still send those roles, but they are rejected rather than promoted.
+    z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().trim().min(1).max(50000) })).min(1).max(60)
   )
 });
 
@@ -46,10 +49,11 @@ export async function POST(request: NextRequest) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) return Response.json({ ok: false, error: "invalid_request" }, { status: 400 });
   const threadId = parsed.data.threadId ?? crypto.randomUUID();
+  const guestIdentity = user?.id ?? request.cookies.get(GUEST_COOKIE)?.value ?? createGuestIdentity();
   if (!user && parsed.data.activeDocumentIds.length) return Response.json({ ok: false, error: "auth_required" }, { status: 401 });
   try {
     const latestUserMessage = [...parsed.data.messages].reverse().find((message) => message.role === "user");
-    let messages = parsed.data.messages;
+    let messages: ServerMessage[] = parsed.data.messages;
     const currentTimeRequested = Boolean(latestUserMessage && isCurrentTimeQuestion(latestUserMessage.content));
     if (currentTimeRequested) messages = [{ role: "system", content: buildCurrentTimeContext("UTC") }, ...messages];
     const knowledgeRequested = parsed.data.mode === "knowledge" || parsed.data.activeDocumentIds.length > 0;
@@ -104,13 +108,14 @@ export async function POST(request: NextRequest) {
         ? "none"
         : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
       : undefined;
-    const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId, resourceId: user?.id ?? `guest:${threadId}`, userId: user?.id, signal: request.signal, toolChoice });
+    const result = await streamMastraChat({ agent: agentRegistry[selectedAgent], messages, threadId, resourceId: guestIdentity, userId: user?.id, signal: request.signal, toolChoice });
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         let searched = searchRequested;
         let searchStatus: "used" | "failed" | "empty" | "not-used" = searchRequested ? (preflightResults.length ? "used" : searchFailed ? "failed" : "empty") : "not-used";
         let answerText = "";
+        let streamFailed = false;
         const returnedUrls = new Set<string>();
         const announcedToolCalls = new Set<string>();
         const isResearchTool = (name?: string) => Boolean(name && ["websearch", "parallelresearch"].includes(name.toLowerCase().replace(/[-_]/g, "")));
@@ -152,12 +157,13 @@ export async function POST(request: NextRequest) {
                 send("text", { delta });
               }
             } else if (part.type === "error") {
+              streamFailed = true;
               send("error", { message: "Mastra execution failed" });
             }
           }
           const unsupported = searched ? unsupportedCitationUrls(answerText, [...returnedUrls]) : [];
           if (unsupported.length) send("citation-warning", { status: "unsupported", count: unsupported.length });
-          send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searchStatus === "used" ? "verified" : "not-applicable" });
+          if (!streamFailed) send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searchStatus === "used" ? "source-linked" : "not-applicable" });
           controller.close();
         } catch {
           send("error", { message: "Mastra execution failed" });
@@ -165,7 +171,9 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-    return new Response(stream, { headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", connection: "keep-alive", "x-rassy-agent": selectedAgent, "x-rassy-thread-id": threadId, "x-rassy-web-search": searchRequested ? "delegated-to-mastra" : "not-requested" } });
+    const response = new NextResponse(stream, { headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", connection: "keep-alive", "x-rassy-agent": selectedAgent, "x-rassy-thread-id": threadId, "x-rassy-web-search": searchRequested ? "delegated-to-mastra" : "not-requested" } });
+    if (!user && !request.cookies.get(GUEST_COOKIE)) response.cookies.set(GUEST_COOKIE, guestIdentity, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 7, path: "/" });
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Mastra agent failed";
     return new Response(message, { status: /429|503|busy/i.test(message) ? 429 : 502 });
