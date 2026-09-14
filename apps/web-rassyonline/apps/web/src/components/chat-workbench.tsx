@@ -697,11 +697,25 @@ function CodeBlock({ language, text }: { language: string | null; text: string }
 }
 
 function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
-  if ((artifact.kind === "dot-matrix" || artifact.kind === "math-lab") && artifact.svg) return <figure className={`visual-artifact ${artifact.kind === "math-lab" ? "math-lab-artifact" : "dot-matrix-artifact"}`}><div dangerouslySetInnerHTML={{ __html: artifact.svg }} /><figcaption>{artifact.title ?? (artifact.kind === "math-lab" ? "Math Lab" : "Dot-matrix artwork")} · {artifact.width ?? 500} × {artifact.height ?? 500}px{artifact.mode ? ` · ${artifact.mode}` : ""}</figcaption></figure>;
+  if ((artifact.kind === "dot-matrix" || artifact.kind === "math-lab") && artifact.svg) {
+    const svg = sanitizeArtifactSvg(artifact.svg);
+    if (!svg) return <ArtifactFallback label="This visual artifact could not be safely rendered." />;
+    return <figure className={`visual-artifact ${artifact.kind === "math-lab" ? "math-lab-artifact" : "dot-matrix-artifact"}`}><div dangerouslySetInnerHTML={{ __html: svg }} /><figcaption>{artifact.title ?? (artifact.kind === "math-lab" ? "Math Lab" : "Dot-matrix artwork")} · {artifact.width ?? 500} × {artifact.height ?? 500}px{artifact.mode ? ` · ${artifact.mode}` : ""}</figcaption></figure>;
+  }
   if (artifact.kind === "ascii-art" && artifact.art) return <figure className="visual-artifact ascii-artifact"><pre>{artifact.art}</pre><figcaption>{artifact.title ?? "ASCII artwork"}</figcaption></figure>;
   if (artifact.kind === "chart" && artifact.labels && artifact.values) return <figure className="visual-artifact chart-artifact"><div className="chart-bars">{artifact.labels.map((label, index) => <div className="chart-bar" key={`${label}-${index}`}><span style={{ "--bar": `${Math.max(4, Math.min(100, Math.abs(artifact.values?.[index] ?? 0) / Math.max(...(artifact.values ?? [1])) * 100))}%` } as React.CSSProperties} /><b>{label}</b><small>{artifact.values?.[index]}</small></div>)}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
   if (artifact.kind === "calculator") return <section className={`visual-artifact calculator-artifact ${artifact.status === "failed" ? "failed" : ""}`}><header><span>RASSY GRAPHICS CALCULATOR</span><b>RUN / 01</b></header><div className="calculator-expression"><code>{artifact.expression}</code><span>=</span><strong>{artifact.status === "ok" ? artifact.result : "Unable to calculate"}</strong></div>{artifact.graph ? <CalculatorGraph graph={artifact.graph} /> : null}{artifact.error ? <p>{artifact.error}</p> : null}<small>Calculator · verified result{artifact.graph ? " · graph sampled from expression" : ""}</small></section>;
   return null;
+}
+
+function sanitizeArtifactSvg(input: string): string | null {
+  if (input.length > 220_000 || !/^\s*<svg[\s>]/i.test(input) || /<(?:script|iframe|object|embed|foreignObject)\b/i.test(input)) return null;
+  const sanitized = input.replace(/\s(?:on[a-z]+|href|xlink:href)\s*=\s*(["'])[^"']*\1/gi, "").replace(/url\s*\(\s*['"]?(?:https?:|data:|javascript:)[^)]*\)?/gi, "none");
+  return sanitized.length <= 220_000 ? sanitized : null;
+}
+
+function ArtifactFallback({ label }: { label: string }) {
+  return <div className="visual-artifact artifact-fallback" role="status">{label}</div>;
 }
 
 function CalculatorGraph({ graph }: { graph: NonNullable<VisualArtifact["graph"]> }) {
