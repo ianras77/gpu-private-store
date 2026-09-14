@@ -33,6 +33,12 @@ export function matrixDeterminant(input: number[][]): number {
   return Number((determinant * sign).toFixed(8));
 }
 
+export function symmetricEigenvectors2x2(input: number[][]): number[][] {
+  if (input.length !== 2 || input.some((row) => row.length !== 2)) throw new Error("eigenvectors currently support 2x2 matrices");
+  const angle = .5 * Math.atan2(2 * input[0][1], input[0][0] - input[1][1]);
+  return [[Number(Math.cos(angle).toFixed(8)), Number(Math.sin(angle).toFixed(8))], [Number(-Math.sin(angle).toFixed(8)), Number(Math.cos(angle).toFixed(8))]];
+}
+
 function plotPath(points: Array<{ x: number; y: number | null }>, xMin: number, xMax: number, width: number, height: number, minY: number, maxY: number) {
   const rangeY = maxY - minY || 1;
   return points.filter((point) => point.y !== null).map((point) => `${((point.x - xMin) / (xMax - xMin) * width).toFixed(2)},${(height - ((point.y as number - minY) / rangeY * height)).toFixed(2)}`).join(" ");
@@ -44,13 +50,14 @@ export function makeMathLabSvg(mode: "formula" | "matrix" | "plot" | "wavefuncti
   const eigenvalues = mode === "matrix" && matrix.length ? symmetricEigenvalues(matrix) : [];
   const trace = mode === "matrix" && matrix.length ? matrixTrace(matrix) : null;
   const determinant = mode === "matrix" && matrix.length ? matrixDeterminant(matrix) : null;
+  const eigenvectors = mode === "matrix" && matrix.length === 2 ? symmetricEigenvectors2x2(matrix) : [];
   const width = 760; const height = 430; const left = 64; const top = 86; const graphW = 650; const graphH = 270;
   let body = `<text x="${left}" y="58" class="formula">${safeFormula}</text>`;
   if (mode === "matrix") {
     const rows = matrix.slice(0, 8); const cols = Math.max(...rows.map((row) => row.length), 1); const cellW = 72; const cellH = 42; const startX = (width - cols * cellW) / 2; const startY = 130;
     body += `<path class="bracket" d="M${startX - 22} ${startY - 18}h12v${rows.length * cellH + 6}h-12M${startX + cols * cellW + 22} ${startY - 18}h-12v${rows.length * cellH + 6}h12"/>`;
     rows.forEach((row, rowIndex) => row.slice(0, cols).forEach((value, columnIndex) => { body += `<text x="${startX + columnIndex * cellW + cellW / 2}" y="${startY + rowIndex * cellH}" class="matrix-value" text-anchor="middle">${Number(value.toFixed(4))}</text>`; }));
-    if (eigenvalues.length) body += `<text x="${left}" y="350" class="small">EIGENVALUES λ</text><text x="${left}" y="385" class="eigenvalues">${eigenvalues.map((value) => value.toFixed(5)).join("   ")}</text><text x="${left + 380}" y="350" class="small">TRACE / DET</text><text x="${left + 380}" y="385" class="invariants">${trace?.toFixed(5)}  /  ${determinant?.toFixed(5)}</text>`;
+    if (eigenvalues.length) body += `<text x="${left}" y="350" class="small">EIGENVALUES λ</text><text x="${left}" y="385" class="eigenvalues">${eigenvalues.map((value) => value.toFixed(5)).join("   ")}</text><text x="${left + 380}" y="350" class="small">TRACE / DET</text><text x="${left + 380}" y="385" class="invariants">${trace?.toFixed(5)}  /  ${determinant?.toFixed(5)}</text>${eigenvectors.length ? `<text x="${left}" y="412" class="small">EIGENVECTORS  ${eigenvectors.map((vector) => `(${vector.map((value) => value.toFixed(3)).join(", ")})`).join("   ")}</text>` : ""}`;
   } else if (mode === "formula") {
     body += `<text x="${left}" y="142" class="hint">A clean mathematical expression, ready to discuss or transform.</text><path class="rule" d="M${left} 176h${graphW}"/>`;
     body += `<text x="${left}" y="224" class="small">differentiate · integrate · simplify · dimensional-check · explain</text>`;
@@ -67,6 +74,6 @@ export const mathLabTool = createTool({
   id: "math-lab",
   description: "Create an elegant mathematical artifact for physics and higher mathematics. Use formula for a typeset expression, matrix for linear algebra, plot for a supplied f(x), wavefunction for a quantum-style damped oscillation, or vector-field for a directional calculus visualization. Never invent matrix values or claim physical meaning beyond the supplied formula.",
   inputSchema: z.object({ mode: z.enum(["formula", "matrix", "plot", "wavefunction", "vector-field"]).default("formula"), title: z.string().trim().min(1).max(160).default("Math Lab"), formula: z.string().trim().max(220).default("f(x) = sin(x)"), matrix: z.array(z.array(z.number().finite()).min(1).max(8)).max(8).default([]) }),
-  outputSchema: z.object({ kind: z.literal("math-lab"), mode: z.string(), title: z.string(), width: z.literal(760), height: z.literal(430), svg: z.string(), eigenvalues: z.array(z.number()).optional(), trace: z.number().optional(), determinant: z.number().optional() }),
-  execute: async ({ mode, title, formula, matrix }) => ({ kind: "math-lab" as const, mode, title, width: 760 as const, height: 430 as const, svg: makeMathLabSvg(mode, title, formula, matrix), eigenvalues: mode === "matrix" && matrix.length ? symmetricEigenvalues(matrix) : undefined, trace: mode === "matrix" && matrix.length ? matrixTrace(matrix) : undefined, determinant: mode === "matrix" && matrix.length ? matrixDeterminant(matrix) : undefined })
+  outputSchema: z.object({ kind: z.literal("math-lab"), mode: z.string(), title: z.string(), width: z.literal(760), height: z.literal(430), svg: z.string(), eigenvalues: z.array(z.number()).optional(), eigenvectors: z.array(z.array(z.number())).optional(), trace: z.number().optional(), determinant: z.number().optional() }),
+  execute: async ({ mode, title, formula, matrix }) => ({ kind: "math-lab" as const, mode, title, width: 760 as const, height: 430 as const, svg: makeMathLabSvg(mode, title, formula, matrix), eigenvalues: mode === "matrix" && matrix.length ? symmetricEigenvalues(matrix) : undefined, eigenvectors: mode === "matrix" && matrix.length === 2 ? symmetricEigenvectors2x2(matrix) : undefined, trace: mode === "matrix" && matrix.length ? matrixTrace(matrix) : undefined, determinant: mode === "matrix" && matrix.length ? matrixDeterminant(matrix) : undefined })
 });

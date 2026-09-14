@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { makeMathLabSvg, matrixDeterminant, matrixTrace, symmetricEigenvalues } from "./math-lab";
+import { makeMathLabSvg, matrixDeterminant, matrixTrace, symmetricEigenvalues, symmetricEigenvectors2x2 } from "./math-lab";
 
 describe("math lab", () => {
   it("finds eigenvalues for a symmetric matrix", () => {
@@ -9,6 +9,12 @@ describe("math lab", () => {
   it("checks the basic spectral invariants", () => {
     expect(matrixTrace([[2, 1], [1, 2]])).toBe(4);
     expect(matrixDeterminant([[2, 1], [1, 2]])).toBe(3);
+  });
+
+  it("returns orthonormal eigenvectors for a 2x2 symmetric matrix", () => {
+    const vectors = symmetricEigenvectors2x2([[2, 1], [1, 2]]);
+    expect(vectors[0][0] ** 2 + vectors[0][1] ** 2).toBeCloseTo(1);
+    expect(makeMathLabSvg("matrix", "Hamiltonian", "H", [[2, 1], [1, 2]])).toContain("EIGENVECTORS");
   });
 
   it("fails closed for non-symmetric matrices", () => {

@@ -86,6 +86,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     if (!signedIn) return;
     void refreshDocuments();
     void refreshThreads();
+    const storedThread = window.localStorage.getItem("rassy-online-thread-id");
+    if (storedThread) void openThread(storedThread);
   }, [signedIn]);
 
   useEffect(() => {
@@ -519,7 +521,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
             <strong>{signedIn ? `${activeDocuments.length} stored sources` : `${sessionDocuments.length} session files`}</strong>
             {
               <label className={uploading ? "upload-button disabled" : "upload-button"}>
-                {uploading ? "Indexing" : "Upload"}
+                <span aria-hidden="true">↑</span> {uploading ? "Indexing" : "Add sources"}
                 <input type="file" multiple accept=".txt,.md,.markdown,.rst,.adoc,.json,.jsonl,.csv,.tsv,.log,.yaml,.yml,.toml,.ini,.conf,.env,.js,.jsx,.ts,.tsx,.py,.rb,.go,.rs,.java,.kt,.swift,.c,.h,.cpp,.hpp,.cs,.php,.sh,.bash,.zsh,.sql,.html,.css,.scss,.xml,.graphql,.proto,.dockerfile,text/*,application/json" onChange={uploadDocument} disabled={uploading} />
               </label>
             }
