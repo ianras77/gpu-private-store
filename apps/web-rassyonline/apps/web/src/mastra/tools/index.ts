@@ -7,6 +7,7 @@ import { timeTool } from "./time";
 import { chartTool } from "./chart";
 import { asciiArtTool } from "./ascii-art";
 import { dotMatrixTool } from "./dot-matrix";
+import { mathLabTool } from "./math-lab";
 
 export const toolRegistry = {
   "document-search": { tool: documentSearchTool, category: "knowledge", risk: "read-only", enabled: true },
@@ -18,6 +19,7 @@ export const toolRegistry = {
   ,"chart": { tool: chartTool, category: "visualization", risk: "read-only", enabled: true }
   ,"ascii-art": { tool: asciiArtTool, category: "visualization", risk: "read-only", enabled: true }
   ,"dot-matrix": { tool: dotMatrixTool, category: "visualization", risk: "read-only", enabled: true }
+  ,"math-lab": { tool: mathLabTool, category: "visualization", risk: "read-only", enabled: true }
 } as const;
 
-export const rassyTools = { documentSearch: documentSearchTool, webSearch: webSearchTool, parallelResearch: parallelResearchTool, pageReader: pageReaderTool, calculator: calculatorTool, currentTime: timeTool, chart: chartTool, asciiArt: asciiArtTool, dotMatrix: dotMatrixTool };
+export const rassyTools = { documentSearch: documentSearchTool, webSearch: webSearchTool, parallelResearch: parallelResearchTool, pageReader: pageReaderTool, calculator: calculatorTool, currentTime: timeTool, chart: chartTool, asciiArt: asciiArtTool, dotMatrix: dotMatrixTool, mathLab: mathLabTool };

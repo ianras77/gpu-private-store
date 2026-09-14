@@ -6,7 +6,7 @@ import { parseMarkdownBlocks } from "@/lib/markdown";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
 
-type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
+type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -697,7 +697,7 @@ function CodeBlock({ language, text }: { language: string | null; text: string }
 }
 
 function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
-  if (artifact.kind === "dot-matrix" && artifact.svg) return <figure className="visual-artifact dot-matrix-artifact"><div dangerouslySetInnerHTML={{ __html: artifact.svg }} /><figcaption>{artifact.title ?? "Dot-matrix artwork"} · {artifact.width ?? 500} × {artifact.height ?? 500}px</figcaption></figure>;
+  if ((artifact.kind === "dot-matrix" || artifact.kind === "math-lab") && artifact.svg) return <figure className={`visual-artifact ${artifact.kind === "math-lab" ? "math-lab-artifact" : "dot-matrix-artifact"}`}><div dangerouslySetInnerHTML={{ __html: artifact.svg }} /><figcaption>{artifact.title ?? (artifact.kind === "math-lab" ? "Math Lab" : "Dot-matrix artwork")} · {artifact.width ?? 500} × {artifact.height ?? 500}px{artifact.mode ? ` · ${artifact.mode}` : ""}</figcaption></figure>;
   if (artifact.kind === "ascii-art" && artifact.art) return <figure className="visual-artifact ascii-artifact"><pre>{artifact.art}</pre><figcaption>{artifact.title ?? "ASCII artwork"}</figcaption></figure>;
   if (artifact.kind === "chart" && artifact.labels && artifact.values) return <figure className="visual-artifact chart-artifact"><div className="chart-bars">{artifact.labels.map((label, index) => <div className="chart-bar" key={`${label}-${index}`}><span style={{ "--bar": `${Math.max(4, Math.min(100, Math.abs(artifact.values?.[index] ?? 0) / Math.max(...(artifact.values ?? [1])) * 100))}%` } as React.CSSProperties} /><b>{label}</b><small>{artifact.values?.[index]}</small></div>)}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
   if (artifact.kind === "calculator") return <section className={`visual-artifact calculator-artifact ${artifact.status === "failed" ? "failed" : ""}`}><header><span>RASSY GRAPHICS CALCULATOR</span><b>RUN / 01</b></header><div className="calculator-expression"><code>{artifact.expression}</code><span>=</span><strong>{artifact.status === "ok" ? artifact.result : "Unable to calculate"}</strong></div>{artifact.graph ? <CalculatorGraph graph={artifact.graph} /> : null}{artifact.error ? <p>{artifact.error}</p> : null}<small>Calculator · verified result{artifact.graph ? " · graph sampled from expression" : ""}</small></section>;
