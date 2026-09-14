@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { makeMathLabSvg, matrixDeterminant, matrixTrace, symmetricEigenvalues, symmetricEigenvectors2x2 } from "./math-lab";
+import { makeMathLabSvg, matrixDeterminant, matrixInverse, matrixMultiply, matrixTrace, matrixTranspose, symmetricEigenvalues, symmetricEigenvectors2x2 } from "./math-lab";
 
 describe("math lab", () => {
   it("finds eigenvalues for a symmetric matrix", () => {
@@ -15,6 +15,13 @@ describe("math lab", () => {
     const vectors = symmetricEigenvectors2x2([[2, 1], [1, 2]]);
     expect(vectors[0][0] ** 2 + vectors[0][1] ** 2).toBeCloseTo(1);
     expect(makeMathLabSvg("matrix", "Hamiltonian", "H", [[2, 1], [1, 2]])).toContain("EIGENVECTORS");
+  });
+
+  it("supports core matrix operations", () => {
+    expect(matrixTranspose([[1, 2], [3, 4]])).toEqual([[1, 3], [2, 4]]);
+    expect(matrixMultiply([[1, 2]], [[3], [4]])).toEqual([[11]]);
+    expect(matrixInverse([[2, 0], [0, 4]])).toEqual([[0.5, 0], [0, 0.25]]);
+    expect(makeMathLabSvg("fourier", "Fourier study", "f(x)", [])).toContain("polyline");
   });
 
   it("fails closed for non-symmetric matrices", () => {
