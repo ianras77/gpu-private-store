@@ -34,6 +34,7 @@ services:
     volumes:
       - ${APP_DATA_DIR}/app-data/web-rassyonline/uploads:/app-data/uploads
       - ${APP_DATA_DIR}/app-data/web-rassyonline/artifacts:/app-data/artifacts
+      - /data/runtipi/media/data/books:/books:ro
     extra_hosts:
       - host.docker.internal:host-gateway
     depends_on:
@@ -96,6 +97,7 @@ services:
       - ${APP_DATA_DIR}/app-data/web-rassyonline/artifacts:/app-data/artifacts
       - ${APP_DATA_DIR}/app-data/web-rassyonline/project-fix-fixtures:/app-data/project-fix-fixtures
       - ${APP_DATA_DIR}/app-data/web-rassyonline/project-fix-workspaces:/app-data/project-fix-workspaces
+      - /data/runtipi/media/data/books:/books:ro
     depends_on:
       rassy-online-postgres:
         condition: service_healthy

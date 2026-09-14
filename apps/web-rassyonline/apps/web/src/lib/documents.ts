@@ -15,6 +15,8 @@ export type AppDocument = {
   chunkCount: number;
   createdAt: Date;
   updatedAt: Date;
+  sourceKind?: string;
+  sourceKey?: string | null;
 };
 
 type DocumentRow = {
@@ -30,6 +32,8 @@ type DocumentRow = {
   chunk_count: number;
   created_at: Date;
   updated_at: Date;
+  source_kind?: string;
+  source_key?: string | null;
 };
 
 function mapDocument(row: DocumentRow): AppDocument {
@@ -46,13 +50,15 @@ function mapDocument(row: DocumentRow): AppDocument {
     chunkCount: row.chunk_count,
     createdAt: row.created_at,
     updatedAt: row.updated_at
+    ,sourceKind: row.source_kind
+    ,sourceKey: row.source_key
   };
 }
 
 export async function listDocumentsForUser(userId: string): Promise<AppDocument[]> {
   await ensureSchema();
   const result = await getPool().query<DocumentRow>(
-    `select id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at
+    `select id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at, source_kind, source_key
      from documents
      where user_id = $1
      order by created_at desc`,
@@ -75,7 +81,7 @@ export async function createPendingDocument(input: {
   const result = await getPool().query<DocumentRow>(
     `insert into documents (id, user_id, title, filename, mime_type, size_bytes, storage_path, checksum)
      values ($1, $2, $3, $4, $5, $6, $7, $8)
-     returning id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at`,
+     returning id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at, source_kind, source_key`,
     [id, input.userId, input.title, input.filename, input.mimeType, input.sizeBytes, input.storagePath, input.checksum]
   );
   return mapDocument(result.rows[0]);
@@ -102,7 +108,7 @@ export async function markDocumentReady(userId: string, documentId: string, chun
     `update documents
      set status = 'ready', error = null, chunk_count = $3, updated_at = now()
      where user_id = $1 and id = $2
-     returning id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at`,
+     returning id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at, source_kind, source_key`,
     [userId, documentId, chunkCount]
   );
   if (!result.rows[0]) throw new Error("document_not_found");
@@ -115,7 +121,7 @@ export async function markDocumentFailed(userId: string, documentId: string, err
     `update documents
      set status = 'failed', error = $3, updated_at = now()
      where user_id = $1 and id = $2
-     returning id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at`,
+     returning id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at, source_kind, source_key`,
     [userId, documentId, error.slice(0, 1000)]
   );
   return result.rows[0] ? mapDocument(result.rows[0]) : null;
@@ -127,10 +133,35 @@ export async function setDocumentActive(userId: string, documentId: string, acti
     `update documents
      set active = $3, updated_at = now()
      where user_id = $1 and id = $2
-     returning id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at`,
+     returning id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at, source_kind, source_key`,
     [userId, documentId, active]
   );
   if (!result.rows[0]) throw new Error("document_not_found");
+  return mapDocument(result.rows[0]);
+}
+
+export async function findLibraryDocument(userId: string, sourceKey: string) {
+  await ensureSchema();
+  const result = await getPool().query<DocumentRow>(`select id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at, source_kind, source_key from documents where user_id=$1 and source_kind='book' and source_key=$2`, [userId, sourceKey]);
+  return result.rows[0] ? mapDocument(result.rows[0]) : null;
+}
+
+export async function getLibraryChecksum(userId: string, sourceKey: string) {
+  await ensureSchema();
+  const result = await getPool().query<{ checksum: string }>("select checksum from documents where user_id=$1 and source_kind='book' and source_key=$2", [userId, sourceKey]);
+  return result.rows[0]?.checksum ?? null;
+}
+
+export async function listLibraryDocuments(userId: string) {
+  await ensureSchema();
+  const result = await getPool().query<DocumentRow>(`select id, user_id, title, filename, mime_type, size_bytes, status, active, error, chunk_count, created_at, updated_at, source_kind, source_key from documents where user_id=$1 and source_kind='book' order by filename`, [userId]);
+  return result.rows.map(mapDocument);
+}
+
+export async function createLibraryDocument(input: Parameters<typeof createPendingDocument>[0] & { sourceKey: string }) {
+  await ensureSchema();
+  const id = randomUUID();
+  const result = await getPool().query<DocumentRow>(`insert into documents (id,user_id,title,filename,mime_type,size_bytes,storage_path,checksum,source_kind,source_key) values ($1,$2,$3,$4,$5,$6,$7,$8,'book',$9) returning id,user_id,title,filename,mime_type,size_bytes,status,active,error,chunk_count,created_at,updated_at,source_kind,source_key`, [id,input.userId,input.title,input.filename,input.mimeType,input.sizeBytes,input.storagePath,input.checksum,input.sourceKey]);
   return mapDocument(result.rows[0]);
 }
 

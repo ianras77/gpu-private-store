@@ -83,6 +83,9 @@ async function migrate(): Promise<void> {
 
     create index if not exists documents_user_id_idx on documents(user_id);
     create index if not exists documents_user_active_idx on documents(user_id, active);
+    alter table documents add column if not exists source_kind text not null default 'upload';
+    alter table documents add column if not exists source_key text;
+    create unique index if not exists documents_library_source_idx on documents(user_id, source_kind, source_key) where source_kind = 'book' and source_key is not null;
 
     create table if not exists document_chunks (
       id text primary key,
