@@ -24,5 +24,3 @@ export const librarianTool = createTool({
     try { const order = await rerankTexts(query, found.map((item) => item.payload?.text ?? "")); return { status: "ok" as const, results: order.filter((index) => Number.isInteger(index) && index >= 0 && index < found.length).slice(0, limit).map((index) => format(found[index])) }; } catch { return { status: "ok" as const, results: found.slice(0, limit).map(format) }; }
   }
 });
-
-export const bookSearchTool = librarianTool;

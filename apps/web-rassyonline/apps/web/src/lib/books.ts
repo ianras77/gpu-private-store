@@ -42,6 +42,7 @@ function htmlText(value: string) {
 async function extractEpub(buffer: Buffer) {
   const zip = await JSZip.loadAsync(buffer);
   const names = Object.keys(zip.files).filter((name) => /\.(xhtml|html?|htm)$/i.test(name)).sort();
+  if (names.length > 500) throw new Error("epub_too_many_sections");
   const parts: string[] = [];
   for (const name of names) {
     const file = zip.files[name];
@@ -60,10 +61,10 @@ async function extract(file: string, buffer: Buffer) {
 async function indexBook(ownerId: string, file: string, sourceKey: string, checksum: string, buffer: Buffer, result: BookSyncResult) {
   const current = await findLibraryDocument(ownerId, sourceKey);
   if (current?.status === "ready" && (await getLibraryChecksum(ownerId, sourceKey)) === checksum) { result.unchanged++; return; }
-  if (current) { await deleteDocumentVectors(ownerId, current.id).catch(() => undefined); await getPool().query("delete from documents where id=$1", [current.id]); }
   const text = await extract(file, buffer);
   const chunks = chunkText(text, { maxChars: 2200, overlapChars: 240 });
   if (!chunks.length) throw new Error("empty_book");
+  if (current) { await deleteDocumentVectors(ownerId, current.id).catch(() => undefined); await getPool().query("delete from documents where id=$1", [current.id]); }
   const title = path.basename(file, path.extname(file)).replace(/[._-]+/g, " ").trim() || path.basename(file);
   const document = await createLibraryDocument({ userId: ownerId, title, filename: sourceKey, mimeType: path.extname(file).toLowerCase() === ".pdf" ? "application/pdf" : path.extname(file).toLowerCase() === ".epub" ? "application/epub+zip" : "text/plain", sizeBytes: buffer.byteLength, storagePath: file, checksum, sourceKey, });
   try {
