@@ -37,17 +37,12 @@ describe("public homepage research-desk direction", () => {
     }
   });
 
-  it("centers research, analysis, writing, and curation without reverting to the storefront", () => {
+  it("centers the current editorial desk without reverting to the storefront", () => {
     for (const required of [
-      "research-workbench",
-      "analysis-radar",
-      "writing-queue",
-      "source-ledger",
-      "cycle-pulse",
-      "Search sweep",
-      "Research lanes",
-      "Writing queue",
-      "Source ledger",
+      "Latest stories",
+      "Channels",
+      "Follow the threads",
+      "Desk status",
     ]) {
       assert.equal(homepageSurface.includes(required), true, `${required} should be represented in the homepage surface`);
     }

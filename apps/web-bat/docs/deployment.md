@@ -7,6 +7,17 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
+The two required secrets must be non-empty and must remain stable across
+restarts: `BAT_INTERNAL_SERVICE_TOKEN` authenticates internal API/Mastra/web
+calls, while `BAT_POSTGRES_PASSWORD` must match the password used by the
+database URL. Managed Runtipi deployments source these from the protected
+`app.env`; never commit that file or replace its values with placeholders.
+
+For a recreated empty Postgres volume, Compose runs all checked-in init SQL,
+including the Mastra editorial tables and legacy-provenance reconciliation.
+Existing volumes are not re-initialized; apply any newly added SQL migrations
+once according to the operations runbook before declaring the deployment ready.
+
 ## Health checks
 
 - API: `GET http://localhost:8017/api/v1/health/live`

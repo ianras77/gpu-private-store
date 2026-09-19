@@ -70,6 +70,9 @@ class Settings(BaseSettings):
     bat_internal_service_token: str = "change_me"
     mastra_url: str = "http://bat-mastra:8090"
     editorial_orchestrator: str = "mastra"
+    # Browser access is same-origin by default. Set a comma-separated list
+    # only when a separately hosted trusted frontend is intentionally used.
+    cors_origins: str = ""
 
     searxng_base_url: str = "https://search.rasies.com"
     searxng_search_path: str = "/search"
@@ -213,6 +216,10 @@ class Settings(BaseSettings):
     @property
     def blocked_file_extensions(self) -> tuple[str, ...]:
         return tuple(ext.strip().lower() for ext in self.searxng_blocked_file_extensions.split("|") if ext.strip())
+
+    @property
+    def allowed_cors_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 settings = Settings()

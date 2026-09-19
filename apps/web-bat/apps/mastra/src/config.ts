@@ -9,7 +9,9 @@ export const config = z.object({
   serviceToken: requiredSecret,
   persistReports: z.coerce.boolean().default(false),
   rassyMindBaseUrl: z.string().url().default('http://host.docker.internal:8844'),
-  rassyMindApiKey: z.string().min(1),
+  // Local RassyMind deployments may be intentionally unauthenticated. The
+  // request client already omits Authorization when this value is empty.
+  rassyMindApiKey: z.string().default(''),
   rassyMindModel: z.string().default('rassy-fast'),
   scheduleEnabled: z.coerce.boolean().default(false),
   scheduleIntervalSeconds: z.coerce.number().int().min(300).default(21600),

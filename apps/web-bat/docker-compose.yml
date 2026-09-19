@@ -1,5 +1,5 @@
 x-bat-runtime-env: &bat-runtime-env
-  DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://bat:bat_password_change_me@bat-postgres:5432/bat}
+  DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://bat:${BAT_POSTGRES_PASSWORD}@bat-postgres:5432/bat}
   REDIS_URL: ${REDIS_URL:-redis://bat-redis:6379/0}
   QDRANT_URL: ${QDRANT_URL:-http://bat-qdrant:6333}
   SOCIAL_PUBLISHER_URL: ${SOCIAL_PUBLISHER_URL:-http://bat-social-publisher:8100}
@@ -148,6 +148,8 @@ services:
       - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/003_trend_observation_uniqueness.sql:/docker-entrypoint-initdb.d/003_trend_observation_uniqueness.sql:ro
       - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/004_reports.sql:/docker-entrypoint-initdb.d/004_reports.sql:ro
       - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/005_report_runtime.sql:/docker-entrypoint-initdb.d/005_report_runtime.sql:ro
+      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/006_mastra_editorial_integration.sql:/docker-entrypoint-initdb.d/006_mastra_editorial_integration.sql:ro
+      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/007_legacy_provenance_reconciliation.sql:/docker-entrypoint-initdb.d/007_legacy_provenance_reconciliation.sql:ro
     healthcheck:
       test:
         - CMD-SHELL
@@ -232,7 +234,7 @@ services:
         - CMD
         - node
         - -e
-        - "fetch('http://127.0.0.1:3000/api/v1/health/live').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+        - "fetch('http://127.0.0.1:3000/').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
       interval: 20s
       timeout: 10s
       retries: 10
