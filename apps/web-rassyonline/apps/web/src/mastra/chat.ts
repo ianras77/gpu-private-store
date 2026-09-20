@@ -1,5 +1,6 @@
 import type { Agent } from "@mastra/core/agent";
 import { RequestContext } from "@mastra/core/request-context";
+import { isRetryableMastraFailure } from "./errors";
 
 export type MastraChatInput = {
   agent: Agent;
@@ -25,7 +26,7 @@ export async function streamMastraChat(input: MastraChatInput) {
   const context = input.messages.filter((message) => message.role === "system").map((message) => ({ role: "system" as const, content: message.content }));
   const requestContext = input.userId ? new RequestContext<{ userId: string }>() : undefined;
   if (requestContext && input.userId) requestContext.set("userId", input.userId);
-  return input.agent.stream(latest, {
+  const options = {
     ...(context.length ? { context } : {}),
     memory: { thread: input.threadId, resource: input.resourceId },
     maxSteps: input.maxSteps ?? 8,
@@ -34,5 +35,13 @@ export async function streamMastraChat(input: MastraChatInput) {
     ...(input.toolChoice ? { toolChoice: input.toolChoice } : {}),
     ...(requestContext ? { requestContext } : {}),
     abortSignal: input.signal,
-  });
+  };
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try { return await input.agent.stream(latest, options); }
+    catch (error) {
+      if (attempt === 1 || !isRetryableMastraFailure(error) || input.signal?.aborted) throw error;
+      await new Promise<void>((resolve, reject) => { const timer = setTimeout(resolve, 250); input.signal?.addEventListener("abort", () => { clearTimeout(timer); reject(input.signal?.reason); }, { once: true }); });
+    }
+  }
+  throw new Error("Mastra stream unavailable");
 }

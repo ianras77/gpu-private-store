@@ -15,6 +15,7 @@ import { checkAnonymousThrottle } from "@/lib/anonymous-throttle";
 import { readPublicPage } from "@/mastra/tools/page-reader";
 import { buildCurrentTimeContext, isCurrentTimeQuestion } from "@/mastra/tools/time";
 import { localOnlyExecution } from "@/mastra/local-policy";
+import { mastraFailureMessage } from "@/mastra/errors";
 
 export const dynamic = "force-dynamic";
 type ServerMessage = { role: "user" | "assistant" | "system"; content: string };
@@ -187,8 +188,8 @@ export async function POST(request: NextRequest) {
           if (unsupported.length) send("citation-warning", { status: "unsupported", count: unsupported.length });
           if (!streamFailed) send("complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searchStatus === "used" ? "source-linked" : "not-applicable" });
           controller.close();
-        } catch {
-          send("error", { message: "Mastra execution failed" });
+        } catch (error) {
+          send("error", { message: mastraFailureMessage(error), retryable: true });
           controller.close();
         }
       }
