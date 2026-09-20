@@ -6,7 +6,7 @@ export function rassymindProvider() {
     apiKey: process.env.RASSYMIND_API_KEY ?? "runtipi-server-key",
     headers: {
       "X-Rassy-Profile": "agent",
-      "X-Rassy-Domain": "rassy-online",
+      "X-Rassy-Domain": "general",
       "X-Rassy-Workload": "interactive",
       "X-Rassy-Deadline-Ms": "120000"
     }
