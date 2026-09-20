@@ -7,7 +7,7 @@ export function rassymindProvider() {
     headers: {
       "X-Rassy-Profile": "agent",
       "X-Rassy-Domain": "rassy-online",
-      "X-Rassy-Workload": "agent-tools",
+      "X-Rassy-Workload": "interactive",
       "X-Rassy-Deadline-Ms": "120000"
     }
   });
