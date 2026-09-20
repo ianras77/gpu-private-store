@@ -91,6 +91,15 @@ describe("Mastra web-search execution contract", () => {
     expect(result[0]?.title).toBe("Next.js cache documentation");
   });
 
+  it("does not let a one-word match beat a result covering the whole query", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
+      { title: "Cache", url: "https://noise.example/cache", content: "cache" },
+      { title: "Next.js 15 cache documentation", url: "https://nextjs.org/docs/cache", content: "Next.js 15 cache behavior" }
+    ] }), { status: 200 })));
+    const result = await searchWebResources("Next.js 15 cache behavior", { max_results: 1 });
+    expect(result[0]?.url).toBe("https://nextjs.org/docs/cache");
+  });
+
   it("distinguishes empty and failed searches", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ results: [] }), { status: 200 })).mockRejectedValueOnce(new Error("offline")));
     await expect(executeWebSearch({ query: "nothing" })).resolves.toEqual({ status: "empty", results: [] });

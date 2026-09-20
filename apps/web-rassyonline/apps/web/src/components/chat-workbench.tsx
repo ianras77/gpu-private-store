@@ -8,6 +8,12 @@ import { detectThemeIntent, getTheme, type ThemeId } from "@/lib/theme";
 
 type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
 
+const displayNumber = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, useGrouping: true });
+
+function sourceHost(url: string): string {
+  try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return "source"; }
+}
+
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
@@ -556,7 +562,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
               <div className="message-meta"><div className="message-actions">{message.status === "interrupted" ? <span className="search-warning">Stopped</span> : message.status === "failed" ? <span className="search-warning">Failed</span> : null}{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>▶ Listen</button></> : null}</div></div>
-              {message.sources?.length ? <details className="search-sources"><summary>Search signal <span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noreferrer"><strong>{sourceIndex + 1}. {source.title}</strong><small>{source.snippet || source.url}</small></a>)}</div></details> : null}
+              {message.sources?.length ? <details className="search-sources"><summary><span className="search-sources-label"><i aria-hidden="true">✦</i> Search signal</span><span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noopener noreferrer" aria-label={`Open ${source.title} from ${sourceHost(source.url)}`}><strong><em>{String(sourceIndex + 1).padStart(2, "0")}</em> {source.title}</strong><small><b>{sourceHost(source.url)}</b>{source.snippet ? ` · ${source.snippet}` : ""}</small></a>)}</div></details> : null}
               {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide reasoning trace" : "Show reasoning trace"}<span>RASSYMIND / TRANSPARENT</span></summary><p>{message.reasoning.trim()}</p></details> : null}
               {message.artifacts?.map((artifact, artifactIndex) => <ArtifactView artifact={artifact} key={`${artifact.kind}-${artifactIndex}`} />)}
               {message.role === "assistant" && !message.content && sending ? <ThinkingState /> : <MarkdownMessage content={message.content || ""} />}
@@ -705,7 +711,10 @@ function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
     return <figure className={`visual-artifact ${artifact.kind === "math-lab" ? "math-lab-artifact" : "dot-matrix-artifact"}`}><div dangerouslySetInnerHTML={{ __html: svg }} /><figcaption>{artifact.title ?? (artifact.kind === "math-lab" ? "Math Lab" : "Dot-matrix artwork")} · {artifact.width ?? 500} × {artifact.height ?? 500}px{artifact.mode ? ` · ${artifact.mode}` : ""}</figcaption></figure>;
   }
   if (artifact.kind === "ascii-art" && artifact.art) return <figure className="visual-artifact ascii-artifact"><pre>{artifact.art}</pre><figcaption>{artifact.title ?? "ASCII artwork"}</figcaption></figure>;
-  if (artifact.kind === "chart" && artifact.labels && artifact.values) return <figure className="visual-artifact chart-artifact"><div className="chart-bars">{artifact.labels.map((label, index) => <div className="chart-bar" key={`${label}-${index}`}><span style={{ "--bar": `${Math.max(4, Math.min(100, Math.abs(artifact.values?.[index] ?? 0) / Math.max(...(artifact.values ?? [1])) * 100))}%` } as React.CSSProperties} /><b>{label}</b><small>{artifact.values?.[index]}</small></div>)}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
+  if (artifact.kind === "chart" && artifact.labels && artifact.values) {
+    const scale = Math.max(1, ...artifact.values.map((value) => Math.abs(value)));
+    return <figure className="visual-artifact chart-artifact"><div className="chart-bars">{artifact.labels.map((label, index) => <div className="chart-bar" key={`${label}-${index}`}><span style={{ "--bar": `${Math.max(4, Math.min(100, Math.abs(artifact.values?.[index] ?? 0) / scale * 100))}%` } as React.CSSProperties} /><b>{label}</b><small>{displayNumber.format(artifact.values?.[index] ?? 0)}</small></div>)}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
+  }
   if (artifact.kind === "calculator") return <section className={`visual-artifact calculator-artifact ${artifact.status === "failed" ? "failed" : ""}`}><header><span>RASSY GRAPHICS CALCULATOR</span><b>RUN / 01</b></header><div className="calculator-expression"><code>{artifact.expression}</code><span>=</span><strong>{artifact.status === "ok" ? artifact.result : "Unable to calculate"}</strong></div>{artifact.graph ? <CalculatorGraph graph={artifact.graph} /> : null}{artifact.error ? <p>{artifact.error}</p> : null}<small>Calculator · verified result{artifact.graph ? " · graph sampled from expression" : ""}</small></section>;
   return null;
 }

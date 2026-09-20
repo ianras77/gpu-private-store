@@ -325,6 +325,16 @@ html, body { background: var(--ink); }
 .reasoning-panel, .search-sources { margin-bottom: 12px; border-color: var(--line); border-radius: 8px; background: rgba(157,245,216,.035); }
 .reasoning-panel summary, .search-sources summary { color: var(--muted); text-shadow: none; font-family: inherit; font-size: .7rem; }
 .reasoning-panel p, .search-sources a { color: var(--muted); }
+.search-sources { overflow: hidden; border-color: rgba(93, 255, 218, .32); background: linear-gradient(120deg, rgba(11, 35, 39, .72), rgba(13, 18, 24, .84)); box-shadow: 0 0 0 1px rgba(93, 255, 218, .04), 0 0 28px rgba(37, 255, 210, .07); }
+.search-sources summary { background: linear-gradient(90deg, rgba(93,255,218,.1), transparent 70%); }
+.search-sources summary:hover { color: var(--aqua); background: linear-gradient(90deg, rgba(93,255,218,.18), transparent 70%); }
+.search-sources-label { display: inline-flex; align-items: center; gap: 7px; }
+.search-sources-label i { color: #f6ee76; font-style: normal; text-shadow: 0 0 10px rgba(246,238,118,.8); }
+.search-sources a { position: relative; border-top: 1px solid rgba(93,255,218,.08); transition: background .18s ease, padding-left .18s ease; }
+.search-sources a:hover { padding-left: 12px; background: linear-gradient(90deg, rgba(93,255,218,.13), transparent); }
+.search-sources strong { display: flex; gap: 8px; align-items: baseline; color: var(--paper); }
+.search-sources strong em { color: #f6ee76; font: 700 .62rem "Courier New", monospace; font-style: normal; letter-spacing: .08em; }
+.search-sources small b { color: var(--aqua); font-weight: 600; }
 .composer-preview { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 10px 12px 12px; border-top-color: var(--line); background: #0d1010; }
 .composer-preview textarea { min-height: 46px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 11px; background: #111515; color: var(--paper); font-family: inherit; font-size: .95rem; }
 .composer-preview textarea:focus { border-color: var(--aqua); box-shadow: 0 0 0 3px rgba(157,245,216,.08); }

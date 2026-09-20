@@ -13,17 +13,21 @@ export type WebSearchResult = {
 };
 
 const SEARCH_RANGES = new Set(["day", "week", "month", "year"]);
-const SEARCH_STOP_WORDS = new Set(["the", "and", "for", "with", "from", "what", "when", "where", "which", "latest", "current", "please", "about"]);
+const SEARCH_STOP_WORDS = new Set(["a", "an", "the", "and", "or", "but", "for", "with", "from", "into", "about", "what", "when", "where", "which", "who", "how", "why", "latest", "current", "please", "can", "could", "would", "tell", "find", "look", "search", "web", "internet"]);
 
 function searchTerms(query: string): string[] {
-  return [...new Set(query.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ").split(/\s+/).filter((term) => term.length >= 3 && !SEARCH_STOP_WORDS.has(term)))].slice(0, 12);
+  return [...new Set(query.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ").split(/\s+/).filter((term) => term.length >= 2 && !SEARCH_STOP_WORDS.has(term)))].slice(0, 16);
 }
 
 function relevanceScore(result: WebSearchResult, terms: string[]): number {
-  const title = result.title.toLowerCase();
-  const snippet = result.snippet.toLowerCase();
+  const title = result.title.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ");
+  const snippet = result.snippet.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ");
   const url = result.url.toLowerCase();
-  return terms.reduce((score, term) => score + (title.includes(term) ? 5 : 0) + (snippet.includes(term) ? 2 : 0) + (url.includes(term) ? 1 : 0), 0);
+  const haystack = `${title} ${snippet} ${url}`;
+  const matched = terms.filter((term) => new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(haystack));
+  const coverage = terms.length ? matched.length / terms.length : 0;
+  const phrase = terms.length > 1 && haystack.includes(terms.join(" ")) ? 8 : 0;
+  return matched.length * 2 + Math.round(coverage * 10) + phrase + terms.reduce((score, term) => score + (title.includes(term) ? 6 : 0) + (snippet.includes(term) ? 2 : 0) + (url.includes(term) ? 1 : 0), 0);
 }
 
 type SearchResponse = {
@@ -131,9 +135,9 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
         return true;
       } catch { return false; }
     })
-    .sort((left, right) => relevanceScore(right, searchTerms(query)) - relevanceScore(left, searchTerms(query)));
-  const terms = searchTerms(query);
-  const relevant = terms.length ? normalized.filter((result) => relevanceScore(result, terms) > 0) : normalized;
+    .sort((left, right) => relevanceScore(right, searchTerms(searchQueryForPrompt(query))) - relevanceScore(left, searchTerms(searchQueryForPrompt(query))));
+  const terms = searchTerms(searchQueryForPrompt(query));
+  const relevant = terms.length ? normalized.filter((result) => relevanceScore(result, terms) >= Math.max(3, Math.ceil(terms.length * 1.5))) : normalized;
   return (relevant.length ? relevant : normalized).slice(0, Math.min(options.max_results ?? 5, 8));
 }
 
