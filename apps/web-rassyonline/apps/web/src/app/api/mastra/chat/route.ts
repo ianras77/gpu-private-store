@@ -153,6 +153,7 @@ export async function POST(request: NextRequest) {
             const toolName = part.toolName ?? (typeof payload?.toolName === "string" ? payload.toolName : typeof payload?.name === "string" ? payload.name : undefined);
             const toolCallId = part.toolCallId ?? (typeof payload?.toolCallId === "string" ? payload.toolCallId : undefined);
             if (part.type === "tool-call" || part.type === "tool-call-input-streaming-start" || part.type === "tool-call-delta") {
+              if (toolName) send("activity", { status: "using-tool", tool: toolName, toolCallId });
               if (isResearchTool(toolName)) {
                 searched = true;
                 const activityId = toolCallId ?? `${part.type}:${announcedToolCalls.size}`;

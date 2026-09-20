@@ -64,6 +64,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [threads, setThreads] = useState<ThreadSummary[]>([]);
   const [activity, setActivity] = useState(0.16);
   const [activityKind, setActivityKind] = useState<"idle" | "thinking" | "searching" | "answering">("idle");
+  const [activeTool, setActiveTool] = useState<string | null>(null);
   const [activeAgent, setActiveAgent] = useState("rassy");
   const [recording, setRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
@@ -332,6 +333,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     setSending(true);
     setActivity(0.72);
     setActivityKind("thinking");
+    setActiveTool(null);
 
     const abort = new AbortController();
     abortRef.current = abort;
@@ -385,7 +387,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         const event = record.split("\n").find((line) => line.startsWith("event: "))?.slice(7);
         if (!dataLine) return;
         const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; retryable?: boolean; citationStatus?: ChatMessage["citationStatus"]; artifact?: VisualArtifact; kind?: string };
-        if (event === "activity" && data.tool === "web-search") { searched = true; setActivityKind("searching"); }
+        if (event === "activity" && data.tool) { setActiveTool(data.tool); if (data.tool === "web-search" || data.tool === "parallel-research") { searched = true; setActivityKind("searching"); } else setActivityKind("thinking"); }
         if (event === "search") { searched = true; searchStatus = data.status ?? "empty"; sources = data.results ?? []; setActivityKind("thinking"); }
         if (event === "artifact" && data.results?.length) sources = data.results;
         if (event === "artifact" && data.artifact?.kind) {
@@ -472,6 +474,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       setSending(false);
       setActivity(0.24);
       setActivityKind("idle");
+      setActiveTool(null);
       if (signedIn) void refreshThreads();
       abortRef.current = null;
     }
@@ -546,7 +549,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       <div className="transcript-shell">
         <div className="desk-signal" aria-live="polite">
           <span className="desk-signal-pulse" />
-          <strong>{sending ? (activityKind === "searching" ? "Rassy is researching" : "Rassy is working") : "Rassy is ready"}</strong>
+          <strong>{sending ? (activityKind === "searching" ? "Rassy is researching" : activeTool ? `Rassy is using ${activeTool}` : "Rassy is working") : "Rassy is ready"}</strong>
           <small>{streamModel} · {activeAgent === "researcher" ? "source-aware" : activeAgent === "coder" ? "build-aware" : activeAgent === "knowledge" ? "document-aware" : "Mastra orchestration"}</small>
         </div>
         <div className="message-list" ref={messageListRef}>
