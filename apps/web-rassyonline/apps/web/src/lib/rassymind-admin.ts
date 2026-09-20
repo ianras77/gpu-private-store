@@ -11,8 +11,8 @@ export type RassyMindAdminSnapshot = {
 };
 
 const EXPECTED_LANES = [
-  { id: "rassy-mind", capabilities: ["chat", "streaming", "tools", "JSON Schema: unqualified"] },
-  { id: "rassy-code", capabilities: ["chat", "streaming", "tools", "JSON Schema: unqualified"] },
+  { id: "rassy-mind", capabilities: ["Qwen3.8", "chat", "streaming", "tools", "JSON Schema: unqualified", "parallel tools: unsupported"] },
+  { id: "rassy-code", capabilities: ["Qwen3.8", "chat", "streaming", "tools", "JSON Schema: unqualified", "parallel tools: unsupported"] },
   { id: "rassy-fast", capabilities: ["chat", "streaming", "qualified"] },
   { id: "rassy-utility", capabilities: ["chat", "streaming"] },
   { id: "rassy-embed", capabilities: ["4096-dimensional embeddings"] },
@@ -35,12 +35,13 @@ export async function getRassyMindAdminSnapshot(): Promise<RassyMindAdminSnapsho
     const models = (payload.models ?? []).map((model) => ({
       id: model.id ?? "unknown",
       capabilities: [
-        ...(model.chat ? ["chat", "streaming"] : []),
+        ...(model.chat || model.features?.chat === "supported" || model.features?.chat === "qualified" ? ["chat"] : []),
+        ...(model.features?.streaming === "qualified" ? ["streaming"] : []),
         ...(model.embeddings ? ["embeddings"] : []),
         ...(model.rerank ? ["rerank"] : []),
         ...(model.stt ? ["speech to text"] : []),
         ...(model.tts ? ["text to speech"] : [])
-      ].concat(model.features?.tools === "qualified" ? ["tools"] : [], model.features?.json_schema === "pending" ? ["JSON Schema: unqualified"] : [], model.features?.parallel_tools === "unsupported" ? ["parallel tools: unsupported"] : [], model.status === "qualified" ? ["qualified"] : []),
+      ].concat(model.id && ["rassy-mind", "rassy-code"].includes(model.id) ? ["Qwen3.8"] : [], model.features?.tools === "qualified" ? ["tools"] : [], model.features?.json_schema === "pending" ? ["JSON Schema: unqualified"] : [], model.features?.parallel_tools === "unsupported" ? ["parallel tools: unsupported"] : [], model.status === "qualified" ? ["qualified"] : []),
       featureStates: model.features,
       status: model.status
     }));
