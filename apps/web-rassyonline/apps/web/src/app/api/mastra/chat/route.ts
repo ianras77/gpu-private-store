@@ -160,9 +160,11 @@ export async function POST(request: NextRequest) {
               }
             } else if (part.type === "tool-result") {
               const visualOutput = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { kind?: string; title?: string; width?: number; height?: number; svg?: string; art?: string; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } } | undefined;
-              if ((visualOutput?.kind === "dot-matrix" || visualOutput?.kind === "math-lab") && visualOutput.svg) send("artifact", { kind: visualOutput.kind, status: "ready", artifact: visualOutput });
-              if (visualOutput?.kind === "ascii-art" || visualOutput?.kind === "chart") send("artifact", { kind: visualOutput.kind, status: "ready", artifact: visualOutput });
-              if (toolName === "calculator" && visualOutput?.expression) send("artifact", { kind: "calculator", status: visualOutput.status === "ok" ? "ready" : "failed", artifact: { kind: "calculator", ...visualOutput } });
+              if (visualOutput?.kind === "dot-matrix" || visualOutput?.kind === "math-lab" || visualOutput?.kind === "ascii-art" || visualOutput?.kind === "chart") {
+                const ready = visualOutput.kind === "dot-matrix" || visualOutput.kind === "math-lab" ? Boolean(visualOutput.svg) : visualOutput.kind === "ascii-art" ? Boolean(visualOutput.art) : Boolean(visualOutput.labels?.length && visualOutput.values?.length);
+                if (ready) send("artifact", { kind: visualOutput.kind, status: "ready", artifact: visualOutput });
+              }
+              if ((toolName === "calculator" || visualOutput?.kind === "calculator") && visualOutput?.expression) send("artifact", { kind: "calculator", status: visualOutput.status === "ok" ? "ready" : "failed", artifact: { kind: "calculator", ...visualOutput } });
               if (isResearchTool(toolName)) {
                 const output = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { status?: string; results?: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }>; searches?: Array<{ status: string; results: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }> }> } | undefined;
                 const results = output?.searches?.flatMap((search) => search.results) ?? output?.results ?? [];
