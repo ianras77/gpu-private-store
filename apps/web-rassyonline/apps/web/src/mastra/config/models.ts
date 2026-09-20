@@ -1,4 +1,5 @@
 export const RASSYMIND_LANES = {
+  agent: "rassy-agent",
   mind: "rassy-mind",
   code: "rassy-code",
   fast: "rassy-fast",
@@ -10,6 +11,7 @@ export const RASSYMIND_LANES = {
 export type RassyMindLane = (typeof RASSYMIND_LANES)[keyof typeof RASSYMIND_LANES];
 
 export const MODEL_CAPABILITIES = {
+  "rassy-agent": { supportsTools: true, supportsReasoning: true },
   "rassy-mind": { supportsTools: true, supportsReasoning: true },
   "rassy-code": { supportsTools: false, supportsReasoning: true },
   "rassy-fast": { supportsTools: false, supportsReasoning: false },

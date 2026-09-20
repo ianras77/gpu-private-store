@@ -3,7 +3,13 @@ import { createOpenAI } from "@ai-sdk/openai";
 export function rassymindProvider() {
   return createOpenAI({
     baseURL: `${(process.env.RASSYMIND_BASE_URL ?? "http://host.docker.internal:8844").replace(/\/+$/, "")}/v1`,
-    apiKey: process.env.RASSYMIND_API_KEY ?? "runtipi-server-key"
+    apiKey: process.env.RASSYMIND_API_KEY ?? "runtipi-server-key",
+    headers: {
+      "X-Rassy-Profile": "agent",
+      "X-Rassy-Domain": "rassy-online",
+      "X-Rassy-Workload": "agent-tools",
+      "X-Rassy-Deadline-Ms": "120000"
+    }
   });
 }
 

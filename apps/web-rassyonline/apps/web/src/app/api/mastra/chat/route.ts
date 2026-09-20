@@ -16,6 +16,7 @@ import { readPublicPage } from "@/mastra/tools/page-reader";
 import { buildCurrentTimeContext, isCurrentTimeQuestion } from "@/mastra/tools/time";
 import { localOnlyExecution } from "@/mastra/local-policy";
 import { mastraFailureMessage } from "@/mastra/errors";
+import { RASSY_AGENT_MODEL } from "@/mastra/config/runtime";
 
 export const dynamic = "force-dynamic";
 type ServerMessage = { role: "user" | "assistant" | "system"; content: string };
@@ -26,7 +27,7 @@ const schema = z.object({
   activeDocumentIds: z.array(z.string()).max(50).default([]),
   sessionDocuments: z.array(z.object({ title: z.string().trim().min(1).max(180), text: z.string().min(1).max(40_000) })).max(8).default([]),
   temperature: z.number().finite().min(0).max(1.5).default(0.7),
-  maxTokens: z.number().int().min(256).max(8192).default(2048),
+  maxTokens: z.number().int().min(256).max(8192).default(8192),
   // A browser can retain an empty streaming placeholder after a reload or
   // interrupted request. It is not a message and must not invalidate the
   // next otherwise-valid prompt.
@@ -140,6 +141,7 @@ export async function POST(request: NextRequest) {
         const isResearchTool = (name?: string) => Boolean(name && ["websearch", "parallelresearch"].includes(name.toLowerCase().replace(/[-_]/g, "")));
         const send = (event: string, data: unknown) => controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
         try {
+          send("start", { agent: executionAgent.id, model: RASSY_AGENT_MODEL, maxOutputTokens: parsed.data.maxTokens, profile: "agent" });
           if (searchRequested) {
             for (const source of preflightResults) returnedUrls.add(source.url);
             send("activity", { status: "searching", tool: "web-search", source: "preflight" });
@@ -181,7 +183,7 @@ export async function POST(request: NextRequest) {
               }
             } else if (part.type === "error") {
               streamFailed = true;
-              send("error", { message: "Mastra execution failed" });
+              send("error", { message: mastraFailureMessage(part.error), retryable: true });
             }
           }
           const unsupported = searched ? unsupportedCitationUrls(answerText, [...returnedUrls]) : [];
@@ -194,7 +196,7 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-    const response = new NextResponse(stream, { headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", connection: "keep-alive", "x-rassy-agent": executionAgent.id, "x-rassy-thread-id": threadId, "x-rassy-web-search": localOnlyExecution(parsed.data.webSearch) ? "disabled" : searchRequested ? "delegated-to-mastra" : "not-requested" } });
+    const response = new NextResponse(stream, { headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", connection: "keep-alive", "x-rassy-agent": executionAgent.id, "x-rassy-model": RASSY_AGENT_MODEL, "x-rassy-profile": "agent", "x-rassy-thread-id": threadId, "x-rassy-web-search": localOnlyExecution(parsed.data.webSearch) ? "disabled" : searchRequested ? "delegated-to-mastra" : "not-requested" } });
     if (!user && !request.cookies.get(GUEST_COOKIE)) response.cookies.set(GUEST_COOKIE, guestIdentity, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 7, path: "/" });
     return response;
   } catch (error) {

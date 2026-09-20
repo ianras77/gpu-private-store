@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, type ReactNode, useEffect, useMemo, useRef, use
 import { applyLocalChatIntent, type WebSearchMode } from "@/lib/chat-intents";
 import { parseMarkdownBlocks } from "@/lib/markdown";
 import type { ChatMode } from "@/lib/rassymind";
-import { detectThemeIntent, getTheme, THEME_PRESETS, type ThemeId } from "@/lib/theme";
+import { detectThemeIntent, getTheme, type ThemeId } from "@/lib/theme";
 
 type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
 
@@ -68,15 +68,16 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [recording, setRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [audioBusy, setAudioBusy] = useState(false);
+  const [streamModel, setStreamModel] = useState("rassy-agent");
   const abortRef = useRef<AbortController | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const requestSequenceRef = useRef(0);
+  const messageListRef = useRef<HTMLDivElement | null>(null);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
-  const activeTheme = getTheme(themeId);
 
   useEffect(() => {
     setMessages((current) => current.length === 1 && current[0]?.role === "assistant" ? [{ role: "assistant", content: OPENING_LINES[Math.floor(Math.random() * OPENING_LINES.length)] }] : current);
@@ -112,6 +113,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   useEffect(() => {
     if (messages.length > 1) window.localStorage.setItem("rassy-online-transcript", JSON.stringify(messages.slice(-60)));
   }, [messages]);
+
+  useEffect(() => {
+    if (sending && messageListRef.current) messageListRef.current.scrollTo({ top: messageListRef.current.scrollHeight, behavior: "auto" });
+  }, [messages, sending]);
 
   useEffect(() => {
     const storedDraft = window.localStorage.getItem("rassy-online-draft");
@@ -188,6 +193,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     if (!files.length) return;
     setUploading(true);
 
+    let receivedComplete = false;
     try {
       if (!signedIn) {
         const next: SessionDocument[] = [];
@@ -329,6 +335,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
     const abort = new AbortController();
     abortRef.current = abort;
+    let receivedComplete = false;
 
     try {
       const mastraThreadId = threadId ?? (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `rassy-${Date.now()}`);
@@ -355,6 +362,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       const nextThreadId = response.headers.get("x-thread-id");
       if (nextThreadId) setThreadId(nextThreadId);
       setActiveAgent(response.headers.get("x-rassy-agent") ?? "rassy");
+      setStreamModel(response.headers.get("x-rassy-model") ?? "rassy-agent");
       let searched = false;
       let searchStatus: ChatMessage["searchStatus"] = "not-used";
       let sources: ChatMessage["sources"] = [];
@@ -372,6 +380,24 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       let reasoning = "";
       let inReasoning = false;
       let eventBuffer = "";
+      const processRecord = (record: string) => {
+        const dataLine = record.split("\n").find((line) => line.startsWith("data: "));
+        const event = record.split("\n").find((line) => line.startsWith("event: "))?.slice(7);
+        if (!dataLine) return;
+        const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; retryable?: boolean; citationStatus?: ChatMessage["citationStatus"]; artifact?: VisualArtifact; kind?: string };
+        if (event === "activity" && data.tool === "web-search") { searched = true; setActivityKind("searching"); }
+        if (event === "search") { searched = true; searchStatus = data.status ?? "empty"; sources = data.results ?? []; setActivityKind("thinking"); }
+        if (event === "artifact" && data.results?.length) sources = data.results;
+        if (event === "artifact" && data.artifact?.kind) {
+          const artifact = data.artifact;
+          setMessages((current) => current.map((message, messageIndex) => messageIndex === current.length - 1 ? { ...message, artifacts: [...(message.artifacts ?? []), artifact] } : message));
+        }
+        if (event === "complete") { citationStatus = data.citationStatus; receivedComplete = true; }
+        if (event === "citation-warning") citationStatus = "unsupported";
+        if (event === "text" && data.delta) streamText += data.delta;
+        if (event === "reasoning" && data.delta) reasoning += data.delta;
+        if (event === "error") throw new Error(data.message ?? "RassyMind stream failed");
+      };
 
       while (true) {
         const { value, done } = await reader.read();
@@ -382,24 +408,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         const records = eventBuffer.split("\n\n");
         eventBuffer = records.pop() ?? "";
         for (const record of records) {
-          const dataLine = record.split("\n").find((line) => line.startsWith("data: "));
-          const event = record.split("\n").find((line) => line.startsWith("event: "))?.slice(7);
-          if (!dataLine) continue;
-          try {
-            const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; citationStatus?: ChatMessage["citationStatus"]; artifact?: VisualArtifact; kind?: string };
-            if (event === "activity" && data.tool === "web-search") { searched = true; setActivityKind("searching"); }
-            if (event === "search") { searched = true; searchStatus = data.status ?? "empty"; sources = data.results ?? []; setActivityKind("thinking"); }
-            if (event === "artifact" && data.results?.length) sources = data.results;
-            if (event === "artifact" && data.artifact?.kind) {
-              const artifact = data.artifact;
-              setMessages((current) => current.map((message, messageIndex) => messageIndex === current.length - 1 ? { ...message, artifacts: [...(message.artifacts ?? []), artifact] } : message));
-            }
-            if (event === "complete") { citationStatus = data.citationStatus; }
-            if (event === "citation-warning") { citationStatus = "unsupported"; }
-            if (event === "text" && data.delta) streamText += data.delta;
-            if (event === "reasoning" && data.delta) reasoning += data.delta;
-            if (event === "error") throw new Error(data.message ?? "Mastra execution failed");
-          } catch (error) { if (error instanceof Error && error.message === "Mastra execution failed") throw error; }
+          try { processRecord(record); } catch (error) { if (error instanceof Error) throw error; }
         }
         const reasoningStart = streamText.indexOf("<think>");
         if (reasoningStart >= 0) {
@@ -432,6 +441,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         setActivity((value) => Math.min(1, value * 0.72 + Math.min(.3, chunk.length / 180)));
         setActivityKind(reasoning ? "thinking" : "answering");
       }
+      if (eventBuffer.trim()) processRecord(eventBuffer.trim());
+      if (!receivedComplete) throw new Error("RassyMind stream ended before completion; the response may be incomplete.");
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         if (requestSequence === requestSequenceRef.current) {
@@ -455,7 +466,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       setMessages((current) => {
         const copy = [...current];
         const last = copy[copy.length - 1];
-        if (last?.role === "assistant" && last.status === "streaming") copy[copy.length - 1] = { ...last, status: "complete" };
+        if (last?.role === "assistant" && last.status === "streaming" && receivedComplete) copy[copy.length - 1] = { ...last, status: "complete" };
         return copy;
       });
       setSending(false);
@@ -489,20 +500,6 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
             ))}
           </div>
 
-          <div className="theme-options" aria-label={`Atmosphere: ${activeTheme.label}`}>
-            {THEME_PRESETS.map((theme) => (
-              <button
-                aria-label={theme.label}
-                className={theme.id === themeId ? "theme-swatch active" : "theme-swatch"}
-                data-theme-swatch={theme.id}
-                key={theme.id}
-                onClick={() => setThemeId(theme.id)}
-                type="button"
-              >
-                <span />
-              </button>
-            ))}
-          </div>
           <button className={showTuning ? "tuning-toggle active" : "tuning-toggle"} type="button" onClick={() => setShowTuning((value) => !value)} aria-expanded={showTuning}>
             Tune <span>{showTuning ? "−" : "+"}</span>
           </button>
@@ -550,9 +547,9 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         <div className="desk-signal" aria-live="polite">
           <span className="desk-signal-pulse" />
           <strong>{sending ? (activityKind === "searching" ? "Rassy is researching" : "Rassy is working") : "Rassy is ready"}</strong>
-          <small>{activeAgent === "researcher" ? "source-aware" : activeAgent === "coder" ? "build-aware" : activeAgent === "knowledge" ? "document-aware" : "automatic capability routing"}</small>
+          <small>{streamModel} · {activeAgent === "researcher" ? "source-aware" : activeAgent === "coder" ? "build-aware" : activeAgent === "knowledge" ? "document-aware" : "Mastra orchestration"}</small>
         </div>
-        <div className="message-list">
+        <div className="message-list" ref={messageListRef}>
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
               <div className="message-meta"><div className="message-actions">{message.status === "interrupted" ? <span className="search-warning">Stopped</span> : message.status === "failed" ? <span className="search-warning">Failed</span> : null}{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>▶ Listen</button></> : null}</div></div>
