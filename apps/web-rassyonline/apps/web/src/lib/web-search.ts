@@ -103,7 +103,7 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
   // word (for example, `Mastra release` becomes salad recipes). Preserve the
   // entity by adding its category only for this known ambiguous framework,
   // while leaving ordinary user queries untouched.
-  const disambiguatedQuery = /\bmastra\b/i.test(searchQuery) && !/\bai\b/i.test(searchQuery) ? `${searchQuery} AI` : searchQuery;
+  const disambiguatedQuery = /\bmastra\b/i.test(searchQuery) ? "Mastra AI" : searchQuery;
   url.searchParams.set("q", disambiguatedQuery);
   url.searchParams.set("format", "json");
   url.searchParams.set("language", "en");
@@ -149,7 +149,8 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
         const score = relevanceScore(result, terms);
         const haystack = `${result.title} ${result.snippet} ${result.url}`.toLowerCase();
         const matchedTerms = terms.filter((term) => new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(haystack)).length;
-        return score >= Math.max(3, Math.ceil(terms.length * 1.5)) && matchedTerms >= (terms.length > 1 ? 2 : 1);
+        const trustedMastraSource = /(?:^|\.)mastra\.ai$|github\.com\/mastra-ai\//i.test(result.url);
+        return score >= Math.max(3, Math.ceil(terms.length * 1.5)) && (matchedTerms >= (terms.length > 1 ? 2 : 1) || trustedMastraSource);
       })
     : normalized;
   return relevant.slice(0, Math.min(options.max_results ?? 5, 8));

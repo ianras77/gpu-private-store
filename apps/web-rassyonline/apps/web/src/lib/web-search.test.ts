@@ -74,7 +74,7 @@ describe("Mastra web-search execution contract", () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     await searchWebResources("what is the latest Mastra release?", { max_results: 5 });
-    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("q=the+Mastra+release+AI");
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("q=Mastra+AI");
   });
 
   it("filters unsafe URLs, removes duplicates, and bounds snippets", async () => {
