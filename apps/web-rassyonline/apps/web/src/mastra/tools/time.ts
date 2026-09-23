@@ -7,7 +7,7 @@ export function currentTime(timezone: string) {
 }
 
 export function isCurrentTimeQuestion(prompt: string): boolean {
-  return /\b(current date|today'?s date|what day is it|current time|what time is it|right now)\b/i.test(prompt);
+  return /\b(?:current|today'?s|today is|what(?:'s| is) the)\s+(?:date|day|time)\b|\bwhat day is (?:today|it)\b|\bwhat(?:'s| is) the time\b|\bright now\b/i.test(prompt);
 }
 
 export function buildCurrentTimeContext(timezone = "UTC") {

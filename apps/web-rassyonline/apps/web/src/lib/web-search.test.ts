@@ -24,7 +24,7 @@ describe("shouldUseWebSearch", () => {
   });
 
   it("cleans conversational search prompts", () => {
-    expect(searchQueryForPrompt("Please look up the latest Next.js release notes")).toBe("the latest Next.js release notes");
+    expect(searchQueryForPrompt("Please look up the latest Next.js release notes")).toBe("the Next.js release notes");
   });
 });
 

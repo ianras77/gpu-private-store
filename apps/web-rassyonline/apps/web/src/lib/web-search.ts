@@ -43,7 +43,7 @@ type SearchResponse = {
 
 const SEARCH_INTENT_PATTERNS = [
   /\b(search|browse|look up|lookup|web|internet)\b/i,
-  /\b(latest|recent|current|today|tonight|this week|breaking|news|release notes?|docs?|sources?|citations?)\b/i,
+  /\b(latest|recent|current|today|tonight|this week|breaking|news|release notes?|docs?|sources?|citations?|verify|fact[- ]?check)\b/i,
   /\b(weather|forecast|price|pricing|stock|score|schedule|availability|opening hours)\b/i
 ];
 const SEARCH_EXCLUSIONS = [/^what does .* mean\??$/i, /^explain\b/i, /^rewrite\b/i, /^summari[sz]e this\b/i];
@@ -51,7 +51,7 @@ const SEARCH_EXCLUSIONS = [/^what does .* mean\??$/i, /^explain\b/i, /^rewrite\b
 export function shouldUseWebSearch(prompt: string): boolean {
   const compact = prompt.trim();
   if (!compact) return false;
-  return !SEARCH_EXCLUSIONS.some((pattern) => pattern.test(compact)) && !/\b(current date|today'?s date|what day is it|current time|what time is it)\b/i.test(compact) && SEARCH_INTENT_PATTERNS.some((pattern) => pattern.test(compact));
+  return !SEARCH_EXCLUSIONS.some((pattern) => pattern.test(compact)) && !/\b(?:current|today'?s|today is|what(?:'s| is) the)\s+(?:date|day|time)\b|\bwhat day is (?:today|it)\b|\bwhat(?:'s| is) the time\b/i.test(compact) && SEARCH_INTENT_PATTERNS.some((pattern) => pattern.test(compact));
 }
 
 export function normalizeSearchQuery(query: string): string {
@@ -66,6 +66,7 @@ export function searchQueryForPrompt(query: string): string {
   const focused = normalizeSearchQuery(query)
     .replace(/\b(can you|could you|would you|please|tell me|i want to know|i need to know|find out|give me|show me|look into)\b/gi, " ")
     .replace(/\b(what is|what are|who is|where is|when is|how does|how do|why is|why are)\b/gi, " ")
+    .replace(/\b(latest|recent|currently|today|tonight|right now|this week|this month|breaking|newest)\b/gi, " ")
     .replace(/[?!]+$/g, "").replace(/\s+/g, " ").trim();
   return (focused || normalizeSearchQuery(query)).slice(0, 500);
 }
@@ -137,8 +138,15 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
     })
     .sort((left, right) => relevanceScore(right, searchTerms(searchQueryForPrompt(query))) - relevanceScore(left, searchTerms(searchQueryForPrompt(query))));
   const terms = searchTerms(searchQueryForPrompt(query));
-  const relevant = terms.length ? normalized.filter((result) => relevanceScore(result, terms) >= Math.max(3, Math.ceil(terms.length * 1.5))) : normalized;
-  return (relevant.length ? relevant : normalized).slice(0, Math.min(options.max_results ?? 5, 8));
+  const relevant = terms.length
+    ? normalized.filter((result) => {
+        const score = relevanceScore(result, terms);
+        const haystack = `${result.title} ${result.snippet} ${result.url}`.toLowerCase();
+        const matchedTerms = terms.filter((term) => new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(haystack)).length;
+        return score >= Math.max(3, Math.ceil(terms.length * 1.5)) && matchedTerms >= (terms.length > 1 ? 2 : 1);
+      })
+    : normalized;
+  return relevant.slice(0, Math.min(options.max_results ?? 5, 8));
 }
 
 export type WebSearchInput = { query: string; recency?: string; domains?: string[]; max_results?: number };
