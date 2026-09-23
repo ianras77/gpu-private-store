@@ -70,6 +70,13 @@ describe("Mastra web-search execution contract", () => {
     await expect(executeWebSearch({ query: "Mastra docs", max_results: 1 })).resolves.toEqual({ status: "ok", results: [{ title: "Docs", url: "https://mastra.ai/docs", source: "mastra.ai", publishedAt: "2026-01-01", snippet: "Useful passage", status: "ok" }] });
   });
 
+  it("preserves ambiguous Mastra entity context in the upstream query", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await searchWebResources("what is the latest Mastra release?", { max_results: 5 });
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("q=the+Mastra+release+AI");
+  });
+
   it("filters unsafe URLs, removes duplicates, and bounds snippets", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
       { title: "Good", url: "https://example.com/a", content: "x".repeat(5000) },

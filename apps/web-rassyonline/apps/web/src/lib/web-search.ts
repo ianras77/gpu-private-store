@@ -98,7 +98,13 @@ export function buildSearchContextMessage(results: WebSearchResult[]): ChatSyste
 export async function searchWebResources(query: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> = {}): Promise<WebSearchResult[]> {
   const baseUrl = process.env.RASSY_ONLINE_SEARCH_URL ?? "https://search.rasies.com";
   const url = new URL("/search", baseUrl);
-  url.searchParams.set("q", searchQueryForPrompt(query));
+  const searchQuery = searchQueryForPrompt(query);
+  // Some engines interpret a product/framework name as a normal dictionary
+  // word (for example, `Mastra release` becomes salad recipes). Preserve the
+  // entity by adding its category only for this known ambiguous framework,
+  // while leaving ordinary user queries untouched.
+  const disambiguatedQuery = /\bmastra\b/i.test(searchQuery) && !/\bai\b/i.test(searchQuery) ? `${searchQuery} AI` : searchQuery;
+  url.searchParams.set("q", disambiguatedQuery);
   url.searchParams.set("format", "json");
   url.searchParams.set("language", "en");
   url.searchParams.set("safesearch", "1");
