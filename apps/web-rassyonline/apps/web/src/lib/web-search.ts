@@ -44,7 +44,8 @@ type SearchResponse = {
 const SEARCH_INTENT_PATTERNS = [
   /\b(search|browse|look up|lookup|web|internet)\b/i,
   /\b(latest|recent|current|today|tonight|this week|breaking|news|release notes?|docs?|sources?|citations?|verify|fact[- ]?check)\b/i,
-  /\b(weather|forecast|price|pricing|stock|score|schedule|availability|opening hours)\b/i
+  /\b(weather|forecast|price|pricing|stock|score|schedule|availability|opening hours)\b/i,
+  /\b(?:[Ww]hat(?:'s| is)|[Ww]ho is|[Hh]ow does)\s+(?:the\s+)?[A-Z][\w.-]+/
 ];
 const SEARCH_EXCLUSIONS = [/^what does .* mean\??$/i, /^explain\b/i, /^rewrite\b/i, /^summari[sz]e this\b/i];
 

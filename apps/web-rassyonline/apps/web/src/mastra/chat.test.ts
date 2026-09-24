@@ -18,6 +18,9 @@ describe("Mastra chat transport", () => {
       ]
     });
     expect(stream).toHaveBeenCalledWith("latest", expect.objectContaining({ memory: { thread: "thread-1", resource: "resource-1" }, abortSignal: signal }));
+    const options = stream.mock.calls[0]?.[1] as { context?: Array<{ content: string }> };
+    expect(options.context?.[0]?.content).toContain("earlier");
+    expect(options.context?.[0]?.content).toContain("old answer");
   });
 
   it("requires a tool for research turns", async () => {

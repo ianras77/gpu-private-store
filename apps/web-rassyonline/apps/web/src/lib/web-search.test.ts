@@ -19,6 +19,12 @@ describe("shouldUseWebSearch", () => {
     expect(shouldUseWebSearch("what is the latest price of this service?")).toBe(true);
   });
 
+  it("routes named-entity knowledge questions to fresh evidence", () => {
+    expect(shouldUseWebSearch("What is Mastra?" )).toBe(true);
+    expect(shouldUseWebSearch("how does Next.js work?" )).toBe(true);
+    expect(shouldUseWebSearch("what is a closure?" )).toBe(false);
+  });
+
   it("does not send the current date to web search", () => {
     expect(shouldUseWebSearch("What is the current date?" )).toBe(false);
   });
