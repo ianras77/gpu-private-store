@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-    const response = new NextResponse(stream, { headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", connection: "keep-alive", "x-rassy-agent": executionAgent.id, "x-rassy-model": RASSY_AGENT_MODEL, "x-rassy-profile": "agent", "x-rassy-thread-id": threadId, "x-rassy-web-search": localOnlyExecution(parsed.data.webSearch) ? "disabled" : searchRequested ? "delegated-to-mastra" : "not-requested" } });
+    const response = new NextResponse(stream, { headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", connection: "keep-alive", "x-rassy-agent": executionAgent.id, "x-rassy-model": RASSY_AGENT_MODEL, "x-rassy-profile": "agent", "x-rassy-thread-id": threadId, "x-rassy-web-search": localOnlyExecution(parsed.data.webSearch) ? "disabled" : searchRequested ? "server-preflight-and-mastra-synthesis" : "not-requested" } });
     if (!user && !request.cookies.get(GUEST_COOKIE)) response.cookies.set(GUEST_COOKIE, guestIdentity, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 7, path: "/" });
     return response;
   } catch (error) {
