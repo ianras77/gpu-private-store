@@ -10,7 +10,7 @@ import { buildDocumentContextMessage } from "@/lib/document-memory";
 import { getReadyDocumentIdsForUser } from "@/lib/documents";
 import { embedTexts, rerankTexts } from "@/lib/rassymind";
 import { searchUserDocuments } from "@/lib/qdrant";
-import { maxStepsForMode, selectMastraAgent, type MastraAgentId } from "@/mastra/routing";
+import { buildExecutionBrief, maxStepsForMode, selectMastraAgent, taskShape, type MastraAgentId } from "@/mastra/routing";
 import { checkAnonymousThrottle } from "@/lib/anonymous-throttle";
 import { readPublicPage } from "@/mastra/tools/page-reader";
 import { buildCurrentTimeContext } from "@/mastra/tools/time";
@@ -114,6 +114,8 @@ export async function POST(request: NextRequest) {
       }
     }
     const comparisonRequested = Boolean(latestUserMessage?.content.match(/\b(compare|comparison|versus|vs\.?|difference|differentiate)\b/i));
+    const executionShape = latestUserMessage ? taskShape(latestUserMessage.content, { mode: parsed.data.mode, searchRequested, knowledgeRequested }) : "conversation";
+    if (latestUserMessage) messages = [{ role: "system", content: buildExecutionBrief(latestUserMessage.content, { mode: parsed.data.mode, searchRequested, knowledgeRequested }) }, ...messages];
     // Route by capability, not by whether preflight happened to return hits.
     // Search evidence is context for the researcher; it must not demote the
     // request back to the generic agent after the specialist was selected.
@@ -132,7 +134,7 @@ export async function POST(request: NextRequest) {
         ? "none"
         : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
       : undefined;
-    const result = await streamMastraChat({ agent: executionAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent), temperature: parsed.data.temperature, maxTokens: parsed.data.maxTokens, toolChoice: localOnlyExecution(parsed.data.webSearch) ? "none" : toolChoice });
+    const result = await streamMastraChat({ agent: executionAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent, executionShape), temperature: parsed.data.temperature, maxTokens: parsed.data.maxTokens, toolChoice: localOnlyExecution(parsed.data.webSearch) ? "none" : toolChoice });
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {

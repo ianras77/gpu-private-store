@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { agentForMode, maxStepsForMode, selectMastraAgent } from "./routing";
+import { agentForMode, buildExecutionBrief, maxStepsForMode, selectMastraAgent, taskShape } from "./routing";
 
 describe("Mastra automatic routing", () => {
   it("keeps ordinary conversation on Rassy", () => {
@@ -27,5 +27,12 @@ describe("Mastra automatic routing", () => {
     expect(maxStepsForMode("quick", "utility")).toBe(3);
     expect(maxStepsForMode("deep-coding", "coder")).toBe(12);
     expect(maxStepsForMode("general", "researcher")).toBe(10);
+  });
+
+  it("creates an execution posture for intelligent task completion", () => {
+    expect(taskShape("implement and verify this change", { mode: "general", searchRequested: false })).toBe("build");
+    expect(taskShape("compare these current options", { mode: "general", searchRequested: true })).toBe("research");
+    expect(buildExecutionBrief("implement and verify this change", { mode: "general", searchRequested: false })).toContain("verify outputs");
+    expect(maxStepsForMode("general", "rassy", "build")).toBe(12);
   });
 });
