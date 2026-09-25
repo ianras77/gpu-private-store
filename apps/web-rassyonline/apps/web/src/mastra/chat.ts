@@ -35,6 +35,28 @@ function buildConversationContext(messages: MastraChatInput["messages"], latest:
     : null;
 }
 
+function compactSystemContext(messages: MastraChatInput["messages"]): Array<{ role: "system"; content: string }> {
+  const budget = 48_000;
+  let remaining = budget;
+  return messages
+    .filter((message) => message.role === "system")
+    .map((message) => {
+      const content = message.content.trim().slice(0, Math.min(message.content.length, remaining));
+      remaining -= content.length;
+      return { role: "system" as const, content };
+    })
+    .filter((message) => message.content.length > 0);
+}
+
+function retryDelay(signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) { reject(signal.reason); return; }
+    const onAbort = () => { clearTimeout(timer); signal?.removeEventListener("abort", onAbort); reject(signal?.reason); };
+    const timer = setTimeout(() => { signal?.removeEventListener("abort", onAbort); resolve(); }, 250);
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
 /** Native Mastra stream seam. IDs are mandatory so memory cannot accidentally become global. */
 export async function streamMastraChat(input: MastraChatInput) {
   if (!input.threadId || !input.resourceId) throw new Error("Mastra chat requires threadId and resourceId");
@@ -43,7 +65,7 @@ export async function streamMastraChat(input: MastraChatInput) {
   // that support the qualified agent loop. Keep only this turn plus trusted
   // server context; continuity remains keyed by thread/resource.
   const latest = [...input.messages].reverse().find((message) => message.role === "user")?.content ?? "";
-  const context = input.messages.filter((message) => message.role === "system").map((message) => ({ role: "system" as const, content: message.content }));
+  const context = compactSystemContext(input.messages);
   const conversationContext = buildConversationContext(input.messages, latest);
   if (conversationContext) context.push({ role: "system", content: conversationContext });
   const requestContext = input.userId ? new RequestContext<{ userId: string }>() : undefined;
@@ -51,7 +73,7 @@ export async function streamMastraChat(input: MastraChatInput) {
   const options = {
     ...(context.length ? { context } : {}),
     memory: { thread: input.threadId, resource: input.resourceId },
-    maxSteps: input.maxSteps ?? 8,
+    maxSteps: Math.min(16, Math.max(1, input.maxSteps ?? 8)),
     ...(input.temperature === undefined ? {} : { temperature: input.temperature }),
     ...(input.maxTokens === undefined ? {} : { maxOutputTokens: input.maxTokens }),
     ...(input.toolChoice ? { toolChoice: input.toolChoice } : {}),
@@ -62,7 +84,7 @@ export async function streamMastraChat(input: MastraChatInput) {
     try { return await input.agent.stream(latest, options); }
     catch (error) {
       if (attempt === 1 || !isRetryableMastraFailure(error) || input.signal?.aborted) throw error;
-      await new Promise<void>((resolve, reject) => { const timer = setTimeout(resolve, 250); input.signal?.addEventListener("abort", () => { clearTimeout(timer); reject(input.signal?.reason); }, { once: true }); });
+      await retryDelay(input.signal);
     }
   }
   throw new Error("Mastra stream unavailable");
