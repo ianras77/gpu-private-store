@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildSearchContextMessage, buildSearchProviderQuery, executeWebSearch, interleaveSearchResults, normalizeSearchQuery, officialComparisonQueries, requiredSearchDomains, resolveSearchPrompt, SEARCH_REQUEST_TIMEOUT_MS, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
+import { buildSearchContextMessage, buildSearchProviderQuery, executeWebSearch, interleaveSearchResults, normalizeSearchQuery, officialComparisonQueries, officialSeedResults, requiredSearchDomains, resolveSearchPrompt, SEARCH_REQUEST_TIMEOUT_MS, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -39,6 +39,10 @@ describe("shouldUseWebSearch", () => {
 });
 
 describe("search constraints", () => {
+  it("offers curated first-party seeds without violating explicit source limits", () => {
+    expect(officialSeedResults("Mastra official documentation").map((result) => result.url)).toEqual(["https://mastra.ai/"]);
+    expect(officialSeedResults("Mastra official documentation", ["example.org"])).toEqual([]);
+  });
   it("gives each named subject a retrieval path in an official comparison", () => {
     expect(officialComparisonQueries("Mastra and LangGraph. Compare those two using their official documentation.")).toEqual(["Mastra official documentation", "LangGraph official documentation"]);
     expect(officialComparisonQueries("Explain Mastra")).toEqual([]);
@@ -88,6 +92,13 @@ describe("search constraints", () => {
     ] }), { status: 200, headers: { "content-type": "application/json" } })));
     const results = await searchWebResources("Compare Mastra and LangGraph using official documentation");
     expect(results.map((result) => result.url)).toEqual(["https://mastra.ai/docs", "https://docs.langchain.com/oss/python/langgraph/overview"]);
+  });
+  it("falls back to a first-party source after irrelevant backend results", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
+      { title: "Unrelated", url: "https://noise.example/", content: "nothing useful" }
+    ] }), { status: 200, headers: { "content-type": "application/json" } })));
+    const results = await searchWebResources("Mastra official documentation");
+    expect(results.map((result) => result.url)).toEqual(["https://mastra.ai/"]);
   });
 });
 

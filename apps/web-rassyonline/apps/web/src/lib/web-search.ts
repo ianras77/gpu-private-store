@@ -31,6 +31,11 @@ const OFFICIAL_ENTITY_SOURCES: Array<[RegExp, RegExp]> = [
   [/\blanggraph\b/i, /(?:^|\.)langchain\.com(?:\/|$)|^github\.com\/langchain-ai(?:\/|$)/i],
   [/\bnext(?:\.js)?\b/i, /(?:^|\.)nextjs\.org(?:\/|$)|^github\.com\/vercel\/next\.js/i]
 ];
+const OFFICIAL_ENTITY_SEEDS: Array<{ pattern: RegExp; title: string; url: string; snippet: string }> = [
+  { pattern: /\bmastra\b/i, title: "Mastra official documentation", url: "https://mastra.ai/", snippet: "Official Mastra framework documentation and product site." },
+  { pattern: /\blanggraph\b/i, title: "LangGraph official documentation", url: "https://docs.langchain.com/oss/javascript/langgraph/overview", snippet: "Official LangGraph documentation from LangChain." },
+  { pattern: /\bnext(?:\.js)?\b/i, title: "Next.js official documentation", url: "https://nextjs.org/docs", snippet: "Official Next.js documentation from Vercel." }
+];
 
 /**
  * The first pass must preserve the user's actual wording. Appending a generic
@@ -188,6 +193,24 @@ export function buildSearchContextMessage(results: WebSearchResult[]): ChatSyste
   };
 }
 
+/**
+ * SearXNG is a discovery service, not an authority. When it returns no
+ * relevant result for a known technical platform, retain a narrow curated
+ * first-party route instead of treating unrelated backend noise as a failed
+ * research turn. These URLs are still read, reranked, and cited like any
+ * other source; the catalog never expands a user-specified source boundary.
+ */
+export function officialSeedResults(query: string, domains: string[] = []): WebSearchResult[] {
+  const requested = domains.map((domain) => domain.toLocaleLowerCase());
+  return OFFICIAL_ENTITY_SEEDS
+    .filter((seed) => seed.pattern.test(query))
+    .filter((seed) => {
+      const host = new URL(seed.url).hostname;
+      return !requested.length || requested.some((domain) => host === domain || host.endsWith(`.${domain}`));
+    })
+    .map((seed) => ({ ...seed, source: new URL(seed.url).hostname, status: "ok" as const }));
+}
+
 async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> & { signal?: AbortSignal } = {}): Promise<WebSearchResult[]> {
   const baseUrl = process.env.RASSY_ONLINE_SEARCH_URL ?? "https://search.rasies.com";
   const url = new URL("/search", baseUrl);
@@ -279,13 +302,14 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
     }
   }
   const backendSafe = backendSafeSearchProviderQuery(query);
-  if (!backendSafe || [primary, fallback].some((candidate) => candidate.toLocaleLowerCase() === backendSafe.toLocaleLowerCase())) return firstPass;
+  if (!backendSafe || [primary, fallback].some((candidate) => candidate.toLocaleLowerCase() === backendSafe.toLocaleLowerCase())) return officialSeedResults(query, options.domains).slice(0, Math.min(options.max_results ?? 5, 8));
   try {
-    return await searchWebResourcesForQuery(backendSafe, query, options);
+    const safeResults = await searchWebResourcesForQuery(backendSafe, query, options);
+    return safeResults.length ? safeResults : officialSeedResults(query, options.domains).slice(0, Math.min(options.max_results ?? 5, 8));
   } catch {
     // The exact-subject pass was healthy but found no usable evidence. A
     // failed retry must not turn that truthful empty result into a fake outage.
-    return firstPass;
+    return officialSeedResults(query, options.domains).slice(0, Math.min(options.max_results ?? 5, 8));
   }
 }
 
