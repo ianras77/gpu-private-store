@@ -24,7 +24,7 @@ const copyHeaders = (source: Headers, target: Headers, names: string[]) => {
 export const proxyControllerMedia = async (
   request: Request,
   upstreamPath: string,
-  options: { timeoutMs?: number } = {}
+  options: { timeoutMs?: number; cacheControl?: string } = {}
 ) => {
   const upstreamHeaders = new Headers();
   copyHeaders(request.headers, upstreamHeaders, requestHeaderAllowlist);
@@ -49,7 +49,7 @@ export const proxyControllerMedia = async (
     copyHeaders(upstreamResponse.headers, headers, responseHeaderAllowlist);
     headers.set("Access-Control-Allow-Origin", "*");
     headers.set("X-Robots-Tag", "noindex");
-    headers.set("Cache-Control", headers.get("cache-control") || "no-store");
+    headers.set("Cache-Control", options.cacheControl ?? headers.get("cache-control") ?? "no-store");
 
     if (request.method === "HEAD") {
       upstreamResponse.body?.cancel();

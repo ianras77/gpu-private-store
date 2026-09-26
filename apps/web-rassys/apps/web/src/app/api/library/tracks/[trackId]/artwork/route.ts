@@ -8,7 +8,9 @@ export async function GET(
   context: { params: Promise<{ trackId: string }> }
 ) {
   const { trackId } = await context.params;
-  return proxyControllerMedia(request, `/public/library/tracks/${encodeURIComponent(trackId)}/artwork`);
+  return proxyControllerMedia(request, `/public/library/tracks/${encodeURIComponent(trackId)}/artwork`, {
+    cacheControl: "public, max-age=86400, immutable"
+  });
 }
 
 export async function HEAD(
@@ -16,5 +18,7 @@ export async function HEAD(
   context: { params: Promise<{ trackId: string }> }
 ) {
   const { trackId } = await context.params;
-  return proxyControllerMedia(request, `/public/library/tracks/${encodeURIComponent(trackId)}/artwork`);
+  return proxyControllerMedia(request, `/public/library/tracks/${encodeURIComponent(trackId)}/artwork`, {
+    cacheControl: "public, max-age=86400, immutable"
+  });
 }

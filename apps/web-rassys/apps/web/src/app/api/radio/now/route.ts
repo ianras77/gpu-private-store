@@ -12,9 +12,16 @@ export async function GET() {
     const data = await fetchRadio<LibraryTrack | null>("/public/now");
     const track = enrichTrack(data);
     if (track) {
-      // One stable contract for the live player: this route resolves embedded
-      // or nearby art first and supplies the branded fallback only when needed.
-      return NextResponse.json({ ...track, albumArtUrl: "/api/radio/artwork", hasArtwork: true });
+      const params = new URLSearchParams({
+        title: track.title ?? "Current record",
+        artist: track.artist ?? "Mr Rassy Radio"
+      });
+      // A track id is immutable for the library: point the browser at it
+      // directly so the image is cached for the entire song and revisits.
+      const albumArtUrl = track.hasArtwork
+        ? `/api/library/tracks/${encodeURIComponent(track.id)}/artwork`
+        : `/api/library/artwork/placeholder?${params.toString()}`;
+      return NextResponse.json({ ...track, albumArtUrl, hasArtwork: true });
     }
     return NextResponse.json(track ?? {});
   } catch {
