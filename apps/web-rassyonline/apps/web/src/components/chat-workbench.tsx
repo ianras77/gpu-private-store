@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { applyLocalChatIntent, type WebSearchMode } from "@/lib/chat-intents";
 import { parseMarkdownBlocks } from "@/lib/markdown";
+import { ServerEventParser, type ServerEvent } from "@/lib/sse";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, type ThemeId } from "@/lib/theme";
 
@@ -22,7 +23,7 @@ type ChatMessage = {
   searchStatus?: "used" | "failed" | "empty" | "not-used";
   sources?: Array<{ title: string; url: string; snippet: string }>;
   citationStatus?: "verified" | "source-linked" | "unsupported" | "not-applicable";
-  status?: "streaming" | "complete" | "interrupted" | "failed";
+  status?: "streaming" | "complete" | "truncated" | "interrupted" | "failed";
   artifacts?: VisualArtifact[];
 };
 
@@ -35,18 +36,13 @@ type UserDocument = {
   error: string | null;
   chunkCount: number;
 };
-type SessionDocument = { id: string; title: string; text: string; sizeBytes: number };
+type SessionDocument = { id: string; title: string; text: string; sizeBytes: number; truncated: boolean };
 type ThreadSummary = { id: string; title: string; updatedAt: string };
 
-const OPENING_LINES = [
-  "I’m Rassy. Go on then—give me something interesting.",
-  "Rassy online. I’m listening, judging only a little.",
-  "Ask me anything. I’ll bring the useful answers and one raised eyebrow.",
-  "Ready when you are. Make it weird, difficult, or both.",
-  "I’m here. Your move, chief."
-];
+const OPENING_LINES = ["Hi, I’m Rassy. What can I help with?"];
 
-export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn: boolean }) {
+export function ChatWorkbench({ modes, signedIn, accountId }: { modes: ChatMode[]; signedIn: boolean; accountId?: string }) {
+  const storageKey = (name: string) => `rassy-online:${accountId ?? "guest"}:${name}`;
   const [mode, setMode] = useState(modes.find((item) => item.id === "general")?.id ?? modes[0]?.id ?? "general");
   const [webSearch, setWebSearch] = useState<WebSearchMode>("auto");
   const [threadId, setThreadId] = useState<string | null>(null);
@@ -66,7 +62,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(modes[0]?.maxTokens ?? 2048);
   const [showTuning, setShowTuning] = useState(false);
-  const [showReasoning, setShowReasoning] = useState(true);
+  const [showReasoning, setShowReasoning] = useState(false);
   const [threads, setThreads] = useState<ThreadSummary[]>([]);
   const [activity, setActivity] = useState(0.16);
   const [activityKind, setActivityKind] = useState<"idle" | "thinking" | "searching" | "answering">("idle");
@@ -75,26 +71,32 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   const [recording, setRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [audioBusy, setAudioBusy] = useState(false);
+  const [speechPlaying, setSpeechPlaying] = useState(false);
   const [streamModel, setStreamModel] = useState("rassy-agent");
   const abortRef = useRef<AbortController | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const playbackRef = useRef<HTMLAudioElement | null>(null);
+  const playbackUrlRef = useRef<string | null>(null);
+  const recordingTimerRef = useRef<number | null>(null);
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const requestSequenceRef = useRef(0);
   const messageListRef = useRef<HTMLDivElement | null>(null);
+  const stickToBottomRef = useRef(true);
+  const [showJump, setShowJump] = useState(false);
 
   const activeMode = useMemo(() => modes.find((item) => item.id === mode) ?? modes[0], [mode, modes]);
   const activeDocuments = documents.filter((document) => document.active && document.status === "ready");
 
   useEffect(() => {
-    setMessages((current) => current.length === 1 && current[0]?.role === "assistant" ? [{ role: "assistant", content: OPENING_LINES[Math.floor(Math.random() * OPENING_LINES.length)] }] : current);
+    setMessages((current) => current.length === 1 && current[0]?.role === "assistant" ? [{ role: "assistant", content: OPENING_LINES[0] }] : current);
   }, []);
 
   useEffect(() => {
     if (!signedIn) return;
     void refreshDocuments();
     void refreshThreads();
-    const storedThread = window.localStorage.getItem("rassy-online-thread-id");
+    const storedThread = window.localStorage.getItem(storageKey("thread-id"));
     if (storedThread) void openThread(storedThread);
   }, [signedIn]);
 
@@ -104,35 +106,38 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
   }, []);
 
   useEffect(() => {
-    const storedThread = window.localStorage.getItem("rassy-online-thread-id");
+    if (signedIn) return;
+    const storedThread = window.localStorage.getItem(storageKey("thread-id"));
     if (storedThread) setThreadId(storedThread);
-    const storedMessages = window.localStorage.getItem("rassy-online-transcript");
+    const storedMessages = window.localStorage.getItem(storageKey("transcript"));
     if (storedMessages) {
       try {
         const restored = JSON.parse(storedMessages) as ChatMessage[];
         if (Array.isArray(restored) && restored.length) setMessages(restored.slice(-60));
       } catch {
-        window.localStorage.removeItem("rassy-online-transcript");
+        window.localStorage.removeItem(storageKey("transcript"));
       }
     }
   }, []);
 
   useEffect(() => {
-    if (messages.length > 1) window.localStorage.setItem("rassy-online-transcript", JSON.stringify(messages.slice(-60)));
-  }, [messages]);
+    if (signedIn || messages.length <= 1) return;
+    const timer = window.setTimeout(() => window.localStorage.setItem(storageKey("transcript"), JSON.stringify(messages.slice(-60))), 500);
+    return () => window.clearTimeout(timer);
+  }, [messages, signedIn]);
 
   useEffect(() => {
-    if (sending && messageListRef.current) messageListRef.current.scrollTo({ top: messageListRef.current.scrollHeight, behavior: "auto" });
+    if (sending && stickToBottomRef.current && messageListRef.current) messageListRef.current.scrollTo({ top: messageListRef.current.scrollHeight, behavior: "auto" });
   }, [messages, sending]);
 
   useEffect(() => {
-    const storedDraft = window.localStorage.getItem("rassy-online-draft");
+    const storedDraft = window.localStorage.getItem(storageKey("draft"));
     if (storedDraft) setInput(storedDraft);
   }, []);
 
   useEffect(() => {
-    if (input) window.localStorage.setItem("rassy-online-draft", input);
-    else window.localStorage.removeItem("rassy-online-draft");
+    if (input) window.localStorage.setItem(storageKey("draft"), input);
+    else window.localStorage.removeItem(storageKey("draft"));
     const textarea = composerRef.current;
     if (textarea) {
       textarea.style.height = "auto";
@@ -146,6 +151,13 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     const timer = window.setInterval(() => setRecordingSeconds(Math.floor((Date.now() - started) / 1000)), 250);
     return () => window.clearInterval(timer);
   }, [recording]);
+
+  useEffect(() => () => {
+    recorderRef.current?.stream.getTracks().forEach((track) => track.stop());
+    playbackRef.current?.pause();
+    if (playbackUrlRef.current) URL.revokeObjectURL(playbackUrlRef.current);
+    if (recordingTimerRef.current) window.clearTimeout(recordingTimerRef.current);
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.rassyTheme = themeId;
@@ -176,21 +188,24 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     abortRef.current = null;
     setSending(false);
     setThreadId(null);
-    window.localStorage.removeItem("rassy-online-thread-id");
-    window.localStorage.removeItem("rassy-online-transcript");
+    window.localStorage.removeItem(storageKey("thread-id"));
+    window.localStorage.removeItem(storageKey("transcript"));
     document.cookie = "rassy_online_thread=; Max-Age=0; Path=/; SameSite=Lax";
-    setMessages([{ role: "assistant", content: OPENING_LINES[Math.floor(Math.random() * OPENING_LINES.length)] }]);
+    setMessages([{ role: "assistant", content: OPENING_LINES[0] }]);
     setInput("");
   }
 
   async function openThread(id: string) {
-    requestSequenceRef.current += 1;
+    const sequence = ++requestSequenceRef.current;
     abortRef.current?.abort();
+    abortRef.current = null;
+    setSending(false);
     const response = await fetch(`/api/threads/${id}`, { cache: "no-store" });
-    if (!response.ok) return;
+    if (!response.ok || sequence !== requestSequenceRef.current) return;
     const data = (await response.json()) as { messages?: Array<{ role: "user" | "assistant" | "system"; content: string }> };
+    if (sequence !== requestSequenceRef.current) return;
     setThreadId(id);
-    window.localStorage.setItem("rassy-online-thread-id", id);
+    window.localStorage.setItem(storageKey("thread-id"), id);
     document.cookie = `rassy_online_thread=${encodeURIComponent(id)}; Max-Age=31536000; Path=/; SameSite=Lax`;
     setMessages((data.messages ?? []).filter((message) => message.role === "user" || message.role === "assistant").map((message) => ({ role: message.role as "user" | "assistant", content: message.content })));
   }
@@ -206,12 +221,12 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         const next: SessionDocument[] = [];
         for (const file of files) {
           if (file.size > 5 * 1024 * 1024) throw new Error(`${file.name}: guest files are limited to 5 MB`);
-          const text = (await file.text()).replace(/\s+/g, " ").trim();
+          const text = (await file.text()).replace(/\r\n/g, "\n").trim();
           if (!text) throw new Error(`${file.name}: the file is empty`);
-          next.push({ id: `${file.name}-${file.lastModified}-${file.size}`, title: file.name, text: text.slice(0, 40_000), sizeBytes: file.size });
+          next.push({ id: `${file.name}-${file.lastModified}-${file.size}`, title: file.name, text: text.slice(0, 40_000), sizeBytes: file.size, truncated: text.length > 40_000 });
         }
         setSessionDocuments((current) => [...current, ...next].slice(-8));
-        setDocumentNotice(`${next.length} file${next.length === 1 ? "" : "s"} ready for this session only. Sign in to keep them.`);
+        setDocumentNotice(`${next.length} file${next.length === 1 ? "" : "s"} ready for this session only${next.some((document) => document.truncated) ? " (content capped at 40,000 characters)" : ""}. Sign in to keep them.`);
         return;
       }
       let completed = 0;
@@ -251,6 +266,12 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     }
   }
 
+  async function removeDocument(document: UserDocument) {
+    const response = await fetch(`/api/documents/${document.id}`, { method: "DELETE" });
+    if (!response.ok) { setDocumentNotice("Could not delete the document."); return; }
+    setDocuments((current) => current.filter((item) => item.id !== document.id));
+  }
+
   async function toggleRecording() {
     if (recording) { recorderRef.current?.stop(); return; }
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) { setDocumentNotice("This browser does not support microphone recording."); return; }
@@ -261,11 +282,13 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       audioChunksRef.current = [];
       recorder.ondataavailable = (event) => { if (event.data.size) audioChunksRef.current.push(event.data); };
       recorder.onerror = () => {
+        if (recordingTimerRef.current) window.clearTimeout(recordingTimerRef.current);
         stream.getTracks().forEach((track) => track.stop());
         setRecording(false); setAudioBusy(false);
         setDocumentNotice("The microphone stopped before any audio was captured.");
       };
       recorder.onstop = async () => {
+        if (recordingTimerRef.current) window.clearTimeout(recordingTimerRef.current);
         stream.getTracks().forEach((track) => track.stop());
         setRecording(false); setAudioBusy(true);
         try {
@@ -273,6 +296,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           const extension = type.includes("mp4") ? "m4a" : type.includes("ogg") ? "ogg" : "webm";
           const blob = new Blob(audioChunksRef.current, { type });
           if (!blob.size) throw new Error("No audio was captured. Hold the mic button while speaking, then stop.");
+          if (blob.size > 25 * 1024 * 1024) throw new Error("Recording exceeds the 25 MB audio limit.");
           const form = new FormData(); form.append("file", blob, `rassy-recording.${extension}`);
           const response = await fetch("/api/audio/transcriptions", { method: "POST", body: form });
           const data = await response.json().catch(() => ({})) as { text?: string; error?: string };
@@ -282,19 +306,39 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         finally { setAudioBusy(false); }
       };
       recorderRef.current = recorder; recorder.start(250); setRecording(true); setDocumentNotice("Listening… speak naturally, then press Stop mic.");
+      recordingTimerRef.current = window.setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 120_000);
     } catch { setDocumentNotice("Microphone permission was not granted."); }
   }
 
   async function readAloud(text: string) {
+    if (playbackRef.current) {
+      playbackRef.current.pause();
+      playbackRef.current = null;
+      if (playbackUrlRef.current) URL.revokeObjectURL(playbackUrlRef.current);
+      playbackUrlRef.current = null;
+      setSpeechPlaying(false);
+      return;
+    }
     if (audioBusy || !text.trim()) return;
     setAudioBusy(true);
     try {
       const response = await fetch("/api/audio/speech", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input: text }) });
       if (!response.ok) throw new Error("Speech synthesis failed");
-      const audio = new Audio(URL.createObjectURL(await response.blob()));
-      audio.onended = () => URL.revokeObjectURL(audio.src);
+      const url = URL.createObjectURL(await response.blob());
+      const audio = new Audio(url);
+      playbackRef.current = audio;
+      playbackUrlRef.current = url;
+      audio.onended = () => { if (playbackUrlRef.current) URL.revokeObjectURL(playbackUrlRef.current); playbackRef.current = null; playbackUrlRef.current = null; setSpeechPlaying(false); };
       await audio.play();
-    } catch (error) { setDocumentNotice(error instanceof Error ? error.message : "Speech synthesis failed"); }
+      setSpeechPlaying(true);
+    } catch (error) {
+      playbackRef.current?.pause();
+      playbackRef.current = null;
+      if (playbackUrlRef.current) URL.revokeObjectURL(playbackUrlRef.current);
+      playbackUrlRef.current = null;
+      setSpeechPlaying(false);
+      setDocumentNotice(error instanceof Error ? error.message : "Speech synthesis failed");
+    }
     finally { setAudioBusy(false); }
   }
 
@@ -334,6 +378,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     const visibleMessages = intentNotice ? [...messages, intentNotice] : messages;
     const nextMessages = [...visibleMessages, { role: "user" as const, content: prompt }];
     const requestSequence = ++requestSequenceRef.current;
+    stickToBottomRef.current = true;
+    setShowJump(false);
     setMessages([...nextMessages, { role: "assistant", content: "", status: "streaming" }]);
     setInput("");
     setSending(true);
@@ -344,11 +390,13 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
     const abort = new AbortController();
     abortRef.current = abort;
     let receivedComplete = false;
+    let terminalStatus: "complete" | "truncated" = "complete";
+    let partialText = "";
 
     try {
       const mastraThreadId = threadId ?? (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `rassy-${Date.now()}`);
       if (!threadId) setThreadId(mastraThreadId);
-      window.localStorage.setItem("rassy-online-thread-id", mastraThreadId);
+      window.localStorage.setItem(storageKey("thread-id"), mastraThreadId);
       document.cookie = `rassy_online_thread=${encodeURIComponent(mastraThreadId)}; Max-Age=31536000; Path=/; SameSite=Lax`;
       const response = await fetch("/api/mastra/chat", {
         method: "POST",
@@ -367,7 +415,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         })
       });
 
-      const nextThreadId = response.headers.get("x-thread-id");
+      const nextThreadId = response.headers.get("x-rassy-thread-id") ?? response.headers.get("x-thread-id");
       if (nextThreadId) setThreadId(nextThreadId);
       setActiveAgent(response.headers.get("x-rassy-agent") ?? "rassy");
       setStreamModel(response.headers.get("x-rassy-model") ?? "rassy-agent");
@@ -383,16 +431,12 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       }
 
       const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      const parser = new ServerEventParser();
       let streamText = "";
       let reasoning = "";
       let inReasoning = false;
-      let eventBuffer = "";
-      const processRecord = (record: string) => {
-        const dataLine = record.split("\n").find((line) => line.startsWith("data: "));
-        const event = record.split("\n").find((line) => line.startsWith("event: "))?.slice(7);
-        if (!dataLine) return;
-        const data = JSON.parse(dataLine.slice(6)) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; retryable?: boolean; citationStatus?: ChatMessage["citationStatus"]; artifact?: VisualArtifact; kind?: string };
+      const processRecord = ({ event, data: raw }: ServerEvent) => {
+        const data = JSON.parse(raw) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; retryable?: boolean; citationStatus?: ChatMessage["citationStatus"]; artifact?: VisualArtifact; kind?: string };
         if (event === "activity" && data.tool) { setActiveTool(data.tool); if (data.tool === "web-search" || data.tool === "parallel-research") { searched = true; setActivityKind("searching"); } else setActivityKind("thinking"); }
         if (event === "search") { searched = true; searchStatus = data.status ?? "empty"; sources = data.results ?? []; setActivityKind("thinking"); }
         if (event === "artifact" && data.results?.length) sources = data.results;
@@ -400,9 +444,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           const artifact = data.artifact;
           setMessages((current) => current.map((message, messageIndex) => messageIndex === current.length - 1 ? { ...message, artifacts: [...(message.artifacts ?? []), artifact] } : message));
         }
-        if (event === "complete") { citationStatus = data.citationStatus; receivedComplete = true; }
+        if (event === "complete" || event === "truncated") { citationStatus = data.citationStatus; terminalStatus = event; receivedComplete = true; }
         if (event === "citation-warning") citationStatus = "unsupported";
         if (event === "text" && data.delta) streamText += data.delta;
+        if (event === "text" && data.delta) partialText += data.delta;
         if (event === "reasoning" && data.delta) reasoning += data.delta;
         if (event === "error") throw new Error(data.message ?? "RassyMind stream failed");
       };
@@ -411,13 +456,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         const { value, done } = await reader.read();
         if (done) break;
         if (requestSequence !== requestSequenceRef.current) return;
-        const chunk = decoder.decode(value, { stream: true });
-        eventBuffer += chunk;
-        const records = eventBuffer.split("\n\n");
-        eventBuffer = records.pop() ?? "";
-        for (const record of records) {
-          try { processRecord(record); } catch (error) { if (error instanceof Error) throw error; }
-        }
+        for (const record of parser.feed(value)) processRecord(record);
         const reasoningStart = streamText.indexOf("<think>");
         if (reasoningStart >= 0) {
           const reasoningEnd = streamText.indexOf("</think>", reasoningStart + 7);
@@ -446,10 +485,10 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
               copy[copy.length - 1] = { ...last, content: streamText, reasoning, searched, searchStatus, sources, citationStatus, status: "streaming" };
           return copy;
         });
-        setActivity((value) => Math.min(1, value * 0.72 + Math.min(.3, chunk.length / 180)));
+        setActivity((current) => Math.min(1, current * 0.72 + Math.min(.3, value.length / 180)));
         setActivityKind(reasoning ? "thinking" : "answering");
       }
-      if (eventBuffer.trim()) processRecord(eventBuffer.trim());
+      for (const record of parser.finish()) processRecord(record);
       if (!receivedComplete) throw new Error("RassyMind stream ended before completion; the response may be incomplete.");
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
@@ -464,9 +503,11 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         return;
       }
       const message = error instanceof Error ? error.message : "Chat request failed";
+      if (requestSequence !== requestSequenceRef.current) return;
       setMessages((current) => {
         const copy = [...current];
-        copy[copy.length - 1] = { role: "assistant", content: message, status: "failed" };
+        const last = copy[copy.length - 1];
+        copy[copy.length - 1] = { ...last, role: "assistant", content: partialText ? `${partialText}\n\nResponse interrupted: ${message}` : message, status: "failed" };
         return copy;
       });
     } finally {
@@ -474,7 +515,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       setMessages((current) => {
         const copy = [...current];
         const last = copy[copy.length - 1];
-        if (last?.role === "assistant" && last.status === "streaming" && receivedComplete) copy[copy.length - 1] = { ...last, status: "complete" };
+        if (last?.role === "assistant" && last.status === "streaming" && receivedComplete) copy[copy.length - 1] = { ...last, status: terminalStatus };
         return copy;
       });
       setSending(false);
@@ -488,21 +529,27 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
 
   return (
     <div className="rassy-chat-layout">
-      {signedIn ? <aside className="chat-history" aria-label="Chat history"><div className="history-heading"><span>RASSY / HISTORY</span><button type="button" onClick={startNewThread}>New</button></div><div className="history-list">{threads.length ? threads.map((thread) => <button className={thread.id === threadId ? "history-item active" : "history-item"} key={thread.id} type="button" onClick={() => void openThread(thread.id)}>{thread.title}<small>{new Date(thread.updatedAt).toLocaleDateString()}</small></button>) : <p>No saved chats yet.</p>}</div></aside> : null}
+      {signedIn ? <aside className="chat-history" aria-label="Chat history"><div className="history-heading"><span>Chats</span><button type="button" onClick={startNewThread}>New</button></div><div className="history-list">{threads.length ? threads.map((thread) => <button className={thread.id === threadId ? "history-item active" : "history-item"} key={thread.id} type="button" onClick={() => void openThread(thread.id)}>{thread.title}<small>{new Date(thread.updatedAt).toLocaleDateString()}</small></button>) : <p>No saved chats yet.</p>}</div></aside> : null}
       <section className="chat-workbench" aria-label="Rassy chat">
       <div className="routing-ribbon" aria-label="Rassy controls">
         <div className="lane-switcher autopilot-control" aria-label="Rassy focus">
           <div className="focus-control" role="group" aria-label="Choose response focus">
-            {([["general", "Thinking"], ["knowledge", "More thinking"], ["deep-coding", "Coding"]] as const).map(([value, label]) => (
+            {([["general", "Chat"], ["knowledge", "Documents"], ["deep-coding", "Code"]] as const).map(([value, label]) => (
               <button className={mode === value ? "active" : ""} key={value} type="button" onClick={() => setMode(value)}>{label}</button>
             ))}
           </div>
         </div>
 
         <div className="ribbon-tools">
+          <label className="web-control">Web
+            <select value={webSearch} onChange={(event) => setWebSearch(event.target.value as WebSearchMode)} aria-label="Web search policy">
+              <option value="auto">Auto</option><option value="on">On</option><option value="off">Off</option>
+            </select>
+          </label>
           <button className={showTuning ? "tuning-toggle active" : "tuning-toggle"} type="button" onClick={() => setShowTuning((value) => !value)} aria-expanded={showTuning}>
             Settings <span>{showTuning ? "−" : "+"}</span>
           </button>
+          {!signedIn ? <button className="tuning-toggle" type="button" onClick={startNewThread}>New chat</button> : null}
         </div>
 
         {showTuning ? (
@@ -512,7 +559,8 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           </div>
         ) : null}
 
-        <section className="memory-source-tray" aria-label="Document memory">
+        <details className="memory-source-tray" aria-label="Document memory">
+          <summary>Files{signedIn ? activeDocuments.length ? ` · ${activeDocuments.length} selected` : "" : sessionDocuments.length ? ` · ${sessionDocuments.length} attached` : ""}</summary>
           <div className="memory-head">
             <p className="system-label">Sources</p>
             <strong>{signedIn ? `${activeDocuments.length} stored sources` : `${sessionDocuments.length} session files`}</strong>
@@ -527,39 +575,40 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           {signedIn ? (
             <div className="document-list memory-source-list">
               {documents.map((document) => (
-                <button
+                <div className="document-entry" key={document.id}><button
                   className={document.active ? "document-pill active" : "document-pill"}
                   disabled={document.status !== "ready"}
-                  key={document.id}
                   onClick={() => toggleDocument(document)}
                   type="button"
                 >
                   <span>{document.title}</span>
                   <small>{document.status === "ready" ? `${document.chunkCount} chunks` : document.error ?? document.status}</small>
-                </button>
+                </button><button className="document-remove" type="button" onClick={() => void removeDocument(document)} aria-label={`Delete ${document.title}`}>Remove</button></div>
               ))}
             </div>
-          ) : sessionDocuments.length ? <div className="document-list memory-source-list">{sessionDocuments.map((document) => <div className="document-pill active session-document" key={document.id}><span>{document.title}</span><small>session only · {Math.ceil(document.sizeBytes / 1024)} KB</small></div>)}</div> : <p className="document-notice">Files stay in this browser session until you sign in.</p>}
-        </section>
+          ) : sessionDocuments.length ? <div className="document-list memory-source-list">{sessionDocuments.map((document) => <div className="document-entry" key={document.id}><div className="document-pill active session-document"><span>{document.title}</span><small>session only · {Math.ceil(document.sizeBytes / 1024)} KB{document.truncated ? " · truncated" : ""}</small></div><button className="document-remove" type="button" onClick={() => setSessionDocuments((current) => current.filter((item) => item.id !== document.id))} aria-label={`Remove ${document.title}`}>Remove</button></div>)}</div> : <p className="document-notice">Files stay in this browser session until you sign in.</p>}
+        </details>
       </div>
 
       <div className="transcript-shell">
-        <div className="desk-signal" aria-live="polite">
-          <span className="desk-signal-pulse" />
-          <strong>{sending ? (activityKind === "searching" ? "Rassy is researching" : activeTool ? `Rassy is using ${activeTool}` : "Rassy is working") : "Rassy is ready"}</strong>
-          <small>{streamModel} · {activeAgent === "researcher" ? "source-aware" : activeAgent === "coder" ? "build-aware" : activeAgent === "knowledge" ? "document-aware" : "Mastra orchestration"}</small>
-        </div>
-        <div className="message-list" ref={messageListRef}>
+        {sending ? <div className="desk-signal" aria-live="polite"><span className="desk-signal-pulse" /><strong>{activityKind === "searching" ? "Searching the web…" : "Rassy is working…"}</strong></div> : null}
+        <div className="message-list" ref={messageListRef} onScroll={(event) => {
+          const element = event.currentTarget;
+          const nearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 96;
+          stickToBottomRef.current = nearBottom;
+          setShowJump(!nearBottom);
+        }}>
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <div className="message-meta"><div className="message-actions">{message.status === "interrupted" ? <span className="search-warning">Stopped</span> : message.status === "failed" ? <span className="search-warning">Failed</span> : null}{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>▶ Listen</button></> : null}</div></div>
+              <div className="message-meta"><div className="message-actions">{message.status === "interrupted" ? <span className="search-warning">Stopped</span> : message.status === "failed" ? <span className="search-warning">Failed</span> : message.status === "truncated" ? <span className="search-warning">Stopped at response limit</span> : null}{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>{speechPlaying ? "■ Stop audio" : "▶ Listen"}</button></> : null}</div></div>
               {message.sources?.length ? <details className="search-sources"><summary><span className="search-sources-label"><i aria-hidden="true">✦</i> Search signal</span><span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noopener noreferrer" aria-label={`Open ${source.title} from ${sourceHost(source.url)}`}><strong><em>{String(sourceIndex + 1).padStart(2, "0")}</em> {source.title}</strong><small><b>{sourceHost(source.url)}</b>{source.snippet ? ` · ${source.snippet}` : ""}</small></a>)}</div></details> : null}
-              {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide reasoning trace" : "Show reasoning trace"}<span>RASSYMIND / TRANSPARENT</span></summary><p>{message.reasoning.trim()}</p></details> : null}
+              {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide details" : "Show details"}</summary><p>{message.reasoning.trim()}</p></details> : null}
               {message.artifacts?.map((artifact, artifactIndex) => <ArtifactView artifact={artifact} key={`${artifact.kind}-${artifactIndex}`} />)}
               {message.role === "assistant" && !message.content && sending ? <ThinkingState /> : <MarkdownMessage content={message.content || ""} />}
             </article>
           ))}
         </div>
+        {showJump ? <button className="jump-latest" type="button" onClick={() => { messageListRef.current?.scrollTo({ top: messageListRef.current.scrollHeight, behavior: "smooth" }); stickToBottomRef.current = true; setShowJump(false); }}>Jump to latest</button> : null}
       </div>
 
       <form className="composer-preview live" onSubmit={sendMessage}>
@@ -568,7 +617,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+            if (event.key === "Enter" && !event.nativeEvent.isComposing && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
               event.preventDefault();
               if (!sending && input.trim()) event.currentTarget.form?.requestSubmit();
             }
@@ -579,8 +628,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
         />
         <button type="button" className={recording ? "recording voice-button" : "voice-button"} onClick={() => void toggleRecording()} disabled={audioBusy} aria-label={recording ? "Stop recording" : "Dictate message"}>{recording ? `Stop ${recordingSeconds}s` : audioBusy ? "Transcribing…" : "Voice"}</button>
         {sending ? <button type="button" onClick={() => abortRef.current?.abort()}>Stop</button> : null}
-        <button type="button" onClick={startNewThread} aria-label="Clear chat">Clear chat</button>
-        <button type="submit">Send</button>
+        {!sending ? <button type="submit">Send</button> : null}
       </form>
 
       </section>
@@ -703,17 +751,48 @@ function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
   }
   if (artifact.kind === "ascii-art" && artifact.art) return <figure className="visual-artifact ascii-artifact"><pre>{artifact.art}</pre><figcaption>{artifact.title ?? "ASCII artwork"}</figcaption></figure>;
   if (artifact.kind === "chart" && artifact.labels && artifact.values) {
+    if (artifact.type !== "bar") return <ArtifactFallback label={`${artifact.type ?? "This"} chart rendering is not available yet.`} />;
     const scale = Math.max(1, ...artifact.values.map((value) => Math.abs(value)));
-    return <figure className="visual-artifact chart-artifact"><div className="chart-bars">{artifact.labels.map((label, index) => <div className="chart-bar" key={`${label}-${index}`}><span style={{ "--bar": `${Math.max(4, Math.min(100, Math.abs(artifact.values?.[index] ?? 0) / scale * 100))}%` } as React.CSSProperties} /><b>{label}</b><small>{displayNumber.format(artifact.values?.[index] ?? 0)}</small></div>)}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
+    return <figure className="visual-artifact chart-artifact"><div className="chart-bars signed">{artifact.labels.map((label, index) => {
+      const value = artifact.values?.[index] ?? 0;
+      return <div className="chart-bar" key={`${label}-${index}`}><div className="chart-positive">{value > 0 ? <span style={{ height: `${value / scale * 100}%` }} /> : null}</div><div className="chart-negative">{value < 0 ? <span style={{ height: `${-value / scale * 100}%` }} /> : value === 0 ? <i aria-label="zero value" /> : null}</div><b>{label}</b><small>{displayNumber.format(value)}</small></div>;
+    })}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
   }
   if (artifact.kind === "calculator") return <section className={`visual-artifact calculator-artifact ${artifact.status === "failed" ? "failed" : ""}`}><header><span>RASSY GRAPHICS CALCULATOR</span><b>RUN / 01</b></header><div className="calculator-expression"><code>{artifact.expression}</code><span>=</span><strong>{artifact.status === "ok" ? artifact.result : "Unable to calculate"}</strong></div>{artifact.graph ? <CalculatorGraph graph={artifact.graph} /> : null}{artifact.error ? <p>{artifact.error}</p> : null}<small>Calculator · verified result{artifact.graph ? " · graph sampled from expression" : ""}</small></section>;
   return null;
 }
 
 function sanitizeArtifactSvg(input: string): string | null {
-  if (input.length > 220_000 || !/^\s*<svg[\s>]/i.test(input) || /<(?:script|iframe|object|embed|foreignObject)\b/i.test(input)) return null;
-  const sanitized = input.replace(/\s(?:on[a-z]+|href|xlink:href)\s*=\s*(["'])[^"']*\1/gi, "").replace(/url\s*\(\s*['"]?(?:https?:|data:|javascript:)[^)]*\)?/gi, "none");
-  return sanitized.length <= 220_000 ? sanitized : null;
+  if (input.length > 220_000 || typeof DOMParser === "undefined" || typeof XMLSerializer === "undefined") return null;
+  const parsed = new DOMParser().parseFromString(input, "image/svg+xml");
+  if (parsed.querySelector("parsererror") || parsed.documentElement.localName !== "svg") return null;
+  const namespace = "http://www.w3.org/2000/svg";
+  const allowedTags = new Set(["svg", "g", "rect", "circle", "line", "path", "polyline", "polygon", "text", "title"]);
+  const allowedAttributes = new Set(["width", "height", "viewBox", "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "d", "points", "fill", "stroke", "stroke-width", "opacity", "text-anchor", "role", "aria-label", "class"]);
+  const safeValue = (name: string, value: string) => {
+    if (name === "aria-label") return value.length <= 160;
+    if (name === "role") return value === "img";
+    if (name === "class") return /^[a-z-]{1,30}$/.test(value);
+    if (name === "fill" || name === "stroke") return /^(?:none|white|black|#[0-9a-f]{3,8})$/i.test(value);
+    if (name === "text-anchor") return /^(?:start|middle|end)$/.test(value);
+    return value.length <= 20_000 && /^[0-9eE+.,%\s\-a-zA-Z]*$/.test(value);
+  };
+  const clean = parsed.implementation.createDocument(namespace, "svg", null);
+  const copy = (source: Element, target: Element, depth: number): void => {
+    if (depth > 16) return;
+    for (const attribute of Array.from(source.attributes)) {
+      if (allowedAttributes.has(attribute.name) && safeValue(attribute.name, attribute.value)) target.setAttribute(attribute.name, attribute.value);
+    }
+    if (source.localName === "text" || source.localName === "title") target.textContent = source.textContent?.slice(0, 1000) ?? "";
+    for (const child of Array.from(source.children)) {
+      if (child.namespaceURI !== namespace || !allowedTags.has(child.localName)) continue;
+      const next = clean.createElementNS(namespace, child.localName);
+      copy(child, next, depth + 1);
+      target.appendChild(next);
+    }
+  };
+  copy(parsed.documentElement, clean.documentElement, 0);
+  return new XMLSerializer().serializeToString(clean);
 }
 
 function ArtifactFallback({ label }: { label: string }) {
@@ -726,10 +805,16 @@ function CalculatorGraph({ graph }: { graph: NonNullable<VisualArtifact["graph"]
   const minY = Math.min(...valid.map((point) => point.y as number), -1);
   const maxY = Math.max(...valid.map((point) => point.y as number), 1);
   const rangeY = maxY - minY || 1;
-  const points = valid.map((point) => `${((point.x - graph.xMin) / (graph.xMax - graph.xMin) * 100).toFixed(2)},${(100 - ((point.y as number - minY) / rangeY * 100)).toFixed(2)}`).join(" ");
+  const segments: string[] = [];
+  let current: string[] = [];
+  for (const point of graph.points) {
+    if (point.y === null) { if (current.length) segments.push(current.join(" ")); current = []; continue; }
+    current.push(`${((point.x - graph.xMin) / (graph.xMax - graph.xMin) * 100).toFixed(2)},${(100 - ((point.y - minY) / rangeY * 100)).toFixed(2)}`);
+  }
+  if (current.length) segments.push(current.join(" "));
   const zeroX = graph.xMin <= 0 && graph.xMax >= 0 ? ((-graph.xMin) / (graph.xMax - graph.xMin) * 100) : null;
   const zeroY = minY <= 0 && maxY >= 0 ? (100 - ((0 - minY) / rangeY * 100)) : null;
-  return <div className="calculator-graph"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Graph of calculator expression"><path className="graph-grid" d="M0 25H100M0 50H100M0 75H100M25 0V100M50 0V100M75 0V100" />{zeroX !== null ? <path className="graph-axis" d={`M${zeroX} 0V100`} /> : null}{zeroY !== null ? <path className="graph-axis" d={`M0 ${zeroY}H100`} /> : null}<polyline className="graph-line" points={points} /></svg><div className="graph-labels"><span>{graph.xMin}</span><span>0</span><span>{graph.xMax}</span></div></div>;
+  return <div className="calculator-graph"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Graph of calculator expression"><path className="graph-grid" d="M0 25H100M0 50H100M0 75H100M25 0V100M50 0V100M75 0V100" />{zeroX !== null ? <path className="graph-axis" d={`M${zeroX} 0V100`} /> : null}{zeroY !== null ? <path className="graph-axis" d={`M0 ${zeroY}H100`} /> : null}{segments.map((points, index) => <polyline className="graph-line" points={points} key={index} />)}</svg><div className="graph-labels"><span>{graph.xMin}</span><span>0</span><span>{graph.xMax}</span></div></div>;
 }
 
 function renderInline(text: string) {

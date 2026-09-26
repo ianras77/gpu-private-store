@@ -34,4 +34,9 @@ describe("math lab", () => {
     expect(svg).toContain("3.00000");
     expect(svg).toContain("width=\"760\"");
   });
+
+  it("breaks a plot at undefined samples", () => {
+    const svg = makeMathLabSvg("plot", "Reciprocal", "1/x", []);
+    expect((svg.match(/<polyline class="curve"/g) ?? []).length).toBe(2);
+  });
 });

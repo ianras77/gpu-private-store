@@ -8,6 +8,8 @@ export type MastraChatInput = {
   threadId: string;
   resourceId: string;
   userId?: string;
+  selectedDocumentIds?: string[];
+  includePriorContext?: boolean;
   signal?: AbortSignal;
   maxSteps?: number;
   temperature?: number;
@@ -16,7 +18,11 @@ export type MastraChatInput = {
 };
 
 function buildConversationContext(messages: MastraChatInput["messages"], latest: string): string | null {
-  const prior = messages.filter((message) => message.role !== "system" && message.content !== latest).slice(-20);
+  let latestIndex = -1;
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index].role === "user" && messages[index].content === latest) { latestIndex = index; break; }
+  }
+  const prior = messages.slice(0, latestIndex < 0 ? messages.length : latestIndex).filter((message) => message.role !== "system").slice(-20);
   if (!prior.length) return null;
   const budget = 18_000;
   let used = 0;
@@ -66,16 +72,21 @@ export async function streamMastraChat(input: MastraChatInput) {
   // server context; continuity remains keyed by thread/resource.
   const latest = [...input.messages].reverse().find((message) => message.role === "user")?.content ?? "";
   const context = compactSystemContext(input.messages);
-  const conversationContext = buildConversationContext(input.messages, latest);
+  const conversationContext = input.includePriorContext ? buildConversationContext(input.messages, latest) : null;
   if (conversationContext) context.push({ role: "system", content: conversationContext });
-  const requestContext = input.userId ? new RequestContext<{ userId: string }>() : undefined;
-  if (requestContext && input.userId) requestContext.set("userId", input.userId);
+  const requestContext = input.userId ? new RequestContext<{ userId: string; selectedDocumentIds: string[] }>() : undefined;
+  if (requestContext && input.userId) {
+    requestContext.set("userId", input.userId);
+    requestContext.set("selectedDocumentIds", input.selectedDocumentIds ?? []);
+  }
   const options = {
     ...(context.length ? { context } : {}),
     memory: { thread: input.threadId, resource: input.resourceId },
     maxSteps: Math.min(16, Math.max(1, input.maxSteps ?? 8)),
-    ...(input.temperature === undefined ? {} : { temperature: input.temperature }),
-    ...(input.maxTokens === undefined ? {} : { maxOutputTokens: input.maxTokens }),
+    ...(input.temperature === undefined && input.maxTokens === undefined ? {} : { modelSettings: {
+      ...(input.temperature === undefined ? {} : { temperature: input.temperature }),
+      ...(input.maxTokens === undefined ? {} : { maxOutputTokens: input.maxTokens })
+    } }),
     ...(input.toolChoice ? { toolChoice: input.toolChoice } : {}),
     ...(requestContext ? { requestContext } : {}),
     abortSignal: input.signal,

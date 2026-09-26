@@ -4,6 +4,11 @@ import { embedTexts, rerankTexts } from "@/lib/rassymind";
 import { getReadyDocumentIdsForUser } from "@/lib/documents";
 import { searchUserDocuments } from "@/lib/qdrant";
 
+export function permittedDocumentIds(selected: string[], requested?: string[]): string[] {
+  const allowed = new Set(selected);
+  return [...new Set(requested ?? selected)].filter((id) => allowed.has(id));
+}
+
 export const documentSearchTool = createTool({
   id: "document-search",
   description: "Search only the authenticated user's selected, ready documents.",
@@ -12,7 +17,9 @@ export const documentSearchTool = createTool({
   execute: async ({ query, documentIds, limit }, context) => {
     const userId = context?.requestContext?.get?.("userId");
     if (typeof userId !== "string" || !userId) return { status: "unauthorized" as const, results: [] };
-    const ids = [...new Set(await getReadyDocumentIdsForUser(userId, [...new Set(documentIds ?? [])]))];
+    const selected = context?.requestContext?.get?.("selectedDocumentIds");
+    if (!Array.isArray(selected)) return { status: "unauthorized" as const, results: [] };
+    const ids = [...new Set(await getReadyDocumentIdsForUser(userId, permittedDocumentIds(selected, documentIds)))];
     if (!ids.length) return { status: "empty" as const, results: [] };
     const [vector] = await embedTexts([query]);
     const found = await searchUserDocuments({ userId, documentIds: ids, vector, limit });

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE } from "@/lib/auth/sessions";
 import { getUserForSessionToken } from "@/lib/auth/users";
-import { listThreadsForUser } from "@/lib/chat-store";
+import { listConversationThreads } from "@/lib/conversation-history";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +11,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: true, threads: [] });
   }
 
-  const threads = await listThreadsForUser(user.id);
+  const threads = await listConversationThreads(user.id);
   return NextResponse.json({ ok: true, threads });
 }
