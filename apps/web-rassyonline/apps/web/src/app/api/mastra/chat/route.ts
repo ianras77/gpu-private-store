@@ -4,7 +4,7 @@ import { createGuestIdentity, GUEST_COOKIE, SESSION_COOKIE } from "@/lib/auth/se
 import { getUserForSessionToken } from "@/lib/auth/users";
 import { agentRegistry } from "@/mastra";
 import { conversationMemory } from "@/mastra/agents";
-import { rassyLocal } from "@/mastra/agents";
+import { rassyLocal, researcherGrounded } from "@/mastra/agents";
 import { streamMastraChat } from "@/mastra/chat";
 import { buildSearchContextMessage, interleaveSearchResults, officialComparisonQueries, requiredSearchDomains, resolveSearchPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "@/lib/web-search";
 import { getConversationForUser } from "@/lib/conversation-history";
@@ -148,8 +148,8 @@ export async function POST(request: NextRequest) {
                 ? interleaveSearchResults(await Promise.all(comparisonQueries.map((query) => searchWebResources(query, { max_results: 4, recency: searchRecencyForPrompt(latestUserMessage.content), domains: requiredDomains, signal: request.signal }))))
                 : await searchWebResources(researchPrompt, { max_results: 8, recency: searchRecencyForPrompt(latestUserMessage.content), domains: requiredDomains, signal: request.signal });
               const pages = await Promise.all(preflightResults.slice(0, 5).map((source) => readPublicPage(source.url, request.signal)));
-              const readablePages = pages.filter((page) => page.status === "ok" && page.text).map((page) => `[Page evidence] ${page.title}\n${page.url}\n${page.text}`);
-              if (readablePages.length) {
+              let readablePages: string[] = [];
+              if (pages.some((page) => page.status === "ok" && page.text)) {
                 const pageRanks = await rerankTexts(latestUserMessage.content, pages.map((page, index) => page?.status === "ok" && page.text ? `${page.title}\n${page.text}` : preflightResults[index]?.snippet ?? "")).catch(() => []);
                 const rankedIndexes = pageRanks.length ? pageRanks.filter((index) => Number.isInteger(index) && index >= 0 && index < preflightResults.length) : preflightResults.map((_, index) => index);
                 preflightResults = rankedIndexes.map((index) => {
@@ -157,6 +157,15 @@ export async function POST(request: NextRequest) {
                   const page = pages[index];
                   return page?.status === "ok" && page.text ? { ...source, title: page.title || source.title, url: page.url, originalUrl: source.url, snippet: page.text.slice(0, 1200) } : source;
                 });
+                // Raw pages are noisy and can be very large. Supplying five
+                // full documents was enough to crowd out the user turn and
+                // trigger unstable, word-dump completions. Give the model a
+                // compact, reranked evidence packet instead.
+                readablePages = rankedIndexes
+                  .map((index) => pages[index])
+                  .filter((page) => page?.status === "ok" && page.text)
+                  .slice(0, 2)
+                  .map((page) => `[Page evidence] ${page.title}\n${page.url}\n${page.text.slice(0, 3_000)}`);
               }
               const context = buildSearchContextMessage(preflightResults);
               if (context) messages = [context, ...messages];
@@ -168,10 +177,16 @@ export async function POST(request: NextRequest) {
             if (preflightResults.length) send("artifact", { kind: "source-board", status: "ready", sources: preflightResults });
           }
           if (request.signal.aborted) throw new Error("request cancelled");
+          // Preflight has already searched, filtered, read, and reranked the
+          // evidence. Letting the model search again here caused repeated
+          // identical tool loops and diluted the answer. Keep tools mandatory
+          // only when the evidence packet is absent; otherwise synthesize the
+          // bounded packet we can actually show and cite.
           const toolChoice = requiredDomains.length ? "none" : selectedAgent === "researcher"
-            ? preflightResults.length ? "auto" : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
+            ? preflightResults.length ? "none" : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
             : undefined;
-          const result = await streamMastraChat({ agent: executionAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, selectedDocumentIds, includePriorContext: !existingThread, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent, executionShape), temperature: parsed.data.temperature, maxTokens: outputLimit, toolChoice: localOnlyExecution(parsed.data.webSearch) ? undefined : toolChoice });
+          const turnAgent = selectedAgent === "researcher" && preflightResults.length ? researcherGrounded : executionAgent;
+          const result = await streamMastraChat({ agent: turnAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, selectedDocumentIds, includePriorContext: !existingThread, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent, executionShape), temperature: parsed.data.temperature, maxTokens: outputLimit, toolChoice: localOnlyExecution(parsed.data.webSearch) ? undefined : toolChoice });
           for await (const part of result.fullStream as AsyncIterable<{ type: string; textDelta?: string; delta?: string; text?: string; reasoning?: string; reasoningDelta?: string; reasoning_content?: string; toolName?: string; toolCallId?: string; output?: unknown; result?: unknown; payload?: Record<string, unknown>; error?: unknown; finishReason?: string }>) {
             const payload = part.payload;
             if (part.type === "finish" || part.type === "finish-step") finishReason = part.finishReason ?? (typeof payload?.finishReason === "string" ? payload.finishReason : finishReason);

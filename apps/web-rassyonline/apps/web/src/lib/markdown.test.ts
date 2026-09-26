@@ -54,4 +54,12 @@ describe("parseMarkdownBlocks", () => {
       { type: "code", language: "json", text: "{\"ok\":true}" }
     ]);
   });
+
+  it("keeps display mathematics as a dedicated block", () => {
+    expect(parseMarkdownBlocks("Before\n\n$$\nE = mc^2\n$$\n\nAfter")).toEqual([
+      { type: "paragraph", text: "Before" },
+      { type: "math", text: "E = mc^2" },
+      { type: "paragraph", text: "After" }
+    ]);
+  });
 });

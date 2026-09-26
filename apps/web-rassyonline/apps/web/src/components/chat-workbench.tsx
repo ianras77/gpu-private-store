@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import katex from "katex";
 import { applyLocalChatIntent, type WebSearchMode } from "@/lib/chat-intents";
 import { parseMarkdownBlocks } from "@/lib/markdown";
 import { ServerEventParser, type ServerEvent } from "@/lib/sse";
@@ -600,7 +601,7 @@ export function ChatWorkbench({ modes, signedIn, accountId }: { modes: ChatMode[
         }}>
           {messages.map((message, index) => (
             <article className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <div className="message-meta"><div className="message-actions">{message.status === "interrupted" ? <span className="search-warning">Stopped</span> : message.status === "failed" ? <span className="search-warning">Failed</span> : message.status === "truncated" ? <span className="search-warning">Stopped at response limit</span> : null}{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search failed</span> : message.searchStatus === "empty" ? <span className="search-warning">No usable results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>{speechPlaying ? "■ Stop audio" : "▶ Listen"}</button></> : null}</div></div>
+              <div className="message-meta"><div className="message-actions">{message.status === "interrupted" ? <span className="search-warning">Stopped</span> : message.status === "failed" ? <span className="search-warning">Failed</span> : message.status === "truncated" ? <span className="search-warning">Stopped at response limit</span> : null}{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search unavailable</span> : message.searchStatus === "empty" ? <span className="search-warning">No relevant web results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>{speechPlaying ? "■ Stop audio" : "▶ Listen"}</button></> : null}</div></div>
               {message.sources?.length ? <details className="search-sources"><summary><span className="search-sources-label"><i aria-hidden="true">✦</i> Search signal</span><span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noopener noreferrer" aria-label={`Open ${source.title} from ${sourceHost(source.url)}`}><strong><em>{String(sourceIndex + 1).padStart(2, "0")}</em> {source.title}</strong><small><b>{sourceHost(source.url)}</b>{source.snippet ? ` · ${source.snippet}` : ""}</small></a>)}</div></details> : null}
               {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide details" : "Show details"}</summary><p>{message.reasoning.trim()}</p></details> : null}
               {message.artifacts?.map((artifact, artifactIndex) => <ArtifactView artifact={artifact} key={`${artifact.kind}-${artifactIndex}`} />)}
@@ -712,6 +713,7 @@ function MarkdownMessage({ content }: { content: string }) {
         if (block.type === "code") {
           return <CodeBlock key={index} language={block.language} text={block.text} />;
         }
+        if (block.type === "math") return <MathExpression key={index} tex={block.text} display />;
         return <p key={index}>{renderInline(block.text)}</p>;
       })}
     </div>
@@ -741,6 +743,15 @@ function CopyButton({ text, label }: { text: string; label: string }) {
 
 function CodeBlock({ language, text }: { language: string | null; text: string }) {
   return <div className="code-block"><div className="code-toolbar"><span>{language ?? "code"}</span><CopyButton text={text} label="Copy code" /></div><pre><code>{text}</code></pre></div>;
+}
+
+function MathExpression({ tex, display = false }: { tex: string; display?: boolean }) {
+  try {
+    const html = katex.renderToString(tex, { displayMode: display, throwOnError: false, strict: "warn", trust: false, output: "htmlAndMathml" });
+    return <span className={display ? "math-display" : "math-inline"} dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch {
+    return <code className="math-fallback">{tex}</code>;
+  }
 }
 
 function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
@@ -819,7 +830,7 @@ function CalculatorGraph({ graph }: { graph: NonNullable<VisualArtifact["graph"]
 
 function renderInline(text: string) {
   const nodes: ReactNode[] = [];
-  const pattern = /(\*\*[^*]+\*\*|~~[^~]+~~|`[^`]+`|\[[^\]]+\]\((?:https?:\/\/|mailto:)[^)]+\))/g;
+  const pattern = /(\*\*[^*]+\*\*|~~[^~]+~~|`[^`]+`|\$[^$\n]+\$|\\\([^\n]+?\\\)|\[[^\]]+\]\((?:https?:\/\/|mailto:)[^)]+\))/g;
   let lastIndex = 0;
 
   for (const match of text.matchAll(pattern)) {
@@ -831,6 +842,10 @@ function renderInline(text: string) {
       nodes.push(<del key={`${token}-${match.index}`}>{token.slice(2, -2)}</del>);
     } else if (token.startsWith("`")) {
       nodes.push(<code key={`${token}-${match.index}`}>{token.slice(1, -1)}</code>);
+    } else if (token.startsWith("$")) {
+      nodes.push(<MathExpression key={`${token}-${match.index}`} tex={token.slice(1, -1)} />);
+    } else if (token.startsWith("\\(")) {
+      nodes.push(<MathExpression key={`${token}-${match.index}`} tex={token.slice(2, -2)} />);
     } else {
       const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
       nodes.push(

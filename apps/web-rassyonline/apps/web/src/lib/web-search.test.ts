@@ -20,10 +20,13 @@ describe("shouldUseWebSearch", () => {
     expect(shouldUseWebSearch("what is the latest price of this service?")).toBe(true);
   });
 
-  it("routes named-entity knowledge questions to fresh evidence", () => {
+  it("researches factual named-entity questions without requiring a magic command", () => {
     expect(shouldUseWebSearch("What is Mastra?" )).toBe(true);
     expect(shouldUseWebSearch("how does Next.js work?" )).toBe(true);
+    expect(shouldUseWebSearch("Who leads the UK government?" )).toBe(true);
     expect(shouldUseWebSearch("what is a closure?" )).toBe(false);
+    expect(shouldUseWebSearch("rewrite this email" )).toBe(false);
+    expect(shouldUseWebSearch("search the web for the current Next.js cache docs" )).toBe(true);
   });
 
   it("does not send the current date to web search", () => {
@@ -130,11 +133,23 @@ describe("Mastra web-search execution contract", () => {
     await expect(executeWebSearch({ query: "Mastra docs", max_results: 1 })).resolves.toEqual({ status: "ok", results: [{ title: "Docs", url: "https://mastra.ai/docs", source: "mastra.ai", publishedAt: "2026-01-01", snippet: "Useful passage", status: "ok" }] });
   });
 
-  it("preserves the complete subject while disambiguating an ambiguous entity", async () => {
+  it("uses the complete subject as the first-stage provider query", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [] }), { status: 200, headers: { "content-type": "application/json" } }));
     vi.stubGlobal("fetch", fetchMock);
     await searchWebResources("what is the latest Mastra release?", { max_results: 5 });
-    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("q=the+Mastra+release+AI");
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("q=what+is+the+latest+Mastra+release%3F");
+  });
+
+  it("retries with a narrow subject only when the full-subject pass has no relevant evidence", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ results: [{ title: "Gateway", url: "https://www.google.com/", content: "Google" }] }), { status: 200, headers: { "content-type": "application/json" } }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ results: [{ title: "Next.js cache documentation", url: "https://nextjs.org/docs/cache", content: "Next.js 15 cache behavior" }] }), { status: 200, headers: { "content-type": "application/json" } }));
+    vi.stubGlobal("fetch", fetchMock);
+    const result = await searchWebResources("what is the latest Next.js 15 cache documentation?", { max_results: 2 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(new URL(String(fetchMock.mock.calls[0]?.[0])).searchParams.get("q")).toBe("what is the latest Next.js 15 cache documentation?");
+    expect(new URL(String(fetchMock.mock.calls[1]?.[0])).searchParams.get("q")).toBe("the Next.js 15 cache documentation");
+    expect(result.map((item) => item.url)).toEqual(["https://nextjs.org/docs/cache"]);
   });
 
   it("does not collapse distinct Mastra questions into one query", () => {

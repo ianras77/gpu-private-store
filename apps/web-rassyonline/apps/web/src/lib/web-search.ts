@@ -20,23 +20,39 @@ function searchTerms(query: string): string[] {
   return [...new Set(query.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ").split(/\s+/).filter((term) => term.length >= 2 && !SEARCH_STOP_WORDS.has(term)))].slice(0, 16);
 }
 
-const ENTITY_HINTS: Array<[RegExp, string]> = [
-  [/\bmastra\b/i, "AI framework"],
-  [/\bnext(?:\.js)?\b/i, "web framework"],
-  [/\brassy(?:mind| online)?\b/i, "AI platform"]
-];
 const OFFICIAL_ENTITY_SOURCES: Array<[RegExp, RegExp]> = [
   [/\bmastra\b/i, /(?:^|\.)mastra\.ai(?:\/|$)|^github\.com\/mastra-ai(?:\/|$)/i],
   [/\blanggraph\b/i, /(?:^|\.)langchain\.com(?:\/|$)|^github\.com\/langchain-ai(?:\/|$)/i],
   [/\bnext(?:\.js)?\b/i, /(?:^|\.)nextjs\.org(?:\/|$)|^github\.com\/vercel\/next\.js/i]
 ];
 
-/** Preserve the user's subject; hints only disambiguate known ambiguous names. */
+/**
+ * The first pass must preserve the user's actual wording. Appending a generic
+ * label (for example, "AI framework") made the backend choose that label over
+ * the requested release, behaviour, or comparison.
+ */
 export function buildSearchProviderQuery(query: string): string {
-  const focused = searchQueryForPrompt(query);
-  const hint = ENTITY_HINTS.find(([pattern]) => pattern.test(focused))?.[1];
-  if (!hint || new RegExp(`\\b${hint.split(" ")[0]}\\b`, "i").test(focused)) return focused;
-  return `${focused} ${hint}`.slice(0, 500);
+  return normalizeSearchQuery(query).replace(/\s+/g, " ").trim().slice(0, 500);
+}
+
+/** A narrower retry is used only after the full-subject pass has no evidence. */
+export function fallbackSearchProviderQuery(query: string): string {
+  return searchQueryForPrompt(query);
+}
+
+/**
+ * Some upstream engines tokenize dotted product names badly (notably
+ * "Next.js" as the unrelated retailer "Next"). This is a transport repair,
+ * not a new interpretation of the question: retain every remaining subject
+ * term while spelling known product tokens in the form the backend indexes.
+ */
+export function backendSafeSearchProviderQuery(query: string): string {
+  return fallbackSearchProviderQuery(query)
+    .replace(/\bnext\.js\b/gi, "nextjs")
+    .replace(/\bnode\.js\b/gi, "nodejs")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 500);
 }
 
 function relevanceScore(result: WebSearchResult, terms: string[]): number {
@@ -66,12 +82,26 @@ class WebSearchFailure extends Error {
 }
 
 const SEARCH_INTENT_PATTERNS = [
-  /\b(search|browse|look up|lookup|web|internet)\b/i,
-  /\b(latest|recent|current|today|tonight|this week|breaking|news|release notes?|docs?|sources?|citations?|verify|fact[- ]?check)\b/i,
+  // Freshness is not the only reason research is useful. A direct factual
+  // question about a product, person, organisation, event, or place benefits
+  // from current, attributable evidence too. Keep transformations and pure
+  // explanations local, but do not make the user discover a magic command in
+  // order to get a researched answer.
+  /\b(?:search|browse|look up|lookup)\b\s+(?:the\s+)?\S+/i,
   /\b(weather|forecast|price|pricing|stock|score|schedule|availability|opening hours)\b/i,
-  /\b(?:[Ww]hat(?:'s| is)|[Ww]ho is|[Hh]ow does)\s+(?:the\s+)?[A-Z][\w.-]+/
+  /\b(?:latest|recent|current)\s+(?:release notes?|version|documentation|docs?)\b/i,
+  /\b(?:breaking news|news (?:today|this week)|what happened (?:today|this week)|current exchange rate)\b/i,
+  /^(?:who|what|when|where|which)\b/i,
+  /^how (?:does|do|did|can|has|have|is|are)\b/i
 ];
-const SEARCH_EXCLUSIONS = [/^what does .* mean\??$/i, /^explain\b/i, /^rewrite\b/i, /^summari[sz]e this\b/i];
+const SEARCH_EXCLUSIONS = [
+  /^what does .* mean\??$/i,
+  /^what is (?:an? )?(?:closure|array|function|variable|loop|class|algorithm|metaphor|word|term)\b/i,
+  /^explain\b/i,
+  /^rewrite\b/i,
+  /^summari[sz]e this\b/i,
+  /^(?:write|draft|translate|proofread|format|brainstorm|make)\b/i
+];
 
 export function requiredSearchDomains(prompt: string): string[] {
   const matches = [...prompt.matchAll(/\b(?:use|search|browse|cite)\s+only\s+(?:https?:\/\/)?(?:www\.)?([a-z0-9.-]+\.[a-z]{2,})\b|\b(?:only|just)\s+(?:from\s+)?(?:https?:\/\/)?(?:www\.)?([a-z0-9.-]+\.[a-z]{2,})\b/gi)];
@@ -107,7 +137,7 @@ export function shouldUseWebSearch(prompt: string): boolean {
   const compact = prompt.trim();
   if (!compact) return false;
   if (requiredSearchDomains(compact).length) return true;
-  if (/\b(search|browse|look up|lookup)\s+(?:the\s+)?(?:web|internet)\b|\b(?:search|browse|look up|lookup)\s+(?:for\s+)?(?:sources?|documentation|docs?)\b/i.test(compact)) return true;
+  if (/\b(?:search|browse|look up|lookup)\b\s+(?:the\s+)?\S+/i.test(compact)) return true;
   return !SEARCH_EXCLUSIONS.some((pattern) => pattern.test(compact)) && !/\b(?:current|today'?s|today is|what(?:'s| is) the)\s+(?:date|day|time)\b|\bwhat day is (?:today|it)\b|\bwhat(?:'s| is) the time\b/i.test(compact) && SEARCH_INTENT_PATTERNS.some((pattern) => pattern.test(compact));
 }
 
@@ -152,11 +182,11 @@ export function buildSearchContextMessage(results: WebSearchResult[]): ChatSyste
   };
 }
 
-export async function searchWebResources(query: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> & { signal?: AbortSignal } = {}): Promise<WebSearchResult[]> {
+async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> & { signal?: AbortSignal } = {}): Promise<WebSearchResult[]> {
   const baseUrl = process.env.RASSY_ONLINE_SEARCH_URL ?? "https://search.rasies.com";
   const url = new URL("/search", baseUrl);
-  const searchQuery = searchQueryForPrompt(query);
-  url.searchParams.set("q", buildSearchProviderQuery(query));
+  const searchQuery = searchQueryForPrompt(relevanceQuery);
+  url.searchParams.set("q", providerQuery);
   url.searchParams.set("format", "json");
   url.searchParams.set("language", "auto");
   url.searchParams.set("safesearch", "1");
@@ -196,9 +226,9 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
         return true;
       } catch { return false; }
     })
-    .sort((left, right) => relevanceScore(right, searchTerms(searchQueryForPrompt(query))) - relevanceScore(left, searchTerms(searchQueryForPrompt(query))));
-  const officialSources = /\bofficial\s+(?:documentation|docs?|sources?)\b/i.test(query)
-    ? OFFICIAL_ENTITY_SOURCES.filter(([entity]) => entity.test(query)).map(([, source]) => source)
+    .sort((left, right) => relevanceScore(right, searchTerms(searchQueryForPrompt(relevanceQuery))) - relevanceScore(left, searchTerms(searchQueryForPrompt(relevanceQuery))));
+  const officialSources = /\bofficial\s+(?:documentation|docs?|sources?)\b/i.test(relevanceQuery)
+    ? OFFICIAL_ENTITY_SOURCES.filter(([entity]) => entity.test(relevanceQuery)).map(([, source]) => source)
     : [];
   const windowMs = options.recency === "day" ? 86_400_000 : options.recency === "week" ? 604_800_000 : options.recency === "month" ? 2_592_000_000 : options.recency === "year" ? 31_536_000_000 : null;
   const inWindow = (result: WebSearchResult) => {
@@ -220,6 +250,37 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
       })
     : normalized.filter((result) => inWindow(result) && (!officialSources.length || officialSources.some((pattern) => pattern.test(`${result.source}${new URL(result.url).pathname}`))));
   return relevant.slice(0, Math.min(options.max_results ?? 5, 8));
+}
+
+/**
+ * Retrieval is deliberately two-stage. The full user subject gets first pass;
+ * only an empty *relevant* set earns a compact or backend-safe retry. All passes are scored
+ * against the original request, so a convenient fallback hit cannot redefine
+ * what the user asked for.
+ */
+export async function searchWebResources(query: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> & { signal?: AbortSignal } = {}): Promise<WebSearchResult[]> {
+  const primary = buildSearchProviderQuery(query);
+  const firstPass = await searchWebResourcesForQuery(primary, query, options);
+  if (firstPass.length) return firstPass;
+  const fallback = fallbackSearchProviderQuery(query);
+  if (fallback && fallback.toLocaleLowerCase() !== primary.toLocaleLowerCase()) {
+    try {
+      const retry = await searchWebResourcesForQuery(fallback, query, options);
+      if (retry.length) return retry;
+    } catch {
+      // Continue to the backend-safe form; the first pass is still the
+      // authoritative empty result if no later pass supplies evidence.
+    }
+  }
+  const backendSafe = backendSafeSearchProviderQuery(query);
+  if (!backendSafe || [primary, fallback].some((candidate) => candidate.toLocaleLowerCase() === backendSafe.toLocaleLowerCase())) return firstPass;
+  try {
+    return await searchWebResourcesForQuery(backendSafe, query, options);
+  } catch {
+    // The exact-subject pass was healthy but found no usable evidence. A
+    // failed retry must not turn that truthful empty result into a fake outage.
+    return firstPass;
+  }
 }
 
 export type WebSearchInput = { query: string; recency?: string; domains?: string[]; max_results?: number };

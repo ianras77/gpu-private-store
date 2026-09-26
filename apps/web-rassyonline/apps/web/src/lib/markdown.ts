@@ -7,6 +7,7 @@ export type MarkdownBlock =
   | { type: "image"; alt: string; url: string }
   | { type: "callout"; tone: "note" | "tip" | "warning" | "danger"; text: string }
   | { type: "code"; language: string | null; text: string }
+  | { type: "math"; text: string }
   | { type: "table"; headers: string[]; rows: string[][] };
 
 export function parseMarkdownBlocks(markdown: string): MarkdownBlock[] {
@@ -68,6 +69,25 @@ export function parseMarkdownBlocks(markdown: string): MarkdownBlock[] {
       continue;
     }
 
+    if (trimmed.startsWith("$$")) {
+      const mathLines: string[] = [];
+      const firstLine = trimmed.slice(2);
+      if (firstLine.endsWith("$$") && firstLine.length > 2) {
+        mathLines.push(firstLine.slice(0, -2));
+        index += 1;
+      } else {
+        if (firstLine) mathLines.push(firstLine);
+        index += 1;
+        while (index < lines.length && lines[index].trim() !== "$$") {
+          mathLines.push(lines[index]);
+          index += 1;
+        }
+        if (index < lines.length) index += 1;
+      }
+      blocks.push({ type: "math", text: mathLines.join("\n").trim() });
+      continue;
+    }
+
     const heading = trimmed.match(/^(#{1,3})\s+(.+)$/);
     if (heading) {
       blocks.push({ type: "heading", depth: heading[1].length as 1 | 2 | 3, text: heading[2].trim() });
@@ -105,6 +125,7 @@ export function parseMarkdownBlocks(markdown: string): MarkdownBlock[] {
       if (
         !current ||
         /^```|^~~~/.test(current) ||
+        /^\$\$/.test(current) ||
         /^(?:---|___|\*\s*\*\s*\*)$/.test(current) ||
         /^!\[[^\]]*\]\(https?:\/\/[^)\s]+\)$/.test(current) ||
         /^\[!(?:NOTE|TIP|WARNING|DANGER)\]/i.test(current) ||
