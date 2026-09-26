@@ -718,6 +718,26 @@ const schemaStatements = [
     )`,
   `CREATE INDEX IF NOT EXISTS rassy_report_versions_approved_idx ON rassy_report_versions(report_type, approved_at DESC)`,
   `CREATE UNIQUE INDEX IF NOT EXISTS rassy_report_versions_path_sha_idx ON rassy_report_versions(relative_path, sha256)`
+  ,`CREATE TABLE IF NOT EXISTS rassy_report_feedback (
+      id TEXT PRIMARY KEY,
+      report_id TEXT NOT NULL,
+      report_sha256 TEXT NOT NULL,
+      reaction TEXT NOT NULL CHECK (reaction IN ('useful','question')),
+      quote_text TEXT NOT NULL,
+      quote_prefix TEXT NOT NULL,
+      quote_suffix TEXT NOT NULL,
+      block_id TEXT,
+      quote_start INTEGER NOT NULL,
+      quote_end INTEGER NOT NULL,
+      note TEXT,
+      reader_id TEXT NOT NULL,
+      moderation_state TEXT NOT NULL DEFAULT 'pending' CHECK (moderation_state IN ('pending','accepted','rejected')),
+      moderated_at TIMESTAMPTZ,
+      moderated_by TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )`
+  ,`CREATE INDEX IF NOT EXISTS rassy_report_feedback_triage_idx ON rassy_report_feedback(moderation_state, created_at DESC)`
+  ,`CREATE INDEX IF NOT EXISTS rassy_report_feedback_version_idx ON rassy_report_feedback(report_id, report_sha256, created_at DESC)`
 ];
 
 const ensureSchemaInternal = async () => {

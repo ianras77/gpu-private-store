@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { requireAdmin } from "../../../lib/admin-auth";
 import { getIndexedReport, type IndexedReport } from "../../../lib/report-index";
+import { ReportQuoteFeedback } from "../../../components/ReportQuoteFeedback";
 
 export const dynamic = "force-dynamic";
 export const metadata = { robots: { index: false, follow: false } };
@@ -22,8 +23,10 @@ export default async function ReportReadingPage({ params }: { params: Promise<{ 
       <p className="mt-5 text-xs text-cloud/60">{report.approvedAt ? `Approved ${new Date(report.approvedAt).toLocaleDateString("en-US", { timeZone: "UTC" })}` : "Private draft"} · Version SHA-256 {report.sha256.slice(0, 16)}…</p>
       {admin && report.type === "system" && <p className="mt-2 text-xs text-amber-200">Admin-only diagnostics. Keep this page private.</p>}
     </header>
-    <article className="mt-7 overflow-x-auto rounded-[30px] border border-white/10 bg-[#120e1c] p-6 text-sm leading-8 text-cloud/85 sm:p-10 [&_a]:break-all [&_a]:text-glow [&_blockquote]:border-l-2 [&_blockquote]:border-glow/40 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:bg-white/10 [&_code]:px-1 [&_h1]:mt-8 [&_h1]:text-3xl [&_h1]:font-semibold [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mt-8 [&_h3]:text-xl [&_h3]:font-semibold [&_li]:ml-5 [&_li]:list-disc [&_p]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:bg-black/35 [&_pre]:p-4 [&_table]:my-6 [&_table]:min-w-full [&_td]:border-b [&_td]:border-white/10 [&_td]:p-2 [&_th]:border-b [&_th]:border-white/20 [&_th]:p-2">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml disallowedElements={["img", "iframe", "script", "style"]}>{report.markdown}</ReactMarkdown>
-    </article>
+    <ReportQuoteFeedback reportId={report.id} markdown={report.markdown}>
+      <article className="mt-7 overflow-x-auto rounded-[30px] border border-white/10 bg-[#120e1c] p-6 text-sm leading-8 text-cloud/85 sm:p-10 [&_a]:break-all [&_a]:text-glow [&_blockquote]:border-l-2 [&_blockquote]:border-glow/40 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:bg-white/10 [&_code]:px-1 [&_h1]:mt-8 [&_h1]:text-3xl [&_h1]:font-semibold [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mt-8 [&_h3]:text-xl [&_h3]:font-semibold [&_li]:ml-5 [&_li]:list-disc [&_p]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:bg-black/35 [&_pre]:p-4 [&_table]:my-6 [&_table]:min-w-full [&_td]:border-b [&_td]:border-white/10 [&_td]:p-2 [&_th]:border-b [&_th]:border-white/20 [&_th]:p-2">
+        <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml disallowedElements={["img", "iframe", "script", "style"]}>{report.markdown}</ReactMarkdown>
+      </article>
+    </ReportQuoteFeedback>
   </main>;
 }
