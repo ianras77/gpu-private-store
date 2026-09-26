@@ -123,6 +123,7 @@ services:
       MINECRAFT_TROUPE_STATUS_TIMEOUT_MS: ${MINECRAFT_TROUPE_STATUS_TIMEOUT_MS:-2500}
       MINECRAFT_TROUPE_BOT_NAMES: ${MINECRAFT_TROUPE_BOT_NAMES:-}
       BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/web-rassys}
+      RASSY_REPORTS_ROOT: /reports
     depends_on:
       redis:
         condition: service_healthy
@@ -142,6 +143,7 @@ services:
     volumes:
       # Authored thoughts intentionally live in the Runtipi media data area.
       - ${ROOT_FOLDER_HOST:-.}/media/data/web-rassys:${BLOG_STORAGE_PATH:-/media/web-rassys}
+      - ${APP_DATA_DIR}/app-data/web-rassys/reports:/reports:ro
     restart: unless-stopped
     healthcheck:
       test:

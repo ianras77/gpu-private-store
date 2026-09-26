@@ -20,6 +20,7 @@ export const rassysApps = [
   { id: "stories", label: "Stories", shortLabel: "Stories", href: "/stories", description: "Bedtime stories and things to hear.", homepageDescription: "Keep listening to the family story shelf.", iconName: "book", accent: "violet", priority: 4, public: true, aliases: ["/real-life-bedtime-stories"] },
   { id: "family", label: "Family Archive", shortLabel: "Family", href: "/family", description: "Photos, videos, and memories.", homepageDescription: "A private archive of the people and moments that matter.", iconName: "images", accent: "green", priority: 5, public: true, aliases: ["/photos"] },
   { id: "notebook", label: "Notebook", shortLabel: "Notes", href: "/notebook", description: "Thoughts, interests, and notes.", homepageDescription: "A running notebook from around here.", iconName: "notebook", accent: "blue", priority: 6, public: true, aliases: ["/thoughts"] },
+  { id: "reports", label: "Reports", shortLabel: "Reports", href: "/reports", description: "Approved research and editorial reports.", homepageDescription: "Read approved research with its sources and version.", iconName: "book", accent: "violet", priority: 7, public: true },
 ] satisfies RassysAppDefinition[];
 
 export const publicRassysApps = rassysApps.filter((app) => app.public).sort((a, b) => a.priority - b.priority);

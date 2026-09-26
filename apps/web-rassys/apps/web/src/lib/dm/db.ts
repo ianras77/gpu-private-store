@@ -704,7 +704,20 @@ const schemaStatements = [
       published_at TIMESTAMPTZ
     )`,
   `CREATE INDEX IF NOT EXISTS rassy_artifacts_channel_status_idx ON rassy_artifacts(channel_id, status, updated_at DESC)`,
-  `CREATE INDEX IF NOT EXISTS rassy_artifacts_owner_idx ON rassy_artifacts(owner_resource_id, updated_at DESC)`
+  `CREATE INDEX IF NOT EXISTS rassy_artifacts_owner_idx ON rassy_artifacts(owner_resource_id, updated_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS rassy_report_versions (
+      report_id TEXT NOT NULL,
+      sha256 TEXT NOT NULL,
+      relative_path TEXT NOT NULL,
+      report_type TEXT NOT NULL CHECK (report_type IN ('analyst','system','stepparentpath')),
+      title TEXT NOT NULL,
+      indexed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      approved_at TIMESTAMPTZ,
+      approved_by TEXT,
+      PRIMARY KEY (report_id, sha256)
+    )`,
+  `CREATE INDEX IF NOT EXISTS rassy_report_versions_approved_idx ON rassy_report_versions(report_type, approved_at DESC)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS rassy_report_versions_path_sha_idx ON rassy_report_versions(relative_path, sha256)`
 ];
 
 const ensureSchemaInternal = async () => {
