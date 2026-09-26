@@ -166,5 +166,16 @@ async function migrate(): Promise<void> {
       expires_at timestamptz
     );
     create index if not exists agent_artifacts_owner_idx on agent_artifacts(user_id, created_at desc);
+    create table if not exists conversation_turn_data (
+      turn_id text primary key,
+      thread_id text not null,
+      user_id text not null references users(id) on delete cascade,
+      assistant_content text not null,
+      sources jsonb not null default '[]'::jsonb,
+      artifacts jsonb not null default '[]'::jsonb,
+      terminal_status text not null check (terminal_status in ('complete','truncated','failed','cancelled','empty')),
+      created_at timestamptz not null default now()
+    );
+    create index if not exists conversation_turn_data_thread_idx on conversation_turn_data(user_id, thread_id, created_at asc);
   `);
 }

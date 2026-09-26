@@ -202,12 +202,12 @@ export function ChatWorkbench({ modes, signedIn, accountId }: { modes: ChatMode[
     setSending(false);
     const response = await fetch(`/api/threads/${id}`, { cache: "no-store" });
     if (!response.ok || sequence !== requestSequenceRef.current) return;
-    const data = (await response.json()) as { messages?: Array<{ role: "user" | "assistant" | "system"; content: string }> };
+    const data = (await response.json()) as { messages?: Array<ChatMessage> };
     if (sequence !== requestSequenceRef.current) return;
     setThreadId(id);
     window.localStorage.setItem(storageKey("thread-id"), id);
     document.cookie = `rassy_online_thread=${encodeURIComponent(id)}; Max-Age=31536000; Path=/; SameSite=Lax`;
-    setMessages((data.messages ?? []).filter((message) => message.role === "user" || message.role === "assistant").map((message) => ({ role: message.role as "user" | "assistant", content: message.content })));
+    setMessages((data.messages ?? []).filter((message) => message.role === "user" || message.role === "assistant").map((message) => ({ ...message, role: message.role as "user" | "assistant" })));
   }
 
   async function uploadDocument(event: ChangeEvent<HTMLInputElement>) {
