@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildSearchContextMessage, buildSearchProviderQuery, executeWebSearch, interleaveSearchResults, normalizeSearchQuery, officialComparisonQueries, requiredSearchDomains, resolveSearchPrompt, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
+import { buildSearchContextMessage, buildSearchProviderQuery, executeWebSearch, interleaveSearchResults, normalizeSearchQuery, officialComparisonQueries, requiredSearchDomains, resolveSearchPrompt, SEARCH_REQUEST_TIMEOUT_MS, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -128,6 +128,10 @@ describe("citation provenance", () => {
 });
 
 describe("Mastra web-search execution contract", () => {
+  it("allows the configured provider aggregation window before timing out", () => {
+    expect(SEARCH_REQUEST_TIMEOUT_MS).toBe(15_000);
+  });
+
   it("returns structured source metadata on success", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [{ title: "Docs", url: "https://mastra.ai/docs", content: "Useful passage", publishedDate: "2026-01-01" }] }), { status: 200, headers: { "content-type": "application/json" } })));
     await expect(executeWebSearch({ query: "Mastra docs", max_results: 1 })).resolves.toEqual({ status: "ok", results: [{ title: "Docs", url: "https://mastra.ai/docs", source: "mastra.ai", publishedAt: "2026-01-01", snippet: "Useful passage", status: "ok" }] });

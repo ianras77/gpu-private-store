@@ -14,6 +14,12 @@ export type WebSearchResult = {
 };
 
 const SEARCH_RANGES = new Set(["day", "week", "month", "year"]);
+// The managed SearXNG instance waits for several upstream engines. Its normal
+// response can arrive shortly after eight seconds, so an eight-second client
+// timeout turned healthy searches into a race. Keep this finite so a failed
+// provider cannot tie up a chat turn indefinitely, but leave enough room for
+// the provider's aggregation window and the response transfer.
+export const SEARCH_REQUEST_TIMEOUT_MS = 15_000;
 const SEARCH_STOP_WORDS = new Set(["a", "an", "the", "and", "or", "but", "for", "with", "from", "into", "about", "what", "when", "where", "which", "who", "how", "why", "latest", "current", "please", "can", "could", "would", "tell", "find", "look", "search", "web", "internet"]);
 
 function searchTerms(query: string): string[] {
@@ -195,7 +201,7 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
 
   const response = await fetch(url, {
     headers: { accept: "application/json" },
-    signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(8000)]) : AbortSignal.timeout(8000)
+    signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(SEARCH_REQUEST_TIMEOUT_MS)]) : AbortSignal.timeout(SEARCH_REQUEST_TIMEOUT_MS)
   });
 
   if (!response.ok) throw new WebSearchFailure(response.status === 403 ? "forbidden" : response.status === 429 ? "rate_limited" : "unavailable");
