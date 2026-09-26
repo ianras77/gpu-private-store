@@ -66,3 +66,10 @@ Updated: 2026-09-26 UTC
 - Commands/results: `pnpm --filter web exec tsc --noEmit` PASS; `pnpm run lint:web` PASS; `pnpm run build:web` PASS before the final client whitespace-only selection adjustment. The prior temporary API staging environment was removed after Slice E. End-to-end feedback API/browser interaction still needs the same restore-gated staging environment before deployment.
 - Open blocker: production backup/restore gate remains unmet; OpenFang's active Hand and schedules remain untouched. No public or private feedback data was imported or exposed.
 - Next action: commit web feedback slice; then perform targeted site modality authorization/usability repairs and produce the release/rollback runbook while retaining the production gate.
+
+## Targeted site journey repair: Family Archive
+
+- Demonstrated defect: Family Archive was marked public in the registry and its shelf plus file, preview and poster proxy routes accepted unauthenticated requests. A guessed media ID could therefore reach the controller path through the website.
+- Change: `/photos`/`/family` now render a private-shelf state without an admin session. `/api/photos` and all file/preview/poster proxy GET and HEAD routes independently enforce `requireAdmin()` and return private/no-store `401` before contacting the controller. Registry status was intentionally left unchanged so navigation remains discoverable while data stays server-authorized.
+- Commands/results: `pnpm --filter web exec tsc --noEmit` PASS; `pnpm run lint:web` PASS. Commit `ed6760312`. No deployed endpoint or browser session proof yet due the restore-tested backup gate.
+- Next action: finish the remaining modality completed-path smoke matrix in a staging environment, then write the precise backup/restore, staged migration, smoke and rollback release runbook.
