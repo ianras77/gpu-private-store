@@ -6,7 +6,7 @@ import { agentRegistry } from "@/mastra";
 import { conversationMemory } from "@/mastra/agents";
 import { rassyLocal, researcherGrounded } from "@/mastra/agents";
 import { streamMastraChat } from "@/mastra/chat";
-import { buildSearchContextMessage, interleaveSearchResults, officialComparisonQueries, requiredSearchDomains, resolveSearchPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "@/lib/web-search";
+import { buildSearchContextMessage, interleaveSearchResults, requiredSearchDomains, resolveSearchPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "@/lib/web-search";
 import { getConversationForUser } from "@/lib/conversation-history";
 import { buildDocumentContextMessage } from "@/lib/document-memory";
 import { getReadyDocumentIdsForUser } from "@/lib/documents";
@@ -20,6 +20,7 @@ import { localOnlyExecution } from "@/mastra/local-policy";
 import { mastraFailureMessage } from "@/mastra/errors";
 import { getModelCapability, modelForAgent } from "@/lib/model-capabilities";
 import { saveConversationTurnData, type ConversationArtifact } from "@/lib/conversation-turn-data";
+import { buildResearchPlan, buildResearchPlanContext } from "@/mastra/research-plan";
 
 export const dynamic = "force-dynamic";
 type ServerMessage = { role: "user" | "assistant" | "system"; content: string };
@@ -102,7 +103,8 @@ export async function POST(request: NextRequest) {
     }
     const searchRequested = parsed.data.webSearch === "on" || (parsed.data.webSearch === "auto" && Boolean(latestUserMessage && shouldUseWebSearch(latestUserMessage.content)));
     const requiredDomains = latestUserMessage ? requiredSearchDomains(latestUserMessage.content) : [];
-    const comparisonRequested = Boolean(latestUserMessage?.content.match(/\b(compare|comparison|versus|vs\.?|difference|differentiate)\b/i));
+    const researchPlan = latestUserMessage && searchRequested ? buildResearchPlan(researchPrompt) : null;
+    const comparisonRequested = researchPlan?.objective === "comparison";
     const executionShape = latestUserMessage ? taskShape(latestUserMessage.content, { mode: parsed.data.mode, searchRequested, knowledgeRequested }) : "conversation";
     if (latestUserMessage) messages = [{ role: "system", content: buildExecutionBrief(latestUserMessage.content, { mode: parsed.data.mode, searchRequested, knowledgeRequested }) }, ...messages];
     // Route by capability, not by whether preflight happened to return hits.
@@ -143,10 +145,10 @@ export async function POST(request: NextRequest) {
           if (searchRequested && latestUserMessage) {
             send("activity", { status: "searching", tool: "web-search", source: "preflight" });
             try {
-              const comparisonQueries = officialComparisonQueries(researchPrompt);
-              preflightResults = comparisonQueries.length
-                ? interleaveSearchResults(await Promise.all(comparisonQueries.map((query) => searchWebResources(query, { max_results: 4, recency: searchRecencyForPrompt(latestUserMessage.content), domains: requiredDomains, signal: request.signal }))))
-                : await searchWebResources(researchPrompt, { max_results: 8, recency: searchRecencyForPrompt(latestUserMessage.content), domains: requiredDomains, signal: request.signal });
+              const plan = researchPlan ?? buildResearchPlan(researchPrompt);
+              messages = [{ role: "system", content: buildResearchPlanContext(plan) }, ...messages];
+              const groups = await Promise.all(plan.queries.map((entry) => searchWebResources(entry.query, { max_results: plan.queries.length > 1 ? 4 : 8, recency: plan.recency, domains: entry.domains ?? requiredDomains, signal: request.signal })));
+              preflightResults = groups.length > 1 ? interleaveSearchResults(groups) : groups[0] ?? [];
               const pages = await Promise.all(preflightResults.slice(0, 5).map((source) => readPublicPage(source.url, request.signal)));
               let readablePages: string[] = [];
               if (pages.some((page) => page.status === "ok" && page.text)) {
