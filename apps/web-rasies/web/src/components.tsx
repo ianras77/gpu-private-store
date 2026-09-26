@@ -2406,10 +2406,12 @@ export function MinecraftPanel({
   serverHost,
   blueMapUrl,
   blueMapEmbedUrl,
+  observatoryUrl,
 }: {
   serverHost: string;
   blueMapUrl: string;
   blueMapEmbedUrl: string;
+  observatoryUrl: string;
 }) {
   const [copyNote, setCopyNote] = useState<string | null>(null);
   const joinPrompt = `Give me three build ideas, one easy starter quest, and one ridiculous group goal for my family Minecraft server at ${serverHost}.`;
@@ -2438,8 +2440,8 @@ export function MinecraftPanel({
           </div>
           <h3>Copy the address, peek at the map, then jump in.</h3>
           <p>
-            The map and helper bots are here so you can wander in, find the
-            server, and start building without hunting for the details.
+            The map is here for the world, and the live troupe observatory
+            shows what Oak, Flint, and Juniper are actually doing.
           </p>
 
           <div
@@ -2486,6 +2488,15 @@ export function MinecraftPanel({
               className="service-open"
             >
               Open live map
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+            </a>
+            <a
+              href={observatoryUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="service-open"
+            >
+              Meet the live troupe
               <ExternalLink className="h-3.5 w-3.5" aria-hidden />
             </a>
             <button

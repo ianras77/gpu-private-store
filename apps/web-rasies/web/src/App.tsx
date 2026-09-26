@@ -67,6 +67,7 @@ type Config = {
   mcTroupServerHost: string;
   mcTroupBlueMapUrl: string;
   mcTroupBlueMapEmbedUrl: string;
+  mcTroupObservatoryUrl: string;
   about: AboutConfig;
 };
 
@@ -134,6 +135,7 @@ const defaultConfig: Config = {
   mcTroupServerHost: "crafty.rasies.com:25565",
   mcTroupBlueMapUrl: "https://crafty.rasies.com/mc-troup-map",
   mcTroupBlueMapEmbedUrl: "/mc-troup-map/",
+  mcTroupObservatoryUrl: "https://rassys.com/minecraft",
   about: defaultAbout,
 };
 
@@ -462,6 +464,8 @@ export default function App() {
           mcTroupBlueMapEmbedUrl:
             data.mcTroupBlueMapEmbedUrl ??
             resolveBlueMapEmbedUrl(data.mcTroupBlueMapUrl, mcTroupServerHost),
+          mcTroupObservatoryUrl:
+            data.mcTroupObservatoryUrl ?? defaultConfig.mcTroupObservatoryUrl,
           about: sanitizeAbout(data.about),
         });
       })
@@ -1435,6 +1439,7 @@ export default function App() {
             serverHost={config.mcTroupServerHost}
             blueMapUrl={config.mcTroupBlueMapUrl}
             blueMapEmbedUrl={config.mcTroupBlueMapEmbedUrl}
+            observatoryUrl={config.mcTroupObservatoryUrl}
           />
         </section>
 

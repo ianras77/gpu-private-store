@@ -21,6 +21,7 @@ function buildEnv(overrides: Partial<Env> = {}): Env {
     MC_TROUP_SERVER_HOST: 'crafty.rasies.com:25565',
     MC_TROUP_BLUEMAP_URL: 'https://crafty.rasies.com/mc-troup-map',
     MC_TROUP_BLUEMAP_PROXY_PATH: '/mc-troup-map',
+    MC_TROUP_OBSERVATORY_URL: 'https://rassys.com/minecraft',
     SEARXNG_BASE_URL: 'https://search.rasies.com',
     SEARXNG_PATH: '/search',
     SEARXNG_TIMEOUT_MS: 9000,

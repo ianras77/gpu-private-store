@@ -203,6 +203,7 @@ export async function createApp(
       mcTroupServerHost: env.MC_TROUP_SERVER_HOST,
       mcTroupBlueMapUrl,
       mcTroupBlueMapEmbedUrl: `${env.MC_TROUP_BLUEMAP_PROXY_PATH.replace(/\/$/, "")}/`,
+      mcTroupObservatoryUrl: env.MC_TROUP_OBSERVATORY_URL,
       about: {
         name: env.ABOUT_NAME,
         tagline: env.ABOUT_TAGLINE,

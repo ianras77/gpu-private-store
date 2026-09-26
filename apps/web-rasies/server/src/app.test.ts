@@ -92,6 +92,7 @@ describe("app", () => {
     expect(body.mcTroupBlueMapUrl).toBe(
       "https://crafty.rasies.com/mc-troup-map",
     );
+    expect(body.mcTroupObservatoryUrl).toBe("https://rassys.com/minecraft");
   });
 
   it("serves the built frontend root when a web dist is available", async () => {

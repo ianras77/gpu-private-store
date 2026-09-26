@@ -17,7 +17,7 @@ export function createHouseDirectoryTool(env: Env) {
         ["photos", env.PHOTOS_URL, "family photos"],
         ["big files", env.SEND_URL, "send large files"],
         ["draw", env.DRAW_URL, "collaborative drawing"],
-        ["Minecraft", `https://${env.MC_TROUP_SERVER_HOST}`, "Minecraft server and map"],
+        ["Minecraft troupe", env.MC_TROUP_OBSERVATORY_URL, "live Oak, Flint, and Juniper status plus the world map"],
       ];
       const query = context.query?.toLowerCase().trim();
       return (query ? entries.filter((entry) => entry.join(" ").toLowerCase().includes(query)) : entries)

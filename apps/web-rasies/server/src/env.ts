@@ -12,6 +12,7 @@ const EnvSchema = z.object({
     .string()
     .default("https://crafty.rasies.com/mc-troup-map"),
   MC_TROUP_BLUEMAP_PROXY_PATH: z.string().default("/mc-troup-map"),
+  MC_TROUP_OBSERVATORY_URL: z.string().url().default("https://rassys.com/minecraft"),
 
   SEARXNG_BASE_URL: z.string().default("https://search.rasies.com"),
   SEARXNG_PATH: z.string().default("/search"),

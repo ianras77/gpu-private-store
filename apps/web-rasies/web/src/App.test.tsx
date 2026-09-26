@@ -34,6 +34,7 @@ describe("App", () => {
                 mcTroupServerHost: "crafty.rasies.com:25565",
                 mcTroupBlueMapUrl: "http://192.168.100.10:8100",
                 mcTroupBlueMapEmbedUrl: "/mc-troup-map/",
+                mcTroupObservatoryUrl: "https://rassys.com/minecraft",
                 about: {
                   name: "Rassy",
                   tagline: "Builder of the family cloud.",
@@ -617,6 +618,9 @@ describe("App", () => {
     expect(
       screen.getByRole("link", { name: /^Open full apps guide$/i }),
     ).toHaveAttribute("href", "/#/apps");
+    expect(
+      screen.getByRole("link", { name: /^Meet the live troupe$/i }),
+    ).toHaveAttribute("href", "https://rassys.com/minecraft");
   });
 
   it("keeps the fallback about copy centered on the family, not implementation notes", async () => {
