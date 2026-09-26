@@ -39,7 +39,21 @@ const moodEnergy: Record<string, number> = {
     nocturnal: 0.22,
     electric: 0.82,
     golden: 0.62,
-    velvet: 0.3
+    velvet: 0.3,
+    wistful: 0.27,
+    weightless: 0.31,
+    intimate: 0.36,
+    cinematic: 0.5,
+    unhurried: 0.42,
+    kinetic: 0.76,
+    euphoric: 0.88,
+    feverish: 0.8,
+    playful: 0.66,
+    defiant: 0.73,
+    restorative: 0.29,
+    devotional: 0.33,
+    cosmic: 0.46,
+    nocturne: 0.23
 };
 const dayPartProfiles: Record<string, { energy: number; tokens: string[] }> = {
     "deep night": {
@@ -114,7 +128,14 @@ const semanticBundles: Array<{ match: RegExp; tokens: string[]; energy?: number 
     { match: /\btender|gentle|soft|ache|heart\b/i, tokens: ["tender", "gentle", "heart", "soft"], energy: 0.34 },
     { match: /\bneon|electric|voltage|static|spark\b/i, tokens: ["neon", "electric", "voltage", "spark"], energy: 0.74 },
     { match: /\bglow|warm|honey|velvet\b/i, tokens: ["glow", "warm", "velvet", "honey"], energy: 0.46 },
-    { match: /\bfocus|study|deep|heads?-down\b/i, tokens: ["focus", "steady", "deep", "line"], energy: 0.36 }
+    { match: /\bfocus|study|deep|heads?-down\b/i, tokens: ["focus", "steady", "deep", "line"], energy: 0.36 },
+    { match: /\bwistful|yearn|ache|longing\b/i, tokens: ["wistful", "yearn", "ache", "memory"], energy: 0.28 },
+    { match: /\bweightless|floating|celestial|cosmic\b/i, tokens: ["weightless", "cosmic", "float", "space"], energy: 0.38 },
+    { match: /\bintimate|candlelit|close|devotional\b/i, tokens: ["intimate", "candlelit", "close", "soul"], energy: 0.34 },
+    { match: /\bkinetic|restless|feverish|urgent\b/i, tokens: ["kinetic", "restless", "fever", "drive"], energy: 0.78 },
+    { match: /\beuphoric|ecstatic|release|triumphant\b/i, tokens: ["euphoric", "release", "anthem", "shine"], energy: 0.86 },
+    { match: /\bplayful|mischief|wry|bounce\b/i, tokens: ["playful", "mischief", "bounce", "groove"], energy: 0.64 },
+    { match: /\brestorative|healing|exhale|soft landing\b/i, tokens: ["restorative", "exhale", "gentle", "warm"], energy: 0.3 }
 ];
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 const TRACK_TITLE_DECORATION_PATTERN = /[\[(][^\])]*(?:remaster(?:ed)?|mono|stereo|edit|mix|version|radio|single|album|deluxe|bonus|clean|explicit)[^\])]*[\])]/gi;

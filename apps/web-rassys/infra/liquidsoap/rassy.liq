@@ -28,9 +28,13 @@ hires_mount = env("STREAM_HIRES_MOUNT", "/live-hires.ogg")
 station_name = env("STATION_NAME", "Mr Rassy Radio")
 station_desc = env("STATION_DESCRIPTION", "Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.")
 station_genre = env("STATION_GENRE", "eclectic")
-transition_default_seconds = float_of_string(env("RADIO_TRANSITION_DEFAULT_SECONDS", "4.5"))
-transition_fade_in_seconds = float_of_string(env("RADIO_TRANSITION_FADE_IN_SECONDS", "3.0"))
-transition_fade_out_seconds = float_of_string(env("RADIO_TRANSITION_FADE_OUT_SECONDS", "3.0"))
+# The controller explicitly marks the handful of handoffs worth producing and
+# supplies their duration in rassy_transition_seconds.  Everything else gets a
+# nearly imperceptible safety fade: a station sounds authored when a transition
+# has a reason, not when every record is washed into the next one.
+transition_default_seconds = float_of_string(env("RADIO_TRANSITION_DEFAULT_SECONDS", "0.35"))
+transition_fade_in_seconds = float_of_string(env("RADIO_TRANSITION_FADE_IN_SECONDS", "0.35"))
+transition_fade_out_seconds = float_of_string(env("RADIO_TRANSITION_FADE_OUT_SECONDS", "0.35"))
 processing_enabled = env_bool("RADIO_PROCESSING_ENABLED", "true")
 
 # Queue for controller-driven selections

@@ -23,11 +23,16 @@ const proxyArtwork = async (request: Request) => {
     const now = await fetchRadio<LibraryTrack | null>(
       "/public/now",
     );
-    if (now?.id && now.hasArtwork) {
-      return proxyControllerMedia(
+    if (now?.id) {
+      // The live playhead can arrive before the controller's full metadata
+      // refresh has completed.  The controller can still read embedded or
+      // nearby artwork by track id, so try it rather than showing a synthetic
+      // cover merely because the quick catalog has not set hasArtwork yet.
+      const response = await proxyControllerMedia(
         request,
         `/public/library/tracks/${encodeURIComponent(now.id)}/artwork`,
       );
+      if (response.ok) return response;
     }
 
     const artworkUrl = now?.albumArtUrl?.trim();

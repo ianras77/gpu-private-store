@@ -531,7 +531,10 @@ const emotionalWeatherByDayPart = {
         "sleepwalker pulse",
         "slow-burn ache",
         "midnight patience",
-        "low-lit drift"
+        "low-lit drift",
+        "nocturne devotion",
+        "cosmic stillness",
+        "afterglow solitude"
     ],
     "blue hour": [
         "tender voltage",
@@ -539,7 +542,10 @@ const emotionalWeatherByDayPart = {
         "first-light hush",
         "soft ignition",
         "quiet bloom",
-        "silver patience"
+        "silver patience",
+        "weightless anticipation",
+        "rainy-window tenderness",
+        "daydream recovery"
     ],
     daybreak: [
         "open-window lift",
@@ -547,7 +553,10 @@ const emotionalWeatherByDayPart = {
         "sun-on-concrete glow",
         "morning motion",
         "fresh current",
-        "slow brightening"
+        "slow brightening",
+        "clear-sky resolve",
+        "porchlight optimism",
+        "unhurried renewal"
     ],
     "late morning": [
         "bright mischief",
@@ -555,7 +564,10 @@ const emotionalWeatherByDayPart = {
         "midday glide",
         "clean heat",
         "forward motion",
-        "easy momentum"
+        "easy momentum",
+        "playful precision",
+        "coffeehouse kinetic",
+        "bright-eyed focus"
     ],
     midday: [
         "loose magnetism",
@@ -563,7 +575,10 @@ const emotionalWeatherByDayPart = {
         "crisp charge",
         "sunlit push",
         "open-road focus",
-        "bright pressure"
+        "bright pressure",
+        "electric ease",
+        "crystalline motion",
+        "restless joy"
     ],
     "golden afternoon": [
         "warm gravity",
@@ -571,7 +586,10 @@ const emotionalWeatherByDayPart = {
         "golden sway",
         "dust and glow",
         "radiant shoulder-roll",
-        "sun-laced cruise"
+        "sun-laced cruise",
+        "cinematic warmth",
+        "slow-dance confidence",
+        "rooftop euphoria"
     ],
     sunset: [
         "amber patience",
@@ -579,7 +597,10 @@ const emotionalWeatherByDayPart = {
         "heartline warmth",
         "evening bloom",
         "soft smoke",
-        "slow-burn honey"
+        "slow-burn honey",
+        "wistful gold",
+        "tender release",
+        "violet-hour romance"
     ],
     "after-hours": [
         "neon patience",
@@ -587,7 +608,10 @@ const emotionalWeatherByDayPart = {
         "restless glow",
         "club-light ache",
         "mirrorball shadow",
-        "after-hours electricity"
+        "after-hours electricity",
+        "neon catharsis",
+        "intimate defiance",
+        "velvet momentum"
     ]
 };
 const weekendWeather = [
@@ -1488,11 +1512,16 @@ const pickTransitionStyle = (track, nextTrack, context) => {
     const energyDelta = (nextTrack?.energy ?? track?.energy ?? 0.5) - (track?.energy ?? 0.5);
     const dayPart = context.dayPart?.toLowerCase() ?? "";
     const mood = context.mood?.toLowerCase() ?? "";
+    const atmosphere = `${dayPart} ${mood} ${context.emotionalWeather?.toLowerCase() ?? ""}`;
+    if (/wistful|tender|intimate|devotion|restorative|solitude/.test(atmosphere) && energyDelta < 0.12)
+        return "bloom";
+    if (/euphoric|kinetic|electric|restless|catharsis|momentum/.test(atmosphere) && energyDelta >= 0.07)
+        return "lift";
     if (energyDelta >= 0.18)
         return "lift";
     if (energyDelta <= -0.18)
         return "drop";
-    if (/deep night|blue hour|after-hours|velvet|drift|hush|tender/.test(`${dayPart} ${mood}`))
+    if (/deep night|blue hour|after-hours|velvet|drift|hush|tender/.test(atmosphere))
         return "bloom";
     if (Math.abs(energyDelta) <= 0.05)
         return "long-blend";
@@ -2194,9 +2223,14 @@ const updateOnMetaChange = async (meta) => {
         meta.rassy_track_id?.trim() ||
         meta.rassyTrackId?.trim() ||
         "";
-    const match = explicitTrackId
+    const metadataMatch = explicitTrackId
         ? library.getTrackById(explicitTrackId) ?? library.findByTitleArtist(now.title, now.artist)
         : library.findByTitleArtist(now.title, now.artist);
+    // Some decoders replace request annotations with imperfect file tags.  The
+    // controller owns the queue, so its next real track is a safer fallback
+    // than broadcasting a folder name as the artist or dropping artwork.
+    const queuedTrackId = toQueuedTrackIds(await redis.lrange(QUEUE_KEY, 0, -1))[0];
+    const match = metadataMatch ?? (queuedTrackId ? library.getTrackById(queuedTrackId) : undefined);
     const currentNow = safeJson(await redis.get(NOW_KEY));
     if (match?.id && currentNow?.id === match.id && currentNow.startedAt) {
         const currentStartedAtMs = Date.parse(currentNow.startedAt);
@@ -2214,6 +2248,8 @@ const updateOnMetaChange = async (meta) => {
     const approvedSkip = match ? await consumeMarkedSkip(match.id) : false;
     if (match) {
         now.id = match.id;
+        now.title = match.title;
+        now.artist = match.artist;
         now.album = match.album ?? now.album;
         if (match.albumArtUrl) {
             now.albumArtUrl = match.albumArtUrl;
@@ -2647,6 +2683,11 @@ export const startScheduler = async () => {
     setInterval(() => {
         void runLibraryRefresh("quick");
     }, Math.max(30, config.RADIO_LIBRARY_REFRESH_SECONDS) * 1000);
-    await runQueueFill();
+    // A quick scan intentionally avoids opening every media file.  It is useful
+    // for spotting additions, but its fallback records have only path-derived
+    // titles and no embedded-cover information.  Start the complete scan before
+    // any potentially slow queue work so a busy Liquidsoap connection cannot
+    // indefinitely postpone the metadata/artwork index.
     void runLibraryRefresh("full");
+    await runQueueFill();
 };
