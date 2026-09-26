@@ -53,11 +53,20 @@ const port = Number(process.env.PORT ?? 1866);
 const internalToken = process.env.RASSY_INTELLIGENCE_INTERNAL_TOKEN?.trim();
 const app = Fastify({ logger: true });
 
+const modelGateway = () => (process.env.RASSYMIND_BASE_URL ?? "").replace(/\/$/, "");
+
+const readinessFailure = () => {
+  if (!internalToken) return "internal_token_missing";
+  if (!modelGateway()) return "rassymind_base_url_missing";
+  return null;
+};
+
 app.get("/livez", async () => ({ ok: true, service: "rassy-intelligence" }));
 app.get("/healthz", async () => ({ ok: true, service: "rassy-intelligence", mode: "mastra-multi-agent" }));
 app.get("/readyz", async (_request, reply) => {
-  const base = (process.env.RASSYMIND_BASE_URL ?? "").replace(/\/$/, "");
-  if (!base) return reply.code(503).send({ ok: false, reason: "RASSYMIND_BASE_URL is not configured" });
+  const configurationFailure = readinessFailure();
+  if (configurationFailure) return reply.code(503).send({ ok: false, reason: configurationFailure });
+  const base = modelGateway();
   try {
     const upstream = await fetch(`${base}/v1/models`, {
       headers: process.env.RASSYMIND_API_KEY ? { Authorization: `Bearer ${process.env.RASSYMIND_API_KEY}` } : {},
@@ -85,6 +94,13 @@ app.get("/v1/registry/consistency", async (_request, reply) => {
   const missing = [...referenced].filter((id) => !registered.has(id));
   return missing.length ? reply.code(500).send({ ok: false, missing }) : { ok: true, agentCount: registered.size };
 });
+app.get("/v1/status", async () => ({
+  mode: "mastra-multi-agent",
+  agentCount: Object.keys(agents).length,
+  internalAuthentication: "configured",
+  memory: process.env.DATABASE_URL ? "postgres" : "none",
+  modelGateway: modelGateway() ? "configured" : "missing",
+}));
 app.get("/v1/tools", async () => ({ tools: RASSY_TOOLS }));
 app.get("/v1/artifacts/kinds", async () => ({ kinds: RASSY_ARTIFACT_KINDS }));
 app.get("/v1/dungeon-master/capabilities", async () => ({

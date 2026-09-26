@@ -2,6 +2,7 @@
 docker-compose.generated.yml
 apps/web/.next/
 apps/web/.next-usr-a/
+apps/web/tsconfig.tsbuildinfo
 apps/web/node_modules/
 services/*/dist/
 services/*/node_modules/

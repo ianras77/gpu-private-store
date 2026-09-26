@@ -19,7 +19,7 @@ services:
       - host.docker.internal:host-gateway
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:1866/healthz || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:1866/readyz || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 10
