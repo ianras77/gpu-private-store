@@ -11,9 +11,10 @@ export async function GET() {
   try {
     const data = await fetchRadio<LibraryTrack | null>("/public/now");
     const track = enrichTrack(data);
-    if (track && !track.albumArtUrl) {
-      const params = new URLSearchParams({ title: track.title ?? "Current record", artist: track.artist ?? "Mr Rassy Radio" });
-      return NextResponse.json({ ...track, albumArtUrl: `/api/library/artwork/placeholder?${params.toString()}`, hasArtwork: true });
+    if (track) {
+      // One stable contract for the live player: this route resolves embedded
+      // or nearby art first and supplies the branded fallback only when needed.
+      return NextResponse.json({ ...track, albumArtUrl: "/api/radio/artwork", hasArtwork: true });
     }
     return NextResponse.json(track ?? {});
   } catch {
