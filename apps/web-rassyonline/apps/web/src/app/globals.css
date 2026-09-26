@@ -238,6 +238,17 @@ body { overflow-x: hidden; overflow-y: auto; }
 .workspace-grid { display: block; height: auto; min-height: 0; flex: none; }
 .rassy-chat-layout { height: auto; min-height: calc(100dvh - 82px); }
 .chat-workbench { height: auto !important; min-height: calc(100dvh - 82px); overflow: visible; grid-template-rows: auto auto auto; }
+
+/* QUIET CONTROLS: the intelligence stays deep; the surface stays obvious. */
+.focus-control { display: inline-flex; gap: 2px; align-items: center; }
+.focus-control button { min-height: 30px; padding: 0 12px; border: 1px solid transparent; border-radius: 2px; background: transparent; color: var(--muted); font: 600 .66rem/1 Arial, sans-serif; letter-spacing: .01em; }
+.focus-control button:hover, .focus-control button.active { border-color: var(--aqua); color: #000; background: var(--aqua); box-shadow: none; text-shadow: none; }
+.ribbon-tools { margin-left: auto; }
+.voice-button { min-width: 62px; }
+.composer-preview > button { border-radius: 2px; box-shadow: none; }
+.composer-preview > button[type="submit"] { min-width: 68px; }
+.message-actions .copy-button { text-shadow: none; box-shadow: none; }
+@media (max-width: 640px) { .focus-control button { padding: 0 8px; font-size: .6rem; } .ribbon-tools { margin-left: 0; } }
 .transcript-shell { min-height: 0; display: block; }
 .message-list { max-height: none; overflow: visible; }
 .composer-preview { position: sticky; bottom: 0; z-index: 4; background: rgba(0,0,0,.96); }

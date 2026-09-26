@@ -19,6 +19,20 @@ function searchTerms(query: string): string[] {
   return [...new Set(query.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ").split(/\s+/).filter((term) => term.length >= 2 && !SEARCH_STOP_WORDS.has(term)))].slice(0, 16);
 }
 
+const ENTITY_HINTS: Array<[RegExp, string]> = [
+  [/\bmastra\b/i, "AI framework"],
+  [/\bnext(?:\.js)?\b/i, "web framework"],
+  [/\brassy(?:mind| online)?\b/i, "AI platform"]
+];
+
+/** Preserve the user's subject; hints only disambiguate known ambiguous names. */
+export function buildSearchProviderQuery(query: string): string {
+  const focused = searchQueryForPrompt(query);
+  const hint = ENTITY_HINTS.find(([pattern]) => pattern.test(focused))?.[1];
+  if (!hint || new RegExp(`\\b${hint.split(" ")[0]}\\b`, "i").test(focused)) return focused;
+  return `${focused} ${hint}`.slice(0, 500);
+}
+
 function relevanceScore(result: WebSearchResult, terms: string[]): number {
   const title = result.title.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ");
   const snippet = result.snippet.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ");
@@ -26,8 +40,8 @@ function relevanceScore(result: WebSearchResult, terms: string[]): number {
   const haystack = `${title} ${snippet} ${url}`;
   const matched = terms.filter((term) => new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(haystack));
   const coverage = terms.length ? matched.length / terms.length : 0;
-  const phrase = terms.length > 1 && haystack.includes(terms.join(" ")) ? 8 : 0;
-  return matched.length * 2 + Math.round(coverage * 10) + phrase + terms.reduce((score, term) => score + (title.includes(term) ? 6 : 0) + (snippet.includes(term) ? 2 : 0) + (url.includes(term) ? 1 : 0), 0);
+  const phrase = terms.length > 1 && haystack.includes(terms.join(" ")) ? 12 : 0;
+  return matched.length * 2 + Math.round(coverage * 12) + phrase + terms.reduce((score, term) => score + (new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(title) ? 8 : 0) + (new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(snippet) ? 3 : 0) + (url.includes(term) ? 1 : 0), 0);
 }
 
 type SearchResponse = {
@@ -100,12 +114,7 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
   const baseUrl = process.env.RASSY_ONLINE_SEARCH_URL ?? "https://search.rasies.com";
   const url = new URL("/search", baseUrl);
   const searchQuery = searchQueryForPrompt(query);
-  // Some engines interpret a product/framework name as a normal dictionary
-  // word (for example, `Mastra release` becomes salad recipes). Preserve the
-  // entity by adding its category only for this known ambiguous framework,
-  // while leaving ordinary user queries untouched.
-  const disambiguatedQuery = /\bmastra\b/i.test(searchQuery) ? "Mastra AI" : searchQuery;
-  url.searchParams.set("q", disambiguatedQuery);
+  url.searchParams.set("q", buildSearchProviderQuery(query));
   url.searchParams.set("format", "json");
   url.searchParams.set("language", "en");
   url.searchParams.set("safesearch", "1");
@@ -144,14 +153,14 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
       } catch { return false; }
     })
     .sort((left, right) => relevanceScore(right, searchTerms(searchQueryForPrompt(query))) - relevanceScore(left, searchTerms(searchQueryForPrompt(query))));
-  const terms = searchTerms(searchQueryForPrompt(query));
+  const terms = searchTerms(searchQuery);
   const relevant = terms.length
     ? normalized.filter((result) => {
         const score = relevanceScore(result, terms);
         const haystack = `${result.title} ${result.snippet} ${result.url}`.toLowerCase();
         const matchedTerms = terms.filter((term) => new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(haystack)).length;
         const trustedMastraSource = /(?:^|\.)mastra\.ai$|github\.com\/mastra-ai\//i.test(result.url);
-        return score >= Math.max(3, Math.ceil(terms.length * 1.5)) && (matchedTerms >= (terms.length > 1 ? 2 : 1) || trustedMastraSource);
+        return score >= Math.max(5, Math.ceil(terms.length * 2)) && (matchedTerms >= (terms.length > 1 ? Math.max(2, Math.ceil(terms.length * 0.5)) : 1) || trustedMastraSource);
       })
     : normalized;
   return relevant.slice(0, Math.min(options.max_results ?? 5, 8));

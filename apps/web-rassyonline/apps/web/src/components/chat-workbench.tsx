@@ -491,26 +491,17 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
       {signedIn ? <aside className="chat-history" aria-label="Chat history"><div className="history-heading"><span>RASSY / HISTORY</span><button type="button" onClick={startNewThread}>New</button></div><div className="history-list">{threads.length ? threads.map((thread) => <button className={thread.id === threadId ? "history-item active" : "history-item"} key={thread.id} type="button" onClick={() => void openThread(thread.id)}>{thread.title}<small>{new Date(thread.updatedAt).toLocaleDateString()}</small></button>) : <p>No saved chats yet.</p>}</div></aside> : null}
       <section className="chat-workbench" aria-label="Rassy chat">
       <div className="routing-ribbon" aria-label="Rassy controls">
-        <div className="lane-switcher autopilot-control" aria-label="Rassy automatic routing">
-          <label className="preference-select">
-              <select aria-label="Optional focus preference" value={mode} onChange={(event) => setMode(event.target.value as ChatMode["id"]) }>
-              <option value="general">Rassy decides</option>
-              {modes.filter((item) => item.id !== "general").map((item) => <option key={item.id} value={item.id}>{item.id === "spark" ? "Faster response" : item.label} · optional focus</option>)}
-            </select>
-          </label>
+        <div className="lane-switcher autopilot-control" aria-label="Rassy focus">
+          <div className="focus-control" role="group" aria-label="Choose response focus">
+            {([["general", "Thinking"], ["knowledge", "More thinking"], ["deep-coding", "Coding"]] as const).map(([value, label]) => (
+              <button className={mode === value ? "active" : ""} key={value} type="button" onClick={() => setMode(value)}>{label}</button>
+            ))}
+          </div>
         </div>
 
         <div className="ribbon-tools">
-          <div className="segmented-control" aria-label="Web search mode">
-            {(["auto", "on", "off"] as WebSearchMode[]).map((item) => (
-              <button className={webSearch === item ? "active" : ""} key={item} onClick={() => setWebSearch(item)} type="button">
-                {item === "on" ? "search" : item === "off" ? "local" : "auto"}
-              </button>
-            ))}
-          </div>
-
           <button className={showTuning ? "tuning-toggle active" : "tuning-toggle"} type="button" onClick={() => setShowTuning((value) => !value)} aria-expanded={showTuning}>
-            Tune <span>{showTuning ? "−" : "+"}</span>
+            Settings <span>{showTuning ? "−" : "+"}</span>
           </button>
         </div>
 
@@ -586,7 +577,7 @@ export function ChatWorkbench({ modes, signedIn }: { modes: ChatMode[]; signedIn
           aria-label="Message Rassy"
           rows={1}
         />
-        <button type="button" className={recording ? "recording" : ""} onClick={() => void toggleRecording()} disabled={audioBusy} aria-label={recording ? "Stop recording" : "Dictate message"}>{recording ? `Stop ${recordingSeconds}s` : audioBusy ? "Transcribing…" : "Speak"}</button>
+        <button type="button" className={recording ? "recording voice-button" : "voice-button"} onClick={() => void toggleRecording()} disabled={audioBusy} aria-label={recording ? "Stop recording" : "Dictate message"}>{recording ? `Stop ${recordingSeconds}s` : audioBusy ? "Transcribing…" : "Voice"}</button>
         {sending ? <button type="button" onClick={() => abortRef.current?.abort()}>Stop</button> : null}
         <button type="button" onClick={startNewThread} aria-label="Clear chat">Clear chat</button>
         <button type="submit">Send</button>
