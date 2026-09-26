@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildSearchContextMessage, buildSearchProviderQuery, executeWebSearch, normalizeSearchQuery, requiredSearchDomains, resolveSearchPrompt, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
+import { buildSearchContextMessage, buildSearchProviderQuery, executeWebSearch, interleaveSearchResults, normalizeSearchQuery, officialComparisonQueries, requiredSearchDomains, resolveSearchPrompt, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -36,6 +36,12 @@ describe("shouldUseWebSearch", () => {
 });
 
 describe("search constraints", () => {
+  it("gives each named subject a retrieval path in an official comparison", () => {
+    expect(officialComparisonQueries("Mastra and LangGraph. Compare those two using their official documentation.")).toEqual(["Mastra official documentation", "LangGraph official documentation"]);
+    expect(officialComparisonQueries("Explain Mastra")).toEqual([]);
+    const source = (url: string) => ({ title: url, url, snippet: url });
+    expect(interleaveSearchResults([[source("https://mastra.ai/1"), source("https://mastra.ai/2")], [source("https://langchain.com/1")]]).map((result) => result.url)).toEqual(["https://mastra.ai/1", "https://langchain.com/1", "https://mastra.ai/2"]);
+  });
   it("extracts an explicit source domain", () => {
     expect(requiredSearchDomains("Use only example.org for sources")).toEqual(["example.org"]);
     expect(requiredSearchDomains("search only https://www.example.org for updates")).toEqual(["example.org"]);

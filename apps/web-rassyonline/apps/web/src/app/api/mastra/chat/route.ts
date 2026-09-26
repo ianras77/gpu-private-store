@@ -6,7 +6,7 @@ import { agentRegistry } from "@/mastra";
 import { conversationMemory } from "@/mastra/agents";
 import { rassyLocal } from "@/mastra/agents";
 import { streamMastraChat } from "@/mastra/chat";
-import { buildSearchContextMessage, requiredSearchDomains, resolveSearchPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "@/lib/web-search";
+import { buildSearchContextMessage, interleaveSearchResults, officialComparisonQueries, requiredSearchDomains, resolveSearchPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "@/lib/web-search";
 import { getConversationForUser } from "@/lib/conversation-history";
 import { buildDocumentContextMessage } from "@/lib/document-memory";
 import { getReadyDocumentIdsForUser } from "@/lib/documents";
@@ -141,7 +141,10 @@ export async function POST(request: NextRequest) {
           if (searchRequested && latestUserMessage) {
             send("activity", { status: "searching", tool: "web-search", source: "preflight" });
             try {
-              preflightResults = await searchWebResources(researchPrompt, { max_results: 8, recency: searchRecencyForPrompt(latestUserMessage.content), domains: requiredDomains, signal: request.signal });
+              const comparisonQueries = officialComparisonQueries(researchPrompt);
+              preflightResults = comparisonQueries.length
+                ? interleaveSearchResults(await Promise.all(comparisonQueries.map((query) => searchWebResources(query, { max_results: 4, recency: searchRecencyForPrompt(latestUserMessage.content), domains: requiredDomains, signal: request.signal }))))
+                : await searchWebResources(researchPrompt, { max_results: 8, recency: searchRecencyForPrompt(latestUserMessage.content), domains: requiredDomains, signal: request.signal });
               const pages = await Promise.all(preflightResults.slice(0, 5).map((source) => readPublicPage(source.url, request.signal)));
               const readablePages = pages.filter((page) => page.status === "ok" && page.text).map((page) => `[Page evidence] ${page.title}\n${page.url}\n${page.text}`);
               if (readablePages.length) {
