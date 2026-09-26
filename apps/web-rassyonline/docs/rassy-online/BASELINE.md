@@ -38,5 +38,6 @@
 - [x] Join Mastra and legacy history reads without deleting records.
 - [x] Repair stream parsing, partial output, stale thread callbacks, and selected document scope.
 - [x] Harden page reads against private DNS answers and rebinding.
-- [ ] Prove installed Mastra SDK tool loop and live app behavior after deployment.
-- [ ] Complete evidence ledger, stored artifact/source history, migration rehearsal, renderer/voice/UI qualification, screenshots, and rollback rehearsal.
+- [x] Prove installed SDK calculator loop and live app behavior after deployment.
+- [x] Capture and inspect deployed desktop/mobile screenshots.
+- [ ] Complete stored artifact/source history, migration rehearsal, interactive renderer/voice/UI qualification, and rollback rehearsal.
