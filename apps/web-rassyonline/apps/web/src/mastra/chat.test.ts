@@ -10,6 +10,7 @@ describe("Mastra chat transport", () => {
       agent,
       threadId: "thread-1",
       resourceId: "resource-1",
+      includePriorContext: true,
       signal,
       messages: [
         { role: "user", content: "earlier" },
@@ -32,7 +33,7 @@ describe("Mastra chat transport", () => {
   it("forwards bounded applied generation settings to Mastra", async () => {
     const stream = vi.fn().mockResolvedValue({ fullStream: (async function* () {})() });
     await streamMastraChat({ agent: { stream } as never, threadId: "t", resourceId: "r", temperature: 0.4, maxTokens: 1024, messages: [{ role: "user", content: "hello" }] });
-    expect(stream).toHaveBeenCalledWith("hello", expect.objectContaining({ temperature: 0.4, maxOutputTokens: 1024 }));
+    expect(stream).toHaveBeenCalledWith("hello", expect.objectContaining({ modelSettings: { temperature: 0.4, maxOutputTokens: 1024 } }));
   });
 
   it("clamps provider tool-loop budgets to the stability envelope", async () => {

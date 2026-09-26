@@ -20,7 +20,7 @@ afterEach(() => {
 describe("RassyMind mode mapping", () => {
   test("publishes the exact ordered chat modes", () => {
     expect(CHAT_MODES).toEqual([
-      { id: "general", label: "Talk", model: "rassy-agent", maxTokens: 8192, thinking: true, reasoningEffort: "medium", contextWindow: "RassyMind agent lane · 8k output", description: "Automatic RassyMind agent routing with tools, reasoning, streaming, and provenance." },
+      { id: "general", label: "Talk", model: "rassy-agent", maxTokens: 4096, thinking: true, reasoningEffort: "medium", contextWindow: "Up to 4k output tokens", description: "Conversation with qualified local tools and optional web research." },
       { id: "deep-coding", label: "Deep Code", model: "rassy-code", maxTokens: 4096, thinking: true, reasoningEffort: "high", contextWindow: "Code lane", description: "High-context coding, systems reasoning, and operator work." },
       { id: "fast-coding", label: "Fast Code", model: "rassy-code", maxTokens: 1536, thinking: false, reasoningEffort: "none", contextWindow: "Code lane", description: "Focused implementation loops through the same canonical code lane." },
       { id: "quick", label: "Utility", model: "rassy-utility", maxTokens: 768, thinking: false, reasoningEffort: "none", contextWindow: "Utility lane", description: "Short answers, titles, summaries, and quick transforms." },

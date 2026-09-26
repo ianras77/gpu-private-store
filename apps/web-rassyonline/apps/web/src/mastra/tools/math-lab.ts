@@ -54,7 +54,14 @@ export function matrixInverse(input: number[][]): number[][] {
 
 function plotPath(points: Array<{ x: number; y: number | null }>, xMin: number, xMax: number, width: number, height: number, minY: number, maxY: number) {
   const rangeY = maxY - minY || 1;
-  return points.filter((point) => point.y !== null).map((point) => `${((point.x - xMin) / (xMax - xMin) * width).toFixed(2)},${(height - ((point.y as number - minY) / rangeY * height)).toFixed(2)}`).join(" ");
+  const segments: string[] = [];
+  let current: string[] = [];
+  for (const point of points) {
+    if (point.y === null) { if (current.length) segments.push(current.join(" ")); current = []; continue; }
+    current.push(`${((point.x - xMin) / (xMax - xMin) * width).toFixed(2)},${(height - ((point.y - minY) / rangeY * height)).toFixed(2)}`);
+  }
+  if (current.length) segments.push(current.join(" "));
+  return segments.map((segment) => `<polyline class="curve" points="${segment}"/>`).join("");
 }
 
 export function makeMathLabSvg(mode: "formula" | "matrix" | "plot" | "wavefunction" | "vector-field" | "fourier" | "phase", title: string, formula: string, matrix: number[][], operation = "spectrum", matrixB: number[][] = []): string {
@@ -82,7 +89,7 @@ export function makeMathLabSvg(mode: "formula" | "matrix" | "plot" | "wavefuncti
   } else {
     const expression = mode === "wavefunction" ? `sin(x) * exp(-x^2 / 8)` : mode === "vector-field" ? `sin(x) * cos(x)` : mode === "fourier" ? `sin(x) + sin(3*x)/3 + sin(5*x)/5` : mode === "phase" ? `cos(x) * exp(-x^2 / 12)` : formula;
     const points = sampleGraph(expression, -10, 10, 161); const valid = points.filter((point) => point.y !== null); const rawMin = Math.min(...valid.map((point) => point.y as number), -1); const rawMax = Math.max(...valid.map((point) => point.y as number), 1); const pad = Math.max((rawMax - rawMin) * .08, .5); const minY = rawMin - pad; const maxY = rawMax + pad; const path = plotPath(points, -10, 10, graphW, graphH, minY, maxY); const zeroY = minY <= 0 && maxY >= 0 ? top + graphH - ((0 - minY) / (maxY - minY) * graphH) : null;
-    body += `<path class="grid" d="M${left} ${top + graphH / 2}h${graphW}M${left + graphW / 2} ${top}v${graphH}M${left} ${top + graphH * .25}h${graphW}M${left} ${top + graphH * .75}h${graphW}"/>${zeroY === null ? "" : `<path class="axis" d="M${left} ${zeroY}h${graphW}"/>`}<polyline class="curve" points="${path}"/>`;
+    body += `<path class="grid" d="M${left} ${top + graphH / 2}h${graphW}M${left + graphW / 2} ${top}v${graphH}M${left} ${top + graphH * .25}h${graphW}M${left} ${top + graphH * .75}h${graphW}"/>${zeroY === null ? "" : `<path class="axis" d="M${left} ${zeroY}h${graphW}"/>`}${path}`;
     body += `<text x="${left}" y="${top + graphH + 32}" class="small">−10</text><text x="${left + graphW / 2}" y="${top + graphH + 32}" class="small" text-anchor="middle">0</text><text x="${left + graphW}" y="${top + graphH + 32}" class="small" text-anchor="end">10</text>`;
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${safeTitle}"><rect width="100%" height="100%" fill="#0b0d0d"/><text x="${left}" y="34" class="title">${safeTitle}</text><style>.title{fill:#9de8ce;font:600 14px ui-monospace,monospace;letter-spacing:2px;text-transform:uppercase}.formula{fill:#edf1eb;font:italic 29px Georgia,serif}.hint,.small{fill:#87918b;font:13px ui-monospace,monospace}.matrix-value,.eigenvalues,.invariants{fill:#edf1eb;font:22px ui-monospace,monospace}.eigenvalues{fill:#9de8ce;font-size:25px}.invariants{fill:#edf1eb;font-size:19px}.bracket{fill:none;stroke:#9de8ce;stroke-width:3}.rule{stroke:#9de8ce;stroke-width:1;opacity:.5}.grid{fill:none;stroke:#edf1eb;stroke-width:1;opacity:.1}.axis{stroke:#9de8ce;stroke-width:1;opacity:.6}.curve{fill:none;stroke:#9de8ce;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}</style>${body}</svg>`;

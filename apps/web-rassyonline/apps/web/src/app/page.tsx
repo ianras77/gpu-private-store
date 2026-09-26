@@ -16,7 +16,7 @@ export default async function Home() {
               <circle className="signal" cx="55" cy="27" r="2.5" />
             </svg>
           </span>
-          <span className="brand-type"><strong>RASSY</strong><small>PRIVATE / LIVE</small></span>
+          <span className="brand-type"><strong>RASSY</strong><small>ONLINE</small></span>
         </Link>
         <div className="top-actions">
           {user ? (
@@ -42,7 +42,7 @@ export default async function Home() {
       </header>
 
       <section className="workspace-grid">
-        <ChatWorkbench modes={CHAT_MODES} signedIn={Boolean(user)} />
+        <ChatWorkbench modes={CHAT_MODES} signedIn={Boolean(user)} accountId={user?.id} />
       </section>
     </main>
   );

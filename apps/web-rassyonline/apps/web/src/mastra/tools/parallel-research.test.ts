@@ -6,7 +6,7 @@ afterEach(() => vi.restoreAllMocks());
 describe("parallel research", () => {
   it("keeps independent result groups and preserves failures", async () => {
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ results: [{ title: "One", url: "https://one.example", content: "one" }] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ results: [{ title: "One", url: "https://one.example", content: "one" }] }), { status: 200, headers: { "content-type": "application/json" } }))
       .mockRejectedValueOnce(new Error("offline"));
     vi.stubGlobal("fetch", fetchMock);
     await expect(executeParallelResearch([{ query: "one" }, { query: "two" }])).resolves.toMatchObject({ searches: [
