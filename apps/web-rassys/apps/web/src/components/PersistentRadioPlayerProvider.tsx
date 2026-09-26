@@ -986,7 +986,6 @@ export function PersistentRadioPlayerProvider({
     <PersistentRadioPlayerContext.Provider value={value}>
       {children}
       <audio
-        key={activeStreamUrl}
         ref={audioRef}
         src={activeStreamUrl}
         preload="none"

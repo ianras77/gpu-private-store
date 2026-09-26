@@ -31,12 +31,12 @@ export async function GET(request: Request) {
 
   if (new URL(request.url).searchParams.has("clientId")) return NextResponse.json({ error: "client_id_not_allowed" }, { status: 400 });
 
+  const identity = await visitor();
   try {
-    const identity = await visitor();
     const data = await fetchRadio(`/public/chat?clientId=${encodeURIComponent(identity.id)}`);
     return respond(data ?? { messages: [] }, identity);
   } catch {
-    return NextResponse.json({ error: "radio_unavailable" }, { status: 502 });
+    return respond({ error: "radio_unavailable" }, identity, 502);
   }
 }
 
@@ -58,8 +58,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
 
+  const identity = await visitor();
   try {
-    const identity = await visitor();
     const data = await fetchRadio("/public/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -75,6 +75,6 @@ export async function POST(request: Request) {
     });
     return respond(data ?? { ok: true }, identity, data?.pending ? 202 : 200);
   } catch {
-    return NextResponse.json({ error: "radio_unavailable" }, { status: 502 });
+    return respond({ error: "radio_unavailable" }, identity, 502);
   }
 }
