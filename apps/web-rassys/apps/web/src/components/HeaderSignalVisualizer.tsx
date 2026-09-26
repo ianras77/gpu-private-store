@@ -106,9 +106,11 @@ export function HeaderSignalVisualizer() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 overflow-hidden"
+      className="header-signal-visualizer pointer-events-none absolute inset-0 overflow-hidden"
+      data-active={frame.active ? "true" : "false"}
     >
-      <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(circle_at_18%_28%,rgba(255,228,115,0.2),transparent_28%),radial-gradient(circle_at_78%_36%,rgba(66,245,255,0.18),transparent_32%),radial-gradient(circle_at_50%_100%,rgba(255,79,216,0.18),transparent_40%)]" />
+      <div className="header-signal-glow absolute inset-x-0 top-0 h-full bg-[radial-gradient(circle_at_18%_28%,rgba(255,228,115,0.2),transparent_28%),radial-gradient(circle_at_78%_36%,rgba(66,245,255,0.18),transparent_32%),radial-gradient(circle_at_50%_100%,rgba(255,79,216,0.18),transparent_40%)]" />
+      <div className="header-signal-flash absolute inset-0" />
       <svg
         viewBox="0 0 100 24"
         preserveAspectRatio="none"

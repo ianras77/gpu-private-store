@@ -49,44 +49,25 @@ export function Hero() {
           initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="glass-panel rounded-[28px] p-4 md:p-5 lg:px-7 lg:py-5"
+          className="glass-panel relative overflow-hidden rounded-[28px] p-4 md:p-5 lg:px-7 lg:py-5"
         >
+          <HeaderSignalVisualizer />
           <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.34em] text-cloud/58">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="glow-dot h-2.5 w-2.5 rounded-full" />
-                Ian Rasmussen // home signal
-              </div>
-            </div>
-
-            <div className="max-w-[46rem]">
-              <div className="text-[11px] uppercase tracking-[0.5em] text-cloud/55">
-                Welcome to my world
+            <div className="relative z-10 max-w-[46rem]">
+              <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-cloud/60">
+                <span className="glow-dot h-2 w-2 rounded-full" /> Ian Rasmussen&apos;s corner
               </div>
               <h1 className="section-title mt-2 whitespace-nowrap text-[clamp(2rem,9.5vw,6rem)] leading-[.98] tracking-[-0.055em]">
                 Rassy’s <span className="hero-wordmark-dot">dot</span> Com
               </h1>
-              <div className="relative mt-3 max-w-3xl overflow-hidden rounded-[24px] border border-white/10 bg-black/18 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
-                <HeaderSignalVisualizer />
-                <div className="relative px-4 py-3 md:px-5 md:py-3">
-                  <div className="text-base leading-7 text-cloud/90 md:text-lg">
-                    Come on in.
-                  </div>
-                  <p className="mt-2 max-w-2xl text-sm leading-7 text-cloud/84 md:text-[15px]">
-                    {mrRassyLine}
-                  </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-cloud/58">
-                    <span className="rave-chip rounded-full px-3 py-2">
-                      Mr Rassy
-                    </span>
-                    <span className="rave-chip rounded-full px-3 py-2">
-                      {formatHomepageAtmosphere({
-                        mood: stationAtmosphere || dj?.mood,
-                        artist: data?.status?.nowPlaying?.artist,
-                        title: data?.status?.nowPlaying?.title,
-                      })}
-                    </span>
-                  </div>
+              <div className="mt-3 max-w-3xl text-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
+                <div className="text-base leading-7 text-cloud/95 md:text-lg">Come on in.</div>
+                <p className="mt-2 max-w-2xl text-sm leading-7 text-cloud/90 md:text-[15px]">{mrRassyLine}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-cloud/70">
+                  <span className="rave-chip rounded-full px-3 py-2">Mr Rassy</span>
+                  <span className="rave-chip rounded-full px-3 py-2">
+                    {formatHomepageAtmosphere({ mood: stationAtmosphere || dj?.mood, artist: data?.status?.nowPlaying?.artist, title: data?.status?.nowPlaying?.title })}
+                  </span>
                 </div>
               </div>
 

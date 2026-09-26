@@ -716,6 +716,40 @@ textarea::placeholder {
   box-shadow: 0 0 12px rgba(66, 245, 255, 0.5);
 }
 
+.header-signal-visualizer {
+  opacity: 0.68;
+  transition: opacity 280ms ease;
+}
+
+.header-signal-visualizer[data-active="true"] {
+  opacity: 1;
+}
+
+.header-signal-visualizer[data-active="true"] .header-signal-glow {
+  animation: headerSignalBloom 1.35s ease-in-out infinite;
+}
+
+.header-signal-flash {
+  background: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.04) 42%, rgba(255, 230, 109, 0.11) 50%, rgba(66, 245, 255, 0.08) 58%, transparent 80%);
+  opacity: 0;
+}
+
+.header-signal-visualizer[data-active="true"] .header-signal-flash {
+  animation: headerSignalFlash 1.35s steps(2, end) infinite;
+}
+
+@keyframes headerSignalBloom {
+  0%, 100% { filter: saturate(1.05) brightness(1); transform: scale(1); }
+  46% { filter: saturate(1.45) brightness(1.32); transform: scale(1.025); }
+  54% { filter: saturate(1.7) brightness(1.52); transform: scale(1.04); }
+}
+
+@keyframes headerSignalFlash {
+  0%, 42%, 100% { opacity: 0; transform: translateX(-12%); }
+  48% { opacity: 0.34; transform: translateX(0); }
+  56% { opacity: 0.08; transform: translateX(8%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
