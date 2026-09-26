@@ -8,16 +8,17 @@ Updated: 2026-09-26 UTC. Release branch: `codex/rassyonline-release-only-2026092
 | --- | --- | --- |
 | Clean install | PASS | `npm ci --offline`; 356 packages installed, audit found 0 vulnerabilities. |
 | Types | PASS | `npm run lint` (`tsc --noEmit`) after the repaired contracts. |
-| Unit suite | PASS | Final rerun: 29 files / 100 tests. |
+| Unit suite | PASS | Final rerun: 29 files / 101 tests. |
 | Production build | PASS | `npm run build` and managed Docker image build passed, with the known Mastra dynamic dependency warning. |
 | Gateway capability metadata | PASS | Authenticated model catalog and per-alias capability endpoints from the running application container. |
 | Installed SDK calculator loop | PASS | Disposable container with the installed `ai`, `@ai-sdk/openai`, and `zod` packages completed a two-step synthetic calculator tool loop and final answer containing `44.1`. |
 | Installed Mastra settings wire test | PASS | `chat-wire.test.ts` observed the outgoing provider body carry `temperature: 0.4` and `max_tokens: 1024`. |
 | Search service | PASS | Application-container request returned HTTP 200, JSON content type, and Mastra official-site/GitHub results. |
-| Managed final rebuild | PASS | Web image `sha256:c4c633c3a26e923ab8b16baa0084030b7ef402ac8c51f5fbadaaed9cd96e3492`; only `rassy-online-web` was recreated. Postgres and Qdrant stayed running. |
+| Managed final rebuild | PASS | Web image `sha256:9871964ddb36da56ad6453225dbc46d660178114af3d0b74d4b12b083c382b14`; only `rassy-online-web` was recreated. Postgres and Qdrant stayed running. |
 | Live synthetic smoke | PASS | Final image: health, capability map, web-off arithmetic `44.1`, and explicit search all completed. |
 | Live two-turn research | PASS | Guest follow-up completed, resolved both subjects, and returned official Mastra and LangGraph sources including `mastra.ai`, `www.langchain.com/langgraph`, and `docs.langchain.com/oss/python/langgraph/overview`. Claim-by-claim source support was not audited. |
 | Rendered screenshots | PASS | Captured deployed app at `after-390.png`, `after-768.png`, and `after-1440.png`; 390px and 1440px images were visually inspected. Baseline at `before-1440.png`. |
+| Signed-in evidence persistence | PASS (unit) | Turn evidence/artifacts and terminal state are user- and thread-scoped in `conversation_turn_data`, then returned with the matching Mastra assistant message. The regression test covers restoration; a controlled live account run was not performed to avoid creating persistent test accounts. |
 
 ## Remaining qualification
 
@@ -25,6 +26,7 @@ Updated: 2026-09-26 UTC. Release branch: `codex/rassyonline-release-only-2026092
 | --- | --- | --- |
 | Final source/image parity | PASS | The final source was synced to the managed mirror before the final Docker build and web recreate. |
 | Claim-level citation support | NOT RUN | Verify each generated claim against its cited page; the current URL check establishes retrieval/allowlisting, not factual support. |
+| Interactive authenticated isolation | NOT RUN | Verify account A/B access and selected-document scope with controlled accounts in a safe staging database. |
 | Signed-in history/document isolation | NOT RUN | Use controlled test accounts in staging and verify create, reopen, account switch, and selected-document scope. |
 | Browser workflows | NOT RUN | Exercise keyboard, IME, file, voice, scroll, stop/retry, and 390/768/1440px plus 200% zoom in an interactive browser. |
 | Migration reconciliation | NOT RUN | Rehearse old `threads/messages` plus Mastra overlap in a staging database snapshot. Dual-read compatibility code is present; no destructive migration was run. |

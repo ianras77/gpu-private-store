@@ -19,6 +19,7 @@ import { buildCurrentTimeContext } from "@/mastra/tools/time";
 import { localOnlyExecution } from "@/mastra/local-policy";
 import { mastraFailureMessage } from "@/mastra/errors";
 import { getModelCapability, modelForAgent } from "@/lib/model-capabilities";
+import { saveConversationTurnData, type ConversationArtifact } from "@/lib/conversation-turn-data";
 
 export const dynamic = "force-dynamic";
 type ServerMessage = { role: "user" | "assistant" | "system"; content: string };
@@ -131,6 +132,7 @@ export async function POST(request: NextRequest) {
         let finishReason: string | undefined;
         const returnedUrls = new Set<string>();
         const evidence = new Map<string, Awaited<ReturnType<typeof searchWebResources>>[number]>();
+        const artifacts: ConversationArtifact[] = [];
         const announcedToolCalls = new Set<string>();
         const isResearchTool = (name?: string) => Boolean(name && ["websearch", "parallelresearch"].includes(name.toLowerCase().replace(/[-_]/g, "")));
         let sequence = 0;
@@ -187,8 +189,13 @@ export async function POST(request: NextRequest) {
               if (visualOutput?.kind === "dot-matrix" || visualOutput?.kind === "math-lab" || visualOutput?.kind === "ascii-art" || visualOutput?.kind === "chart") {
                 const ready = visualOutput.kind === "dot-matrix" || visualOutput.kind === "math-lab" ? Boolean(visualOutput.svg) : visualOutput.kind === "ascii-art" ? Boolean(visualOutput.art) : Boolean(visualOutput.labels?.length && visualOutput.values?.length);
                 if (ready) send("artifact", { kind: visualOutput.kind, status: "ready", artifact: visualOutput });
+                if (ready) artifacts.push(visualOutput as ConversationArtifact);
               }
-              if ((toolName === "calculator" || visualOutput?.kind === "calculator") && visualOutput?.expression) send("artifact", { kind: "calculator", status: visualOutput.status === "ok" ? "ready" : "failed", artifact: { kind: "calculator", ...visualOutput } });
+              if ((toolName === "calculator" || visualOutput?.kind === "calculator") && visualOutput?.expression) {
+                const artifact = { kind: "calculator", ...visualOutput };
+                send("artifact", { kind: "calculator", status: visualOutput.status === "ok" ? "ready" : "failed", artifact });
+                artifacts.push(artifact as ConversationArtifact);
+              }
               if (toolName?.toLowerCase().replace(/[-_]/g, "") === "pagereader") {
                 const page = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { status?: string; url?: string; title?: string; text?: string } | undefined;
                 if (page?.status === "ok" && page.url && page.text) {
@@ -228,6 +235,8 @@ export async function POST(request: NextRequest) {
           }
           const unsupported = searched ? unsupportedCitationUrls(answerText, [...returnedUrls]) : [];
           if (unsupported.length) send("citation-warning", { status: "unsupported", count: unsupported.length });
+          const terminalStatus = streamFailed ? "failed" : !answerText.trim() ? "empty" : finishReason === "length" ? "truncated" : "complete";
+          if (user) await saveConversationTurnData({ turnId, threadId, userId: user.id, assistantContent: answerText, sources: [...evidence.values()], artifacts, terminalStatus });
           if (!streamFailed && !answerText.trim()) send("error", { message: "The model returned an empty answer.", retryable: true });
           else if (!streamFailed) send(finishReason === "length" ? "truncated" : "complete", { searchStatus: searched ? searchStatus : "not-used", citationStatus: unsupported.length ? "unsupported" : searchStatus === "used" ? "source-linked" : "not-applicable" });
           controller.close();
