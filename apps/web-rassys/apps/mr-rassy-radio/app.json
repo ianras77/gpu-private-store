@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Mr Rassy Radio",
+    "slug": "mr-rassy-radio",
+    "scheme": "mrrassyradio",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "plugins": [["expo-audio", { "recordAudioAndroid": false, "microphonePermission": false }]],
+    "ios": {
+      "bundleIdentifier": "online.rassy.mrrassyradio",
+      "supportsTablet": false,
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      }
+    },
+    "android": {
+      "package": "online.rassy.mrrassyradio",
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
+    }
+  }
+}
