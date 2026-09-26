@@ -507,7 +507,7 @@ export function RadioTower({
       const response = await fetch("/api/radio/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, clientId: activeClientId, requestId }),
+        body: JSON.stringify({ message, requestId }),
       });
       const payload = await response.json().catch(() => null);
 

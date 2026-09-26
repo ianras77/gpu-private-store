@@ -1,7 +1,3 @@
-const RADIO_CHAT_CLIENT_STORAGE_KEY = "mr-rassy-radio-chat-client-id";
-
-const buildRandomId = () =>
-  `listener-${Date.now().toString(36)}-${Math.round(Math.random() * 1_000_000).toString(36)}`;
 
 export type RadioChatRecommendationStatus =
   | "accepted"
@@ -56,16 +52,7 @@ export const isRapidDuplicateRadioChatSubmission = (
 
 export const ensureRadioChatClientId = () => {
   if (typeof window === "undefined") return null;
-
-  const existing = window.localStorage.getItem(RADIO_CHAT_CLIENT_STORAGE_KEY)?.trim();
-  if (existing) return existing;
-
-  const nextId =
-    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-      ? `listener-${crypto.randomUUID()}`
-      : buildRandomId();
-  window.localStorage.setItem(RADIO_CHAT_CLIENT_STORAGE_KEY, nextId);
-  return nextId;
+  return "visitor-bound";
 };
 
 export const normalizeRadioChatMessages = <T extends { id?: string; createdAt?: number }>(
@@ -99,5 +86,4 @@ export const normalizeRadioChatMessages = <T extends { id?: string; createdAt?: 
   });
 };
 
-export const buildRadioChatUrl = (clientId?: string | null) =>
-  clientId ? `/api/radio/chat?clientId=${encodeURIComponent(clientId)}` : "/api/radio/chat";
+export const buildRadioChatUrl = (_clientId?: string | null) => "/api/radio/chat";

@@ -21,16 +21,21 @@ export function MrRassyStationDeck({ compact = false }: { compact?: boolean }) {
   useEffect(() => {
     if (!pendingSince || !clientIdRef.current) return;
     const poll = async () => {
+      if (Date.now() - pendingSince > 30_000) {
+        setStatus("The booth has not answered yet. Try sending again in a moment.");
+        setPendingSince(null);
+        return;
+      }
       try {
-        const response = await fetch(`/api/radio/chat?clientId=${encodeURIComponent(clientIdRef.current!)}`);
+        const response = await fetch("/api/radio/chat");
         const payload = await response.json().catch(() => null);
         const messages = Array.isArray(payload?.messages) ? payload.messages : [];
-        const answer = messages.find((item: { role?: string; createdAt?: number; text?: string }) =>
+        const answer = messages.find((item: { role?: string; createdAt?: number; text?: string; replySource?: string }) =>
           item.role === "dj" && Number(item.createdAt) >= pendingSince,
         );
         if (answer?.text) {
           setReply(answer.text);
-          setStatus("Back on the mic.");
+          setStatus(answer.replySource === "error" ? "The booth lost that reply. You can try again." : "Back on the mic.");
           setPendingSince(null);
         }
       } catch {
@@ -48,13 +53,12 @@ export function MrRassyStationDeck({ compact = false }: { compact?: boolean }) {
     setReply("");
     setStatus("Sending to the booth…");
     try {
-      const clientId = clientIdRef.current ?? ensureRadioChatClientId();
       const requestId = createRadioChatRequestId();
-      const response = await fetch("/api/radio/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, clientId, requestId }) });
+      const response = await fetch("/api/radio/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, requestId }) });
       const payload = await response.json().catch(() => null);
       if (!response.ok) throw new Error(payload?.error ?? "radio_unavailable");
       setReply(payload?.reply?.message ?? payload?.reply?.text ?? (payload?.pending ? "Mr Rassy heard you. He’s shaping a reply — stay on the line." : "Mr Rassy heard you."));
-      setStatus(payload?.pending ? "The booth is thinking…" : "Back on the mic.");
+      setStatus(payload?.pending ? "The booth is thinking…" : payload?.reply?.replySource === "error" ? "The booth lost that reply. You can try again." : "Back on the mic.");
       if (payload?.pending) {
         const latestListener = Array.isArray(payload?.messages)
           ? payload.messages.filter((item: { role?: string }) => item.role === "listener").at(-1)
