@@ -5,8 +5,10 @@ import { HomeRassyOpeningPanel } from "../components/HomeRassyOpeningPanel";
 import { ThoughtsPanel } from "../components/ThoughtsPanel";
 import { HomeFamilyStrip } from "../components/HomeFamilyStrip";
 import { RoomShell } from "../components/RoomShell";
+import { requireAdmin } from "../lib/admin-auth";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const canViewFamily = await requireAdmin();
   return (
     <RoomShell theme="home" channel="home" agent="site-curator"><main className="relative overflow-hidden pb-12">
       <div className="pointer-events-none absolute inset-0 z-0 h-full w-full">
@@ -32,7 +34,7 @@ export default function HomePage() {
         </div>
       </section>
       <ThoughtsPanel />
-      <HomeFamilyStrip />
+      {canViewFamily ? <HomeFamilyStrip /> : null}
       <Footer />
     </main></RoomShell>
   );

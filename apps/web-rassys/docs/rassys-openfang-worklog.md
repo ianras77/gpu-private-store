@@ -87,3 +87,10 @@ Updated: 2026-09-26 UTC
 - Change: raised the workspace `sharp` override to `0.35.4` and the Expo-transitive `uuid` override to `11.1.1`; refreshed `pnpm-lock.yaml`. Native typecheck and Expo public config still pass.
 - Full qualification result: install, intelligence build, radio build, 62 radio tests, Minecraft build, Cheshire build, web lint and web production build all PASS. `pnpm audit --prod` remains a failing gate with two high findings in Expo 54's Metro-only `image-size@1.2.1` dependency. `metro@0.83.3` calls the v1 CommonJS default function; the advisory's fixed `image-size@2.0.3` changes that API, so a forced override would break Expo bundling. The direct sharp and uuid advisories are resolved. Upgrade Metro through a tested Expo SDK release rather than forcing the incompatible major.
 - Next action: commit dependency update and continue page-level error/loading audit. Release remains blocked by backup/restore rehearsal and the remaining Expo toolchain advisory.
+
+## Stability pass: home and Family Archive seam
+
+- Observed source/runtime gap: deployed Family Archive is still public because it is running the earlier image; its unauthenticated `/api/photos` returned media metadata during the read-only smoke. Source deployment remains blocked. In the hardened source, the public home page still mounted `HomeFamilyStrip`, which would fetch the newly protected endpoint and show a misleading empty-gallery message to visitors.
+- Change: the home page now checks the server-side admin session and mounts the family photo strip only for authorized readers. Public home navigation can still describe the Family Archive, while no public page requests or renders private metadata.
+- Commands/results: `pnpm --filter web exec tsc --noEmit` PASS; `pnpm run lint:web` PASS; `pnpm run build:web` PASS. No production behavior changed.
+- Next action: commit this cleanup, continue interactive-page and API error-state audit, then produce staging/release runbook with the open backup and Expo advisories.
