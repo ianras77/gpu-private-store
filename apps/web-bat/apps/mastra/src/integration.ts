@@ -2,6 +2,19 @@ import { config } from './config.js';
 
 const headers = { 'content-type': 'application/json', authorization: `Bearer ${config.serviceToken}` };
 
+export async function refreshSources(query: string, limit = 20) {
+  const response = await fetch(`${config.apiUrl}/api/v1/sources/ingest`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ query, limit, include_x: false }),
+    signal: AbortSignal.timeout(90000),
+  });
+  if (!response.ok) throw new Error(`source refresh failed: ${response.status}`);
+  return await response.json() as {
+    summary?: { high_quality_kept?: number; created?: number; updated?: number; total_sources?: number };
+  };
+}
+
 export async function loadPersonaContext() {
   const response = await fetch(`${config.apiUrl}/api/v1/integration/persona-context?limit=5`, { headers, signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error(`persona context unavailable: ${response.status}`);

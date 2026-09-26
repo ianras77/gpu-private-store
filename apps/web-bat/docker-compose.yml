@@ -89,7 +89,7 @@ services:
         - CMD
         - python
         - -c
-        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/live', timeout=5)
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/themes', timeout=5)
       interval: 15s
       timeout: 10s
       retries: 10
@@ -115,6 +115,7 @@ services:
       RASSYMIND_EDITORIAL_MODEL: ${RASSYMIND_EDITORIAL_MODEL:-rassy-fast}
       MASTRA_SCHEDULE_ENABLED: ${MASTRA_SCHEDULE_ENABLED:-true}
       MASTRA_SCHEDULE_INTERVAL_SECONDS: ${MASTRA_SCHEDULE_INTERVAL_SECONDS:-21600}
+      MASTRA_SCHEDULE_SOURCE_MAX_AGE_HOURS: ${MASTRA_SCHEDULE_SOURCE_MAX_AGE_HOURS:-30}
       MASTRA_SCHEDULE_DIRECTIVE: ${MASTRA_SCHEDULE_DIRECTIVE:-Trump executive overreach latest 2026}
     extra_hosts: *bat-host-gateway
     expose:

@@ -72,6 +72,19 @@ The local compose stack is wired around RassyMind and Qdrant-backed Cheshire Cat
 3. Review/approve in admin UI or API approve endpoints.
 4. Publish approved stories/homepage/social posts.
 
+## Managed data location
+
+The installed Runtipi stack uses `APP_DATA_DIR=/`. PostgreSQL lives at
+`/app-data/web-bat/named/bat-postgres-data` and Qdrant lives at
+`/app-data/web-bat/named/bat-qdrant-data`. The checkout's `.docker-data`
+directory is only the local Compose fallback; pointing a managed deployment at
+the wrong root starts a fresh seeded database and makes existing stories seem
+to disappear. Keep `DATABASE_URL` in the protected managed `app.env` aligned
+with the running PostgreSQL role password. Check `/api/v1/health/ready` for
+`status: ready`; an HTTP 200 with `status: degraded` is a failed readiness
+check. The API container health probe reads `/api/v1/themes` so database
+authentication failures mark the container unhealthy.
+
 ## Direct publish workflow (no draft hold)
 
 1. Open `/admin/settings` and enable `Direct publish`.

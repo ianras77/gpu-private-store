@@ -5,6 +5,7 @@ import { researchRequest } from './schemas.js';
 import { listSourcesTool } from './tools.js';
 import { editorialStoryWorkflow, researchWorkflow, reportWorkflow, storyWorkflow } from './workflows.js';
 import { writer } from './agents.js';
+import { refreshSources } from './integration.js';
 
 const server = http.createServer(async (req, res) => {
   if (req.url !== '/health' && req.url !== '/v1/capabilities' && req.headers.authorization !== `Bearer ${config.serviceToken}`) { res.writeHead(401, {'content-type':'application/json'}); res.end(JSON.stringify({error:'unauthorized'})); return; }
@@ -77,7 +78,13 @@ const server = http.createServer(async (req, res) => {
 
 async function runScheduledCycle() {
   try {
-    const story = await editorialStoryWorkflow({ directive: config.scheduleDirective, maxSources: 20 });
+    const refresh = await refreshSources(config.scheduleDirective, 20);
+    const accepted = refresh.summary?.high_quality_kept ?? 0;
+    if (accepted < 3) throw new Error(`source refresh produced only ${accepted} approved sources`);
+    const story = await editorialStoryWorkflow(
+      { directive: config.scheduleDirective, maxSources: 20 },
+      { maxSourceAgeHours: config.scheduleSourceMaxAgeHours },
+    );
     const response = await fetch(`${config.apiUrl}/api/v1/integration/runs/${story.runId}/publish`, {
       method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${config.serviceToken}` },
       body: JSON.stringify({ title: story.title, dek: story.dek, body_md: story.body, source_ids: story.sourceIds, metadata: { fact_check: story.factCheck, scheduled: true } }), signal: AbortSignal.timeout(30000),

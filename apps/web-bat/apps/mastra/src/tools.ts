@@ -10,7 +10,7 @@ export const listSourcesTool = createTool({
     const response = await fetch(`${config.apiUrl}/api/v1/sources?limit=${input.limit}`, { headers: { Authorization: `Bearer ${config.apiToken}` }, signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error(`source service unavailable: ${response.status}`);
     const body = await response.json() as unknown;
-    return Array.isArray(body) ? { sources: body.map((source) => ({ id: String(source.id ?? ''), title: String(source.title ?? 'Untitled source'), url: String(source.source_url ?? source.url ?? ''), evidence: String(source.evidence ?? '') })) } : body;
+    return Array.isArray(body) ? { sources: body.map((source) => ({ id: String(source.id ?? ''), title: String(source.title ?? 'Untitled source'), url: String(source.source_url ?? source.url ?? ''), evidence: String(source.evidence ?? ''), fetchedAt: String(source.fetched_at ?? '') })) } : body;
   },
 });
 

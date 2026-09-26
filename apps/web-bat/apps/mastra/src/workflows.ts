@@ -5,6 +5,7 @@ import { editor, factChecker, publisher, writer } from './agents.js';
 import { config } from './config.js';
 import { reportArtifact, type ReportArtifact } from './report.js';
 import { completeEditorialRun, loadPersonaContext, recordEditorialStage, startEditorialRun } from './integration.js';
+import { parseFactCheck } from './fact-check.js';
 
 /** The first newsroom workflow is deliberately deterministic at its boundary:
  * search and source policy remain owned by BAT API; model reasoning is added
@@ -78,19 +79,25 @@ function extractJson(text: string): Record<string, unknown> {
 
 /** Real Mastra-owned story path. The API remains the evidence/persistence
  * plane; Mastra owns the editorial judgment and agent sequence. */
-export async function editorialStoryWorkflow(input: unknown): Promise<StoryWorkflowResult> {
+export async function editorialStoryWorkflow(input: unknown, options: { maxSourceAgeHours?: number } = {}): Promise<StoryWorkflowResult> {
   const request = researchRequest.parse(input);
   const persona = await loadPersonaContext();
   const run = await startEditorialRun('story', request.directive, { voice: 'Mirror, Pin, Twist', context: persona });
   try {
-    const raw = await listSourcesTool.execute!({ query: request.directive, limit: Math.max(request.maxSources, 20) }, {} as never) as { sources?: Array<{ id?: string; title?: string; url?: string; evidence?: string }> };
+    const raw = await listSourcesTool.execute!({ query: request.directive, limit: Math.max(request.maxSources, 20) }, {} as never) as { sources?: Array<{ id?: string; title?: string; url?: string; evidence?: string; fetchedAt?: string }> };
     const terms = request.directive.toLowerCase().split(/[^a-z0-9$]+/).filter(term => term.length > 3);
-    const sources = (raw.sources ?? []).filter((source): source is { id: string; title: string; url: string; evidence: string } => Boolean(source.id && source.title && source.url))
+    const minimumFetchedAt = options.maxSourceAgeHours ? Date.now() - (options.maxSourceAgeHours * 60 * 60 * 1000) : 0;
+    const sources = (raw.sources ?? []).filter((source): source is { id: string; title: string; url: string; evidence: string; fetchedAt?: string } => {
+      if (!source.id || !source.title || !source.url) return false;
+      if (!minimumFetchedAt) return true;
+      const fetchedAt = Date.parse(source.fetchedAt ?? '');
+      return Number.isFinite(fetchedAt) && fetchedAt >= minimumFetchedAt;
+    })
       .sort((left, right) => {
         const score = (source: { title: string; evidence: string }) => terms.reduce((total, term) => total + (source.title.toLowerCase().includes(term) ? 3 : 0) + (source.evidence.toLowerCase().includes(term) ? 1 : 0), 0);
         return score(right) - score(left);
       }).slice(0, 5);
-    if (sources.length < 3) throw new Error('story workflow requires at least three approved sources');
+    if (sources.length < 3) throw new Error(options.maxSourceAgeHours ? `story workflow requires at least three approved sources fetched within ${options.maxSourceAgeHours} hours` : 'story workflow requires at least three approved sources');
     await recordEditorialStage(run.id, 'research', 'bat-researcher', { directive: request.directive, source_count: sources.length }, sources.map(source => source.id));
     const evidence = sources.map(source => `${source.id} | ${source.title} | ${source.url}\nRECEIPT:\n${source.evidence.slice(0, 900)}`).join('\n');
     const voiceContext = { constitution: persona.constitution, voice_memory: persona.voice_memory };
@@ -102,13 +109,13 @@ export async function editorialStoryWorkflow(input: unknown): Promise<StoryWorkf
     const editedDraft = extractJson(editedResult.text);
     await recordEditorialStage(run.id, 'editor', 'bat-editor', { ...editedDraft }, sourceIds);
     let finalDraft = editedDraft;
-    let fact = extractJson((await factChecker.generate(`Return JSON with passed (boolean) and notes (string array). Check the draft for factual claims, quotations, numbers, dates, named events, and source attributions that are unsupported by the receipts. Clearly signaled opinion, metaphor, satire, and editorial analysis are allowed, but must not introduce new factual assertions. Set passed true when factual claims are grounded and the analysis is visibly framed as analysis.\nSOURCES:\n${evidence}\nDRAFT:\n${JSON.stringify(editedDraft)}`)).text);
+    let fact = parseFactCheck(extractJson((await factChecker.generate(`Return only JSON in this exact shape: {"passed": boolean, "notes": ["specific actionable note"]}. Check the draft for factual claims, quotations, numbers, dates, named events, and source attributions that are unsupported by the receipts. Clearly signaled opinion, metaphor, satire, and editorial analysis are allowed, but must not introduce new factual assertions. Set passed true when factual claims are grounded and the analysis is visibly framed as analysis. If passed is false, notes must contain at least one specific repair instruction.\nSOURCES:\n${evidence}\nDRAFT:\n${JSON.stringify(editedDraft)}`)).text));
     await recordEditorialStage(run.id, 'fact-check', 'bat-fact-checker', { ...fact }, sourceIds);
     if (fact.passed !== true) {
       const revision = await writer.generate(`Return JSON with title, dek, and body_markdown. Revise this draft to remove unsupported factual claims identified by the fact checker. Keep clearly signaled opinion, metaphor, satire, and editorial analysis. Use only the exact source IDs in APPROVED SOURCES; never invent or reuse any other source ID.\nAPPROVED SOURCES:\n${evidence}\nFACT CHECK NOTES:\n${JSON.stringify(fact)}\nDRAFT:\n${JSON.stringify(editedDraft)}`);
       finalDraft = extractJson(revision.text);
       await recordEditorialStage(run.id, 'writer-rework', 'bat-writer', { ...finalDraft }, sourceIds);
-      fact = extractJson((await factChecker.generate(`Return JSON with passed (boolean) and notes (string array). Check factual claims, quotations, numbers, dates, named events, and source attributions against the exact APPROVED SOURCES. Clearly signaled opinion, metaphor, satire, and editorial analysis are allowed.\nAPPROVED SOURCES:\n${evidence}\nREVISED DRAFT:\n${revision.text}`)).text);
+      fact = parseFactCheck(extractJson((await factChecker.generate(`Return only JSON in this exact shape: {"passed": boolean, "notes": ["specific actionable note"]}. Check factual claims, quotations, numbers, dates, named events, and source attributions against the exact APPROVED SOURCES. Clearly signaled opinion, metaphor, satire, and editorial analysis are allowed. If passed is false, notes must contain at least one specific repair instruction.\nAPPROVED SOURCES:\n${evidence}\nREVISED DRAFT:\n${revision.text}`)).text));
       await recordEditorialStage(run.id, 'fact-check-rework', 'bat-fact-checker', { ...fact }, sourceIds);
     }
     if (fact.passed !== true) throw new Error('fact-check rejected the story after one revision');

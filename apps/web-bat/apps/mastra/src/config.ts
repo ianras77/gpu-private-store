@@ -15,6 +15,7 @@ export const config = z.object({
   rassyMindModel: z.string().default('rassy-fast'),
   scheduleEnabled: z.coerce.boolean().default(false),
   scheduleIntervalSeconds: z.coerce.number().int().min(300).default(21600),
+  scheduleSourceMaxAgeHours: z.coerce.number().int().min(1).max(168).default(30),
   scheduleDirective: z.string().min(1).max(4000).default('Trump executive overreach latest 2026'),
 }).parse({
   port: process.env.MASTRA_PORT,
@@ -27,5 +28,6 @@ export const config = z.object({
   rassyMindModel: process.env.RASSYMIND_EDITORIAL_MODEL ?? process.env.RASSYMIND_MODEL ?? 'rassy-fast',
   scheduleEnabled: process.env.MASTRA_SCHEDULE_ENABLED,
   scheduleIntervalSeconds: process.env.MASTRA_SCHEDULE_INTERVAL_SECONDS,
+  scheduleSourceMaxAgeHours: process.env.MASTRA_SCHEDULE_SOURCE_MAX_AGE_HOURS,
   scheduleDirective: process.env.MASTRA_SCHEDULE_DIRECTIVE,
 });
