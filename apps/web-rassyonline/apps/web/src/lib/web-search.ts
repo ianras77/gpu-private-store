@@ -84,6 +84,25 @@ export function resolveSearchPrompt(latest: string, priorUserMessages: string[])
   return prior.length ? `${prior.join(" ")} ${latest}`.slice(0, 1000) : latest;
 }
 
+export function officialComparisonQueries(prompt: string): string[] {
+  if (!/\b(?:compare|comparison|versus|vs\.?|difference)\b/i.test(prompt) || !/\bofficial\s+(?:documentation|docs?|sources?)\b/i.test(prompt)) return [];
+  const entities = OFFICIAL_ENTITY_SOURCES.filter(([pattern]) => pattern.test(prompt)).map(([pattern]) => pattern.source.includes("mastra") ? "Mastra" : pattern.source.includes("langgraph") ? "LangGraph" : "Next.js");
+  return entities.length > 1 ? entities.map((entity) => `${entity} official documentation`) : [];
+}
+
+export function interleaveSearchResults(groups: WebSearchResult[][], limit = 8): WebSearchResult[] {
+  const results: WebSearchResult[] = [];
+  const seen = new Set<string>();
+  for (let index = 0; results.length < limit && groups.some((group) => index < group.length); index++) {
+    for (const group of groups) {
+      const source = group[index];
+      if (source && !seen.has(source.url)) { seen.add(source.url); results.push(source); }
+      if (results.length >= limit) break;
+    }
+  }
+  return results;
+}
+
 export function shouldUseWebSearch(prompt: string): boolean {
   const compact = prompt.trim();
   if (!compact) return false;
