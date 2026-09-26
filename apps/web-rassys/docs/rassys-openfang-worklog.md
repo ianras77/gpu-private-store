@@ -81,3 +81,9 @@ Updated: 2026-09-26 UTC
 - Change: radio-controller's Redis singleton uses lazy connection in `NODE_ENV=test`; pure unit tests no longer attempt a real Redis socket merely by importing helpers.
 - Commands/results: `pnpm run build:intelligence` PASS; `pnpm --filter radio-controller build` PASS; `pnpm run test:radio` PASS (16 files/62 tests, clean stderr). Deployed primary-page HTTP smoke: `/`, `/mr-rassy`, `/dungeon-master`, `/minecraft`, `/stories`, `/family`, `/notebook` each `200`. `/reports` is `404` on the old deployed image, expected until the restore-gated release. No browser interaction, authenticated-media, audio-continuity, or model-generation proof was claimed.
 - Next action: commit the stability slice, run the full source qualification gate, then inspect the largest interactive page error/loading paths and prepare the release/rollback runbook.
+
+## Stability pass: dependency qualification
+
+- Change: raised the workspace `sharp` override to `0.35.4` and the Expo-transitive `uuid` override to `11.1.1`; refreshed `pnpm-lock.yaml`. Native typecheck and Expo public config still pass.
+- Full qualification result: install, intelligence build, radio build, 62 radio tests, Minecraft build, Cheshire build, web lint and web production build all PASS. `pnpm audit --prod` remains a failing gate with two high findings in Expo 54's Metro-only `image-size@1.2.1` dependency. `metro@0.83.3` calls the v1 CommonJS default function; the advisory's fixed `image-size@2.0.3` changes that API, so a forced override would break Expo bundling. The direct sharp and uuid advisories are resolved. Upgrade Metro through a tested Expo SDK release rather than forcing the incompatible major.
+- Next action: commit dependency update and continue page-level error/loading audit. Release remains blocked by backup/restore rehearsal and the remaining Expo toolchain advisory.
