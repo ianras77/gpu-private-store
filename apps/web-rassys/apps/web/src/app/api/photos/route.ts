@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { fetchPhotoShelf } from "../../../lib/media-controller";
 import { getClientIp } from "../../../lib/request";
 import { rateLimit } from "../../../lib/rate-limit";
+import { requireAdmin } from "../../../lib/admin-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
+  if (!await requireAdmin()) return NextResponse.json({ error: "unauthorized" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
   const ip = await getClientIp();
   const { allowed } = await rateLimit(`rl:photos:${ip}`, 40, 60);
   if (!allowed) {
