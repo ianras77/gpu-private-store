@@ -101,7 +101,8 @@ const SEARCH_INTENT_PATTERNS = [
   /\b(?:search|browse|look up|lookup)\b\s+(?:the\s+)?\S+/i,
   /\b(weather|forecast|price|pricing|stock|score|schedule|availability|opening hours)\b/i,
   /\b(?:latest|recent|current)\s+(?:release notes?|version|documentation|docs?)\b/i,
-  /\b(?:breaking news|news (?:today|this week)|what happened (?:today|this week)|current exchange rate|war|conflict|strike|ceasefire|sanctions)\b/i
+  /\b(?:breaking news|news (?:today|this week)|what happened (?:today|this week)|current exchange rate)\b/i,
+  /\b(?:latest|recent|current|today|this week|update(?:s)? on)\b.{0,80}\b(?:war|conflict|strike|ceasefire|sanctions)\b/i
 ];
 const SEARCH_EXCLUSIONS = [
   /^what does .* mean\??$/i,

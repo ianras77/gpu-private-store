@@ -18,6 +18,8 @@ describe("shouldUseWebSearch", () => {
   it("recognizes common freshness-sensitive questions", () => {
     expect(shouldUseWebSearch("what is the weather forecast for tomorrow?")).toBe(true);
     expect(shouldUseWebSearch("what is the latest price of this service?")).toBe(true);
+    expect(shouldUseWebSearch("give me updates on the US Iran conflict")).toBe(true);
+    expect(shouldUseWebSearch("explain the history of the US Iran conflict")).toBe(false);
   });
 
   it("lets Mastra decide whether stable conversational questions need a tool", () => {
