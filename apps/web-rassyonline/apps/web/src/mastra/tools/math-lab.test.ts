@@ -39,4 +39,9 @@ describe("math lab", () => {
     const svg = makeMathLabSvg("plot", "Reciprocal", "1/x", []);
     expect((svg.match(/<polyline class="curve"/g) ?? []).length).toBe(2);
   });
+
+  it("renders semantically distinct field and phase artifacts", () => {
+    expect(makeMathLabSvg("vector-field", "Flow", "v", [])).toContain('class="vector"');
+    expect(makeMathLabSvg("phase", "Orbit", "x, v", [])).toContain("PHASE PORTRAIT");
+  });
 });

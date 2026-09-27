@@ -238,7 +238,13 @@ export async function searchNewsFallback(query: string, signal?: AbortSignal): P
     const source = decodeXml(item.match(/<source[^>]*>([\s\S]*?)<\/source>/i)?.[1] ?? "Google News");
     return title && /^https:\/\//i.test(link) ? [{ title, url: link, source, publishedAt, snippet: `Dated news report from ${source}.`, status: "ok" as const }] : [];
   });
-  return [...new Map(items.map((item) => [item.url, item])).values()];
+  // RSS providers do not consistently order a query feed by publication time.
+  // A request for "latest" must not quietly put an older headline first.
+  return [...new Map(items.map((item) => [item.url, item])).values()].sort((left, right) => {
+    const leftTime = Date.parse(left.publishedAt ?? "");
+    const rightTime = Date.parse(right.publishedAt ?? "");
+    return (Number.isFinite(rightTime) ? rightTime : 0) - (Number.isFinite(leftTime) ? leftTime : 0);
+  });
 }
 
 async function finalSearchFallback(query: string, options: Pick<WebSearchInput, "domains" | "max_results"> & { signal?: AbortSignal }): Promise<WebSearchResult[]> {

@@ -86,13 +86,38 @@ export function makeMathLabSvg(mode: "formula" | "matrix" | "plot" | "wavefuncti
   } else if (mode === "formula") {
     body += `<text x="${left}" y="142" class="hint">A clean mathematical expression, ready to discuss or transform.</text><path class="rule" d="M${left} 176h${graphW}"/>`;
     body += `<text x="${left}" y="224" class="small">differentiate · integrate · simplify · dimensional-check · explain</text>`;
+  } else if (mode === "vector-field") {
+    // This is deliberately a vector field, rather than a line plot with a
+    // vector-field label.  Short normalized arrows remain legible at phone
+    // size and avoid suggesting a numerical solution we have not computed.
+    const columns = 11; const rows = 6;
+    const arrows: string[] = [];
+    for (let row = 0; row < rows; row += 1) for (let column = 0; column < columns; column += 1) {
+      const x = left + (column / (columns - 1)) * graphW;
+      const y = top + (row / (rows - 1)) * graphH;
+      const normalizedX = (column / (columns - 1)) * 4 - 2;
+      const normalizedY = 2 - (row / (rows - 1)) * 4;
+      const dx = -normalizedY; const dy = normalizedX;
+      const scale = 15 / Math.max(Math.hypot(dx, dy), .35);
+      const endX = x + dx * scale; const endY = y - dy * scale;
+      arrows.push(`<path class="vector" d="M${x.toFixed(1)} ${y.toFixed(1)}L${endX.toFixed(1)} ${endY.toFixed(1)}m${(endX - 5).toFixed(1)} ${(endY + 2).toFixed(1)}l5 -2 -2 5"/>`);
+    }
+    body += `<text x="${left}" y="105" class="small">ROTATIONAL FIELD · direction only</text><path class="grid" d="M${left} ${top + graphH / 2}h${graphW}M${left + graphW / 2} ${top}v${graphH}"/>${arrows.join("")}`;
+  } else if (mode === "phase") {
+    const points = Array.from({ length: 180 }, (_, index) => {
+      const t = index / 179 * Math.PI * 8;
+      const radius = 1.85 * Math.exp(-t / 15);
+      return { x: radius * Math.cos(t), y: radius * Math.sin(t) };
+    });
+    const path = points.map((point, index) => `${index ? "L" : "M"}${(left + graphW / 2 + point.x * 92).toFixed(2)} ${(top + graphH / 2 - point.y * 92).toFixed(2)}`).join(" ");
+    body += `<text x="${left}" y="105" class="small">PHASE PORTRAIT · DAMPED ORBIT</text><path class="grid" d="M${left} ${top + graphH / 2}h${graphW}M${left + graphW / 2} ${top}v${graphH}"/><path class="curve" d="${path}"/><circle class="origin" cx="${left + graphW / 2}" cy="${top + graphH / 2}" r="4"/>`;
   } else {
-    const expression = mode === "wavefunction" ? `sin(x) * exp(-x^2 / 8)` : mode === "vector-field" ? `sin(x) * cos(x)` : mode === "fourier" ? `sin(x) + sin(3*x)/3 + sin(5*x)/5` : mode === "phase" ? `cos(x) * exp(-x^2 / 12)` : formula;
+    const expression = mode === "wavefunction" ? `sin(x) * exp(-x^2 / 8)` : mode === "fourier" ? `sin(x) + sin(3*x)/3 + sin(5*x)/5` : formula;
     const points = sampleGraph(expression, -10, 10, 161); const valid = points.filter((point) => point.y !== null); const rawMin = Math.min(...valid.map((point) => point.y as number), -1); const rawMax = Math.max(...valid.map((point) => point.y as number), 1); const pad = Math.max((rawMax - rawMin) * .08, .5); const minY = rawMin - pad; const maxY = rawMax + pad; const path = plotPath(points, -10, 10, graphW, graphH, minY, maxY); const zeroY = minY <= 0 && maxY >= 0 ? top + graphH - ((0 - minY) / (maxY - minY) * graphH) : null;
     body += `<path class="grid" d="M${left} ${top + graphH / 2}h${graphW}M${left + graphW / 2} ${top}v${graphH}M${left} ${top + graphH * .25}h${graphW}M${left} ${top + graphH * .75}h${graphW}"/>${zeroY === null ? "" : `<path class="axis" d="M${left} ${zeroY}h${graphW}"/>`}${path}`;
     body += `<text x="${left}" y="${top + graphH + 32}" class="small">−10</text><text x="${left + graphW / 2}" y="${top + graphH + 32}" class="small" text-anchor="middle">0</text><text x="${left + graphW}" y="${top + graphH + 32}" class="small" text-anchor="end">10</text>`;
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${safeTitle}"><rect width="100%" height="100%" fill="#0b0d0d"/><text x="${left}" y="34" class="title">${safeTitle}</text><style>.title{fill:#9de8ce;font:600 14px ui-monospace,monospace;letter-spacing:2px;text-transform:uppercase}.formula{fill:#edf1eb;font:italic 29px Georgia,serif}.hint,.small{fill:#87918b;font:13px ui-monospace,monospace}.matrix-value,.eigenvalues,.invariants{fill:#edf1eb;font:22px ui-monospace,monospace}.eigenvalues{fill:#9de8ce;font-size:25px}.invariants{fill:#edf1eb;font-size:19px}.bracket{fill:none;stroke:#9de8ce;stroke-width:3}.rule{stroke:#9de8ce;stroke-width:1;opacity:.5}.grid{fill:none;stroke:#edf1eb;stroke-width:1;opacity:.1}.axis{stroke:#9de8ce;stroke-width:1;opacity:.6}.curve{fill:none;stroke:#9de8ce;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}</style>${body}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${safeTitle}"><rect width="100%" height="100%" fill="#0b0d0d"/><text x="${left}" y="34" class="title">${safeTitle}</text><style>.title{fill:#9de8ce;font:600 14px ui-monospace,monospace;letter-spacing:2px;text-transform:uppercase}.formula{fill:#edf1eb;font:italic 29px Georgia,serif}.hint,.small{fill:#87918b;font:13px ui-monospace,monospace}.matrix-value,.eigenvalues,.invariants{fill:#edf1eb;font:22px ui-monospace,monospace}.eigenvalues{fill:#9de8ce;font-size:25px}.invariants{fill:#edf1eb;font-size:19px}.bracket{fill:none;stroke:#9de8ce;stroke-width:3}.rule{stroke:#9de8ce;stroke-width:1;opacity:.5}.grid{fill:none;stroke:#edf1eb;stroke-width:1;opacity:.1}.axis{stroke:#9de8ce;stroke-width:1;opacity:.6}.curve{fill:none;stroke:#9de8ce;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.vector{fill:none;stroke:#9de8ce;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.88}.origin{fill:#9de8ce}</style>${body}</svg>`;
 }
 
 export const mathLabTool = createTool({
