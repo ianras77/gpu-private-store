@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildSearchContextMessage, buildSearchProviderQuery, executeWebSearch, interleaveSearchResults, normalizeSearchQuery, officialComparisonQueries, officialSeedResults, requiredSearchDomains, resolveSearchPrompt, SEARCH_REQUEST_TIMEOUT_MS, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
+import { buildSearchContextMessage, buildSearchProviderQuery, executeWebSearch, interleaveSearchResults, normalizeSearchQuery, officialComparisonQueries, officialSeedResults, requiredSearchDomains, resolveSearchPrompt, SEARCH_REQUEST_TIMEOUT_MS, searchNewsFallback, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -20,10 +20,10 @@ describe("shouldUseWebSearch", () => {
     expect(shouldUseWebSearch("what is the latest price of this service?")).toBe(true);
   });
 
-  it("researches factual named-entity questions without requiring a magic command", () => {
-    expect(shouldUseWebSearch("What is Mastra?" )).toBe(true);
-    expect(shouldUseWebSearch("how does Next.js work?" )).toBe(true);
-    expect(shouldUseWebSearch("Who leads the UK government?" )).toBe(true);
+  it("lets Mastra decide whether stable conversational questions need a tool", () => {
+    expect(shouldUseWebSearch("What is Mastra?" )).toBe(false);
+    expect(shouldUseWebSearch("how does Next.js work?" )).toBe(false);
+    expect(shouldUseWebSearch("Who leads the UK government?" )).toBe(false);
     expect(shouldUseWebSearch("what is a closure?" )).toBe(false);
     expect(shouldUseWebSearch("rewrite this email" )).toBe(false);
     expect(shouldUseWebSearch("search the web for the current Next.js cache docs" )).toBe(true);
@@ -42,6 +42,11 @@ describe("search constraints", () => {
   it("offers curated first-party seeds without violating explicit source limits", () => {
     expect(officialSeedResults("Mastra official documentation").map((result) => result.url)).toEqual(["https://mastra.ai/"]);
     expect(officialSeedResults("Mastra official documentation", ["example.org"])).toEqual([]);
+  });
+  it("uses dated news RSS only for news-shaped research", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(`<?xml version="1.0"?><rss><channel><item><title>US Iran update - Reuters</title><link>https://news.google.com/rss/articles/example</link><pubDate>Sat, 27 Sep 2026 12:00:00 GMT</pubDate><source>Reuters</source></item></channel></rss>`, { status: 200 })));
+    await expect(searchNewsFallback("latest US Iran war updates")).resolves.toMatchObject([{ title: "US Iran update - Reuters", source: "Reuters", publishedAt: "Sat, 27 Sep 2026 12:00:00 GMT" }]);
+    await expect(searchNewsFallback("Mastra documentation")).resolves.toEqual([]);
   });
   it("gives each named subject a retrieval path in an official comparison", () => {
     expect(officialComparisonQueries("Mastra and LangGraph. Compare those two using their official documentation.")).toEqual(["Mastra official documentation", "LangGraph official documentation"]);

@@ -101,13 +101,10 @@ const SEARCH_INTENT_PATTERNS = [
   /\b(?:search|browse|look up|lookup)\b\s+(?:the\s+)?\S+/i,
   /\b(weather|forecast|price|pricing|stock|score|schedule|availability|opening hours)\b/i,
   /\b(?:latest|recent|current)\s+(?:release notes?|version|documentation|docs?)\b/i,
-  /\b(?:breaking news|news (?:today|this week)|what happened (?:today|this week)|current exchange rate)\b/i,
-  /^(?:who|what|when|where|which)\b/i,
-  /^how (?:does|do|did|can|has|have|is|are)\b/i
+  /\b(?:breaking news|news (?:today|this week)|what happened (?:today|this week)|current exchange rate|war|conflict|strike|ceasefire|sanctions)\b/i
 ];
 const SEARCH_EXCLUSIONS = [
   /^what does .* mean\??$/i,
-  /^what is (?:an? )?(?:closure|array|function|variable|loop|class|algorithm|metaphor|word|term)\b/i,
   /^explain\b/i,
   /^rewrite\b/i,
   /^summari[sz]e this\b/i,
@@ -211,6 +208,44 @@ export function officialSeedResults(query: string, domains: string[] = []): WebS
     .map((seed) => ({ ...seed, source: new URL(seed.url).hostname, status: "ok" as const }));
 }
 
+function isNewsResearch(query: string): boolean {
+  return /\b(?:news|update(?:s)?|latest|recent|today|this week|war|conflict|strike|election|sanctions|ceasefire)\b/i.test(query);
+}
+
+function decodeXml(value: string): string {
+  return value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim();
+}
+
+/** Bounded dated-news fallback when the general discovery backend is empty. */
+export async function searchNewsFallback(query: string, signal?: AbortSignal): Promise<WebSearchResult[]> {
+  if (!isNewsResearch(query)) return [];
+  const url = new URL("https://news.google.com/rss/search");
+  url.searchParams.set("q", query.slice(0, 500));
+  url.searchParams.set("hl", "en-US");
+  url.searchParams.set("gl", "US");
+  url.searchParams.set("ceid", "US:en");
+  const response = await fetch(url, { headers: { accept: "application/rss+xml, application/xml, text/xml" }, signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(12_000)]) : AbortSignal.timeout(12_000) });
+  if (!response.ok) return [];
+  const body = await response.text();
+  if (body.length > 2 * 1024 * 1024) return [];
+  const items = [...body.matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0, 8).flatMap((match) => {
+    const item = match[1];
+    const field = (name: string) => item.match(new RegExp(`<${name}>([\\s\\S]*?)<\\/${name}>`, "i"))?.[1];
+    const title = decodeXml(field("title") ?? "");
+    const link = decodeXml(field("link") ?? "");
+    const publishedAt = decodeXml(field("pubDate") ?? "");
+    const source = decodeXml(item.match(/<source[^>]*>([\s\S]*?)<\/source>/i)?.[1] ?? "Google News");
+    return title && /^https:\/\//i.test(link) ? [{ title, url: link, source, publishedAt, snippet: `Dated news report from ${source}.`, status: "ok" as const }] : [];
+  });
+  return [...new Map(items.map((item) => [item.url, item])).values()];
+}
+
+async function finalSearchFallback(query: string, options: Pick<WebSearchInput, "domains" | "max_results"> & { signal?: AbortSignal }): Promise<WebSearchResult[]> {
+  const news = await searchNewsFallback(query, options.signal).catch(() => []);
+  const fallback = news.length ? news : officialSeedResults(query, options.domains);
+  return fallback.slice(0, Math.min(options.max_results ?? 5, 8));
+}
+
 async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> & { signal?: AbortSignal } = {}): Promise<WebSearchResult[]> {
   const baseUrl = process.env.RASSY_ONLINE_SEARCH_URL ?? "https://search.rasies.com";
   const url = new URL("/search", baseUrl);
@@ -302,14 +337,14 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
     }
   }
   const backendSafe = backendSafeSearchProviderQuery(query);
-  if (!backendSafe || [primary, fallback].some((candidate) => candidate.toLocaleLowerCase() === backendSafe.toLocaleLowerCase())) return officialSeedResults(query, options.domains).slice(0, Math.min(options.max_results ?? 5, 8));
+  if (!backendSafe || [primary, fallback].some((candidate) => candidate.toLocaleLowerCase() === backendSafe.toLocaleLowerCase())) return finalSearchFallback(query, options);
   try {
     const safeResults = await searchWebResourcesForQuery(backendSafe, query, options);
-    return safeResults.length ? safeResults : officialSeedResults(query, options.domains).slice(0, Math.min(options.max_results ?? 5, 8));
+    return safeResults.length ? safeResults : finalSearchFallback(query, options);
   } catch {
     // The exact-subject pass was healthy but found no usable evidence. A
     // failed retry must not turn that truthful empty result into a fake outage.
-    return officialSeedResults(query, options.domains).slice(0, Math.min(options.max_results ?? 5, 8));
+    return finalSearchFallback(query, options);
   }
 }
 
