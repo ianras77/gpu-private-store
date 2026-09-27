@@ -1,6 +1,7 @@
 import { documentSearchTool } from "./document-search";
 import { webSearchTool } from "./web-search";
 import { parallelResearchTool } from "./parallel-research";
+import { adaptiveResearchTool } from "./adaptive-research";
 import { pageReaderTool } from "./page-reader";
 import { calculatorTool } from "./calculator";
 import { timeTool } from "./time";
@@ -15,6 +16,7 @@ export const toolRegistry = {
   "librarian": { tool: librarianTool, category: "knowledge", risk: "read-only", enabled: true },
   "web-search": { tool: webSearchTool, category: "web", risk: "read-only", enabled: true },
   "parallel-research": { tool: parallelResearchTool, category: "web", risk: "read-only", enabled: true }
+  ,"adaptive-research": { tool: adaptiveResearchTool, category: "web", risk: "read-only", enabled: true }
   ,"page-reader": { tool: pageReaderTool, category: "web", risk: "read-only", enabled: true }
   ,"calculator": { tool: calculatorTool, category: "utility", risk: "read-only", enabled: true }
   ,"current-time": { tool: timeTool, category: "utility", risk: "read-only", enabled: true }
@@ -24,4 +26,4 @@ export const toolRegistry = {
   ,"math-lab": { tool: mathLabTool, category: "visualization", risk: "read-only", enabled: true }
 } as const;
 
-export const rassyTools = { documentSearch: documentSearchTool, librarian: librarianTool, webSearch: webSearchTool, parallelResearch: parallelResearchTool, pageReader: pageReaderTool, calculator: calculatorTool, currentTime: timeTool, chart: chartTool, asciiArt: asciiArtTool, dotMatrix: dotMatrixTool, mathLab: mathLabTool };
+export const rassyTools = { documentSearch: documentSearchTool, librarian: librarianTool, webSearch: webSearchTool, parallelResearch: parallelResearchTool, adaptiveResearch: adaptiveResearchTool, pageReader: pageReaderTool, calculator: calculatorTool, currentTime: timeTool, chart: chartTool, asciiArt: asciiArtTool, dotMatrix: dotMatrixTool, mathLab: mathLabTool };

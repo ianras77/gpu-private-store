@@ -74,11 +74,10 @@ export async function streamMastraChat(input: MastraChatInput) {
   const context = compactSystemContext(input.messages);
   const conversationContext = input.includePriorContext ? buildConversationContext(input.messages, latest) : null;
   if (conversationContext) context.push({ role: "system", content: conversationContext });
-  const requestContext = input.userId ? new RequestContext<{ userId: string; selectedDocumentIds: string[] }>() : undefined;
-  if (requestContext && input.userId) {
-    requestContext.set("userId", input.userId);
-    requestContext.set("selectedDocumentIds", input.selectedDocumentIds ?? []);
-  }
+  const requestContext = new RequestContext<{ userId?: string; selectedDocumentIds: string[]; researchQueries: string[] }>();
+  if (input.userId) requestContext.set("userId", input.userId);
+  requestContext.set("selectedDocumentIds", input.selectedDocumentIds ?? []);
+  requestContext.set("researchQueries", []);
   const options = {
     ...(context.length ? { context } : {}),
     memory: { thread: input.threadId, resource: input.resourceId },
@@ -88,7 +87,7 @@ export async function streamMastraChat(input: MastraChatInput) {
       ...(input.maxTokens === undefined ? {} : { maxOutputTokens: input.maxTokens })
     } }),
     ...(input.toolChoice ? { toolChoice: input.toolChoice } : {}),
-    ...(requestContext ? { requestContext } : {}),
+    requestContext,
     abortSignal: input.signal,
   };
   for (let attempt = 0; attempt < 2; attempt += 1) {

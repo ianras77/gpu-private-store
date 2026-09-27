@@ -4,7 +4,7 @@ import { createGuestIdentity, GUEST_COOKIE, SESSION_COOKIE } from "@/lib/auth/se
 import { getUserForSessionToken } from "@/lib/auth/users";
 import { agentRegistry } from "@/mastra";
 import { conversationMemory } from "@/mastra/agents";
-import { rassyLocal, researcherGrounded } from "@/mastra/agents";
+import { rassyLocal } from "@/mastra/agents";
 import { streamMastraChat } from "@/mastra/chat";
 import { buildSearchContextMessage, interleaveSearchResults, requiredSearchDomains, resolveSearchPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "@/lib/web-search";
 import { getConversationForUser } from "@/lib/conversation-history";
@@ -179,16 +179,13 @@ export async function POST(request: NextRequest) {
             if (preflightResults.length) send("artifact", { kind: "source-board", status: "ready", sources: preflightResults });
           }
           if (request.signal.aborted) throw new Error("request cancelled");
-          // Preflight has already searched, filtered, read, and reranked the
-          // evidence. Letting the model search again here caused repeated
-          // identical tool loops and diluted the answer. Keep tools mandatory
-          // only when the evidence packet is absent; otherwise synthesize the
-          // bounded packet we can actually show and cite.
+          // Research remains available after preflight: the model may pursue
+          // a new uncovered subquestion. adaptiveResearch owns per-turn query
+          // deduplication, so this is flexible without reopening loop risk.
           const toolChoice = requiredDomains.length ? "none" : selectedAgent === "researcher"
-            ? preflightResults.length ? "none" : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
+            ? preflightResults.length ? "auto" : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
             : undefined;
-          const turnAgent = selectedAgent === "researcher" && preflightResults.length ? researcherGrounded : executionAgent;
-          const result = await streamMastraChat({ agent: turnAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, selectedDocumentIds, includePriorContext: !existingThread, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent, executionShape), temperature: parsed.data.temperature, maxTokens: outputLimit, toolChoice: localOnlyExecution(parsed.data.webSearch) ? undefined : toolChoice });
+          const result = await streamMastraChat({ agent: executionAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, selectedDocumentIds, includePriorContext: !existingThread, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent, executionShape), temperature: parsed.data.temperature, maxTokens: outputLimit, toolChoice: localOnlyExecution(parsed.data.webSearch) ? undefined : toolChoice });
           for await (const part of result.fullStream as AsyncIterable<{ type: string; textDelta?: string; delta?: string; text?: string; reasoning?: string; reasoningDelta?: string; reasoning_content?: string; toolName?: string; toolCallId?: string; output?: unknown; result?: unknown; payload?: Record<string, unknown>; error?: unknown; finishReason?: string }>) {
             const payload = part.payload;
             if (part.type === "finish" || part.type === "finish-step") finishReason = part.finishReason ?? (typeof payload?.finishReason === "string" ? payload.finishReason : finishReason);
