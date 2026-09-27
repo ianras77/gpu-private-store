@@ -830,7 +830,7 @@ function CalculatorGraph({ graph }: { graph: NonNullable<VisualArtifact["graph"]
 
 function renderInline(text: string) {
   const nodes: ReactNode[] = [];
-  const pattern = /(\*\*[^*]+\*\*|~~[^~]+~~|`[^`]+`|\$[^$\n]+\$|\\\([^\n]+?\\\)|\[[^\]]+\]\((?:https?:\/\/|mailto:)[^)]+\))/g;
+  const pattern = /(\*\*[^*]+\*\*|~~[^~]+~~|`[^`]+`|\$[^$\n]+\$|\\\([^\n]+?\\\)|\[[^\]]+\]\((?:https?:\/\/|mailto:)[^)]+\)|\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}\b)/g;
   let lastIndex = 0;
 
   for (const match of text.matchAll(pattern)) {
@@ -846,6 +846,9 @@ function renderInline(text: string) {
       nodes.push(<MathExpression key={`${token}-${match.index}`} tex={token.slice(1, -1)} />);
     } else if (token.startsWith("\\(")) {
       nodes.push(<MathExpression key={`${token}-${match.index}`} tex={token.slice(2, -2)} />);
+    } else if (/^(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}$/.test(token)) {
+      const date = new Date(`${token} UTC`);
+      nodes.push(<time className="rendered-date" key={`${token}-${match.index}`} dateTime={Number.isNaN(date.getTime()) ? undefined : date.toISOString().slice(0, 10)}>{token}</time>);
     } else {
       const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
       nodes.push(
