@@ -13,10 +13,10 @@
 
 ## Remaining
 
-- Migrate intake, chart, reading, compatibility, and account shells to shared components.
-- Add chart interaction tests and live browser qualification with a real saved chart.
+- Continue consolidating route-specific intake, reading, and account presentation into shared components.
+- Expand chart interaction and report browser coverage; the compatibility Atlas is currently qualified with mocked HTTP responses at the browser boundary and real API calls in isolated local qualification.
 - Upgrade Next/React only after a separate compatibility qualification; current Next 14 builds remain green.
-- Run browser screenshot matrix at 390, 768, and 1440 widths.
+- Capture a visual screenshot review at 390, 768, and 1440 widths.
 
 ## Live chart and brand smoke qualification (2026-09-05)
 
@@ -32,3 +32,11 @@
 
 The remaining qualification is browser screenshot and interaction coverage for
 intake, report, compatibility, and account routes.
+
+## Rework update (2026-10-03)
+
+- All five home pages use their brand's typed world and visual language; chart pages share the interactive observatory, visual wheel, planetary index, and unknown-time treatment.
+- Intake, chart, reading, primary navigation, and compatibility Atlas passed the 15-case Playwright suite against fresh local builds across all five brands.
+- The signed-in compatibility flow now executes the durable Mastra relationship workflow and renders its report as an Atlas. All five brand browser projects passed this flow.
+- A mobile-width home check passes at 390 pixels for all five brand apps.
+- A screenshot comparison pass and physical mobile-device review have not been completed.

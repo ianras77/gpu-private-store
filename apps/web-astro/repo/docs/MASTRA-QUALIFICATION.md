@@ -35,11 +35,28 @@
 - live RassyMind structured inference;
 - live structured-output qualification remains open: the edge returned HTTP 501 (`requested capability is not qualified on the available local providers`) for JSON response-format probes on `rassy-fast`, `rassy-mind`, and `rassy-utility`;
 - Mastra package safety/version selection;
-- durable report execution and streaming;
+- report execution is qualified on the isolated database; report streaming remains open;
 - production Postgres migration execution;
 - complete Qdrant lore inventory and migration comparison;
-- five-brand Report Atlas browser proof;
-- mobile real-device/user-flow proof and Playwright proof;
+- mobile real-device/user-flow proof;
 - Runtipi image deployment using the qualified Dockerfiles (the Dockerfiles themselves build successfully).
 
 The Playwright command was attempted on 2026-09-05 and failed before application assertions because no web servers were listening on `localhost:3000`, `3001`, `3002`, or `3003` (`ERR_CONNECTION_REFUSED` / one 60-second locator timeout). This is an environment-only result, not browser qualification.
+
+## Qualification update (2026-10-03)
+
+### Passed
+
+- Full workspace test suite: 28 tasks passed; API 8 files / 33 tests.
+- Full workspace build: 17 tasks passed, including the API and all five Next applications.
+- Chart Companion API exercised against an isolated disposable Postgres database using a synthetic account and chart. The workflow invoked `get-chart-facts`, returned chart fact references, persisted a two-turn thread, and erased stored turns when memory was disabled.
+- Compatibility report workflow exercised through plan, execute, and reload. The Mastra run completed and persisted a report artifact with 24 synastry fact references.
+- The 2026-10-03 report-table reconciliation and companion-memory migrations both applied twice to a disposable Postgres database seeded with the existing `User` and `ChartProfile` tables.
+- Full Playwright suite passed: 15 cases across the five brand applications, including the signed-in compatibility flow that creates a private Mastra Atlas from the saved chart and partner chart.
+
+### Still open
+
+- Model-backed inference is not qualified in this runtime: `RASSYMIND_API_KEY` is absent, so Chart Companion answers used the grounded fallback. The report workflow completed from deterministic evidence, but production prose generation was not demonstrated.
+- Production Postgres backup and migration execution remain pending. The disposable migration replay is not a production migration.
+- Canonical source reconciliation, release provenance, immutable Runtipi image build, deployment, and live user-flow proof remain pending.
+- Live lore inventory/vector migration, mobile device qualification, and full report streaming qualification remain pending.

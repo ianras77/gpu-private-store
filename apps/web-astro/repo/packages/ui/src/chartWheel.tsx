@@ -149,8 +149,8 @@ export const ChartWheel: React.FC<ChartWheelProps> = ({
   const houseOuter = signBandInner - 8;
   const houseInner = size * 0.2;
   const planetOrbitBase = houseOuter - 16;
-
-  const cusps = chart.houses?.cusps ?? Array.from({ length: 12 }, (_, i) => i * 30);
+  const cusps = chart.houses?.cusps ?? [];
+  const hasHouses = cusps.length === 12;
 
   const planetPoints = chart.points
     .filter((point) => point.type === "planet" || point.key === "Asc" || point.key === "MC")
@@ -209,7 +209,7 @@ export const ChartWheel: React.FC<ChartWheelProps> = ({
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         role="img"
-        aria-label="Birth chart wheel with zodiac ring, houses, planets, and aspect lines"
+        aria-label={hasHouses ? "Birth chart wheel with zodiac ring, houses, planets, and aspect lines" : "Birth chart wheel with zodiac ring, planets, and aspect lines; house divisions omitted because birth time is unavailable"}
       >
         <defs>
           <radialGradient id="chartWheelBg" cx="50%" cy="50%" r="60%">
@@ -250,7 +250,7 @@ export const ChartWheel: React.FC<ChartWheelProps> = ({
           })}
         </g>
 
-        <g opacity={layerOpacity.houses}>
+        {hasHouses ? <g opacity={layerOpacity.houses}>
           <circle
             cx={center}
             cy={center}
@@ -299,7 +299,7 @@ export const ChartWheel: React.FC<ChartWheelProps> = ({
               </text>
             );
           })}
-        </g>
+        </g> : null}
 
         <g opacity={layerOpacity.aspects}>
           {aspectLines.map(({ aspect, a, b, key }) => {

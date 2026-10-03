@@ -37,11 +37,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {brand.name}
                 </Link>
                 <nav className="astro-site-nav" aria-label="Primary">
-                  <Link href="/intake" className="astro-site-link">
-                    Birth Chart
+                  <Link href="/chart" className="astro-site-link">
+                    Your Chart
                   </Link>
                   <Link href="/reading" className="astro-site-link">
                     Reading
+                  </Link>
+                  <Link href="/compatibility" className="astro-site-link">
+                    Compatibility
                   </Link>
                   <Link href="/account" className="astro-site-link astro-site-link-strong">
                     Account

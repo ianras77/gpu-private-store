@@ -23,6 +23,10 @@ export default defineConfig({
     {
       name: "web-maleficme",
       use: { baseURL: process.env.WEB_MALEFICME_URL ?? "http://localhost:3003" }
+    },
+    {
+      name: "web-oracleveil",
+      use: { baseURL: process.env.WEB_ORACLEVEIL_URL ?? "http://localhost:3004" }
     }
   ]
 });
