@@ -136,9 +136,12 @@ app.post("/v1/chat/completions", async (request, reply) => {
   try {
     let content: string;
     if (jsonObjectRequested) {
-      const result = await agents[agentId].generateLegacy(prompt, {
+      const result = await agents[agentId].generate(prompt, {
         maxSteps: 1,
-        output: z.record(z.string(), z.unknown()),
+        structuredOutput: {
+          schema: z.record(z.string(), z.unknown()),
+          jsonPromptInjection: "auto",
+        },
       });
       content = JSON.stringify(result.object) ?? "";
     } else {
