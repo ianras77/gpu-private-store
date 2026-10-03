@@ -132,7 +132,13 @@ app.get("/v1/dungeon-master/capabilities", async () => ({
 // OpenAI-compatible compatibility surface for existing server-side callers.
 // It remains inside Mastra: no caller may bypass the shared Mr Rassy runtime.
 app.post("/v1/chat/completions", async (request, reply) => {
-  const body = request.body as { model?: unknown; messages?: unknown; response_format?: unknown };
+  const body = request.body as {
+    model?: unknown;
+    messages?: unknown;
+    response_format?: unknown;
+    max_tokens?: unknown;
+    temperature?: unknown;
+  };
   if (!Array.isArray(body?.messages)) return reply.code(400).send({ error: "messages_required" });
   const prompt = body.messages
     .filter((message): message is { role?: string; content?: unknown } => Boolean(message && typeof message === "object"))
@@ -145,6 +151,19 @@ app.post("/v1/chat/completions", async (request, reply) => {
     typeof body.response_format === "object" &&
     "type" in body.response_format &&
     body.response_format.type === "json_object";
+  const maxTokens = typeof body.max_tokens === "number" && Number.isFinite(body.max_tokens)
+    ? Math.min(4096, Math.max(16, Math.floor(body.max_tokens)))
+    : undefined;
+  const temperature = typeof body.temperature === "number" && Number.isFinite(body.temperature)
+    ? Math.min(2, Math.max(0, body.temperature))
+    : undefined;
+  const modelSettings = {
+    ...(maxTokens === undefined ? {} : { maxTokens }),
+    ...(temperature === undefined ? {} : { temperature }),
+  };
+  const generationAbort = new AbortController();
+  const abortGeneration = () => generationAbort.abort();
+  request.raw.once("aborted", abortGeneration);
   try {
     let content: string;
     if (jsonObjectRequested) {
@@ -152,7 +171,11 @@ app.post("/v1/chat/completions", async (request, reply) => {
       const prompts = [prompt, `${prompt}\n\nOutput format correction: ${correction}`];
       content = "";
       for (const candidatePrompt of prompts) {
-        const result = await agents[agentId].generate(candidatePrompt, { maxSteps: 1 });
+        const result = await agents[agentId].generate(candidatePrompt, {
+          maxSteps: 1,
+          modelSettings,
+          abortSignal: generationAbort.signal,
+        });
         const normalized = normalizeJsonObject(result.text);
         if (normalized) {
           content = normalized;
@@ -160,13 +183,19 @@ app.post("/v1/chat/completions", async (request, reply) => {
         }
       }
     } else {
-      const result = await agents[agentId].generate(prompt, { maxSteps: 1 });
+      const result = await agents[agentId].generate(prompt, {
+        maxSteps: 1,
+        modelSettings,
+        abortSignal: generationAbort.signal,
+      });
       content = result.text;
     }
     if (!content || content === "undefined") return reply.code(502).send({ error: "structured_generation_failed" });
     return { id: `rassy-${Date.now()}`, object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: "stop" }], model: typeof body.model === "string" ? body.model : "rassy-mind" };
   } catch {
     return reply.code(503).send({ error: "rassymind_unavailable" });
+  } finally {
+    request.raw.off("aborted", abortGeneration);
   }
 });
 app.post("/v1/embeddings", async (request, reply) => {
