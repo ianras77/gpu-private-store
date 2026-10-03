@@ -24,6 +24,7 @@ ARG APP_NAME
 WORKDIR /repo
 ENV NODE_ENV=production
 RUN useradd --create-home --uid 10001 astro
+RUN corepack enable
 COPY --from=build --chown=astro:astro /repo /repo
 USER astro
 EXPOSE 3000
