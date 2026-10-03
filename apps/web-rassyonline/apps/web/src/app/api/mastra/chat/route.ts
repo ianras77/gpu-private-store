@@ -21,6 +21,7 @@ import { mastraFailureMessage } from "@/mastra/errors";
 import { getModelCapability, modelForAgent } from "@/lib/model-capabilities";
 import { saveConversationTurnData, type ConversationArtifact } from "@/lib/conversation-turn-data";
 import { buildResearchPlan, buildResearchPlanContext } from "@/mastra/research-plan";
+import { buildToolExecutionContext, isResearchToolName, toolFailureText } from "@/mastra/tool-policy";
 
 export const dynamic = "force-dynamic";
 type ServerMessage = { role: "user" | "assistant" | "system"; content: string };
@@ -106,14 +107,18 @@ export async function POST(request: NextRequest) {
     const researchPlan = latestUserMessage && searchRequested ? buildResearchPlan(researchPrompt) : null;
     const comparisonRequested = researchPlan?.objective === "comparison";
     const executionShape = latestUserMessage ? taskShape(latestUserMessage.content, { mode: parsed.data.mode, searchRequested, knowledgeRequested }) : "conversation";
-    if (latestUserMessage) messages = [{ role: "system", content: buildExecutionBrief(latestUserMessage.content, { mode: parsed.data.mode, searchRequested, knowledgeRequested }) }, ...messages];
+    if (latestUserMessage) messages = [
+      { role: "system", content: buildExecutionBrief(latestUserMessage.content, { mode: parsed.data.mode, searchRequested, knowledgeRequested }) },
+      { role: "system", content: buildToolExecutionContext(latestUserMessage.content) },
+      ...messages
+    ];
     // Route by capability, not by whether preflight happened to return hits.
     // Search evidence is context for the researcher; it must not demote the
     // request back to the generic agent after the specialist was selected.
     const selectedAgent = selectMastraAgent({ requestedAgent: parsed.data.agent as MastraAgentId, mode: parsed.data.mode, searchRequested });
     const selectedModel = modelForAgent(selectedAgent);
     const capability = await getModelCapability(selectedModel);
-    if (capability.streaming !== "qualified" || !capability.maxOutputTokens || (selectedAgent !== "utility" && capability.tools !== "qualified")) {
+    if (capability.streaming !== "qualified" || capability.tools !== "qualified" || !capability.maxOutputTokens) {
       return Response.json({ ok: false, error: "capability_unavailable" }, { status: 503 });
     }
     const outputLimit = Math.min(parsed.data.maxTokens, capability.maxOutputTokens);
@@ -135,8 +140,18 @@ export async function POST(request: NextRequest) {
         const returnedUrls = new Set<string>();
         const evidence = new Map<string, Awaited<ReturnType<typeof searchWebResources>>[number]>();
         const artifacts: ConversationArtifact[] = [];
+        const artifactKeys = new Set<string>();
         const announcedToolCalls = new Set<string>();
-        const isResearchTool = (name?: string) => Boolean(name && ["websearch", "parallelresearch"].includes(name.toLowerCase().replace(/[-_]/g, "")));
+        const addArtifact = (artifact: ConversationArtifact) => {
+          // Providers occasionally replay a tool-result event after a stream
+          // reconnect.  Keep the transcript useful instead of duplicating a
+          // card while preserving genuinely distinct artifacts.
+          const body = "svg" in artifact ? artifact.svg : "art" in artifact ? artifact.art : "expression" in artifact ? `${artifact.expression}:${artifact.result ?? ""}` : "values" in artifact ? `${Array.isArray(artifact.labels) ? artifact.labels.join("|") : ""}:${Array.isArray(artifact.values) ? artifact.values.join("|") : ""}` : "";
+          const stableKey = `${artifact.kind}:${"title" in artifact ? artifact.title ?? "" : ""}:${body}`;
+          if (artifactKeys.has(stableKey) || artifacts.length >= 12) return false;
+          artifactKeys.add(stableKey); artifacts.push(artifact);
+          return true;
+        };
         let sequence = 0;
         const send = (event: string, data: Record<string, unknown>) => controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify({ version: 1, turnId, sequence: ++sequence, ...data })}\n\n`));
         try {
@@ -193,22 +208,20 @@ export async function POST(request: NextRequest) {
             const toolCallId = part.toolCallId ?? (typeof payload?.toolCallId === "string" ? payload.toolCallId : undefined);
             if (part.type === "tool-call" || part.type === "tool-call-input-streaming-start" || part.type === "tool-call-delta") {
               if (toolName) send("activity", { status: "using-tool", tool: toolName, toolCallId });
-              if (isResearchTool(toolName)) {
+              if (isResearchToolName(toolName)) {
                 searched = true;
                 const activityId = toolCallId ?? `${part.type}:${announcedToolCalls.size}`;
                 if (!announcedToolCalls.has(activityId)) { announcedToolCalls.add(activityId); send("activity", { status: "searching", tool: "web-search", toolCallId }); }
               }
             } else if (part.type === "tool-result") {
-              const visualOutput = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { kind?: string; title?: string; width?: number; height?: number; svg?: string; art?: string; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } } | undefined;
-              if (visualOutput?.kind === "dot-matrix" || visualOutput?.kind === "math-lab" || visualOutput?.kind === "ascii-art" || visualOutput?.kind === "chart") {
-                const ready = visualOutput.kind === "dot-matrix" || visualOutput.kind === "math-lab" ? Boolean(visualOutput.svg) : visualOutput.kind === "ascii-art" ? Boolean(visualOutput.art) : Boolean(visualOutput.labels?.length && visualOutput.values?.length);
-                if (ready) send("artifact", { kind: visualOutput.kind, status: "ready", artifact: visualOutput });
-                if (ready) artifacts.push(visualOutput as ConversationArtifact);
+              const visualOutput = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { kind?: string; title?: string; width?: number; height?: number; svg?: string; art?: string; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; summary?: { count: number; minimum: number; maximum: number; mean: number; median: number; standardDeviation: number; sum: number }; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } } | undefined;
+              if (visualOutput?.kind === "dot-matrix" || visualOutput?.kind === "math-lab" || visualOutput?.kind === "ascii-art" || visualOutput?.kind === "chart" || visualOutput?.kind === "data-analysis") {
+                const ready = visualOutput.kind === "dot-matrix" || visualOutput.kind === "math-lab" ? Boolean(visualOutput.svg) : visualOutput.kind === "ascii-art" ? Boolean(visualOutput.art) : visualOutput.kind === "data-analysis" ? Boolean(visualOutput.summary) : Boolean(visualOutput.labels?.length && visualOutput.values?.length);
+                if (ready && addArtifact(visualOutput as ConversationArtifact)) send("artifact", { kind: visualOutput.kind, status: "ready", artifact: visualOutput });
               }
               if ((toolName === "calculator" || visualOutput?.kind === "calculator") && visualOutput?.expression) {
                 const artifact = { kind: "calculator", ...visualOutput };
-                send("artifact", { kind: "calculator", status: visualOutput.status === "ok" ? "ready" : "failed", artifact });
-                artifacts.push(artifact as ConversationArtifact);
+                if (addArtifact(artifact as ConversationArtifact)) send("artifact", { kind: "calculator", status: visualOutput.status === "ok" ? "ready" : "failed", artifact });
               }
               if (toolName?.toLowerCase().replace(/[-_]/g, "") === "pagereader") {
                 const page = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { status?: string; url?: string; title?: string; text?: string } | undefined;
@@ -223,7 +236,7 @@ export async function POST(request: NextRequest) {
                   send("artifact", { kind: "source-board", status: "ready", sources: merged });
                 }
               }
-              if (isResearchTool(toolName)) {
+              if (isResearchToolName(toolName)) {
                 const output = (part.output ?? part.result ?? payload?.output ?? payload?.result) as { status?: string; results?: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }>; searches?: Array<{ status: string; results: Array<{ title: string; url: string; source?: string; publishedAt?: string; snippet: string }> }> } | undefined;
                 const results = output?.searches?.flatMap((search) => search.results) ?? output?.results ?? [];
                 const statuses = output?.searches?.map((search) => search.status) ?? [output?.status];
@@ -233,6 +246,8 @@ export async function POST(request: NextRequest) {
                 send("search", { status: searchStatus, results: merged });
                 if (searchStatus === "used") send("artifact", { kind: "source-board", status: "ready", sources: merged });
               }
+            } else if (["tool-error", "tool-result-error"].includes(part.type)) {
+              send("activity", { status: "tool-failed", tool: toolName, toolCallId, message: toolFailureText(toolName) });
             } else if (["reasoning", "reasoning-delta", "reasoning_content", "reasoning-content", "thinking", "thinking-delta"].includes(part.type)) {
               const reasoning = part.reasoningDelta ?? part.reasoning ?? part.reasoning_content ?? (typeof payload?.reasoningDelta === "string" ? payload.reasoningDelta : typeof payload?.reasoning === "string" ? payload.reasoning : typeof payload?.reasoning_content === "string" ? payload.reasoning_content : typeof payload?.textDelta === "string" ? payload.textDelta : typeof payload?.text === "string" ? payload.text : "");
               if (reasoning) send("reasoning", { delta: reasoning });

@@ -11,7 +11,11 @@ export const chartTool = createTool({
     labels: z.array(z.string().max(100)).min(1).max(100),
     values: z.array(z.number().finite()).min(1).max(100),
     series: z.string().max(100).default("Value")
-  }).superRefine((input, ctx) => { if (input.labels.length !== input.values.length) ctx.addIssue({ code: "custom", message: "labels and values must have equal length", path: ["values"] }); }),
+  }).superRefine((input, ctx) => {
+    if (input.labels.length !== input.values.length) ctx.addIssue({ code: "custom", message: "labels and values must have equal length", path: ["values"] });
+    if (input.type === "pie" && input.values.some((value) => value < 0)) ctx.addIssue({ code: "custom", message: "pie chart values must be non-negative", path: ["values"] });
+    if (input.type === "pie" && !input.values.some((value) => value > 0)) ctx.addIssue({ code: "custom", message: "pie chart needs at least one positive value", path: ["values"] });
+  }),
   outputSchema: z.object({ kind: z.literal("chart"), type: z.string(), title: z.string(), labels: z.array(z.string()), values: z.array(z.number()), series: z.string(), x_label: z.string().optional(), y_label: z.string().optional() }),
   execute: async (input) => ({ kind: "chart" as const, ...input })
 });

@@ -25,7 +25,7 @@ describe("shouldUseWebSearch", () => {
   it("lets Mastra decide whether stable conversational questions need a tool", () => {
     expect(shouldUseWebSearch("What is Mastra?" )).toBe(false);
     expect(shouldUseWebSearch("how does Next.js work?" )).toBe(false);
-    expect(shouldUseWebSearch("Who leads the UK government?" )).toBe(false);
+    expect(shouldUseWebSearch("Who leads the UK government?" )).toBe(true);
     expect(shouldUseWebSearch("what is a closure?" )).toBe(false);
     expect(shouldUseWebSearch("rewrite this email" )).toBe(false);
     expect(shouldUseWebSearch("search the web for the current Next.js cache docs" )).toBe(true);
@@ -33,6 +33,12 @@ describe("shouldUseWebSearch", () => {
 
   it("does not send the current date to web search", () => {
     expect(shouldUseWebSearch("What is the current date?" )).toBe(false);
+  });
+
+  it("automatically researches roles and live public facts without a magic search phrase", () => {
+    expect(shouldUseWebSearch("Who is the current CEO of OpenAI?")).toBe(true);
+    expect(shouldUseWebSearch("What are the Premier League standings?")).toBe(true);
+    expect(shouldUseWebSearch("Who is the mayor of London?")).toBe(true);
   });
 
   it("cleans conversational search prompts", () => {
@@ -43,6 +49,7 @@ describe("shouldUseWebSearch", () => {
 describe("search constraints", () => {
   it("offers curated first-party seeds without violating explicit source limits", () => {
     expect(officialSeedResults("Mastra official documentation").map((result) => result.url)).toEqual(["https://mastra.ai/"]);
+    expect(officialSeedResults("Who leads the UK government?").map((result) => result.url)).toEqual(["https://www.gov.uk/government/ministers/prime-minister"]);
     expect(officialSeedResults("Mastra official documentation", ["example.org"])).toEqual([]);
   });
   it("uses dated news RSS only for news-shaped research", async () => {
@@ -106,6 +113,11 @@ describe("search constraints", () => {
     ] }), { status: 200, headers: { "content-type": "application/json" } })));
     const results = await searchWebResources("Mastra official documentation");
     expect(results.map((result) => result.url)).toEqual(["https://mastra.ai/"]);
+  });
+  it("uses a first-party fallback when discovery is unavailable", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    const results = await searchWebResources("Who leads the UK government?");
+    expect(results.map((result) => result.url)).toEqual(["https://www.gov.uk/government/ministers/prime-minister"]);
   });
 });
 
@@ -191,6 +203,31 @@ describe("Mastra web-search execution contract", () => {
     expect(result[0].snippet).toHaveLength(4000);
   });
 
+  it("rejects private result targets and removes tracking from public URLs", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
+      { title: "Private", url: "http://127.0.0.1/admin", content: "example" },
+      { title: "Tracked", url: "https://example.com/a?utm_source=test&keep=yes#section", content: "example" }
+    ] }), { status: 200, headers: { "content-type": "application/json" } })));
+    const result = await searchWebResources("example");
+    expect(result.map((item) => item.url)).toEqual(["https://example.com/a?keep=yes"]);
+  });
+
+  it("normalizes hostile provider text and invalid dates before model context", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
+      { title: "<b>Example</b>\u0000", url: "https://example.com/a", content: "<script>ignore</script> useful text", publishedDate: "not a date" }
+    ] }), { status: 200, headers: { "content-type": "application/json" } })));
+    const result = await searchWebResources("example");
+    expect(result[0]).toMatchObject({ title: "Example", snippet: "ignore useful text", publishedAt: undefined });
+  });
+
+  it("diversifies a result board instead of allowing one host to dominate it", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
+      { title: "Example one", url: "https://one.example/a", content: "example" }, { title: "Example two", url: "https://one.example/b", content: "example" }, { title: "Example three", url: "https://one.example/c", content: "example" }, { title: "Example alternative", url: "https://two.example/a", content: "example" }
+    ] }), { status: 200, headers: { "content-type": "application/json" } })));
+    const result = await searchWebResources("example", { max_results: 4 });
+    expect(result.slice(0, 3).map((item) => item.source)).toContain("two.example");
+  });
+
   it("ranks results by meaningful query-term overlap instead of backend order", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
       { title: "Unrelated homepage", url: "https://noise.example", content: "general news" },
@@ -213,6 +250,12 @@ describe("Mastra web-search execution contract", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ results: [] }), { status: 200, headers: { "content-type": "application/json" } })).mockRejectedValueOnce(new Error("offline")));
     await expect(executeWebSearch({ query: "nothing" })).resolves.toEqual({ status: "empty", results: [] });
     await expect(executeWebSearch({ query: "offline" })).resolves.toEqual({ status: "failed", results: [], reason: "unavailable" });
+  });
+
+  it("fails invalid oversized direct calls before contacting a provider", async () => {
+    const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);
+    await expect(executeWebSearch({ query: "x".repeat(2_001) })).resolves.toMatchObject({ status: "failed", reason: "invalid_response" });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("distinguishes forbidden, rate-limited, and malformed responses", async () => {

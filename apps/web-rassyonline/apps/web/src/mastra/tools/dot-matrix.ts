@@ -35,12 +35,12 @@ export function makeDotMatrixSvg(pattern: "rosette" | "wave" | "halftone" | "con
       }
     }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500" role="img" aria-label="${safeTitle}"><title>${safeTitle}</title><rect width="500" height="500" fill="white"/><g fill="black">${dots.join("")}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500" role="img" aria-label="${safeTitle}"><title>${safeTitle}</title><rect width="500" height="500" fill="#0b0d0d"/><g fill="#9de8ce">${dots.join("")}</g></svg>`;
 }
 
 export const dotMatrixTool = createTool({
   id: "dot-matrix",
-  description: "Create sophisticated black-and-white 500x500 print-quality dot-matrix artwork. Use supplied title and seed; choose rosette, wave, halftone, or constellation. The result is a visual artifact, not ASCII text.",
+  description: "Create a refined 500x500 dot-matrix study for the dark Rassy canvas. Use supplied title and seed; choose rosette, wave, halftone, or constellation. The result is a visual artifact, not ASCII text, and does not represent data unless the user supplied it.",
   inputSchema: z.object({
     pattern: z.enum(["rosette", "wave", "halftone", "constellation"]).default("rosette"),
     title: z.string().trim().min(1).max(160).default("Dot matrix study"),

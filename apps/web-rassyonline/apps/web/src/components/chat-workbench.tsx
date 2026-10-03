@@ -8,9 +8,19 @@ import { ServerEventParser, type ServerEvent } from "@/lib/sse";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, type ThemeId } from "@/lib/theme";
 
-type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
+type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab" | "data-analysis"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; summary?: { count: number; minimum: number; maximum: number; mean: number; median: number; standardDeviation: number; sum: number }; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
 
 const displayNumber = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, useGrouping: true });
+const preciseNumber = new Intl.NumberFormat(undefined, { maximumFractionDigits: 6, useGrouping: true });
+
+function formatArtifactNumber(value: number | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "—";
+  const magnitude = Math.abs(value);
+  // Charts are compact, but zeroing a real small number is a data error. Use
+  // scientific notation at the extremes and locale formatting in the middle.
+  if (magnitude > 0 && (magnitude < 0.000001 || magnitude >= 1_000_000_000)) return value.toExponential(3);
+  return magnitude > 0 && magnitude < 0.01 ? preciseNumber.format(value) : displayNumber.format(value);
+}
 
 function sourceHost(url: string): string {
   try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return "source"; }
@@ -145,6 +155,14 @@ export function ChatWorkbench({ modes, signedIn, accountId }: { modes: ChatMode[
       textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight, 72), 240)}px`;
     }
   }, [input]);
+
+  useEffect(() => {
+    // The chat should be ready for the next thought as soon as a turn settles,
+    // but never steal focus while the user is operating another control.
+    if (sending || recording || document.activeElement !== document.body) return;
+    const timer = window.setTimeout(() => composerRef.current?.focus(), 0);
+    return () => window.clearTimeout(timer);
+  }, [sending, recording]);
 
   useEffect(() => {
     if (!recording) { setRecordingSeconds(0); return; }
@@ -437,10 +455,13 @@ export function ChatWorkbench({ modes, signedIn, accountId }: { modes: ChatMode[
       let reasoning = "";
       let inReasoning = false;
       const processRecord = ({ event, data: raw }: ServerEvent) => {
-        const data = JSON.parse(raw) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; tool?: string; message?: string; retryable?: boolean; citationStatus?: ChatMessage["citationStatus"]; artifact?: VisualArtifact; kind?: string };
+        const data = JSON.parse(raw) as { delta?: string; status?: ChatMessage["searchStatus"]; results?: ChatMessage["sources"]; sources?: ChatMessage["sources"]; tool?: string; message?: string; retryable?: boolean; citationStatus?: ChatMessage["citationStatus"]; artifact?: VisualArtifact; kind?: string };
         if (event === "activity" && data.tool) { setActiveTool(data.tool); if (data.tool === "web-search" || data.tool === "parallel-research") { searched = true; setActivityKind("searching"); } else setActivityKind("thinking"); }
         if (event === "search") { searched = true; searchStatus = data.status ?? "empty"; sources = data.results ?? []; setActivityKind("thinking"); }
-        if (event === "artifact" && data.results?.length) sources = data.results;
+        // Source boards are streamed as artifacts, but their payload is named
+        // `sources` (search events use `results`). Accept both contracts so a
+        // later artifact cannot make an already-successful search disappear.
+        if (event === "artifact" && (data.results?.length || data.sources?.length)) sources = data.results ?? data.sources ?? [];
         if (event === "artifact" && data.artifact?.kind) {
           const artifact = data.artifact;
           setMessages((current) => current.map((message, messageIndex) => messageIndex === current.length - 1 ? { ...message, artifacts: [...(message.artifacts ?? []), artifact] } : message));
@@ -604,8 +625,8 @@ export function ChatWorkbench({ modes, signedIn, accountId }: { modes: ChatMode[
               <div className="message-meta"><div className="message-actions">{message.status === "interrupted" ? <span className="search-warning">Stopped</span> : message.status === "failed" ? <span className="search-warning">Failed</span> : message.status === "truncated" ? <span className="search-warning">Stopped at response limit</span> : null}{message.searchStatus === "used" ? <span className="evidence-badge">Searched</span> : message.searchStatus === "failed" ? <span className="search-warning">Search unavailable</span> : message.searchStatus === "empty" ? <span className="search-warning">No relevant web results</span> : null}{message.citationStatus === "unsupported" ? <span className="search-warning">Citation review needed</span> : message.citationStatus === "source-linked" ? <span className="evidence-badge">Sources linked</span> : message.citationStatus === "verified" ? <span className="evidence-badge">Citations checked</span> : null}{message.role === "assistant" && message.content ? <><CopyButton text={message.content} label="Copy" /><button className="copy-button" type="button" onClick={() => void readAloud(message.content)} disabled={audioBusy}>{speechPlaying ? "■ Stop audio" : "▶ Listen"}</button></> : null}</div></div>
               {message.sources?.length ? <details className="search-sources"><summary><span className="search-sources-label"><i aria-hidden="true">✦</i> Search signal</span><span>{message.sources.length} sources · open evidence</span></summary><div>{message.sources.map((source, sourceIndex) => <a href={source.url} key={`${source.url}-${sourceIndex}`} target="_blank" rel="noopener noreferrer" aria-label={`Open ${source.title} from ${sourceHost(source.url)}`}><strong><em>{String(sourceIndex + 1).padStart(2, "0")}</em> {source.title}</strong><small><b>{sourceHost(source.url)}</b>{source.snippet ? ` · ${source.snippet}` : ""}</small></a>)}</div></details> : null}
               {message.role === "assistant" && message.reasoning ? <details className="reasoning-panel" open={showReasoning}><summary onClick={(event) => { event.preventDefault(); setShowReasoning((value) => !value); }}>{showReasoning ? "Hide details" : "Show details"}</summary><p>{message.reasoning.trim()}</p></details> : null}
-              {message.artifacts?.map((artifact, artifactIndex) => <ArtifactView artifact={artifact} key={`${artifact.kind}-${artifactIndex}`} />)}
               {message.role === "assistant" && !message.content && sending ? <ThinkingState /> : <MarkdownMessage content={message.content || ""} />}
+              {message.artifacts?.map((artifact, artifactIndex) => <ArtifactView artifact={artifact} key={`${artifact.kind}-${artifactIndex}`} />)}
             </article>
           ))}
         </div>
@@ -762,15 +783,50 @@ function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
   }
   if (artifact.kind === "ascii-art" && artifact.art) return <figure className="visual-artifact ascii-artifact"><pre>{artifact.art}</pre><figcaption>{artifact.title ?? "ASCII artwork"}</figcaption></figure>;
   if (artifact.kind === "chart" && artifact.labels && artifact.values) {
+    if (artifact.type === "line") return <LineChart artifact={artifact} />;
+    if (artifact.type === "scatter") return <ScatterChart artifact={artifact} />;
+    if (artifact.type === "pie") return <PieChart artifact={artifact} />;
     if (artifact.type !== "bar") return <ArtifactFallback label={`${artifact.type ?? "This"} chart rendering is not available yet.`} />;
     const scale = Math.max(1, ...artifact.values.map((value) => Math.abs(value)));
     return <figure className="visual-artifact chart-artifact"><div className="chart-bars signed">{artifact.labels.map((label, index) => {
       const value = artifact.values?.[index] ?? 0;
-      return <div className="chart-bar" key={`${label}-${index}`}><div className="chart-positive">{value > 0 ? <span style={{ height: `${value / scale * 100}%` }} /> : null}</div><div className="chart-negative">{value < 0 ? <span style={{ height: `${-value / scale * 100}%` }} /> : value === 0 ? <i aria-label="zero value" /> : null}</div><b>{label}</b><small>{displayNumber.format(value)}</small></div>;
+      return <div className="chart-bar" key={`${label}-${index}`}><div className="chart-positive">{value > 0 ? <span style={{ height: `${value / scale * 100}%` }} /> : null}</div><div className="chart-negative">{value < 0 ? <span style={{ height: `${-value / scale * 100}%` }} /> : value === 0 ? <i aria-label="zero value" /> : null}</div><b>{label}</b><small>{formatArtifactNumber(value)}</small></div>;
     })}</div><figcaption>{artifact.title ?? "Chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
   }
-  if (artifact.kind === "calculator") return <section className={`visual-artifact calculator-artifact ${artifact.status === "failed" ? "failed" : ""}`}><header><span>RASSY GRAPHICS CALCULATOR</span><b>RUN / 01</b></header><div className="calculator-expression"><code>{artifact.expression}</code><span>=</span><strong>{artifact.status === "ok" ? artifact.result : "Unable to calculate"}</strong></div>{artifact.graph ? <CalculatorGraph graph={artifact.graph} /> : null}{artifact.error ? <p>{artifact.error}</p> : null}<small>Calculator · verified result{artifact.graph ? " · graph sampled from expression" : ""}</small></section>;
+  if (artifact.kind === "calculator") return <section className={`visual-artifact calculator-artifact ${artifact.status === "failed" ? "failed" : ""}`}><header><span>RASSY GRAPHICS CALCULATOR</span><b>RUN / 01</b></header><div className="calculator-expression"><code>{artifact.expression}</code><span>=</span><strong>{artifact.status === "ok" ? formatArtifactNumber(artifact.result) : "Unable to calculate"}</strong></div>{artifact.graph ? <CalculatorGraph graph={artifact.graph} /> : null}{artifact.error ? <p>{artifact.error}</p> : null}<small>Calculator · verified result{artifact.graph ? " · graph sampled from expression" : ""}</small></section>;
+  if (artifact.kind === "data-analysis" && artifact.summary) return <section className="visual-artifact data-analysis-artifact"><header><span>DATA ANALYSIS</span><b>{artifact.mode?.replace(/-/g, " ") ?? "describe"}</b></header><div className="analysis-grid"><span><small>Count</small><b>{artifact.summary.count}</b></span><span><small>Mean</small><b>{formatArtifactNumber(artifact.summary.mean)}</b></span><span><small>Median</small><b>{formatArtifactNumber(artifact.summary.median)}</b></span><span><small>Range</small><b>{formatArtifactNumber(artifact.summary.minimum)}–{formatArtifactNumber(artifact.summary.maximum)}</b></span><span><small>σ</small><b>{formatArtifactNumber(artifact.summary.standardDeviation)}</b></span><span><small>Total</small><b>{formatArtifactNumber(artifact.summary.sum)}</b></span></div><small>Verified from {artifact.summary.count} supplied observations</small></section>;
   return null;
+}
+
+function ScatterChart({ artifact }: { artifact: VisualArtifact }) {
+  const values = artifact.values ?? [];
+  const labels = artifact.labels ?? [];
+  const max = Math.max(...values, 1); const min = Math.min(...values, 0); const range = max - min || 1;
+  return <figure className="visual-artifact chart-artifact scatter-chart-artifact"><div className="scatter-chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${artifact.title ?? "Scatter"} chart`}><path className="line-chart-grid" d="M8 8V92H94M8 29H94M8 50H94M8 71H94" />{values.map((value, index) => { const x = values.length === 1 ? 51 : 8 + index / (values.length - 1) * 86; const y = 92 - (value - min) / range * 84; return <circle className="scatter-point" cx={x} cy={y} r="2.1" key={`${labels[index]}-${index}`}><title>{`${labels[index] ?? index + 1}: ${formatArtifactNumber(value)}`}</title></circle>; })}</svg><div className="line-chart-labels">{labels.map((label, index) => <span key={`${label}-${index}`}>{label}<b>{formatArtifactNumber(values[index])}</b></span>)}</div></div><figcaption>{artifact.title ?? "Scatter chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
+}
+
+function PieChart({ artifact }: { artifact: VisualArtifact }) {
+  const values = artifact.values ?? []; const labels = artifact.labels ?? [];
+  const total = values.reduce((sum, value) => sum + Math.max(0, value), 0);
+  if (total <= 0) return <ArtifactFallback label="Pie charts need at least one positive value." />;
+  let cursor = 0;
+  const slices = values.map((value, index) => { const portion = Math.max(0, value) / total; const start = cursor; cursor += portion; const end = cursor; const angle = (fraction: number) => ({ x: 50 + 42 * Math.cos(-Math.PI / 2 + fraction * Math.PI * 2), y: 50 + 42 * Math.sin(-Math.PI / 2 + fraction * Math.PI * 2) }); const a = angle(start); const b = angle(end); const large = portion > .5 ? 1 : 0; return { index, portion, path: portion >= .999 ? "M50 8A42 42 0 1 1 49.999 8Z" : `M50 50L${a.x} ${a.y}A42 42 0 ${large} 1 ${b.x} ${b.y}Z` }; });
+  return <figure className="visual-artifact chart-artifact pie-chart-artifact"><div className="pie-chart"><svg viewBox="0 0 100 100" role="img" aria-label={`${artifact.title ?? "Pie"} chart`}>{slices.map((slice) => <path className={`pie-slice slice-${slice.index % 6}`} d={slice.path} key={slice.index}><title>{`${labels[slice.index] ?? slice.index + 1}: ${(slice.portion * 100).toFixed(1)}%`}</title></path>)}</svg><div className="pie-legend">{slices.map((slice) => <span key={slice.index}><i className={`slice-${slice.index % 6}`} />{labels[slice.index] ?? slice.index + 1}<b>{(slice.portion * 100).toFixed(1)}%</b></span>)}</div></div><figcaption>{artifact.title ?? "Pie chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
+}
+
+function LineChart({ artifact }: { artifact: VisualArtifact }) {
+  const values = artifact.values ?? [];
+  const labels = artifact.labels ?? [];
+  const minimum = Math.min(0, ...values);
+  const maximum = Math.max(0, ...values);
+  const range = maximum - minimum || 1;
+  const points = values.map((value, index) => {
+    const x = values.length === 1 ? 50 : 6 + index / (values.length - 1) * 88;
+    const y = 92 - (value - minimum) / range * 84;
+    return { x, y, value, label: labels[index] ?? String(index + 1) };
+  });
+  const zeroY = minimum < 0 && maximum > 0 ? 92 - (0 - minimum) / range * 84 : null;
+  return <figure className="visual-artifact chart-artifact line-chart-artifact"><div className="line-chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${artifact.title ?? "Line"} chart`}><path className="line-chart-grid" d="M6 8V92H94M6 29H94M6 50H94M6 71H94" />{zeroY !== null ? <path className="line-chart-zero" d={`M6 ${zeroY}H94`} /> : null}<polyline className="line-chart-path" points={points.map((point) => `${point.x},${point.y}`).join(" ")} />{points.map((point) => <circle className="line-chart-point" cx={point.x} cy={point.y} r="1.5" key={point.label}><title>{`${point.label}: ${formatArtifactNumber(point.value)}`}</title></circle>)}</svg><div className="line-chart-labels">{points.map((point) => <span title={`${point.label}: ${formatArtifactNumber(point.value)}`} key={point.label}>{point.label}<b>{formatArtifactNumber(point.value)}</b></span>)}</div></div><figcaption>{artifact.title ?? "Line chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
 }
 
 function sanitizeArtifactSvg(input: string): string | null {
@@ -825,12 +881,15 @@ function CalculatorGraph({ graph }: { graph: NonNullable<VisualArtifact["graph"]
   if (current.length) segments.push(current.join(" "));
   const zeroX = graph.xMin <= 0 && graph.xMax >= 0 ? ((-graph.xMin) / (graph.xMax - graph.xMin) * 100) : null;
   const zeroY = minY <= 0 && maxY >= 0 ? (100 - ((0 - minY) / rangeY * 100)) : null;
-  return <div className="calculator-graph"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Graph of calculator expression"><path className="graph-grid" d="M0 25H100M0 50H100M0 75H100M25 0V100M50 0V100M75 0V100" />{zeroX !== null ? <path className="graph-axis" d={`M${zeroX} 0V100`} /> : null}{zeroY !== null ? <path className="graph-axis" d={`M0 ${zeroY}H100`} /> : null}{segments.map((points, index) => <polyline className="graph-line" points={points} key={index} />)}</svg><div className="graph-labels"><span>{graph.xMin}</span><span>0</span><span>{graph.xMax}</span></div></div>;
+  return <div className="calculator-graph"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Graph of calculator expression"><path className="graph-grid" d="M0 25H100M0 50H100M0 75H100M25 0V100M50 0V100M75 0V100" />{zeroX !== null ? <path className="graph-axis" d={`M${zeroX} 0V100`} /> : null}{zeroY !== null ? <path className="graph-axis" d={`M0 ${zeroY}H100`} /> : null}{segments.map((points, index) => <polyline className="graph-line" points={points} key={index} />)}</svg><div className="graph-labels"><span>{formatArtifactNumber(graph.xMin)}</span><span>0</span><span>{formatArtifactNumber(graph.xMax)}</span></div></div>;
 }
 
 function renderInline(text: string) {
   const nodes: ReactNode[] = [];
-  const pattern = /(\*\*[^*]+\*\*|~~[^~]+~~|`[^`]+`|\$[^$\n]+\$|\\\([^\n]+?\\\)|\[[^\]]+\]\((?:https?:\/\/|mailto:)[^)]+\)|\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}\b)/g;
+  // Dollar-delimited TeX must close on a non-space character. Without that
+  // boundary, prose such as "$20 and $30" becomes a malformed math run and
+  // makes otherwise ordinary numbers render as symbols.
+  const pattern = /(\*\*[^*]+\*\*|~~[^~]+~~|`[^`]+`|\$(?=\S)(?:\\.|[^$\\\n])*?\S\$|\\\([^\n]+?\\\)|\[[^\]]+\]\((?:https?:\/\/|mailto:)[^)]+\))/g;
   let lastIndex = 0;
 
   for (const match of text.matchAll(pattern)) {
@@ -846,9 +905,6 @@ function renderInline(text: string) {
       nodes.push(<MathExpression key={`${token}-${match.index}`} tex={token.slice(1, -1)} />);
     } else if (token.startsWith("\\(")) {
       nodes.push(<MathExpression key={`${token}-${match.index}`} tex={token.slice(2, -2)} />);
-    } else if (/^(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}$/.test(token)) {
-      const date = new Date(`${token} UTC`);
-      nodes.push(<time className="rendered-date" key={`${token}-${match.index}`} dateTime={Number.isNaN(date.getTime()) ? undefined : date.toISOString().slice(0, 10)}>{token}</time>);
     } else {
       const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
       nodes.push(

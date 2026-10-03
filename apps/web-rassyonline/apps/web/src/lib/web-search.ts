@@ -14,6 +14,9 @@ export type WebSearchResult = {
 };
 
 const SEARCH_RANGES = new Set(["day", "week", "month", "year"]);
+const MAX_RESULTS_PER_TURN = 8;
+const MAX_PROVIDER_BODY_BYTES = 2 * 1024 * 1024;
+const MAX_RESULT_SNIPPET_CHARS = 4_000;
 // The managed SearXNG instance waits for several upstream engines. Its normal
 // response can arrive shortly after eight seconds, so an eight-second client
 // timeout turned healthy searches into a race. Keep this finite so a failed
@@ -26,6 +29,36 @@ function searchTerms(query: string): string[] {
   return [...new Set(query.toLowerCase().replace(/[^a-z0-9+#.-]+/g, " ").split(/\s+/).filter((term) => term.length >= 2 && !SEARCH_STOP_WORDS.has(term)))].slice(0, 16);
 }
 
+function cleanSearchText(value: string | undefined, limit: number): string {
+  return (value ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, limit);
+}
+
+function isPrivateHost(host: string): boolean {
+  const normalized = host.toLowerCase().replace(/\.$/, "");
+  return normalized === "localhost" || normalized.endsWith(".localhost") || normalized === "::1" || /^127\./.test(normalized) || /^10\./.test(normalized) || /^192\.168\./.test(normalized) || /^172\.(?:1[6-9]|2\d|3[0-1])\./.test(normalized) || /^169\.254\./.test(normalized) || normalized === "0.0.0.0";
+}
+
+function canonicalSearchUrl(value: string): string | null {
+  try {
+    const url = new URL(value);
+    if (!(["http:", "https:"].includes(url.protocol)) || !url.hostname || isPrivateHost(url.hostname)) return null;
+    url.hash = "";
+    for (const key of [...url.searchParams.keys()]) if (/^(?:utm_|fbclid$|gclid$|mc_[ce]id$)/i.test(key)) url.searchParams.delete(key);
+    return url.toString();
+  } catch { return null; }
+}
+
+function diversifyDomains(results: WebSearchResult[], limit: number): WebSearchResult[] {
+  const selected: WebSearchResult[] = []; const perDomain = new Map<string, number>();
+  for (const result of results) {
+    const domain = result.source ?? ""; const count = perDomain.get(domain) ?? 0;
+    if (count >= 2 && results.some((candidate) => candidate.source !== domain && !selected.includes(candidate))) continue;
+    selected.push(result); perDomain.set(domain, count + 1);
+    if (selected.length >= limit) break;
+  }
+  return selected;
+}
+
 const OFFICIAL_ENTITY_SOURCES: Array<[RegExp, RegExp]> = [
   [/\bmastra\b/i, /(?:^|\.)mastra\.ai(?:\/|$)|^github\.com\/mastra-ai(?:\/|$)/i],
   [/\blanggraph\b/i, /(?:^|\.)langchain\.com(?:\/|$)|^github\.com\/langchain-ai(?:\/|$)/i],
@@ -34,7 +67,11 @@ const OFFICIAL_ENTITY_SOURCES: Array<[RegExp, RegExp]> = [
 const OFFICIAL_ENTITY_SEEDS: Array<{ pattern: RegExp; title: string; url: string; snippet: string }> = [
   { pattern: /\bmastra\b/i, title: "Mastra official documentation", url: "https://mastra.ai/", snippet: "Official Mastra framework documentation and product site." },
   { pattern: /\blanggraph\b/i, title: "LangGraph official documentation", url: "https://docs.langchain.com/oss/javascript/langgraph/overview", snippet: "Official LangGraph documentation from LangChain." },
-  { pattern: /\bnext(?:\.js)?\b/i, title: "Next.js official documentation", url: "https://nextjs.org/docs", snippet: "Official Next.js documentation from Vercel." }
+  { pattern: /\bnext(?:\.js)?\b/i, title: "Next.js official documentation", url: "https://nextjs.org/docs", snippet: "Official Next.js documentation from Vercel." },
+  // This is a stable official index, not a stored answer. It is used only
+  // when discovery returns no usable result, and the page reader still fetches
+  // the live government page before the model can answer.
+  { pattern: /\b(?:who\s+)?(?:leads?|runs?|heads?)\b.{0,80}\b(?:uk|u\.k\.|united kingdom|british)\b.{0,80}\bgovernment\b|\b(?:uk|u\.k\.|united kingdom|british)\b.{0,80}\b(?:prime minister|government leader)\b/i, title: "UK Government: Prime Minister", url: "https://www.gov.uk/government/ministers/prime-minister", snippet: "Current Prime Minister information from the UK Government." }
 ];
 
 /**
@@ -104,6 +141,15 @@ const SEARCH_INTENT_PATTERNS = [
   /\b(?:breaking news|news (?:today|this week)|what happened (?:today|this week)|current exchange rate)\b/i,
   /\b(?:latest|recent|current|today|this week|update(?:s)? on)\b.{0,80}\b(?:war|conflict|strike|ceasefire|sanctions)\b/i
 ];
+// These are factual questions whose answer is inherently time-sensitive even
+// when the user does not say "latest".  In particular, a named office-holder
+// or organisation can change between turns, so leaving it to the base model
+// makes automatic search look arbitrarily broken to a normal user.
+const CURRENT_FACT_PATTERNS = [
+  /\b(?:who|which person)\s+(?:is|leads?|runs?|heads?|chairs?|owns?)\b.{0,120}\b(?:government|country|company|organisation|organization|party|ministry|department|parliament|senate|council|team|club)\b/i,
+  /\b(?:president|prime minister|chancellor|monarch|king|queen|governor|mayor|ceo|chief executive|leader|minister|secretary)\b/i,
+  /\b(?:election|polling|result|winner|standings?|rankings?|fixture|game|match)\b/i
+];
 const SEARCH_EXCLUSIONS = [
   /^what does .* mean\??$/i,
   /^explain\b/i,
@@ -147,6 +193,7 @@ export function shouldUseWebSearch(prompt: string): boolean {
   if (!compact) return false;
   if (requiredSearchDomains(compact).length) return true;
   if (/\b(?:search|browse|look up|lookup)\b\s+(?:the\s+)?\S+/i.test(compact)) return true;
+  if (CURRENT_FACT_PATTERNS.some((pattern) => pattern.test(compact))) return true;
   return !SEARCH_EXCLUSIONS.some((pattern) => pattern.test(compact)) && !/\b(?:current|today'?s|today is|what(?:'s| is) the)\s+(?:date|day|time)\b|\bwhat day is (?:today|it)\b|\bwhat(?:'s| is) the time\b/i.test(compact) && SEARCH_INTENT_PATTERNS.some((pattern) => pattern.test(compact));
 }
 
@@ -250,7 +297,7 @@ export async function searchNewsFallback(query: string, signal?: AbortSignal): P
 async function finalSearchFallback(query: string, options: Pick<WebSearchInput, "domains" | "max_results"> & { signal?: AbortSignal }): Promise<WebSearchResult[]> {
   const news = await searchNewsFallback(query, options.signal).catch(() => []);
   const fallback = news.length ? news : officialSeedResults(query, options.domains);
-  return fallback.slice(0, Math.min(options.max_results ?? 5, 8));
+  return fallback.slice(0, Math.min(options.max_results ?? 5, MAX_RESULTS_PER_TURN));
 }
 
 async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> & { signal?: AbortSignal } = {}): Promise<WebSearchResult[]> {
@@ -273,7 +320,7 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
   if (!/application\/json/i.test(response.headers.get("content-type") ?? "")) throw new WebSearchFailure("invalid_response");
 
   const body = await response.arrayBuffer();
-  if (body.byteLength > 2 * 1024 * 1024) throw new WebSearchFailure("invalid_response");
+  if (body.byteLength > MAX_PROVIDER_BODY_BYTES) throw new WebSearchFailure("invalid_response");
   let parsed: SearchResponse;
   try { parsed = JSON.parse(new TextDecoder().decode(body)) as SearchResponse; }
   catch { throw new WebSearchFailure("invalid_response"); }
@@ -281,11 +328,11 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
   const seen = new Set<string>();
   const normalized = (Array.isArray(parsed.results) ? parsed.results : [])
     .map((result) => ({
-      title: result.title?.trim() ?? "",
-      url: result.url?.trim() ?? "",
-      source: (() => { try { return new URL(result.url ?? "").hostname; } catch { return ""; } })(),
-      publishedAt: result.publishedDate ?? result.published_at,
-      snippet: (result.content ?? result.snippet ?? "").replace(/\s+/g, " ").trim().slice(0, 4000),
+      title: cleanSearchText(result.title, 500),
+      url: canonicalSearchUrl(result.url ?? "") ?? "",
+      source: (() => { try { return new URL(canonicalSearchUrl(result.url ?? "") ?? "").hostname; } catch { return ""; } })(),
+      publishedAt: (() => { const value = cleanSearchText(result.publishedDate ?? result.published_at, 120); return Number.isFinite(Date.parse(value)) ? value : undefined; })(),
+      snippet: cleanSearchText(result.content ?? result.snippet, MAX_RESULT_SNIPPET_CHARS),
       status: "ok" as const
     }))
     .filter((result) => {
@@ -320,7 +367,7 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
         return score >= Math.max(5, Math.ceil(terms.length * 2)) && (matchedTerms >= (terms.length > 1 ? Math.max(2, Math.ceil(terms.length * 0.5)) : 1) || trustedMastraSource);
       })
     : normalized.filter((result) => inWindow(result) && (!officialSources.length || officialSources.some((pattern) => pattern.test(`${result.source}${new URL(result.url).pathname}`))));
-  return relevant.slice(0, Math.min(options.max_results ?? 5, 8));
+  return diversifyDomains(relevant, Math.min(options.max_results ?? 5, MAX_RESULTS_PER_TURN));
 }
 
 /**
@@ -330,8 +377,19 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
  * what the user asked for.
  */
 export async function searchWebResources(query: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> & { signal?: AbortSignal } = {}): Promise<WebSearchResult[]> {
+  if (!query.trim() || query.trim().length > 2_000) throw new WebSearchFailure("invalid_response");
   const primary = buildSearchProviderQuery(query);
-  const firstPass = await searchWebResourcesForQuery(primary, query, options);
+  let firstPass: WebSearchResult[];
+  try {
+    firstPass = await searchWebResourcesForQuery(primary, query, options);
+  } catch (error) {
+    // An unavailable discovery provider must not bypass a narrow, live
+    // first-party fallback. Preserve the outage for subjects without one so
+    // the UI remains truthful instead of presenting an empty search as proof.
+    const recovered = await finalSearchFallback(query, options);
+    if (recovered.length) return recovered;
+    throw error;
+  }
   if (firstPass.length) return firstPass;
   const fallback = fallbackSearchProviderQuery(query);
   if (fallback && fallback.toLocaleLowerCase() !== primary.toLocaleLowerCase()) {

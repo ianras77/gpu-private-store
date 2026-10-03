@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { makeMathLabSvg, matrixDeterminant, matrixInverse, matrixMultiply, matrixTrace, matrixTranspose, symmetricEigenvalues, symmetricEigenvectors2x2 } from "./math-lab";
+import { makeMathLabSvg, mathLabTool, matrixDeterminant, matrixInverse, matrixMultiply, matrixPower, matrixTrace, matrixTranspose, reducedRowEchelon, solveLinearSystem, solveResidual, symmetricEigenvalues, symmetricEigenvectors2x2 } from "./math-lab";
 
 describe("math lab", () => {
   it("finds eigenvalues for a symmetric matrix", () => {
@@ -24,15 +24,36 @@ describe("math lab", () => {
     expect(makeMathLabSvg("fourier", "Fourier study", "f(x)", [])).toContain("polyline");
   });
 
+  it("solves a supplied system without asking the model to invent an inverse", () => {
+    expect(solveLinearSystem([[2, 1], [1, 3]], [5, 8])).toEqual([1.4, 2.2]);
+    const svg = makeMathLabSvg("matrix", "Solve AX=B", "AX=B", [[2, 1], [1, 3]], "solve", [], [5, 8]);
+    expect(svg).toContain("SOLUTION VECTOR X");
+    expect(svg).toContain("1.4");
+    expect(solveResidual([[2, 1], [1, 3]], [5, 8], [1.4, 2.2])).toBeCloseTo(0);
+  });
+
+  it("supports rank-revealing and repeated linear operations", () => {
+    expect(reducedRowEchelon([[1, 2], [2, 4]]).rank).toBe(1);
+    expect(matrixPower([[1, 1], [0, 1]], 3)).toEqual([[1, 3], [0, 1]]);
+    expect(makeMathLabSvg("matrix", "Row reduction", "A", [[1, 2], [2, 4]], "rref")).toContain("RANK");
+  });
+
+  it("accepts blank optional fields that tool-calling models commonly emit", () => {
+    const input = (mathLabTool.inputSchema as unknown as { parse(value: unknown): { matrixB: number[][]; vectorB: number[]; exponent: number } }).parse({ mode: "matrix", operation: "solve", title: "Solve", formula: "", matrix: [[2, 1], [1, 3]], matrixB: "", vectorB: [5, 8], exponent: "" });
+    expect(input).toMatchObject({ matrixB: [], vectorB: [5, 8], exponent: 2 });
+  });
+
   it("fails closed for non-symmetric matrices", () => {
     expect(() => symmetricEigenvalues([[0, 1], [0, 0]])).toThrow("real symmetric matrix");
+    expect(makeMathLabSvg("matrix", "General matrix", "A", [[0, 1], [0, 0]])).toContain("REAL-SYMMETRIC EIGENSPECTRUM REQUIRED");
   });
 
   it("renders matrix spectrum into a bounded SVG", () => {
     const svg = makeMathLabSvg("matrix", "Hamiltonian", "H", [[2, 1], [1, 2]]);
     expect(svg).toContain("EIGENVALUES λ");
-    expect(svg).toContain("3.00000");
+    expect(svg).toContain(">3   1<");
     expect(svg).toContain("width=\"760\"");
+    expect(svg).not.toContain("<style>");
   });
 
   it("breaks a plot at undefined samples", () => {
