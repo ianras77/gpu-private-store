@@ -31,6 +31,7 @@ services:
 
   astro-api:
     image: astro-api:1.1.0
+    pull_policy: build
     build:
       context: ./repo
       dockerfile: infra/Dockerfile.api
@@ -113,6 +114,7 @@ services:
 
   astro-web-jupiterseek:
     image: astro-web-jupiterseek:1.1.0
+    pull_policy: build
     build:
       context: ./repo
       dockerfile: infra/Dockerfile.web
@@ -143,6 +145,7 @@ services:
 
   astro-web-maleficme:
     image: astro-web-maleficme:1.1.0
+    pull_policy: build
     build:
       context: ./repo
       dockerfile: infra/Dockerfile.web
@@ -170,6 +173,7 @@ services:
 
   astro-web-saturnleo:
     image: astro-web-saturnleo:1.1.0
+    pull_policy: build
     build:
       context: ./repo
       dockerfile: infra/Dockerfile.web
@@ -197,6 +201,7 @@ services:
 
   astro-web-saturnseer:
     image: astro-web-saturnseer:1.1.0
+    pull_policy: build
     build:
       context: ./repo
       dockerfile: infra/Dockerfile.web
@@ -224,6 +229,7 @@ services:
 
   astro-web-oracleveil:
     image: astro-web-oracleveil:1.1.0
+    pull_policy: build
     build:
       context: ./repo
       dockerfile: infra/Dockerfile.web
