@@ -54,6 +54,18 @@ async function runDungeonMasterOrchestration(message: string, contextPrompt: str
 const port = Number(process.env.PORT ?? 1866);
 const internalToken = process.env.RASSY_INTELLIGENCE_INTERNAL_TOKEN?.trim();
 const app = Fastify({ logger: true });
+const jsonObjectSchema = z.record(z.string(), z.unknown());
+
+function normalizeJsonObject(text: string): string | null {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  try {
+    const parsed = jsonObjectSchema.safeParse(JSON.parse(fenced?.[1] ?? trimmed));
+    return parsed.success ? JSON.stringify(parsed.data) : null;
+  } catch {
+    return null;
+  }
+}
 
 const modelGateway = () => (process.env.RASSYMIND_BASE_URL ?? "").replace(/\/$/, "");
 
@@ -136,14 +148,17 @@ app.post("/v1/chat/completions", async (request, reply) => {
   try {
     let content: string;
     if (jsonObjectRequested) {
-      const result = await agents[agentId].generate(prompt, {
-        maxSteps: 1,
-        structuredOutput: {
-          schema: z.record(z.string(), z.unknown()),
-          jsonPromptInjection: "auto",
-        },
-      });
-      content = JSON.stringify(result.object) ?? "";
+      const correction = "Return exactly one valid JSON object. Use double-quoted property names, no trailing commas, and no prose or markdown.";
+      const prompts = [prompt, `${prompt}\n\nOutput format correction: ${correction}`];
+      content = "";
+      for (const candidatePrompt of prompts) {
+        const result = await agents[agentId].generate(candidatePrompt, { maxSteps: 1 });
+        const normalized = normalizeJsonObject(result.text);
+        if (normalized) {
+          content = normalized;
+          break;
+        }
+      }
     } else {
       const result = await agents[agentId].generate(prompt, { maxSteps: 1 });
       content = result.text;
