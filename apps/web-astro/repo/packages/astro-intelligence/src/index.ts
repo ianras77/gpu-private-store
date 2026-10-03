@@ -78,7 +78,7 @@ export type RassyMindCapability = z.infer<typeof RassyMindCapabilitySchema>;
 export const RassyMindConfig = z.object({ baseUrl: z.string().url(), apiKey: z.string().min(1), lanes: z.object({ fast: RassyMindLaneSchema, mind: RassyMindLaneSchema, utility: RassyMindLaneSchema, embed: RassyMindLaneSchema, rerank: RassyMindLaneSchema }) });
 export function readRassyMindConfig(env: NodeJS.ProcessEnv = process.env) {
   const baseUrl = (env.RASSYMIND_BASE_URL ?? "http://127.0.0.1:8844/v1").replace(/\/+$/, "");
-  return RassyMindConfig.parse({ baseUrl, apiKey: env.RASSYMIND_API_KEY, lanes: { fast: env.ASTRO_RASSYMIND_FAST_MODEL ?? "rassy-fast", mind: env.ASTRO_RASSYMIND_MIND_MODEL ?? "rassy-mind", utility: env.ASTRO_RASSYMIND_UTILITY_MODEL ?? "rassy-utility", embed: env.ASTRO_RASSYMIND_EMBED_MODEL ?? "rassy-embed", rerank: env.ASTRO_RASSYMIND_RERANK_MODEL ?? "rassy-rerank" } });
+  return RassyMindConfig.parse({ baseUrl, apiKey: env.RASSYMIND_API_KEY, lanes: { fast: env.ASTRO_RASSYMIND_FAST_MODEL ?? "rassy-fast", mind: env.ASTRO_RASSYMIND_MIND_MODEL ?? "rassy-fast", utility: env.ASTRO_RASSYMIND_UTILITY_MODEL ?? "rassy-utility", embed: env.ASTRO_RASSYMIND_EMBED_MODEL ?? "rassy-embed", rerank: env.ASTRO_RASSYMIND_RERANK_MODEL ?? "rassy-rerank" } });
 }
 export function readRassyMindCapabilities(env: NodeJS.ProcessEnv = process.env): Record<string, RassyMindCapability> {
   const raw = env.RASSYMIND_CAPABILITIES_JSON;
@@ -89,7 +89,7 @@ export function readRassyMindCapabilities(env: NodeJS.ProcessEnv = process.env):
 }
 export function requireRassyMindCapability(lane: RassyMindLane, capability: keyof RassyMindCapability, env: NodeJS.ProcessEnv = process.env) {
   const capabilities = readRassyMindCapabilities(env);
-  const model = { "rassy-fast": env.ASTRO_RASSYMIND_FAST_MODEL ?? "rassy-fast", "rassy-mind": env.ASTRO_RASSYMIND_MIND_MODEL ?? "rassy-mind", "rassy-utility": env.ASTRO_RASSYMIND_UTILITY_MODEL ?? "rassy-utility", "rassy-embed": env.ASTRO_RASSYMIND_EMBED_MODEL ?? "rassy-embed", "rassy-rerank": env.ASTRO_RASSYMIND_RERANK_MODEL ?? "rassy-rerank" }[lane];
+  const model = { "rassy-fast": env.ASTRO_RASSYMIND_FAST_MODEL ?? "rassy-fast", "rassy-mind": env.ASTRO_RASSYMIND_MIND_MODEL ?? "rassy-fast", "rassy-utility": env.ASTRO_RASSYMIND_UTILITY_MODEL ?? "rassy-utility", "rassy-embed": env.ASTRO_RASSYMIND_EMBED_MODEL ?? "rassy-embed", "rassy-rerank": env.ASTRO_RASSYMIND_RERANK_MODEL ?? "rassy-rerank" }[lane];
   if (!capabilities[model]?.[capability]) throw new Error(`RassyMind lane ${model} is not qualified for ${capability}`);
   return model;
 }
