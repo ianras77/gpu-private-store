@@ -27,4 +27,4 @@ RUN useradd --create-home --uid 10001 astro
 COPY --from=build --chown=astro:astro /repo /repo
 USER astro
 EXPOSE 3000
-CMD ["sh", "-c", "node apps/${APP_NAME#@astro/}/node_modules/next/dist/bin/next start -p 3000 -H 0.0.0.0"]
+CMD ["sh", "-c", "cd apps/${APP_NAME#@astro/} && node node_modules/next/dist/bin/next start -p 3000 -H 0.0.0.0"]
