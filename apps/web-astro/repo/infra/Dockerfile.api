@@ -14,6 +14,7 @@ WORKDIR /repo
 ENV NODE_ENV=production
 RUN useradd --create-home --uid 10001 astro
 RUN corepack enable
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=build --chown=astro:astro /repo /repo
 USER astro
 EXPOSE 4020
