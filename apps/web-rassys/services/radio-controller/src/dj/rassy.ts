@@ -2332,7 +2332,10 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
     const retryDelayMs = Math.max(0, options?.retryDelayMs ?? config.RASSYMIND_RETRY_DELAY_MS);
     const laneName = options?.lane ?? "programming";
     const queueWaitMs = Math.max(0, options?.queueWaitMs ?? 1200);
-    const jsonMode = options?.jsonMode === "json_object" ? "json_object" : "prompt";
+    // Every caller supplies a Zod schema, and the canonical intelligence
+    // endpoint can enforce a JSON object response. Keep prompt-only mode as
+    // an explicit opt-out for providers that need plain text.
+    const jsonMode = options?.jsonMode === "prompt" ? "prompt" : "json_object";
     let lastFailure = null;
     for (let attempt = 0; attempt <= retries; attempt += 1) {
         const controller = new AbortController();

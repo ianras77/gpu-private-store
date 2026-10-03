@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import { embed } from "ai";
+import { z } from "zod";
 import { RASSY_ARTIFACT_KINDS, RASSY_CHANNELS, RASSY_TOOLS, rassyRequestContextSchema, resolveRassyChannel } from "@rassys/mr-rassy-core";
 import { agents } from "./mastra.js";
 import { rassymind } from "./models/rassymind.js";
@@ -119,7 +120,7 @@ app.get("/v1/dungeon-master/capabilities", async () => ({
 // OpenAI-compatible compatibility surface for existing server-side callers.
 // It remains inside Mastra: no caller may bypass the shared Mr Rassy runtime.
 app.post("/v1/chat/completions", async (request, reply) => {
-  const body = request.body as { model?: unknown; messages?: unknown };
+  const body = request.body as { model?: unknown; messages?: unknown; response_format?: unknown };
   if (!Array.isArray(body?.messages)) return reply.code(400).send({ error: "messages_required" });
   const prompt = body.messages
     .filter((message): message is { role?: string; content?: unknown } => Boolean(message && typeof message === "object"))
@@ -128,9 +129,24 @@ app.post("/v1/chat/completions", async (request, reply) => {
   if (!prompt.trim() || prompt.length > 50000) return reply.code(400).send({ error: "prompt_required" });
   const purpose = request.headers["x-cheshire-purpose"] ?? request.headers["x-rassy-purpose"];
   const agentId = resolveCompatibilityAgent(String(purpose ?? ""));
+  const jsonObjectRequested = body.response_format !== null &&
+    typeof body.response_format === "object" &&
+    "type" in body.response_format &&
+    body.response_format.type === "json_object";
   try {
-    const result = await agents[agentId].generate(prompt, { maxSteps: 1 });
-    return { id: `rassy-${Date.now()}`, object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content: result.text }, finish_reason: "stop" }], model: typeof body.model === "string" ? body.model : "rassy-mind" };
+    let content: string;
+    if (jsonObjectRequested) {
+      const result = await agents[agentId].generateLegacy(prompt, {
+        maxSteps: 1,
+        output: z.record(z.string(), z.unknown()),
+      });
+      content = JSON.stringify(result.object) ?? "";
+    } else {
+      const result = await agents[agentId].generate(prompt, { maxSteps: 1 });
+      content = result.text;
+    }
+    if (!content || content === "undefined") return reply.code(502).send({ error: "structured_generation_failed" });
+    return { id: `rassy-${Date.now()}`, object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: "stop" }], model: typeof body.model === "string" ? body.model : "rassy-mind" };
   } catch {
     return reply.code(503).send({ error: "rassymind_unavailable" });
   }
