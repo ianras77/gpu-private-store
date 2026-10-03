@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
 import Link from "next/link";
-import { PageShell, Section, Text, Input, Button, Card, Heading } from "@astro/ui";
-import { API_BASE } from "../../lib/api";
+import { PageShell, Section, Text, Input, Button, Card, Heading, ReportAtlas } from "@astro/ui";
+import { API_BASE, apiRequest } from "../../lib/api";
 import { brand, brandCopy } from "../../lib/brand";
-import { loadChart } from "../../lib/storage";
+import { loadAuthSession, loadChart } from "../../lib/storage";
 
 type GeoCandidate = {
   id: string;
@@ -21,6 +21,8 @@ export default function CompatibilityPage() {
   const [chart, setChart] = useState<any | null>(null);
   const [partnerChart, setPartnerChart] = useState<any | null>(null);
   const [reading, setReading] = useState<any | null>(null);
+  const [reportArtifact, setReportArtifact] = useState<any | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,11 +36,13 @@ export default function CompatibilityPage() {
 
   useEffect(() => {
     setChart(loadChart());
+    setAuthToken(loadAuthSession()?.token ?? null);
   }, []);
 
   useEffect(() => {
     setPartnerChart(null);
     setReading(null);
+    setReportArtifact(null);
   }, [birthDate, birthTime, timeUnknown, selectedLocation?.id]);
 
   useEffect(() => {
@@ -142,6 +146,30 @@ export default function CompatibilityPage() {
     try {
       const partner = partnerChart ?? (await buildPartnerChart());
       setPartnerChart(partner);
+      if (authToken && chart.chartProfileId) {
+        const planned = await apiRequest<any>("/v1/report-runs", {
+          method: "POST",
+          token: authToken,
+          body: {
+            chartProfileId: chart.chartProfileId,
+            chartAJson: chart,
+            chartBJson: partner,
+            brandId: brand.id,
+            kind: "compatibility",
+            depth: length === "short" ? "quick" : length,
+            idempotencyKey: crypto.randomUUID(),
+            workflowVersion: "compatibility-v1"
+          }
+        });
+        const executed = await apiRequest<any>(`/v1/report-runs/${planned.run.id}/execute`, {
+          method: "POST",
+          token: authToken
+        });
+        if (!executed.artifact) throw new Error("The relationship report finished without an Atlas artifact.");
+        setReportArtifact(executed.artifact);
+        setReading(null);
+        return;
+      }
       const response = await fetch(`${API_BASE}/v1/compatibility/natal`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Brand-Id": brand.id },
@@ -190,6 +218,12 @@ export default function CompatibilityPage() {
               Long Form
             </Button>
           </div>
+
+          <Text muted>
+            {authToken && chart.chartProfileId
+              ? "Your saved relationship map becomes a private Mastra Atlas, grounded in the patterns between both charts."
+              : "Save your chart in an account to create a private Mastra Atlas. You can still explore a relationship reading here."}
+          </Text>
 
           {error ? <Text>{error}</Text> : null}
         </div>
@@ -315,6 +349,8 @@ export default function CompatibilityPage() {
           ))}
         </div>
       </Section>
+
+      {reportArtifact ? <ReportAtlas artifact={reportArtifact} /> : null}
 
       {reading ? (
         <>

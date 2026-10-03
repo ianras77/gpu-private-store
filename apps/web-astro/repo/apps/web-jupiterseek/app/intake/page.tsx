@@ -150,12 +150,12 @@ export default function IntakePage() {
       <Section title="Birth Details">
         <div className="astro-form-shell">
           <div className="astro-stack-tight">
-            <Heading level={2}>The birth-chart step should feel easy.</Heading>
+            <Heading level={2}>Where did your story begin?</Heading>
             <Text muted>{brandCopy.intake.intro}</Text>
           </div>
 
           <div className="astro-note-strip">
-            <strong>This is all we need</strong>
+            <strong>Start with three coordinates</strong>
             <Text muted>
               Birthday, birth time if you have it, and birthplace. We draw the chart visually first,
               then the longer report takes over.

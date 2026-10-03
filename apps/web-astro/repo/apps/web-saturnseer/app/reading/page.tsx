@@ -22,6 +22,8 @@ export default function ReadingPage() {
   const [error, setError] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [readerName, setReaderName] = useState<string | null>(null);
+  const [lifeContext, setLifeContext] = useState("");
+  const [includeLifeContext, setIncludeLifeContext] = useState(false);
 
   useEffect(() => {
     setChart(loadChart());
@@ -109,7 +111,8 @@ export default function ReadingPage() {
     if (!authToken) { setError("Sign in to generate and save a life handbook."); return; }
     setLoading(true); setError(null);
     try {
-      const created = await apiRequest<any>("/v1/report-runs", { method: "POST", token: authToken, body: { chartJson: chart, chartProfileId: chart.chartProfileId, brandId: brand.id, kind: "natal", depth: "handbook", idempotencyKey: crypto.randomUUID(), workflowVersion: "natal-report-v2" } });
+      const approvedContext = includeLifeContext && lifeContext.trim() ? [{ id: crypto.randomUUID(), text: lifeContext.trim(), source: "user-provided", sensitivity: "ordinary", approvedForSynthesis: true }] : [];
+      const created = await apiRequest<any>("/v1/report-runs", { method: "POST", token: authToken, body: { chartJson: chart, chartProfileId: chart.chartProfileId, brandId: brand.id, kind: "natal", depth: "handbook", idempotencyKey: crypto.randomUUID(), workflowVersion: "natal-report-v2", context: approvedContext } });
       const result = await apiRequest<any>(`/v1/report-runs/${created.run.id}/execute`, { method: "POST", token: authToken });
       setReportArtifact(result.artifact);
     } catch (err: any) { setError(err.message ?? "Unable to generate the handbook."); } finally { setLoading(false); }
@@ -141,6 +144,19 @@ export default function ReadingPage() {
               Deep Dive
             </Button>
             <Button variant="ghost" onClick={requestHandbook} disabled={loading}>Life Handbook</Button>
+          </div>
+
+          <div className="life-context-panel">
+            <label className="astro-field" htmlFor="life-handbook-context">
+              <span className="astro-field-label">A little context from your life <span className="life-context-optional">OPTIONAL</span></span>
+              <span className="astro-field-hint">Name a current question, a repeating pattern, or what you hope this reading can help you see.</span>
+              <textarea id="life-handbook-context" className="life-context-input" value={lifeContext} onChange={(event) => setLifeContext(event.target.value)} maxLength={10_000} rows={4} placeholder="What would you like your chart reading to understand about this season of your life?" />
+            </label>
+            <label className="life-context-consent">
+              <input type="checkbox" checked={includeLifeContext} onChange={(event) => setIncludeLifeContext(event.target.checked)} disabled={!lifeContext.trim()} />
+              <span>Use this context in my private Life Handbook. I understand it will be saved with the report.</span>
+            </label>
+            <p className="life-context-privacy">Only checked context is sent to the report workflow. Avoid details you do not want saved in your account.</p>
           </div>
 
           <div className="astro-note-strip">

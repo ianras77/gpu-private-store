@@ -7,7 +7,7 @@
   "id": "web-astro",
   "description": "Five branded astrology fronts powered by one shared API, Postgres, Redis, and a Qdrant-backed lore engine.",
   "tipi_version": 5,
-  "version": "1.0.4",
+  "version": "1.1.0",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",

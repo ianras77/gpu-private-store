@@ -1,12 +1,21 @@
 # Parameterized immutable web image. Build with --build-arg APP_NAME=@astro/web-jupiterseek.
 FROM node:20-bookworm AS build
-ARG APP_NAME
 WORKDIR /repo
 RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json tsconfig.build.base.json ./
 COPY apps apps
 COPY packages packages
-RUN pnpm install --frozen-lockfile && pnpm --filter "${APP_NAME}" build
+RUN pnpm install --frozen-lockfile
+ARG APP_NAME
+ARG NEXT_PUBLIC_API_BASE=http://astro-api:4020
+ARG NEXT_PUBLIC_UMAMI_SCRIPT_URL=https://umami.rasies.com/script.js
+ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID=
+ARG NEXT_PUBLIC_UMAMI_DOMAINS=
+ENV NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE} \
+    NEXT_PUBLIC_UMAMI_SCRIPT_URL=${NEXT_PUBLIC_UMAMI_SCRIPT_URL} \
+    NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID} \
+    NEXT_PUBLIC_UMAMI_DOMAINS=${NEXT_PUBLIC_UMAMI_DOMAINS}
+RUN pnpm --filter "${APP_NAME}" build
 
 FROM node:20-bookworm-slim AS runtime
 ARG APP_NAME

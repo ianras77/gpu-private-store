@@ -95,6 +95,7 @@ export function requireRassyMindCapability(lane: RassyMindLane, capability: keyo
 }
 export function selectFactSlice(graph: ChartFactGraph, ids: string[]) { const wanted = new Set(ids); return graph.facts.filter((fact) => wanted.has(fact.id)); }
 export * from "./mastra";
+export * from "./companion-workflow";
 export * from "./rassymind";
 export * from "./grounding";
 export * from "./workflow";

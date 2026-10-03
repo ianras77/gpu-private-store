@@ -11,4 +11,13 @@ describe("life handbook planning", () => {
     expect(plan.sections.some((section) => section.key === "framework-integration")).toBe(false);
     expect(plan.omissions).toContain("life-narrative: no approved life context");
   });
+
+  it("includes the life narrative only after the user approves context", () => {
+    const plan = planLifeHandbook({
+      graph: buildChartFactGraph(chart, "fixture"),
+      context: [{ id: "context-1", text: "I am considering a new creative direction.", source: "user-provided", sensitivity: "ordinary", approvedForSynthesis: true }]
+    });
+    expect(plan.sections.some((section) => section.key === "life-narrative")).toBe(true);
+    expect(plan.omissions).not.toContain("life-narrative: no approved life context");
+  });
 });
