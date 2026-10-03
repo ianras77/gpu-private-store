@@ -144,9 +144,11 @@ app.post("/v1/chat/completions", async (request, reply) => {
     .filter((message): message is { role?: string; content?: unknown } => Boolean(message && typeof message === "object"))
     .map((message) => `${message.role ?? "user"}: ${typeof message.content === "string" ? message.content : JSON.stringify(message.content)}`)
     .join("\n\n");
-  if (!prompt.trim() || prompt.length > 50000) return reply.code(400).send({ error: "prompt_required" });
   const purpose = request.headers["x-cheshire-purpose"] ?? request.headers["x-rassy-purpose"];
   const agentId = resolveCompatibilityAgent(String(purpose ?? ""));
+  const promptLimit = agentId === "radio-dj" ? 120000 : 50000;
+  if (!prompt.trim()) return reply.code(400).send({ error: "prompt_required" });
+  if (prompt.length > promptLimit) return reply.code(413).send({ error: "prompt_too_large" });
   const jsonObjectRequested = body.response_format !== null &&
     typeof body.response_format === "object" &&
     "type" in body.response_format &&
