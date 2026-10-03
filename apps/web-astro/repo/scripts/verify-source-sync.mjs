@@ -6,7 +6,7 @@ import { join } from "node:path";
 const packageRoot = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const vendoredRoot = packageRoot;
 const canonicalRoot = process.env.ASTRO_CANONICAL_REPO || "/data/apps/2-Migrated/web-astrology";
-const generated = /(^|\/)(node_modules|\.next|\.vitest|dist|coverage|\.turbo|\.git)(\/|$)/;
+const generated = /(^|\/)(node_modules|\.next|\.vitest|dist|coverage|\.turbo|\.pnpm-store|test-results|playwright-report|\.git)(\/|$)|(^|\/)\.source-provenance\.json$/;
 const git = (cwd, args) => execFileSync("git", ["-C", cwd, ...args], { encoding: "utf8" }).trim();
 const files = (cwd) => git(cwd, ["ls-files", "-z"]).split("\0").filter((file) => file && !generated.test(file));
 if (!existsSync(canonicalRoot)) { console.error(`Canonical repository not found: ${canonicalRoot}`); process.exit(2); }
