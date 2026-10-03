@@ -74,6 +74,7 @@ const companionStep = createStep({
           analysisVersion: evidenceResult.analysisVersion
         }),
         deadlineMs: 45_000,
+        maxTokens: 512,
         structuredOutput: false
       });
       const grounded = parseGroundedCompanionReply(response.text, factRefs);
