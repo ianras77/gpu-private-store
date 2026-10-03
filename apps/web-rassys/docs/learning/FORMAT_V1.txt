@@ -1,0 +1,85 @@
+RASSY MODULES — FORMAT v1
+Proposed contract, 2026-10-01. This kit specifies a reader to be implemented; the current rassys.com code does not yet support it.
+
+1. THE UNIT OF CONTENT
+
+One module is a directory named with its stable slug. It contains module.md. Optional local images live under assets/. A text-only module needs only module.md. The host folder is configured by HOST_LEARNING_PATH; the web container reads it at LEARNING_STORAGE_PATH. Neither variable currently exists in the reviewed repository.
+
+Example paths relative to the configured host folder:
+  reading-family-story/module.md
+  reading-family-story/assets/cover.webp
+  another-topic/module.md
+
+The module catalog is derived from this directory at runtime. Do not maintain a handwritten catalog.json or an import list. Adding normal content requires no application rebuild after the reader has been deployed. Adding a new kind of interactive component requires a code change and deployment.
+
+2. FRONT MATTER
+
+module.md is UTF-8, starts with --- on its own line, then YAML, then --- on its own line, then Markdown. Required fields:
+  schema: rassy-module/v1
+  slug: lower-case letters/numbers separated by hyphens; must match directory
+  version: positive integer; increment on published-content revisions
+  status: draft or published
+  title: 1–120 characters
+  summary: 1–280 characters
+  topic: 1–60 characters; topic groups are discovered, not hardcoded
+  objectives: 1–6 short strings describing useful reader outcomes
+
+Optional fields: tags (up to 8), minutes (integer 1–180), level (beginner/intermediate/advanced), author, updated (quoted YYYY-MM-DD), cover (relative assets/ raster-image path), cover_alt, related (up to 8 existing module slugs). A cover requires meaningful cover_alt. If minutes is absent, estimate from rendered word count / 200, rounded up with a minimum of 1; label as an estimate. A supplied minutes value can account for exercises and reflection. Do not label either as measured completion time.
+
+No aliases, custom YAML tags, executable values, duplicate keys, or multiple documents. Unknown fields are validation errors. See module.schema.json. All examples are v1; reject unsupported schema versions with a useful author error.
+
+3. MARKDOWN
+
+Support ordinary paragraphs, bold, italic, ordered/unordered lists, block quotes, links, fenced code, raster images, GFM tables, and footnotes. No raw HTML, JSX, imports, or evaluation. H1 is reserved for the generated module title.
+
+Each top-level H2 starts a reader section and ends with an explicit ID, e.g.:
+  ## Ask a better question {#ask}
+
+The reader strips the suffix from visible text and uses the ID as the section key/anchor. This suffix is a Rassy extension, not baseline CommonMark. Match IDs using the same slug rule. Require 1–24 H2 sections and unique IDs. H3/H4 are subheadings and do not change completion units. Introductory content before the first H2 appears below the module header. Use Markdown AST transforms so code fences and inline code are never split accidentally by a heading-looking string. Avoid regex-based parsing of the whole document.
+
+4. TEACHING BLOCKS
+
+Use remark-directive container syntax, adapted to a closed component registry:
+  :::idea[The key idea]{#stable-block-id}
+  Markdown content.
+  :::
+
+Allowed names:
+  idea     A concise highlighted teaching point.
+  reveal   An accessible details/summary disclosure for optional depth.
+  practice An action or short exercise with a visible label.
+  reflect  A prompt and an optional reader response field.
+
+All four require a nonempty label and a unique explicit ID. The only author attribute is the ID. No nesting directives inside directives in v1. Their bodies can use ordinary Markdown except H1/H2, further custom blocks, or a rassy-check fence. Interpret the label as plain text. Unknown block names/attributes are validation errors, not raw HTML fallbacks.
+
+The application owns the HTML, styling, keyboard behavior, and accessibility. Files describe content. A reflect response is not a survey submission. Default: keep typed reflections only in session memory; explicitly offer Save on this device, Export, and Clear if local persistence is implemented. Explain shared-device visibility next to Save, and handle blocked storage gracefully. Never send reflection text to analytics or an LLM automatically.
+
+5. KNOWLEDGE CHECKS
+
+A fenced block with the language rassy-check contains one JSON object validated against check.schema.json. It has id, question, options, and answer. Each option has id, text, feedback. Use 2–5 options; option IDs must be unique and answer must match exactly one. All fields are plain text. Check IDs share the module-wide ID namespace with sections and teaching blocks. Do not reuse an ID.
+
+The reader displays a fieldset, radio options, Check answer, and feedback in a polite live region. Do not grade beliefs or personal reflections. A check is self-study: its answer is available to the client, and it is not an exam or credential. Allow retry. Show explanations without requiring an account. Do not auto-advance when an answer is chosen.
+
+6. LINKS, ASSETS, AND SOURCES
+
+Use relative assets/... images (PNG/JPEG/WebP/AVIF/GIF). No SVG, HTML, script files, data URLs, remote images, or executable embeds in v1. Link text can point to https:// sources; local section links use #id, and links to another module use /learn/slug. Images require meaningful alt text; optional cover has a separate cover_alt field. Keep captions in adjacent Markdown. Include actual assets and attribution; do not invent files.
+
+The server exposes images only through a controlled asset route after checking the module is valid and published. Restrict extensions and content types, verify image bytes, cap file size at 10 MiB, refuse symlinks, and resolve paths inside the module assets directory. Slug validation, percent decoding, realpath containment, and MIME checking must agree. Reject backslashes, dot segments, encoded traversal, and paths outside the module. Use nosniff. Draft assets must not be publicly retrievable by guessing the path. Do not expose the whole mounted directory through static serving.
+
+Factual source links belong next to claims; fuller bibliographic notes can appear under a Sources H3 in the last section. A reader should be able to distinguish sourced fact from interpretation and original exercises.
+
+7. DISCOVERY AND PUBLICATION
+
+Scan direct child directories only. Ignore hidden directories and temporary files. Catalog only valid modules with status: published. Draft means omitted from every public catalog, content route, image route, and search surface; it is not simply hidden in the UI. A local author preview can display drafts, with no public draft endpoint in v1.
+
+For an initial small library, use bounded on-request scanning with a maximum 30-second index lifetime and no filesystem watcher dependency. Recheck public status and validity when serving detail/assets so unpublishing does not expose cached content. Use a single refresh promise to avoid request stampedes and a bounded cache. New/changed valid modules appear on the next catalog load after that window. Client SWR refreshes the catalog every 30 seconds while visible and on focus. An already open lesson must not reset during reading; indicate when a newer version is available. Publication is not instantaneous.
+
+Reject files over 512 KiB and enforce scan/parse limits. One malformed module must not break the catalog. Omit that module and log an author-readable validation error with relative file path and position where possible; do not send host paths or source content to public clients. No silent stale published copy when the current version is draft or invalid. Deleted content stops serving; if the entire mounted folder becomes unavailable, show a useful unavailable state rather than treating it as an empty success.
+
+Copy a new directory completely in a staging location on the same filesystem, then rename into the live root. For an existing module, upload uniquely named assets first and atomically replace module.md last; do not overwrite assets referenced by an open version. Validate before promotion. Publishing is an intentional choice, not the consequence of generating a file. No upload UI or ZIP extraction service is required in v1.
+
+8. READER STATE AND EXTENSIONS
+
+Use /learn for the catalog and /learn/<slug>#<section-id> for durable links, with one shared reader layout. Client navigation can change the selected topic without a document reload; URL updates, Back/Forward, and direct refresh must work. Explicit Mark section complete controls determine progress; scrolling does not imply learning. Store non-sensitive completion state locally by slug + version + section ID. Keep older-version completion separate; never silently mark a revised module completed.
+
+Initially offer reading, expandable depth, practice, reflection, objective checks, images, links, and print. Search by title, summary, tags, and topic. Future timelines, comparisons, diagrams, audio, simulations, translations, and ordered learning paths can be added through versioned schemas and reviewed renderer components. They are not supported simply by putting a new block name in Markdown. RassyMind can later help AUTHOR drafts; the reader must not need an LLM to work.

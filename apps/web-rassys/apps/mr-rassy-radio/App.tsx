@@ -156,6 +156,13 @@ const formatDuration = (seconds?: number) => {
 const cleanScript = (value?: string | null) =>
   value?.replace(/\n{3,}/g, "\n\n").trim() ?? "";
 
+const chatReplyStatus = (source?: RadioChatMessage["replySource"]) => {
+  if (source === "llm") return "Live intelligence reply.";
+  if (source === "fallback") return "Local fallback reply.";
+  if (source === "error") return "The booth lost that reply. Try again.";
+  return "Mr Rassy is back on the mic.";
+};
+
 const pickFallbackCurio = () =>
   fallbackCurios[
     Math.floor(Date.now() / (15 * 60 * 1000)) % fallbackCurios.length
@@ -356,10 +363,11 @@ export default function App() {
     try {
       const result = await fetchRadioChat();
       setChatMessages(Array.isArray(result.messages) ? result.messages : []);
-      if (chatPending && chatPendingSince && result.messages?.some((item) => item.role === "dj" && item.createdAt >= chatPendingSince)) {
+      const answer = [...(result.messages ?? [])].reverse().find((item) => item.role === "dj" && item.createdAt >= (chatPendingSince ?? Number.POSITIVE_INFINITY));
+      if (chatPending && chatPendingSince && answer) {
         setChatPending(false);
         setChatPendingSince(null);
-        setChatStatus("Mr Rassy is back on the mic.");
+        setChatStatus(chatReplyStatus(answer.replySource));
       }
     } catch {
       setChatStatus("The booth is unavailable. Pull to retry.");
@@ -379,7 +387,7 @@ export default function App() {
       if (!result.pending) {
         setChatPending(false);
         setChatPendingSince(null);
-        setChatStatus(result.reply?.replySource === "error" ? "The booth lost that reply. Try again." : "Mr Rassy is back on the mic.");
+        setChatStatus(chatReplyStatus(result.reply?.replySource));
       } else {
         const latestListener = [...(result.messages ?? [])].reverse().find((item) => item.role === "listener");
         setChatPendingSince(latestListener?.createdAt ?? Date.now());
@@ -774,6 +782,9 @@ export default function App() {
               <Text style={styles.sectionBody}>
                 {dashboard.dj?.script ??
                   "Mr Rassy is waiting for the next transition to open up in the room."}
+              </Text>
+              <Text style={styles.sectionEyebrow}>
+                {dashboard.dj?.source === "llm" ? "Live intelligence" : dashboard.dj?.source === "fallback" ? "Local fallback" : "Source not reported"}
               </Text>
 
               <View style={styles.metricRow}>

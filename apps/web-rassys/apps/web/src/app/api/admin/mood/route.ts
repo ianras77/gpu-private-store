@@ -21,6 +21,9 @@ export async function POST(req: Request) {
     await callAdmin("/admin/mood", parsed.data);
     return NextResponse.json({ ok: true });
   } catch {
-    return NextResponse.json({ error: "radio_controller_unavailable" }, { status: 502 });
+    return NextResponse.json(
+      { error: "radio_controller_unavailable" },
+      { status: 502 },
+    );
   }
 }

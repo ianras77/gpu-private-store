@@ -114,7 +114,10 @@ const normalizeTrackText = (value?: string | null) =>
     .replace(/\s+/g, " ")
     .trim() ?? "";
 
-const noteMatchesTrack = (note: RadioNote | null | undefined, track?: RadioNoteTrack | null) => {
+const noteMatchesTrack = (
+  note: RadioNote | null | undefined,
+  track?: RadioNoteTrack | null,
+) => {
   if (!note || !track) return false;
   if (track.id && note.trackIds?.includes(track.id)) return true;
 
@@ -175,7 +178,8 @@ const buildLiveSessionTracks = (
       const key = track.id ?? `${track.title}-${track.artist}`;
       return (
         tracks.findIndex(
-          (candidate) => (candidate.id ?? `${candidate.title}-${candidate.artist}`) === key,
+          (candidate) =>
+            (candidate.id ?? `${candidate.title}-${candidate.artist}`) === key,
         ) === index
       );
     })
@@ -185,12 +189,19 @@ const buildLiveSessionTracks = (
       title: track.title,
       artist: track.artist,
       slot: index + 1,
-      role: index === 0 ? ("now" as const) : index === 1 ? ("next" as const) : ("later" as const),
+      role:
+        index === 0
+          ? ("now" as const)
+          : index === 1
+            ? ("next" as const)
+            : ("later" as const),
       whyItFits:
         index === 0
           ? `${track.title} is the record actually in the room now, so the live note is following the speakers instead of the archive.`
           : `${track.title} is sitting close enough to shape the next handoff.`,
-      context: trackMeta(track) || "The deeper note is still catching up to this turn.",
+      context:
+        trackMeta(track) ||
+        "The deeper note is still catching up to this turn.",
       listenFor:
         index === 0
           ? "Listen for how this record changes the pressure in the room before the next move arrives."
@@ -206,7 +217,8 @@ const buildLiveFallbackNote = (options: {
   const { currentTrack, queueTracks, mood, fetchedAt } = options;
   if (!currentTrack) return null;
 
-  const nextTrack = queueTracks.find((track) => track.id !== currentTrack.id) ?? null;
+  const nextTrack =
+    queueTracks.find((track) => track.id !== currentTrack.id) ?? null;
   const liveDeck = buildLiveSessionTracks(currentTrack, queueTracks);
   const headline = `${currentTrack.title}${currentTrack.artist ? ` // ${currentTrack.artist}` : ""}`;
   const intro = `${formatTrackStamp(currentTrack)} is the record in the room now. The written booth note is catching up, but the live read has moved with the song.`;
@@ -228,7 +240,9 @@ const buildLiveFallbackNote = (options: {
     boothDossier: {
       headline,
       intro,
-      deepCut: trackMeta(currentTrack) || "The record has the room; the archive note is still being written.",
+      deepCut:
+        trackMeta(currentTrack) ||
+        "The record has the room; the archive note is still being written.",
       nextMove,
       sections: {
         lineup: {
@@ -237,7 +251,9 @@ const buildLiveFallbackNote = (options: {
         },
         context: {
           title: "Record in the room",
-          body: trackMeta(currentTrack) || `${currentTrack.artist} is carrying this turn.`,
+          body:
+            trackMeta(currentTrack) ||
+            `${currentTrack.artist} is carrying this turn.`,
         },
         listenFor: {
           title: "Next move",
@@ -271,19 +287,22 @@ export function MrRassyNotesPanel() {
     ...queueItems.map(toNoteTrack),
     ...featuredItems.map(toNoteTrack),
   ].filter((track): track is RadioNoteTrack => Boolean(track));
-  const matchedNote = notes.find((note) => noteMatchesTrack(note, liveTrack)) ?? null;
+  const matchedNote =
+    notes.find((note) => noteMatchesTrack(note, liveTrack)) ?? null;
   const fallbackNote = buildLiveFallbackNote({
     currentTrack: liveTrack,
     queueTracks: liveQueueTracks,
     mood: data?.status?.mood ?? data?.dj?.mood ?? null,
     fetchedAt: data?.fetchedAt,
   });
-  const currentNote = matchedNote ?? fallbackNote ?? (liveTrack ? null : notes[0] ?? null);
+  const currentNote =
+    matchedNote ?? fallbackNote ?? (liveTrack ? null : (notes[0] ?? null));
   const isLiveFallbackNote = Boolean(currentNote && !matchedNote && liveTrack);
   const historyNotes = currentNote
     ? notes.filter((note) => note.id !== matchedNote?.id).slice(0, 4)
     : notes.slice(0, 4);
-  const currentTrack = liveTrack ?? currentNote?.currentTrack ?? currentNote?.setlist[0] ?? null;
+  const currentTrack =
+    liveTrack ?? currentNote?.currentTrack ?? currentNote?.setlist[0] ?? null;
   const lineupSection = currentNote?.boothDossier?.sections?.lineup;
   const contextSection = currentNote?.boothDossier?.sections?.context;
   const listenForSection = currentNote?.boothDossier?.sections?.listenFor;
@@ -319,7 +338,8 @@ export function MrRassyNotesPanel() {
     },
   ];
   const firstFocusSection =
-    focusSections.find((section) => section.body.trim().length > 0) ?? focusSections[0];
+    focusSections.find((section) => section.body.trim().length > 0) ??
+    focusSections[0];
   const visibleSessionTracks = sessionTracks.slice(0, 4);
   const firstSessionTrackSlot = visibleSessionTracks[0]?.slot ?? null;
   const [activeFocus, setActiveFocus] = useState<FocusSectionKey>(
@@ -341,31 +361,34 @@ export function MrRassyNotesPanel() {
     visibleSessionTracks.find((track) => track.slot === activeTrackSlot) ??
     visibleSessionTracks[0] ??
     null;
-  const spotlightSections: Array<{ label: string; body: string }> = selectedSessionTrack
-    ? [
-        {
-          label: "Why it fits",
-          body: selectedSessionTrack.whyItFits,
-        },
-        {
-          label: "Track context",
-          body: selectedSessionTrack.context,
-        },
-        {
-          label: "Listen for",
-          body: selectedSessionTrack.listenFor,
-        },
-        selectedSessionTrack.playbackReason
-          ? {
-              label:
-                selectedSessionTrack.playbackMode === "clip"
-                  ? "Playback move"
-                  : "How it plays",
-              body: selectedSessionTrack.playbackReason,
-            }
-          : null,
-      ].filter((section): section is { label: string; body: string } => Boolean(section))
-    : [];
+  const spotlightSections: Array<{ label: string; body: string }> =
+    selectedSessionTrack
+      ? [
+          {
+            label: "Why it fits",
+            body: selectedSessionTrack.whyItFits,
+          },
+          {
+            label: "Track context",
+            body: selectedSessionTrack.context,
+          },
+          {
+            label: "Listen for",
+            body: selectedSessionTrack.listenFor,
+          },
+          selectedSessionTrack.playbackReason
+            ? {
+                label:
+                  selectedSessionTrack.playbackMode === "clip"
+                    ? "Playback move"
+                    : "How it plays",
+                body: selectedSessionTrack.playbackReason,
+              }
+            : null,
+        ].filter((section): section is { label: string; body: string } =>
+          Boolean(section),
+        )
+      : [];
 
   return (
     <section
@@ -410,7 +433,10 @@ export function MrRassyNotesPanel() {
                 {currentNote.boothDossier?.headline ?? currentNote.title}
               </h3>
               <p className="mt-4 max-w-3xl text-base leading-7 text-cloud/84 md:text-lg">
-                {shorten(currentNote.boothDossier?.intro ?? currentNote.excerpt, 260)}
+                {shorten(
+                  currentNote.boothDossier?.intro ?? currentNote.excerpt,
+                  260,
+                )}
               </p>
 
               <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -508,7 +534,13 @@ export function MrRassyNotesPanel() {
                   )}
 
                   <Button asChild>
-                    <Link href={isLiveFallbackNote ? "/radio/notes" : `/radio/notes#${currentNote.id}`}>
+                    <Link
+                      href={
+                        isLiveFallbackNote
+                          ? "/radio/notes"
+                          : `/radio/notes#${currentNote.id}`
+                      }
+                    >
                       {isLiveFallbackNote ? "Open archive" : "Open this note"}
                     </Link>
                   </Button>

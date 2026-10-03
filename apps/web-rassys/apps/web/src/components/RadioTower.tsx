@@ -194,42 +194,30 @@ const boothMoodThemes = [
   {
     shell:
       "radial-gradient(circle_at_10%_12%,rgba(255,230,109,0.18),transparent 28%),radial-gradient(circle_at_86%_10%,rgba(66,245,255,0.16),transparent 34%),linear-gradient(150deg,rgba(8,12,28,0.96),rgba(39,10,48,0.88))",
-    mic:
-      "linear-gradient(145deg,rgba(30,8,43,0.88),rgba(10,26,39,0.9))",
-    note:
-      "linear-gradient(160deg,rgba(8,20,36,0.92),rgba(24,12,45,0.82))",
-    side:
-      "linear-gradient(160deg,rgba(16,9,40,0.9),rgba(15,34,44,0.8))",
+    mic: "linear-gradient(145deg,rgba(30,8,43,0.88),rgba(10,26,39,0.9))",
+    note: "linear-gradient(160deg,rgba(8,20,36,0.92),rgba(24,12,45,0.82))",
+    side: "linear-gradient(160deg,rgba(16,9,40,0.9),rgba(15,34,44,0.8))",
   },
   {
     shell:
       "radial-gradient(circle_at_18%_16%,rgba(122,232,255,0.17),transparent 30%),radial-gradient(circle_at_84%_14%,rgba(255,170,108,0.14),transparent 32%),linear-gradient(152deg,rgba(6,18,30,0.96),rgba(20,36,52,0.84))",
-    mic:
-      "linear-gradient(150deg,rgba(9,30,45,0.9),rgba(22,19,53,0.86))",
-    note:
-      "linear-gradient(160deg,rgba(9,27,39,0.92),rgba(30,15,40,0.82))",
-    side:
-      "linear-gradient(160deg,rgba(12,33,44,0.88),rgba(20,15,47,0.8))",
+    mic: "linear-gradient(150deg,rgba(9,30,45,0.9),rgba(22,19,53,0.86))",
+    note: "linear-gradient(160deg,rgba(9,27,39,0.92),rgba(30,15,40,0.82))",
+    side: "linear-gradient(160deg,rgba(12,33,44,0.88),rgba(20,15,47,0.8))",
   },
   {
     shell:
       "radial-gradient(circle_at_14%_12%,rgba(255,132,198,0.17),transparent 30%),radial-gradient(circle_at_82%_14%,rgba(90,170,255,0.18),transparent 34%),linear-gradient(152deg,rgba(10,12,32,0.96),rgba(42,9,42,0.84))",
-    mic:
-      "linear-gradient(145deg,rgba(34,11,48,0.9),rgba(13,24,52,0.88))",
-    note:
-      "linear-gradient(160deg,rgba(20,12,47,0.92),rgba(10,26,43,0.82))",
-    side:
-      "linear-gradient(160deg,rgba(32,11,44,0.88),rgba(12,29,47,0.82))",
+    mic: "linear-gradient(145deg,rgba(34,11,48,0.9),rgba(13,24,52,0.88))",
+    note: "linear-gradient(160deg,rgba(20,12,47,0.92),rgba(10,26,43,0.82))",
+    side: "linear-gradient(160deg,rgba(32,11,44,0.88),rgba(12,29,47,0.82))",
   },
   {
     shell:
       "radial-gradient(circle_at_12%_12%,rgba(182,255,138,0.14),transparent 28%),radial-gradient(circle_at_88%_14%,rgba(255,214,120,0.16),transparent 32%),linear-gradient(152deg,rgba(8,18,22,0.96),rgba(36,18,41,0.84))",
-    mic:
-      "linear-gradient(145deg,rgba(18,34,31,0.9),rgba(37,14,42,0.86))",
-    note:
-      "linear-gradient(160deg,rgba(9,26,31,0.92),rgba(34,16,38,0.82))",
-    side:
-      "linear-gradient(160deg,rgba(16,33,27,0.88),rgba(34,17,44,0.8))",
+    mic: "linear-gradient(145deg,rgba(18,34,31,0.9),rgba(37,14,42,0.86))",
+    note: "linear-gradient(160deg,rgba(9,26,31,0.92),rgba(34,16,38,0.82))",
+    side: "linear-gradient(160deg,rgba(16,33,27,0.88),rgba(34,17,44,0.8))",
   },
 ] as const;
 
@@ -390,14 +378,13 @@ export function RadioTower({
     if (!pendingReply) return;
 
     const receivedReply = chatMessages.some(
-      (message) => message.role === "dj" && message.createdAt >= pendingReply.sentAt,
+      (message) =>
+        message.role === "dj" && message.createdAt >= pendingReply.sentAt,
     );
     if (receivedReply) {
       setPendingReply(null);
       setChatStatus((current) =>
-        current?.includes("cueing")
-          ? "Mr Rassy is back on the line."
-          : current,
+        current?.includes("cueing") ? "Mr Rassy is back on the line." : current,
       );
       return;
     }
@@ -405,13 +392,18 @@ export function RadioTower({
     const ageMs = Date.now() - pendingReply.sentAt;
     if (ageMs > 30_000) {
       setPendingReply(null);
-      setChatStatus("Mr Rassy is still thinking. Give him another pass in a second.");
+      setChatStatus(
+        "Mr Rassy is still thinking. Give him another pass in a second.",
+      );
       return;
     }
 
-    const timer = window.setTimeout(() => {
-      void mutateChat();
-    }, ageMs < 12_000 ? 900 : 1500);
+    const timer = window.setTimeout(
+      () => {
+        void mutateChat();
+      },
+      ageMs < 12_000 ? 900 : 1500,
+    );
 
     return () => window.clearTimeout(timer);
   }, [chatMessages, mutateChat, pendingReply]);
@@ -451,9 +443,9 @@ export function RadioTower({
       body: JSON.stringify({ trackId }),
     });
     if (res.ok) {
-      const payload = (await res.json().catch(() => null)) as
-        | { mode?: string | null }
-        | null;
+      const payload = (await res.json().catch(() => null)) as {
+        mode?: string | null;
+      } | null;
       setQueueStatus(
         payload?.mode === "already-live"
           ? "That one is already in the run."
@@ -526,11 +518,12 @@ export function RadioTower({
       }
 
       if (payload?.pending) {
-        const latestListenerMessage = normalizeRadioChatMessages<RadioChatMessage>(
-          Array.isArray(payload?.messages) ? payload.messages : [],
-        )
-          .filter((entry) => entry.role === "listener")
-          .at(-1);
+        const latestListenerMessage =
+          normalizeRadioChatMessages<RadioChatMessage>(
+            Array.isArray(payload?.messages) ? payload.messages : [],
+          )
+            .filter((entry) => entry.role === "listener")
+            .at(-1);
         setPendingReply({
           messageId: latestListenerMessage?.id ?? requestId,
           sentAt: latestListenerMessage?.createdAt ?? Date.now(),
@@ -542,8 +535,7 @@ export function RadioTower({
       }
 
       const replyStatus = payload?.reply?.recommendationStatus as
-        | RadioChatRecommendationStatus
-        | undefined;
+        RadioChatRecommendationStatus | undefined;
       setPendingReply(null);
       if (replyStatus === "accepted") {
         setChatStatus(
@@ -763,11 +755,17 @@ export function RadioTower({
     ? formatTimeAgo(new Date(boothHearingAt).toISOString())
     : "just now";
   const boothSourceLabel =
-    boothDossier.source === "llm" ? "Long listen" : "Booth jot";
+    boothDossier.source === "llm"
+      ? "Long listen"
+      : boothDossier.source === "fallback"
+        ? "Local fallback note"
+        : "Source not reported";
   const boothSourceHint =
     boothDossier.source === "llm"
       ? "A longer note from the booth, catching the lineage, the texture, and the shape of the turn."
-      : "A quick note from the booth while the night's shape is still fresh.";
+      : boothDossier.source === "fallback"
+        ? "A locally assembled note from the current station context."
+        : "The note source was not reported.";
   const boothSourceTone =
     boothDossier.source === "llm"
       ? "border-aurora/20 bg-aurora/10 text-cloud/88"
@@ -842,7 +840,9 @@ export function RadioTower({
   const boothMoment = getBoothMoment();
   const moodLabel = formatRadioMood(boothMood);
   const boothTheme =
-    boothMoodThemes[hashMood(`${boothMood}-${boothMoment.chip}`) % boothMoodThemes.length];
+    boothMoodThemes[
+      hashMood(`${boothMood}-${boothMoment.chip}`) % boothMoodThemes.length
+    ];
   const boothSceneTitle =
     moodLabel.toLowerCase() === boothMoment.label
       ? `${boothMoment.weekday} ${boothMoment.label}`
@@ -1070,7 +1070,8 @@ export function RadioTower({
                       <span>thinking</span>
                     </div>
                     <p className="mt-3 text-sm leading-7 text-cloud/82">
-                      He&apos;s turning that over and will come right back with a thought.
+                      He&apos;s turning that over and will come right back with
+                      a thought.
                     </p>
                   </div>
                 </div>
@@ -1113,8 +1114,8 @@ export function RadioTower({
               </div>
             </div>
             <p className="mt-3 text-sm leading-6 text-cloud/76">
-              Broad asks, specific cuts, and the ways Mr Rassy is answering
-              them with music.
+              Broad asks, specific cuts, and the ways Mr Rassy is answering them
+              with music.
             </p>
 
             {recentCalls.length > 0 ? (
@@ -1127,8 +1128,7 @@ export function RadioTower({
                         item.status === "rejected"
                         ? item.status
                         : undefined,
-                    ) ??
-                    "On the line";
+                    ) ?? "On the line";
                   const selectedTracks = Array.isArray(item.tracks)
                     ? item.tracks.slice(0, 3)
                     : [];
@@ -1517,190 +1517,195 @@ export function RadioTower({
           <div className="flex flex-col gap-6">
             {showDeckPlayer ? (
               <div className="rounded-[32px] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(255,79,216,0.14),transparent_34%),radial-gradient(circle_at_90%_12%,rgba(66,245,255,0.12),transparent_34%),linear-gradient(150deg,rgba(9,13,26,0.95),rgba(40,10,42,0.88))] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.36)]">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.38em] text-cloud/58">
-                    On Air Deck
-                  </div>
-                  <div className="mt-3 text-3xl font-semibold text-white">
-                    {displayNow?.title ?? "Needle in the air"}
-                  </div>
-                  <div className="mt-1 text-sm text-cloud/75">
-                    {displayNow?.artist ?? "Mr Rassy"}
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge>{formatRadioMood(boothMood)}</Badge>
-                  <Badge
-                    className={
-                      streamState === "locked in" ? "text-glow" : "text-laser"
-                    }
-                  >
-                    {streamState}
-                  </Badge>
-                  <Badge>{signalValue}</Badge>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-5 sm:grid-cols-[136px_minmax(0,1fr)]">
-                <div className="relative h-[136px] overflow-hidden rounded-[24px] border border-white/10 bg-black/40">
-                  {displayNow?.albumArtUrl ? (
-                    <Image
-                      src={displayNow.albumArtUrl}
-                      alt={displayNow.title ?? "Album art"}
-                      fill
-                      sizes="136px"
-                      className="object-cover"
-                      loading="lazy"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] uppercase tracking-[0.2em] text-cloud/60">
-                      No Art
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] uppercase tracking-[0.38em] text-cloud/58">
+                      On Air Deck
                     </div>
-                  )}
-                </div>
-
-                <div className="flex min-w-0 flex-col justify-center gap-3">
-                  <div className="text-sm leading-7 text-cloud/82">
-                    {formatTrackStamp(displayNow)}
-                  </div>
-                  <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em] text-cloud/60">
-                    {displayNow?.album && (
-                      <span className="rave-chip rounded-full px-3 py-2">
-                        {displayNow.album}
-                      </span>
-                    )}
-                    {displayNow?.year && (
-                      <span className="rave-chip rounded-full px-3 py-2">
-                        {displayNow.year}
-                      </span>
-                    )}
-                    {currentGenre && (
-                      <span className="rave-chip rounded-full px-3 py-2">
-                        {currentGenre}
-                      </span>
-                    )}
-                    {typeof displayNow?.energy === "number" && (
-                      <span className="rave-chip rounded-full px-3 py-2">
-                        Energy {Math.round(displayNow.energy * 100)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {deskCards.map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4"
-                  >
-                    <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/45">
-                      {item.label}
+                    <div className="mt-3 text-3xl font-semibold text-white">
+                      {displayNow?.title ?? "Needle in the air"}
                     </div>
-                    <div className="mt-2 text-sm font-semibold leading-5 text-white">
-                      {item.value}
-                    </div>
-                    <div className="mt-2 text-xs leading-5 text-cloud/62">
-                      {item.meta}
+                    <div className="mt-1 text-sm text-cloud/75">
+                      {displayNow?.artist ?? "Mr Rassy"}
                     </div>
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-5 rounded-[28px] border border-white/10 bg-black/25 p-4">
-                <div className="text-[10px] uppercase tracking-[0.32em] text-cloud/55">
-                  Transport + feedback
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge>{formatRadioMood(boothMood)}</Badge>
+                    <Badge
+                      className={
+                        streamState === "locked in" ? "text-glow" : "text-laser"
+                      }
+                    >
+                      {streamState}
+                    </Badge>
+                    <Badge>{signalValue}</Badge>
+                  </div>
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <Button onClick={toggle} disabled={playStatus === "loading"}>
-                    {playing
-                      ? "Pause"
-                      : playStatus === "loading"
-                        ? "Loading..."
-                        : "Play"}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={toggleFallback}
-                    disabled={!canFallback}
-                  >
-                    {useFallback ? "Back to the live room" : "Hear the stacks"}
-                  </Button>
-                  {!useFallback && (
-                    <Button variant="secondary" onClick={toggleLiveSourceMode}>
-                      {liveSourceMode === "direct"
-                        ? "Back to the stable line"
-                        : "Try the direct station line"}
+
+                <div className="mt-5 grid gap-5 sm:grid-cols-[136px_minmax(0,1fr)]">
+                  <div className="relative h-[136px] overflow-hidden rounded-[24px] border border-white/10 bg-black/40">
+                    {displayNow?.albumArtUrl ? (
+                      <Image
+                        src={displayNow.albumArtUrl}
+                        alt={displayNow.title ?? "Album art"}
+                        fill
+                        sizes="136px"
+                        className="object-cover"
+                        loading="lazy"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[10px] uppercase tracking-[0.2em] text-cloud/60">
+                        No Art
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex min-w-0 flex-col justify-center gap-3">
+                    <div className="text-sm leading-7 text-cloud/82">
+                      {formatTrackStamp(displayNow)}
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em] text-cloud/60">
+                      {displayNow?.album && (
+                        <span className="rave-chip rounded-full px-3 py-2">
+                          {displayNow.album}
+                        </span>
+                      )}
+                      {displayNow?.year && (
+                        <span className="rave-chip rounded-full px-3 py-2">
+                          {displayNow.year}
+                        </span>
+                      )}
+                      {currentGenre && (
+                        <span className="rave-chip rounded-full px-3 py-2">
+                          {currentGenre}
+                        </span>
+                      )}
+                      {typeof displayNow?.energy === "number" && (
+                        <span className="rave-chip rounded-full px-3 py-2">
+                          Energy {Math.round(displayNow.energy * 100)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {deskCards.map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4"
+                    >
+                      <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/45">
+                        {item.label}
+                      </div>
+                      <div className="mt-2 text-sm font-semibold leading-5 text-white">
+                        {item.value}
+                      </div>
+                      <div className="mt-2 text-xs leading-5 text-cloud/62">
+                        {item.meta}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5 rounded-[28px] border border-white/10 bg-black/25 p-4">
+                  <div className="text-[10px] uppercase tracking-[0.32em] text-cloud/55">
+                    Transport + feedback
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <Button
+                      onClick={toggle}
+                      disabled={playStatus === "loading"}
+                    >
+                      {playing
+                        ? "Pause"
+                        : playStatus === "loading"
+                          ? "Loading..."
+                          : "Play"}
                     </Button>
-                  )}
-                  {useFallback && fallbackList.length > 1 && (
                     <Button
                       variant="secondary"
-                      onClick={nextFallbackTrack}
+                      onClick={toggleFallback}
+                      disabled={!canFallback}
                     >
-                      Next cut
+                      {useFallback
+                        ? "Back to the live room"
+                        : "Hear the stacks"}
                     </Button>
-                  )}
-                  <a
-                    className="text-xs text-cloud/80 underline decoration-dotted"
-                    href={externalStreamUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open station stream
-                  </a>
-                </div>
+                    {!useFallback && (
+                      <Button
+                        variant="secondary"
+                        onClick={toggleLiveSourceMode}
+                      >
+                        {liveSourceMode === "direct"
+                          ? "Back to the stable line"
+                          : "Try the direct station line"}
+                      </Button>
+                    )}
+                    {useFallback && fallbackList.length > 1 && (
+                      <Button variant="secondary" onClick={nextFallbackTrack}>
+                        Next cut
+                      </Button>
+                    )}
+                    <a
+                      className="text-xs text-cloud/80 underline decoration-dotted"
+                      href={externalStreamUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open station stream
+                    </a>
+                  </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <Button
-                    variant="secondary"
-                    className="px-4 py-1 text-xs"
-                    onClick={() => sendVote("up")}
-                    disabled={voting !== null}
-                  >
-                    {voting === "up" ? "Sending..." : "Love this"}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    className="px-4 py-1 text-xs"
-                    onClick={() => sendVote("down")}
-                    disabled={voting !== null}
-                  >
-                    {voting === "down" ? "Sending..." : "Not this one"}
-                  </Button>
-                  {voteStatus && (
-                    <div className="text-xs text-cloud/70">{voteStatus}</div>
-                  )}
-                </div>
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <Button
+                      variant="secondary"
+                      className="px-4 py-1 text-xs"
+                      onClick={() => sendVote("up")}
+                      disabled={voting !== null}
+                    >
+                      {voting === "up" ? "Sending..." : "Love this"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="px-4 py-1 text-xs"
+                      onClick={() => sendVote("down")}
+                      disabled={voting !== null}
+                    >
+                      {voting === "down" ? "Sending..." : "Not this one"}
+                    </Button>
+                    {voteStatus && (
+                      <div className="text-xs text-cloud/70">{voteStatus}</div>
+                    )}
+                  </div>
 
-                {streamError && (
-                  <div className="mt-3 text-xs text-comet">{streamError}</div>
-                )}
-                {buffering && (
-                  <div className="mt-1 text-xs text-cloud/60">
-                    Needle catching. Hold tight...
+                  {streamError && (
+                    <div className="mt-3 text-xs text-comet">{streamError}</div>
+                  )}
+                  {buffering && (
+                    <div className="mt-1 text-xs text-cloud/60">
+                      Needle catching. Hold tight...
+                    </div>
+                  )}
+                  {useFallback && (
+                    <div className="mt-1 text-xs text-cloud/70">
+                      A nearby cut is keeping the room warm for a minute.
+                    </div>
+                  )}
+                  {!useFallback && (
+                    <div className="mt-1 text-xs text-cloud/70">
+                      {liveSourceMode === "direct"
+                        ? "You're hearing the direct station line."
+                        : "You're hearing the stable live line through the site relay."}
+                    </div>
+                  )}
+                  <div className="mt-4 rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-xs leading-6 text-cloud/68">
+                    The radio now keeps playing while you move around the site.
+                    Use the header control or the booth buttons whenever you
+                    want to stop it.
                   </div>
-                )}
-                {useFallback && (
-                  <div className="mt-1 text-xs text-cloud/70">
-                    A nearby cut is keeping the room warm for a minute.
-                  </div>
-                )}
-                {!useFallback && (
-                  <div className="mt-1 text-xs text-cloud/70">
-                    {liveSourceMode === "direct"
-                      ? "You're hearing the direct station line."
-                      : "You're hearing the stable live line through the site relay."}
-                  </div>
-                )}
-                <div className="mt-4 rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-xs leading-6 text-cloud/68">
-                  The radio now keeps playing while you move around the site.
-                  Use the header control or the booth buttons whenever you want
-                  to stop it.
                 </div>
-              </div>
               </div>
             ) : null}
 
@@ -1929,7 +1934,10 @@ export function RadioTower({
         <div className="grid gap-4 md:grid-cols-3">
           {featuredItems.map((track) => (
             <div
-              key={track.id ?? `${track.artist ?? "track"}-${track.title ?? "unknown"}`}
+              key={
+                track.id ??
+                `${track.artist ?? "track"}-${track.title ?? "unknown"}`
+              }
               className="group relative flex items-center gap-4 overflow-hidden rounded-2xl rave-chip p-4"
             >
               <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40">

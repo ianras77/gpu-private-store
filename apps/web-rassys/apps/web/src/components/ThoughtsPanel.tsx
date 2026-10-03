@@ -45,7 +45,10 @@ export function ThoughtsPanel() {
           Thoughts
         </div>
         <h2 className="section-title text-3xl">The year before fifty.</h2>
-        <p className="max-w-2xl text-sm leading-6 text-cloud/68">A twelve-month notebook for looking back at the year I arrived, and forward from here.</p>
+        <p className="max-w-2xl text-sm leading-6 text-cloud/68">
+          A twelve-month notebook for looking back at the year I arrived, and
+          forward from here.
+        </p>
       </div>
       <div className="grid gap-6 md:grid-cols-3">
         {(data ?? []).map((thought, index) => {
@@ -68,8 +71,15 @@ export function ThoughtsPanel() {
                     <span>{formatTimeAgo(thought.createdAt) || "recent"}</span>
                     {(leadImage || thought.assets?.length) && (
                       <span>
-                        {(thought.images?.length ?? 0) + (thought.assets?.length ?? 0)} piece
-                        {(thought.images?.length ?? 0) + (thought.assets?.length ?? 0) === 1 ? "" : "s"} attached
+                        {(thought.images?.length ?? 0) +
+                          (thought.assets?.length ?? 0)}{" "}
+                        piece
+                        {(thought.images?.length ?? 0) +
+                          (thought.assets?.length ?? 0) ===
+                        1
+                          ? ""
+                          : "s"}{" "}
+                        attached
                       </span>
                     )}
                   </div>
@@ -114,7 +124,11 @@ export function ThoughtsPanel() {
                 {shorten(thought.excerpt, 150)}
               </p>
               <div className="mt-auto text-xs text-cloud/60">
-                {thought.assets?.length ? `${thought.assets.length} linked assets` : leadImage ? `${thought.images?.length ?? 0} images` : "Words only"}
+                {thought.assets?.length
+                  ? `${thought.assets.length} linked assets`
+                  : leadImage
+                    ? `${thought.images?.length ?? 0} images`
+                    : "Words only"}
               </div>
             </Card>
           );

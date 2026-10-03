@@ -9,7 +9,8 @@ const bodySchema = z.object({ request: z.string().min(3).max(120) });
 export async function POST(req: Request) {
   const ip = await getClientIp();
   const { allowed } = await rateLimit(`rl:radio:req:${ip}`, 8, 60);
-  if (!allowed) return NextResponse.json({ error: "rate limit" }, { status: 429 });
+  if (!allowed)
+    return NextResponse.json({ error: "rate limit" }, { status: 429 });
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
     await fetchRadio("/public/request", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(parsed.data)
+      body: JSON.stringify(parsed.data),
     });
     return NextResponse.json({ ok: true });
   } catch {

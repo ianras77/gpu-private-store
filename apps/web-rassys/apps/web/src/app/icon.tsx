@@ -107,98 +107,97 @@ export default async function Icon() {
   const monogram = (track?.artist ?? "Rassy").charAt(0).toUpperCase();
 
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          position: "relative",
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "flex-start",
-          overflow: "hidden",
-          borderRadius: 16,
-          background:
-            "linear-gradient(160deg, rgba(9,17,34,1) 0%, rgba(35,10,46,1) 52%, rgba(10,36,51,1) 100%)",
-        }}
-      >
-        {artwork ? (
-          <img
-            src={artwork}
-            alt={track ? `${track.title} by ${track.artist}` : "Daily album artwork"}
-            width={64}
-            height={64}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-        ) : null}
-        <div
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "flex-start",
+        overflow: "hidden",
+        borderRadius: 16,
+        background:
+          "linear-gradient(160deg, rgba(9,17,34,1) 0%, rgba(35,10,46,1) 52%, rgba(10,36,51,1) 100%)",
+      }}
+    >
+      {artwork ? (
+        <img
+          src={artwork}
+          alt={
+            track ? `${track.title} by ${track.artist}` : "Daily album artwork"
+          }
+          width={64}
+          height={64}
           style={{
             position: "absolute",
             inset: 0,
-            background:
-              artwork
-                ? "linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.55) 100%)"
-                : "linear-gradient(160deg, rgba(255,230,109,0.24) 0%, rgba(255,79,216,0.12) 48%, rgba(66,245,255,0.12) 100%)",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
           }}
         />
-        <div
-          style={{
-            position: "absolute",
-            top: 7,
-            right: 7,
-            display: "flex",
-            width: 18,
-            height: 18,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 9999,
-            background: "rgba(255,255,255,0.18)",
-            color: "white",
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          {monogram}
-        </div>
-        <div
-          style={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            padding: "0 8px 8px 8px",
-            color: "white",
-            lineHeight: 1.08,
-            maxWidth: "100%",
-          }}
-        >
-          <span
-            style={{
-              fontSize: 8,
-              opacity: 0.72,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-            }}
-          >
-            {track ? "Daily Cut" : "Rassy"}
-          </span>
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              textShadow: "0 2px 10px rgba(0,0,0,0.38)",
-            }}
-          >
-            {track?.title?.slice(0, 18) ?? "Mr Rassy"}
-          </span>
-        </div>
+      ) : null}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: artwork
+            ? "linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.55) 100%)"
+            : "linear-gradient(160deg, rgba(255,230,109,0.24) 0%, rgba(255,79,216,0.12) 48%, rgba(66,245,255,0.12) 100%)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: 7,
+          right: 7,
+          display: "flex",
+          width: 18,
+          height: 18,
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 9999,
+          background: "rgba(255,255,255,0.18)",
+          color: "white",
+          fontSize: 10,
+          fontWeight: 700,
+        }}
+      >
+        {monogram}
       </div>
-    ),
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          padding: "0 8px 8px 8px",
+          color: "white",
+          lineHeight: 1.08,
+          maxWidth: "100%",
+        }}
+      >
+        <span
+          style={{
+            fontSize: 8,
+            opacity: 0.72,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+          }}
+        >
+          {track ? "Daily Cut" : "Rassy"}
+        </span>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            textShadow: "0 2px 10px rgba(0,0,0,0.38)",
+          }}
+        >
+          {track?.title?.slice(0, 18) ?? "Mr Rassy"}
+        </span>
+      </div>
+    </div>,
     size,
   );
 }

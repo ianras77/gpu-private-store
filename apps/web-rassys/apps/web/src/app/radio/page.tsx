@@ -8,7 +8,7 @@ import { Button } from "../../components/ui/button";
 export const metadata: Metadata = {
   title: "Mr Rassy Radio // Ian Rasmussen",
   description:
-    "My live station, with booth notes, requests, and the set moving in real time."
+    "My live station, with booth notes, requests, and the set moving in real time.",
 };
 
 export default function RadioPage() {
@@ -27,18 +27,10 @@ export default function RadioPage() {
           music as it moves.
         </p>
         <div className="mt-4 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.24em] text-cloud/60">
-          <span className="rave-chip rounded-full px-3 py-2">
-            Live booth
-          </span>
-          <span className="rave-chip rounded-full px-3 py-2">
-            Request line
-          </span>
-          <span className="rave-chip rounded-full px-3 py-2">
-            Booth notes
-          </span>
-          <span className="rave-chip rounded-full px-3 py-2">
-            Phone player
-          </span>
+          <span className="rave-chip rounded-full px-3 py-2">Live booth</span>
+          <span className="rave-chip rounded-full px-3 py-2">Request line</span>
+          <span className="rave-chip rounded-full px-3 py-2">Booth notes</span>
+          <span className="rave-chip rounded-full px-3 py-2">Phone player</span>
         </div>
         <div className="mt-6">
           <div className="flex flex-wrap gap-3">

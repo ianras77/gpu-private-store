@@ -20,7 +20,7 @@ const filterOptions = [
   { id: "all", label: "All" },
   { id: "weapon", label: "Weapons" },
   { id: "event", label: "Events" },
-  { id: "character", label: "Characters" }
+  { id: "character", label: "Characters" },
 ] as const;
 
 const excerpt = (value: string, limit: number) => {
@@ -38,9 +38,13 @@ const typeToEntryTypes = (type: (typeof filterOptions)[number]["id"]) => {
 
 const formatTypeLabel = (value: string) => value.replace(/_/g, " ");
 
-export function RulesLookup({ activeSystemId, activeSystemName }: RulesLookupProps) {
+export function RulesLookup({
+  activeSystemId,
+  activeSystemName,
+}: RulesLookupProps) {
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<(typeof filterOptions)[number]["id"]>("all");
+  const [filter, setFilter] =
+    useState<(typeof filterOptions)[number]["id"]>("all");
   const [items, setItems] = useState<LookupItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -66,9 +70,12 @@ export function RulesLookup({ activeSystemId, activeSystemName }: RulesLookupPro
         if (entryTypes?.length) params.set("types", entryTypes.join(","));
         params.set("limit", "12");
 
-        const res = await fetch(`/api/dm/systems/${encodeURIComponent(activeSystemId)}/compendium?${params.toString()}`, {
-          signal: controller.signal
-        });
+        const res = await fetch(
+          `/api/dm/systems/${encodeURIComponent(activeSystemId)}/compendium?${params.toString()}`,
+          {
+            signal: controller.signal,
+          },
+        );
         if (!res.ok) {
           throw new Error("Lookup failed");
         }
@@ -89,8 +96,9 @@ export function RulesLookup({ activeSystemId, activeSystemName }: RulesLookupPro
           title: item.name,
           subtitle: item.summary ? excerpt(item.summary, 160) : undefined,
           section:
-            (typeof item.data?.section === "string" ? item.data.section : undefined) ??
-            item.tags?.find((entry) => entry.length > 0)
+            (typeof item.data?.section === "string"
+              ? item.data.section
+              : undefined) ?? item.tags?.find((entry) => entry.length > 0),
         }));
         setItems(mapped);
         setTotal(data.total ?? 0);
@@ -111,7 +119,9 @@ export function RulesLookup({ activeSystemId, activeSystemName }: RulesLookupPro
 
   return (
     <div className="rave-panel rounded-3xl p-5">
-      <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Rules Lookup</div>
+      <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+        Rules Lookup
+      </div>
       <div className="mt-2 text-sm text-cloud/80">
         {supportsLookup
           ? `Search indexed compendium entries for ${activeSystemName ?? "this ruleset"}. If nothing appears yet, that system still needs ingestion.`
@@ -133,7 +143,7 @@ export function RulesLookup({ activeSystemId, activeSystemName }: RulesLookupPro
               type="button"
               className={cn(
                 "rave-chip rounded-full px-3 py-2 transition",
-                filter === option.id ? "text-white" : "text-cloud/60"
+                filter === option.id ? "text-white" : "text-cloud/60",
               )}
               onClick={() => setFilter(option.id)}
               disabled={!supportsLookup}
@@ -151,11 +161,17 @@ export function RulesLookup({ activeSystemId, activeSystemName }: RulesLookupPro
 
       <div className="mt-4 grid max-h-64 gap-2 overflow-auto pr-1 text-sm text-cloud/80">
         {!supportsLookup && (
-          <div className="rave-chip rounded-2xl px-3 py-2">Compendium lookup disabled.</div>
+          <div className="rave-chip rounded-2xl px-3 py-2">
+            Compendium lookup disabled.
+          </div>
         )}
-        {error && <div className="rave-chip rounded-2xl px-3 py-2">{error}</div>}
+        {error && (
+          <div className="rave-chip rounded-2xl px-3 py-2">{error}</div>
+        )}
         {supportsLookup && !loading && !items.length && !error && (
-          <div className="rave-chip rounded-2xl px-3 py-2">No indexed matches yet.</div>
+          <div className="rave-chip rounded-2xl px-3 py-2">
+            No indexed matches yet.
+          </div>
         )}
         {items.map((item) => (
           <div key={item.id} className="rave-chip rounded-2xl px-3 py-2">
@@ -164,7 +180,9 @@ export function RulesLookup({ activeSystemId, activeSystemName }: RulesLookupPro
               <span>{item.section}</span>
             </div>
             <div className="mt-1 text-sm text-white">{item.title}</div>
-            {item.subtitle && <div className="mt-1 text-xs text-cloud/70">{item.subtitle}</div>}
+            {item.subtitle && (
+              <div className="mt-1 text-xs text-cloud/70">{item.subtitle}</div>
+            )}
           </div>
         ))}
       </div>

@@ -56,8 +56,12 @@ const hueFromSeed = (seed: string) => {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const title = (url.searchParams.get("title") ?? "Legacy Selection").trim() || "Legacy Selection";
-  const artist = (url.searchParams.get("artist") ?? "Mr Rassy Archive").trim() || "Mr Rassy Archive";
+  const title =
+    (url.searchParams.get("title") ?? "Legacy Selection").trim() ||
+    "Legacy Selection";
+  const artist =
+    (url.searchParams.get("artist") ?? "Mr Rassy Archive").trim() ||
+    "Mr Rassy Archive";
 
   const hue = hueFromSeed(`${title}:${artist}`);
   const accent = (hue + 52) % 360;

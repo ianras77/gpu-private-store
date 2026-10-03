@@ -1,0 +1,25 @@
+Create a Rassy learning module from the material I supply.
+
+OUTPUT
+Return a folder named after the module slug, containing module.md and an optional assets/ folder. Follow FORMAT_V1.txt and module.schema.json exactly. Use the existing template as the starting point. I should be able to add the folder to the site's configured learning folder after the reader is implemented. Do not generate new site code or a new page for each module.
+
+EDITORIAL APPROACH
+Make this a small learning experience with a clear payoff. Start with an inviting question or concrete scene. Teach one idea at a time. Use 3–6 short sections where useful, each with a stable explicit heading ID. Prefer 5–15 minutes for an introductory module; split larger material into several related modules. Do not pad content to hit a length.
+
+Use this sequence when it fits: orient, explain, examine an example, try or reflect, take away. Use the available blocks only where they add value. Avoid a callout after every paragraph. Optional depth belongs in reveal blocks. Keep the main reading path coherent when every reveal is closed. Do not hide required evidence or instructions in optional blocks.
+
+CONTENT RESPONSIBILITY
+Read the supplied source material. If it refers to earlier research or a named file, retrieve that source before claiming to adapt it. Do not reconstruct unseen research from memory. Identify uncertain, disputed, and interpretive claims. Distinguish historical evidence, a tradition's beliefs, personal interpretation, and scientific findings. Personal meaning is not a quiz answer. Use knowledge checks only for objective distinctions actually taught in the module; include useful feedback on every option. Do not force a quiz into a reflective topic.
+
+Do not invent quotations, sources, personal memories, family details, or image credits. Attach verified links to important factual claims and include a Sources section. For original exercises, say they are original exercises. Label fictional examples. Paraphrase copyrighted material appropriately. Do not place confidential work information or private family material in a public module without the user's clear instruction.
+
+FORMAT
+Use YAML front matter, CommonMark/GFM body content, explicit H2 IDs, and only the four supported directives: idea, reveal, practice, reflect. A knowledge check, when warranted, is a rassy-check JSON fence. No HTML, JavaScript, JSX, MDX, remote embeds, custom CSS, or fabricated widgets. Use relative assets/ image paths, meaningful alt text, and captions/credits where relevant. Do not reference assets that are not supplied. New visual behaviors require a separately implemented reader component.
+
+For a new module, use version: 1 and status: draft unless I explicitly request publication. The slug must match the folder name. Quote dates. Preserve stable section and block IDs in revisions; increment version when revising published content. Preserve an existing slug unless I ask to change its URL. Add related slugs only when those modules are known to exist.
+
+BEFORE DELIVERY
+Validate the front matter against module.schema.json and any checks against check.schema.json. Confirm unique IDs, balanced directive fences, supported block types, correct answer references, section anchors, actual asset existence, and source attribution. Check that the preview uses the actual module content when a renderer is available. If validation or the production renderer is unavailable, state exactly what was and was not checked. Do not claim the file is live merely because you created it.
+
+DELIVERY
+Supply the module folder as a ZIP when assets are included, otherwise provide module.md. Briefly tell me its title, reading time, and where to put it. When I ask for a new module later, this authoring prompt and FORMAT_V1.txt are the reusable instructions to attach.

@@ -106,9 +106,7 @@ export function HomeLiveLine() {
   const quickPrompts = useMemo(() => {
     const prompts = [
       displayNow?.title ? `Why ${displayNow.title} right now?` : null,
-      displayNow?.artist
-        ? `Take me deeper into ${displayNow.artist}.`
-        : null,
+      displayNow?.artist ? `Take me deeper into ${displayNow.artist}.` : null,
       queueItems[0]?.title ? `Why is ${queueItems[0].title} next?` : null,
       "I have a recommendation for the request line.",
       "What does this hour feel like to you?",
@@ -135,14 +133,13 @@ export function HomeLiveLine() {
     if (!pendingReply) return;
 
     const receivedReply = chatMessages.some(
-      (message) => message.role === "dj" && message.createdAt >= pendingReply.sentAt,
+      (message) =>
+        message.role === "dj" && message.createdAt >= pendingReply.sentAt,
     );
     if (receivedReply) {
       setPendingReply(null);
       setChatStatus((current) =>
-        current?.includes("cueing")
-          ? "Mr Rassy is back on the line."
-          : current,
+        current?.includes("cueing") ? "Mr Rassy is back on the line." : current,
       );
       return;
     }
@@ -150,13 +147,18 @@ export function HomeLiveLine() {
     const ageMs = Date.now() - pendingReply.sentAt;
     if (ageMs > 30_000) {
       setPendingReply(null);
-      setChatStatus("Mr Rassy is still thinking. Give him another pass in a second.");
+      setChatStatus(
+        "Mr Rassy is still thinking. Give him another pass in a second.",
+      );
       return;
     }
 
-    const timer = window.setTimeout(() => {
-      void mutateChat();
-    }, ageMs < 12_000 ? 900 : 1500);
+    const timer = window.setTimeout(
+      () => {
+        void mutateChat();
+      },
+      ageMs < 12_000 ? 900 : 1500,
+    );
 
     return () => window.clearTimeout(timer);
   }, [chatMessages, mutateChat, pendingReply]);
@@ -223,11 +225,12 @@ export function HomeLiveLine() {
       }
 
       if (payload?.pending) {
-        const latestListenerMessage = normalizeRadioChatMessages<RadioChatMessage>(
-          Array.isArray(payload?.messages) ? payload.messages : [],
-        )
-          .filter((entry) => entry.role === "listener")
-          .at(-1);
+        const latestListenerMessage =
+          normalizeRadioChatMessages<RadioChatMessage>(
+            Array.isArray(payload?.messages) ? payload.messages : [],
+          )
+            .filter((entry) => entry.role === "listener")
+            .at(-1);
         setPendingReply({
           messageId: latestListenerMessage?.id ?? requestId,
           sentAt: latestListenerMessage?.createdAt ?? Date.now(),
@@ -237,8 +240,7 @@ export function HomeLiveLine() {
       }
 
       const replyStatus = payload?.reply?.recommendationStatus as
-        | RadioChatRecommendationStatus
-        | undefined;
+        RadioChatRecommendationStatus | undefined;
       setPendingReply(null);
       if (replyStatus === "accepted") {
         setChatStatus("Recommendation accepted.");
@@ -267,7 +269,10 @@ export function HomeLiveLine() {
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_340px]">
         <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(255,79,216,0.14),transparent_34%),radial-gradient(circle_at_85%_14%,rgba(66,245,255,0.12),transparent_34%),linear-gradient(150deg,rgba(10,13,28,0.96),rgba(33,7,42,0.9))] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.35)] md:p-6">
-          <div className="absolute inset-0 noise opacity-35" aria-hidden="true" />
+          <div
+            className="absolute inset-0 noise opacity-35"
+            aria-hidden="true"
+          />
           <div className="relative">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="max-w-2xl">
@@ -331,7 +336,9 @@ export function HomeLiveLine() {
                           </span>
                         )}
                       </div>
-                      <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7">{message.text}</p>
+                      <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7">
+                        {message.text}
+                      </p>
                       {matchedTrack && (
                         <div className="mt-3 rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-xs text-cloud/70">
                           {formatTrackStamp(matchedTrack)}
@@ -356,7 +363,8 @@ export function HomeLiveLine() {
                       <span>thinking</span>
                     </div>
                     <p className="mt-3 text-sm leading-7 text-cloud/82">
-                      He&apos;s turning that over and will come back on the line in a second.
+                      He&apos;s turning that over and will come back on the line
+                      in a second.
                     </p>
                   </div>
                 </div>
@@ -368,7 +376,10 @@ export function HomeLiveLine() {
                 value={chatInput}
                 onChange={(event) => setChatInput(event.target.value)}
                 onKeyDown={(event) => {
-                  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                  if (
+                    (event.metaKey || event.ctrlKey) &&
+                    event.key === "Enter"
+                  ) {
                     event.preventDefault();
                     void sendChat();
                   }
@@ -407,20 +418,20 @@ export function HomeLiveLine() {
         </div>
 
         <div className="grid gap-4">
-        <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(150deg,rgba(11,16,30,0.94),rgba(30,8,48,0.84))] p-5 shadow-[0_20px_56px_rgba(0,0,0,0.28)]">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="text-[11px] uppercase tracking-[0.38em] text-cloud/58">
-                Request Line
+          <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(150deg,rgba(11,16,30,0.94),rgba(30,8,48,0.84))] p-5 shadow-[0_20px_56px_rgba(0,0,0,0.28)]">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.38em] text-cloud/58">
+                  Request Line
+                </div>
+                <div className="mt-2 text-xs leading-5 text-cloud/56">
+                  Ask for one cut, a whole mood, an era, or the kind of turn you
+                  want him to answer with music.
+                </div>
               </div>
-              <div className="mt-2 text-xs leading-5 text-cloud/56">
-                Ask for one cut, a whole mood, an era, or the kind of turn you
-                want him to answer with music.
-              </div>
-            </div>
-            <div className="text-xs text-cloud/55">
-              {status?.requestLineDepth
-                ? `${status.requestLineDepth} live`
+              <div className="text-xs text-cloud/55">
+                {status?.requestLineDepth
+                  ? `${status.requestLineDepth} live`
                   : "Open line"}
               </div>
             </div>
@@ -435,8 +446,7 @@ export function HomeLiveLine() {
                         item.status === "rejected"
                         ? item.status
                         : undefined,
-                    ) ??
-                    "On the line";
+                    ) ?? "On the line";
                   const selectedTracks = Array.isArray(item.tracks)
                     ? item.tracks.slice(0, 3)
                     : [];

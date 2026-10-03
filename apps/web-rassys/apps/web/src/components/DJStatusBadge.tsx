@@ -6,7 +6,9 @@ import { formatRadioMood } from "../lib/radio-mood";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function DJStatusBadge() {
-  const { data } = useSWR("/api/radio/status", fetcher, { refreshInterval: 15000 });
+  const { data } = useSWR("/api/radio/status", fetcher, {
+    refreshInterval: 15000,
+  });
   const mode = data?.djMode ?? "unknown";
   const queueDepth = Number(data?.queueDepth ?? 0);
   const rawMood = typeof data?.mood === "string" ? data.mood : "";
@@ -46,9 +48,7 @@ export function DJStatusBadge() {
         <span className={`h-2 w-2 rounded-full ${dotTone}`} />
         {label}
       </span>
-      <span
-        className="rave-chip hidden rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-cloud/70 md:inline-flex"
-      >
+      <span className="rave-chip hidden rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-cloud/70 md:inline-flex">
         {queueLabel}
       </span>
     </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Search } from "lucide-react";
 import { Footer } from "../../../components/Footer";
 import { Button } from "../../../components/ui/button";
@@ -10,8 +11,14 @@ import {
   formatRadioNoteType,
   listRadioNotes,
   type IndexedRadioNote,
-  type RadioNoteBoothSection
+  type RadioNoteBoothSection,
 } from "../../../lib/radio-notes";
+
+export const metadata: Metadata = {
+  title: "Booth Notes",
+  description:
+    "Recent sets, track notes, and little transmissions from Mr Rassy’s radio booth.",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -33,13 +40,15 @@ const trackMeta = (
     year?: number;
     genres?: string[];
     duration?: number;
-  } | null
+  } | null,
 ) =>
   [
     track?.album,
     track?.year,
     track?.genres?.slice(0, 2).join(" / "),
-    typeof track?.duration === "number" ? `${Math.round(track.duration / 60)} min` : null
+    typeof track?.duration === "number"
+      ? `${Math.round(track.duration / 60)} min`
+      : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -66,7 +75,7 @@ const buildHref = (
     q?: string;
     tag?: string;
     special?: string;
-  }>
+  }>,
 ) => {
   const params = new URLSearchParams();
   const next = { ...current, ...patch };
@@ -90,7 +99,7 @@ const filterNotes = (
     q?: string;
     tag?: string;
     special?: string;
-  }
+  },
 ) => {
   const q = filters.q?.trim().toLowerCase();
   const artist = filters.artist?.trim().toLowerCase();
@@ -100,11 +109,19 @@ const filterNotes = (
   const special = filters.special?.trim().toLowerCase();
 
   return notes.filter((note) => {
-    if (artist && !note.artists.some((value) => value.toLowerCase() === artist)) return false;
-    if (genre && !note.genres.some((value) => value.toLowerCase() === genre)) return false;
-    if (tag && !note.tags.some((value) => value.toLowerCase() === tag)) return false;
-    if (special && (note.specialType ?? "").toLowerCase() !== special) return false;
-    if (noteType && formatRadioNoteType(note.eventType).toLowerCase() !== noteType) return false;
+    if (artist && !note.artists.some((value) => value.toLowerCase() === artist))
+      return false;
+    if (genre && !note.genres.some((value) => value.toLowerCase() === genre))
+      return false;
+    if (tag && !note.tags.some((value) => value.toLowerCase() === tag))
+      return false;
+    if (special && (note.specialType ?? "").toLowerCase() !== special)
+      return false;
+    if (
+      noteType &&
+      formatRadioNoteType(note.eventType).toLowerCase() !== noteType
+    )
+      return false;
     if (q && !note.searchText.includes(q)) return false;
     return true;
   });
@@ -113,7 +130,7 @@ const filterNotes = (
 const FilterChip = ({
   label,
   href,
-  active
+  active,
 }: {
   label: string;
   href: string;
@@ -131,17 +148,23 @@ const FilterChip = ({
 
 const SectionCard = ({
   label,
-  section
+  section,
 }: {
   label: string;
   section: RadioNoteBoothSection;
 }) => (
   <div className="rounded-[24px] border border-white/10 bg-black/18 p-4 md:grid md:grid-cols-[170px_minmax(0,1fr)] md:gap-5">
     <div>
-      <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/48">{label}</div>
-      <div className="mt-3 text-lg font-semibold text-white">{section.title}</div>
+      <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/48">
+        {label}
+      </div>
+      <div className="mt-3 text-lg font-semibold text-white">
+        {section.title}
+      </div>
     </div>
-    <p className="mt-3 text-sm leading-7 text-cloud/80 md:mt-0">{section.body}</p>
+    <p className="mt-3 text-sm leading-7 text-cloud/80 md:mt-0">
+      {section.body}
+    </p>
   </div>
 );
 
@@ -150,15 +173,20 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
   const sections = note.boothDossier?.sections ?? {};
   const lineup = sections.lineup ?? {
     title: note.boothDossier?.headline ?? note.title,
-    body: note.reason ?? note.excerpt
+    body: note.reason ?? note.excerpt,
   };
   const contextSection = sections.context ?? {
-    title: leadTrack?.album ? `${leadTrack.album}${leadTrack.year ? ` · ${leadTrack.year}` : ""}` : "Inside the record",
-    body: note.boothDossier?.deepCut ?? note.excerpt
+    title: leadTrack?.album
+      ? `${leadTrack.album}${leadTrack.year ? ` · ${leadTrack.year}` : ""}`
+      : "Inside the record",
+    body: note.boothDossier?.deepCut ?? note.excerpt,
   };
   const listenFor = sections.listenFor ?? {
     title: "What to catch",
-    body: note.boothDossier?.nextMove ?? note.reason ?? "The next turn stayed in the air a little longer."
+    body:
+      note.boothDossier?.nextMove ??
+      note.reason ??
+      "The next turn stayed in the air a little longer.",
   };
   const sessionTracks = note.boothDossier?.sessionTracks ?? [];
   const playback = note.boothDossier?.programming?.playback ?? [];
@@ -169,15 +197,27 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
       className="rounded-[32px] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(255,230,109,0.12),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(66,245,255,0.12),transparent_30%),linear-gradient(152deg,rgba(8,12,28,0.96),rgba(33,9,47,0.9))] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.3)] md:p-6"
     >
       <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-cloud/58">
-        <span className="rave-chip rounded-full px-3 py-2">{formatRadioMood(note.mood)}</span>
-        <span className="rave-chip rounded-full px-3 py-2">{formatRadioNoteType(note.eventType)}</span>
-        <span className="rave-chip rounded-full px-3 py-2">{formatRadioNoteDate(note.createdAt)}</span>
-        <span className="rave-chip rounded-full px-3 py-2">{formatRadioNoteTime(note.createdAt)}</span>
+        <span className="rave-chip rounded-full px-3 py-2">
+          {formatRadioMood(note.mood)}
+        </span>
+        <span className="rave-chip rounded-full px-3 py-2">
+          {formatRadioNoteType(note.eventType)}
+        </span>
+        <span className="rave-chip rounded-full px-3 py-2">
+          {formatRadioNoteDate(note.createdAt)}
+        </span>
+        <span className="rave-chip rounded-full px-3 py-2">
+          {formatRadioNoteTime(note.createdAt)}
+        </span>
         {note.programmingLabel && (
-          <span className="rave-chip rounded-full px-3 py-2">{note.programmingLabel}</span>
+          <span className="rave-chip rounded-full px-3 py-2">
+            {note.programmingLabel}
+          </span>
         )}
         {note.specialType && (
-          <span className="rave-chip rounded-full px-3 py-2">{formatSpecialLabel(note.specialType)}</span>
+          <span className="rave-chip rounded-full px-3 py-2">
+            {formatSpecialLabel(note.specialType)}
+          </span>
         )}
       </div>
 
@@ -191,11 +231,15 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
           </p>
 
           <div className="mt-5 rounded-[24px] border border-white/10 bg-black/18 p-4">
-            <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/50">Record in focus</div>
+            <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/50">
+              Record in focus
+            </div>
             <div className="mt-3 text-lg font-semibold text-white">
               {leadTrack?.title ?? "Open room"}
             </div>
-            <div className="mt-1 text-sm text-cloud/72">{leadTrack?.artist ?? "Mr Rassy"}</div>
+            <div className="mt-1 text-sm text-cloud/72">
+              {leadTrack?.artist ?? "Mr Rassy"}
+            </div>
             <div className="mt-2 text-xs leading-6 text-cloud/58">
               {trackMeta(leadTrack) || note.energyLabel || "Live booth turn"}
             </div>
@@ -203,7 +247,9 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
 
           {note.boothDossier?.programming && (
             <div className="mt-4 rounded-[24px] border border-white/10 bg-[linear-gradient(160deg,rgba(9,21,33,0.92),rgba(24,11,44,0.82))] p-4">
-              <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/50">Programming</div>
+              <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/50">
+                Programming
+              </div>
               <div className="mt-3 text-lg font-semibold text-white">
                 {note.boothDossier.programming.label}
               </div>
@@ -213,8 +259,12 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
               {playback.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.18em] text-cloud/64">
                   {playback.slice(0, 4).map((item, index) => (
-                    <span key={`${note.id}-playback-${index}`} className="rave-chip rounded-full px-3 py-2">
-                      {item.title ?? item.trackId ?? `Track ${index + 1}`} · {item.mode}
+                    <span
+                      key={`${note.id}-playback-${index}`}
+                      className="rave-chip rounded-full px-3 py-2"
+                    >
+                      {item.title ?? item.trackId ?? `Track ${index + 1}`} ·{" "}
+                      {item.mode}
                     </span>
                   ))}
                 </div>
@@ -230,15 +280,23 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
         </div>
       </div>
 
-      {(note.artists.length > 0 || note.genres.length > 0 || note.tags.length > 0) && (
+      {(note.artists.length > 0 ||
+        note.genres.length > 0 ||
+        note.tags.length > 0) && (
         <div className="mt-4 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.18em] text-cloud/64">
           {note.artists.slice(0, 3).map((artist) => (
-            <span key={`${note.id}-${artist}`} className="rave-chip rounded-full px-3 py-2">
+            <span
+              key={`${note.id}-${artist}`}
+              className="rave-chip rounded-full px-3 py-2"
+            >
               {artist}
             </span>
           ))}
           {note.genres.slice(0, 3).map((genre) => (
-            <span key={`${note.id}-${genre}`} className="rave-chip rounded-full px-3 py-2">
+            <span
+              key={`${note.id}-${genre}`}
+              className="rave-chip rounded-full px-3 py-2"
+            >
               {genre}
             </span>
           ))}
@@ -246,7 +304,10 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
             .filter((tag) => tag !== note.eventType)
             .slice(0, 4)
             .map((tag) => (
-              <span key={`${note.id}-${tag}`} className="rave-chip rounded-full px-3 py-2">
+              <span
+                key={`${note.id}-${tag}`}
+                className="rave-chip rounded-full px-3 py-2"
+              >
                 {tag}
               </span>
             ))}
@@ -256,8 +317,13 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
       {sessionTracks.length > 0 ? (
         <div className="mt-5 rounded-[24px] border border-white/10 bg-[linear-gradient(160deg,rgba(10,15,31,0.95),rgba(20,8,42,0.84))] p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">Session map</div>
-            <div className="text-xs text-cloud/55">{sessionTracks.length} stored song note{sessionTracks.length === 1 ? "" : "s"}</div>
+            <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">
+              Session map
+            </div>
+            <div className="text-xs text-cloud/55">
+              {sessionTracks.length} stored song note
+              {sessionTracks.length === 1 ? "" : "s"}
+            </div>
           </div>
           <div className="mt-4 grid gap-3">
             {sessionTracks.map((track) => (
@@ -267,29 +333,49 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
               >
                 <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.22em] text-cloud/46 lg:block">
                   <span>{String(track.slot).padStart(2, "0")}</span>
-                  <span className="lg:mt-2 lg:block">{track.role ?? "set"}</span>
+                  <span className="lg:mt-2 lg:block">
+                    {track.role ?? "set"}
+                  </span>
                 </div>
                 <div className="mt-3 lg:mt-0">
-                  <div className="text-base font-semibold text-white">{track.title}</div>
-                  <div className="mt-1 text-sm text-cloud/70">{track.artist}</div>
+                  <div className="text-base font-semibold text-white">
+                    {track.title}
+                  </div>
+                  <div className="mt-1 text-sm text-cloud/70">
+                    {track.artist}
+                  </div>
                   {track.playbackMode && (
                     <div className="mt-2 text-[10px] uppercase tracking-[0.22em] text-cloud/48">
-                      {track.playbackMode === "clip" ? "Excerpted play" : "Full play"}
+                      {track.playbackMode === "clip"
+                        ? "Excerpted play"
+                        : "Full play"}
                     </div>
                   )}
                 </div>
                 <div className="mt-4 grid gap-3 md:grid-cols-3 lg:mt-0">
                   <div>
-                    <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/48">Why it fits</div>
-                    <p className="mt-2 text-sm leading-7 text-cloud/80">{track.whyItFits}</p>
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/48">
+                      Why it fits
+                    </div>
+                    <p className="mt-2 text-sm leading-7 text-cloud/80">
+                      {track.whyItFits}
+                    </p>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/48">Track context</div>
-                    <p className="mt-2 text-sm leading-7 text-cloud/80">{track.context}</p>
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/48">
+                      Track context
+                    </div>
+                    <p className="mt-2 text-sm leading-7 text-cloud/80">
+                      {track.context}
+                    </p>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/48">Listen for</div>
-                    <p className="mt-2 text-sm leading-7 text-cloud/80">{track.listenFor}</p>
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/48">
+                      Listen for
+                    </div>
+                    <p className="mt-2 text-sm leading-7 text-cloud/80">
+                      {track.listenFor}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -298,7 +384,9 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
         </div>
       ) : note.setlist.length > 0 ? (
         <div className="mt-5 rounded-[24px] border border-white/10 bg-[linear-gradient(160deg,rgba(10,15,31,0.95),rgba(20,8,42,0.84))] p-4">
-          <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">Set path</div>
+          <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">
+            Set path
+          </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {note.setlist.slice(0, 6).map((track, index) => (
               <div
@@ -308,9 +396,13 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
                 <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/45">
                   {String(index + 1).padStart(2, "0")}
                 </div>
-                <div className="mt-2 text-sm font-semibold text-white">{track.title}</div>
+                <div className="mt-2 text-sm font-semibold text-white">
+                  {track.title}
+                </div>
                 <div className="mt-1 text-xs text-cloud/70">{track.artist}</div>
-                <div className="mt-2 text-xs leading-6 text-cloud/58">{trackMeta(track)}</div>
+                <div className="mt-2 text-xs leading-6 text-cloud/58">
+                  {trackMeta(track)}
+                </div>
               </div>
             ))}
           </div>
@@ -332,7 +424,7 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
 };
 
 export default async function RadioNotesPage({
-  searchParams
+  searchParams,
 }: {
   searchParams?: Promise<SearchParamsInput>;
 }) {
@@ -343,28 +435,37 @@ export default async function RadioNotesPage({
     genre: firstValue(params.genre)?.trim(),
     tag: firstValue(params.tag)?.trim(),
     noteType: firstValue(params.noteType)?.trim(),
-    special: firstValue(params.special)?.trim()
+    special: firstValue(params.special)?.trim(),
   };
 
   const notes = await listRadioNotes(120);
   const catalog = buildRadioNotesCatalog(notes);
   const filteredNotes = filterNotes(catalog.notes, filters);
-  const materializedNote = filteredNotes.length > 0
-    ? filteredNotes[Math.floor(Math.random() * filteredNotes.length)]
-    : null;
+  const materializedNote =
+    filteredNotes.length > 0
+      ? filteredNotes[Math.floor(Math.random() * filteredNotes.length)]
+      : null;
   const hasFilters = Object.values(filters).some(Boolean);
 
   return (
     <main className="min-h-screen">
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="relative overflow-hidden rounded-[38px] border border-white/12 bg-[radial-gradient(circle_at_top_left,rgba(255,230,109,0.16),transparent_26%),radial-gradient(circle_at_82%_18%,rgba(66,245,255,0.18),transparent_28%),radial-gradient(circle_at_50%_100%,rgba(255,79,216,0.2),transparent_40%),linear-gradient(145deg,rgba(7,11,28,0.96),rgba(32,8,49,0.9))] px-6 py-9 shadow-[0_28px_90px_rgba(0,0,0,0.38)] md:px-10">
-          <div className="absolute inset-0 noise opacity-50" aria-hidden="true" />
+          <div
+            className="absolute inset-0 noise opacity-50"
+            aria-hidden="true"
+          />
           <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_320px] xl:items-end">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.42em] text-cloud/58">Mr Rassy // found signals</div>
-              <h1 className="section-title mt-4 text-4xl md:text-5xl">Open one and see what happens.</h1>
+              <div className="text-[11px] uppercase tracking-[0.42em] text-cloud/58">
+                Mr Rassy // found signals
+              </div>
+              <h1 className="section-title mt-4 text-4xl md:text-5xl">
+                Open one and see what happens.
+              </h1>
               <p className="mt-4 max-w-2xl text-base leading-8 text-cloud/82">
-                These are not filing cabinets. They are little pieces of the station’s mind — a record, a feeling, a turn, a reason to stay.
+                These are not filing cabinets. They are little pieces of the
+                station’s mind — a record, a feeling, a turn, a reason to stay.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button asChild>
@@ -378,20 +479,36 @@ export default async function RadioNotesPage({
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
               <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">Stored notes</div>
-                <div className="mt-2 text-3xl font-semibold text-white">{catalog.notes.length}</div>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">
+                  Stored notes
+                </div>
+                <div className="mt-2 text-3xl font-semibold text-white">
+                  {catalog.notes.length}
+                </div>
               </div>
               <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">Artists</div>
-                <div className="mt-2 text-3xl font-semibold text-white">{catalog.facets.artists.length}</div>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">
+                  Artists
+                </div>
+                <div className="mt-2 text-3xl font-semibold text-white">
+                  {catalog.facets.artists.length}
+                </div>
               </div>
               <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">Genres</div>
-                <div className="mt-2 text-3xl font-semibold text-white">{catalog.facets.genres.length}</div>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">
+                  Genres
+                </div>
+                <div className="mt-2 text-3xl font-semibold text-white">
+                  {catalog.facets.genres.length}
+                </div>
               </div>
               <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">Special turns</div>
-                <div className="mt-2 text-3xl font-semibold text-white">{catalog.facets.specialTypes.length}</div>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">
+                  Special turns
+                </div>
+                <div className="mt-2 text-3xl font-semibold text-white">
+                  {catalog.facets.specialTypes.length}
+                </div>
               </div>
             </div>
           </div>
@@ -415,11 +532,29 @@ export default async function RadioNotesPage({
                     placeholder="Search the notebook"
                     className="rave-input h-12 w-full rounded-[18px] pl-11 pr-4 text-sm"
                   />
-                  {filters.artist && <input type="hidden" name="artist" value={filters.artist} />}
-                  {filters.genre && <input type="hidden" name="genre" value={filters.genre} />}
-                  {filters.tag && <input type="hidden" name="tag" value={filters.tag} />}
-                  {filters.noteType && <input type="hidden" name="noteType" value={filters.noteType} />}
-                  {filters.special && <input type="hidden" name="special" value={filters.special} />}
+                  {filters.artist && (
+                    <input type="hidden" name="artist" value={filters.artist} />
+                  )}
+                  {filters.genre && (
+                    <input type="hidden" name="genre" value={filters.genre} />
+                  )}
+                  {filters.tag && (
+                    <input type="hidden" name="tag" value={filters.tag} />
+                  )}
+                  {filters.noteType && (
+                    <input
+                      type="hidden"
+                      name="noteType"
+                      value={filters.noteType}
+                    />
+                  )}
+                  {filters.special && (
+                    <input
+                      type="hidden"
+                      name="special"
+                      value={filters.special}
+                    />
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Button type="submit">Search</Button>
@@ -431,28 +566,53 @@ export default async function RadioNotesPage({
 
               {hasFilters && (
                 <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.22em] text-cloud/64">
-                  {filters.artist && <span className="rave-chip rounded-full px-3 py-2">Artist: {filters.artist}</span>}
-                  {filters.genre && <span className="rave-chip rounded-full px-3 py-2">Genre: {filters.genre}</span>}
-                  {filters.tag && <span className="rave-chip rounded-full px-3 py-2">Tag: {filters.tag}</span>}
+                  {filters.artist && (
+                    <span className="rave-chip rounded-full px-3 py-2">
+                      Artist: {filters.artist}
+                    </span>
+                  )}
+                  {filters.genre && (
+                    <span className="rave-chip rounded-full px-3 py-2">
+                      Genre: {filters.genre}
+                    </span>
+                  )}
+                  {filters.tag && (
+                    <span className="rave-chip rounded-full px-3 py-2">
+                      Tag: {filters.tag}
+                    </span>
+                  )}
                   {filters.noteType && (
-                    <span className="rave-chip rounded-full px-3 py-2">Type: {filters.noteType}</span>
+                    <span className="rave-chip rounded-full px-3 py-2">
+                      Type: {filters.noteType}
+                    </span>
                   )}
                   {filters.special && (
-                    <span className="rave-chip rounded-full px-3 py-2">Special: {filters.special}</span>
+                    <span className="rave-chip rounded-full px-3 py-2">
+                      Special: {filters.special}
+                    </span>
                   )}
-                  {filters.q && <span className="rave-chip rounded-full px-3 py-2">Search: {filters.q}</span>}
+                  {filters.q && (
+                    <span className="rave-chip rounded-full px-3 py-2">
+                      Search: {filters.q}
+                    </span>
+                  )}
                 </div>
               )}
 
               <div>
-                <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">Artists</div>
+                <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">
+                  Artists
+                </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {catalog.facets.artists.slice(0, 10).map((facet) => (
                     <FilterChip
                       key={facet.value}
                       label={`${facet.value} · ${facet.count}`}
                       href={buildHref(filters, {
-                        artist: filters.artist === facet.value ? undefined : facet.value
+                        artist:
+                          filters.artist === facet.value
+                            ? undefined
+                            : facet.value,
                       })}
                       active={filters.artist === facet.value}
                     />
@@ -461,14 +621,19 @@ export default async function RadioNotesPage({
               </div>
 
               <div>
-                <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">Genres</div>
+                <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">
+                  Genres
+                </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {catalog.facets.genres.slice(0, 10).map((facet) => (
                     <FilterChip
                       key={facet.value}
                       label={`${facet.value} · ${facet.count}`}
                       href={buildHref(filters, {
-                        genre: filters.genre === facet.value ? undefined : facet.value
+                        genre:
+                          filters.genre === facet.value
+                            ? undefined
+                            : facet.value,
                       })}
                       active={filters.genre === facet.value}
                     />
@@ -478,14 +643,19 @@ export default async function RadioNotesPage({
 
               {catalog.facets.specialTypes.length > 0 && (
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">Specials</div>
+                  <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">
+                    Specials
+                  </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {catalog.facets.specialTypes.slice(0, 8).map((facet) => (
                       <FilterChip
                         key={facet.value}
                         label={`${formatSpecialLabel(facet.value)} · ${facet.count}`}
                         href={buildHref(filters, {
-                          special: filters.special === facet.value ? undefined : facet.value
+                          special:
+                            filters.special === facet.value
+                              ? undefined
+                              : facet.value,
                         })}
                         active={filters.special === facet.value}
                       />
@@ -495,14 +665,19 @@ export default async function RadioNotesPage({
               )}
 
               <div>
-                <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">Note shape</div>
+                <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">
+                  Note shape
+                </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {catalog.facets.noteTypes.map((facet) => (
                     <FilterChip
                       key={facet.value}
                       label={`${facet.value} · ${facet.count}`}
                       href={buildHref(filters, {
-                        noteType: filters.noteType === facet.value ? undefined : facet.value
+                        noteType:
+                          filters.noteType === facet.value
+                            ? undefined
+                            : facet.value,
                       })}
                       active={filters.noteType === facet.value}
                     />
@@ -512,7 +687,8 @@ export default async function RadioNotesPage({
                       key={facet.value}
                       label={facet.value}
                       href={buildHref(filters, {
-                        tag: filters.tag === facet.value ? undefined : facet.value
+                        tag:
+                          filters.tag === facet.value ? undefined : facet.value,
                       })}
                       active={filters.tag === facet.value}
                     />
@@ -525,15 +701,24 @@ export default async function RadioNotesPage({
           <div className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="text-[11px] uppercase tracking-[0.32em] text-cloud/58">
-                {filteredNotes.length} possible signal{filteredNotes.length === 1 ? "" : "s"}
+                {filteredNotes.length} possible signal
+                {filteredNotes.length === 1 ? "" : "s"}
               </div>
-              <div className="text-sm text-cloud/68">One note materialized from the current trail.</div>
+              <div className="text-sm text-cloud/68">
+                One note materialized from the current trail.
+              </div>
             </div>
 
             {materializedNote ? (
               <>
-                <div className="booth-materialize-stamp rounded-[24px] border border-glow/25 bg-glow/[0.06] px-4 py-3 text-xs uppercase tracking-[0.2em] text-glow">Found in the static · {formatRadioNoteDate(materializedNote.createdAt)} · follow the thread below</div>
-                <div className="booth-materialize"><NoteCard key={materializedNote.id} note={materializedNote} /></div>
+                <div className="booth-materialize-stamp rounded-[24px] border border-glow/25 bg-glow/[0.06] px-4 py-3 text-xs uppercase tracking-[0.2em] text-glow">
+                  Found in the static ·{" "}
+                  {formatRadioNoteDate(materializedNote.createdAt)} · follow the
+                  thread below
+                </div>
+                <div className="booth-materialize">
+                  <NoteCard key={materializedNote.id} note={materializedNote} />
+                </div>
               </>
             ) : (
               <div className="rounded-[30px] border border-white/10 bg-black/20 p-6 text-sm text-cloud/72">

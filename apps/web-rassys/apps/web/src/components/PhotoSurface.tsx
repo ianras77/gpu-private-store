@@ -6,7 +6,8 @@ import type { PhotoItem } from "../lib/media-controller";
 
 const isHeifImage = (item: PhotoItem) =>
   item.kind === "image" &&
-  (/\.(heic|heif)$/i.test(item.extension) || /image\/hei[cf]/i.test(item.mimeType));
+  (/\.(heic|heif)$/i.test(item.extension) ||
+    /image\/hei[cf]/i.test(item.mimeType));
 
 type PhotoSurfaceProps = {
   item: PhotoItem;

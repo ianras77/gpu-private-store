@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export async function QRCodeBlock({
   value,
-  label
+  label,
 }: {
   value: string;
   label: string;
@@ -13,8 +13,8 @@ export async function QRCodeBlock({
     width: 160,
     color: {
       dark: "#081018",
-      light: "#ffffff"
-    }
+      light: "#ffffff",
+    },
   });
 
   return (

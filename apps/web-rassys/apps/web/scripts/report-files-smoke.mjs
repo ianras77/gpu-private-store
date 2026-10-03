@@ -4,7 +4,8 @@ import { mkdtemp, mkdir, writeFile, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-const { listReportFiles, reportId } = await import("../src/lib/report-files.ts");
+const { listReportFiles, reportId } =
+  await import("../src/lib/report-files.ts");
 const root = await mkdtemp(path.join(tmpdir(), "rassys-report-files-"));
 const month = path.join(root, "analyst", "2026", "09");
 await mkdir(month, { recursive: true });

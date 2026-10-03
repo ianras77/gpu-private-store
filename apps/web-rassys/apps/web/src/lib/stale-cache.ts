@@ -14,10 +14,9 @@ export const createVolatileCache = <T>() => {
     write(value: T) {
       entry = {
         value,
-        at: Date.now()
+        at: Date.now(),
       };
       return entry;
-    }
+    },
   };
 };
-

@@ -1,6 +1,6 @@
 import {
   buildMinecraftMapTargetUrl,
-  resolveMinecraftMapBaseUrl
+  resolveMinecraftMapBaseUrl,
 } from "../../../lib/minecraft-map";
 
 export const runtime = "nodejs";
@@ -15,19 +15,19 @@ const shouldProxyMapRequest = (pathSegments: string[] | undefined) => {
 
 const proxyRequest = async (
   request: Request,
-  pathSegments: string[] | undefined
+  pathSegments: string[] | undefined,
 ) => {
   const requestUrl = new URL(request.url);
   const upstreamBaseUrl = resolveMinecraftMapBaseUrl(
     process.env.NEXT_PUBLIC_MINECRAFT_MAP_URL,
-    process.env.NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS
+    process.env.NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS,
   );
   const suffix = pathSegments?.length ? `/${pathSegments.join("/")}` : "/";
   const target = buildMinecraftMapTargetUrl(
     `${proxyBasePath}${suffix}`,
     proxyBasePath,
     upstreamBaseUrl,
-    requestUrl.search
+    requestUrl.search,
   );
 
   if (!shouldProxyMapRequest(pathSegments)) {
@@ -38,13 +38,14 @@ const proxyRequest = async (
     method: request.method,
     headers: {
       accept: request.headers.get("accept") ?? "*/*",
-      "accept-language": request.headers.get("accept-language") ?? "en-US,en;q=0.8",
+      "accept-language":
+        request.headers.get("accept-language") ?? "en-US,en;q=0.8",
       "user-agent":
         request.headers.get("user-agent") ??
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36"
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36",
     },
     redirect: "follow",
-    cache: "no-store"
+    cache: "no-store",
   });
 
   const headers = new Headers(upstream.headers);
@@ -56,13 +57,13 @@ const proxyRequest = async (
 
   return new Response(upstream.body, {
     status: upstream.status,
-    headers
+    headers,
   });
 };
 
 export async function GET(
   request: Request,
-  context: { params: Promise<{ path?: string[] }> }
+  context: { params: Promise<{ path?: string[] }> },
 ) {
   const { path } = await context.params;
   return proxyRequest(request, path);
@@ -70,7 +71,7 @@ export async function GET(
 
 export async function HEAD(
   request: Request,
-  context: { params: Promise<{ path?: string[] }> }
+  context: { params: Promise<{ path?: string[] }> },
 ) {
   const { path } = await context.params;
   return proxyRequest(request, path);

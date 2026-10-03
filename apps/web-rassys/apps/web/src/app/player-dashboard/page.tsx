@@ -25,7 +25,12 @@ type CampaignSummary = {
   updatedAt: string;
 };
 
-type InventoryItem = { id: string; name: string; detail?: string; quantity: number };
+type InventoryItem = {
+  id: string;
+  name: string;
+  detail?: string;
+  quantity: number;
+};
 type CharacterRecord = {
   id: string;
   userId: string;
@@ -166,11 +171,15 @@ const formatAgo = (iso: string | null) => {
 
 const compactValue = (value: unknown) => {
   if (value === null || typeof value === "undefined") return "null";
-  if (typeof value === "string") return value.length > 90 ? `${value.slice(0, 89)}...` : value;
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (typeof value === "string")
+    return value.length > 90 ? `${value.slice(0, 89)}...` : value;
+  if (typeof value === "number" || typeof value === "boolean")
+    return String(value);
   try {
     const serialized = JSON.stringify(value);
-    return serialized.length > 120 ? `${serialized.slice(0, 119)}...` : serialized;
+    return serialized.length > 120
+      ? `${serialized.slice(0, 119)}...`
+      : serialized;
   } catch {
     return "unserializable";
   }
@@ -191,7 +200,9 @@ export default function PlayerDashboardPage() {
   const [campaignsLoading, setCampaignsLoading] = useState(false);
   const [campaignError, setCampaignError] = useState<string | null>(null);
 
-  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(
+    null,
+  );
   const [state, setState] = useState<PlayerDashboardState | null>(null);
   const [stateLoading, setStateLoading] = useState(false);
   const [stateError, setStateError] = useState<string | null>(null);
@@ -207,46 +218,59 @@ export default function PlayerDashboardPage() {
   const [rollError, setRollError] = useState<string | null>(null);
   const [lastRoll, setLastRoll] = useState<RollOutcome | null>(null);
   const [recentRolls, setRecentRolls] = useState<DiceRollTimelineRecord[]>([]);
-  const [recentTransitions, setRecentTransitions] = useState<StateTransitionTimelineRecord[]>([]);
+  const [recentTransitions, setRecentTransitions] = useState<
+    StateTransitionTimelineRecord[]
+  >([]);
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [timelineError, setTimelineError] = useState<string | null>(null);
 
-  const [streamStatus, setStreamStatus] = useState<"idle" | "connecting" | "live" | "error">("idle");
+  const [streamStatus, setStreamStatus] = useState<
+    "idle" | "connecting" | "live" | "error"
+  >("idle");
   const [streamError, setStreamError] = useState<string | null>(null);
 
   const refreshTimerRef = useRef<number | null>(null);
 
-  const fetchTimeline = useCallback(async (campaignId: string, silent = false) => {
-    if (!silent) setTimelineLoading(true);
-    setTimelineError(null);
-    try {
-      const [rollsResponse, transitionsResponse] = await Promise.all([
-        fetch(`/api/dm/campaigns/${campaignId}/rolls?limit=80`, { cache: "no-store" }),
-        fetch(`/api/dm/campaigns/${campaignId}/transitions?limit=120`, { cache: "no-store" })
-      ]);
+  const fetchTimeline = useCallback(
+    async (campaignId: string, silent = false) => {
+      if (!silent) setTimelineLoading(true);
+      setTimelineError(null);
+      try {
+        const [rollsResponse, transitionsResponse] = await Promise.all([
+          fetch(`/api/dm/campaigns/${campaignId}/rolls?limit=80`, {
+            cache: "no-store",
+          }),
+          fetch(`/api/dm/campaigns/${campaignId}/transitions?limit=120`, {
+            cache: "no-store",
+          }),
+        ]);
 
-      const rollsPayload = (await rollsResponse.json()) as {
-        rolls?: DiceRollTimelineRecord[];
-        error?: string;
-      };
-      const transitionsPayload = (await transitionsResponse.json()) as {
-        transitions?: StateTransitionTimelineRecord[];
-        error?: string;
-      };
+        const rollsPayload = (await rollsResponse.json()) as {
+          rolls?: DiceRollTimelineRecord[];
+          error?: string;
+        };
+        const transitionsPayload = (await transitionsResponse.json()) as {
+          transitions?: StateTransitionTimelineRecord[];
+          error?: string;
+        };
 
-      if (!rollsResponse.ok || !transitionsResponse.ok) {
-        setTimelineError(rollsPayload.error ?? transitionsPayload.error ?? "timeline_failed");
-        return;
+        if (!rollsResponse.ok || !transitionsResponse.ok) {
+          setTimelineError(
+            rollsPayload.error ?? transitionsPayload.error ?? "timeline_failed",
+          );
+          return;
+        }
+
+        setRecentRolls(rollsPayload.rolls ?? []);
+        setRecentTransitions(transitionsPayload.transitions ?? []);
+      } catch {
+        setTimelineError("timeline_failed");
+      } finally {
+        if (!silent) setTimelineLoading(false);
       }
-
-      setRecentRolls(rollsPayload.rolls ?? []);
-      setRecentTransitions(transitionsPayload.transitions ?? []);
-    } catch {
-      setTimelineError("timeline_failed");
-    } finally {
-      if (!silent) setTimelineLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   const fetchPlayerState = useCallback(
     async (campaignId: string, characterId?: string | null, silent = false) => {
@@ -257,10 +281,16 @@ export default function PlayerDashboardPage() {
           characterId && characterId.trim()
             ? `?characterId=${encodeURIComponent(characterId)}`
             : "";
-        const response = await fetch(`/api/dm/campaigns/${campaignId}/player-state${query}`, {
-          cache: "no-store"
-        });
-        const payload = (await response.json()) as { state?: PlayerDashboardState; error?: string };
+        const response = await fetch(
+          `/api/dm/campaigns/${campaignId}/player-state${query}`,
+          {
+            cache: "no-store",
+          },
+        );
+        const payload = (await response.json()) as {
+          state?: PlayerDashboardState;
+          error?: string;
+        };
         if (!response.ok || !payload.state) {
           setStateError(payload.error ?? "player_state_failed");
           return;
@@ -276,7 +306,7 @@ export default function PlayerDashboardPage() {
         if (!silent) setStateLoading(false);
       }
     },
-    [fetchTimeline]
+    [fetchTimeline],
   );
 
   const fetchCampaigns = useCallback(
@@ -284,8 +314,13 @@ export default function PlayerDashboardPage() {
       setCampaignsLoading(true);
       setCampaignError(null);
       try {
-        const response = await fetch("/api/dm/campaigns", { cache: "no-store" });
-        const payload = (await response.json()) as { campaigns?: CampaignSummary[]; error?: string };
+        const response = await fetch("/api/dm/campaigns", {
+          cache: "no-store",
+        });
+        const payload = (await response.json()) as {
+          campaigns?: CampaignSummary[];
+          error?: string;
+        };
         if (!response.ok) {
           setCampaignError(payload.error ?? "campaign_list_failed");
           return;
@@ -293,9 +328,10 @@ export default function PlayerDashboardPage() {
         const next = payload.campaigns ?? [];
         setCampaigns(next);
         const selected =
-          preferredCampaignId && next.some((entry) => entry.id === preferredCampaignId)
+          preferredCampaignId &&
+          next.some((entry) => entry.id === preferredCampaignId)
             ? preferredCampaignId
-            : next[0]?.id ?? null;
+            : (next[0]?.id ?? null);
         setActiveCampaignId(selected);
         if (selected) {
           await fetchPlayerState(selected, selectedCharacterId, true);
@@ -310,7 +346,7 @@ export default function PlayerDashboardPage() {
         setCampaignsLoading(false);
       }
     },
-    [fetchPlayerState, selectedCharacterId]
+    [fetchPlayerState, selectedCharacterId],
   );
 
   useEffect(() => {
@@ -349,7 +385,9 @@ export default function PlayerDashboardPage() {
 
     setStreamStatus("connecting");
     setStreamError(null);
-    const stream = new EventSource(`/api/dm/campaigns/${activeCampaignId}/stream`);
+    const stream = new EventSource(
+      `/api/dm/campaigns/${activeCampaignId}/stream`,
+    );
 
     const queueRefresh = () => {
       if (refreshTimerRef.current) {
@@ -376,7 +414,7 @@ export default function PlayerDashboardPage() {
             "dice_roll",
             "state_patch",
             "quest_update",
-            "character_update"
+            "character_update",
           ].includes(event.type)
         ) {
           queueRefresh();
@@ -418,11 +456,14 @@ export default function PlayerDashboardPage() {
           body: JSON.stringify({
             email,
             password,
-            displayName: authMode === "register" ? displayName : undefined
-          })
-        }
+            displayName: authMode === "register" ? displayName : undefined,
+          }),
+        },
       );
-      const payload = (await response.json()) as { user?: DmViewer; error?: string };
+      const payload = (await response.json()) as {
+        user?: DmViewer;
+        error?: string;
+      };
       if (!response.ok || !payload.user) {
         setAuthError(payload.error ?? "auth_failed");
         return;
@@ -454,14 +495,17 @@ export default function PlayerDashboardPage() {
     setActionPending(true);
     setActionError(null);
     try {
-      const response = await fetch(`/api/dm/campaigns/${activeCampaignId}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: actionText.trim(),
-          actorCharacterId: selectedCharacterId ?? undefined
-        })
-      });
+      const response = await fetch(
+        `/api/dm/campaigns/${activeCampaignId}/chat`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: actionText.trim(),
+            actorCharacterId: selectedCharacterId ?? undefined,
+          }),
+        },
+      );
       const payload = (await response.json()) as {
         turn?: { narration?: string };
         error?: string;
@@ -485,17 +529,22 @@ export default function PlayerDashboardPage() {
     setRollPending(true);
     setRollError(null);
     try {
-      const response = await fetch(`/api/dm/campaigns/${activeCampaignId}/roll`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          expression: rollExpression,
-          reason: rollReason,
-          actorCharacterId: selectedCharacterId ?? undefined,
-          autoResolve: true
-        })
-      });
-      const payload = (await response.json()) as RollOutcome & { error?: string };
+      const response = await fetch(
+        `/api/dm/campaigns/${activeCampaignId}/roll`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            expression: rollExpression,
+            reason: rollReason,
+            actorCharacterId: selectedCharacterId ?? undefined,
+            autoResolve: true,
+          }),
+        },
+      );
+      const payload = (await response.json()) as RollOutcome & {
+        error?: string;
+      };
       if (!response.ok || !payload.roll) {
         setRollError(payload.error ?? "roll_failed");
         return;
@@ -511,13 +560,16 @@ export default function PlayerDashboardPage() {
   };
 
   const activeCampaign = useMemo(
-    () => campaigns.find((campaign) => campaign.id === activeCampaignId) ?? null,
-    [activeCampaignId, campaigns]
+    () =>
+      campaigns.find((campaign) => campaign.id === activeCampaignId) ?? null,
+    [activeCampaignId, campaigns],
   );
 
   const visibleRolls = useMemo(() => {
     if (!selectedCharacterId) return recentRolls.slice(0, 30);
-    return recentRolls.filter((roll) => roll.actorCharacterId === selectedCharacterId).slice(0, 30);
+    return recentRolls
+      .filter((roll) => roll.actorCharacterId === selectedCharacterId)
+      .slice(0, 30);
   }, [recentRolls, selectedCharacterId]);
 
   const visibleTransitions = useMemo(() => {
@@ -525,8 +577,16 @@ export default function PlayerDashboardPage() {
     return recentTransitions
       .filter((entry) => {
         if (entry.actorCharacterId === selectedCharacterId) return true;
-        if (entry.entityType === "character" && entry.entityId === selectedCharacterId) return true;
-        if (entry.entityType === "inventory_item" && entry.entityId?.startsWith(`${selectedCharacterId}:`)) return true;
+        if (
+          entry.entityType === "character" &&
+          entry.entityId === selectedCharacterId
+        )
+          return true;
+        if (
+          entry.entityType === "inventory_item" &&
+          entry.entityId?.startsWith(`${selectedCharacterId}:`)
+        )
+          return true;
         return false;
       })
       .slice(0, 40);
@@ -545,17 +605,28 @@ export default function PlayerDashboardPage() {
       <main className="min-h-screen bg-[#05050b] px-6 py-16 text-cloud">
         <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[1.2fr_0.8fr]">
           <Card className="p-8">
-            <p className="text-xs uppercase tracking-[0.35em] text-cloud/60">Player Dashboard</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-cloud/60">
+              Player Dashboard
+            </p>
             <h1 className="section-title mt-4 text-4xl">
-              Character State <span className="magical-text">Persists Through Play</span>
+              Character State{" "}
+              <span className="magical-text">Persists Through Play</span>
             </h1>
             <p className="mt-4 text-sm text-cloud/80">
-              Gameplay advances through chat and dice. Every turn writes events, updates world and quest state, and keeps character progression visible.
+              Gameplay advances through chat and dice. Every turn writes events,
+              updates world and quest state, and keeps character progression
+              visible.
             </p>
             <div className="mt-6 grid gap-2 text-sm text-cloud/70">
-              <div className="rave-chip rounded-2xl px-4 py-2">Chat actions become authoritative session turns.</div>
-              <div className="rave-chip rounded-2xl px-4 py-2">Dice rolls are persisted as campaign events.</div>
-              <div className="rave-chip rounded-2xl px-4 py-2">Player dashboard stays synced via realtime stream + snapshots.</div>
+              <div className="rave-chip rounded-2xl px-4 py-2">
+                Chat actions become authoritative session turns.
+              </div>
+              <div className="rave-chip rounded-2xl px-4 py-2">
+                Dice rolls are persisted as campaign events.
+              </div>
+              <div className="rave-chip rounded-2xl px-4 py-2">
+                Player dashboard stays synced via realtime stream + snapshots.
+              </div>
             </div>
           </Card>
 
@@ -599,7 +670,9 @@ export default function PlayerDashboardPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 type="password"
               />
-              {authError && <div className="text-xs text-rose-300">{authError}</div>}
+              {authError && (
+                <div className="text-xs text-rose-300">{authError}</div>
+              )}
               <Button
                 onClick={submitAuth}
                 disabled={
@@ -609,7 +682,11 @@ export default function PlayerDashboardPage() {
                   (authMode === "register" && !displayName.trim())
                 }
               >
-                {authPending ? "Working..." : authMode === "login" ? "Sign In" : "Create Account"}
+                {authPending
+                  ? "Working..."
+                  : authMode === "login"
+                    ? "Sign In"
+                    : "Create Account"}
               </Button>
             </div>
           </Card>
@@ -623,13 +700,19 @@ export default function PlayerDashboardPage() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-cloud/60">Player Dashboard</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-cloud/60">
+              Player Dashboard
+            </p>
             <h1 className="section-title text-3xl">
-              Welcome, <span className="magical-text">{viewer.displayName}</span>
+              Welcome,{" "}
+              <span className="magical-text">{viewer.displayName}</span>
             </h1>
           </div>
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => void fetchCampaigns(activeCampaignId)}>
+            <Button
+              variant="secondary"
+              onClick={() => void fetchCampaigns(activeCampaignId)}
+            >
               Refresh
             </Button>
             <Button variant="secondary" onClick={logout}>
@@ -640,7 +723,9 @@ export default function PlayerDashboardPage() {
 
         <div className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
           <Card className="p-5">
-            <p className="text-xs uppercase tracking-[0.3em] text-cloud/60">Session Controls</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+              Session Controls
+            </p>
             <div className="mt-3 grid gap-3">
               <select
                 className="rave-input rounded-2xl px-3 py-2 text-sm"
@@ -666,7 +751,8 @@ export default function PlayerDashboardPage() {
                 onChange={(event) => {
                   const next = event.target.value || null;
                   setSelectedCharacterId(next);
-                  if (activeCampaignId) void fetchPlayerState(activeCampaignId, next);
+                  if (activeCampaignId)
+                    void fetchPlayerState(activeCampaignId, next);
                 }}
                 disabled={!state?.ownedCharacters.length}
               >
@@ -678,53 +764,94 @@ export default function PlayerDashboardPage() {
                 ))}
               </select>
 
-              {campaignError && <div className="text-xs text-rose-300">{campaignError}</div>}
-              {stateError && <div className="text-xs text-rose-300">{stateError}</div>}
-              {timelineError && <div className="text-xs text-rose-300">{timelineError}</div>}
-              {streamError && <div className="text-xs text-amber-300">{streamError}</div>}
+              {campaignError && (
+                <div className="text-xs text-rose-300">{campaignError}</div>
+              )}
+              {stateError && (
+                <div className="text-xs text-rose-300">{stateError}</div>
+              )}
+              {timelineError && (
+                <div className="text-xs text-rose-300">{timelineError}</div>
+              )}
+              {streamError && (
+                <div className="text-xs text-amber-300">{streamError}</div>
+              )}
             </div>
 
             <div className="mt-5 grid gap-2 text-xs text-cloud/70">
-              <div className="rave-chip rounded-xl px-3 py-2">Stream: {streamStatus}</div>
-              <div className="rave-chip rounded-xl px-3 py-2">Timeline: {timelineLoading ? "syncing" : "ready"}</div>
-              <div className="rave-chip rounded-xl px-3 py-2">Campaigns: {campaigns.length}</div>
-              <div className="rave-chip rounded-xl px-3 py-2">Updated: {formatAgo(activeCampaign?.updatedAt ?? null)}</div>
+              <div className="rave-chip rounded-xl px-3 py-2">
+                Stream: {streamStatus}
+              </div>
+              <div className="rave-chip rounded-xl px-3 py-2">
+                Timeline: {timelineLoading ? "syncing" : "ready"}
+              </div>
+              <div className="rave-chip rounded-xl px-3 py-2">
+                Campaigns: {campaigns.length}
+              </div>
+              <div className="rave-chip rounded-xl px-3 py-2">
+                Updated: {formatAgo(activeCampaign?.updatedAt ?? null)}
+              </div>
             </div>
           </Card>
 
           <Card className="p-5">
             {!activeCampaignId || !state ? (
               <div className="text-sm text-cloud/70">
-                {stateLoading ? "Loading player state..." : "Join or select a campaign to start playing."}
+                {stateLoading
+                  ? "Loading player state..."
+                  : "Join or select a campaign to start playing."}
               </div>
             ) : (
               <div className="grid gap-6">
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">World Scene</p>
-                    <h2 className="mt-2 text-xl text-white">{state.worldState.location}</h2>
-                    <p className="mt-2 text-sm text-cloud/80">{state.worldState.sceneSummary}</p>
-                    <p className="mt-2 text-xs text-cloud/60">Story beat: {state.worldState.storyBeat}</p>
-                    <p className="mt-1 text-xs text-cloud/60">Threats: {state.worldState.activeThreats.join(", ") || "None"}</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      World Scene
+                    </p>
+                    <h2 className="mt-2 text-xl text-white">
+                      {state.worldState.location}
+                    </h2>
+                    <p className="mt-2 text-sm text-cloud/80">
+                      {state.worldState.sceneSummary}
+                    </p>
+                    <p className="mt-2 text-xs text-cloud/60">
+                      Story beat: {state.worldState.storyBeat}
+                    </p>
+                    <p className="mt-1 text-xs text-cloud/60">
+                      Threats:{" "}
+                      {state.worldState.activeThreats.join(", ") || "None"}
+                    </p>
                   </div>
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">Character Focus</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      Character Focus
+                    </p>
                     {state.activeCharacter ? (
                       <>
                         <h2 className="mt-2 text-xl text-white">
-                          {state.activeCharacter.name} <span className="text-sm text-cloud/60">({state.activeCharacter.archetype})</span>
+                          {state.activeCharacter.name}{" "}
+                          <span className="text-sm text-cloud/60">
+                            ({state.activeCharacter.archetype})
+                          </span>
                         </h2>
                         <p className="mt-2 text-sm text-cloud/80">
-                          HP {state.activeCharacter.hpCurrent}/{state.activeCharacter.hpMax} (temp {state.activeCharacter.hpTemp})
+                          HP {state.activeCharacter.hpCurrent}/
+                          {state.activeCharacter.hpMax} (temp{" "}
+                          {state.activeCharacter.hpTemp})
                         </p>
-                        <p className="text-sm text-cloud/80">Status: {state.activeCharacter.status}</p>
+                        <p className="text-sm text-cloud/80">
+                          Status: {state.activeCharacter.status}
+                        </p>
                         {state.activeCharacter.notes && (
-                          <p className="mt-2 text-xs text-cloud/60">{state.activeCharacter.notes}</p>
+                          <p className="mt-2 text-xs text-cloud/60">
+                            {state.activeCharacter.notes}
+                          </p>
                         )}
                       </>
                     ) : (
                       <p className="mt-2 text-sm text-cloud/80">
-                        No owned character found yet. Join a campaign and create one.
+                        No owned character found yet. Join a campaign and create
+                        one.
                       </p>
                     )}
                   </div>
@@ -732,7 +859,9 @@ export default function PlayerDashboardPage() {
 
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">Chat Action</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      Chat Action
+                    </p>
                     <textarea
                       className="rave-input mt-3 h-24 w-full resize-none rounded-2xl p-3 text-sm"
                       value={actionText}
@@ -751,9 +880,16 @@ export default function PlayerDashboardPage() {
                         </button>
                       ))}
                     </div>
-                    {actionError && <p className="mt-2 text-xs text-rose-300">{actionError}</p>}
+                    {actionError && (
+                      <p className="mt-2 text-xs text-rose-300">
+                        {actionError}
+                      </p>
+                    )}
                     <div className="mt-3 flex justify-end">
-                      <Button onClick={sendAction} disabled={actionPending || !actionText.trim()}>
+                      <Button
+                        onClick={sendAction}
+                        disabled={actionPending || !actionText.trim()}
+                      >
                         {actionPending ? "Sending..." : "Send Action"}
                       </Button>
                     </div>
@@ -765,12 +901,16 @@ export default function PlayerDashboardPage() {
                   </div>
 
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">Dice + Resolve</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      Dice + Resolve
+                    </p>
                     <div className="mt-3 grid gap-2 sm:grid-cols-[0.35fr_0.65fr]">
                       <input
                         className="rave-input rounded-2xl px-3 py-2 text-sm"
                         value={rollExpression}
-                        onChange={(event) => setRollExpression(event.target.value)}
+                        onChange={(event) =>
+                          setRollExpression(event.target.value)
+                        }
                         placeholder="d20"
                       />
                       <input
@@ -780,9 +920,14 @@ export default function PlayerDashboardPage() {
                         placeholder="Reason (Perception check, etc.)"
                       />
                     </div>
-                    {rollError && <p className="mt-2 text-xs text-rose-300">{rollError}</p>}
+                    {rollError && (
+                      <p className="mt-2 text-xs text-rose-300">{rollError}</p>
+                    )}
                     <div className="mt-3 flex justify-end">
-                      <Button onClick={rollAndResolve} disabled={rollPending || !rollExpression.trim()}>
+                      <Button
+                        onClick={rollAndResolve}
+                        disabled={rollPending || !rollExpression.trim()}
+                      >
                         {rollPending ? "Rolling..." : "Roll + Resolve"}
                       </Button>
                     </div>
@@ -794,12 +939,13 @@ export default function PlayerDashboardPage() {
                             ? "border-emerald-400/40 bg-emerald-950/20"
                             : lastRoll.roll.criticalFailure
                               ? "border-rose-400/40 bg-rose-950/20"
-                              : "border-white/10 bg-black/30"
+                              : "border-white/10 bg-black/30",
                         )}
                       >
                         <p className="text-cloud/90">{lastRoll.summary}</p>
                         <p className="mt-1 text-xs text-cloud/60">
-                          Rolls: {lastRoll.roll.rolls.join(", ")} | Total: {lastRoll.roll.total}
+                          Rolls: {lastRoll.roll.rolls.join(", ")} | Total:{" "}
+                          {lastRoll.roll.total}
                         </p>
                       </div>
                     )}
@@ -808,29 +954,54 @@ export default function PlayerDashboardPage() {
 
                 <div className="grid gap-4 lg:grid-cols-[0.45fr_0.55fr]">
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">Player Stats</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      Player Stats
+                    </p>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-cloud/80">
-                      <div className="rave-chip rounded-xl px-3 py-2">Rolls: {state.stats.totalRolls}</div>
-                      <div className="rave-chip rounded-xl px-3 py-2">Avg Total: {state.stats.averageRollTotal ?? "n/a"}</div>
-                      <div className="rave-chip rounded-xl px-3 py-2">Crits: {state.stats.criticalSuccesses}</div>
-                      <div className="rave-chip rounded-xl px-3 py-2">Fumbles: {state.stats.criticalFailures}</div>
-                      <div className="rave-chip rounded-xl px-3 py-2">Actions: {state.stats.actionsTaken}</div>
-                      <div className="rave-chip rounded-xl px-3 py-2">DM Beats: {state.stats.dmResponsesSeen}</div>
+                      <div className="rave-chip rounded-xl px-3 py-2">
+                        Rolls: {state.stats.totalRolls}
+                      </div>
+                      <div className="rave-chip rounded-xl px-3 py-2">
+                        Avg Total: {state.stats.averageRollTotal ?? "n/a"}
+                      </div>
+                      <div className="rave-chip rounded-xl px-3 py-2">
+                        Crits: {state.stats.criticalSuccesses}
+                      </div>
+                      <div className="rave-chip rounded-xl px-3 py-2">
+                        Fumbles: {state.stats.criticalFailures}
+                      </div>
+                      <div className="rave-chip rounded-xl px-3 py-2">
+                        Actions: {state.stats.actionsTaken}
+                      </div>
+                      <div className="rave-chip rounded-xl px-3 py-2">
+                        DM Beats: {state.stats.dmResponsesSeen}
+                      </div>
                     </div>
                     <p className="mt-3 text-xs text-cloud/60">
-                      Last action: {formatAgo(state.stats.lastActionAt)} | Last roll: {formatAgo(state.stats.lastRollAt)}
+                      Last action: {formatAgo(state.stats.lastActionAt)} | Last
+                      roll: {formatAgo(state.stats.lastRollAt)}
                     </p>
                   </div>
 
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">Quest Tracker</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      Quest Tracker
+                    </p>
                     <div className="mt-3 grid gap-2 text-sm text-cloud/80">
                       {state.quests.length ? (
                         state.quests.slice(0, 6).map((quest) => (
-                          <div key={quest.id} className="rave-chip rounded-xl px-3 py-2">
+                          <div
+                            key={quest.id}
+                            className="rave-chip rounded-xl px-3 py-2"
+                          >
                             <div className="text-white">{quest.title}</div>
                             <div className="text-xs text-cloud/60">
-                              {quest.status} • {quest.progress}% • {quest.objectives.filter((obj) => !obj.completed).length} objectives left
+                              {quest.status} • {quest.progress}% •{" "}
+                              {
+                                quest.objectives.filter((obj) => !obj.completed)
+                                  .length
+                              }{" "}
+                              objectives left
                             </div>
                           </div>
                         ))
@@ -843,11 +1014,16 @@ export default function PlayerDashboardPage() {
 
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">Key Moments</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      Key Moments
+                    </p>
                     <ul className="mt-3 grid gap-2 text-sm text-cloud/80">
                       {state.keyMoments.length ? (
                         state.keyMoments.map((moment, index) => (
-                          <li key={`${moment}-${index}`} className="rave-chip rounded-xl px-3 py-2">
+                          <li
+                            key={`${moment}-${index}`}
+                            className="rave-chip rounded-xl px-3 py-2"
+                          >
                             {moment}
                           </li>
                         ))
@@ -858,14 +1034,23 @@ export default function PlayerDashboardPage() {
                   </div>
 
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">Recent Events</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      Recent Events
+                    </p>
                     <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto text-sm text-cloud/80">
                       {state.recentEvents.length ? (
                         state.recentEvents.slice(0, 24).map((event) => (
-                          <div key={event.id} className="rave-chip rounded-xl px-3 py-2">
-                            <div className="text-xs uppercase tracking-[0.2em] text-cloud/60">{event.type}</div>
+                          <div
+                            key={event.id}
+                            className="rave-chip rounded-xl px-3 py-2"
+                          >
+                            <div className="text-xs uppercase tracking-[0.2em] text-cloud/60">
+                              {event.type}
+                            </div>
                             <div className="mt-1">{event.summary}</div>
-                            <div className="mt-1 text-xs text-cloud/50">{formatAgo(event.createdAt)}</div>
+                            <div className="mt-1 text-xs text-cloud/50">
+                              {formatAgo(event.createdAt)}
+                            </div>
                           </div>
                         ))
                       ) : (
@@ -877,21 +1062,33 @@ export default function PlayerDashboardPage() {
 
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">Roll Timeline (Persisted)</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      Roll Timeline (Persisted)
+                    </p>
                     <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto text-sm text-cloud/80">
                       {!visibleRolls.length && timelineLoading ? (
-                        <p className="text-cloud/70">Loading roll timeline...</p>
+                        <p className="text-cloud/70">
+                          Loading roll timeline...
+                        </p>
                       ) : visibleRolls.length ? (
                         visibleRolls.map((roll) => (
-                          <div key={roll.id} className="rave-chip rounded-xl px-3 py-2">
+                          <div
+                            key={roll.id}
+                            className="rave-chip rounded-xl px-3 py-2"
+                          >
                             <div className="text-xs uppercase tracking-[0.2em] text-cloud/60">
                               {roll.expression} • {roll.outcomeStatus}
                             </div>
-                            <div className="mt-1 text-white">{roll.summary}</div>
-                            <div className="mt-1 text-xs text-cloud/60">
-                              Rolls: {roll.rolls.join(", ")} • Total: {roll.total}
+                            <div className="mt-1 text-white">
+                              {roll.summary}
                             </div>
-                            <div className="mt-1 text-xs text-cloud/50">{formatAgo(roll.createdAt)}</div>
+                            <div className="mt-1 text-xs text-cloud/60">
+                              Rolls: {roll.rolls.join(", ")} • Total:{" "}
+                              {roll.total}
+                            </div>
+                            <div className="mt-1 text-xs text-cloud/50">
+                              {formatAgo(roll.createdAt)}
+                            </div>
                           </div>
                         ))
                       ) : (
@@ -901,27 +1098,40 @@ export default function PlayerDashboardPage() {
                   </div>
 
                   <div className="rave-panel rounded-2xl p-4">
-                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">State Transitions (Persisted)</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-cloud/60">
+                      State Transitions (Persisted)
+                    </p>
                     <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto text-sm text-cloud/80">
                       {!visibleTransitions.length && timelineLoading ? (
-                        <p className="text-cloud/70">Loading state transitions...</p>
+                        <p className="text-cloud/70">
+                          Loading state transitions...
+                        </p>
                       ) : visibleTransitions.length ? (
                         visibleTransitions.map((transition) => (
-                          <div key={transition.id} className="rave-chip rounded-xl px-3 py-2">
+                          <div
+                            key={transition.id}
+                            className="rave-chip rounded-xl px-3 py-2"
+                          >
                             <div className="text-xs uppercase tracking-[0.2em] text-cloud/60">
-                              {transition.entityType} • {transition.transitionType}
+                              {transition.entityType} •{" "}
+                              {transition.transitionType}
                             </div>
                             <div className="mt-1 text-white">
-                              {transition.entityId ?? "n/a"} → {transition.fieldPath}
+                              {transition.entityId ?? "n/a"} →{" "}
+                              {transition.fieldPath}
                             </div>
                             <div className="mt-1 text-xs text-cloud/60">
                               {compactValue(transition.newValue)}
                             </div>
-                            <div className="mt-1 text-xs text-cloud/50">{formatAgo(transition.createdAt)}</div>
+                            <div className="mt-1 text-xs text-cloud/50">
+                              {formatAgo(transition.createdAt)}
+                            </div>
                           </div>
                         ))
                       ) : (
-                        <p className="text-cloud/70">No persisted transitions yet.</p>
+                        <p className="text-cloud/70">
+                          No persisted transitions yet.
+                        </p>
                       )}
                     </div>
                   </div>

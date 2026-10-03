@@ -480,7 +480,7 @@ export function AudioShelfPlayer({
                         key={item.id}
                         type="button"
                         onClick={() => void selectItem(item.id)}
-                      className={`group grid w-full gap-3 rounded-[24px] border px-4 py-4 text-left transition md:grid-cols-[minmax(0,1fr)_auto] md:items-start ${
+                        className={`group grid w-full gap-3 rounded-[24px] border px-4 py-4 text-left transition md:grid-cols-[minmax(0,1fr)_auto] md:items-start ${
                           isActive
                             ? "border-glow/40 bg-glow/10 shadow-[0_18px_40px_rgba(66,245,255,0.12)]"
                             : "border-white/10 bg-black/15 hover:border-white/20 hover:bg-white/5"

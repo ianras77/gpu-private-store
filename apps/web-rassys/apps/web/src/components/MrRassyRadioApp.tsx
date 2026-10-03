@@ -376,7 +376,11 @@ export function MrRassyRadioApp() {
                     </div>
                   </div>
                   <Badge className="bg-black/20 text-cloud/82">
-                    {hearing?.source === "llm" ? "Long listen" : "Booth jot"}
+                    {hearing?.source === "llm"
+                      ? "Long listen"
+                      : hearing?.source === "fallback"
+                        ? "Local fallback"
+                        : "Source not reported"}
                   </Badge>
                 </div>
 
@@ -555,7 +559,6 @@ export function MrRassyRadioApp() {
                 </div>
               </div>
             </section>
-
           </div>
         </div>
       </main>

@@ -7,15 +7,21 @@ import {
   buildContextPacket,
   ensureActiveSession,
   loadCampaignBundle,
-  loadMembershipRole
+  loadMembershipRole,
 } from "./context";
 import {
   createFallbackTurn,
   embedTextWithRassyIntelligence,
   runContextAwareDmTurn,
-  type DmContextPacket
+  type DmContextPacket,
 } from "./intelligence";
-import { dmQuery, ensureDmSchema, toJson, withCampaignLock, withDmTransaction } from "./db";
+import {
+  dmQuery,
+  ensureDmSchema,
+  toJson,
+  withCampaignLock,
+  withDmTransaction,
+} from "./db";
 import { getSystemPlugin, type SeedResult } from "./systems";
 import type {
   CampaignSnapshot,
@@ -28,18 +34,18 @@ import type {
   PublicUser,
   QuestPatch,
   QuestRecord,
-  UserRecord
+  UserRecord,
 } from "./types";
 
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(200),
-  displayName: z.string().trim().min(2).max(80)
+  displayName: z.string().trim().min(2).max(80),
 });
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8).max(200)
+  password: z.string().min(8).max(200),
 });
 
 const worldSeedSchema = z.object({
@@ -56,14 +62,14 @@ const worldSeedSchema = z.object({
   tableLines: z.string().trim().max(500).optional(),
   openingSituation: z.string().trim().min(2).max(600).optional(),
   playerHook: z.string().trim().min(2).max(600).optional(),
-  campaignTwist: z.string().trim().min(2).max(600).optional()
+  campaignTwist: z.string().trim().min(2).max(600).optional(),
 });
 
 const createCampaignSchema = z.object({
   name: z.string().trim().min(2).max(120),
   description: z.string().trim().min(10).max(4000),
   systemId: z.string().trim().min(1).max(80).default("gamma-world"),
-  worldSeed: worldSeedSchema.optional()
+  worldSeed: worldSeedSchema.optional(),
 });
 
 const createCharacterActionSchema = z.object({
@@ -74,7 +80,7 @@ const createCharacterActionSchema = z.object({
   usesCurrent: z.number().int().min(0).max(999).optional(),
   usesMax: z.number().int().min(0).max(999).optional(),
   cooldownTurns: z.number().int().min(0).max(1000).optional(),
-  metadata: z.record(z.string(), z.unknown()).optional()
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const createCharacterAttributeSchema = z
@@ -83,14 +89,14 @@ const createCharacterAttributeSchema = z
     valueNumber: z.number().finite().optional(),
     valueText: z.string().trim().max(500).optional(),
     valueJson: z.unknown().optional(),
-    source: z.string().trim().max(80).default("sheet")
+    source: z.string().trim().max(80).default("sheet"),
   })
   .refine(
     (value) =>
       typeof value.valueNumber === "number" ||
       typeof value.valueText === "string" ||
       typeof value.valueJson !== "undefined",
-    "attribute requires valueNumber, valueText, or valueJson"
+    "attribute requires valueNumber, valueText, or valueJson",
   );
 
 const createCharacterSchema = z.object({
@@ -112,11 +118,11 @@ const createCharacterSchema = z.object({
       z.object({
         name: z.string().trim().min(1).max(120),
         detail: z.string().trim().max(240).optional(),
-        quantity: z.number().int().min(0).max(999)
-      })
+        quantity: z.number().int().min(0).max(999),
+      }),
     )
     .max(300)
-    .optional()
+    .optional(),
 });
 
 const patchCharacterSchema = z.object({
@@ -134,15 +140,15 @@ const patchCharacterSchema = z.object({
           valueNumber: z.number().finite().optional(),
           valueText: z.string().trim().max(500).optional(),
           valueJson: z.unknown().optional(),
-          source: z.string().trim().max(80).default("sheet")
+          source: z.string().trim().max(80).default("sheet"),
         })
         .refine(
           (value) =>
             typeof value.valueNumber === "number" ||
             typeof value.valueText === "string" ||
             typeof value.valueJson !== "undefined",
-          "attribute requires valueNumber, valueText, or valueJson"
-        )
+          "attribute requires valueNumber, valueText, or valueJson",
+        ),
     )
     .max(120)
     .optional(),
@@ -156,8 +162,8 @@ const patchCharacterSchema = z.object({
         usesCurrent: z.number().int().min(0).max(999).optional(),
         usesMax: z.number().int().min(0).max(999).optional(),
         cooldownTurns: z.number().int().min(0).max(1000).optional(),
-        metadata: z.record(z.string(), z.unknown()).optional()
-      })
+        metadata: z.record(z.string(), z.unknown()).optional(),
+      }),
     )
     .max(120)
     .optional(),
@@ -168,17 +174,17 @@ const patchCharacterSchema = z.object({
       z.object({
         itemName: z.string().trim().min(1).max(120),
         quantityDelta: z.number().int().min(-999).max(999),
-        detail: z.string().trim().max(240).optional()
-      })
+        detail: z.string().trim().max(240).optional(),
+      }),
     )
     .max(200)
-    .optional()
+    .optional(),
 });
 
 const actionSchema = z.object({
   actionText: z.string().trim().min(1).max(5000),
   actorCharacterId: z.string().trim().min(1).max(120).optional(),
-  idempotencyKey: z.string().trim().min(8).max(180).optional()
+  idempotencyKey: z.string().trim().min(8).max(180).optional(),
 });
 
 const rollSchema = z.object({
@@ -186,26 +192,33 @@ const rollSchema = z.object({
   reason: z.string().trim().max(600).optional(),
   actorCharacterId: z.string().trim().min(1).max(120).optional(),
   autoResolve: z.boolean().default(true),
-  idempotencyKey: z.string().trim().min(8).max(180).optional()
+  idempotencyKey: z.string().trim().min(8).max(180).optional(),
 });
 
 const createInviteSchema = z.object({
   role: z.enum(["dm", "player"]).default("player"),
-  expiresInHours: z.number().int().min(1).max(24 * 30).default(72)
+  expiresInHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(72),
 });
 
 const addFactSchema = z.object({
   kind: z.string().trim().min(1).max(80).default("canon"),
   factText: z.string().trim().min(2).max(2000),
   confidence: z.number().int().min(1).max(100).default(90),
-  pinned: z.boolean().default(true)
+  pinned: z.boolean().default(true),
 });
 
 const normalizeEmail = (value: string) => value.trim().toLowerCase();
 const nowIso = () => new Date().toISOString();
 const createId = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
-const clampText = (value: string, maxLen: number) => value.trim().slice(0, maxLen);
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, value));
+const clampText = (value: string, maxLen: number) =>
+  value.trim().slice(0, maxLen);
 const slugify = (value: string) =>
   value
     .toLowerCase()
@@ -215,31 +228,42 @@ const slugify = (value: string) =>
     .slice(0, 120);
 
 const toRecord = (value: unknown): Record<string, unknown> =>
-  value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 
 const toStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+  Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
 
 const normalizeCharacterAttributes = (
-  raw: Array<z.infer<typeof createCharacterAttributeSchema>> | undefined
+  raw: Array<z.infer<typeof createCharacterAttributeSchema>> | undefined,
 ): Array<z.infer<typeof createCharacterAttributeSchema>> =>
   (raw ?? []).map((entry) => ({
     ...entry,
-    key: entry.key.trim().toLowerCase()
+    key: entry.key.trim().toLowerCase(),
   }));
 
 const normalizeCharacterActions = (
-  raw: Array<z.infer<typeof createCharacterActionSchema>> | undefined
+  raw: Array<z.infer<typeof createCharacterActionSchema>> | undefined,
 ): Array<z.infer<typeof createCharacterActionSchema>> =>
   (raw ?? []).map((entry) => ({
     ...entry,
-    key: (entry.key?.trim() || slugify(entry.name) || `action-${crypto.randomUUID().slice(0, 8)}`).toLowerCase()
+    key: (
+      entry.key?.trim() ||
+      slugify(entry.name) ||
+      `action-${crypto.randomUUID().slice(0, 8)}`
+    ).toLowerCase(),
   }));
 
 const normalizeInventorySeed = (
-  raw: Array<{ name: string; detail?: string; quantity: number }> | undefined
+  raw: Array<{ name: string; detail?: string; quantity: number }> | undefined,
 ): Array<{ name: string; detail?: string; quantity: number }> => {
-  const merged = new Map<string, { name: string; detail?: string; quantity: number }>();
+  const merged = new Map<
+    string,
+    { name: string; detail?: string; quantity: number }
+  >();
   for (const item of raw ?? []) {
     const key = item.name.trim().toLowerCase();
     if (!key || item.quantity <= 0) continue;
@@ -248,7 +272,7 @@ const normalizeInventorySeed = (
       merged.set(key, {
         name: item.name.trim(),
         detail: item.detail,
-        quantity: item.quantity
+        quantity: item.quantity,
       });
       continue;
     }
@@ -256,7 +280,7 @@ const normalizeInventorySeed = (
     merged.set(key, {
       name: existing.name,
       detail: item.detail ?? existing.detail,
-      quantity: existing.quantity + item.quantity
+      quantity: existing.quantity + item.quantity,
     });
   }
   return [...merged.values()];
@@ -298,12 +322,13 @@ const ensureSentence = (value: string, maxLen: number) => {
   return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
 };
 
-const lowerFirst = (value: string) => (value ? `${value.charAt(0).toLowerCase()}${value.slice(1)}` : value);
+const lowerFirst = (value: string) =>
+  value ? `${value.charAt(0).toLowerCase()}${value.slice(1)}` : value;
 
 const applyWorldSeedOverrides = (
   baseSeed: SeedResult,
   campaignName: string,
-  worldSeed?: CampaignWorldSeed
+  worldSeed?: CampaignWorldSeed,
 ): SeedResult => {
   if (!worldSeed) return baseSeed;
 
@@ -312,20 +337,27 @@ const applyWorldSeedOverrides = (
   const partyFocus = uniqueStrings(worldSeed.partyFocus, 4);
   const stakes = uniqueStrings(worldSeed.stakes, 4);
 
-  const location = worldSeed.startingPoint?.trim() || baseSeed.worldState.location;
+  const location =
+    worldSeed.startingPoint?.trim() || baseSeed.worldState.location;
   const openingSituation = worldSeed.openingSituation?.trim();
   const playerHook = worldSeed.playerHook?.trim();
   const twist = worldSeed.campaignTwist?.trim();
   const landmark = worldSeed.landmark?.trim();
   const techLevel = worldSeed.techLevel?.trim();
-  const activeThreats = threats.length ? threats : baseSeed.worldState.activeThreats;
+  const activeThreats = threats.length
+    ? threats
+    : baseSeed.worldState.activeThreats;
 
   const sceneSummary = [
     `${campaignName} opens in ${location}.`,
-    openingSituation ? ensureSentence(openingSituation, 280) : baseSeed.worldState.sceneSummary,
+    openingSituation
+      ? ensureSentence(openingSituation, 280)
+      : baseSeed.worldState.sceneSummary,
     landmark ? `Signature landmark: ${ensureSentence(landmark, 180)}` : "",
-    factions.length ? `Factions already moving: ${humanList(factions, "local powers")}.` : "",
-    techLevel ? `World texture: ${ensureSentence(techLevel, 180)}` : ""
+    factions.length
+      ? `Factions already moving: ${humanList(factions, "local powers")}.`
+      : "",
+    techLevel ? `World texture: ${ensureSentence(techLevel, 180)}` : "",
   ]
     .filter((value) => value.length > 0)
     .join(" ");
@@ -337,9 +369,15 @@ const applyWorldSeedOverrides = (
       : baseSeed.worldState.storyBeat;
 
   const questSummary = [
-    openingSituation ? ensureSentence(openingSituation, 180) : baseSeed.initialQuest.summary,
-    stakes.length ? `The party must ${lowerFirst(humanList(stakes, "survive the opening crisis"))}.` : "",
-    twist ? `A hidden complication shadows the first move: ${ensureSentence(twist, 180)}` : ""
+    openingSituation
+      ? ensureSentence(openingSituation, 180)
+      : baseSeed.initialQuest.summary,
+    stakes.length
+      ? `The party must ${lowerFirst(humanList(stakes, "survive the opening crisis"))}.`
+      : "",
+    twist
+      ? `A hidden complication shadows the first move: ${ensureSentence(twist, 180)}`
+      : "",
   ]
     .filter((value) => value.length > 0)
     .join(" ");
@@ -347,13 +385,19 @@ const applyWorldSeedOverrides = (
   const questObjectives = uniqueStrings(
     [
       playerHook ? `Act on the first hook: ${clampText(playerHook, 96)}` : "",
-      factions[0] ? `Learn what ${clampText(factions[0], 80)} wants from ${location}` : "",
-      activeThreats[0] ? `Contain or outmaneuver ${clampText(activeThreats[0], 80)}` : "",
+      factions[0]
+        ? `Learn what ${clampText(factions[0], 80)} wants from ${location}`
+        : "",
+      activeThreats[0]
+        ? `Contain or outmaneuver ${clampText(activeThreats[0], 80)}`
+        : "",
       stakes[0] ? `Push toward ${lowerFirst(clampText(stakes[0], 100))}` : "",
-      partyFocus[0] ? `Get the ${lowerFirst(clampText(partyFocus[0], 90))} moving as a unit` : "",
-      ...baseSeed.initialQuest.objectives
+      partyFocus[0]
+        ? `Get the ${lowerFirst(clampText(partyFocus[0], 90))} moving as a unit`
+        : "",
+      ...baseSeed.initialQuest.objectives,
     ],
-    3
+    3,
   );
 
   return {
@@ -368,21 +412,29 @@ const applyWorldSeedOverrides = (
         worldSeed.genre?.trim(),
         worldSeed.tone?.trim(),
         landmark,
-        techLevel
+        techLevel,
       ]
-        .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        .filter(
+          (value): value is string =>
+            typeof value === "string" && value.trim().length > 0,
+        )
         .map((value) => clampText(value, 180))
-        .join(", ")
+        .join(", "),
     },
     initialQuest: {
       ...baseSeed.initialQuest,
       summary: questSummary,
-      objectives: questObjectives.length ? questObjectives : baseSeed.initialQuest.objectives
-    }
+      objectives: questObjectives.length
+        ? questObjectives
+        : baseSeed.initialQuest.objectives,
+    },
   };
 };
 
-const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed): SeedFactRecord[] => {
+const buildWorldSeedFacts = (
+  campaignName: string,
+  worldSeed?: CampaignWorldSeed,
+): SeedFactRecord[] => {
   if (!worldSeed) return [];
 
   const factions = uniqueStrings(worldSeed.factions, 4);
@@ -397,12 +449,14 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           text: `Campaign '${campaignName}' premise: ${[
             worldSeed.genre,
             worldSeed.tone ? `${worldSeed.tone} tone` : "",
-            worldSeed.pacing ? `${worldSeed.pacing} pacing` : ""
+            worldSeed.pacing ? `${worldSeed.pacing} pacing` : "",
           ]
-            .filter((value) => typeof value === "string" && value.trim().length > 0)
+            .filter(
+              (value) => typeof value === "string" && value.trim().length > 0,
+            )
             .join(", ")}`,
           confidence: 96,
-          pinned: true
+          pinned: true,
         }
       : null,
     worldSeed.startingPoint
@@ -410,7 +464,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:starting_point",
           text: `Opening location: ${clampText(worldSeed.startingPoint, 160)}`,
           confidence: 98,
-          pinned: true
+          pinned: true,
         }
       : null,
     worldSeed.openingSituation
@@ -418,7 +472,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:opening_situation",
           text: `Opening situation: ${clampText(worldSeed.openingSituation, 320)}`,
           confidence: 98,
-          pinned: true
+          pinned: true,
         }
       : null,
     worldSeed.playerHook
@@ -426,7 +480,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:player_hook",
           text: `Player hook: ${clampText(worldSeed.playerHook, 320)}`,
           confidence: 97,
-          pinned: true
+          pinned: true,
         }
       : null,
     worldSeed.campaignTwist
@@ -434,7 +488,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:twist",
           text: `Hidden complication: ${clampText(worldSeed.campaignTwist, 320)}`,
           confidence: 92,
-          pinned: true
+          pinned: true,
         }
       : null,
     worldSeed.landmark
@@ -442,7 +496,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:landmark",
           text: `Signature landmark: ${clampText(worldSeed.landmark, 280)}`,
           confidence: 90,
-          pinned: true
+          pinned: true,
         }
       : null,
     worldSeed.techLevel
@@ -450,7 +504,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:tech_level",
           text: `Tech or magic texture: ${clampText(worldSeed.techLevel, 240)}`,
           confidence: 88,
-          pinned: true
+          pinned: true,
         }
       : null,
     factions.length
@@ -458,7 +512,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:factions",
           text: `Key factions in motion: ${humanList(factions, "local powers")}`,
           confidence: 92,
-          pinned: true
+          pinned: true,
         }
       : null,
     threats.length
@@ -466,7 +520,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:threats",
           text: `Immediate threats: ${humanList(threats, "danger gathering nearby")}`,
           confidence: 92,
-          pinned: true
+          pinned: true,
         }
       : null,
     partyFocus.length
@@ -474,7 +528,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:party_focus",
           text: `Party identity: ${humanList(partyFocus, "adventurers")}`,
           confidence: 85,
-          pinned: true
+          pinned: true,
         }
       : null,
     stakes.length
@@ -482,7 +536,7 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:stakes",
           text: `Campaign stakes: ${humanList(stakes, "survive the opening crisis")}`,
           confidence: 94,
-          pinned: true
+          pinned: true,
         }
       : null,
     worldSeed.tableLines
@@ -490,9 +544,9 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
           key: "seed:table_lines",
           text: `Table safety boundaries: ${clampText(worldSeed.tableLines, 320)}`,
           confidence: 99,
-          pinned: true
+          pinned: true,
         }
-      : null
+      : null,
   ];
 
   return factRows.filter((entry): entry is SeedFactRecord => Boolean(entry));
@@ -501,13 +555,20 @@ const buildWorldSeedFacts = (campaignName: string, worldSeed?: CampaignWorldSeed
 const insertWorldSeedFacts = async (
   client: PoolClient,
   campaignId: string,
-  facts: SeedFactRecord[]
+  facts: SeedFactRecord[],
 ) => {
   for (const fact of facts) {
     await client.query(
       `INSERT INTO dm_memory_facts (id, campaign_id, kind, fact_key, fact_text, confidence, pinned, created_at, updated_at)
        VALUES ($1, $2, 'world_seed', $3, $4, $5, $6, now(), now())`,
-      [createId("fact"), campaignId, fact.key, fact.text, fact.confidence, fact.pinned]
+      [
+        createId("fact"),
+        campaignId,
+        fact.key,
+        fact.text,
+        fact.confidence,
+        fact.pinned,
+      ],
     );
   }
 };
@@ -523,7 +584,9 @@ const compactContextForRetry = (context: DmContextPacket): DmContextPacket => ({
     hpMax: character.hpMax,
     hpTemp: character.hpTemp,
     status: character.status,
-    inventory: Array.isArray(character.inventory) ? character.inventory.slice(0, 8) : []
+    inventory: Array.isArray(character.inventory)
+      ? character.inventory.slice(0, 8)
+      : [],
   })),
   quests: context.quests.slice(0, 8),
   recentTurns: context.recentTurns.slice(0, 8),
@@ -533,8 +596,8 @@ const compactContextForRetry = (context: DmContextPacket): DmContextPacket => ({
   compendiumContext: context.compendiumContext?.slice(0, 6),
   contextMeta: {
     ...(context.contextMeta ?? {}),
-    compactRetry: true
-  }
+    compactRetry: true,
+  },
 });
 
 type CharacterTemplate = {
@@ -545,15 +608,21 @@ type CharacterTemplate = {
   actions?: Array<z.infer<typeof createCharacterActionSchema>>;
 };
 
-const getArchetypeTemplate = async (systemId: string, archetype: string): Promise<CharacterTemplate | null> => {
-  const result = await dmQuery<{ id: string; data: Record<string, unknown> | null }>(
+const getArchetypeTemplate = async (
+  systemId: string,
+  archetype: string,
+): Promise<CharacterTemplate | null> => {
+  const result = await dmQuery<{
+    id: string;
+    data: Record<string, unknown> | null;
+  }>(
     `SELECT id, data
      FROM dm_compendium_entries
      WHERE system_id = $1
        AND entry_type = 'archetype_template'
        AND lower(name) = lower($2)
      LIMIT 1`,
-    [systemId, archetype]
+    [systemId, archetype],
   );
 
   const row = result.rows[0];
@@ -573,10 +642,11 @@ const getArchetypeTemplate = async (systemId: string, archetype: string): Promis
 
   return {
     entryId: row.id,
-    playerType: typeof data.playerType === "string" ? data.playerType : undefined,
+    playerType:
+      typeof data.playerType === "string" ? data.playerType : undefined,
     specialTraits: toStringArray(data.specialTraits),
     attributes: normalizeCharacterAttributes(attributes),
-    actions: normalizeCharacterActions(actions)
+    actions: normalizeCharacterActions(actions),
   };
 };
 
@@ -660,7 +730,9 @@ const parseDiceExpression = (value: string) => {
 const rollDice = (expression: string): DiceRollResult => {
   const normalized = expression.trim().toLowerCase();
   const { count, sides, modifier } = parseDiceExpression(normalized);
-  const rolls = Array.from({ length: count }, () => crypto.randomInt(1, sides + 1));
+  const rolls = Array.from({ length: count }, () =>
+    crypto.randomInt(1, sides + 1),
+  );
   const rollTotal = rolls.reduce((sum, value) => sum + value, 0);
   const total = rollTotal + modifier;
   const criticalSuccess = count === 1 && sides === 20 && rolls[0] === 20;
@@ -673,7 +745,7 @@ const rollDice = (expression: string): DiceRollResult => {
     rolls,
     total,
     criticalSuccess,
-    criticalFailure
+    criticalFailure,
   };
 };
 
@@ -682,13 +754,21 @@ const toPublicUser = (user: UserRecord): PublicUser => ({
   email: user.email,
   displayName: user.displayName,
   createdAt: user.createdAt,
-  lastLoginAt: user.lastLoginAt
+  lastLoginAt: user.lastLoginAt,
 });
 
 const hashInviteToken = (token: string) =>
-  crypto.createHash("sha256").update(`${token}:${process.env.DM_JWT_SECRET ?? "development-only-dm-secret"}`).digest("hex");
+  crypto
+    .createHash("sha256")
+    .update(
+      `${token}:${process.env.DM_JWT_SECRET ?? "development-only-dm-secret"}`,
+    )
+    .digest("hex");
 
-const assertMembership = async (campaignId: string, userId: string): Promise<DmRole> => {
+const assertMembership = async (
+  campaignId: string,
+  userId: string,
+): Promise<DmRole> => {
   const role = await loadMembershipRole(campaignId, userId);
   if (!role) throw new Error("forbidden");
   return role;
@@ -697,7 +777,7 @@ const assertMembership = async (campaignId: string, userId: string): Promise<DmR
 const resolveIdempotentAction = async (
   client: PoolClient,
   campaignId: string,
-  idempotencyKey: string
+  idempotencyKey: string,
 ): Promise<ActionResultPayload | null> => {
   const existing = await client.query<{
     result_payload: ActionResultPayload | null;
@@ -707,56 +787,64 @@ const resolveIdempotentAction = async (
      FROM dm_turns
      WHERE campaign_id = $1 AND idempotency_key = $2
      LIMIT 1`,
-    [campaignId, idempotencyKey]
+    [campaignId, idempotencyKey],
   );
 
   const turn = existing.rows[0];
   if (!turn) return null;
-  if (turn.status === "applied" && turn.result_payload) return turn.result_payload;
+  if (turn.status === "applied" && turn.result_payload)
+    return turn.result_payload;
   if (turn.status === "processing") throw new Error("turn_in_progress");
   if (turn.status === "failed") throw new Error("turn_previously_failed");
   return null;
 };
 
-const extractAutoFacts = (patch: DmTurnPatch): Array<{ key: string; text: string; confidence: number }> => {
+const extractAutoFacts = (
+  patch: DmTurnPatch,
+): Array<{ key: string; text: string; confidence: number }> => {
   const facts: Array<{ key: string; text: string; confidence: number }> = [];
 
   if (patch.worldPatch?.location) {
     facts.push({
       key: "world:location",
       text: `Current location: ${clampText(patch.worldPatch.location, 240)}`,
-      confidence: 88
+      confidence: 88,
     });
   }
   if (patch.worldPatch?.weather) {
     facts.push({
       key: "world:weather",
       text: `Current weather: ${clampText(patch.worldPatch.weather, 240)}`,
-      confidence: 84
+      confidence: 84,
     });
   }
   if (patch.worldPatch?.storyBeat) {
     facts.push({
       key: "world:story_beat",
       text: `Story beat: ${clampText(patch.worldPatch.storyBeat, 320)}`,
-      confidence: 86
+      confidence: 86,
     });
   }
 
   for (const quest of patch.questPatches ?? []) {
-    const questKey = quest.questId ? `quest:${quest.questId}` : `quest-title:${slugify(quest.title) || "unknown"}`;
+    const questKey = quest.questId
+      ? `quest:${quest.questId}`
+      : `quest-title:${slugify(quest.title) || "unknown"}`;
     const status = quest.status ?? "active";
-    const progress = typeof quest.progress === "number" ? clamp(Math.round(quest.progress), 0, 100) : null;
+    const progress =
+      typeof quest.progress === "number"
+        ? clamp(Math.round(quest.progress), 0, 100)
+        : null;
     facts.push({
       key: `${questKey}:status`,
       text: `Quest '${clampText(quest.title, 160)}' status: ${status}${progress === null ? "" : ` (${progress}% progress)`}`,
-      confidence: 82
+      confidence: 82,
     });
     if (quest.summary) {
       facts.push({
         key: `${questKey}:summary`,
         text: `Quest summary: ${clampText(quest.summary, 320)}`,
-        confidence: 74
+        confidence: 74,
       });
     }
   }
@@ -766,7 +854,7 @@ const extractAutoFacts = (patch: DmTurnPatch): Array<{ key: string; text: string
       facts.push({
         key: `character:${character.characterId}:status`,
         text: `Character ${character.characterId} status: ${clampText(character.status, 140)}`,
-        confidence: 76
+        confidence: 76,
       });
     }
   }
@@ -774,7 +862,11 @@ const extractAutoFacts = (patch: DmTurnPatch): Array<{ key: string; text: string
   return facts.slice(0, 40);
 };
 
-const upsertAutoFacts = async (client: PoolClient, campaignId: string, patch: DmTurnPatch) => {
+const upsertAutoFacts = async (
+  client: PoolClient,
+  campaignId: string,
+  patch: DmTurnPatch,
+) => {
   const facts = extractAutoFacts(patch);
   if (!facts.length) return;
 
@@ -787,7 +879,7 @@ const upsertAutoFacts = async (client: PoolClient, campaignId: string, patch: Dm
        WHERE campaign_id = $1
          AND fact_key = $2
        RETURNING id`,
-      [campaignId, fact.key, fact.text, fact.confidence]
+      [campaignId, fact.key, fact.text, fact.confidence],
     );
     if (updated.rowCount && updated.rowCount > 0) {
       continue;
@@ -796,7 +888,7 @@ const upsertAutoFacts = async (client: PoolClient, campaignId: string, patch: Dm
     await client.query(
       `INSERT INTO dm_memory_facts (id, campaign_id, kind, fact_key, fact_text, confidence, pinned, created_at, updated_at)
        VALUES ($1, $2, 'auto_state', $3, $4, $5, false, now(), now())`,
-      [createId("fact"), campaignId, fact.key, fact.text, fact.confidence]
+      [createId("fact"), campaignId, fact.key, fact.text, fact.confidence],
     );
   }
 };
@@ -821,12 +913,13 @@ type TransitionWriteInput = {
   metadata?: Record<string, unknown>;
 };
 
-const transitionJson = (value: unknown) => (typeof value === "undefined" ? null : toJson(value));
+const transitionJson = (value: unknown) =>
+  typeof value === "undefined" ? null : toJson(value);
 
 const writeStateTransition = async (
   client: PoolClient,
   source: TransitionSourceContext,
-  input: TransitionWriteInput
+  input: TransitionWriteInput,
 ) => {
   await client.query(
     `INSERT INTO dm_state_transitions (
@@ -865,15 +958,15 @@ const writeStateTransition = async (
       input.transitionType ?? "set",
       transitionJson(input.oldValue),
       transitionJson(input.newValue),
-      toJson(input.metadata ?? {})
-    ]
+      toJson(input.metadata ?? {}),
+    ],
   );
 };
 
 const writePatchStateTransitions = async (
   client: PoolClient,
   source: TransitionSourceContext,
-  patch: DmTurnPatch
+  patch: DmTurnPatch,
 ) => {
   const world = patch.worldPatch;
   if (world) {
@@ -884,7 +977,7 @@ const writePatchStateTransitions = async (
       ["activeThreats", world.activeThreats],
       ["sceneSummary", world.sceneSummary],
       ["storyBeat", world.storyBeat],
-      ["visualPrompt", world.visualPrompt]
+      ["visualPrompt", world.visualPrompt],
     ];
 
     for (const [field, value] of worldFields) {
@@ -894,19 +987,20 @@ const writePatchStateTransitions = async (
         entityId: source.campaignId,
         fieldPath: field,
         transitionType: "set",
-        newValue: value
+        newValue: value,
       });
     }
   }
 
   for (const questPatch of patch.questPatches ?? []) {
-    const questEntityId = questPatch.questId ?? `title:${slugify(questPatch.title) || "unknown"}`;
+    const questEntityId =
+      questPatch.questId ?? `title:${slugify(questPatch.title) || "unknown"}`;
     await writeStateTransition(client, source, {
       entityType: "quest",
       entityId: questEntityId,
       fieldPath: "title",
       transitionType: questPatch.questId ? "set" : "create",
-      newValue: questPatch.title
+      newValue: questPatch.title,
     });
 
     if (typeof questPatch.summary === "string") {
@@ -915,7 +1009,7 @@ const writePatchStateTransitions = async (
         entityId: questEntityId,
         fieldPath: "summary",
         transitionType: "set",
-        newValue: questPatch.summary
+        newValue: questPatch.summary,
       });
     }
     if (typeof questPatch.status === "string") {
@@ -924,7 +1018,7 @@ const writePatchStateTransitions = async (
         entityId: questEntityId,
         fieldPath: "status",
         transitionType: "set",
-        newValue: questPatch.status
+        newValue: questPatch.status,
       });
     }
     if (typeof questPatch.progress === "number") {
@@ -933,7 +1027,7 @@ const writePatchStateTransitions = async (
         entityId: questEntityId,
         fieldPath: "progress",
         transitionType: "set",
-        newValue: clamp(Math.round(questPatch.progress), 0, 100)
+        newValue: clamp(Math.round(questPatch.progress), 0, 100),
       });
     }
     if (questPatch.objectives?.length) {
@@ -944,8 +1038,8 @@ const writePatchStateTransitions = async (
         transitionType: "replace",
         newValue: questPatch.objectives.map((objective) => ({
           text: objective.text,
-          completed: Boolean(objective.completed)
-        }))
+          completed: Boolean(objective.completed),
+        })),
       });
     }
   }
@@ -957,7 +1051,7 @@ const writePatchStateTransitions = async (
         entityId: characterPatch.characterId,
         fieldPath: "hpCurrent",
         transitionType: "delta",
-        newValue: { delta: characterPatch.hpDelta }
+        newValue: { delta: characterPatch.hpDelta },
       });
     }
     if (typeof characterPatch.hpTemp === "number") {
@@ -966,7 +1060,7 @@ const writePatchStateTransitions = async (
         entityId: characterPatch.characterId,
         fieldPath: "hpTemp",
         transitionType: "set",
-        newValue: characterPatch.hpTemp
+        newValue: characterPatch.hpTemp,
       });
     }
     if (typeof characterPatch.status === "string") {
@@ -975,16 +1069,19 @@ const writePatchStateTransitions = async (
         entityId: characterPatch.characterId,
         fieldPath: "status",
         transitionType: "set",
-        newValue: characterPatch.status
+        newValue: characterPatch.status,
       });
     }
-    if (typeof characterPatch.notesAppend === "string" && characterPatch.notesAppend.trim()) {
+    if (
+      typeof characterPatch.notesAppend === "string" &&
+      characterPatch.notesAppend.trim()
+    ) {
       await writeStateTransition(client, source, {
         entityType: "character",
         entityId: characterPatch.characterId,
         fieldPath: "notes",
         transitionType: "append",
-        newValue: clampText(characterPatch.notesAppend, 1200)
+        newValue: clampText(characterPatch.notesAppend, 1200),
       });
     }
     for (const delta of characterPatch.inventoryDelta ?? []) {
@@ -993,7 +1090,11 @@ const writePatchStateTransitions = async (
         entityId: `${characterPatch.characterId}:${slugify(delta.itemName) || "item"}`,
         fieldPath: "quantity",
         transitionType: "delta",
-        newValue: { itemName: delta.itemName, quantityDelta: delta.quantityDelta, detail: delta.detail ?? null }
+        newValue: {
+          itemName: delta.itemName,
+          quantityDelta: delta.quantityDelta,
+          detail: delta.detail ?? null,
+        },
       });
     }
   }
@@ -1005,7 +1106,7 @@ const recordPatchEvents = async (
   sessionId: string,
   turnId: string,
   actorUserId: string,
-  patch: DmTurnPatch
+  patch: DmTurnPatch,
 ) => {
   if (patch.worldPatch) {
     await client.query(
@@ -1018,8 +1119,8 @@ const recordPatchEvents = async (
         turnId,
         actorUserId,
         "World state patched",
-        toJson(patch.worldPatch)
-      ]
+        toJson(patch.worldPatch),
+      ],
     );
   }
 
@@ -1034,8 +1135,8 @@ const recordPatchEvents = async (
         turnId,
         actorUserId,
         `Quest update: ${clampText(questPatch.title, 140)}`,
-        toJson(questPatch)
-      ]
+        toJson(questPatch),
+      ],
     );
   }
 
@@ -1051,8 +1152,8 @@ const recordPatchEvents = async (
         actorUserId,
         characterPatch.characterId,
         `Character update: ${characterPatch.characterId}`,
-        toJson(characterPatch)
-      ]
+        toJson(characterPatch),
+      ],
     );
   }
 };
@@ -1060,7 +1161,7 @@ const recordPatchEvents = async (
 const applyQuestPatches = async (
   client: PoolClient,
   campaignId: string,
-  patches: QuestPatch[] | undefined
+  patches: QuestPatch[] | undefined,
 ) => {
   if (!patches?.length) return;
 
@@ -1068,7 +1169,7 @@ const applyQuestPatches = async (
     const existingById = patch.questId
       ? await client.query<{ id: string }>(
           `SELECT id FROM dm_quests WHERE campaign_id = $1 AND id = $2 LIMIT 1`,
-          [campaignId, patch.questId]
+          [campaignId, patch.questId],
         )
       : { rows: [] as Array<{ id: string }> };
 
@@ -1077,7 +1178,7 @@ const applyQuestPatches = async (
       (
         await client.query<{ id: string }>(
           `SELECT id FROM dm_quests WHERE campaign_id = $1 AND lower(title) = lower($2) LIMIT 1`,
-          [campaignId, patch.title]
+          [campaignId, patch.title],
         )
       ).rows[0];
 
@@ -1093,8 +1194,8 @@ const applyQuestPatches = async (
           patch.title,
           patch.summary ?? "",
           patch.status ?? "active",
-          clamp(Math.round(patch.progress ?? 0), 0, 100)
-        ]
+          clamp(Math.round(patch.progress ?? 0), 0, 100),
+        ],
       );
     } else {
       await client.query(
@@ -1111,19 +1212,30 @@ const applyQuestPatches = async (
           patch.title,
           patch.summary ?? null,
           patch.status ?? null,
-          typeof patch.progress === "number" ? clamp(Math.round(patch.progress), 0, 100) : null
-        ]
+          typeof patch.progress === "number"
+            ? clamp(Math.round(patch.progress), 0, 100)
+            : null,
+        ],
       );
     }
 
     if (patch.objectives?.length) {
-      await client.query(`DELETE FROM dm_quest_objectives WHERE quest_id = $1`, [questId]);
+      await client.query(
+        `DELETE FROM dm_quest_objectives WHERE quest_id = $1`,
+        [questId],
+      );
       let ord = 0;
       for (const objective of patch.objectives) {
         await client.query(
           `INSERT INTO dm_quest_objectives (id, quest_id, ord, text, completed)
            VALUES ($1, $2, $3, $4, $5)`,
-          [createId("objective"), questId, ord, objective.text, Boolean(objective.completed)]
+          [
+            createId("objective"),
+            questId,
+            ord,
+            objective.text,
+            Boolean(objective.completed),
+          ],
         );
         ord += 1;
       }
@@ -1134,7 +1246,7 @@ const applyQuestPatches = async (
 const applyInventoryDelta = async (
   client: PoolClient,
   characterId: string,
-  inventoryDelta: CharacterPatch["inventoryDelta"]
+  inventoryDelta: CharacterPatch["inventoryDelta"],
 ) => {
   for (const delta of inventoryDelta ?? []) {
     const existing = await client.query<{ id: string; quantity: number }>(
@@ -1142,7 +1254,7 @@ const applyInventoryDelta = async (
        FROM dm_inventory_items
        WHERE character_id = $1 AND lower(name) = lower($2)
        ORDER BY updated_at DESC, id ASC`,
-      [characterId, delta.itemName]
+      [characterId, delta.itemName],
     );
 
     if (!existing.rows.length) {
@@ -1150,16 +1262,28 @@ const applyInventoryDelta = async (
       await client.query(
         `INSERT INTO dm_inventory_items (id, character_id, name, detail, quantity, updated_at)
          VALUES ($1, $2, $3, $4, $5, now())`,
-        [createId("item"), characterId, delta.itemName, delta.detail ?? null, delta.quantityDelta]
+        [
+          createId("item"),
+          characterId,
+          delta.itemName,
+          delta.detail ?? null,
+          delta.quantityDelta,
+        ],
       );
       continue;
     }
 
     const item = existing.rows[0];
-    const mergedQuantity = existing.rows.reduce((total, row) => total + row.quantity, 0);
+    const mergedQuantity = existing.rows.reduce(
+      (total, row) => total + row.quantity,
+      0,
+    );
     const nextQuantity = mergedQuantity + delta.quantityDelta;
     if (nextQuantity <= 0) {
-      await client.query(`DELETE FROM dm_inventory_items WHERE id = ANY($1::text[])`, [existing.rows.map((row) => row.id)]);
+      await client.query(
+        `DELETE FROM dm_inventory_items WHERE id = ANY($1::text[])`,
+        [existing.rows.map((row) => row.id)],
+      );
       continue;
     }
 
@@ -1169,13 +1293,14 @@ const applyInventoryDelta = async (
            detail = COALESCE($3, detail),
            updated_at = now()
       WHERE id = $1`,
-      [item.id, nextQuantity, delta.detail ?? null]
+      [item.id, nextQuantity, delta.detail ?? null],
     );
 
     if (existing.rows.length > 1) {
-      await client.query(`DELETE FROM dm_inventory_items WHERE id = ANY($1::text[])`, [
-        existing.rows.slice(1).map((row) => row.id)
-      ]);
+      await client.query(
+        `DELETE FROM dm_inventory_items WHERE id = ANY($1::text[])`,
+        [existing.rows.slice(1).map((row) => row.id)],
+      );
     }
   }
 };
@@ -1184,7 +1309,7 @@ const upsertCharacterAttributes = async (
   client: PoolClient,
   characterId: string,
   systemId: string,
-  attributes: Array<z.infer<typeof createCharacterAttributeSchema>> | undefined
+  attributes: Array<z.infer<typeof createCharacterAttributeSchema>> | undefined,
 ) => {
   if (!attributes) return;
 
@@ -1216,11 +1341,15 @@ const upsertCharacterAttributes = async (
         characterId,
         systemId,
         attribute.key,
-        typeof attribute.valueNumber === "number" ? attribute.valueNumber : null,
+        typeof attribute.valueNumber === "number"
+          ? attribute.valueNumber
+          : null,
         typeof attribute.valueText === "string" ? attribute.valueText : null,
-        typeof attribute.valueJson !== "undefined" ? toJson(attribute.valueJson) : null,
-        attribute.source ?? "sheet"
-      ]
+        typeof attribute.valueJson !== "undefined"
+          ? toJson(attribute.valueJson)
+          : null,
+        attribute.source ?? "sheet",
+      ],
     );
   }
 };
@@ -1229,10 +1358,13 @@ const replaceCharacterActions = async (
   client: PoolClient,
   characterId: string,
   systemId: string,
-  actions: Array<z.infer<typeof createCharacterActionSchema>> | undefined
+  actions: Array<z.infer<typeof createCharacterActionSchema>> | undefined,
 ) => {
   if (!actions) return;
-  await client.query(`DELETE FROM dm_character_actions WHERE character_id = $1`, [characterId]);
+  await client.query(
+    `DELETE FROM dm_character_actions WHERE character_id = $1`,
+    [characterId],
+  );
 
   for (const action of normalizeCharacterActions(actions)) {
     await client.query(
@@ -1264,8 +1396,8 @@ const replaceCharacterActions = async (
         typeof action.usesCurrent === "number" ? action.usesCurrent : null,
         typeof action.usesMax === "number" ? action.usesMax : null,
         typeof action.cooldownTurns === "number" ? action.cooldownTurns : null,
-        toJson(action.metadata ?? {})
-      ]
+        toJson(action.metadata ?? {}),
+      ],
     );
   }
 };
@@ -1274,7 +1406,7 @@ const applyCharacterPatches = async (
   client: PoolClient,
   campaignId: string,
   systemId: string,
-  patches: CharacterPatch[] | undefined
+  patches: CharacterPatch[] | undefined,
 ) => {
   if (!patches?.length) return;
 
@@ -1300,7 +1432,7 @@ const applyCharacterPatches = async (
        FROM dm_characters
        WHERE campaign_id = $1 AND id = $2
        LIMIT 1`,
-      [campaignId, patch.characterId]
+      [campaignId, patch.characterId],
     );
 
     const row = characterResult.rows[0];
@@ -1320,7 +1452,7 @@ const applyCharacterPatches = async (
       notes: row.notes ?? undefined,
       inventory: [],
       createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString()
+      updatedAt: row.updated_at.toISOString(),
     };
 
     const normalizedPatch = plugin.normalizeCharacterPatch(character, patch);
@@ -1347,14 +1479,22 @@ const applyCharacterPatches = async (
            notes = $6,
            updated_at = now()
        WHERE campaign_id = $1 AND id = $2`,
-      [campaignId, patch.characterId, hpCurrent, hpTemp, status, notes ?? null]
+      [campaignId, patch.characterId, hpCurrent, hpTemp, status, notes ?? null],
     );
 
-    await applyInventoryDelta(client, patch.characterId, normalizedPatch.inventoryDelta);
+    await applyInventoryDelta(
+      client,
+      patch.characterId,
+      normalizedPatch.inventoryDelta,
+    );
   }
 };
 
-const maybeCreateRollingSummary = async (client: PoolClient, campaignId: string, endTurnIndex: number) => {
+const maybeCreateRollingSummary = async (
+  client: PoolClient,
+  campaignId: string,
+  endTurnIndex: number,
+) => {
   if (endTurnIndex % 6 !== 0) return;
 
   const existing = await client.query<{ id: string }>(
@@ -1362,7 +1502,7 @@ const maybeCreateRollingSummary = async (client: PoolClient, campaignId: string,
      FROM dm_memory_summaries
      WHERE campaign_id = $1 AND end_turn_index = $2
      LIMIT 1`,
-    [campaignId, endTurnIndex]
+    [campaignId, endTurnIndex],
   );
   if (existing.rows[0]) return;
 
@@ -1378,20 +1518,29 @@ const maybeCreateRollingSummary = async (client: PoolClient, campaignId: string,
        AND turn_index > $2
        AND turn_index <= $3
      ORDER BY turn_index ASC`,
-    [campaignId, endTurnIndex - 6, endTurnIndex]
+    [campaignId, endTurnIndex - 6, endTurnIndex],
   );
 
   if (!turns.rows.length) return;
 
   const summary = turns.rows
-    .map((turn) => `T${turn.turn_index}: ${turn.action_text} -> ${turn.llm_narration ?? "(no narration)"}`)
+    .map(
+      (turn) =>
+        `T${turn.turn_index}: ${turn.action_text} -> ${turn.llm_narration ?? "(no narration)"}`,
+    )
     .join("\n")
     .slice(0, 8000);
 
   await client.query(
     `INSERT INTO dm_memory_summaries (id, campaign_id, start_turn_index, end_turn_index, summary, source)
      VALUES ($1, $2, $3, $4, $5, 'system')`,
-    [createId("summary"), campaignId, endTurnIndex - turns.rows.length + 1, endTurnIndex, summary]
+    [
+      createId("summary"),
+      campaignId,
+      endTurnIndex - turns.rows.length + 1,
+      endTurnIndex,
+      summary,
+    ],
   );
 };
 
@@ -1400,7 +1549,7 @@ const upsertEmbedding = async (
   sourceType: string,
   sourceId: string,
   textChunk: string,
-  model: string
+  model: string,
 ) => {
   const embedding = await embedTextWithRassyIntelligence(textChunk);
   if (!embedding) return;
@@ -1408,34 +1557,51 @@ const upsertEmbedding = async (
   await dmQuery(
     `DELETE FROM dm_memory_embeddings
      WHERE campaign_id = $1 AND source_type = $2 AND source_id = $3`,
-    [campaignId, sourceType, sourceId]
+    [campaignId, sourceType, sourceId],
   );
 
   await dmQuery(
     `INSERT INTO dm_memory_embeddings (id, campaign_id, source_type, source_id, text_chunk, embedding, model, created_at)
      VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, now())`,
-    [createId("embed"), campaignId, sourceType, sourceId, textChunk.slice(0, 4000), toJson(embedding), model]
+    [
+      createId("embed"),
+      campaignId,
+      sourceType,
+      sourceId,
+      textChunk.slice(0, 4000),
+      toJson(embedding),
+      model,
+    ],
   );
 };
 
-const recordCheckpoint = async (client: PoolClient, campaignId: string, turnId: string, role: DmRole) => {
+const recordCheckpoint = async (
+  client: PoolClient,
+  campaignId: string,
+  turnId: string,
+  role: DmRole,
+) => {
   const snapshot = await buildCampaignSnapshot(campaignId, role);
   await client.query(
     `INSERT INTO dm_checkpoints (id, campaign_id, turn_id, snapshot, created_at)
      VALUES ($1, $2, $3, $4::jsonb, now())`,
-    [createId("checkpoint"), campaignId, turnId, toJson(snapshot)]
+    [createId("checkpoint"), campaignId, turnId, toJson(snapshot)],
   );
   return snapshot;
 };
 
 export const parseRegisterInput = (body: unknown) => registerSchema.parse(body);
 export const parseLoginInput = (body: unknown) => loginSchema.parse(body);
-export const parseCreateCampaignInput = (body: unknown) => createCampaignSchema.parse(body);
-export const parseCreateCharacterInput = (body: unknown) => createCharacterSchema.parse(body);
-export const parsePatchCharacterInput = (body: unknown) => patchCharacterSchema.parse(body);
+export const parseCreateCampaignInput = (body: unknown) =>
+  createCampaignSchema.parse(body);
+export const parseCreateCharacterInput = (body: unknown) =>
+  createCharacterSchema.parse(body);
+export const parsePatchCharacterInput = (body: unknown) =>
+  patchCharacterSchema.parse(body);
 export const parseActionInput = (body: unknown) => actionSchema.parse(body);
 export const parseRollInput = (body: unknown) => rollSchema.parse(body);
-export const parseCreateInviteInput = (body: unknown) => createInviteSchema.parse(body);
+export const parseCreateInviteInput = (body: unknown) =>
+  createInviteSchema.parse(body);
 export const parseAddFactInput = (body: unknown) => addFactSchema.parse(body);
 
 export const recordDmAuthEvent = async (input: {
@@ -1460,8 +1626,8 @@ export const recordDmAuthEvent = async (input: {
       sessionKey,
       ipAddress,
       userAgent,
-      toJson(input.metadata ?? {})
-    ]
+      toJson(input.metadata ?? {}),
+    ],
   );
 };
 
@@ -1471,7 +1637,7 @@ export const registerDmUser = async (input: z.infer<typeof registerSchema>) => {
   const normalizedEmail = normalizeEmail(input.email);
   const existing = await dmQuery<{ id: string }>(
     `SELECT id FROM dm_users WHERE email_normalized = $1 LIMIT 1`,
-    [normalizedEmail]
+    [normalizedEmail],
   );
 
   if (existing.rows[0]) {
@@ -1486,7 +1652,7 @@ export const registerDmUser = async (input: z.infer<typeof registerSchema>) => {
     displayName: input.displayName,
     passwordHash: hashPassword(input.password),
     createdAt: now,
-    lastLoginAt: now
+    lastLoginAt: now,
   };
 
   await dmQuery(
@@ -1499,14 +1665,16 @@ export const registerDmUser = async (input: z.infer<typeof registerSchema>) => {
       user.displayName,
       user.passwordHash,
       user.createdAt,
-      user.lastLoginAt ?? null
-    ]
+      user.lastLoginAt ?? null,
+    ],
   );
 
   return toPublicUser(user);
 };
 
-export const authenticateDmUser = async (input: z.infer<typeof loginSchema>) => {
+export const authenticateDmUser = async (
+  input: z.infer<typeof loginSchema>,
+) => {
   await ensureDmSchema();
 
   const normalizedEmail = normalizeEmail(input.email);
@@ -1523,7 +1691,7 @@ export const authenticateDmUser = async (input: z.infer<typeof loginSchema>) => 
      FROM dm_users
      WHERE email_normalized = $1
      LIMIT 1`,
-    [normalizedEmail]
+    [normalizedEmail],
   );
 
   const row = result.rows[0];
@@ -1533,7 +1701,9 @@ export const authenticateDmUser = async (input: z.infer<typeof loginSchema>) => 
     return null;
   }
 
-  await dmQuery(`UPDATE dm_users SET last_login_at = now() WHERE id = $1`, [row.id]);
+  await dmQuery(`UPDATE dm_users SET last_login_at = now() WHERE id = $1`, [
+    row.id,
+  ]);
 
   return toPublicUser({
     id: row.id,
@@ -1542,7 +1712,7 @@ export const authenticateDmUser = async (input: z.infer<typeof loginSchema>) => 
     displayName: row.display_name,
     passwordHash: row.password_hash,
     createdAt: row.created_at.toISOString(),
-    lastLoginAt: new Date().toISOString()
+    lastLoginAt: new Date().toISOString(),
   });
 };
 
@@ -1562,7 +1732,7 @@ export const getDmUserById = async (userId: string) => {
      FROM dm_users
      WHERE id = $1
      LIMIT 1`,
-    [userId]
+    [userId],
   );
 
   const row = result.rows[0];
@@ -1575,11 +1745,15 @@ export const getDmUserById = async (userId: string) => {
     displayName: row.display_name,
     passwordHash: row.password_hash,
     createdAt: row.created_at.toISOString(),
-    lastLoginAt: row.last_login_at ? row.last_login_at.toISOString() : undefined
+    lastLoginAt: row.last_login_at
+      ? row.last_login_at.toISOString()
+      : undefined,
   });
 };
 
-export const listCampaignsForUser = async (userId: string): Promise<CampaignSummary[]> => {
+export const listCampaignsForUser = async (
+  userId: string,
+): Promise<CampaignSummary[]> => {
   await ensureDmSchema();
 
   const result = await dmQuery<{
@@ -1606,7 +1780,7 @@ export const listCampaignsForUser = async (userId: string): Promise<CampaignSumm
      JOIN dm_campaigns c ON c.id = m.campaign_id
      WHERE m.user_id = $1
      ORDER BY c.updated_at DESC`,
-    [userId]
+    [userId],
   );
 
   return result.rows.map((row) => ({
@@ -1618,13 +1792,13 @@ export const listCampaignsForUser = async (userId: string): Promise<CampaignSumm
     playerCount: row.player_count,
     characterCount: row.character_count,
     activeQuestCount: row.active_quest_count,
-    updatedAt: row.updated_at.toISOString()
+    updatedAt: row.updated_at.toISOString(),
   }));
 };
 
 export const createCampaignForUser = async (
   userId: string,
-  input: z.infer<typeof createCampaignSchema>
+  input: z.infer<typeof createCampaignSchema>,
 ): Promise<CampaignSnapshot> => {
   await ensureDmSchema();
   const systemExists = await dmQuery<{ id: string }>(
@@ -1632,15 +1806,18 @@ export const createCampaignForUser = async (
      FROM dm_systems
      WHERE id = $1
      LIMIT 1`,
-    [input.systemId]
+    [input.systemId],
   );
   if (!systemExists.rows[0]) throw new Error("system_not_supported");
 
   const plugin = getSystemPlugin(input.systemId);
   const seed = applyWorldSeedOverrides(
-    plugin.seedWorld({ campaignName: input.name, description: input.description }),
+    plugin.seedWorld({
+      campaignName: input.name,
+      description: input.description,
+    }),
     input.name,
-    input.worldSeed
+    input.worldSeed,
   );
   const campaignId = createId("camp");
   const initialQuestId = createId("quest");
@@ -1650,13 +1827,20 @@ export const createCampaignForUser = async (
     await client.query(
       `INSERT INTO dm_campaigns (id, name, system_id, description, created_by_user_id, status, story_summary, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, 'active', $6, now(), now())`,
-      [campaignId, input.name, input.systemId, input.description, userId, "Campaign created"]
+      [
+        campaignId,
+        input.name,
+        input.systemId,
+        input.description,
+        userId,
+        "Campaign created",
+      ],
     );
 
     await client.query(
       `INSERT INTO dm_memberships (user_id, campaign_id, role, joined_at)
        VALUES ($1, $2, 'dm', now())`,
-      [userId, campaignId]
+      [userId, campaignId],
     );
 
     await client.query(
@@ -1670,14 +1854,19 @@ export const createCampaignForUser = async (
         toJson(seed.worldState.activeThreats),
         seed.worldState.sceneSummary,
         seed.worldState.storyBeat,
-        seed.worldState.visualPrompt
-      ]
+        seed.worldState.visualPrompt,
+      ],
     );
 
     await client.query(
       `INSERT INTO dm_quests (id, campaign_id, title, summary, status, progress, created_at, updated_at)
        VALUES ($1, $2, $3, $4, 'active', 0, now(), now())`,
-      [initialQuestId, campaignId, seed.initialQuest.title, seed.initialQuest.summary]
+      [
+        initialQuestId,
+        campaignId,
+        seed.initialQuest.title,
+        seed.initialQuest.summary,
+      ],
     );
 
     let ord = 0;
@@ -1685,7 +1874,7 @@ export const createCampaignForUser = async (
       await client.query(
         `INSERT INTO dm_quest_objectives (id, quest_id, ord, text, completed)
          VALUES ($1, $2, $3, $4, false)`,
-        [createId("objective"), initialQuestId, ord, objective]
+        [createId("objective"), initialQuestId, ord, objective],
       );
       ord += 1;
     }
@@ -1705,9 +1894,9 @@ export const createCampaignForUser = async (
         toJson({
           systemId: input.systemId,
           description: input.description,
-          worldSeed: input.worldSeed ?? null
-        })
-      ]
+          worldSeed: input.worldSeed ?? null,
+        }),
+      ],
     );
   });
 
@@ -1717,14 +1906,14 @@ export const createCampaignForUser = async (
 export const bootstrapCampaign = async (
   userId: string,
   campaignId: string,
-  seedPrompt?: string
+  seedPrompt?: string,
 ): Promise<DmTurnPatch> => {
   const campaignMeta = await dmQuery<{ name: string; system_id: string }>(
     `SELECT name, system_id
      FROM dm_campaigns
      WHERE id = $1
      LIMIT 1`,
-    [campaignId]
+    [campaignId],
   );
   const campaignName = campaignMeta.rows[0]?.name ?? "the campaign";
   const systemId = campaignMeta.rows[0]?.system_id ?? "generic";
@@ -1734,7 +1923,7 @@ export const bootstrapCampaign = async (
     actionText:
       seedPrompt?.trim() ||
       `Generate opening narration for '${campaignName}', establish the first scene, and set immediate stakes for this ${plugin.displayName} campaign.`,
-    idempotencyKey: `bootstrap-${campaignId}`
+    idempotencyKey: `bootstrap-${campaignId}`,
   });
 
   return result.turn;
@@ -1742,7 +1931,7 @@ export const bootstrapCampaign = async (
 
 export const getCampaignSnapshotForUser = async (
   userId: string,
-  campaignId: string
+  campaignId: string,
 ): Promise<CampaignSnapshot> => {
   await assertMembership(campaignId, userId);
   const role = (await loadMembershipRole(campaignId, userId)) as DmRole;
@@ -1753,7 +1942,7 @@ export const getCampaignContextForUser = async (
   userId: string,
   campaignId: string,
   actionText: string,
-  actorCharacterId?: string
+  actorCharacterId?: string,
 ) => {
   await assertMembership(campaignId, userId);
   return buildContextPacket(campaignId, actionText, actorCharacterId);
@@ -1762,27 +1951,39 @@ export const getCampaignContextForUser = async (
 export const createCharacterInCampaign = async (
   userId: string,
   campaignId: string,
-  input: z.infer<typeof createCharacterSchema>
+  input: z.infer<typeof createCharacterSchema>,
 ): Promise<CharacterRecord> => {
   await ensureDmSchema();
   await assertMembership(campaignId, userId);
 
   const bundle = await loadCampaignBundle(campaignId);
   const plugin = getSystemPlugin(bundle.campaign.systemId);
-  const template = await getArchetypeTemplate(bundle.campaign.systemId, input.archetype);
+  const template = await getArchetypeTemplate(
+    bundle.campaign.systemId,
+    input.archetype,
+  );
 
-  const resolvedAttributes = normalizeCharacterAttributes(input.attributes ?? template?.attributes);
-  const resolvedActions = normalizeCharacterActions(input.actions ?? template?.actions);
-  const resolvedSpecialTraits = (input.specialTraits ?? template?.specialTraits ?? []).slice(0, 50);
-  const resolvedPlayerType = input.playerType ?? template?.playerType ?? input.archetype;
+  const resolvedAttributes = normalizeCharacterAttributes(
+    input.attributes ?? template?.attributes,
+  );
+  const resolvedActions = normalizeCharacterActions(
+    input.actions ?? template?.actions,
+  );
+  const resolvedSpecialTraits = (
+    input.specialTraits ??
+    template?.specialTraits ??
+    []
+  ).slice(0, 50);
+  const resolvedPlayerType =
+    input.playerType ?? template?.playerType ?? input.archetype;
   const resolvedSystemData = {
     ...(template
       ? {
           templateApplied: template.playerType ?? input.archetype,
-          templateCompendiumEntryId: template.entryId
+          templateCompendiumEntryId: template.entryId,
         }
       : {}),
-    ...(input.systemData ?? {})
+    ...(input.systemData ?? {}),
   };
 
   const character = plugin.normalizeCharacter({
@@ -1805,7 +2006,7 @@ export const createCharacterInCampaign = async (
       id: createId("item"),
       name: item.name,
       detail: item.detail,
-      quantity: item.quantity
+      quantity: item.quantity,
     })),
     attributes: resolvedAttributes.map((attribute) => ({
       id: createId("attr"),
@@ -1814,7 +2015,7 @@ export const createCharacterInCampaign = async (
       valueText: attribute.valueText,
       valueJson: attribute.valueJson,
       source: attribute.source,
-      updatedAt: nowIso()
+      updatedAt: nowIso(),
     })),
     actions: resolvedActions.map((action) => ({
       id: createId("action"),
@@ -1826,10 +2027,10 @@ export const createCharacterInCampaign = async (
       usesMax: action.usesMax,
       cooldownTurns: action.cooldownTurns,
       metadata: action.metadata,
-      updatedAt: nowIso()
+      updatedAt: nowIso(),
     })),
     createdAt: nowIso(),
-    updatedAt: nowIso()
+    updatedAt: nowIso(),
   });
 
   await withDmTransaction(async (client) => {
@@ -1853,22 +2054,35 @@ export const createCharacterInCampaign = async (
         character.status,
         character.notes ?? null,
         toJson(character.specialTraits ?? []),
-        toJson(character.systemData ?? {})
-      ]
+        toJson(character.systemData ?? {}),
+      ],
     );
 
     for (const item of character.inventory) {
       await client.query(
         `INSERT INTO dm_inventory_items (id, character_id, name, detail, quantity, updated_at)
          VALUES ($1, $2, $3, $4, $5, now())`,
-        [item.id, character.id, item.name, item.detail ?? null, item.quantity]
+        [item.id, character.id, item.name, item.detail ?? null, item.quantity],
       );
     }
 
-    await upsertCharacterAttributes(client, character.id, bundle.campaign.systemId, resolvedAttributes);
-    await replaceCharacterActions(client, character.id, bundle.campaign.systemId, resolvedActions);
+    await upsertCharacterAttributes(
+      client,
+      character.id,
+      bundle.campaign.systemId,
+      resolvedAttributes,
+    );
+    await replaceCharacterActions(
+      client,
+      character.id,
+      bundle.campaign.systemId,
+      resolvedActions,
+    );
 
-    await client.query(`UPDATE dm_campaigns SET updated_at = now() WHERE id = $1`, [campaignId]);
+    await client.query(
+      `UPDATE dm_campaigns SET updated_at = now() WHERE id = $1`,
+      [campaignId],
+    );
 
     await client.query(
       `INSERT INTO dm_events (id, campaign_id, type, actor_user_id, actor_character_id, summary, payload, created_at)
@@ -1886,14 +2100,16 @@ export const createCharacterInCampaign = async (
           hp: [character.hpCurrent, character.hpMax],
           specialTraits: character.specialTraits ?? [],
           attributeCount: character.attributes?.length ?? 0,
-          actionCount: character.actions?.length ?? 0
-        })
-      ]
+          actionCount: character.actions?.length ?? 0,
+        }),
+      ],
     );
   });
 
   const snapshot = await getCampaignSnapshotForUser(userId, campaignId);
-  const created = snapshot.characters.find((entry) => entry.id === character.id);
+  const created = snapshot.characters.find(
+    (entry) => entry.id === character.id,
+  );
   if (!created) throw new Error("character_not_found");
   return created;
 };
@@ -1902,7 +2118,7 @@ export const patchCharacterInCampaign = async (
   userId: string,
   campaignId: string,
   characterId: string,
-  input: z.infer<typeof patchCharacterSchema>
+  input: z.infer<typeof patchCharacterSchema>,
 ): Promise<CharacterRecord> => {
   await ensureDmSchema();
   const role = await assertMembership(campaignId, userId);
@@ -1913,7 +2129,7 @@ export const patchCharacterInCampaign = async (
      FROM dm_campaigns
      WHERE id = $1
      LIMIT 1`,
-    [campaignId]
+    [campaignId],
   );
   if (!campaignMeta.rows[0]) throw new Error("campaign_not_found");
   const systemId = campaignMeta.rows[0].system_id;
@@ -1934,7 +2150,7 @@ export const patchCharacterInCampaign = async (
        FROM dm_characters
        WHERE campaign_id = $1 AND id = $2
        LIMIT 1`,
-      [campaignId, characterId]
+      [campaignId, characterId],
     );
 
     const row = characterResult.rows[0];
@@ -1942,14 +2158,21 @@ export const patchCharacterInCampaign = async (
 
     const hpMax = typeof input.hpMax === "number" ? input.hpMax : row.hp_max;
     const hpCurrent =
-      typeof input.hpCurrent === "number" ? clamp(input.hpCurrent, 0, hpMax) : clamp(row.hp_current, 0, hpMax);
-    const hpTemp = typeof input.hpTemp === "number" ? input.hpTemp : row.hp_temp;
+      typeof input.hpCurrent === "number"
+        ? clamp(input.hpCurrent, 0, hpMax)
+        : clamp(row.hp_current, 0, hpMax);
+    const hpTemp =
+      typeof input.hpTemp === "number" ? input.hpTemp : row.hp_temp;
 
     const notes = input.notesAppend
       ? `${row.notes ? `${row.notes}\n` : ""}${nowIso()}: ${input.notesAppend}`
       : row.notes;
-    const specialTraits = input.specialTraits ? input.specialTraits.slice(0, 50) : toStringArray(row.special_traits);
-    const systemData = input.systemData ? { ...(row.system_data ?? {}), ...input.systemData } : row.system_data ?? {};
+    const specialTraits = input.specialTraits
+      ? input.specialTraits.slice(0, 50)
+      : toStringArray(row.special_traits);
+    const systemData = input.systemData
+      ? { ...(row.system_data ?? {}), ...input.systemData }
+      : (row.system_data ?? {});
 
     await client.query(
       `UPDATE dm_characters
@@ -1973,15 +2196,23 @@ export const patchCharacterInCampaign = async (
         toJson(specialTraits),
         toJson(systemData),
         notes ?? null,
-        input.status ?? null
-      ]
+        input.status ?? null,
+      ],
     );
 
     await applyInventoryDelta(client, characterId, input.inventoryDelta);
-    await upsertCharacterAttributes(client, characterId, systemId, input.attributes);
+    await upsertCharacterAttributes(
+      client,
+      characterId,
+      systemId,
+      input.attributes,
+    );
     await replaceCharacterActions(client, characterId, systemId, input.actions);
 
-    await client.query(`UPDATE dm_campaigns SET updated_at = now() WHERE id = $1`, [campaignId]);
+    await client.query(
+      `UPDATE dm_campaigns SET updated_at = now() WHERE id = $1`,
+      [campaignId],
+    );
     await client.query(
       `INSERT INTO dm_events (id, campaign_id, type, actor_user_id, actor_character_id, summary, payload, created_at)
        VALUES ($1, $2, 'character_update', $3, $4, $5, $6::jsonb, now())`,
@@ -1991,13 +2222,15 @@ export const patchCharacterInCampaign = async (
         userId,
         characterId,
         "Character patched",
-        toJson(input)
-      ]
+        toJson(input),
+      ],
     );
   });
 
   const snapshot = await getCampaignSnapshotForUser(userId, campaignId);
-  const character = snapshot.characters.find((entry) => entry.id === characterId);
+  const character = snapshot.characters.find(
+    (entry) => entry.id === characterId,
+  );
   if (!character) throw new Error("character_not_found");
   return character;
 };
@@ -2005,7 +2238,7 @@ export const patchCharacterInCampaign = async (
 export const processCampaignAction = async (
   userId: string,
   campaignId: string,
-  input: z.infer<typeof actionSchema>
+  input: z.infer<typeof actionSchema>,
 ) => {
   await ensureDmSchema();
 
@@ -2013,13 +2246,17 @@ export const processCampaignAction = async (
     const role = await assertMembership(campaignId, userId);
 
     if (input.idempotencyKey) {
-      const replay = await resolveIdempotentAction(client, campaignId, input.idempotencyKey);
+      const replay = await resolveIdempotentAction(
+        client,
+        campaignId,
+        input.idempotencyKey,
+      );
       if (replay) return replay;
     }
 
     const campaignMeta = await client.query<{ system_id: string }>(
       `SELECT system_id FROM dm_campaigns WHERE id = $1 LIMIT 1`,
-      [campaignId]
+      [campaignId],
     );
     if (!campaignMeta.rows[0]) throw new Error("campaign_not_found");
 
@@ -2029,10 +2266,11 @@ export const processCampaignAction = async (
          FROM dm_characters
          WHERE campaign_id = $1 AND id = $2
          LIMIT 1`,
-        [campaignId, input.actorCharacterId]
+        [campaignId, input.actorCharacterId],
       );
       if (!actor.rows[0]) throw new Error("character_not_found");
-      if (role !== "dm" && actor.rows[0].user_id !== userId) throw new Error("forbidden");
+      if (role !== "dm" && actor.rows[0].user_id !== userId)
+        throw new Error("forbidden");
     }
 
     const session = await ensureActiveSession(client, campaignId, userId);
@@ -2041,12 +2279,16 @@ export const processCampaignAction = async (
       `SELECT COALESCE(MAX(turn_index), 0) + 1 as next_turn
        FROM dm_turns
        WHERE campaign_id = $1`,
-      [campaignId]
+      [campaignId],
     );
     const turnIndex = turnIndexResult.rows[0]?.next_turn ?? 1;
     const turnId = createId("turn");
 
-    const context = await buildContextPacket(campaignId, input.actionText, input.actorCharacterId);
+    const context = await buildContextPacket(
+      campaignId,
+      input.actionText,
+      input.actorCharacterId,
+    );
 
     try {
       await client.query(
@@ -2064,13 +2306,17 @@ export const processCampaignAction = async (
           userId,
           input.actorCharacterId ?? null,
           input.actionText,
-          toJson(context)
-        ]
+          toJson(context),
+        ],
       );
     } catch (error) {
       const pgError = error as { code?: string };
       if (input.idempotencyKey && pgError.code === "23505") {
-        const replay = await resolveIdempotentAction(client, campaignId, input.idempotencyKey);
+        const replay = await resolveIdempotentAction(
+          client,
+          campaignId,
+          input.idempotencyKey,
+        );
         if (replay) return replay;
         throw new Error("turn_in_progress");
       }
@@ -2089,8 +2335,8 @@ export const processCampaignAction = async (
         userId,
         input.actorCharacterId ?? null,
         input.actionText.slice(0, 280),
-        toJson({ actionText: input.actionText })
-      ]
+        toJson({ actionText: input.actionText }),
+      ],
     );
 
     let llmPatch: DmTurnPatch;
@@ -2116,10 +2362,14 @@ export const processCampaignAction = async (
       llmResponseJson = llm.responseJson;
       llmLatencyMs = llm.latencyMs;
     } catch (error) {
-      const firstError = error instanceof Error ? error.message : "unknown_llm_error";
+      const firstError =
+        error instanceof Error ? error.message : "unknown_llm_error";
       try {
         const compactContext = compactContextForRetry(context);
-        const llm = await runContextAwareDmTurn(compactContext, dmRequestContext);
+        const llm = await runContextAwareDmTurn(
+          compactContext,
+          dmRequestContext,
+        );
         llmPatch = llm.patch;
         llmProvider = llm.provider;
         llmModel = llm.model;
@@ -2128,7 +2378,7 @@ export const processCampaignAction = async (
         llmPromptPayload = {
           ...llm.promptPayload,
           compactRetry: true,
-          initialError: firstError
+          initialError: firstError,
         };
         llmResponseJson = llm.responseJson;
         llmLatencyMs = llm.latencyMs;
@@ -2136,13 +2386,22 @@ export const processCampaignAction = async (
         llmSuccess = false;
         llmProvider = "fallback";
         const retryMessage =
-          retryError instanceof Error ? retryError.message : "unknown_llm_retry_error";
+          retryError instanceof Error
+            ? retryError.message
+            : "unknown_llm_retry_error";
         llmError = `${firstError};retry:${retryMessage}`;
         llmPatch = createFallbackTurn(input.actionText);
         llmModel = "fallback";
-        promptHash = crypto.createHash("sha256").update(input.actionText).digest("hex");
+        promptHash = crypto
+          .createHash("sha256")
+          .update(input.actionText)
+          .digest("hex");
         llmResponseText = llmPatch.narration;
-        llmPromptPayload = { fallback: true, actionText: input.actionText, initialError: firstError };
+        llmPromptPayload = {
+          fallback: true,
+          actionText: input.actionText,
+          initialError: firstError,
+        };
         llmResponseJson = undefined;
         llmLatencyMs = 0;
       }
@@ -2166,15 +2425,18 @@ export const processCampaignAction = async (
             status: "",
             inventory: [],
             createdAt: nowIso(),
-            updatedAt: nowIso()
+            updatedAt: nowIso(),
           },
-          patch
-        )
+          patch,
+        ),
       ),
       questPatches: (llmPatch.questPatches ?? []).map((quest) => ({
         ...quest,
-        progress: typeof quest.progress === "number" ? clamp(Math.round(quest.progress), 0, 100) : quest.progress
-      }))
+        progress:
+          typeof quest.progress === "number"
+            ? clamp(Math.round(quest.progress), 0, 100)
+            : quest.progress,
+      })),
     };
 
     await client.query("BEGIN");
@@ -2197,11 +2459,13 @@ export const processCampaignAction = async (
             normalizedPatch.worldPatch.location ?? null,
             normalizedPatch.worldPatch.worldTime ?? null,
             normalizedPatch.worldPatch.weather ?? null,
-            normalizedPatch.worldPatch.activeThreats ? toJson(normalizedPatch.worldPatch.activeThreats) : null,
+            normalizedPatch.worldPatch.activeThreats
+              ? toJson(normalizedPatch.worldPatch.activeThreats)
+              : null,
             normalizedPatch.worldPatch.sceneSummary ?? null,
             normalizedPatch.worldPatch.storyBeat ?? null,
-            normalizedPatch.worldPatch.visualPrompt ?? null
-          ]
+            normalizedPatch.worldPatch.visualPrompt ?? null,
+          ],
         );
       }
 
@@ -2210,7 +2474,7 @@ export const processCampaignAction = async (
         client,
         campaignId,
         campaignMeta.rows[0].system_id,
-        normalizedPatch.characterPatches
+        normalizedPatch.characterPatches,
       );
       await writePatchStateTransitions(
         client,
@@ -2221,12 +2485,19 @@ export const processCampaignAction = async (
           sourceType: "dm_turn",
           sourceId: turnId,
           actorUserId: userId,
-          actorCharacterId: input.actorCharacterId ?? null
+          actorCharacterId: input.actorCharacterId ?? null,
         },
-        normalizedPatch
+        normalizedPatch,
       );
       await upsertAutoFacts(client, campaignId, normalizedPatch);
-      await recordPatchEvents(client, campaignId, session.id, turnId, userId, normalizedPatch);
+      await recordPatchEvents(
+        client,
+        campaignId,
+        session.id,
+        turnId,
+        userId,
+        normalizedPatch,
+      );
 
       const dmEventId = createId("event");
       await client.query(
@@ -2238,16 +2509,20 @@ export const processCampaignAction = async (
           session.id,
           turnId,
           userId,
-          normalizedPatch.shortSummary ?? normalizedPatch.narration.slice(0, 280),
-          toJson({ narration: normalizedPatch.narration, patch: normalizedPatch })
-        ]
+          normalizedPatch.shortSummary ??
+            normalizedPatch.narration.slice(0, 280),
+          toJson({
+            narration: normalizedPatch.narration,
+            patch: normalizedPatch,
+          }),
+        ],
       );
 
       await client.query(
         `UPDATE dm_sessions
          SET current_turn = $2
          WHERE id = $1`,
-        [session.id, turnIndex]
+        [session.id, turnIndex],
       );
 
       await client.query(
@@ -2255,7 +2530,7 @@ export const processCampaignAction = async (
          SET updated_at = now(),
              story_summary = COALESCE($2, story_summary)
          WHERE id = $1`,
-        [campaignId, normalizedPatch.shortSummary ?? null]
+        [campaignId, normalizedPatch.shortSummary ?? null],
       );
 
       await client.query(
@@ -2268,7 +2543,14 @@ export const processCampaignAction = async (
              status = 'applied',
              applied_at = now()
          WHERE id = $1`,
-        [turnId, normalizedPatch.narration, toJson(llmPatch), toJson(normalizedPatch), promptHash, llmModel]
+        [
+          turnId,
+          normalizedPatch.narration,
+          toJson(llmPatch),
+          toJson(normalizedPatch),
+          promptHash,
+          llmModel,
+        ],
       );
 
       await client.query(
@@ -2286,8 +2568,8 @@ export const processCampaignAction = async (
           llmResponseJson ? toJson(llmResponseJson) : null,
           llmLatencyMs,
           llmSuccess,
-          llmError
-        ]
+          llmError,
+        ],
       );
 
       await maybeCreateRollingSummary(client, campaignId, turnIndex);
@@ -2299,24 +2581,42 @@ export const processCampaignAction = async (
         meta: {
           turnId,
           sessionId: session.id,
-          turnIndex
-        }
+          turnIndex,
+        },
       };
 
       await client.query(
         `UPDATE dm_turns
          SET result_payload = $2::jsonb
          WHERE id = $1`,
-        [turnId, toJson(resultPayload)]
+        [turnId, toJson(resultPayload)],
       );
 
       await client.query("COMMIT");
 
       // Non-blocking memory embeddings for context retrieval.
-      void upsertEmbedding(campaignId, "player_action", playerEventId, input.actionText, llmModel);
-      void upsertEmbedding(campaignId, "dm_narration", turnId, normalizedPatch.narration, llmModel);
+      void upsertEmbedding(
+        campaignId,
+        "player_action",
+        playerEventId,
+        input.actionText,
+        llmModel,
+      );
+      void upsertEmbedding(
+        campaignId,
+        "dm_narration",
+        turnId,
+        normalizedPatch.narration,
+        llmModel,
+      );
       if (normalizedPatch.shortSummary) {
-        void upsertEmbedding(campaignId, "turn_summary", turnId, normalizedPatch.shortSummary, llmModel);
+        void upsertEmbedding(
+          campaignId,
+          "turn_summary",
+          turnId,
+          normalizedPatch.shortSummary,
+          llmModel,
+        );
       }
 
       return resultPayload;
@@ -2332,7 +2632,7 @@ export const processCampaignAction = async (
              model = $5,
              applied_at = now()
          WHERE id = $1`,
-        [turnId, llmResponseText, toJson(llmPatch), promptHash, llmModel]
+        [turnId, llmResponseText, toJson(llmPatch), promptHash, llmModel],
       );
 
       throw error;
@@ -2340,7 +2640,11 @@ export const processCampaignAction = async (
   });
 };
 
-const summarizeDiceRoll = (actorName: string, roll: DiceRollResult, reason?: string) => {
+const summarizeDiceRoll = (
+  actorName: string,
+  roll: DiceRollResult,
+  reason?: string,
+) => {
   const modifierToken = roll.modifier
     ? roll.modifier > 0
       ? ` + ${roll.modifier}`
@@ -2358,7 +2662,7 @@ const summarizeDiceRoll = (actorName: string, roll: DiceRollResult, reason?: str
 export const rollCampaignDice = async (
   userId: string,
   campaignId: string,
-  input: z.infer<typeof rollSchema>
+  input: z.infer<typeof rollSchema>,
 ): Promise<DiceRollOutcome> => {
   await ensureDmSchema();
   const role = await assertMembership(campaignId, userId);
@@ -2367,12 +2671,16 @@ export const rollCampaignDice = async (
   let actorName = "Player";
 
   if (actorCharacterId) {
-    const actorResult = await dmQuery<{ id: string; user_id: string; name: string }>(
+    const actorResult = await dmQuery<{
+      id: string;
+      user_id: string;
+      name: string;
+    }>(
       `SELECT id, user_id, name
        FROM dm_characters
        WHERE campaign_id = $1 AND id = $2
        LIMIT 1`,
-      [campaignId, actorCharacterId]
+      [campaignId, actorCharacterId],
     );
     const actor = actorResult.rows[0];
     if (!actor) throw new Error("character_not_found");
@@ -2385,7 +2693,7 @@ export const rollCampaignDice = async (
        WHERE campaign_id = $1 AND user_id = $2
        ORDER BY created_at ASC
        LIMIT 1`,
-      [campaignId, userId]
+      [campaignId, userId],
     );
     const owned = ownedResult.rows[0];
     if (owned) {
@@ -2417,7 +2725,7 @@ export const rollCampaignDice = async (
            WHERE campaign_id = $1
              AND request_idempotency_key = $2
            LIMIT 1`,
-          [campaignId, input.idempotencyKey]
+          [campaignId, input.idempotencyKey],
         )
       : null;
 
@@ -2429,11 +2737,13 @@ export const rollCampaignDice = async (
       sides: existingRow.dice_sides,
       modifier: existingRow.modifier,
       rolls: Array.isArray(existingRow.rolls)
-        ? existingRow.rolls.filter((value): value is number => typeof value === "number")
+        ? existingRow.rolls.filter(
+            (value): value is number => typeof value === "number",
+          )
         : [],
       total: existingRow.total,
       criticalSuccess: existingRow.critical_success,
-      criticalFailure: existingRow.critical_failure
+      criticalFailure: existingRow.critical_failure,
     };
 
     const replay: DiceRollOutcome = {
@@ -2441,16 +2751,18 @@ export const rollCampaignDice = async (
       summary: existingRow.summary,
       diceRollId: existingRow.id,
       outcomeStatus: existingRow.outcome_status,
-      resolutionTurnId: existingRow.turn_id ?? undefined
+      resolutionTurnId: existingRow.turn_id ?? undefined,
     };
 
     if (existingRow.turn_id) {
-      const turnResult = await dmQuery<{ result_payload: ActionResultPayload | null }>(
+      const turnResult = await dmQuery<{
+        result_payload: ActionResultPayload | null;
+      }>(
         `SELECT result_payload
          FROM dm_turns
          WHERE campaign_id = $1 AND id = $2
          LIMIT 1`,
-        [campaignId, existingRow.turn_id]
+        [campaignId, existingRow.turn_id],
       );
       const payload = turnResult.rows[0]?.result_payload ?? null;
       if (payload) {
@@ -2467,7 +2779,9 @@ export const rollCampaignDice = async (
   const roll = rollDice(input.expression);
   const summary = summarizeDiceRoll(actorName, roll, input.reason);
   const diceRollId = createId("roll");
-  let persistedOutcomeStatus = input.autoResolve ? "pending_resolution" : "recorded";
+  let persistedOutcomeStatus = input.autoResolve
+    ? "pending_resolution"
+    : "recorded";
 
   await withDmTransaction(async (client) => {
     const sessionResult = await client.query<{ id: string }>(
@@ -2477,7 +2791,7 @@ export const rollCampaignDice = async (
          AND status = 'active'
        ORDER BY started_at DESC
        LIMIT 1`,
-      [campaignId]
+      [campaignId],
     );
     const activeSessionId = sessionResult.rows[0]?.id ?? null;
 
@@ -2500,9 +2814,9 @@ export const rollCampaignDice = async (
           total: roll.total,
           criticalSuccess: roll.criticalSuccess,
           criticalFailure: roll.criticalFailure,
-          reason: input.reason ?? null
-        })
-      ]
+          reason: input.reason ?? null,
+        }),
+      ],
     );
 
     await client.query(
@@ -2547,8 +2861,8 @@ export const rollCampaignDice = async (
         input.reason ?? null,
         summary,
         persistedOutcomeStatus,
-        input.idempotencyKey ?? null
-      ]
+        input.idempotencyKey ?? null,
+      ],
     );
 
     await writeStateTransition(
@@ -2559,7 +2873,7 @@ export const rollCampaignDice = async (
         sourceType: "dice_roll",
         sourceId: diceRollId,
         actorUserId: userId,
-        actorCharacterId: actorCharacterId ?? null
+        actorCharacterId: actorCharacterId ?? null,
       },
       {
         entityType: "dice_roll",
@@ -2571,12 +2885,15 @@ export const rollCampaignDice = async (
           expression: roll.expression,
           total: roll.total,
           criticalSuccess: roll.criticalSuccess,
-          criticalFailure: roll.criticalFailure
-        }
-      }
+          criticalFailure: roll.criticalFailure,
+        },
+      },
     );
 
-    await client.query(`UPDATE dm_campaigns SET updated_at = now() WHERE id = $1`, [campaignId]);
+    await client.query(
+      `UPDATE dm_campaigns SET updated_at = now() WHERE id = $1`,
+      [campaignId],
+    );
   });
 
   if (!input.autoResolve) {
@@ -2585,21 +2902,25 @@ export const rollCampaignDice = async (
       summary,
       diceRollId,
       outcomeStatus: persistedOutcomeStatus,
-      snapshot: await getCampaignSnapshotForUser(userId, campaignId)
+      snapshot: await getCampaignSnapshotForUser(userId, campaignId),
     };
   }
 
   const actionText = [
     summary,
-    input.reason ? `Intent: ${clampText(input.reason, 300)}.` : "Resolve consequences and advance the scene.",
-    "Use the roll result as authoritative for outcome framing."
+    input.reason
+      ? `Intent: ${clampText(input.reason, 300)}.`
+      : "Resolve consequences and advance the scene.",
+    "Use the roll result as authoritative for outcome framing.",
   ].join(" ");
 
   try {
     const resolution = await processCampaignAction(userId, campaignId, {
       actionText,
       actorCharacterId,
-      idempotencyKey: input.idempotencyKey ? `${input.idempotencyKey}:resolve` : undefined
+      idempotencyKey: input.idempotencyKey
+        ? `${input.idempotencyKey}:resolve`
+        : undefined,
     });
 
     persistedOutcomeStatus = "resolved";
@@ -2619,12 +2940,13 @@ export const rollCampaignDice = async (
           campaignId,
           resolution.meta?.sessionId ?? null,
           resolution.meta?.turnId ?? null,
-          resolution.turn.shortSummary ?? resolution.turn.narration.slice(0, 280),
+          resolution.turn.shortSummary ??
+            resolution.turn.narration.slice(0, 280),
           toJson({
             turn: resolution.turn,
-            meta: resolution.meta ?? null
-          })
-        ]
+            meta: resolution.meta ?? null,
+          }),
+        ],
       );
 
       await writeStateTransition(
@@ -2636,7 +2958,7 @@ export const rollCampaignDice = async (
           sourceType: "dice_roll",
           sourceId: diceRollId,
           actorUserId: userId,
-          actorCharacterId: actorCharacterId ?? null
+          actorCharacterId: actorCharacterId ?? null,
         },
         {
           entityType: "dice_roll",
@@ -2647,9 +2969,9 @@ export const rollCampaignDice = async (
           newValue: "resolved",
           metadata: {
             turnId: resolution.meta?.turnId ?? null,
-            turnIndex: resolution.meta?.turnIndex ?? null
-          }
-        }
+            turnIndex: resolution.meta?.turnIndex ?? null,
+          },
+        },
       );
     });
 
@@ -2659,7 +2981,7 @@ export const rollCampaignDice = async (
       diceRollId,
       outcomeStatus: persistedOutcomeStatus,
       resolutionTurnId: resolution.meta?.turnId,
-      resolution
+      resolution,
     };
   } catch (error) {
     persistedOutcomeStatus = "failed";
@@ -2677,9 +2999,9 @@ export const rollCampaignDice = async (
           campaignId,
           "Auto-resolution failed",
           toJson({
-            error: error instanceof Error ? error.message : String(error)
-          })
-        ]
+            error: error instanceof Error ? error.message : String(error),
+          }),
+        ],
       );
 
       await writeStateTransition(
@@ -2689,7 +3011,7 @@ export const rollCampaignDice = async (
           sourceType: "dice_roll",
           sourceId: diceRollId,
           actorUserId: userId,
-          actorCharacterId: actorCharacterId ?? null
+          actorCharacterId: actorCharacterId ?? null,
         },
         {
           entityType: "dice_roll",
@@ -2699,9 +3021,9 @@ export const rollCampaignDice = async (
           oldValue: "pending_resolution",
           newValue: "failed",
           metadata: {
-            reason: error instanceof Error ? error.message : String(error)
-          }
-        }
+            reason: error instanceof Error ? error.message : String(error),
+          },
+        },
       );
     });
     throw error;
@@ -2711,27 +3033,29 @@ export const rollCampaignDice = async (
 export const createCampaignInvite = async (
   userId: string,
   campaignId: string,
-  input: z.infer<typeof createInviteSchema>
+  input: z.infer<typeof createInviteSchema>,
 ) => {
   const role = await assertMembership(campaignId, userId);
   if (role !== "dm") throw new Error("forbidden");
 
   const token = crypto.randomBytes(24).toString("base64url");
   const tokenHash = hashInviteToken(token);
-  const expiresAt = new Date(Date.now() + input.expiresInHours * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(
+    Date.now() + input.expiresInHours * 60 * 60 * 1000,
+  ).toISOString();
   const inviteId = createId("invite");
 
   await dmQuery(
     `INSERT INTO dm_campaign_invites (id, campaign_id, created_by_user_id, role, token_hash, expires_at, created_at)
      VALUES ($1, $2, $3, $4, $5, $6::timestamptz, now())`,
-    [inviteId, campaignId, userId, input.role, tokenHash, expiresAt]
+    [inviteId, campaignId, userId, input.role, tokenHash, expiresAt],
   );
 
   return {
     id: inviteId,
     token,
     role: input.role,
-    expiresAt
+    expiresAt,
   };
 };
 
@@ -2750,20 +3074,21 @@ export const acceptCampaignInvite = async (userId: string, token: string) => {
        FROM dm_campaign_invites
        WHERE token_hash = $1
        LIMIT 1`,
-      [tokenHash]
+      [tokenHash],
     );
 
     const invite = inviteResult.rows[0];
     if (!invite) throw new Error("invite_not_found");
     if (invite.accepted_at) throw new Error("invite_used");
-    if (invite.expires_at && invite.expires_at.getTime() < Date.now()) throw new Error("invite_expired");
+    if (invite.expires_at && invite.expires_at.getTime() < Date.now())
+      throw new Error("invite_expired");
 
     await client.query(
       `INSERT INTO dm_memberships (user_id, campaign_id, role, joined_at)
        VALUES ($1, $2, $3, now())
        ON CONFLICT (user_id, campaign_id)
        DO UPDATE SET role = EXCLUDED.role`,
-      [userId, invite.campaign_id, invite.role]
+      [userId, invite.campaign_id, invite.role],
     );
 
     await client.query(
@@ -2771,23 +3096,32 @@ export const acceptCampaignInvite = async (userId: string, token: string) => {
        SET accepted_by_user_id = $2,
            accepted_at = now()
        WHERE id = $1`,
-      [invite.id, userId]
+      [invite.id, userId],
     );
 
     await client.query(
       `INSERT INTO dm_events (id, campaign_id, type, actor_user_id, summary, payload, created_at)
        VALUES ($1, $2, 'player_joined', $3, $4, $5::jsonb, now())`,
-      [createId("event"), invite.campaign_id, userId, "Player joined campaign", toJson({ viaInvite: invite.id })]
+      [
+        createId("event"),
+        invite.campaign_id,
+        userId,
+        "Player joined campaign",
+        toJson({ viaInvite: invite.id }),
+      ],
     );
 
     return {
       campaignId: invite.campaign_id,
-      role: invite.role
+      role: invite.role,
     };
   });
 };
 
-export const listPinnedFactsForCampaign = async (userId: string, campaignId: string) => {
+export const listPinnedFactsForCampaign = async (
+  userId: string,
+  campaignId: string,
+) => {
   await assertMembership(campaignId, userId);
 
   const result = await dmQuery<{
@@ -2803,7 +3137,7 @@ export const listPinnedFactsForCampaign = async (userId: string, campaignId: str
      FROM dm_memory_facts
      WHERE campaign_id = $1
      ORDER BY pinned DESC, updated_at DESC`,
-    [campaignId]
+    [campaignId],
   );
 
   return result.rows.map((row) => ({
@@ -2813,14 +3147,14 @@ export const listPinnedFactsForCampaign = async (userId: string, campaignId: str
     confidence: row.confidence,
     pinned: row.pinned,
     createdAt: row.created_at.toISOString(),
-    updatedAt: row.updated_at.toISOString()
+    updatedAt: row.updated_at.toISOString(),
   }));
 };
 
 export const addPinnedFactToCampaign = async (
   userId: string,
   campaignId: string,
-  input: z.infer<typeof addFactSchema>
+  input: z.infer<typeof addFactSchema>,
 ) => {
   await assertMembership(campaignId, userId);
 
@@ -2828,24 +3162,47 @@ export const addPinnedFactToCampaign = async (
   await dmQuery(
     `INSERT INTO dm_memory_facts (id, campaign_id, kind, fact_text, confidence, pinned, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, now(), now())`,
-    [factId, campaignId, input.kind, input.factText, input.confidence, input.pinned]
+    [
+      factId,
+      campaignId,
+      input.kind,
+      input.factText,
+      input.confidence,
+      input.pinned,
+    ],
   );
 
   await dmQuery(
     `INSERT INTO dm_events (id, campaign_id, type, actor_user_id, summary, payload, created_at)
      VALUES ($1, $2, 'state_patch', $3, $4, $5::jsonb, now())`,
-    [createId("event"), campaignId, userId, "Pinned fact added", toJson({ factId, kind: input.kind })]
+    [
+      createId("event"),
+      campaignId,
+      userId,
+      "Pinned fact added",
+      toJson({ factId, kind: input.kind }),
+    ],
   );
 
-  void upsertEmbedding(campaignId, "pinned_fact", factId, input.factText, process.env.RASSYMIND_EMBED_MODEL ?? "rassy-embed");
+  void upsertEmbedding(
+    campaignId,
+    "pinned_fact",
+    factId,
+    input.factText,
+    process.env.RASSYMIND_EMBED_MODEL ?? "rassy-embed",
+  );
 
   return {
     id: factId,
-    ...input
+    ...input,
   };
 };
 
-export const getTurnReplay = async (userId: string, campaignId: string, turnId: string) => {
+export const getTurnReplay = async (
+  userId: string,
+  campaignId: string,
+  turnId: string,
+) => {
   await assertMembership(campaignId, userId);
 
   const turnResult = await dmQuery<{
@@ -2867,7 +3224,7 @@ export const getTurnReplay = async (userId: string, campaignId: string, turnId: 
      FROM dm_turns
      WHERE campaign_id = $1 AND id = $2
      LIMIT 1`,
-    [campaignId, turnId]
+    [campaignId, turnId],
   );
 
   const turn = turnResult.rows[0];
@@ -2889,7 +3246,7 @@ export const getTurnReplay = async (userId: string, campaignId: string, turnId: 
      FROM dm_llm_calls
      WHERE campaign_id = $1 AND turn_id = $2
      ORDER BY created_at DESC`,
-    [campaignId, turnId]
+    [campaignId, turnId],
   );
 
   const transitions = await dmQuery<{
@@ -2913,7 +3270,7 @@ export const getTurnReplay = async (userId: string, campaignId: string, turnId: 
      WHERE campaign_id = $1
        AND turn_id = $2
      ORDER BY created_at ASC, id ASC`,
-    [campaignId, turnId]
+    [campaignId, turnId],
   );
 
   const linkedRolls = await dmQuery<{
@@ -2942,7 +3299,7 @@ export const getTurnReplay = async (userId: string, campaignId: string, turnId: 
      WHERE campaign_id = $1
        AND turn_id = $2
      ORDER BY created_at ASC, id ASC`,
-    [campaignId, turnId]
+    [campaignId, turnId],
   );
 
   return {
@@ -2958,7 +3315,7 @@ export const getTurnReplay = async (userId: string, campaignId: string, turnId: 
       model: turn.model,
       status: turn.status,
       createdAt: turn.created_at.toISOString(),
-      appliedAt: turn.applied_at ? turn.applied_at.toISOString() : null
+      appliedAt: turn.applied_at ? turn.applied_at.toISOString() : null,
     },
     llmCalls: llmCalls.rows.map((row) => ({
       id: row.id,
@@ -2970,7 +3327,7 @@ export const getTurnReplay = async (userId: string, campaignId: string, turnId: 
       latencyMs: row.latency_ms,
       success: row.success,
       errorText: row.error_text,
-      createdAt: row.created_at.toISOString()
+      createdAt: row.created_at.toISOString(),
     })),
     stateTransitions: transitions.rows.map((row) => ({
       id: row.id,
@@ -2985,7 +3342,7 @@ export const getTurnReplay = async (userId: string, campaignId: string, turnId: 
       oldValue: row.old_value ?? null,
       newValue: row.new_value ?? null,
       metadata: row.metadata ?? {},
-      createdAt: row.created_at.toISOString()
+      createdAt: row.created_at.toISOString(),
     })),
     linkedDiceRolls: linkedRolls.rows.map((row) => ({
       id: row.id,
@@ -2995,7 +3352,11 @@ export const getTurnReplay = async (userId: string, campaignId: string, turnId: 
       count: row.dice_count,
       sides: row.dice_sides,
       modifier: row.modifier,
-      rolls: Array.isArray(row.rolls) ? row.rolls.filter((value): value is number => typeof value === "number") : [],
+      rolls: Array.isArray(row.rolls)
+        ? row.rolls.filter(
+            (value): value is number => typeof value === "number",
+          )
+        : [],
       total: row.total,
       criticalSuccess: row.critical_success,
       criticalFailure: row.critical_failure,
@@ -3004,15 +3365,15 @@ export const getTurnReplay = async (userId: string, campaignId: string, turnId: 
       outcomeStatus: row.outcome_status,
       outcomeSummary: row.outcome_summary,
       createdAt: row.created_at.toISOString(),
-      resolvedAt: row.resolved_at ? row.resolved_at.toISOString() : null
-    }))
+      resolvedAt: row.resolved_at ? row.resolved_at.toISOString() : null,
+    })),
   };
 };
 
 export const resolveCampaignEventCursor = async (
   userId: string,
   campaignId: string,
-  eventId: string
+  eventId: string,
 ) => {
   await assertMembership(campaignId, userId);
   const result = await dmQuery<{ created_at: Date }>(
@@ -3020,7 +3381,7 @@ export const resolveCampaignEventCursor = async (
      FROM dm_events
      WHERE campaign_id = $1 AND id = $2
      LIMIT 1`,
-    [campaignId, eventId]
+    [campaignId, eventId],
   );
   return result.rows[0]?.created_at.toISOString() ?? null;
 };
@@ -3029,7 +3390,7 @@ export const listCampaignEventsSince = async (
   userId: string,
   campaignId: string,
   sinceIso?: string,
-  afterEventId?: string
+  afterEventId?: string,
 ) => {
   await assertMembership(campaignId, userId);
 
@@ -3052,7 +3413,7 @@ export const listCampaignEventsSince = async (
        )
      ORDER BY created_at ASC, id ASC
      LIMIT 200`,
-    [campaignId, sinceIso ?? null, afterEventId ?? null]
+    [campaignId, sinceIso ?? null, afterEventId ?? null],
   );
 
   return result.rows.map((row) => ({
@@ -3062,14 +3423,14 @@ export const listCampaignEventsSince = async (
     actorCharacterId: row.actor_character_id,
     summary: row.summary,
     payload: row.payload,
-    createdAt: row.created_at.toISOString()
+    createdAt: row.created_at.toISOString(),
   }));
 };
 
 export const listCampaignStateTransitions = async (
   userId: string,
   campaignId: string,
-  input?: { limit?: number; turnId?: string }
+  input?: { limit?: number; turnId?: string },
 ) => {
   await assertMembership(campaignId, userId);
   const limit = clamp(input?.limit ?? 100, 1, 500);
@@ -3098,7 +3459,7 @@ export const listCampaignStateTransitions = async (
        AND ($2::text IS NULL OR turn_id = $2)
      ORDER BY created_at DESC, id DESC
      LIMIT $3`,
-    [campaignId, input?.turnId ?? null, limit]
+    [campaignId, input?.turnId ?? null, limit],
   );
 
   return result.rows.map((row) => ({
@@ -3116,14 +3477,14 @@ export const listCampaignStateTransitions = async (
     oldValue: row.old_value ?? null,
     newValue: row.new_value ?? null,
     metadata: row.metadata ?? {},
-    createdAt: row.created_at.toISOString()
+    createdAt: row.created_at.toISOString(),
   }));
 };
 
 export const listCampaignDiceRolls = async (
   userId: string,
   campaignId: string,
-  input?: { limit?: number; turnId?: string }
+  input?: { limit?: number; turnId?: string },
 ) => {
   await assertMembership(campaignId, userId);
   const limit = clamp(input?.limit ?? 100, 1, 500);
@@ -3158,7 +3519,7 @@ export const listCampaignDiceRolls = async (
        AND ($2::text IS NULL OR turn_id = $2)
      ORDER BY created_at DESC, id DESC
      LIMIT $3`,
-    [campaignId, input?.turnId ?? null, limit]
+    [campaignId, input?.turnId ?? null, limit],
   );
 
   return result.rows.map((row) => ({
@@ -3171,7 +3532,9 @@ export const listCampaignDiceRolls = async (
     count: row.dice_count,
     sides: row.dice_sides,
     modifier: row.modifier,
-    rolls: Array.isArray(row.rolls) ? row.rolls.filter((value): value is number => typeof value === "number") : [],
+    rolls: Array.isArray(row.rolls)
+      ? row.rolls.filter((value): value is number => typeof value === "number")
+      : [],
     total: row.total,
     criticalSuccess: row.critical_success,
     criticalFailure: row.critical_failure,
@@ -3181,7 +3544,7 @@ export const listCampaignDiceRolls = async (
     outcomeSummary: row.outcome_summary,
     outcomePayload: row.outcome_payload ?? {},
     createdAt: row.created_at.toISOString(),
-    resolvedAt: row.resolved_at ? row.resolved_at.toISOString() : null
+    resolvedAt: row.resolved_at ? row.resolved_at.toISOString() : null,
   }));
 };
 
@@ -3214,14 +3577,14 @@ export const listDmSystems = async (): Promise<DmSystemSummary[]> => {
   }>(
     `SELECT id, display_name, description, rules_primer
      FROM dm_systems
-     ORDER BY display_name ASC`
+     ORDER BY display_name ASC`,
   );
 
   return result.rows.map((row) => ({
     id: row.id,
     displayName: row.display_name,
     description: row.description,
-    rulesPrimer: row.rules_primer
+    rulesPrimer: row.rules_primer,
   }));
 };
 
@@ -3266,7 +3629,12 @@ export const searchCompendiumEntries = async (input: {
        )
      ORDER BY updated_at DESC, name ASC
      LIMIT $4`,
-    [input.systemId, normalizedQuery, normalizedTypes.length ? normalizedTypes : null, limit]
+    [
+      input.systemId,
+      normalizedQuery,
+      normalizedTypes.length ? normalizedTypes : null,
+      limit,
+    ],
   );
 
   return result.rows.map((row) => ({
@@ -3278,24 +3646,31 @@ export const searchCompendiumEntries = async (input: {
     slug: row.slug,
     summary: row.summary,
     tags: toStringArray(row.tags),
-    data: row.data ?? {}
+    data: row.data ?? {},
   }));
 };
 
 export const getPlayerDashboardForUser = async (
   userId: string,
   campaignId: string,
-  selectedCharacterId?: string
+  selectedCharacterId?: string,
 ): Promise<PlayerDashboardState> => {
   const snapshot = await getCampaignSnapshotForUser(userId, campaignId);
-  const ownedCharacters = snapshot.characters.filter((character) => character.userId === userId);
-  const ownedCharacterIds = new Set(ownedCharacters.map((character) => character.id));
+  const ownedCharacters = snapshot.characters.filter(
+    (character) => character.userId === userId,
+  );
+  const ownedCharacterIds = new Set(
+    ownedCharacters.map((character) => character.id),
+  );
 
   let activeCharacter: CharacterRecord | null = ownedCharacters[0] ?? null;
   if (selectedCharacterId) {
-    const selected = snapshot.characters.find((character) => character.id === selectedCharacterId);
+    const selected = snapshot.characters.find(
+      (character) => character.id === selectedCharacterId,
+    );
     if (!selected) throw new Error("character_not_found");
-    if (snapshot.role !== "dm" && selected.userId !== userId) throw new Error("forbidden");
+    if (snapshot.role !== "dm" && selected.userId !== userId)
+      throw new Error("forbidden");
     activeCharacter = selected;
   }
 
@@ -3313,7 +3688,7 @@ export const getPlayerDashboardForUser = async (
      WHERE campaign_id = $1
      ORDER BY created_at DESC, id DESC
      LIMIT 400`,
-    [campaignId]
+    [campaignId],
   );
 
   const mappedEvents = eventsResult.rows.map((row) => ({
@@ -3324,7 +3699,7 @@ export const getPlayerDashboardForUser = async (
     actorCharacterId: row.actor_character_id ?? undefined,
     summary: row.summary,
     payload: row.payload ?? undefined,
-    createdAt: row.created_at.toISOString()
+    createdAt: row.created_at.toISOString(),
   }));
 
   const globallyVisibleEventTypes = new Set<EventRecord["type"]>([
@@ -3333,7 +3708,7 @@ export const getPlayerDashboardForUser = async (
     "state_patch",
     "quest_update",
     "character_update",
-    "character_created"
+    "character_created",
   ]);
 
   const relevantEvents =
@@ -3342,7 +3717,11 @@ export const getPlayerDashboardForUser = async (
       : mappedEvents.filter((event) => {
           if (globallyVisibleEventTypes.has(event.type)) return true;
           if (event.actorUserId && event.actorUserId === userId) return true;
-          if (event.actorCharacterId && ownedCharacterIds.has(event.actorCharacterId)) return true;
+          if (
+            event.actorCharacterId &&
+            ownedCharacterIds.has(event.actorCharacterId)
+          )
+            return true;
           return false;
         });
 
@@ -3350,7 +3729,10 @@ export const getPlayerDashboardForUser = async (
   const personalRollEvents = relevantEvents.filter(
     (event) =>
       event.type === "dice_roll" &&
-      (event.actorUserId === userId || (event.actorCharacterId ? ownedCharacterIds.has(event.actorCharacterId) : false))
+      (event.actorUserId === userId ||
+        (event.actorCharacterId
+          ? ownedCharacterIds.has(event.actorCharacterId)
+          : false)),
   );
 
   const rollTotals = personalRollEvents
@@ -3371,12 +3753,18 @@ export const getPlayerDashboardForUser = async (
   }).length;
 
   const actionsTaken = relevantEvents.filter(
-    (event) => event.type === "player_action" && event.actorUserId === userId
+    (event) => event.type === "player_action" && event.actorUserId === userId,
   ).length;
-  const dmResponsesSeen = relevantEvents.filter((event) => event.type === "dm_response").length;
+  const dmResponsesSeen = relevantEvents.filter(
+    (event) => event.type === "dm_response",
+  ).length;
 
   const keyMoments = relevantEvents
-    .filter((event) => ["dm_response", "quest_update", "character_update", "dice_roll"].includes(event.type))
+    .filter((event) =>
+      ["dm_response", "quest_update", "character_update", "dice_roll"].includes(
+        event.type,
+      ),
+    )
     .slice(0, 8)
     .map((event) => event.summary);
 
@@ -3384,12 +3772,12 @@ export const getPlayerDashboardForUser = async (
     ? [
         `As ${activeCharacter.name}, I secure our position at ${snapshot.campaign.worldState.location}.`,
         `As ${activeCharacter.name}, I investigate threat signals and report findings.`,
-        `As ${activeCharacter.name}, I push quest progress while protecting the party.`
+        `As ${activeCharacter.name}, I push quest progress while protecting the party.`,
       ]
     : [
         "I assess the current scene and state one concrete next action.",
         "I ask the DM for tactical options tied to active objectives.",
-        "I coordinate with the party before advancing the scene."
+        "I coordinate with the party before advancing the scene.",
       ];
 
   return {
@@ -3406,21 +3794,31 @@ export const getPlayerDashboardForUser = async (
       criticalSuccesses,
       criticalFailures,
       averageRollTotal: rollTotals.length
-        ? Number((rollTotals.reduce((sum, value) => sum + value, 0) / rollTotals.length).toFixed(2))
+        ? Number(
+            (
+              rollTotals.reduce((sum, value) => sum + value, 0) /
+              rollTotals.length
+            ).toFixed(2),
+          )
         : null,
       actionsTaken,
       dmResponsesSeen,
       lastActionAt:
-        relevantEvents.find((event) => event.type === "player_action" && event.actorUserId === userId)?.createdAt ??
-        null,
-      lastRollAt: personalRollEvents[0]?.createdAt ?? null
+        relevantEvents.find(
+          (event) =>
+            event.type === "player_action" && event.actorUserId === userId,
+        )?.createdAt ?? null,
+      lastRollAt: personalRollEvents[0]?.createdAt ?? null,
     },
     keyMoments,
-    suggestedPrompts: promptsFromCharacter
+    suggestedPrompts: promptsFromCharacter,
   };
 };
 
-export const startCampaignSession = async (userId: string, campaignId: string) => {
+export const startCampaignSession = async (
+  userId: string,
+  campaignId: string,
+) => {
   const role = await assertMembership(campaignId, userId);
   if (role !== "dm") throw new Error("forbidden");
 
@@ -3430,7 +3828,7 @@ export const startCampaignSession = async (userId: string, campaignId: string) =
        SET status = 'ended',
            ended_at = now()
        WHERE campaign_id = $1 AND status = 'active'`,
-      [campaignId]
+      [campaignId],
     );
 
     const sessionId = createId("sess");
@@ -3438,23 +3836,33 @@ export const startCampaignSession = async (userId: string, campaignId: string) =
       `INSERT INTO dm_sessions (id, campaign_id, started_by_user_id, status, current_turn, metadata, started_at)
        VALUES ($1, $2, $3, 'active', 0, '{}'::jsonb, now())
        RETURNING id, started_at`,
-      [sessionId, campaignId, userId]
+      [sessionId, campaignId, userId],
     );
 
     await client.query(
       `INSERT INTO dm_events (id, campaign_id, session_id, type, actor_user_id, summary, payload, created_at)
        VALUES ($1, $2, $3, 'state_patch', $4, $5, $6::jsonb, now())`,
-      [createId("event"), campaignId, sessionId, userId, "New session started", toJson({ sessionId })]
+      [
+        createId("event"),
+        campaignId,
+        sessionId,
+        userId,
+        "New session started",
+        toJson({ sessionId }),
+      ],
     );
 
     return {
       id: created.rows[0].id,
-      startedAt: created.rows[0].started_at.toISOString()
+      startedAt: created.rows[0].started_at.toISOString(),
     };
   });
 };
 
-export const endCampaignSession = async (userId: string, campaignId: string) => {
+export const endCampaignSession = async (
+  userId: string,
+  campaignId: string,
+) => {
   const role = await assertMembership(campaignId, userId);
   if (role !== "dm") throw new Error("forbidden");
 
@@ -3463,7 +3871,7 @@ export const endCampaignSession = async (userId: string, campaignId: string) => 
      SET status = 'ended',
          ended_at = now()
      WHERE campaign_id = $1 AND status = 'active'`,
-    [campaignId]
+    [campaignId],
   );
 
   return { ok: true };

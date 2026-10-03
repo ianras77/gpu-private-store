@@ -4,6 +4,7 @@ import { RASSY_ARTIFACT_KINDS, RASSY_CHANNELS, RASSY_TOOLS, rassyRequestContextS
 import { agents } from "./mastra.js";
 import { rassymind } from "./models/rassymind.js";
 import { isAgentAllowedForContext } from "./policy.js";
+import { resolveCompatibilityAgent } from "./radio-purpose.js";
 
 type AgentId = keyof typeof agents;
 
@@ -126,12 +127,7 @@ app.post("/v1/chat/completions", async (request, reply) => {
     .join("\n\n");
   if (!prompt.trim() || prompt.length > 50000) return reply.code(400).send({ error: "prompt_required" });
   const purpose = request.headers["x-cheshire-purpose"] ?? request.headers["x-rassy-purpose"];
-  const purposeText = String(purpose ?? "").toLowerCase();
-  const agentId = purposeText.includes("dm")
-    ? "dungeon-master"
-    : purposeText.includes("listener") || purposeText.includes("radio") || purposeText.includes("track-intelligence")
-      ? "radio-listener"
-      : "mr-rassy-host";
+  const agentId = resolveCompatibilityAgent(String(purpose ?? ""));
   try {
     const result = await agents[agentId].generate(prompt, { maxSteps: 1 });
     return { id: `rassy-${Date.now()}`, object: "chat.completion", choices: [{ index: 0, message: { role: "assistant", content: result.text }, finish_reason: "stop" }], model: typeof body.model === "string" ? body.model : "rassy-mind" };

@@ -8,7 +8,13 @@ const keyLength = 64;
 const getSecret = () => {
   const configured = process.env.DM_JWT_SECRET || process.env.ADMIN_JWT_SECRET;
   if (process.env.NODE_ENV === "production") {
-    if (!configured || configured.length < 32 || /^(hackme|change-me|unsafe-dm-secret|dm-secret|password)/i.test(configured)) {
+    if (
+      !configured ||
+      configured.length < 32 ||
+      /^(hackme|change-me|unsafe-dm-secret|dm-secret|password)/i.test(
+        configured,
+      )
+    ) {
       throw new Error("DM_JWT_SECRET must be a strong production secret");
     }
   }
@@ -28,7 +34,11 @@ const shouldUseSecureDmCookie = (request?: Request) => {
   if (process.env.DM_COOKIE_SECURE === "false") return false;
   if (process.env.NODE_ENV !== "production") return false;
 
-  const forwardedProto = request?.headers.get("x-forwarded-proto")?.split(",")[0]?.trim().toLowerCase();
+  const forwardedProto = request?.headers
+    .get("x-forwarded-proto")
+    ?.split(",")[0]
+    ?.trim()
+    .toLowerCase();
   if (forwardedProto) {
     return forwardedProto === "https";
   }
@@ -62,7 +72,7 @@ export const issueDmToken = async (session: DmSession, request?: Request) => {
   const token = await new SignJWT({
     scope: "dm-user",
     email: session.email,
-    displayName: session.displayName
+    displayName: session.displayName,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(session.userId)
@@ -75,7 +85,7 @@ export const issueDmToken = async (session: DmSession, request?: Request) => {
     httpOnly: true,
     sameSite: "lax",
     secure: shouldUseSecureDmCookie(request),
-    path: "/"
+    path: "/",
   });
 };
 
@@ -86,7 +96,7 @@ export const clearDmToken = async (request?: Request) => {
     sameSite: "lax",
     secure: shouldUseSecureDmCookie(request),
     path: "/",
-    maxAge: 0
+    maxAge: 0,
   });
 };
 
@@ -100,7 +110,8 @@ export const getDmSession = async (): Promise<DmSession | null> => {
     if (payload.scope !== "dm-user") return null;
     const userId = typeof payload.sub === "string" ? payload.sub : "";
     const email = typeof payload.email === "string" ? payload.email : "";
-    const displayName = typeof payload.displayName === "string" ? payload.displayName : "";
+    const displayName =
+      typeof payload.displayName === "string" ? payload.displayName : "";
     if (!userId || !email || !displayName) return null;
     return { userId, email, displayName };
   } catch {

@@ -114,7 +114,9 @@ const truncateMessage = (value: string, max = 180) => {
 const roundCoord = (value?: number) =>
   typeof value === "number" ? Math.round(value) : 0;
 
-const describeCoords = (coords?: { x?: number; y?: number; z?: number } | null) =>
+const describeCoords = (
+  coords?: { x?: number; y?: number; z?: number } | null,
+) =>
   coords
     ? `x${roundCoord(coords.x)} y${roundCoord(coords.y)} z${roundCoord(coords.z)}`
     : "";
@@ -210,13 +212,20 @@ export function MinecraftObservatory({
     (bot) => bot.state === "auth_failed" || Boolean(bot.authError),
   );
   const botStatusByName = new Map(
-    reachableBots.map((bot) => [String(bot.name ?? "").trim().toLowerCase(), bot]),
+    reachableBots.map((bot) => [
+      String(bot.name ?? "")
+        .trim()
+        .toLowerCase(),
+      bot,
+    ]),
   );
 
   const rawFeed = Array.isArray(events) ? events.slice(0, 30) : [];
   const feed = rawFeed
     .filter((event, index) => {
-      const botKey = String(event.bot ?? "").trim().toLowerCase();
+      const botKey = String(event.bot ?? "")
+        .trim()
+        .toLowerCase();
       const botStatus = botKey ? botStatusByName.get(botKey) : null;
 
       if (
@@ -241,7 +250,9 @@ export function MinecraftObservatory({
 
   const latestEvent = feed[0];
   const primaryBotStatus = authFailedBots[0] ?? reachableBots[0];
-  const players = Array.isArray(playersData?.players) ? playersData.players : [];
+  const players = Array.isArray(playersData?.players)
+    ? playersData.players
+    : [];
   const activeBots = Array.from(
     new Set(
       [
@@ -268,9 +279,13 @@ export function MinecraftObservatory({
     ((!playersError && Boolean(playersData)) ||
       (!mapSettingsError && Boolean(mapSettings)));
   const mapUnavailable =
-    Boolean(publicMapUrl) && !mapAvailable && Boolean(playersError || mapSettingsError);
+    Boolean(publicMapUrl) &&
+    !mapAvailable &&
+    Boolean(playersError || mapSettingsError);
   const mapLinkUrl = mapAvailable ? publicMapEntryUrl || publicMapUrl : "";
-  const worldCount = Array.isArray(mapSettings?.maps) ? mapSettings.maps.length : 0;
+  const worldCount = Array.isArray(mapSettings?.maps)
+    ? mapSettings.maps.length
+    : 0;
   const troupeMarkers = reachableBots
     .filter(
       (bot) =>
@@ -314,11 +329,11 @@ export function MinecraftObservatory({
   const fallbackCenterX =
     typeof latestEvent?.coords?.x === "number"
       ? Number(latestEvent.coords.x)
-      : troupeMarkers[0]?.x ?? players[0]?.position?.x ?? 0;
+      : (troupeMarkers[0]?.x ?? players[0]?.position?.x ?? 0);
   const fallbackCenterZ =
     typeof latestEvent?.coords?.z === "number"
       ? Number(latestEvent.coords.z)
-      : troupeMarkers[0]?.z ?? players[0]?.position?.z ?? 0;
+      : (troupeMarkers[0]?.z ?? players[0]?.position?.z ?? 0);
   const xValues = signalPoints.map((point) => point.x);
   const zValues = signalPoints.map((point) => point.z);
   const minXRaw = xValues.length ? Math.min(...xValues) : fallbackCenterX - 16;
@@ -526,7 +541,9 @@ export function MinecraftObservatory({
                     World Pulse
                   </div>
                   <span className="text-[10px] uppercase tracking-[0.2em] text-cloud/45">
-                    {authFailedBots.length > 0 ? "auth checkpoint" : "bridge live"}
+                    {authFailedBots.length > 0
+                      ? "auth checkpoint"
+                      : "bridge live"}
                   </span>
                 </div>
                 <div className="mt-2 text-lg font-semibold text-white">
@@ -557,9 +574,13 @@ export function MinecraftObservatory({
                     Troupe Status
                   </div>
                   <div className="mt-2 text-sm font-semibold text-white">
-                    {botPreview.length ? botPreview.join(", ") : "Waiting on troupe status"}
+                    {botPreview.length
+                      ? botPreview.join(", ")
+                      : "Waiting on troupe status"}
                   </div>
-                  <div className="mt-2 text-xs text-cloud/60">{authSummary}</div>
+                  <div className="mt-2 text-xs text-cloud/60">
+                    {authSummary}
+                  </div>
                 </div>
               </div>
 
@@ -583,7 +604,9 @@ export function MinecraftObservatory({
                       </div>
                       <div className="mt-2 flex flex-wrap gap-3 text-[10px] text-cloud/50">
                         {bot.home && <span>{describeCoords(bot.home)}</span>}
-                        {bot.currentSubgoal && <span>{bot.currentSubgoal}</span>}
+                        {bot.currentSubgoal && (
+                          <span>{bot.currentSubgoal}</span>
+                        )}
                         {formatRetryText(bot.authRetryAt) && (
                           <span>{formatRetryText(bot.authRetryAt)}</span>
                         )}
@@ -811,8 +834,8 @@ export function MinecraftObservatory({
               </div>
             )}
             <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-sm leading-6 text-cloud/70">
-              {authSummary} Keep this page open for bot status, coordinates,
-              and world chatter.
+              {authSummary} Keep this page open for bot status, coordinates, and
+              world chatter.
             </div>
           </div>
         </Card>

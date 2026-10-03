@@ -2,7 +2,13 @@
 
 import { RefreshCcw, Sparkles, WandSparkles, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { startTransition, useCallback, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "./ui/button";
 
 type EasterEggPayload = {
@@ -104,7 +110,10 @@ const normalizePayload = (
 };
 
 const buildTrailFingerprint = (curio: EasterEggPayload) =>
-  [curio.badge, curio.title, curio.href].filter(Boolean).join(" :: ").slice(0, 140);
+  [curio.badge, curio.title, curio.href]
+    .filter(Boolean)
+    .join(" :: ")
+    .slice(0, 140);
 
 const readTrail = () => {
   if (typeof window === "undefined") return [] as string[];
@@ -114,7 +123,10 @@ const readTrail = () => {
     const parsed = raw ? (JSON.parse(raw) as unknown) : [];
     if (!Array.isArray(parsed)) return [];
     return parsed
-      .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+      .filter(
+        (item): item is string =>
+          typeof item === "string" && item.trim().length > 0,
+      )
       .slice(-MAX_TRAIL_ENTRIES);
   } catch {
     return [];
@@ -134,7 +146,9 @@ const rememberTrail = (curio: EasterEggPayload) => {
 export function EasterEggs() {
   const pathname = usePathname();
   const hidden = pathname.startsWith("/radio/app");
-  const [curio, setCurio] = useState<EasterEggPayload>(() => normalizePayload());
+  const [curio, setCurio] = useState<EasterEggPayload>(() =>
+    normalizePayload(),
+  );
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fresh, setFresh] = useState(false);
@@ -142,10 +156,7 @@ export function EasterEggs() {
   const sequenceRef = useRef<string[]>([]);
 
   const fetchCurio = useCallback(
-    async (
-      forceOpen = false,
-      trigger: EasterEggTrigger = "route",
-    ) => {
+    async (forceOpen = false, trigger: EasterEggTrigger = "route") => {
       if (hidden || loadingRef.current) return;
       loadingRef.current = true;
       setLoading(true);
@@ -342,7 +353,9 @@ export function EasterEggs() {
                 <span className="text-cloud/70">rassy</span> to pull a fresh
                 live whisper.
               </div>
-              <div>{curio.at ? new Date(curio.at).toLocaleTimeString() : ""}</div>
+              <div>
+                {curio.at ? new Date(curio.at).toLocaleTimeString() : ""}
+              </div>
             </div>
           </div>
         </div>

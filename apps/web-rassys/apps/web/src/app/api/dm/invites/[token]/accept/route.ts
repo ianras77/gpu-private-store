@@ -17,10 +17,15 @@ export async function POST(_: Request, context: Params) {
   } catch (error) {
     if (
       error instanceof Error &&
-      ["invite_not_found", "invite_used", "invite_expired"].includes(error.message)
+      ["invite_not_found", "invite_used", "invite_expired"].includes(
+        error.message,
+      )
     ) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    return NextResponse.json({ error: "invite_accept_failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "invite_accept_failed" },
+      { status: 500 },
+    );
   }
 }

@@ -16,14 +16,10 @@ export function SiteHeader() {
     return null;
   }
 
-  const isActiveLink = (href: string) => {
-    if (href.startsWith("/#")) {
-      return pathname === "/";
-    }
-    if (href === "/") {
-      return pathname === "/";
-    }
-    return pathname === href || pathname.startsWith(`${href}/`);
+  const isActiveLink = (href: string, aliases: string[] = []) => {
+    return [href, ...aliases].some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`),
+    );
   };
 
   const showRadioControl = hasInteracted || playStatus !== "idle";
@@ -51,17 +47,17 @@ export function SiteHeader() {
 
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
           <div className="flex min-h-[58px] items-center gap-4 py-2 sm:min-h-[64px]">
-          <Link
-            href="/"
-            className="group relative flex min-w-0 items-center gap-2.5 rounded-xl px-1 py-1 text-white transition hover:text-glow"
-          >
-            <span className="glow-dot h-2.5 w-2.5 rounded-full" />
-            <span className="whitespace-nowrap text-[clamp(.7rem,2.4vw,.94rem)] font-semibold tracking-[0.04em] text-white">
-              Rassy’s <span className="text-glow">dot</span> Com
-            </span>
-          </Link>
+            <Link
+              href="/"
+              className="group relative flex min-w-0 items-center gap-2.5 rounded-xl px-1 py-1 text-white transition hover:text-glow"
+            >
+              <span className="glow-dot h-2.5 w-2.5 rounded-full" />
+              <span className="whitespace-nowrap text-[clamp(.7rem,2.4vw,.94rem)] font-semibold tracking-[0.04em] text-white">
+                Rassy’s <span className="text-glow">dot</span> Com
+              </span>
+            </Link>
 
-            <div className="hidden min-w-0 flex-1 justify-center md:flex">
+            <div className="hidden min-w-0 flex-1 justify-center lg:flex">
               <nav
                 aria-label="Primary"
                 className="flex min-w-0 items-center gap-0.5 rounded-2xl border border-white/10 bg-black/20 px-1.5 py-1 shadow-[0_14px_34px_rgba(0,0,0,0.16)]"
@@ -69,15 +65,19 @@ export function SiteHeader() {
                 {publicRassysApps.map((link) => (
                   <Link
                     key={link.href}
-                      className={`rounded-xl px-3 py-2 text-[10px] uppercase tracking-[0.18em] transition ${
-                      isActiveLink(link.href)
+                    className={`flex min-h-11 items-center rounded-xl px-3 text-[10px] uppercase tracking-[0.18em] transition ${
+                      isActiveLink(link.href, link.aliases)
                         ? "bg-[linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,79,216,0.12))] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_8px_18px_rgba(0,0,0,0.16)]"
                         : "text-cloud/62 hover:bg-white/[0.05] hover:text-white"
                     }`}
                     href={link.href}
                     title={link.description}
+                    aria-label={link.label}
+                    aria-current={
+                      isActiveLink(link.href, link.aliases) ? "page" : undefined
+                    }
                   >
-                    {link.label}
+                    {link.shortLabel}
                   </Link>
                 ))}
               </nav>
@@ -97,9 +97,11 @@ export function SiteHeader() {
               {showRadioControl && (
                 <Button
                   variant="secondary"
-                  className="h-8 gap-2 rounded-full border border-white/10 bg-white/[0.05] px-2.5 text-[10px] uppercase tracking-[0.2em] text-white shadow-[0_12px_28px_rgba(0,0,0,0.16)] hover:bg-white/[0.08] sm:px-3"
+                  className="min-h-11 gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 text-[10px] uppercase tracking-[0.2em] text-white shadow-[0_12px_28px_rgba(0,0,0,0.16)] hover:bg-white/[0.08]"
                   onClick={() => void toggle()}
                   disabled={playStatus === "loading"}
+                  aria-label={radioLabel}
+                  aria-pressed={playing}
                 >
                   <span
                     className={`h-2 w-2 rounded-full ${
@@ -115,20 +117,23 @@ export function SiteHeader() {
             </div>
           </div>
 
-          <div className="pb-2 md:hidden">
+          <div className="pb-2 lg:hidden">
             <nav
-              aria-label="Quick links"
+              aria-label="Primary mobile"
               className="flex gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-black/20 px-1.5 py-1 text-[9px] uppercase tracking-[0.18em] text-cloud/64 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {publicRassysApps.map((link) => (
                 <Link
                   key={link.href}
-                  className={`shrink-0 rounded-full px-3 py-1.5 transition ${
-                    isActiveLink(link.href)
+                  className={`flex min-h-11 shrink-0 items-center rounded-full px-3 transition ${
+                    isActiveLink(link.href, link.aliases)
                       ? "bg-[linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,79,216,0.12))] text-white"
                       : "text-cloud/64 hover:bg-white/[0.05] hover:text-white"
                   }`}
                   href={link.href}
+                  aria-current={
+                    isActiveLink(link.href, link.aliases) ? "page" : undefined
+                  }
                 >
                   {link.label}
                 </Link>

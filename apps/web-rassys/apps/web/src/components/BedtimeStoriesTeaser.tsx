@@ -3,7 +3,11 @@ import Link from "next/link";
 import { fetchPodcastShow } from "../lib/media-controller";
 
 const formatDuration = (seconds?: number) => {
-  if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds <= 0) {
+  if (
+    typeof seconds !== "number" ||
+    !Number.isFinite(seconds) ||
+    seconds <= 0
+  ) {
     return null;
   }
   const hours = Math.floor(seconds / 3600);

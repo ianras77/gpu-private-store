@@ -9,7 +9,7 @@ const contents = fs.readFileSync(file, "utf8");
 const requiredTokens = [
   "createVolatileCache<RadioNote[]>",
   "notesListCache",
-  "RADIO_NOTES_LIST_CACHE_TTL_MS"
+  "RADIO_NOTES_LIST_CACHE_TTL_MS",
 ];
 
 for (const token of requiredTokens) {

@@ -68,7 +68,9 @@ const fetchJson = async <T,>(url: string): Promise<T> => {
 };
 
 const describeBotState = (bot?: TroupeBotStatus | null) => {
-  const state = String(bot?.state ?? "").trim().replace(/_/g, " ");
+  const state = String(bot?.state ?? "")
+    .trim()
+    .replace(/_/g, " ");
   return state || "standing by";
 };
 
@@ -79,7 +81,8 @@ const splitServerAddress = (value: string) => {
   if (value.startsWith("[")) {
     const end = value.indexOf("]");
     const host = end >= 0 ? value.slice(1, end) : value.slice(1);
-    const port = end >= 0 && value[end + 1] === ":" ? value.slice(end + 2) : "25565";
+    const port =
+      end >= 0 && value[end + 1] === ":" ? value.slice(end + 2) : "25565";
     return { host, port };
   }
 
@@ -129,7 +132,9 @@ export function MinecraftHomeCallout() {
     },
   );
   const { data: playersData, error: playersError } = useSWR<LivePlayersPayload>(
-    active && publicMapUrl ? "/mc-troupe-map/maps/world/live/players.json" : null,
+    active && publicMapUrl
+      ? "/mc-troupe-map/maps/world/live/players.json"
+      : null,
     fetchJson,
     {
       refreshInterval: active ? 15000 : 0,
@@ -246,9 +251,7 @@ export function MinecraftHomeCallout() {
             <div className="text-[11px] uppercase tracking-[0.38em] text-cloud/58">
               Minecraft world
             </div>
-            <h2 className="section-title mt-3 text-4xl md:text-5xl">
-              Crafty
-            </h2>
+            <h2 className="section-title mt-3 text-4xl md:text-5xl">Crafty</h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-cloud/82 md:text-base">
               Jump into the world with me and the bots. The live map and troupe
               pulse are right here, and the join address is open whenever you
@@ -272,9 +275,10 @@ export function MinecraftHomeCallout() {
                   {serverAddress}
                 </div>
                 <div className="mt-2 text-xs text-cloud/64">
-                  Connect at <span className="text-white">crafty.rasies.com</span>{" "}
-                  and keep the default Minecraft port visible if you need to key it
-                  in manually.
+                  Connect at{" "}
+                  <span className="text-white">crafty.rasies.com</span> and keep
+                  the default Minecraft port visible if you need to key it in
+                  manually.
                 </div>
               </div>
 
@@ -303,7 +307,9 @@ export function MinecraftHomeCallout() {
                     : "Listening for troupe status"}
                 </div>
                 <div className="mt-2 text-xs text-cloud/62">
-                  {leadBot?.detail || leadBot?.currentGoal || "Waiting on the next move."}
+                  {leadBot?.detail ||
+                    leadBot?.currentGoal ||
+                    "Waiting on the next move."}
                 </div>
               </div>
 
@@ -313,7 +319,9 @@ export function MinecraftHomeCallout() {
                   Live players
                 </div>
                 <div className="mt-2 text-sm font-semibold text-white">
-                  {players.length ? `${players.length} in world` : "No player positions yet"}
+                  {players.length
+                    ? `${players.length} in world`
+                    : "No player positions yet"}
                 </div>
                 <div className="mt-2 text-xs text-cloud/62">
                   {players[0]
@@ -367,7 +375,9 @@ export function MinecraftHomeCallout() {
                 </div>
               </div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/55">
-                {signalPoints.length ? `${signalPoints.length} live markers` : "Waiting for map signal"}
+                {signalPoints.length
+                  ? `${signalPoints.length} live markers`
+                  : "Waiting for map signal"}
               </div>
             </div>
 
@@ -432,7 +442,9 @@ export function MinecraftHomeCallout() {
                 {bots.length} troupe bot{bots.length === 1 ? "" : "s"}
               </span>
               <span className="rave-chip rounded-full px-3 py-2">
-                {latestEvent ? formatTimeAgo(latestEvent.ts) || "live" : "bridge listening"}
+                {latestEvent
+                  ? formatTimeAgo(latestEvent.ts) || "live"
+                  : "bridge listening"}
               </span>
             </div>
           </div>

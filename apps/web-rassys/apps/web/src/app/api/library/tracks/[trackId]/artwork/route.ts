@@ -5,20 +5,28 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  context: { params: Promise<{ trackId: string }> }
+  context: { params: Promise<{ trackId: string }> },
 ) {
   const { trackId } = await context.params;
-  return proxyControllerMedia(request, `/public/library/tracks/${encodeURIComponent(trackId)}/artwork`, {
-    cacheControl: "public, max-age=86400, immutable"
-  });
+  return proxyControllerMedia(
+    request,
+    `/public/library/tracks/${encodeURIComponent(trackId)}/artwork`,
+    {
+      cacheControl: "public, max-age=86400, immutable",
+    },
+  );
 }
 
 export async function HEAD(
   request: Request,
-  context: { params: Promise<{ trackId: string }> }
+  context: { params: Promise<{ trackId: string }> },
 ) {
   const { trackId } = await context.params;
-  return proxyControllerMedia(request, `/public/library/tracks/${encodeURIComponent(trackId)}/artwork`, {
-    cacheControl: "public, max-age=86400, immutable"
-  });
+  return proxyControllerMedia(
+    request,
+    `/public/library/tracks/${encodeURIComponent(trackId)}/artwork`,
+    {
+      cacheControl: "public, max-age=86400, immutable",
+    },
+  );
 }

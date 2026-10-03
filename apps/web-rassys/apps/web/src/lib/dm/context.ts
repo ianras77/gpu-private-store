@@ -1,7 +1,11 @@
 import crypto from "crypto";
 import type { PoolClient } from "pg";
 import { dmQuery } from "./db";
-import { cosineSimilarity, embedTextWithRassyIntelligence, type DmContextPacket } from "./intelligence";
+import {
+  cosineSimilarity,
+  embedTextWithRassyIntelligence,
+  type DmContextPacket,
+} from "./intelligence";
 import { getSystemPlugin } from "./systems";
 import type {
   CampaignRecord,
@@ -11,7 +15,7 @@ import type {
   EventRecord,
   QuestObjective,
   QuestRecord,
-  WorldState
+  WorldState,
 } from "./types";
 
 type SessionRow = {
@@ -74,23 +78,61 @@ type BaseCampaignBundle = {
   semanticMemory: SemanticMemoryRecord[];
 };
 
-const parsePositiveInt = (value: string | undefined, fallback: number, max: number) => {
+const parsePositiveInt = (
+  value: string | undefined,
+  fallback: number,
+  max: number,
+) => {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < 1) return fallback;
   return Math.min(Math.round(parsed), max);
 };
 
 const contextConfig = {
-  maxCharacters: parsePositiveInt(process.env.DM_CONTEXT_MAX_CHARACTERS, 12, 40),
-  maxInventoryPerCharacter: parsePositiveInt(process.env.DM_CONTEXT_MAX_INVENTORY_PER_CHARACTER, 12, 60),
+  maxCharacters: parsePositiveInt(
+    process.env.DM_CONTEXT_MAX_CHARACTERS,
+    12,
+    40,
+  ),
+  maxInventoryPerCharacter: parsePositiveInt(
+    process.env.DM_CONTEXT_MAX_INVENTORY_PER_CHARACTER,
+    12,
+    60,
+  ),
   maxQuests: parsePositiveInt(process.env.DM_CONTEXT_MAX_QUESTS, 12, 40),
-  maxObjectivesPerQuest: parsePositiveInt(process.env.DM_CONTEXT_MAX_OBJECTIVES_PER_QUEST, 8, 24),
-  maxRecentTurns: parsePositiveInt(process.env.DM_CONTEXT_MAX_RECENT_TURNS, 14, 48),
-  maxRollingSummaries: parsePositiveInt(process.env.DM_CONTEXT_MAX_ROLLING_SUMMARIES, 4, 12),
-  maxPinnedFacts: parsePositiveInt(process.env.DM_CONTEXT_MAX_PINNED_FACTS, 18, 64),
-  maxSemanticMemory: parsePositiveInt(process.env.DM_CONTEXT_MAX_SEMANTIC_MEMORY, 8, 24),
-  maxCompendiumHits: parsePositiveInt(process.env.DM_CONTEXT_MAX_COMPENDIUM_HITS, 10, 40),
-  semanticMemoryThreshold: Number(process.env.DM_CONTEXT_SEMANTIC_THRESHOLD ?? 0.2)
+  maxObjectivesPerQuest: parsePositiveInt(
+    process.env.DM_CONTEXT_MAX_OBJECTIVES_PER_QUEST,
+    8,
+    24,
+  ),
+  maxRecentTurns: parsePositiveInt(
+    process.env.DM_CONTEXT_MAX_RECENT_TURNS,
+    14,
+    48,
+  ),
+  maxRollingSummaries: parsePositiveInt(
+    process.env.DM_CONTEXT_MAX_ROLLING_SUMMARIES,
+    4,
+    12,
+  ),
+  maxPinnedFacts: parsePositiveInt(
+    process.env.DM_CONTEXT_MAX_PINNED_FACTS,
+    18,
+    64,
+  ),
+  maxSemanticMemory: parsePositiveInt(
+    process.env.DM_CONTEXT_MAX_SEMANTIC_MEMORY,
+    8,
+    24,
+  ),
+  maxCompendiumHits: parsePositiveInt(
+    process.env.DM_CONTEXT_MAX_COMPENDIUM_HITS,
+    10,
+    40,
+  ),
+  semanticMemoryThreshold: Number(
+    process.env.DM_CONTEXT_SEMANTIC_THRESHOLD ?? 0.2,
+  ),
 };
 
 const clampText = (value: string | null | undefined, limit: number) => {
@@ -101,7 +143,9 @@ const clampText = (value: string | null | undefined, limit: number) => {
 };
 
 const asStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+  Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 
 const compendiumStopWords = new Set([
   "and",
@@ -126,7 +170,7 @@ const compendiumStopWords = new Set([
   "using",
   "against",
   "have",
-  "need"
+  "need",
 ]);
 
 const tokenizeCompendiumTerms = (value: string) =>
@@ -137,7 +181,10 @@ const tokenizeCompendiumTerms = (value: string) =>
     .map((entry) => entry.trim())
     .filter((entry) => entry.length >= 3 && !compendiumStopWords.has(entry));
 
-const deriveCompendiumTerms = (actionText: string, actor?: CharacterRecord): string[] => {
+const deriveCompendiumTerms = (
+  actionText: string,
+  actor?: CharacterRecord,
+): string[] => {
   const seedStrings = [
     actionText,
     actor?.name ?? "",
@@ -145,7 +192,7 @@ const deriveCompendiumTerms = (actionText: string, actor?: CharacterRecord): str
     actor?.playerType ?? "",
     ...(actor?.specialTraits ?? []),
     ...(actor?.actions ?? []).slice(0, 8).map((action) => action.name),
-    ...(actor?.inventory ?? []).slice(0, 10).map((item) => item.name)
+    ...(actor?.inventory ?? []).slice(0, 10).map((item) => item.name),
   ];
 
   const unique = new Set<string>();
@@ -163,7 +210,7 @@ const deriveCompendiumTerms = (actionText: string, actor?: CharacterRecord): str
 const getCompendiumContext = async (
   systemId: string,
   actionText: string,
-  actor?: CharacterRecord
+  actor?: CharacterRecord,
 ): Promise<Array<Record<string, unknown>>> => {
   const terms = deriveCompendiumTerms(actionText, actor);
   if (!terms.length) return [];
@@ -190,7 +237,7 @@ const getCompendiumContext = async (
        )
      ORDER BY updated_at DESC, name ASC
      LIMIT $3`,
-    [systemId, terms, contextConfig.maxCompendiumHits]
+    [systemId, terms, contextConfig.maxCompendiumHits],
   );
 
   return result.rows.map((row) => ({
@@ -199,25 +246,35 @@ const getCompendiumContext = async (
     name: clampText(row.name, 120),
     summary: clampText(row.summary, 260),
     rulesSnippet: clampText(row.rules_text, 340),
-    tags: asStringArray(row.tags)
+    tags: asStringArray(row.tags),
   }));
 };
 
-const parseObjectiveRows = (rows: Array<{ quest_id: string; id: string; ord: number; text: string; completed: boolean }>) => {
+const parseObjectiveRows = (
+  rows: Array<{
+    quest_id: string;
+    id: string;
+    ord: number;
+    text: string;
+    completed: boolean;
+  }>,
+) => {
   const map = new Map<string, QuestObjective[]>();
   for (const row of rows) {
     const existing = map.get(row.quest_id) ?? [];
     existing.push({
       id: row.id,
       text: row.text,
-      completed: row.completed
+      completed: row.completed,
     });
     map.set(row.quest_id, existing);
   }
   return map;
 };
 
-const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> => {
+const mapCharacterRows = async (
+  campaignId: string,
+): Promise<CharacterRecord[]> => {
   const charactersResult = await dmQuery<{
     id: string;
     campaign_id: string;
@@ -241,7 +298,7 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
      FROM dm_characters
      WHERE campaign_id = $1
      ORDER BY created_at ASC`,
-    [campaignId]
+    [campaignId],
   );
 
   const characterIds = charactersResult.rows.map((row) => row.id);
@@ -258,7 +315,7 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
          FROM dm_inventory_items
          WHERE character_id = ANY($1::text[])
          ORDER BY name ASC`,
-        [characterIds]
+        [characterIds],
       )
     : {
         rows: [] as Array<{
@@ -268,7 +325,7 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
           name: string;
           detail: string | null;
           quantity: number;
-        }>
+        }>,
       };
 
   const inventoryByCharacter = new Map<string, CharacterRecord["inventory"]>();
@@ -279,7 +336,7 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
       compendiumEntryId: row.compendium_entry_id ?? undefined,
       name: row.name,
       detail: row.detail ?? undefined,
-      quantity: row.quantity
+      quantity: row.quantity,
     });
     inventoryByCharacter.set(row.character_id, list);
   }
@@ -299,7 +356,7 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
          FROM dm_character_attributes
          WHERE character_id = ANY($1::text[])
          ORDER BY attr_key ASC`,
-        [characterIds]
+        [characterIds],
       )
     : {
         rows: [] as Array<{
@@ -311,7 +368,7 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
           value_json: unknown;
           source: string | null;
           updated_at: Date;
-        }>
+        }>,
       };
 
   const actionsResult = characterIds.length
@@ -333,7 +390,7 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
          FROM dm_character_actions
          WHERE character_id = ANY($1::text[])
          ORDER BY name ASC`,
-        [characterIds]
+        [characterIds],
       )
     : {
         rows: [] as Array<{
@@ -349,10 +406,13 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
           cooldown_turns: number | null;
           metadata: Record<string, unknown> | null;
           updated_at: Date;
-        }>
+        }>,
       };
 
-  const attributesByCharacter = new Map<string, NonNullable<CharacterRecord["attributes"]>>();
+  const attributesByCharacter = new Map<
+    string,
+    NonNullable<CharacterRecord["attributes"]>
+  >();
   for (const row of attributesResult.rows) {
     const list = attributesByCharacter.get(row.character_id) ?? [];
     list.push({
@@ -362,12 +422,15 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
       valueText: row.value_text ?? undefined,
       valueJson: row.value_json ?? undefined,
       source: row.source ?? undefined,
-      updatedAt: row.updated_at.toISOString()
+      updatedAt: row.updated_at.toISOString(),
     });
     attributesByCharacter.set(row.character_id, list);
   }
 
-  const actionsByCharacter = new Map<string, NonNullable<CharacterRecord["actions"]>>();
+  const actionsByCharacter = new Map<
+    string,
+    NonNullable<CharacterRecord["actions"]>
+  >();
   for (const row of actionsResult.rows) {
     const list = actionsByCharacter.get(row.character_id) ?? [];
     list.push({
@@ -381,7 +444,7 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
       usesMax: row.uses_max ?? undefined,
       cooldownTurns: row.cooldown_turns ?? undefined,
       metadata: row.metadata ?? undefined,
-      updatedAt: row.updated_at.toISOString()
+      updatedAt: row.updated_at.toISOString(),
     });
     actionsByCharacter.set(row.character_id, list);
   }
@@ -406,7 +469,7 @@ const mapCharacterRows = async (campaignId: string): Promise<CharacterRecord[]> 
     attributes: attributesByCharacter.get(row.id) ?? [],
     actions: actionsByCharacter.get(row.id) ?? [],
     createdAt: row.created_at.toISOString(),
-    updatedAt: row.updated_at.toISOString()
+    updatedAt: row.updated_at.toISOString(),
   }));
 };
 
@@ -425,7 +488,7 @@ const mapQuestRows = async (campaignId: string): Promise<QuestRecord[]> => {
      FROM dm_quests
      WHERE campaign_id = $1
      ORDER BY created_at ASC`,
-    [campaignId]
+    [campaignId],
   );
 
   const questIds = questsResult.rows.map((row) => row.id);
@@ -441,9 +504,17 @@ const mapQuestRows = async (campaignId: string): Promise<QuestRecord[]> => {
          FROM dm_quest_objectives
          WHERE quest_id = ANY($1::text[])
          ORDER BY quest_id, ord ASC`,
-        [questIds]
+        [questIds],
       )
-    : { rows: [] as Array<{ quest_id: string; id: string; ord: number; text: string; completed: boolean }> };
+    : {
+        rows: [] as Array<{
+          quest_id: string;
+          id: string;
+          ord: number;
+          text: string;
+          completed: boolean;
+        }>,
+      };
 
   const objectiveMap = parseObjectiveRows(objectivesResult.rows);
 
@@ -456,11 +527,14 @@ const mapQuestRows = async (campaignId: string): Promise<QuestRecord[]> => {
     progress: row.progress,
     objectives: objectiveMap.get(row.id) ?? [],
     createdAt: row.created_at.toISOString(),
-    updatedAt: row.updated_at.toISOString()
+    updatedAt: row.updated_at.toISOString(),
   }));
 };
 
-const mapRecentEvents = async (campaignId: string, limit = 100): Promise<EventRecord[]> => {
+const mapRecentEvents = async (
+  campaignId: string,
+  limit = 100,
+): Promise<EventRecord[]> => {
   const result = await dmQuery<{
     id: string;
     campaign_id: string;
@@ -476,7 +550,7 @@ const mapRecentEvents = async (campaignId: string, limit = 100): Promise<EventRe
      WHERE campaign_id = $1
      ORDER BY created_at DESC
      LIMIT $2`,
-    [campaignId, limit]
+    [campaignId, limit],
   );
 
   return result.rows.map((row) => ({
@@ -487,11 +561,14 @@ const mapRecentEvents = async (campaignId: string, limit = 100): Promise<EventRe
     actorCharacterId: row.actor_character_id ?? undefined,
     summary: row.summary,
     payload: row.payload ?? undefined,
-    createdAt: row.created_at.toISOString()
+    createdAt: row.created_at.toISOString(),
   }));
 };
 
-const getSemanticMemory = async (campaignId: string, queryText: string): Promise<SemanticMemoryRecord[]> => {
+const getSemanticMemory = async (
+  campaignId: string,
+  queryText: string,
+): Promise<SemanticMemoryRecord[]> => {
   const embedding = await embedTextWithRassyIntelligence(queryText);
   if (!embedding) return [];
 
@@ -507,7 +584,7 @@ const getSemanticMemory = async (campaignId: string, queryText: string): Promise
      WHERE campaign_id = $1
      ORDER BY created_at DESC
      LIMIT 400`,
-    [campaignId]
+    [campaignId],
   );
 
   return result.rows
@@ -516,14 +593,19 @@ const getSemanticMemory = async (campaignId: string, queryText: string): Promise
       sourceId: row.source_id,
       text: clampText(row.text_chunk, 420),
       createdAt: row.created_at.toISOString(),
-      score: cosineSimilarity(embedding, Array.isArray(row.embedding) ? row.embedding : [])
+      score: cosineSimilarity(
+        embedding,
+        Array.isArray(row.embedding) ? row.embedding : [],
+      ),
     }))
     .filter((row) => row.score >= contextConfig.semanticMemoryThreshold)
     .sort((a, b) => b.score - a.score)
     .slice(0, contextConfig.maxSemanticMemory);
 };
 
-export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampaignBundle> => {
+export const loadCampaignBundle = async (
+  campaignId: string,
+): Promise<BaseCampaignBundle> => {
   const campaignResult = await dmQuery<{
     id: string;
     name: string;
@@ -537,7 +619,7 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
      FROM dm_campaigns
      WHERE id = $1
      LIMIT 1`,
-    [campaignId]
+    [campaignId],
   );
 
   if (!campaignResult.rows[0]) {
@@ -560,7 +642,7 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
      FROM dm_world_state
      WHERE campaign_id = $1
      LIMIT 1`,
-    [campaignId]
+    [campaignId],
   );
 
   if (!worldResult.rows[0]) {
@@ -575,13 +657,13 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
      WHERE campaign_id = $1 AND status = 'active'
      ORDER BY started_at DESC
      LIMIT 1`,
-    [campaignId]
+    [campaignId],
   );
 
   const [characters, quests, recentEvents] = await Promise.all([
     mapCharacterRows(campaignId),
     mapQuestRows(campaignId),
-    mapRecentEvents(campaignId, 100)
+    mapRecentEvents(campaignId, 100),
   ]);
 
   const turnResult = await dmQuery<{
@@ -598,7 +680,7 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
      WHERE campaign_id = $1
      ORDER BY turn_index DESC
      LIMIT $2`,
-    [campaignId, Math.max(contextConfig.maxRecentTurns, 20)]
+    [campaignId, Math.max(contextConfig.maxRecentTurns, 20)],
   );
 
   const latestAppliedTurnResult = await dmQuery<{ turn_index: number }>(
@@ -607,7 +689,7 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
      WHERE campaign_id = $1 AND status = 'applied'
      ORDER BY turn_index DESC
      LIMIT 1`,
-    [campaignId]
+    [campaignId],
   );
 
   const summaryResult = await dmQuery<{
@@ -622,7 +704,7 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
      WHERE campaign_id = $1
      ORDER BY created_at DESC
      LIMIT $2`,
-    [campaignId, Math.max(contextConfig.maxRollingSummaries, 6)]
+    [campaignId, Math.max(contextConfig.maxRollingSummaries, 6)],
   );
 
   const factsResult = await dmQuery<{
@@ -638,7 +720,7 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
      WHERE campaign_id = $1
      ORDER BY pinned DESC, confidence DESC, updated_at DESC
      LIMIT $2`,
-    [campaignId, Math.max(contextConfig.maxPinnedFacts, 30)]
+    [campaignId, Math.max(contextConfig.maxPinnedFacts, 30)],
   );
 
   const plugin = getSystemPlugin(campaignRow.system_id);
@@ -657,11 +739,13 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
       activeThreats: asStringArray(worldRow.active_threats),
       sceneSummary: worldRow.scene_summary,
       storyBeat: worldRow.story_beat,
-      visualPrompt: worldRow.visual_prompt
-    }
+      visualPrompt: worldRow.visual_prompt,
+    },
   };
 
-  const normalizedCharacters = characters.map((character) => plugin.normalizeCharacter(character));
+  const normalizedCharacters = characters.map((character) =>
+    plugin.normalizeCharacter(character),
+  );
   const normalizedQuests = quests.map((quest) => plugin.normalizeQuest(quest));
 
   return {
@@ -679,7 +763,7 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
       narration: row.llm_narration,
       status: row.status,
       createdAt: row.created_at.toISOString(),
-      appliedAt: row.applied_at ? row.applied_at.toISOString() : null
+      appliedAt: row.applied_at ? row.applied_at.toISOString() : null,
     })),
     lastAppliedTurnIndex: latestAppliedTurnResult.rows[0]?.turn_index ?? 0,
     rollingSummaries: summaryResult.rows.map((row) => ({
@@ -687,7 +771,7 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
       startTurnIndex: row.start_turn_index,
       endTurnIndex: row.end_turn_index,
       summary: row.summary,
-      createdAt: row.created_at.toISOString()
+      createdAt: row.created_at.toISOString(),
     })),
     pinnedFacts: factsResult.rows.map((row) => ({
       id: row.id,
@@ -695,16 +779,16 @@ export const loadCampaignBundle = async (campaignId: string): Promise<BaseCampai
       factText: row.fact_text,
       confidence: row.confidence,
       pinned: row.pinned,
-      updatedAt: row.updated_at.toISOString()
+      updatedAt: row.updated_at.toISOString(),
     })),
-    semanticMemory: []
+    semanticMemory: [],
   };
 };
 
 export const buildContextPacket = async (
   campaignId: string,
   actionText: string,
-  actorCharacterId?: string
+  actorCharacterId?: string,
 ): Promise<DmContextPacket> => {
   const bundle = await loadCampaignBundle(campaignId);
   const plugin = getSystemPlugin(bundle.campaign.systemId);
@@ -714,54 +798,70 @@ export const buildContextPacket = async (
     : undefined;
 
   const semanticMemory = await getSemanticMemory(campaignId, actionText);
-  const compendiumContext = await getCompendiumContext(bundle.campaign.systemId, actionText, actor);
+  const compendiumContext = await getCompendiumContext(
+    bundle.campaign.systemId,
+    actionText,
+    actor,
+  );
 
-  const characters = bundle.characters.slice(0, contextConfig.maxCharacters).map((character) => ({
-    id: character.id,
-    name: clampText(character.name, 80),
-    archetype: clampText(character.archetype, 80),
-    playerType: clampText(character.playerType, 80),
-    level: character.level,
-    hpCurrent: character.hpCurrent,
-    hpMax: character.hpMax,
-    hpTemp: character.hpTemp,
-    status: clampText(character.status, 120),
-    notes: clampText(character.notes, 320),
-    specialTraits: (character.specialTraits ?? []).slice(0, 8).map((trait) => clampText(trait, 80)),
-    attributes: (character.attributes ?? []).slice(0, 24).map((attribute) => ({
-      key: clampText(attribute.key, 80),
-      valueNumber: attribute.valueNumber,
-      valueText: clampText(attribute.valueText, 140),
-      source: clampText(attribute.source, 60)
-    })),
-    actions: (character.actions ?? []).slice(0, 16).map((action) => ({
-      key: clampText(action.key, 80),
-      name: clampText(action.name, 120),
-      actionType: clampText(action.actionType, 80),
-      usesCurrent: action.usesCurrent,
-      usesMax: action.usesMax,
-      cooldownTurns: action.cooldownTurns
-    })),
-    inventory: character.inventory.slice(0, contextConfig.maxInventoryPerCharacter).map((item) => ({
-      id: item.id,
-      name: clampText(item.name, 80),
-      detail: clampText(item.detail, 120),
-      quantity: item.quantity
-    }))
-  }));
+  const characters = bundle.characters
+    .slice(0, contextConfig.maxCharacters)
+    .map((character) => ({
+      id: character.id,
+      name: clampText(character.name, 80),
+      archetype: clampText(character.archetype, 80),
+      playerType: clampText(character.playerType, 80),
+      level: character.level,
+      hpCurrent: character.hpCurrent,
+      hpMax: character.hpMax,
+      hpTemp: character.hpTemp,
+      status: clampText(character.status, 120),
+      notes: clampText(character.notes, 320),
+      specialTraits: (character.specialTraits ?? [])
+        .slice(0, 8)
+        .map((trait) => clampText(trait, 80)),
+      attributes: (character.attributes ?? [])
+        .slice(0, 24)
+        .map((attribute) => ({
+          key: clampText(attribute.key, 80),
+          valueNumber: attribute.valueNumber,
+          valueText: clampText(attribute.valueText, 140),
+          source: clampText(attribute.source, 60),
+        })),
+      actions: (character.actions ?? []).slice(0, 16).map((action) => ({
+        key: clampText(action.key, 80),
+        name: clampText(action.name, 120),
+        actionType: clampText(action.actionType, 80),
+        usesCurrent: action.usesCurrent,
+        usesMax: action.usesMax,
+        cooldownTurns: action.cooldownTurns,
+      })),
+      inventory: character.inventory
+        .slice(0, contextConfig.maxInventoryPerCharacter)
+        .map((item) => ({
+          id: item.id,
+          name: clampText(item.name, 80),
+          detail: clampText(item.detail, 120),
+          quantity: item.quantity,
+        })),
+    }));
 
-  const quests = bundle.quests.slice(0, contextConfig.maxQuests).map((quest) => ({
-    id: quest.id,
-    title: clampText(quest.title, 120),
-    summary: clampText(quest.summary, 600),
-    status: quest.status,
-    progress: quest.progress,
-    objectives: quest.objectives.slice(0, contextConfig.maxObjectivesPerQuest).map((objective) => ({
-      id: objective.id,
-      text: clampText(objective.text, 220),
-      completed: objective.completed
-    }))
-  }));
+  const quests = bundle.quests
+    .slice(0, contextConfig.maxQuests)
+    .map((quest) => ({
+      id: quest.id,
+      title: clampText(quest.title, 120),
+      summary: clampText(quest.summary, 600),
+      status: quest.status,
+      progress: quest.progress,
+      objectives: quest.objectives
+        .slice(0, contextConfig.maxObjectivesPerQuest)
+        .map((objective) => ({
+          id: objective.id,
+          text: clampText(objective.text, 220),
+          completed: objective.completed,
+        })),
+    }));
 
   const recentTurns = [...bundle.recentTurns]
     .sort((left, right) => left.turnIndex - right.turnIndex)
@@ -773,25 +873,29 @@ export const buildContextPacket = async (
       narration: clampText(turn.narration, 900),
       status: turn.status,
       createdAt: turn.createdAt,
-      appliedAt: turn.appliedAt
+      appliedAt: turn.appliedAt,
     }));
 
-  const rollingSummaries = bundle.rollingSummaries.slice(0, contextConfig.maxRollingSummaries).map((summary) => ({
-    id: summary.id,
-    startTurnIndex: summary.startTurnIndex,
-    endTurnIndex: summary.endTurnIndex,
-    summary: clampText(summary.summary, 1400),
-    createdAt: summary.createdAt
-  }));
+  const rollingSummaries = bundle.rollingSummaries
+    .slice(0, contextConfig.maxRollingSummaries)
+    .map((summary) => ({
+      id: summary.id,
+      startTurnIndex: summary.startTurnIndex,
+      endTurnIndex: summary.endTurnIndex,
+      summary: clampText(summary.summary, 1400),
+      createdAt: summary.createdAt,
+    }));
 
-  const pinnedFacts = bundle.pinnedFacts.slice(0, contextConfig.maxPinnedFacts).map((fact) => ({
-    id: fact.id,
-    kind: fact.kind,
-    factText: clampText(fact.factText, 360),
-    confidence: fact.confidence,
-    pinned: fact.pinned,
-    updatedAt: fact.updatedAt
-  }));
+  const pinnedFacts = bundle.pinnedFacts
+    .slice(0, contextConfig.maxPinnedFacts)
+    .map((fact) => ({
+      id: fact.id,
+      kind: fact.kind,
+      factText: clampText(fact.factText, 360),
+      confidence: fact.confidence,
+      pinned: fact.pinned,
+      updatedAt: fact.updatedAt,
+    }));
 
   return {
     systemId: bundle.campaign.systemId,
@@ -800,22 +904,24 @@ export const buildContextPacket = async (
       id: bundle.campaign.id,
       name: clampText(bundle.campaign.name, 120),
       description: clampText(bundle.campaign.description, 1200),
-      worldVersion: bundle.worldVersion
+      worldVersion: bundle.worldVersion,
     },
     worldState: {
       location: clampText(bundle.worldState.location, 180),
       worldTime: clampText(bundle.worldState.worldTime, 120),
       weather: clampText(bundle.worldState.weather, 160),
-      activeThreats: bundle.worldState.activeThreats.slice(0, 16).map((threat) => clampText(threat, 100)),
+      activeThreats: bundle.worldState.activeThreats
+        .slice(0, 16)
+        .map((threat) => clampText(threat, 100)),
       sceneSummary: clampText(bundle.worldState.sceneSummary, 1200),
       storyBeat: clampText(bundle.worldState.storyBeat, 600),
-      visualPrompt: clampText(bundle.worldState.visualPrompt, 420)
+      visualPrompt: clampText(bundle.worldState.visualPrompt, 420),
     },
     stateVector: {
       worldVersion: bundle.worldVersion,
       activeSessionId: bundle.session?.id ?? null,
       sessionTurn: bundle.session?.current_turn ?? 0,
-      lastAppliedTurnIndex: bundle.lastAppliedTurnIndex
+      lastAppliedTurnIndex: bundle.lastAppliedTurnIndex,
     },
     session: bundle.session
       ? {
@@ -824,7 +930,9 @@ export const buildContextPacket = async (
           currentTurn: bundle.session.current_turn,
           metadata: bundle.session.metadata,
           startedAt: bundle.session.started_at.toISOString(),
-          endedAt: bundle.session.ended_at ? bundle.session.ended_at.toISOString() : null
+          endedAt: bundle.session.ended_at
+            ? bundle.session.ended_at.toISOString()
+            : null,
         }
       : { id: null, status: "none", currentTurn: 0, metadata: {} },
     characters,
@@ -842,48 +950,58 @@ export const buildContextPacket = async (
       totalRecentTurns: bundle.recentTurns.length,
       totalFacts: bundle.pinnedFacts.length,
       totalSemanticHits: semanticMemory.length,
-      totalCompendiumHits: compendiumContext.length
+      totalCompendiumHits: compendiumContext.length,
     },
     action: {
       text: clampText(actionText, 1200),
       actorCharacterId,
       actorName: actor?.name,
-      allowedCharacterIds: bundle.characters.map((character) => character.id)
-    }
+      allowedCharacterIds: bundle.characters.map((character) => character.id),
+    },
   };
 };
 
-export const buildCampaignSnapshot = async (campaignId: string, role: DmRole): Promise<CampaignSnapshot> => {
+export const buildCampaignSnapshot = async (
+  campaignId: string,
+  role: DmRole,
+): Promise<CampaignSnapshot> => {
   const bundle = await loadCampaignBundle(campaignId);
   return {
     campaign: bundle.campaign,
     role,
     characters: bundle.characters,
     quests: bundle.quests,
-    events: bundle.recentEvents
+    events: bundle.recentEvents,
   };
 };
 
-export const loadMembershipRole = async (campaignId: string, userId: string): Promise<DmRole | null> => {
+export const loadMembershipRole = async (
+  campaignId: string,
+  userId: string,
+): Promise<DmRole | null> => {
   const result = await dmQuery<{ role: DmRole }>(
     `SELECT role
      FROM dm_memberships
      WHERE campaign_id = $1 AND user_id = $2
      LIMIT 1`,
-    [campaignId, userId]
+    [campaignId, userId],
   );
 
   return result.rows[0]?.role ?? null;
 };
 
-export const ensureActiveSession = async (client: PoolClient, campaignId: string, userId: string) => {
+export const ensureActiveSession = async (
+  client: PoolClient,
+  campaignId: string,
+  userId: string,
+) => {
   const existing = await client.query<SessionRow>(
     `SELECT id, campaign_id, status, current_turn, metadata, started_at, ended_at
      FROM dm_sessions
      WHERE campaign_id = $1 AND status = 'active'
      ORDER BY started_at DESC
      LIMIT 1`,
-    [campaignId]
+    [campaignId],
   );
 
   if (existing.rows[0]) {
@@ -894,7 +1012,7 @@ export const ensureActiveSession = async (client: PoolClient, campaignId: string
     `INSERT INTO dm_sessions (id, campaign_id, started_by_user_id, status, current_turn, metadata)
      VALUES ($1, $2, $3, 'active', 0, '{}'::jsonb)
      RETURNING id, campaign_id, status, current_turn, metadata, started_at, ended_at`,
-    [`sess_${crypto.randomUUID()}`, campaignId, userId]
+    [`sess_${crypto.randomUUID()}`, campaignId, userId],
   );
 
   return created.rows[0];

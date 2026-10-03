@@ -12,15 +12,24 @@ export async function GET(_: Request, context: Params) {
 
   try {
     const { campaignId } = await context.params;
-    const snapshot = await getCampaignSnapshotForUser(auth.session.userId, campaignId);
+    const snapshot = await getCampaignSnapshotForUser(
+      auth.session.userId,
+      campaignId,
+    );
     return NextResponse.json({ campaign: snapshot });
   } catch (error) {
     if (error instanceof Error && error.message === "forbidden") {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     if (error instanceof Error && error.message === "campaign_not_found") {
-      return NextResponse.json({ error: "campaign_not_found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "campaign_not_found" },
+        { status: 404 },
+      );
     }
-    return NextResponse.json({ error: "campaign_read_failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "campaign_read_failed" },
+      { status: 500 },
+    );
   }
 }

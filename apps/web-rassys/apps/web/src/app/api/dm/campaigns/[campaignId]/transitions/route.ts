@@ -23,16 +23,23 @@ export async function GET(request: Request, context: Params) {
     const limit = parseLimit(searchParams.get("limit"));
     const turnId = searchParams.get("turnId") ?? undefined;
 
-    const transitions = await listCampaignStateTransitions(auth.session.userId, campaignId, {
-      limit,
-      turnId
-    });
+    const transitions = await listCampaignStateTransitions(
+      auth.session.userId,
+      campaignId,
+      {
+        limit,
+        turnId,
+      },
+    );
 
     return NextResponse.json({ transitions, total: transitions.length });
   } catch (error) {
     if (error instanceof Error && error.message === "forbidden") {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
-    return NextResponse.json({ error: "transitions_list_failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "transitions_list_failed" },
+      { status: 500 },
+    );
   }
 }

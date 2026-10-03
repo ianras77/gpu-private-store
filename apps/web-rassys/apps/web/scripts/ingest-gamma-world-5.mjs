@@ -13,7 +13,7 @@ const dataRoot = path.join(webRoot, "data");
 const defaultPdf = path.join(
   process.env.DM_LIBRARY_ROOT || "/media/roleplay",
   "Gamma World",
-  "Gamma World 5th Edition.pdf"
+  "Gamma World 5th Edition.pdf",
 );
 
 const pdfPath = process.argv[2] || defaultPdf;
@@ -45,7 +45,13 @@ const hasTesseract = async () => {
 const ocrPdf = async (sourcePath) => {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "gamma-ocr-"));
   const prefix = path.join(tmpDir, "page");
-  await execFileAsync("pdftoppm", ["-r", String(ocrDpi), "-png", sourcePath, prefix]);
+  await execFileAsync("pdftoppm", [
+    "-r",
+    String(ocrDpi),
+    "-png",
+    sourcePath,
+    prefix,
+  ]);
   const files = (await fs.readdir(tmpDir))
     .filter((file) => file.endsWith(".png"))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
@@ -55,7 +61,7 @@ const ocrPdf = async (sourcePath) => {
     const input = path.join(tmpDir, file);
     const outputBase = path.join(tmpDir, path.basename(file, ".png"));
     await execFileAsync("tesseract", [input, outputBase, "-l", "eng"], {
-      maxBuffer: 1024 * 1024 * 20
+      maxBuffer: 1024 * 1024 * 20,
     });
     try {
       const pageText = await fs.readFile(`${outputBase}.txt`, "utf-8");
@@ -92,14 +98,17 @@ const isHeading = (line, prevBlank) => {
   if (!hasLetters) return false;
   const upper = trimmed.toUpperCase();
   const isAllCaps = trimmed === upper;
-  const isTitleCase = trimmed.split(" ").every((word) =>
-    word.length <= 3 ? true : word[0] === word[0]?.toUpperCase()
-  );
+  const isTitleCase = trimmed
+    .split(" ")
+    .every((word) =>
+      word.length <= 3 ? true : word[0] === word[0]?.toUpperCase(),
+    );
   return prevBlank && (isAllCaps || isTitleCase);
 };
 
 const mutationAbilityRegex = /\b(STR|DEX|CON|INT|WIL|PER)\b/i;
-const mutationTypeRegex = /\b(Activated|Permanent|Automatic|Passive|Triggered)\b/i;
+const mutationTypeRegex =
+  /\b(Activated|Permanent|Automatic|Passive|Triggered)\b/i;
 
 const featureCategoryRules = [
   { id: "mutations", match: /mutation/i },
@@ -114,8 +123,11 @@ const featureCategoryRules = [
   { id: "encounters", match: /encounter|adventure|scenario|scene/i },
   { id: "creatures", match: /creature|monster|npc|beast/i },
   { id: "races", match: /race|species/i },
-  { id: "setting", match: /setting|gamma world|gamma terra|world|faction|land/i },
-  { id: "rules", match: /rules|mechanic|dice|check/i }
+  {
+    id: "setting",
+    match: /setting|gamma world|gamma terra|world|faction|land/i,
+  },
+  { id: "rules", match: /rules|mechanic|dice|check/i },
 ];
 
 const classifySection = (title) => {
@@ -159,7 +171,7 @@ const parseMutationRankLine = (line) => {
   return {
     rank: parts[0] ?? "",
     activation: parts[1] ?? "",
-    ability: parts[2] ?? ""
+    ability: parts[2] ?? "",
   };
 };
 
@@ -172,7 +184,7 @@ const parseRankedEntry = (name, line, descriptionLines, section, kind) => {
     ability,
     description: normalizeParagraph(descriptionLines),
     section,
-    kind
+    kind,
   };
 };
 
@@ -181,7 +193,8 @@ const shouldSkipMutationLine = (line) => {
   if (!trimmed) return true;
   if (/^Table\\s*GW|^Tape\\s*GW|^TaBLe\\s*GW/i.test(trimmed)) return true;
   if (/^d20\\b/i.test(trimmed)) return true;
-  if (/^\\d{1,2}\\s+[A-Za-z].{0,6}\\b/i.test(trimmed) && !/[.!?]/.test(trimmed)) return true;
+  if (/^\\d{1,2}\\s+[A-Za-z].{0,6}\\b/i.test(trimmed) && !/[.!?]/.test(trimmed))
+    return true;
   return false;
 };
 
@@ -234,8 +247,8 @@ const extractMutationsFromLines = (lines, kind) => {
         lines[rankIndex],
         descriptionLines,
         kind === "mental" ? "Mental Mutations" : "Physical Mutations",
-        kind
-      )
+        kind,
+      ),
     );
 
     i = k;
@@ -287,7 +300,15 @@ const extractDrawbacksFromLines = (lines) => {
       }
     }
 
-    entries.push(parseRankedEntry(line, lines[rankIndex], descriptionLines, "Drawbacks", "drawback"));
+    entries.push(
+      parseRankedEntry(
+        line,
+        lines[rankIndex],
+        descriptionLines,
+        "Drawbacks",
+        "drawback",
+      ),
+    );
     i = k;
   }
 
@@ -318,11 +339,16 @@ const extractTableEntries = (lines) => {
 
 const categorize = (title, text) => {
   if (/weapon|equipment|armory|melee|ranged/i.test(title)) return "weapons";
-  if (/encounter|event|random encounter|adventure seed|story seed/i.test(title)) return "events";
+  if (/encounter|event|random encounter|adventure seed|story seed/i.test(title))
+    return "events";
   if (/creature|monster|npc|beast/i.test(title)) return "characters";
   if (/mutation/i.test(title)) return "mutations";
   if (/drawback/i.test(title)) return "drawbacks";
-  if (/Description:/i.test(text) && /Habitat|Encounter|Action check/i.test(text)) return "characters";
+  if (
+    /Description:/i.test(text) &&
+    /Habitat|Encounter|Action check/i.test(text)
+  )
+    return "characters";
   return null;
 };
 
@@ -337,7 +363,9 @@ const extractWeaponEntriesFromLine = (line, section) => {
   if (/Weapon Skill|Acc Md Range/i.test(normalized)) return [];
   if (!/\bMelee\b|\bRanged\b|\bUnarmed\b/i.test(normalized)) return [];
 
-  const chunks = normalized.split(/(?=\b[GAS]\s+[A-Z])/).map((chunk) => chunk.trim());
+  const chunks = normalized
+    .split(/(?=\b[GAS]\s+[A-Z])/)
+    .map((chunk) => chunk.trim());
   const entries = [];
 
   for (const chunk of chunks) {
@@ -346,7 +374,10 @@ const extractWeaponEntriesFromLine = (line, section) => {
     const rest = chunk.slice(2).trim();
     const typeMatch = rest.match(/\b(Melee|Ranged|Unarmed)\b/i);
     if (!typeMatch) continue;
-    const name = rest.slice(0, typeMatch.index).trim().replace(/^[^A-Za-z]+/, "");
+    const name = rest
+      .slice(0, typeMatch.index)
+      .trim()
+      .replace(/^[^A-Za-z]+/, "");
     if (!name) continue;
     const details = rest.slice(typeMatch.index).trim();
     entries.push({ age, name, details, section, raw: chunk });
@@ -416,9 +447,13 @@ const extractEventEntries = (lines, section) => {
 
 const extractCreatureEntries = (text, section) => {
   const cleanedSection = section.replace(/[‘’]/g, "").trim();
-  const isGenericSection = /creatures|character|mutant|traits/i.test(cleanedSection);
+  const isGenericSection = /creatures|character|mutant|traits/i.test(
+    cleanedSection,
+  );
   const isLikelyName =
-    !isGenericSection && cleanedSection.split(" ").length <= 3 && cleanedSection.length <= 32;
+    !isGenericSection &&
+    cleanedSection.split(" ").length <= 3 &&
+    cleanedSection.length <= 32;
   if (isLikelyName) {
     return [{ name: cleanedSection, text, section }];
   }
@@ -457,7 +492,7 @@ const extractCreatureEntries = (text, section) => {
     "horns",
     "eyes",
     "creature",
-    "animal"
+    "animal",
   ]);
   const entries = [];
   const segments = text.split(/Description:\s*/i);
@@ -466,7 +501,7 @@ const extractCreatureEntries = (text, section) => {
   for (const segment of segments.slice(1)) {
     let name = "Unknown";
     const verbMatch = segment.match(
-      /\b([A-Za-z][A-Za-z'-]{2,})\s+(are|is|walk|stands|stand|prefer|tend|roam|sport|attack|live|hunt|feed|look|have|wear)\b/i
+      /\b([A-Za-z][A-Za-z'-]{2,})\s+(are|is|walk|stands|stand|prefer|tend|roam|sport|attack|live|hunt|feed|look|have|wear)\b/i,
     );
     if (verbMatch && !stopwords.has(verbMatch[1].toLowerCase())) {
       name = verbMatch[1];
@@ -488,12 +523,18 @@ const extractCreatureEntries = (text, section) => {
 
 const main = async () => {
   if (!(await hasPdfToText())) {
-    console.error("pdftotext is not installed. Install poppler-utils to ingest manuals.");
+    console.error(
+      "pdftotext is not installed. Install poppler-utils to ingest manuals.",
+    );
     process.exit(1);
   }
 
   let rawText = "";
-  const { stdout } = await execFileAsync("pdftotext", ["-layout", pdfPath, "-"]);
+  const { stdout } = await execFileAsync("pdftotext", [
+    "-layout",
+    pdfPath,
+    "-",
+  ]);
   rawText = stdout;
   const meaningfulChars = rawText.replace(/[\f\s]/g, "").length;
 
@@ -511,7 +552,7 @@ const main = async () => {
     } else {
       if (!(await hasTesseract())) {
         console.error(
-          "Gamma World 5 PDF appears to be scanned. Install tesseract-ocr to continue OCR ingestion."
+          "Gamma World 5 PDF appears to be scanned. Install tesseract-ocr to continue OCR ingestion.",
         );
         process.exit(1);
       }
@@ -550,7 +591,7 @@ const main = async () => {
       system: "Gamma World",
       edition: "5e",
       title: path.basename(pdfPath, ".pdf"),
-      path: pdfPath
+      path: pdfPath,
     },
     weapons: { sections: [], entries: [] },
     events: { sections: [], entries: [] },
@@ -563,8 +604,8 @@ const main = async () => {
     tables: [],
     stats: {
       totalSections: sections.length,
-      categorizedSections: 0
-    }
+      categorizedSections: 0,
+    },
   };
 
   for (const rule of featureCategoryRules) {
@@ -576,7 +617,11 @@ const main = async () => {
     if (!section.title) continue;
     const text = normalize(section.lines.join("\n"));
     const featureCategory = classifySection(section.title);
-    const sectionEntry = { title: section.title, text, category: featureCategory };
+    const sectionEntry = {
+      title: section.title,
+      text,
+      category: featureCategory,
+    };
     result.sections.push(sectionEntry);
     result.features[featureCategory]?.push(sectionEntry);
 
@@ -586,7 +631,7 @@ const main = async () => {
         result.tables.push({
           title: section.title,
           entries: tableEntries,
-          section: section.title
+          section: section.title,
         });
       } else {
         const fallbackText = normalizeParagraph(section.lines);
@@ -594,7 +639,7 @@ const main = async () => {
           result.tables.push({
             title: section.title,
             entries: [fallbackText],
-            section: section.title
+            section: section.title,
           });
         }
       }
@@ -608,19 +653,27 @@ const main = async () => {
 
     if (category === "weapons") {
       for (const line of section.lines) {
-        result.weapons.entries.push(...extractWeaponEntriesFromLine(line, section.title));
+        result.weapons.entries.push(
+          ...extractWeaponEntriesFromLine(line, section.title),
+        );
       }
       if (/weapon/i.test(section.title)) {
-        result.weapons.entries.push(...extractWeaponDescriptions(text, section.title));
+        result.weapons.entries.push(
+          ...extractWeaponDescriptions(text, section.title),
+        );
       }
     }
 
     if (category === "events") {
-      result.events.entries.push(...extractEventEntries(section.lines, section.title));
+      result.events.entries.push(
+        ...extractEventEntries(section.lines, section.title),
+      );
     }
 
     if (category === "characters") {
-      result.characters.entries.push(...extractCreatureEntries(text, section.title));
+      result.characters.entries.push(
+        ...extractCreatureEntries(text, section.title),
+      );
     }
 
     if (category === "mutations") {
@@ -634,7 +687,9 @@ const main = async () => {
 
   if (result.weapons.entries.length < 10) {
     const globalWeapons = extractWeaponEntriesFromRawLines(lines);
-    const existing = new Set(result.weapons.entries.map((entry) => `${entry.name}|${entry.details}`));
+    const existing = new Set(
+      result.weapons.entries.map((entry) => `${entry.name}|${entry.details}`),
+    );
     for (const entry of globalWeapons) {
       const key = `${entry.name}|${entry.details}`;
       if (existing.has(key)) continue;
@@ -644,34 +699,44 @@ const main = async () => {
   }
 
   const physicalLines = (() => {
-    const start = lines.findIndex((line) => /Physical Mutation Descriptions/i.test(line));
+    const start = lines.findIndex((line) =>
+      /Physical Mutation Descriptions/i.test(line),
+    );
     if (start === -1) return [];
     const end = lines.findIndex(
-      (line, index) => index > start && /Mental Mutation Descriptions/i.test(line)
+      (line, index) =>
+        index > start && /Mental Mutation Descriptions/i.test(line),
     );
     return lines.slice(start + 1, end === -1 ? lines.length : end);
   })();
 
   const mentalLines = (() => {
-    const start = lines.findIndex((line) => /Mental Mutation Descriptions/i.test(line));
+    const start = lines.findIndex((line) =>
+      /Mental Mutation Descriptions/i.test(line),
+    );
     if (start === -1) return [];
     const end = lines.findIndex(
       (line, index) =>
-        index > start && /Drawback Descriptions|Chapter\\s+8/i.test(line)
+        index > start && /Drawback Descriptions|Chapter\\s+8/i.test(line),
     );
     return lines.slice(start + 1, end === -1 ? lines.length : end);
   })();
 
-  const physicalMutations = extractMutationsFromLines(physicalLines, "physical");
+  const physicalMutations = extractMutationsFromLines(
+    physicalLines,
+    "physical",
+  );
   const mentalMutations = extractMutationsFromLines(mentalLines, "mental");
   result.mutations.entries.push(...physicalMutations, ...mentalMutations);
   result.powers.entries.push(...mentalMutations);
 
   const drawbackLines = (() => {
-    const start = lines.findIndex((line) => /^\s*Drawback Descriptions\s*$/i.test(line));
+    const start = lines.findIndex((line) =>
+      /^\s*Drawback Descriptions\s*$/i.test(line),
+    );
     if (start === -1) return [];
     const end = lines.findIndex(
-      (line, index) => index > start && /^Chapter\s+\d+/i.test(line.trim())
+      (line, index) => index > start && /^Chapter\s+\d+/i.test(line.trim()),
     );
     return lines.slice(start + 1, end === -1 ? lines.length : end);
   })();
@@ -683,7 +748,7 @@ const main = async () => {
   await fs.writeFile(outputPath, JSON.stringify(result, null, 2));
 
   console.log(
-    `Wrote ${outputPath}. Weapons: ${result.weapons.entries.length}, Events: ${result.events.entries.length}, Characters: ${result.characters.entries.length}, Mutations: ${result.mutations.entries.length}, Powers: ${result.powers.entries.length}, Drawbacks: ${result.drawbacks.entries.length}, Sections: ${result.sections.length}, Tables: ${result.tables.length}.`
+    `Wrote ${outputPath}. Weapons: ${result.weapons.entries.length}, Events: ${result.events.entries.length}, Characters: ${result.characters.entries.length}, Mutations: ${result.mutations.entries.length}, Powers: ${result.powers.entries.length}, Drawbacks: ${result.drawbacks.entries.length}, Sections: ${result.sections.length}, Tables: ${result.tables.length}.`,
   );
 };
 

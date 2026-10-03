@@ -37,14 +37,19 @@ export async function GET(request: Request) {
       })),
     )
     .filter((episode) => episode.rssReady)
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+    );
 
   const channelLink = toAbsoluteUrl(baseUrl, "/real-life-bedtime-stories");
   const feedUrl = toAbsoluteUrl(baseUrl, "/real-life-bedtime-stories/feed.xml");
-  const imageUrl =
-    series.find((entry) => entry.artworkUrl)?.artworkUrl
-      ? toAbsoluteUrl(baseUrl, series.find((entry) => entry.artworkUrl)!.artworkUrl!)
-      : null;
+  const imageUrl = series.find((entry) => entry.artworkUrl)?.artworkUrl
+    ? toAbsoluteUrl(
+        baseUrl,
+        series.find((entry) => entry.artworkUrl)!.artworkUrl!,
+      )
+    : null;
 
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -92,7 +97,9 @@ export async function GET(request: Request) {
           ? `    <itunes:season>${escapeXml(String(episode.seasonNumber))}</itunes:season>`
           : null,
         `    <itunes:summary>${escapeXml(episode.description ?? `${episode.seriesTitle} episode.`)}</itunes:summary>`,
-        episodeImage ? `    <itunes:image href="${escapeXml(episodeImage)}" />` : null,
+        episodeImage
+          ? `    <itunes:image href="${escapeXml(episodeImage)}" />`
+          : null,
         `    <enclosure url="${escapeXml(enclosureUrl)}" length="${escapeXml(String(episode.fileSize ?? 0))}" type="${escapeXml(toEnclosureType(episode))}" />`,
         "  </item>",
       ]

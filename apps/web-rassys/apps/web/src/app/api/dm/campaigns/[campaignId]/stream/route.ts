@@ -1,5 +1,8 @@
 import { requireDmSession } from "../../../../../../lib/dm/http";
-import { listCampaignEventsSince, resolveCampaignEventCursor } from "../../../../../../lib/dm/service";
+import {
+  listCampaignEventsSince,
+  resolveCampaignEventCursor,
+} from "../../../../../../lib/dm/service";
 
 type Params = { params: Promise<{ campaignId: string }> };
 
@@ -22,7 +25,11 @@ export async function GET(request: Request, context: Params) {
 
     const lastEventId = request.headers.get("last-event-id") ?? undefined;
     if (lastEventId) {
-      const resolved = await resolveCampaignEventCursor(auth.session.userId, campaignId, lastEventId);
+      const resolved = await resolveCampaignEventCursor(
+        auth.session.userId,
+        campaignId,
+        lastEventId,
+      );
       if (resolved) {
         since = resolved;
         afterId = lastEventId;
@@ -48,16 +55,29 @@ export async function GET(request: Request, context: Params) {
 
         const run = async () => {
           controller.enqueue(
-            encoder.encode(toSse("ready", { campaignId, since: since ?? null, afterId: afterId ?? null }))
+            encoder.encode(
+              toSse("ready", {
+                campaignId,
+                since: since ?? null,
+                afterId: afterId ?? null,
+              }),
+            ),
           );
 
           let loops = 0;
           while (!closed && loops < 45) {
             try {
-              const events = await listCampaignEventsSince(auth.session.userId, campaignId, since, afterId);
+              const events = await listCampaignEventsSince(
+                auth.session.userId,
+                campaignId,
+                since,
+                afterId,
+              );
               if (events.length) {
                 for (const event of events) {
-                  controller.enqueue(encoder.encode(toSse("event", event, event.id)));
+                  controller.enqueue(
+                    encoder.encode(toSse("event", event, event.id)),
+                  );
                 }
                 const last = events[events.length - 1];
                 since = last?.createdAt;
@@ -68,9 +88,10 @@ export async function GET(request: Request, context: Params) {
               controller.enqueue(
                 encoder.encode(
                   toSse("error", {
-                    message: error instanceof Error ? error.message : "stream_failed"
-                  })
-                )
+                    message:
+                      error instanceof Error ? error.message : "stream_failed",
+                  }),
+                ),
               );
               break;
             }
@@ -83,15 +104,15 @@ export async function GET(request: Request, context: Params) {
         };
 
         void run();
-      }
+      },
     });
 
     return new Response(stream, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache, no-transform",
-        Connection: "keep-alive"
-      }
+        Connection: "keep-alive",
+      },
     });
   } catch (error) {
     if (error instanceof Error && error.message === "forbidden") {

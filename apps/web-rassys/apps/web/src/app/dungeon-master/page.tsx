@@ -5,10 +5,18 @@ import { motion } from "framer-motion";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
-import { NewWorldWizard, type NewWorldSeed } from "../../components/NewWorldWizard";
+import {
+  NewWorldWizard,
+  type NewWorldSeed,
+} from "../../components/NewWorldWizard";
 import { RulesLookup } from "../../components/RulesLookup";
 import dmLibrary from "../../data/dm-library-summary.json";
-import { getCharacterSignal, getConditionLabel, getLatestChange, getPartyPressure } from "../../lib/dm/play-state";
+import {
+  getCharacterSignal,
+  getConditionLabel,
+  getLatestChange,
+  getPartyPressure,
+} from "../../lib/dm/play-state";
 
 type DmViewer = {
   id: string;
@@ -51,7 +59,12 @@ type CharacterRecord = {
   hpTemp: number;
   status: string;
   notes?: string;
-  inventory: Array<{ id: string; name: string; detail?: string; quantity: number }>;
+  inventory: Array<{
+    id: string;
+    name: string;
+    detail?: string;
+    quantity: number;
+  }>;
 };
 
 type QuestRecord = {
@@ -127,9 +140,25 @@ type DmContextPreview = {
     name?: string;
     summary?: string;
   }>;
-  pinnedFacts?: Array<{ id?: string; kind?: string; factText?: string; confidence?: number }>;
-  recentTurns?: Array<{ id?: string; turnIndex?: number; actionText?: string; narration?: string; status?: string }>;
-  semanticMemory?: Array<{ sourceType?: string; sourceId?: string; text?: string; score?: number }>;
+  pinnedFacts?: Array<{
+    id?: string;
+    kind?: string;
+    factText?: string;
+    confidence?: number;
+  }>;
+  recentTurns?: Array<{
+    id?: string;
+    turnIndex?: number;
+    actionText?: string;
+    narration?: string;
+    status?: string;
+  }>;
+  semanticMemory?: Array<{
+    sourceType?: string;
+    sourceId?: string;
+    text?: string;
+    score?: number;
+  }>;
   rollingSummaries?: Array<{ id?: string; summary?: string }>;
   contextMeta?: {
     generatedAt?: string;
@@ -145,11 +174,15 @@ const quickActions = [
   "Roll initiative for the next encounter.",
   "Advance world time and describe immediate consequences.",
   "Reveal a new threat tied to current objectives.",
-  "Generate a vivid scene continuation."
+  "Generate a vivid scene continuation.",
 ];
 
 const toLogTone = (eventType: string): LogEntry["tone"] => {
-  if (eventType === "state_patch" || eventType === "quest_update" || eventType === "character_update") {
+  if (
+    eventType === "state_patch" ||
+    eventType === "quest_update" ||
+    eventType === "character_update"
+  ) {
     return "system";
   }
   return "story";
@@ -160,7 +193,10 @@ const summarizeQuestObjectives = (quests: QuestRecord[]) =>
     .flatMap((quest) =>
       quest.objectives
         .filter((objective) => !objective.completed)
-        .map((objective) => ({ id: `${quest.id}:${objective.id}`, text: `${quest.title}: ${objective.text}` }))
+        .map((objective) => ({
+          id: `${quest.id}:${objective.id}`,
+          text: `${quest.title}: ${objective.text}`,
+        })),
     )
     .slice(0, 8);
 
@@ -180,32 +216,40 @@ const eventToLogEntry = (event: EventRecord): LogEntry => ({
   id: event.id,
   text: event.summary,
   tone: toLogTone(event.type),
-  createdAt: new Date(event.createdAt).getTime()
+  createdAt: new Date(event.createdAt).getTime(),
 });
 
 const makeIdempotencyKey = () => {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return `turn-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
 const librarySystems = dmLibrary.systems as LibrarySystemSummary[];
-const librarySystemMap = new Map(librarySystems.map((system) => [system.id, system]));
+const librarySystemMap = new Map(
+  librarySystems.map((system) => [system.id, system]),
+);
 
 const fallbackSystemRecords: DmSystemRecord[] = [
   {
     id: "gamma-world",
     displayName: "Gamma World",
-    description: "Post-apocalyptic science-fantasy with mutations, salvage tech, and faction conflict.",
-    rulesPrimer: "Gamma World emphasizes consequences, unstable technology, and evolving world state."
+    description:
+      "Post-apocalyptic science-fantasy with mutations, salvage tech, and faction conflict.",
+    rulesPrimer:
+      "Gamma World emphasizes consequences, unstable technology, and evolving world state.",
   },
   {
     id: "generic",
     displayName: "Generic RPG",
     description: "System-agnostic fallback for narrative RPG sessions.",
-    rulesPrimer: "Maintain continuity, bounded state changes, and explicit consequences."
-  }
+    rulesPrimer:
+      "Maintain continuity, bounded state changes, and explicit consequences.",
+  },
 ];
 
 const toSystemOption = (system: DmSystemRecord): DmSystemOption => {
@@ -217,14 +261,16 @@ const toSystemOption = (system: DmSystemRecord): DmSystemOption => {
     rulesPrimer: system.rulesPrimer,
     manualCount: libraryMatch?.manualCount ?? 0,
     categories: libraryMatch?.categories ?? {},
-    sampleTitles: libraryMatch?.sampleTitles ?? []
+    sampleTitles: libraryMatch?.sampleTitles ?? [],
   };
 };
 
 const fallbackSystems = fallbackSystemRecords.map(toSystemOption);
 
 const pickPreferredSystemId = (systems: DmSystemOption[]) =>
-  systems.find((system) => system.id === "gamma-world")?.id ?? systems[0]?.id ?? "gamma-world";
+  systems.find((system) => system.id === "gamma-world")?.id ??
+  systems[0]?.id ??
+  "gamma-world";
 
 export default function DungeonMasterPage() {
   const [viewer, setViewer] = useState<DmViewer | null>(null);
@@ -239,7 +285,9 @@ export default function DungeonMasterPage() {
   const [systems, setSystems] = useState<DmSystemOption[]>(fallbackSystems);
   const [systemsLoading, setSystemsLoading] = useState(false);
   const [systemsError, setSystemsError] = useState<string | null>(null);
-  const [activeSystemId, setActiveSystemId] = useState(pickPreferredSystemId(fallbackSystems));
+  const [activeSystemId, setActiveSystemId] = useState(
+    pickPreferredSystemId(fallbackSystems),
+  );
 
   const [campaigns, setCampaigns] = useState<CampaignSummary[]>([]);
   const [campaignLoading, setCampaignLoading] = useState(false);
@@ -250,10 +298,12 @@ export default function DungeonMasterPage() {
 
   const [newCampaignName, setNewCampaignName] = useState("Frontier of Echoes");
   const [newCampaignDescription, setNewCampaignDescription] = useState(
-    "A dangerous frontier campaign where the party must secure a foothold, survive rival factions, and uncover what is destabilizing the region."
+    "A dangerous frontier campaign where the party must secure a foothold, survive rival factions, and uncover what is destabilizing the region.",
   );
   const [createCampaignPending, setCreateCampaignPending] = useState(false);
-  const [createCampaignError, setCreateCampaignError] = useState<string | null>(null);
+  const [createCampaignError, setCreateCampaignError] = useState<string | null>(
+    null,
+  );
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [invitePending, setInvitePending] = useState(false);
 
@@ -261,23 +311,42 @@ export default function DungeonMasterPage() {
   const [newCharacterArchetype, setNewCharacterArchetype] = useState("");
   const [newCharacterHpMax, setNewCharacterHpMax] = useState("30");
   const [createCharacterPending, setCreateCharacterPending] = useState(false);
-  const [createCharacterError, setCreateCharacterError] = useState<string | null>(null);
-  const [patchCharacterPendingId, setPatchCharacterPendingId] = useState<string | null>(null);
-  const [patchCharacterError, setPatchCharacterError] = useState<string | null>(null);
-  const [characterDrafts, setCharacterDrafts] = useState<Record<string, CharacterDraft>>({});
+  const [createCharacterError, setCreateCharacterError] = useState<
+    string | null
+  >(null);
+  const [patchCharacterPendingId, setPatchCharacterPendingId] = useState<
+    string | null
+  >(null);
+  const [patchCharacterError, setPatchCharacterError] = useState<string | null>(
+    null,
+  );
+  const [characterDrafts, setCharacterDrafts] = useState<
+    Record<string, CharacterDraft>
+  >({});
 
   const [promptText, setPromptText] = useState("");
   const [promptPending, setPromptPending] = useState(false);
   const [promptError, setPromptError] = useState<string | null>(null);
   const [selectedActorId, setSelectedActorId] = useState("");
-  const [contextPreview, setContextPreview] = useState<DmContextPreview | null>(null);
+  const [contextPreview, setContextPreview] = useState<DmContextPreview | null>(
+    null,
+  );
   const [contextPreviewLoading, setContextPreviewLoading] = useState(false);
-  const [contextPreviewError, setContextPreviewError] = useState<string | null>(null);
+  const [contextPreviewError, setContextPreviewError] = useState<string | null>(
+    null,
+  );
 
   const [rollingDie, setRollingDie] = useState<string | null>(null);
-  const [lastRoll, setLastRoll] = useState({ die: "d20", value: 17, verdict: "success", id: 0 });
+  const [lastRoll, setLastRoll] = useState({
+    die: "d20",
+    value: 17,
+    verdict: "success",
+    id: 0,
+  });
 
-  const [streamStatus, setStreamStatus] = useState<"idle" | "connecting" | "live" | "error">("idle");
+  const [streamStatus, setStreamStatus] = useState<
+    "idle" | "connecting" | "live" | "error"
+  >("idle");
   const [streamError, setStreamError] = useState<string | null>(null);
 
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
@@ -287,12 +356,13 @@ export default function DungeonMasterPage() {
 
   const activeSystem = useMemo(
     () => systems.find((system) => system.id === activeSystemId) ?? systems[0],
-    [activeSystemId, systems]
+    [activeSystemId, systems],
   );
   const sessionSystemId = snapshot?.campaign.systemId ?? activeSystemId;
   const sessionSystem = useMemo(
-    () => systems.find((system) => system.id === sessionSystemId) ?? activeSystem,
-    [activeSystem, sessionSystemId, systems]
+    () =>
+      systems.find((system) => system.id === sessionSystemId) ?? activeSystem,
+    [activeSystem, sessionSystemId, systems],
   );
 
   const worldStateRows = useMemo(() => {
@@ -302,15 +372,24 @@ export default function DungeonMasterPage() {
       { label: "Location", value: world.location },
       { label: "World Time", value: world.worldTime },
       { label: "Weather", value: world.weather },
-      { label: "Active Threats", value: world.activeThreats.join(", ") || "None" }
+      {
+        label: "Active Threats",
+        value: world.activeThreats.join(", ") || "None",
+      },
     ];
   }, [snapshot]);
 
-  const objectiveRows = useMemo(() => (snapshot ? summarizeQuestObjectives(snapshot.quests) : []), [snapshot]);
+  const objectiveRows = useMemo(
+    () => (snapshot ? summarizeQuestObjectives(snapshot.quests) : []),
+    [snapshot],
+  );
 
   const aggregatedInventory = useMemo(() => {
     if (!snapshot) return [];
-    const map = new Map<string, { item: string; detail: string; qty: number }>();
+    const map = new Map<
+      string,
+      { item: string; detail: string; qty: number }
+    >();
     for (const character of snapshot.characters) {
       for (const item of character.inventory) {
         const key = item.name.toLowerCase();
@@ -319,74 +398,100 @@ export default function DungeonMasterPage() {
           map.set(key, {
             item: item.name,
             detail: item.detail ?? character.name,
-            qty: item.quantity
+            qty: item.quantity,
           });
           continue;
         }
         existing.qty += item.quantity;
       }
     }
-    return [...map.values()].sort((left, right) => right.qty - left.qty).slice(0, 12);
+    return [...map.values()]
+      .sort((left, right) => right.qty - left.qty)
+      .slice(0, 12);
   }, [snapshot]);
 
   const terminalEntries = useMemo(
-    () => [...logEntries].sort((left, right) => left.createdAt - right.createdAt).slice(-18),
-    [logEntries]
+    () =>
+      [...logEntries]
+        .sort((left, right) => left.createdAt - right.createdAt)
+        .slice(-18),
+    [logEntries],
   );
 
-  const primaryObjective = objectiveRows[0]?.text ?? "Awaiting the next party decision.";
-  const partyPressure = snapshot ? getPartyPressure(snapshot) : "The table is assembling";
-  const latestChange = snapshot ? getLatestChange(snapshot.events) : "Create a campaign to begin the story.";
+  const primaryObjective =
+    objectiveRows[0]?.text ?? "Awaiting the next party decision.";
+  const partyPressure = snapshot
+    ? getPartyPressure(snapshot)
+    : "The table is assembling";
+  const latestChange = snapshot
+    ? getLatestChange(snapshot.events)
+    : "Create a campaign to begin the story.";
 
   const contextStats = useMemo(() => {
     const meta = contextPreview?.contextMeta;
     return [
       {
         label: "Compendium",
-        value: meta?.totalCompendiumHits ?? contextPreview?.compendiumContext?.length ?? 0
+        value:
+          meta?.totalCompendiumHits ??
+          contextPreview?.compendiumContext?.length ??
+          0,
       },
       {
         label: "Facts",
-        value: meta?.totalFacts ?? contextPreview?.pinnedFacts?.length ?? 0
+        value: meta?.totalFacts ?? contextPreview?.pinnedFacts?.length ?? 0,
       },
       {
         label: "Turns",
-        value: meta?.totalRecentTurns ?? contextPreview?.recentTurns?.length ?? 0
+        value:
+          meta?.totalRecentTurns ?? contextPreview?.recentTurns?.length ?? 0,
       },
       {
         label: "Memory",
-        value: meta?.totalSemanticHits ?? contextPreview?.semanticMemory?.length ?? 0
-      }
+        value:
+          meta?.totalSemanticHits ??
+          contextPreview?.semanticMemory?.length ??
+          0,
+      },
     ];
   }, [contextPreview]);
 
   const topCompendiumItems = useMemo(
     () => (contextPreview?.compendiumContext ?? []).slice(0, 4),
-    [contextPreview]
+    [contextPreview],
   );
 
   const logContainerVariants = useMemo(
     () => ({
       hidden: { opacity: 0 },
-      show: { opacity: 1, transition: { staggerChildren: 0.08 } }
+      show: { opacity: 1, transition: { staggerChildren: 0.08 } },
     }),
-    []
+    [],
   );
 
   const logItemVariants = useMemo(
     () => ({
       hidden: { opacity: 0, y: 14 },
-      show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } }
+      show: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.45, ease: "easeOut" },
+      },
     }),
-    []
+    [],
   );
 
   const resultVariants = useMemo(
     () => ({
       hidden: { opacity: 0, y: 10, scale: 0.98 },
-      show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: "easeOut" } }
+      show: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.35, ease: "easeOut" },
+      },
     }),
-    []
+    [],
   );
 
   const addLocalLog = (text: string, tone: LogEntry["tone"]) => {
@@ -394,7 +499,7 @@ export default function DungeonMasterPage() {
       id: `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       text,
       tone,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
     setLogEntries((prev) => [entry, ...prev].slice(0, 30));
   };
@@ -404,15 +509,25 @@ export default function DungeonMasterPage() {
     setActiveSystemId(nextSnapshot.campaign.systemId);
     const eventLogs = nextSnapshot.events
       .slice()
-      .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+      .sort(
+        (left, right) =>
+          new Date(right.createdAt).getTime() -
+          new Date(left.createdAt).getTime(),
+      )
       .map(eventToLogEntry)
       .slice(0, 24);
 
-    seenEventIdsRef.current = new Set(nextSnapshot.events.map((entry) => entry.id));
+    seenEventIdsRef.current = new Set(
+      nextSnapshot.events.map((entry) => entry.id),
+    );
 
     setLogEntries((prev) => {
-      const localRolls = prev.filter((entry) => entry.id.startsWith("roll-")).slice(0, 6);
-      return [...localRolls, ...eventLogs].sort((a, b) => b.createdAt - a.createdAt).slice(0, 30);
+      const localRolls = prev
+        .filter((entry) => entry.id.startsWith("roll-"))
+        .slice(0, 6);
+      return [...localRolls, ...eventLogs]
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, 30);
     });
   }, []);
 
@@ -420,11 +535,15 @@ export default function DungeonMasterPage() {
     async (campaignId: string, silent = false) => {
       if (!silent) setSnapshotLoading(true);
       try {
-        const response = await fetch(`/api/dm/campaigns/${campaignId}`, { cache: "no-store" });
+        const response = await fetch(`/api/dm/campaigns/${campaignId}`, {
+          cache: "no-store",
+        });
         if (!response.ok) {
           throw new Error("snapshot_load_failed");
         }
-        const payload = (await response.json()) as { campaign?: CampaignSnapshot };
+        const payload = (await response.json()) as {
+          campaign?: CampaignSnapshot;
+        };
         if (payload.campaign) {
           applySnapshot(payload.campaign);
         }
@@ -432,7 +551,7 @@ export default function DungeonMasterPage() {
         if (!silent) setSnapshotLoading(false);
       }
     },
-    [applySnapshot]
+    [applySnapshot],
   );
 
   const scheduleSnapshotRefresh = useCallback(
@@ -445,7 +564,7 @@ export default function DungeonMasterPage() {
         refreshTimerRef.current = null;
       }, 500);
     },
-    [fetchSnapshot]
+    [fetchSnapshot],
   );
 
   const fetchCampaigns = useCallback(
@@ -453,19 +572,26 @@ export default function DungeonMasterPage() {
       setCampaignLoading(true);
       setCampaignError(null);
       try {
-        const response = await fetch("/api/dm/campaigns", { cache: "no-store" });
+        const response = await fetch("/api/dm/campaigns", {
+          cache: "no-store",
+        });
         if (!response.ok) {
           throw new Error("campaign_list_failed");
         }
-        const payload = (await response.json()) as { campaigns?: CampaignSummary[] };
+        const payload = (await response.json()) as {
+          campaigns?: CampaignSummary[];
+        };
         const nextCampaigns = payload.campaigns ?? [];
         setCampaigns(nextCampaigns);
 
         const selectedId =
           preferredCampaignId ??
-          (activeCampaignIdRef.current && nextCampaigns.some((entry) => entry.id === activeCampaignIdRef.current)
+          (activeCampaignIdRef.current &&
+          nextCampaigns.some(
+            (entry) => entry.id === activeCampaignIdRef.current,
+          )
             ? activeCampaignIdRef.current
-            : nextCampaigns[0]?.id ?? null);
+            : (nextCampaigns[0]?.id ?? null));
 
         setActiveCampaignId(selectedId);
         if (selectedId) {
@@ -482,7 +608,7 @@ export default function DungeonMasterPage() {
         setCampaignLoading(false);
       }
     },
-    [fetchSnapshot]
+    [fetchSnapshot],
   );
 
   useEffect(() => {
@@ -522,15 +648,21 @@ export default function DungeonMasterPage() {
         if (!response.ok) {
           throw new Error("system_list_failed");
         }
-        const payload = (await response.json()) as { systems?: DmSystemRecord[] };
-        const nextSystems = (payload.systems?.length ? payload.systems : fallbackSystemRecords).map(toSystemOption);
+        const payload = (await response.json()) as {
+          systems?: DmSystemRecord[];
+        };
+        const nextSystems = (
+          payload.systems?.length ? payload.systems : fallbackSystemRecords
+        ).map(toSystemOption);
         if (!cancelled) {
           setSystems(nextSystems);
         }
       } catch {
         if (!cancelled) {
           setSystems(fallbackSystems);
-          setSystemsError("Using fallback rulesets while the full catalog loads.");
+          setSystemsError(
+            "Using fallback rulesets while the full catalog loads.",
+          );
         }
       } finally {
         if (!cancelled) {
@@ -570,7 +702,7 @@ export default function DungeonMasterPage() {
         next[character.id] = {
           hpCurrent: String(character.hpCurrent),
           status: existing?.status ?? character.status,
-          notesAppend: existing?.notesAppend ?? ""
+          notesAppend: existing?.notesAppend ?? "",
         };
       }
       return next;
@@ -578,7 +710,11 @@ export default function DungeonMasterPage() {
   }, [snapshot]);
 
   useEffect(() => {
-    if (!snapshot?.characters.some((character) => character.id === selectedActorId)) {
+    if (
+      !snapshot?.characters.some(
+        (character) => character.id === selectedActorId,
+      )
+    ) {
       setSelectedActorId("");
     }
   }, [selectedActorId, snapshot]);
@@ -597,17 +733,25 @@ export default function DungeonMasterPage() {
       setContextPreviewError(null);
       try {
         const params = new URLSearchParams({
-          actionText: promptText.trim() || primaryObjective
+          actionText: promptText.trim() || primaryObjective,
         });
         if (selectedActorId) params.set("actorCharacterId", selectedActorId);
-        const response = await fetch("/api/dm/campaigns/" + activeCampaignId + "/context?" + params.toString(), {
-          cache: "no-store",
-          signal: controller.signal
-        });
+        const response = await fetch(
+          "/api/dm/campaigns/" +
+            activeCampaignId +
+            "/context?" +
+            params.toString(),
+          {
+            cache: "no-store",
+            signal: controller.signal,
+          },
+        );
         if (!response.ok) {
           throw new Error("context_preview_failed");
         }
-        const payload = (await response.json()) as { context?: DmContextPreview };
+        const payload = (await response.json()) as {
+          context?: DmContextPreview;
+        };
         setContextPreview(payload.context ?? null);
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
@@ -624,7 +768,14 @@ export default function DungeonMasterPage() {
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [activeCampaignId, primaryObjective, promptText, selectedActorId, snapshot, viewer]);
+  }, [
+    activeCampaignId,
+    primaryObjective,
+    promptText,
+    selectedActorId,
+    snapshot,
+    viewer,
+  ]);
 
   useEffect(() => {
     if (!viewer || !activeCampaignId) {
@@ -635,7 +786,9 @@ export default function DungeonMasterPage() {
     setStreamStatus("connecting");
     setStreamError(null);
 
-    const stream = new EventSource(`/api/dm/campaigns/${activeCampaignId}/stream`);
+    const stream = new EventSource(
+      `/api/dm/campaigns/${activeCampaignId}/stream`,
+    );
 
     const onReady = () => {
       setStreamStatus("live");
@@ -702,12 +855,15 @@ export default function DungeonMasterPage() {
           body: JSON.stringify({
             email,
             password,
-            displayName: authMode === "register" ? displayName : undefined
-          })
-        }
+            displayName: authMode === "register" ? displayName : undefined,
+          }),
+        },
       );
 
-      const payload = (await response.json()) as { user?: DmViewer; error?: string };
+      const payload = (await response.json()) as {
+        user?: DmViewer;
+        error?: string;
+      };
       if (!response.ok || !payload.user) {
         setAuthError(payload.error ?? "Authentication failed.");
         return;
@@ -747,8 +903,12 @@ export default function DungeonMasterPage() {
 
     try {
       const name = input?.name?.trim() || newCampaignName.trim();
-      const description = input?.description?.trim() || newCampaignDescription.trim();
-      const systemId = input?.systemId?.trim() || activeSystemId || pickPreferredSystemId(systems);
+      const description =
+        input?.description?.trim() || newCampaignDescription.trim();
+      const systemId =
+        input?.systemId?.trim() ||
+        activeSystemId ||
+        pickPreferredSystemId(systems);
 
       const response = await fetch("/api/dm/campaigns", {
         method: "POST",
@@ -759,8 +919,10 @@ export default function DungeonMasterPage() {
           systemId,
           bootstrap: true,
           ...(input?.worldSeed ? { worldSeed: input.worldSeed } : {}),
-          ...(input?.bootstrapPrompt ? { bootstrapPrompt: input.bootstrapPrompt } : {})
-        })
+          ...(input?.bootstrapPrompt
+            ? { bootstrapPrompt: input.bootstrapPrompt }
+            : {}),
+        }),
       });
 
       const payload = (await response.json()) as {
@@ -772,7 +934,7 @@ export default function DungeonMasterPage() {
         setCreateCampaignError(
           payload.error === "system_not_supported"
             ? "That ruleset is not available yet. Pick one from the supported list and try again."
-            : payload.error ?? "Campaign creation failed."
+            : (payload.error ?? "Campaign creation failed."),
         );
         return;
       }
@@ -780,7 +942,10 @@ export default function DungeonMasterPage() {
       applySnapshot(payload.campaign);
       const nextCampaignId = payload.campaign.campaign.id;
       await fetchCampaigns(nextCampaignId);
-      addLocalLog(`Created campaign '${payload.campaign.campaign.name}'.`, "system");
+      addLocalLog(
+        `Created campaign '${payload.campaign.campaign.name}'.`,
+        "system",
+      );
     } catch {
       setCreateCampaignError("Campaign creation failed.");
     } finally {
@@ -789,23 +954,34 @@ export default function DungeonMasterPage() {
   };
 
   const createCampaignFromWizard = async (seed: NewWorldSeed) => {
-    const selectedSystem = systems.find((system) => system.id === seed.systemId) ?? activeSystem;
-    const factionsLine = seed.factions.length ? seed.factions.join(", ") : "fractured local powers";
-    const threatLine = seed.threat.length ? seed.threat.join(", ") : "a danger still gathering itself";
-    const partyLine = seed.partyFocus.length ? seed.partyFocus.join(", ") : "survivors";
-    const stakesLine = seed.stakes.length ? seed.stakes.join(", ") : "hold on to something worth saving";
+    const selectedSystem =
+      systems.find((system) => system.id === seed.systemId) ?? activeSystem;
+    const factionsLine = seed.factions.length
+      ? seed.factions.join(", ")
+      : "fractured local powers";
+    const threatLine = seed.threat.length
+      ? seed.threat.join(", ")
+      : "a danger still gathering itself";
+    const partyLine = seed.partyFocus.length
+      ? seed.partyFocus.join(", ")
+      : "survivors";
+    const stakesLine = seed.stakes.length
+      ? seed.stakes.join(", ")
+      : "hold on to something worth saving";
     const description = [
       `${seed.genre} with a ${seed.tone.toLowerCase()} pulse, built for ${partyLine}.`,
       seed.openingSituation,
       `The campaign opens in ${seed.startingPoint}, with ${factionsLine} in motion and ${threatLine} closing in.`,
       `The party is pulled forward because ${seed.playerHook.charAt(0).toLowerCase()}${seed.playerHook.slice(1)}`,
       `If they fail, they risk ${stakesLine.toLowerCase()}.`,
-      `A hidden complication waits beneath it all: ${seed.campaignTwist}`
+      `A hidden complication waits beneath it all: ${seed.campaignTwist}`,
     ].join(" ");
     const bootstrapPrompt = [
       `Build the opening scene for ${seed.worldName}.`,
       `Run this like a ${selectedSystem?.name ?? "tabletop RPG"} campaign.`,
-      selectedSystem?.rulesPrimer ? `Rules primer: ${selectedSystem.rulesPrimer}` : "",
+      selectedSystem?.rulesPrimer
+        ? `Rules primer: ${selectedSystem.rulesPrimer}`
+        : "",
       `Tone: ${seed.tone}. Genre: ${seed.genre}. Pacing: ${seed.pacing}.`,
       `Starting point: ${seed.startingPoint}.`,
       `Opening situation: ${seed.openingSituation}.`,
@@ -818,7 +994,7 @@ export default function DungeonMasterPage() {
       `Landmark: ${seed.landmark}.`,
       `Hidden twist to foreshadow without fully resolving: ${seed.campaignTwist}.`,
       `Table lines and veils: ${seed.tableLines}.`,
-      "Give the table a vivid first scene, one immediate decision, one memorable face or faction pressure point, and two or three actionable leads."
+      "Give the table a vivid first scene, one immediate decision, one memorable face or faction pressure point, and two or three actionable leads.",
     ].join(" ");
 
     setActiveSystemId(seed.systemId);
@@ -829,7 +1005,7 @@ export default function DungeonMasterPage() {
       description,
       systemId: seed.systemId,
       bootstrapPrompt,
-      worldSeed: seed
+      worldSeed: seed,
     });
   };
 
@@ -837,35 +1013,54 @@ export default function DungeonMasterPage() {
     if (!activeCampaignId || invitePending) return;
     setInvitePending(true);
     try {
-      const response = await fetch(`/api/dm/campaigns/${activeCampaignId}/invites`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Idempotency-Key": makeIdempotencyKey() },
-        body: JSON.stringify({ role: "player", expiresInHours: 72 })
-      });
-      const payload = (await response.json()) as { invite?: { token: string }; error?: string };
-      if (!response.ok || !payload.invite?.token) throw new Error(payload.error ?? "invite_failed");
+      const response = await fetch(
+        `/api/dm/campaigns/${activeCampaignId}/invites`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": makeIdempotencyKey(),
+          },
+          body: JSON.stringify({ role: "player", expiresInHours: 72 }),
+        },
+      );
+      const payload = (await response.json()) as {
+        invite?: { token: string };
+        error?: string;
+      };
+      if (!response.ok || !payload.invite?.token)
+        throw new Error(payload.error ?? "invite_failed");
       const link = `${window.location.origin}/dungeon-master/invite/${payload.invite.token}`;
       setInviteLink(link);
       await navigator.clipboard?.writeText(link);
     } catch {
-      setInviteLink("Invite could not be created. Check that you own this campaign.");
+      setInviteLink(
+        "Invite could not be created. Check that you own this campaign.",
+      );
     } finally {
       setInvitePending(false);
     }
   };
 
-  const updateCharacterDraft = (characterId: string, patch: Partial<CharacterDraft>) => {
+  const updateCharacterDraft = (
+    characterId: string,
+    patch: Partial<CharacterDraft>,
+  ) => {
     setCharacterDrafts((prev) => ({
       ...prev,
       [characterId]: {
         hpCurrent: patch.hpCurrent ?? prev[characterId]?.hpCurrent ?? "0",
         status: patch.status ?? prev[characterId]?.status ?? "Ready",
-        notesAppend: patch.notesAppend ?? prev[characterId]?.notesAppend ?? ""
-      }
+        notesAppend: patch.notesAppend ?? prev[characterId]?.notesAppend ?? "",
+      },
     }));
   };
 
-  const adjustCharacterHpDraft = (characterId: string, delta: number, hpMax: number) => {
+  const adjustCharacterHpDraft = (
+    characterId: string,
+    delta: number,
+    hpMax: number,
+  ) => {
     const current = Number(characterDrafts[characterId]?.hpCurrent ?? "0");
     const safeCurrent = Number.isFinite(current) ? current : 0;
     const next = Math.max(0, Math.min(hpMax, safeCurrent + delta));
@@ -890,20 +1085,23 @@ export default function DungeonMasterPage() {
     setCreateCharacterPending(true);
     setCreateCharacterError(null);
     try {
-      const response = await fetch(`/api/dm/campaigns/${activeCampaignId}/characters`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          archetype,
-          level: 1,
-          hpCurrent: hpMax,
-          hpMax,
-          hpTemp: 0,
-          status: "Ready",
-          notes: "Created by the player through the campaign setup"
-        })
-      });
+      const response = await fetch(
+        `/api/dm/campaigns/${activeCampaignId}/characters`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            archetype,
+            level: 1,
+            hpCurrent: hpMax,
+            hpMax,
+            hpTemp: 0,
+            status: "Ready",
+            notes: "Created by the player through the campaign setup",
+          }),
+        },
+      );
 
       const payload = (await response.json()) as {
         character?: CharacterRecord;
@@ -930,14 +1128,19 @@ export default function DungeonMasterPage() {
   const saveCharacterPatch = async (characterId: string) => {
     if (!activeCampaignId || !snapshot) return;
 
-    const character = snapshot.characters.find((entry) => entry.id === characterId);
+    const character = snapshot.characters.find(
+      (entry) => entry.id === characterId,
+    );
     const draft = characterDrafts[characterId];
     if (!character || !draft) return;
 
     const body: Record<string, unknown> = {};
     const hpCurrent = Number(draft.hpCurrent);
     if (Number.isFinite(hpCurrent) && hpCurrent !== character.hpCurrent) {
-      body.hpCurrent = Math.max(0, Math.min(character.hpMax, Math.round(hpCurrent)));
+      body.hpCurrent = Math.max(
+        0,
+        Math.min(character.hpMax, Math.round(hpCurrent)),
+      );
     }
     if (draft.status.trim() && draft.status.trim() !== character.status) {
       body.status = draft.status.trim();
@@ -951,11 +1154,14 @@ export default function DungeonMasterPage() {
     setPatchCharacterPendingId(characterId);
     setPatchCharacterError(null);
     try {
-      const response = await fetch(`/api/dm/campaigns/${activeCampaignId}/characters/${characterId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
+      const response = await fetch(
+        `/api/dm/campaigns/${activeCampaignId}/characters/${characterId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        },
+      );
 
       const payload = (await response.json()) as { error?: string };
       if (!response.ok) {
@@ -986,17 +1192,20 @@ export default function DungeonMasterPage() {
     setPromptError(null);
 
     try {
-      const response = await fetch(`/api/dm/campaigns/${activeCampaignId}/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Idempotency-Key": makeIdempotencyKey()
+      const response = await fetch(
+        `/api/dm/campaigns/${activeCampaignId}/chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": makeIdempotencyKey(),
+          },
+          body: JSON.stringify({
+            actionText: text,
+            actorCharacterId: selectedActorId || undefined,
+          }),
         },
-        body: JSON.stringify({
-          actionText: text,
-          actorCharacterId: selectedActorId || undefined
-        })
-      });
+      );
 
       const payload = (await response.json()) as {
         turn?: { narration?: string };
@@ -1007,7 +1216,9 @@ export default function DungeonMasterPage() {
 
       if (!response.ok) {
         if (payload.error === "rate_limited") {
-          setPromptError(`Rate limited. Retry in ${payload.retryAfterSeconds ?? 1}s.`);
+          setPromptError(
+            `Rate limited. Retry in ${payload.retryAfterSeconds ?? 1}s.`,
+          );
           return;
         }
         setPromptError(payload.error ?? "Prompt failed.");
@@ -1047,13 +1258,27 @@ export default function DungeonMasterPage() {
     if (!activeCampaignId || rollingDie) return;
     setRollingDie(die);
     try {
-      const response = await fetch(`/api/dm/campaigns/${activeCampaignId}/roll`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Idempotency-Key": makeIdempotencyKey() },
-        body: JSON.stringify({ expression: die, actorCharacterId: selectedActorId || undefined, reason: "Table dice tray" })
-      });
-      const payload = (await response.json()) as { roll?: { total?: number; expression?: string }; error?: string };
-      if (!response.ok || !payload.roll) throw new Error(payload.error ?? "roll_failed");
+      const response = await fetch(
+        `/api/dm/campaigns/${activeCampaignId}/roll`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": makeIdempotencyKey(),
+          },
+          body: JSON.stringify({
+            expression: die,
+            actorCharacterId: selectedActorId || undefined,
+            reason: "Table dice tray",
+          }),
+        },
+      );
+      const payload = (await response.json()) as {
+        roll?: { total?: number; expression?: string };
+        error?: string;
+      };
+      if (!response.ok || !payload.roll)
+        throw new Error(payload.error ?? "roll_failed");
       const value = payload.roll.total ?? 0;
       const sides = Number.parseInt(die.slice(1), 10);
       const verdict = getVerdict(sides, value);
@@ -1071,7 +1296,9 @@ export default function DungeonMasterPage() {
       <main className="min-h-screen">
         <section className="mx-auto flex max-w-4xl items-center justify-center px-6 py-28">
           <Card className="w-full max-w-xl text-center">
-            <div className="text-xs uppercase tracking-[0.35em] text-cloud/60">Dungeon Master</div>
+            <div className="text-xs uppercase tracking-[0.35em] text-cloud/60">
+              Dungeon Master
+            </div>
             <h1 className="section-title mt-3 text-3xl">
               Preparing <span className="magical-text">session state</span>
             </h1>
@@ -1092,33 +1319,54 @@ export default function DungeonMasterPage() {
           <div className="absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-aurora/35 blur-3xl animate-float" />
           <div className="relative mx-auto grid max-w-6xl gap-8 px-6 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="glass-panel rounded-[36px] p-8 md:p-12">
-              <div className="text-[11px] uppercase tracking-[0.5em] text-cloud/60">Dungeon Master</div>
+              <div className="text-[11px] uppercase tracking-[0.5em] text-cloud/60">
+                Dungeon Master
+              </div>
               <h1 className="section-title mt-4 text-4xl md:text-6xl">
-                Persistent <span className="magical-text">RPG World</span> Engine
+                Persistent <span className="magical-text">RPG World</span>{" "}
+                Engine
               </h1>
               <p className="mt-6 max-w-2xl text-lg text-cloud/80">
-                Login is required. The world, player stats, inventory, quest progress, and DM timeline are saved per account and updated on every action.
+                Login is required. The world, player stats, inventory, quest
+                progress, and DM timeline are saved per account and updated on
+                every action.
               </p>
               <div className="mt-6 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.3em] text-cloud/60">
-                <span className="rave-chip rounded-full px-3 py-2">Account Required</span>
-                <span className="rave-chip rounded-full px-3 py-2">Session Memory</span>
-                <span className="rave-chip rounded-full px-3 py-2">Live DM</span>
-                <span className="rave-chip rounded-full px-3 py-2">Ruleset Aware</span>
+                <span className="rave-chip rounded-full px-3 py-2">
+                  Account Required
+                </span>
+                <span className="rave-chip rounded-full px-3 py-2">
+                  Session Memory
+                </span>
+                <span className="rave-chip rounded-full px-3 py-2">
+                  Live DM
+                </span>
+                <span className="rave-chip rounded-full px-3 py-2">
+                  Ruleset Aware
+                </span>
               </div>
             </div>
 
             <Card className="h-fit">
-              <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Access</div>
+              <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                Access
+              </div>
               <div className="mt-3 flex gap-2 text-xs uppercase tracking-[0.25em] text-cloud/70">
                 <button
-                  className={cn("rave-chip rounded-full px-3 py-2", authMode === "login" ? "text-white" : "text-cloud/60")}
+                  className={cn(
+                    "rave-chip rounded-full px-3 py-2",
+                    authMode === "login" ? "text-white" : "text-cloud/60",
+                  )}
                   type="button"
                   onClick={() => setAuthMode("login")}
                 >
                   Login
                 </button>
                 <button
-                  className={cn("rave-chip rounded-full px-3 py-2", authMode === "register" ? "text-white" : "text-cloud/60")}
+                  className={cn(
+                    "rave-chip rounded-full px-3 py-2",
+                    authMode === "register" ? "text-white" : "text-cloud/60",
+                  )}
                   type="button"
                   onClick={() => setAuthMode("register")}
                 >
@@ -1155,12 +1403,26 @@ export default function DungeonMasterPage() {
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    autoComplete={authMode === "register" ? "new-password" : "current-password"}
+                    autoComplete={
+                      authMode === "register"
+                        ? "new-password"
+                        : "current-password"
+                    }
                   />
                 </label>
-                {authError && <div className="text-xs text-rose-300">{authError}</div>}
-                <Button type="button" onClick={submitAuth} disabled={authPending}>
-                  {authPending ? "Working..." : authMode === "login" ? "Sign In" : "Create Account"}
+                {authError && (
+                  <div className="text-xs text-rose-300">{authError}</div>
+                )}
+                <Button
+                  type="button"
+                  onClick={submitAuth}
+                  disabled={authPending}
+                >
+                  {authPending
+                    ? "Working..."
+                    : authMode === "login"
+                      ? "Sign In"
+                      : "Create Account"}
                 </Button>
               </div>
             </Card>
@@ -1182,30 +1444,44 @@ export default function DungeonMasterPage() {
           <div className="glass-panel rounded-[36px] p-8 md:p-12">
             <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
               <div className="flex flex-col gap-5">
-                <div className="text-[11px] uppercase tracking-[0.5em] text-cloud/60">Online Dungeon Master</div>
+                <div className="text-[11px] uppercase tracking-[0.5em] text-cloud/60">
+                  Online Dungeon Master
+                </div>
                 <h1 className="section-title text-4xl md:text-6xl">
-                  Persistent <span className="magical-text">Session Console</span>
+                  Persistent{" "}
+                  <span className="magical-text">Session Console</span>
                 </h1>
                 <p className="max-w-2xl text-lg text-cloud/80">
-                  Account-scoped campaigns with persistent world state, character stats, quests, inventory, and world-aware narration.
+                  Account-scoped campaigns with persistent world state,
+                  character stats, quests, inventory, and world-aware narration.
                 </p>
                 <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.3em] text-cloud/60">
-                  <span className="rave-chip rounded-full px-3 py-2">Server Authoritative</span>
-                  <span className="rave-chip rounded-full px-3 py-2">Context-Aware LLM</span>
-                  <span className="rave-chip rounded-full px-3 py-2">Persistent Campaigns</span>
+                  <span className="rave-chip rounded-full px-3 py-2">
+                    Server Authoritative
+                  </span>
+                  <span className="rave-chip rounded-full px-3 py-2">
+                    Context-Aware LLM
+                  </span>
+                  <span className="rave-chip rounded-full px-3 py-2">
+                    Persistent Campaigns
+                  </span>
                 </div>
               </div>
 
               <div className="grid gap-4">
                 <div className="rave-panel rounded-3xl p-5">
-                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Campaign Vault</div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                    Campaign Vault
+                  </div>
                   <div className="mt-3 grid gap-3">
                     <label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-cloud/60">
                       Active ruleset
                       <select
                         className="rave-input rounded-2xl px-3 py-2 text-sm text-white"
                         value={activeSystemId}
-                        onChange={(event) => setActiveSystemId(event.target.value)}
+                        onChange={(event) =>
+                          setActiveSystemId(event.target.value)
+                        }
                         disabled={!systems.length || systemsLoading}
                       >
                         {systems.map((system) => (
@@ -1241,31 +1517,63 @@ export default function DungeonMasterPage() {
                     </label>
 
                     <div className="flex items-center justify-between text-xs text-cloud/60">
-                      <span>{campaignLoading ? "Loading campaigns..." : `${campaigns.length} campaigns`}</span>
-                      <span>{systemsLoading ? "Rulesets: loading" : `Rulesets: ${systems.length}`}</span>
+                      <span>
+                        {campaignLoading
+                          ? "Loading campaigns..."
+                          : `${campaigns.length} campaigns`}
+                      </span>
+                      <span>
+                        {systemsLoading
+                          ? "Rulesets: loading"
+                          : `Rulesets: ${systems.length}`}
+                      </span>
                     </div>
 
-                    {campaignError && <div className="text-xs text-rose-300">{campaignError}</div>}
-                    {systemsError && <div className="text-xs text-amber-200">{systemsError}</div>}
-                    {streamError && <div className="text-xs text-amber-200">{streamError}</div>}
-                    {!systemsError && <div className="text-xs text-cloud/60">Stream: {streamStatus}</div>}
+                    {campaignError && (
+                      <div className="text-xs text-rose-300">
+                        {campaignError}
+                      </div>
+                    )}
+                    {systemsError && (
+                      <div className="text-xs text-amber-200">
+                        {systemsError}
+                      </div>
+                    )}
+                    {streamError && (
+                      <div className="text-xs text-amber-200">
+                        {streamError}
+                      </div>
+                    )}
+                    {!systemsError && (
+                      <div className="text-xs text-cloud/60">
+                        Stream: {streamStatus}
+                      </div>
+                    )}
 
                     <div className="grid gap-2">
                       <input
                         className="rave-input rounded-2xl px-3 py-2 text-sm"
                         value={newCampaignName}
-                        onChange={(event) => setNewCampaignName(event.target.value)}
+                        onChange={(event) =>
+                          setNewCampaignName(event.target.value)
+                        }
                         placeholder="Campaign name"
                       />
                       <textarea
                         className="rave-input h-20 resize-none rounded-2xl px-3 py-2 text-sm"
                         value={newCampaignDescription}
-                        onChange={(event) => setNewCampaignDescription(event.target.value)}
+                        onChange={(event) =>
+                          setNewCampaignDescription(event.target.value)
+                        }
                         placeholder="Describe the campaign seed..."
                       />
                     </div>
 
-                    {createCampaignError && <div className="text-xs text-rose-300">{createCampaignError}</div>}
+                    {createCampaignError && (
+                      <div className="text-xs text-rose-300">
+                        {createCampaignError}
+                      </div>
+                    )}
 
                     <div className="flex gap-3">
                       <Button
@@ -1279,38 +1587,72 @@ export default function DungeonMasterPage() {
                           !newCampaignDescription.trim()
                         }
                       >
-                        {createCampaignPending ? "Creating..." : "Create Campaign"}
+                        {createCampaignPending
+                          ? "Creating..."
+                          : "Create Campaign"}
                       </Button>
-                      <Button className="flex-1" variant="secondary" onClick={logout}>
+                      <Button
+                        className="flex-1"
+                        variant="secondary"
+                        onClick={logout}
+                      >
                         Sign Out ({viewer.displayName})
                       </Button>
                     </div>
                     {activeCampaignId && snapshot?.role === "dm" && (
                       <div className="grid gap-2 border-t border-white/10 pt-3">
-                        <Button type="button" variant="secondary" onClick={() => void createInvite()} disabled={invitePending}>
-                          {invitePending ? "Making invite..." : "Invite a friend to play"}
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => void createInvite()}
+                          disabled={invitePending}
+                        >
+                          {invitePending
+                            ? "Making invite..."
+                            : "Invite a friend to play"}
                         </Button>
-                        {inviteLink && <input readOnly aria-label="Campaign invite link" className="rave-input rounded-2xl px-3 py-2 text-xs" value={inviteLink} onFocus={(event) => event.currentTarget.select()} />}
-                        <p className="text-[11px] leading-5 text-cloud/55">Creates a player invite valid for 72 hours and copies it to your clipboard.</p>
+                        {inviteLink && (
+                          <input
+                            readOnly
+                            aria-label="Campaign invite link"
+                            className="rave-input rounded-2xl px-3 py-2 text-xs"
+                            value={inviteLink}
+                            onFocus={(event) => event.currentTarget.select()}
+                          />
+                        )}
+                        <p className="text-[11px] leading-5 text-cloud/55">
+                          Creates a player invite valid for 72 hours and copies
+                          it to your clipboard.
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
 
                 <div className="rave-chip rounded-3xl p-5 text-sm text-cloud/80">
-                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Status</div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                    Status
+                  </div>
                   <div className="mt-3 grid gap-2">
                     <div className="flex items-center justify-between">
                       <span>Snapshot</span>
-                      <span className="text-white">{snapshotLoading ? "Syncing..." : "Ready"}</span>
+                      <span className="text-white">
+                        {snapshotLoading ? "Syncing..." : "Ready"}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span>Role</span>
-                      <span className="text-white">{snapshot?.role ?? "-"}</span>
+                      <span className="text-white">
+                        {snapshot?.role ?? "-"}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span>Players</span>
-                      <span className="text-white">{campaigns.find((entry) => entry.id === activeCampaignId)?.playerCount ?? 0}</span>
+                      <span className="text-white">
+                        {campaigns.find(
+                          (entry) => entry.id === activeCampaignId,
+                        )?.playerCount ?? 0}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1333,25 +1675,35 @@ export default function DungeonMasterPage() {
       <section id="session" className="mx-auto max-w-6xl px-6 pb-20">
         {!activeCampaignId || !snapshot ? (
           <Card className="text-center">
-            <div className="text-xs uppercase tracking-[0.35em] text-cloud/60">No Active Campaign</div>
-            <h2 className="section-title mt-3 text-3xl">Create Your First Campaign</h2>
+            <div className="text-xs uppercase tracking-[0.35em] text-cloud/60">
+              No Active Campaign
+            </div>
+            <h2 className="section-title mt-3 text-3xl">
+              Create Your First Campaign
+            </h2>
             <p className="mt-3 text-sm text-cloud/70">
-              Use the campaign vault above to create your first world, then start sending DM actions.
+              Use the campaign vault above to create your first world, then
+              start sending DM actions.
             </p>
           </Card>
         ) : (
           <div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
-            <div className="dm-handheld xl:col-span-2" data-testid="gamma-terminal-screen">
+            <div
+              className="dm-handheld xl:col-span-2"
+              data-testid="gamma-terminal-screen"
+            >
               <div className="dm-handheld-topbar">
                 <div>
                   <div className="dm-handheld-kicker">Gamma Terminal</div>
-                  <h2 className="dm-handheld-title">{snapshot.campaign.name}</h2>
+                  <h2 className="dm-handheld-title">
+                    {snapshot.campaign.name}
+                  </h2>
                 </div>
                 <div
                   className={cn(
                     "dm-status-light",
                     streamStatus === "live" && "is-live",
-                    streamStatus === "error" && "is-error"
+                    streamStatus === "error" && "is-error",
                   )}
                 >
                   {streamStatus}
@@ -1361,10 +1713,22 @@ export default function DungeonMasterPage() {
               <div className="dm-lcd">
                 <div className="dm-lcd-hud">
                   {[
-                    { label: "SYS", value: sessionSystem?.name ?? snapshot.campaign.systemId },
-                    { label: "LOC", value: snapshot.campaign.worldState.location },
-                    { label: "TIME", value: snapshot.campaign.worldState.worldTime },
-                    { label: "WX", value: snapshot.campaign.worldState.weather }
+                    {
+                      label: "SYS",
+                      value: sessionSystem?.name ?? snapshot.campaign.systemId,
+                    },
+                    {
+                      label: "LOC",
+                      value: snapshot.campaign.worldState.location,
+                    },
+                    {
+                      label: "TIME",
+                      value: snapshot.campaign.worldState.worldTime,
+                    },
+                    {
+                      label: "WX",
+                      value: snapshot.campaign.worldState.weather,
+                    },
                   ].map((item) => (
                     <div key={item.label} className="dm-hud-cell">
                       <span>{item.label}</span>
@@ -1376,7 +1740,10 @@ export default function DungeonMasterPage() {
                 <div className="dm-world-readout">
                   <div>
                     <span className="dm-readout-label">Threats</span>
-                    <p>{snapshot.campaign.worldState.activeThreats.join(" / ") || "None tracked"}</p>
+                    <p>
+                      {snapshot.campaign.worldState.activeThreats.join(" / ") ||
+                        "None tracked"}
+                    </p>
                   </div>
                   <div>
                     <span className="dm-readout-label">Beat</span>
@@ -1398,25 +1765,43 @@ export default function DungeonMasterPage() {
                             "dm-terminal-line",
                             entry.tone === "roll" && "is-roll",
                             entry.tone === "system" && "is-system",
-                            entry.tone === "story" && "is-story"
+                            entry.tone === "story" && "is-story",
                           )}
                         >
                           <span className="dm-terminal-time">
-                            {new Date(entry.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            {new Date(entry.createdAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </span>
-                          <span className="dm-terminal-prompt">{entry.tone === "story" ? "DM" : entry.tone.toUpperCase()}</span>
+                          <span className="dm-terminal-prompt">
+                            {entry.tone === "story"
+                              ? "DM"
+                              : entry.tone.toUpperCase()}
+                          </span>
                           <span>{entry.text}</span>
                         </div>
                       ))
                     ) : (
-                      <div className="dm-terminal-empty">Awaiting first command.</div>
+                      <div className="dm-terminal-empty">
+                        Awaiting first command.
+                      </div>
                     )}
                   </div>
 
-                  <div className="dm-context-panel" data-testid="dm-context-display">
+                  <div
+                    className="dm-context-panel"
+                    data-testid="dm-context-display"
+                  >
                     <div className="dm-context-header">
                       <span>DM Packet</span>
-                      <span>{contextPreviewLoading ? "SYNC" : contextPreview ? "READY" : "IDLE"}</span>
+                      <span>
+                        {contextPreviewLoading
+                          ? "SYNC"
+                          : contextPreview
+                            ? "READY"
+                            : "IDLE"}
+                      </span>
                     </div>
                     <div className="dm-context-grid">
                       {contextStats.map((stat) => (
@@ -1441,7 +1826,11 @@ export default function DungeonMasterPage() {
                         </div>
                       )}
                     </div>
-                    {contextPreviewError && <div className="dm-context-error">{contextPreviewError}</div>}
+                    {contextPreviewError && (
+                      <div className="dm-context-error">
+                        {contextPreviewError}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1471,83 +1860,209 @@ export default function DungeonMasterPage() {
                     placeholder="Tell the Dungeon Master what your character does..."
                     rows={2}
                   />
-                  <Button variant="primary" onClick={sendPrompt} disabled={promptPending || !promptText.trim()}>
+                  <Button
+                    variant="primary"
+                    onClick={sendPrompt}
+                    disabled={promptPending || !promptText.trim()}
+                  >
                     {promptPending ? "Sending" : "Send"}
                   </Button>
                 </div>
 
                 <div className="dm-quick-row">
                   {quickActions.map((action) => (
-                    <button key={action} type="button" onClick={() => setPromptText(action)}>
+                    <button
+                      key={action}
+                      type="button"
+                      onClick={() => setPromptText(action)}
+                    >
                       {action}
                     </button>
                   ))}
                 </div>
-                {promptError && <div className="dm-context-error">{promptError}</div>}
+                {promptError && (
+                  <div className="dm-context-error">{promptError}</div>
+                )}
               </div>
             </div>
 
             <div className="glass-panel rounded-3xl p-6 md:p-8">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <div className="text-xs uppercase tracking-[0.35em] text-cloud/60">Live Session</div>
+                  <div className="text-xs uppercase tracking-[0.35em] text-cloud/60">
+                    Live Session
+                  </div>
                   <h2 className="section-title text-3xl">
-                    {snapshot.campaign.name} <span className="magical-text">Command Center</span>
+                    {snapshot.campaign.name}{" "}
+                    <span className="magical-text">Command Center</span>
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.3em] text-cloud/60">
-                  <span className="rave-chip rounded-full px-3 py-2">Ruleset: {sessionSystem?.name ?? snapshot.campaign.systemId}</span>
-                  <span className="rave-chip rounded-full px-3 py-2">Campaign: {snapshot.campaign.id.slice(-6)}</span>
-                  <span className="rave-chip rounded-full px-3 py-2">Updated {formatAgo(campaigns.find((entry) => entry.id === snapshot.campaign.id)?.updatedAt ?? new Date().toISOString())}</span>
+                  <span className="rave-chip rounded-full px-3 py-2">
+                    Ruleset: {sessionSystem?.name ?? snapshot.campaign.systemId}
+                  </span>
+                  <span className="rave-chip rounded-full px-3 py-2">
+                    Campaign: {snapshot.campaign.id.slice(-6)}
+                  </span>
+                  <span className="rave-chip rounded-full px-3 py-2">
+                    Updated{" "}
+                    {formatAgo(
+                      campaigns.find(
+                        (entry) => entry.id === snapshot.campaign.id,
+                      )?.updatedAt ?? new Date().toISOString(),
+                    )}
+                  </span>
                 </div>
               </div>
 
               <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                 <div className="rave-panel rounded-3xl p-5">
-                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">World State</div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                    World State
+                  </div>
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     {worldStateRows.map((stat) => (
-                      <div key={stat.label} className="rave-chip rounded-2xl px-4 py-3">
-                        <div className="text-[11px] uppercase tracking-[0.25em] text-cloud/60">{stat.label}</div>
-                        <div className="mt-2 text-sm text-cloud/80">{stat.value}</div>
+                      <div
+                        key={stat.label}
+                        className="rave-chip rounded-2xl px-4 py-3"
+                      >
+                        <div className="text-[11px] uppercase tracking-[0.25em] text-cloud/60">
+                          {stat.label}
+                        </div>
+                        <div className="mt-2 text-sm text-cloud/80">
+                          {stat.value}
+                        </div>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-5 text-sm text-cloud/80">{snapshot.campaign.worldState.sceneSummary}</div>
-                  <div className="mt-2 text-xs text-cloud/60">Story beat: {snapshot.campaign.worldState.storyBeat}</div>
-                  {snapshot.events.find((event) => event.type === "dm_response")?.payload?.patch ? (() => {
-                    const resolution = snapshot.events.find((event) => event.type === "dm_response")?.payload?.patch as { resolution?: { kind?: string; reason?: string; newChoices?: string[] } } | undefined;
-                    if (!resolution?.resolution) return null;
-                    return <div className="mt-4 rounded-2xl border border-glow/20 bg-glow/[0.06] p-4"><div className="text-[10px] uppercase tracking-[0.24em] text-glow">Dungeon Master decision · {String(resolution.resolution.kind ?? "response").replaceAll("_", " ")}</div><p className="mt-2 text-sm text-white/80">{resolution.resolution.reason ?? "The world responds to the party."}</p>{resolution.resolution.newChoices?.length ? <div className="mt-3 flex flex-wrap gap-2">{resolution.resolution.newChoices.map((choice) => <button key={choice} type="button" className="rave-chip rounded-full px-3 py-1 text-xs text-cloud/80" onClick={() => setPromptText(choice)}>{choice}</button>)}</div> : null}</div>;
-                  })() : null}
+                  <div className="mt-5 text-sm text-cloud/80">
+                    {snapshot.campaign.worldState.sceneSummary}
+                  </div>
+                  <div className="mt-2 text-xs text-cloud/60">
+                    Story beat: {snapshot.campaign.worldState.storyBeat}
+                  </div>
+                  {snapshot.events.find((event) => event.type === "dm_response")
+                    ?.payload?.patch
+                    ? (() => {
+                        const resolution = snapshot.events.find(
+                          (event) => event.type === "dm_response",
+                        )?.payload?.patch as
+                          | {
+                              resolution?: {
+                                kind?: string;
+                                reason?: string;
+                                newChoices?: string[];
+                              };
+                            }
+                          | undefined;
+                        if (!resolution?.resolution) return null;
+                        return (
+                          <div className="mt-4 rounded-2xl border border-glow/20 bg-glow/[0.06] p-4">
+                            <div className="text-[10px] uppercase tracking-[0.24em] text-glow">
+                              Dungeon Master decision ·{" "}
+                              {String(
+                                resolution.resolution.kind ?? "response",
+                              ).replaceAll("_", " ")}
+                            </div>
+                            <p className="mt-2 text-sm text-white/80">
+                              {resolution.resolution.reason ??
+                                "The world responds to the party."}
+                            </p>
+                            {resolution.resolution.newChoices?.length ? (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {resolution.resolution.newChoices.map(
+                                  (choice) => (
+                                    <button
+                                      key={choice}
+                                      type="button"
+                                      className="rave-chip rounded-full px-3 py-1 text-xs text-cloud/80"
+                                      onClick={() => setPromptText(choice)}
+                                    >
+                                      {choice}
+                                    </button>
+                                  ),
+                                )}
+                              </div>
+                            ) : null}
+                          </div>
+                        );
+                      })()
+                    : null}
                   <div className="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-black/20 p-4">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[10px] uppercase tracking-[0.25em] text-cloud/55">Latest consequence</span>
+                      <span className="text-[10px] uppercase tracking-[0.25em] text-cloud/55">
+                        Latest consequence
+                      </span>
                       <span className="text-xs text-glow">{partyPressure}</span>
                     </div>
-                    <p className="text-sm leading-6 text-white/85">{latestChange}</p>
+                    <p className="text-sm leading-6 text-white/85">
+                      {latestChange}
+                    </p>
                   </div>
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
                     {snapshot.characters.map((character) => {
                       const signal = getCharacterSignal(character);
-                      return <button key={character.id} type="button" onClick={() => setSelectedActorId(character.id)} className={cn("rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:border-white/25", selectedActorId === character.id && "border-glow bg-glow/10")}>
-                        <div className="flex items-center justify-between gap-2"><span className="font-semibold text-white">{character.name}</span><span className="text-[10px] uppercase tracking-[0.16em] text-white/75">{getConditionLabel(character)}</span></div>
-                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(100, (character.hpCurrent / Math.max(1, character.hpMax)) * 100))}%`, backgroundColor: signal.color === "red" ? "#fb7185" : signal.color === "pink" ? "#ff4fd8" : signal.color === "yellow" ? "#ffe66d" : "#42f5ff" }} /></div>
-                        <p className="mt-2 text-[11px] text-cloud/60">{signal.message} · {character.hpCurrent}/{character.hpMax} HP</p>
-                      </button>;
+                      return (
+                        <button
+                          key={character.id}
+                          type="button"
+                          onClick={() => setSelectedActorId(character.id)}
+                          className={cn(
+                            "rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition hover:border-white/25",
+                            selectedActorId === character.id &&
+                              "border-glow bg-glow/10",
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-white">
+                              {character.name}
+                            </span>
+                            <span className="text-[10px] uppercase tracking-[0.16em] text-white/75">
+                              {getConditionLabel(character)}
+                            </span>
+                          </div>
+                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${Math.max(0, Math.min(100, (character.hpCurrent / Math.max(1, character.hpMax)) * 100))}%`,
+                                backgroundColor:
+                                  signal.color === "red"
+                                    ? "#fb7185"
+                                    : signal.color === "pink"
+                                      ? "#ff4fd8"
+                                      : signal.color === "yellow"
+                                        ? "#ffe66d"
+                                        : "#42f5ff",
+                              }}
+                            />
+                          </div>
+                          <p className="mt-2 text-[11px] text-cloud/60">
+                            {signal.message} · {character.hpCurrent}/
+                            {character.hpMax} HP
+                          </p>
+                        </button>
+                      );
                     })}
                   </div>
                   <div className="mt-5">
-                    <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Objectives</div>
+                    <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                      Objectives
+                    </div>
                     <ul className="mt-3 grid gap-2 text-sm text-cloud/80">
                       {objectiveRows.length ? (
                         objectiveRows.map((objective) => (
-                          <li key={objective.id} className="rave-chip rounded-2xl px-4 py-2">
+                          <li
+                            key={objective.id}
+                            className="rave-chip rounded-2xl px-4 py-2"
+                          >
                             {objective.text}
                           </li>
                         ))
                       ) : (
-                        <li className="rave-chip rounded-2xl px-4 py-2">No incomplete objectives.</li>
+                        <li className="rave-chip rounded-2xl px-4 py-2">
+                          No incomplete objectives.
+                        </li>
                       )}
                     </ul>
                   </div>
@@ -1555,20 +2070,26 @@ export default function DungeonMasterPage() {
 
                 <div className="grid gap-4">
                   <div className="rave-panel rounded-3xl p-5">
-                    <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Party Roster</div>
+                    <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                      Party Roster
+                    </div>
                     <div className="mt-3 grid gap-2">
                       <div className="grid gap-2 sm:grid-cols-3">
                         <input
                           className="rave-input rounded-2xl px-3 py-2 text-sm"
                           placeholder="Character name"
                           value={newCharacterName}
-                          onChange={(event) => setNewCharacterName(event.target.value)}
+                          onChange={(event) =>
+                            setNewCharacterName(event.target.value)
+                          }
                         />
                         <input
                           className="rave-input rounded-2xl px-3 py-2 text-sm"
                           placeholder="Archetype"
                           value={newCharacterArchetype}
-                          onChange={(event) => setNewCharacterArchetype(event.target.value)}
+                          onChange={(event) =>
+                            setNewCharacterArchetype(event.target.value)
+                          }
                         />
                         <input
                           className="rave-input rounded-2xl px-3 py-2 text-sm"
@@ -1577,10 +2098,16 @@ export default function DungeonMasterPage() {
                           min={1}
                           max={1000}
                           value={newCharacterHpMax}
-                          onChange={(event) => setNewCharacterHpMax(event.target.value)}
+                          onChange={(event) =>
+                            setNewCharacterHpMax(event.target.value)
+                          }
                         />
                       </div>
-                      {createCharacterError && <div className="text-xs text-rose-300">{createCharacterError}</div>}
+                      {createCharacterError && (
+                        <div className="text-xs text-rose-300">
+                          {createCharacterError}
+                        </div>
+                      )}
                       <Button
                         variant="secondary"
                         onClick={createCharacter}
@@ -1591,24 +2118,40 @@ export default function DungeonMasterPage() {
                           !newCharacterHpMax.trim()
                         }
                       >
-                        {createCharacterPending ? "Creating..." : "Add Character"}
+                        {createCharacterPending
+                          ? "Creating..."
+                          : "Add Character"}
                       </Button>
                     </div>
                     <div className="mt-4 grid gap-3">
                       {snapshot.characters.length ? (
                         snapshot.characters.map((member) => (
-                          <div key={member.id} className="rave-chip rounded-2xl px-4 py-3">
+                          <div
+                            key={member.id}
+                            className="rave-chip rounded-2xl px-4 py-3"
+                          >
                             <div className="flex items-center justify-between">
                               <div>
-                                <div className="text-sm font-semibold text-white">{member.name}</div>
-                                <div className="text-xs uppercase tracking-[0.2em] text-cloud/60">{member.archetype}</div>
+                                <div className="text-sm font-semibold text-white">
+                                  {member.name}
+                                </div>
+                                <div className="text-xs uppercase tracking-[0.2em] text-cloud/60">
+                                  {member.archetype}
+                                </div>
                               </div>
                               <div className="text-right text-xs text-cloud/70">
-                                <div className="text-white">{member.hpCurrent} / {member.hpMax} (temp {member.hpTemp})</div>
+                                <div className="text-white">
+                                  {member.hpCurrent} / {member.hpMax} (temp{" "}
+                                  {member.hpTemp})
+                                </div>
                                 <div>{member.status}</div>
                               </div>
                             </div>
-                            {member.notes && <div className="mt-2 text-xs text-cloud/60">{member.notes}</div>}
+                            {member.notes && (
+                              <div className="mt-2 text-xs text-cloud/60">
+                                {member.notes}
+                              </div>
+                            )}
                             {snapshot.role === "dm" && (
                               <div className="mt-3 grid gap-2 rounded-xl border border-white/10 bg-black/20 p-3">
                                 <div className="grid gap-2 sm:grid-cols-[auto_1fr_auto]">
@@ -1616,14 +2159,26 @@ export default function DungeonMasterPage() {
                                     <button
                                       type="button"
                                       className="rave-chip rounded-full px-3 py-1 text-xs"
-                                      onClick={() => adjustCharacterHpDraft(member.id, -5, member.hpMax)}
+                                      onClick={() =>
+                                        adjustCharacterHpDraft(
+                                          member.id,
+                                          -5,
+                                          member.hpMax,
+                                        )
+                                      }
                                     >
                                       -5
                                     </button>
                                     <button
                                       type="button"
                                       className="rave-chip rounded-full px-3 py-1 text-xs"
-                                      onClick={() => adjustCharacterHpDraft(member.id, 5, member.hpMax)}
+                                      onClick={() =>
+                                        adjustCharacterHpDraft(
+                                          member.id,
+                                          5,
+                                          member.hpMax,
+                                        )
+                                      }
                                     >
                                       +5
                                     </button>
@@ -1633,55 +2188,87 @@ export default function DungeonMasterPage() {
                                     type="number"
                                     min={0}
                                     max={member.hpMax}
-                                    value={characterDrafts[member.id]?.hpCurrent ?? String(member.hpCurrent)}
+                                    value={
+                                      characterDrafts[member.id]?.hpCurrent ??
+                                      String(member.hpCurrent)
+                                    }
                                     onChange={(event) =>
-                                      updateCharacterDraft(member.id, { hpCurrent: event.target.value })
+                                      updateCharacterDraft(member.id, {
+                                        hpCurrent: event.target.value,
+                                      })
                                     }
                                   />
                                   <input
                                     className="rave-input rounded-2xl px-3 py-2 text-sm"
-                                    value={characterDrafts[member.id]?.status ?? member.status}
+                                    value={
+                                      characterDrafts[member.id]?.status ??
+                                      member.status
+                                    }
                                     onChange={(event) =>
-                                      updateCharacterDraft(member.id, { status: event.target.value })
+                                      updateCharacterDraft(member.id, {
+                                        status: event.target.value,
+                                      })
                                     }
                                   />
                                 </div>
                                 <textarea
                                   className="rave-input h-16 resize-none rounded-2xl px-3 py-2 text-sm"
                                   placeholder="Add a private care note for this character..."
-                                  value={characterDrafts[member.id]?.notesAppend ?? ""}
+                                  value={
+                                    characterDrafts[member.id]?.notesAppend ??
+                                    ""
+                                  }
                                   onChange={(event) =>
-                                    updateCharacterDraft(member.id, { notesAppend: event.target.value })
+                                    updateCharacterDraft(member.id, {
+                                      notesAppend: event.target.value,
+                                    })
                                   }
                                 />
                                 <Button
                                   variant="secondary"
                                   onClick={() => saveCharacterPatch(member.id)}
-                                  disabled={patchCharacterPendingId === member.id}
+                                  disabled={
+                                    patchCharacterPendingId === member.id
+                                  }
                                 >
-                                  {patchCharacterPendingId === member.id ? "Saving..." : "Save Character Patch"}
+                                  {patchCharacterPendingId === member.id
+                                    ? "Saving..."
+                                    : "Save Character Patch"}
                                 </Button>
                               </div>
                             )}
                           </div>
                         ))
                       ) : (
-                        <div className="text-sm text-cloud/70">No characters created yet.</div>
+                        <div className="text-sm text-cloud/70">
+                          No characters created yet.
+                        </div>
                       )}
                     </div>
-                    {patchCharacterError && <div className="mt-3 text-xs text-rose-300">{patchCharacterError}</div>}
+                    {patchCharacterError && (
+                      <div className="mt-3 text-xs text-rose-300">
+                        {patchCharacterError}
+                      </div>
+                    )}
                   </div>
                   <div className="rave-panel rounded-3xl p-5">
-                    <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Quest Board</div>
+                    <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                      Quest Board
+                    </div>
                     <div className="mt-3 grid gap-2 text-sm text-cloud/80">
                       {snapshot.quests.length ? (
                         snapshot.quests.slice(0, 6).map((quest) => (
-                          <div key={quest.id} className="rave-chip rounded-2xl px-4 py-2">
+                          <div
+                            key={quest.id}
+                            className="rave-chip rounded-2xl px-4 py-2"
+                          >
                             {quest.title} ({quest.status}, {quest.progress}%)
                           </div>
                         ))
                       ) : (
-                        <div className="rave-chip rounded-2xl px-4 py-2">No quests available.</div>
+                        <div className="rave-chip rounded-2xl px-4 py-2">
+                          No quests available.
+                        </div>
                       )}
                     </div>
                   </div>
@@ -1690,51 +2277,84 @@ export default function DungeonMasterPage() {
 
               <div className="mt-6 grid gap-4 lg:grid-cols-[0.65fr_1.35fr]">
                 <div className="rave-panel rounded-3xl p-5">
-                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Shared Inventory</div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                    Shared Inventory
+                  </div>
                   <div className="mt-4 grid gap-3">
                     {aggregatedInventory.length ? (
                       aggregatedInventory.map((entry) => (
-                        <div key={entry.item} className="flex items-center justify-between text-sm text-cloud/80">
+                        <div
+                          key={entry.item}
+                          className="flex items-center justify-between text-sm text-cloud/80"
+                        >
                           <div>
                             <div className="text-white">{entry.item}</div>
-                            <div className="text-xs uppercase tracking-[0.2em] text-cloud/60">{entry.detail}</div>
+                            <div className="text-xs uppercase tracking-[0.2em] text-cloud/60">
+                              {entry.detail}
+                            </div>
                           </div>
-                          <div className="rave-chip rounded-full px-3 py-1 text-xs text-cloud/70">{entry.qty}</div>
+                          <div className="rave-chip rounded-full px-3 py-1 text-xs text-cloud/70">
+                            {entry.qty}
+                          </div>
                         </div>
                       ))
                     ) : (
-                      <div className="text-sm text-cloud/70">No inventory tracked yet.</div>
+                      <div className="text-sm text-cloud/70">
+                        No inventory tracked yet.
+                      </div>
                     )}
                   </div>
                 </div>
 
                 <div className="rave-panel rounded-3xl p-5">
-                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Context Relay</div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                    Context Relay
+                  </div>
                   <div className="mt-4 grid gap-3 text-sm text-cloud/80">
                     <div className="grid gap-2 sm:grid-cols-2">
                       {contextStats.map((stat) => (
-                        <div key={stat.label} className="rave-chip rounded-2xl px-4 py-3">
-                          <div className="text-[11px] uppercase tracking-[0.25em] text-cloud/60">{stat.label}</div>
-                          <div className="mt-2 text-2xl font-semibold text-white">{stat.value}</div>
+                        <div
+                          key={stat.label}
+                          className="rave-chip rounded-2xl px-4 py-3"
+                        >
+                          <div className="text-[11px] uppercase tracking-[0.25em] text-cloud/60">
+                            {stat.label}
+                          </div>
+                          <div className="mt-2 text-2xl font-semibold text-white">
+                            {stat.value}
+                          </div>
                         </div>
                       ))}
                     </div>
                     <div className="rave-chip rounded-2xl px-4 py-3">
-                      <div className="text-[11px] uppercase tracking-[0.25em] text-cloud/60">Top References</div>
+                      <div className="text-[11px] uppercase tracking-[0.25em] text-cloud/60">
+                        Top References
+                      </div>
                       <div className="mt-3 grid gap-2">
                         {topCompendiumItems.length ? (
                           topCompendiumItems.map((item) => (
-                            <div key={item.id ?? item.name} className="flex items-start justify-between gap-3">
+                            <div
+                              key={item.id ?? item.name}
+                              className="flex items-start justify-between gap-3"
+                            >
                               <span className="text-white">{item.name}</span>
-                              <span className="text-[10px] uppercase tracking-[0.2em] text-cloud/50">{item.entryType ?? "ref"}</span>
+                              <span className="text-[10px] uppercase tracking-[0.2em] text-cloud/50">
+                                {item.entryType ?? "ref"}
+                              </span>
                             </div>
                           ))
                         ) : (
-                          <div className="text-cloud/60">No references matched yet.</div>
+                          <div className="text-cloud/60">
+                            No references matched yet.
+                          </div>
                         )}
                       </div>
                     </div>
-                    {contextPreviewError && <div className="text-xs text-amber-200">{contextPreviewError}</div>}
+                    {contextPreviewError && (
+                      <div className="text-xs text-amber-200">
+                        {contextPreviewError}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1743,18 +2363,23 @@ export default function DungeonMasterPage() {
             <div className="grid gap-6">
               <RulesLookup
                 activeSystemId={sessionSystemId}
-                activeSystemName={sessionSystem?.name ?? snapshot?.campaign.systemId}
+                activeSystemName={
+                  sessionSystem?.name ?? snapshot?.campaign.systemId
+                }
               />
 
               <div className="rave-panel rounded-3xl p-5">
-                <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Dice Roller</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                  Dice Roller
+                </div>
                 <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs uppercase tracking-[0.3em] text-cloud/70">
                   {dice.map((die) => (
                     <motion.button
                       key={die}
                       className={cn(
                         "rave-chip rounded-2xl px-3 py-4 transition hover:text-white",
-                        rollingDie === die && "animate-raveBeat text-white shadow-[0_0_18px_rgba(66,245,255,0.55)]"
+                        rollingDie === die &&
+                          "animate-raveBeat text-white shadow-[0_0_18px_rgba(66,245,255,0.55)]",
                       )}
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.96 }}
@@ -1772,13 +2397,21 @@ export default function DungeonMasterPage() {
                   animate="show"
                   className="mt-4 text-xs text-cloud/60"
                 >
-                  Last roll: {lastRoll.die} = {lastRoll.value} ({lastRoll.verdict})
+                  Last roll: {lastRoll.die} = {lastRoll.value} (
+                  {lastRoll.verdict})
                 </motion.div>
               </div>
 
               <div className="rave-panel rounded-3xl p-5">
-                <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">Session Log</div>
-                <motion.div className="mt-4 grid gap-3 text-sm text-cloud/80" variants={logContainerVariants} initial="hidden" animate="show">
+                <div className="text-xs uppercase tracking-[0.3em] text-cloud/60">
+                  Session Log
+                </div>
+                <motion.div
+                  className="mt-4 grid gap-3 text-sm text-cloud/80"
+                  variants={logContainerVariants}
+                  initial="hidden"
+                  animate="show"
+                >
                   {logEntries.length ? (
                     logEntries.map((entry) => (
                       <motion.div
@@ -1788,14 +2421,16 @@ export default function DungeonMasterPage() {
                         className={cn(
                           "rave-chip rounded-2xl px-4 py-3",
                           entry.tone === "roll" &&
-                            "border border-glow/40 bg-[linear-gradient(145deg,rgba(14,4,26,0.9),rgba(18,10,40,0.8))] text-white shadow-[0_0_18px_rgba(66,245,255,0.25)]"
+                            "border border-glow/40 bg-[linear-gradient(145deg,rgba(14,4,26,0.9),rgba(18,10,40,0.8))] text-white shadow-[0_0_18px_rgba(66,245,255,0.25)]",
                         )}
                       >
                         {entry.text}
                       </motion.div>
                     ))
                   ) : (
-                    <div className="text-sm text-cloud/70">No session events yet.</div>
+                    <div className="text-sm text-cloud/70">
+                      No session events yet.
+                    </div>
                   )}
                 </motion.div>
               </div>

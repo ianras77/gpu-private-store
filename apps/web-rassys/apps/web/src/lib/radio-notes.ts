@@ -126,7 +126,9 @@ const LEGACY_ALBUM_ART_HOST =
 const localArtworkPath = (trackId: string) =>
   `/api/library/tracks/${encodeURIComponent(trackId)}/artwork`;
 
-const localPlaceholderArtworkPath = (track: Pick<RadioNoteTrack, "title" | "artist">) =>
+const localPlaceholderArtworkPath = (
+  track: Pick<RadioNoteTrack, "title" | "artist">,
+) =>
   `/api/library/artwork/placeholder?title=${encodeURIComponent(track.title)}&artist=${encodeURIComponent(track.artist)}`;
 
 const normalizeRadioNoteTrack = (
@@ -190,20 +192,24 @@ export const listRadioNotes = async (limit = 24) => {
   const cache = getNotesListCache(safeLimit);
   const cacheTtlMs = Math.max(
     0,
-    envNumber("RADIO_NOTES_LIST_CACHE_TTL_MS", 20_000)
+    envNumber("RADIO_NOTES_LIST_CACHE_TTL_MS", 20_000),
   );
   const cached = cacheTtlMs > 0 ? cache.read(cacheTtlMs) : null;
 
   if (cached) return cached.value;
 
   try {
-    const payload = await fetchRadio<{ notes?: RadioNote[] }>(`/public/notes?limit=${safeLimit}`);
-    const notes = Array.isArray(payload.notes) ? normalizeRadioNotes(payload.notes) : [];
+    const payload = await fetchRadio<{ notes?: RadioNote[] }>(
+      `/public/notes?limit=${safeLimit}`,
+    );
+    const notes = Array.isArray(payload.notes)
+      ? normalizeRadioNotes(payload.notes)
+      : [];
     cache.write(notes);
     return notes;
   } catch {
     const stale = cache.read(
-      Math.max(0, envNumber("RADIO_NOTES_LIST_STALE_TTL_MS", 2 * 60 * 1000))
+      Math.max(0, envNumber("RADIO_NOTES_LIST_STALE_TTL_MS", 2 * 60 * 1000)),
     );
     if (stale) return stale.value;
     return [];
@@ -215,8 +221,8 @@ const uniqueValues = (values: Array<string | null | undefined>) =>
     new Set(
       values
         .map((value) => value?.trim())
-        .filter((value): value is string => Boolean(value))
-    )
+        .filter((value): value is string => Boolean(value)),
+    ),
   );
 
 const buildFacet = (values: string[], limit: number) => {
@@ -252,18 +258,18 @@ export const indexRadioNote = (note: RadioNote): IndexedRadioNote => {
   const artists = uniqueValues([
     note.currentTrack?.artist,
     ...note.setlist.map((track) => track.artist),
-    ...(note.boothDossier?.sessionTracks?.map((track) => track.artist) ?? [])
+    ...(note.boothDossier?.sessionTracks?.map((track) => track.artist) ?? []),
   ]);
   const genres = uniqueValues([
     ...(note.currentTrack?.genres ?? []),
-    ...note.setlist.flatMap((track) => track.genres ?? [])
+    ...note.setlist.flatMap((track) => track.genres ?? []),
   ]);
   const tags = uniqueValues([
     ...(note.boothDossier?.tags ?? []),
     note.boothDossier?.programming?.label,
     note.boothDossier?.programming?.specialType,
     note.mood ?? undefined,
-    note.eventType
+    note.eventType,
   ]);
   const programmingLabel = note.boothDossier?.programming?.label ?? null;
   const specialType = note.boothDossier?.programming?.specialType ?? null;
@@ -297,7 +303,7 @@ export const indexRadioNote = (note: RadioNote): IndexedRadioNote => {
       playback.artist,
       playback.mode,
       playback.segment,
-      playback.reason
+      playback.reason,
     ]),
     ...(note.boothDossier?.sessionTracks ?? []).flatMap((track) => [
       track.title,
@@ -306,8 +312,8 @@ export const indexRadioNote = (note: RadioNote): IndexedRadioNote => {
       track.context,
       track.listenFor,
       track.playbackMode,
-      track.playbackReason
-    ])
+      track.playbackReason,
+    ]),
   ]
     .filter(Boolean)
     .join(" ")
@@ -322,27 +328,41 @@ export const indexRadioNote = (note: RadioNote): IndexedRadioNote => {
     energyLabel: energyLabel(leadTrack?.energy),
     programmingLabel,
     specialType,
-    searchText
+    searchText,
   };
 };
 
-export const buildRadioNotesCatalog = (notes: RadioNote[]): RadioNotesCatalog => {
+export const buildRadioNotesCatalog = (
+  notes: RadioNote[],
+): RadioNotesCatalog => {
   const indexedNotes = notes.map(indexRadioNote);
 
   return {
     notes: indexedNotes,
     facets: {
-      artists: buildFacet(indexedNotes.flatMap((note) => note.artists), 18),
-      genres: buildFacet(indexedNotes.flatMap((note) => note.genres), 18),
-      tags: buildFacet(indexedNotes.flatMap((note) => note.tags), 18),
-      noteTypes: buildFacet(indexedNotes.map((note) => formatRadioNoteType(note.eventType)), 3),
+      artists: buildFacet(
+        indexedNotes.flatMap((note) => note.artists),
+        18,
+      ),
+      genres: buildFacet(
+        indexedNotes.flatMap((note) => note.genres),
+        18,
+      ),
+      tags: buildFacet(
+        indexedNotes.flatMap((note) => note.tags),
+        18,
+      ),
+      noteTypes: buildFacet(
+        indexedNotes.map((note) => formatRadioNoteType(note.eventType)),
+        3,
+      ),
       specialTypes: buildFacet(
         indexedNotes
           .map((note) => note.specialType)
           .filter((value): value is string => Boolean(value)),
-        8
-      )
-    }
+        8,
+      ),
+    },
   };
 };
 
@@ -352,7 +372,7 @@ export const formatRadioNoteDate = (value: string) => {
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    year: "numeric"
+    year: "numeric",
   });
 };
 
@@ -361,7 +381,7 @@ export const formatRadioNoteTime = (value: string) => {
   if (!date) return "";
   return date.toLocaleTimeString("en-US", {
     hour: "numeric",
-    minute: "2-digit"
+    minute: "2-digit",
   });
 };
 

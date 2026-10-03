@@ -6,7 +6,8 @@ import { serverConfig } from "../../../../lib/server-config";
 export async function GET() {
   const ip = await getClientIp();
   const { allowed } = await rateLimit(`rl:mc:events:${ip}`, 30, 60);
-  if (!allowed) return NextResponse.json({ error: "rate limit" }, { status: 429 });
+  if (!allowed)
+    return NextResponse.json({ error: "rate limit" }, { status: 429 });
 
   const base = serverConfig.MINECRAFT_BRIDGE_URL.replace(/\/$/, "");
   const res = await fetch(`${base}/events`, { cache: "no-store" });

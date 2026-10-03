@@ -6,7 +6,8 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(scriptDir, "..");
 const dataRoot = path.join(webRoot, "data");
 const sourceDataRoot = path.join(webRoot, "src", "data");
-const root = process.argv[2] || process.env.DM_LIBRARY_ROOT || "/media/roleplay";
+const root =
+  process.argv[2] || process.env.DM_LIBRARY_ROOT || "/media/roleplay";
 const fullOutput = process.argv[3] || path.join(dataRoot, "dm-library.json");
 const summaryOutput = path.join(sourceDataRoot, "dm-library-summary.json");
 
@@ -27,7 +28,7 @@ const manualPatterns = [
   /spellbook/i,
   /equipment|weapons?|armory|gear|items?/i,
   /compendium/i,
-  /codex/i
+  /codex/i,
 ];
 
 const excludePatterns = [
@@ -36,7 +37,7 @@ const excludePatterns = [
   /\bscenario\b/i,
   /\bquest\b/i,
   /\bcampaign\b/i,
-  /\badv\b/i
+  /\badv\b/i,
 ];
 
 const systemMatchers = [
@@ -44,78 +45,94 @@ const systemMatchers = [
     id: "dnd-4e",
     name: "D&D 4e",
     match: (full, name) =>
-      full.includes("dnd_4th_completecollection") || name.includes("d&d 4.0") || name.includes("4th edition")
+      full.includes("dnd_4th_completecollection") ||
+      name.includes("d&d 4.0") ||
+      name.includes("4th edition"),
   },
   {
     id: "dnd-35e",
     name: "D&D 3.5e",
-    match: (full, name) => full.includes("3.5e") || name.includes("3.5")
+    match: (full, name) => full.includes("3.5e") || name.includes("3.5"),
   },
   {
     id: "dnd-30",
     name: "D&D 3.0",
-    match: (_full, name) => name.includes("d&d 3.0") || name.includes("d&d 3e")
+    match: (_full, name) => name.includes("d&d 3.0") || name.includes("d&d 3e"),
   },
   {
     id: "adnd-1e",
     name: "AD&D 1e",
-    match: (_full, name) => name.includes("ad&d 1.0") || name.includes("ad&d 1e") || name.includes("ad&d")
+    match: (_full, name) =>
+      name.includes("ad&d 1.0") ||
+      name.includes("ad&d 1e") ||
+      name.includes("ad&d"),
   },
   {
     id: "dnd-1e",
     name: "D&D 1e",
-    match: (_full, name) => name.includes("d&d 1.0") || name.includes("d&d 1e")
+    match: (_full, name) => name.includes("d&d 1.0") || name.includes("d&d 1e"),
   },
   {
     id: "gamma-world",
     name: "Gamma World",
-    match: (full, name) => full.includes("gamma world") || name.includes("gamma world")
+    match: (full, name) =>
+      full.includes("gamma world") || name.includes("gamma world"),
   },
   {
     id: "merp",
     name: "MERP",
-    match: (full, name) => full.includes("merp") || name.includes("middle-earth")
+    match: (full, name) =>
+      full.includes("merp") || name.includes("middle-earth"),
   },
   {
     id: "call-of-cthulhu",
     name: "Call of Cthulhu",
-    match: (full, name) => full.includes("call of cthulhu") || name.includes("cthulhu")
+    match: (full, name) =>
+      full.includes("call of cthulhu") || name.includes("cthulhu"),
   },
   {
     id: "ars-magica",
     name: "Ars Magica",
-    match: (full, name) => full.includes("ars magica") || name.includes("ars magica")
+    match: (full, name) =>
+      full.includes("ars magica") || name.includes("ars magica"),
   },
   {
     id: "alternity",
     name: "Alternity",
-    match: (full, name) => full.includes("alternity") || name.includes("alternity")
+    match: (full, name) =>
+      full.includes("alternity") || name.includes("alternity"),
   },
   {
     id: "pendragon",
     name: "Pendragon",
-    match: (full, name) => full.includes("pendragon") || name.includes("pendragon")
+    match: (full, name) =>
+      full.includes("pendragon") || name.includes("pendragon"),
   },
   {
     id: "paranoia",
     name: "Paranoia",
-    match: (full, name) => full.includes("paranoia") || name.includes("paranoia")
+    match: (full, name) =>
+      full.includes("paranoia") || name.includes("paranoia"),
   },
   {
     id: "dcc",
     name: "Dungeon Crawl Classics",
-    match: (full, name) => full.includes("dungeon crawl classics") || name.includes("dungeon crawl classics")
+    match: (full, name) =>
+      full.includes("dungeon crawl classics") ||
+      name.includes("dungeon crawl classics"),
   },
   {
     id: "hackmaster",
     name: "Hackmaster",
-    match: (full, name) => full.includes("hackmaster") || name.includes("hackmaster")
+    match: (full, name) =>
+      full.includes("hackmaster") || name.includes("hackmaster"),
   },
   {
     id: "pathfinder",
     name: "Pathfinder",
-    match: (full, name) => full.includes("pathfinder") || name.includes("pathfinder")
-  }
+    match: (full, name) =>
+      full.includes("pathfinder") || name.includes("pathfinder"),
+  },
 ];
 
 const categoryOrder = [
@@ -140,7 +157,7 @@ const categoryOrder = [
   ["core", "core"],
   ["srd", "core"],
   ["compendium", "reference"],
-  ["codex", "reference"]
+  ["codex", "reference"],
 ];
 
 const normalize = (value) => value.toLowerCase();
@@ -163,7 +180,8 @@ const detectSystem = (fullPath, name) => {
   const lowerFull = normalize(fullPath);
   const lowerName = normalize(name);
   for (const system of systemMatchers) {
-    if (system.match(lowerFull, lowerName)) return { id: system.id, name: system.name };
+    if (system.match(lowerFull, lowerName))
+      return { id: system.id, name: system.name };
   }
   return { id: "other", name: "Other" };
 };
@@ -200,19 +218,19 @@ const main = async () => {
     systems.get(id).manuals.push({
       title: filename,
       path: relativePath,
-      category: categorize(filename)
+      category: categorize(filename),
     });
   }
 
   const systemList = Array.from(systems.values()).map((system) => ({
     ...system,
-    manuals: system.manuals.sort((a, b) => a.title.localeCompare(b.title))
+    manuals: system.manuals.sort((a, b) => a.title.localeCompare(b.title)),
   }));
 
   const payload = {
     root,
     generatedAt: new Date().toISOString(),
-    systems: systemList.sort((a, b) => a.name.localeCompare(b.name))
+    systems: systemList.sort((a, b) => a.name.localeCompare(b.name)),
   };
 
   const summary = {
@@ -227,16 +245,18 @@ const main = async () => {
         name: system.name,
         manualCount: system.manuals.length,
         categories: categoryCounts,
-        sampleTitles: system.manuals.slice(0, 4).map((manual) => manual.title)
+        sampleTitles: system.manuals.slice(0, 4).map((manual) => manual.title),
       };
-    })
+    }),
   };
 
   await fs.mkdir(path.dirname(fullOutput), { recursive: true });
   await fs.mkdir(path.dirname(summaryOutput), { recursive: true });
   await fs.writeFile(fullOutput, JSON.stringify(payload, null, 2));
   await fs.writeFile(summaryOutput, JSON.stringify(summary, null, 2));
-  console.log(`Wrote ${fullOutput} and ${summaryOutput} (${payload.systems.length} systems).`);
+  console.log(
+    `Wrote ${fullOutput} and ${summaryOutput} (${payload.systems.length} systems).`,
+  );
 };
 
 main().catch((error) => {

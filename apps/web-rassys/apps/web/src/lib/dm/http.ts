@@ -6,11 +6,11 @@ export const requireDmSession = async () => {
   if (!session) {
     return {
       ok: false as const,
-      response: NextResponse.json({ error: "unauthorized" }, { status: 401 })
+      response: NextResponse.json({ error: "unauthorized" }, { status: 401 }),
     };
   }
   return {
     ok: true as const,
-    session
+    session,
   };
 };

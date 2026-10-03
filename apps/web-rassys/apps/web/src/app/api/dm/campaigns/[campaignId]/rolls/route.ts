@@ -25,7 +25,7 @@ export async function GET(request: Request, context: Params) {
 
     const rolls = await listCampaignDiceRolls(auth.session.userId, campaignId, {
       limit,
-      turnId
+      turnId,
     });
 
     return NextResponse.json({ rolls, total: rolls.length });

@@ -1,4 +1,7 @@
-import { GET as streamGet, HEAD as streamHead } from "../api/radio/stream/route";
+import {
+  GET as streamGet,
+  HEAD as streamHead,
+} from "../api/radio/stream/route";
 
 const withLossless = (request: Request) => {
   const url = new URL(request.url);

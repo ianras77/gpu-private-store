@@ -11,7 +11,14 @@ export type RadioHomeRequestLineItem = {
   trackId?: string | null;
   trackIds?: string[];
   source?: "chat" | "form" | "featured" | null;
-  status?: "accepted" | "rejected" | "considering" | "none" | "queued" | "fulfilled" | null;
+  status?:
+    | "accepted"
+    | "rejected"
+    | "considering"
+    | "none"
+    | "queued"
+    | "fulfilled"
+    | null;
   intent?: string | null;
   createdAt: number;
   tracks?: Array<{
@@ -90,5 +97,5 @@ export const useRadioHome = () =>
   useSWR<RadioHomePayload>("/api/radio/home", fetcher, {
     refreshInterval: 12000,
     dedupingInterval: 5000,
-    revalidateOnFocus: false
+    revalidateOnFocus: false,
   });

@@ -1,8 +1,15 @@
 "use client";
 
 import useSWR from "swr";
-import { AudioShelfPlayer, type AudioShelfItem, type AudioShelfSection } from "./AudioShelfPlayer";
-import { type LibraryTrack, type ListeningRoomPayload } from "../lib/media-controller";
+import {
+  AudioShelfPlayer,
+  type AudioShelfItem,
+  type AudioShelfSection,
+} from "./AudioShelfPlayer";
+import {
+  type LibraryTrack,
+  type ListeningRoomPayload,
+} from "../lib/media-controller";
 
 const fetcher = (url: string) =>
   fetch(url, { cache: "no-store" }).then(async (res) => {
@@ -40,7 +47,10 @@ const buildCounts = (values: string[]) => {
     });
 };
 
-const toShelfItem = (track: ListeningTrack, description?: string): AudioShelfItem => ({
+const toShelfItem = (
+  track: ListeningTrack,
+  description?: string,
+): AudioShelfItem => ({
   id: track.id,
   title: track.title,
   subtitle: `${track.artist}${track.album ? ` · ${track.album}` : ""}`,
@@ -135,7 +145,10 @@ export function ListeningRoomPanel() {
     title: `${facet.value} on the shelf`,
     description: `${facet.count} tracks from ${facet.value} already sitting close at hand.`,
     items: items
-      .filter((track) => track.artist?.trim().toLowerCase() === facet.value.toLowerCase())
+      .filter(
+        (track) =>
+          track.artist?.trim().toLowerCase() === facet.value.toLowerCase(),
+      )
       .slice(0, 24)
       .map((track) =>
         toShelfItem(
@@ -171,13 +184,15 @@ export function ListeningRoomPanel() {
             title: "The shelf I use when I really want to listen",
             description:
               "Lossless cuts and higher-resolution files from the records that deserve a little more quiet around them.",
-            items: hiResItems.slice(0, 36).map((track) =>
-              toShelfItem(
-                track,
-                track.genres?.slice(0, 2).join(" / ") ??
-                  "The kind of record that opens up when I slow down for it.",
+            items: hiResItems
+              .slice(0, 36)
+              .map((track) =>
+                toShelfItem(
+                  track,
+                  track.genres?.slice(0, 2).join(" / ") ??
+                    "The kind of record that opens up when I slow down for it.",
+                ),
               ),
-            ),
           },
         ]
       : []),

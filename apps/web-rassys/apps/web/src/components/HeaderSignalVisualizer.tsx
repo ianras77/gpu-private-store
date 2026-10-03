@@ -23,8 +23,7 @@ const buildPath = (
 ) => {
   const points = bars.map((value, index) => {
     const x = (index / Math.max(1, bars.length - 1)) * 100;
-    const wave =
-      Math.sin(index * 0.8 + options.drift + options.phase) * 1.25;
+    const wave = Math.sin(index * 0.8 + options.drift + options.phase) * 1.25;
     const y =
       options.baseline - value * options.amplitude * 8 + wave * (0.6 + value);
     return { x, y };
@@ -49,28 +48,35 @@ export function HeaderSignalVisualizer() {
   const { subscribeVisualizer } = usePersistentRadioPlayer();
   const [frame, setFrame] = useState<RadioVisualizerFrame>(EMPTY_FRAME);
   const [phase, setPhase] = useState(0);
-
-  useEffect(() => subscribeVisualizer(setFrame), [subscribeVisualizer]);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
-    let animationFrame = 0;
-    let lastTick = 0;
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setReducedMotion(preference.matches);
+    updatePreference();
+    preference.addEventListener("change", updatePreference);
+    return () => preference.removeEventListener("change", updatePreference);
+  }, []);
 
-    const tick = (timestamp: number) => {
-      animationFrame = window.requestAnimationFrame(tick);
-      if (timestamp - lastTick < 42) return;
-      lastTick = timestamp;
-      const driftStep = frame.active
-        ? 0.12 + frame.energy * 0.22
-        : 0.035;
-      setPhase((current) => (current + driftStep) % (Math.PI * 2));
-    };
+  useEffect(() => {
+    if (reducedMotion) {
+      setFrame(EMPTY_FRAME);
+      return;
+    }
+    return subscribeVisualizer(setFrame);
+  }, [reducedMotion, subscribeVisualizer]);
 
-    animationFrame = window.requestAnimationFrame(tick);
-    return () => {
-      window.cancelAnimationFrame(animationFrame);
-    };
-  }, [frame.active, frame.energy]);
+  useEffect(() => {
+    if (!frame.active || reducedMotion) {
+      setPhase(0);
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setPhase((current) => (current + 0.22) % (Math.PI * 2));
+    }, 42);
+    return () => window.clearInterval(timer);
+  }, [frame.active, reducedMotion]);
 
   const primaryPath = useMemo(
     () =>
@@ -117,13 +123,25 @@ export function HeaderSignalVisualizer() {
         className="absolute inset-0 h-full w-full"
       >
         <defs>
-          <linearGradient id="rassy-wave-primary" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient
+            id="rassy-wave-primary"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+          >
             <stop offset="0%" stopColor="rgba(255,230,109,0.0)" />
             <stop offset="20%" stopColor="rgba(255,230,109,0.5)" />
             <stop offset="55%" stopColor="rgba(255,255,255,0.82)" />
             <stop offset="100%" stopColor="rgba(66,245,255,0.0)" />
           </linearGradient>
-          <linearGradient id="rassy-wave-secondary" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient
+            id="rassy-wave-secondary"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+          >
             <stop offset="0%" stopColor="rgba(255,79,216,0.0)" />
             <stop offset="40%" stopColor="rgba(255,79,216,0.4)" />
             <stop offset="100%" stopColor="rgba(66,245,255,0.0)" />

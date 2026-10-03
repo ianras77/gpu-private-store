@@ -7,18 +7,24 @@ import { getClientIp } from "../../../../lib/request";
 
 const bodySchema = z.object({
   username: z.string().min(1),
-  password: z.string().min(4)
+  password: z.string().min(4),
 });
 
 export async function POST(req: Request) {
   const ip = await getClientIp();
   const limit = Number(process.env.ADMIN_AUTH_RATE_LIMIT_COUNT ?? 10);
-  const windowSeconds = Number(process.env.ADMIN_AUTH_RATE_LIMIT_WINDOW_SECONDS ?? 60);
-  const { allowed } = await rateLimit(`admin-auth:login:${ip}`, limit, windowSeconds);
+  const windowSeconds = Number(
+    process.env.ADMIN_AUTH_RATE_LIMIT_WINDOW_SECONDS ?? 60,
+  );
+  const { allowed } = await rateLimit(
+    `admin-auth:login:${ip}`,
+    limit,
+    windowSeconds,
+  );
   if (!allowed) {
     return NextResponse.json(
       { error: "rate_limited", retryAfterSeconds: windowSeconds },
-      { status: 429, headers: { "Retry-After": String(windowSeconds) } }
+      { status: 429, headers: { "Retry-After": String(windowSeconds) } },
     );
   }
 

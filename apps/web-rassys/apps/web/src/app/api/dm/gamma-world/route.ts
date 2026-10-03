@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       systemId: "gamma-world",
       query,
       entryTypes: typeToEntryTypes(requestedType),
-      limit
+      limit,
     });
 
     const mapped: LookupItem[] = items.map((item) => ({
@@ -57,8 +57,9 @@ export async function GET(request: Request) {
       title: item.name,
       subtitle: item.summary ? excerpt(item.summary, 160) : undefined,
       section:
-        (typeof item.data.section === "string" ? item.data.section : undefined) ??
-        item.tags.find((entry) => entry.length > 0)
+        (typeof item.data.section === "string"
+          ? item.data.section
+          : undefined) ?? item.tags.find((entry) => entry.length > 0),
     }));
 
     return NextResponse.json({ items: mapped, total: mapped.length });
@@ -66,7 +67,7 @@ export async function GET(request: Request) {
     console.error("Gamma World rules lookup failed", error);
     return NextResponse.json(
       { items: [], total: 0, error: "Gamma World lookup unavailable." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

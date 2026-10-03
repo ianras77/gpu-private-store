@@ -1,4 +1,9 @@
-import type { CharacterPatch, CharacterRecord, QuestRecord, WorldState } from "./types";
+import type {
+  CharacterPatch,
+  CharacterRecord,
+  QuestRecord,
+  WorldState,
+} from "./types";
 
 export type WorldSeedInput = {
   campaignName: string;
@@ -20,11 +25,15 @@ export type GameSystemPlugin = {
   rulesPrimer: string;
   seedWorld: (input: WorldSeedInput) => SeedResult;
   normalizeCharacter: (character: CharacterRecord) => CharacterRecord;
-  normalizeCharacterPatch: (character: CharacterRecord, patch: CharacterPatch) => CharacterPatch;
+  normalizeCharacterPatch: (
+    character: CharacterRecord,
+    patch: CharacterPatch,
+  ) => CharacterPatch;
   normalizeQuest: (quest: QuestRecord) => QuestRecord;
 };
 
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, value));
 
 const hashText = (value: string) => {
   let hash = 17;
@@ -34,7 +43,8 @@ const hashText = (value: string) => {
   return hash;
 };
 
-const pickVariant = <T>(seed: string, variants: readonly T[]) => variants[hashText(seed) % variants.length];
+const pickVariant = <T>(seed: string, variants: readonly T[]) =>
+  variants[hashText(seed) % variants.length];
 
 const excerpt = (value: string, limit: number) => {
   const cleaned = value.replace(/\s+/g, " ").trim();
@@ -54,10 +64,13 @@ const normalizeCharacterBase = (character: CharacterRecord) => ({
   level: clamp(character.level, 1, 40),
   hpMax: clamp(character.hpMax, 1, 1000),
   hpCurrent: clamp(character.hpCurrent, 0, character.hpMax),
-  hpTemp: clamp(character.hpTemp, 0, 1000)
+  hpTemp: clamp(character.hpTemp, 0, 1000),
 });
 
-const normalizeCharacterPatchBase = (character: CharacterRecord, patch: CharacterPatch) => ({
+const normalizeCharacterPatchBase = (
+  character: CharacterRecord,
+  patch: CharacterPatch,
+) => ({
   ...patch,
   hpTemp:
     typeof patch.hpTemp === "number"
@@ -66,12 +79,12 @@ const normalizeCharacterPatchBase = (character: CharacterRecord, patch: Characte
   hpDelta:
     typeof patch.hpDelta === "number"
       ? clamp(patch.hpDelta, -character.hpMax, character.hpMax)
-      : patch.hpDelta
+      : patch.hpDelta,
 });
 
 const normalizeQuestBase = (quest: QuestRecord) => ({
   ...quest,
-  progress: clamp(quest.progress, 0, 100)
+  progress: clamp(quest.progress, 0, 100),
 });
 
 const genericLocations = [
@@ -80,7 +93,7 @@ const genericLocations = [
   "Morrow Vale",
   "Thornwatch Keep",
   "Starfall Gate",
-  "The Iron Market"
+  "The Iron Market",
 ] as const;
 
 const genericTimes = [
@@ -88,7 +101,7 @@ const genericTimes = [
   "Day 1 / Dawn",
   "Day 1 / Dusk",
   "Nightfall / Second Bell",
-  "Early Morning / Travel Hour"
+  "Early Morning / Travel Hour",
 ] as const;
 
 const genericWeather = [
@@ -96,7 +109,7 @@ const genericWeather = [
   "Low fog threaded with distant bells",
   "Dry wind carrying ash and rumor",
   "Still air before an approaching storm",
-  "A clear sky with an uneasy hush"
+  "A clear sky with an uneasy hush",
 ] as const;
 
 const genericThreats = [
@@ -105,14 +118,14 @@ const genericThreats = [
   "A dangerous shortage of key supplies",
   "An ancient secret close to surfacing",
   "Unstable local alliances",
-  "A panic that could turn the region violent"
+  "A panic that could turn the region violent",
 ] as const;
 
 const genericStoryBeats = [
   "The party arrives just before the balance of power tips.",
   "A local problem is about to become everyone else's emergency.",
   "The first decision will reveal who gains momentum in the region.",
-  "An uneasy status quo is already cracking around the party."
+  "An uneasy status quo is already cracking around the party.",
 ] as const;
 
 const genericQuestTitles = [
@@ -120,19 +133,25 @@ const genericQuestTitles = [
   "Win a First Ally",
   "Recover the Missing Key",
   "Hold the Line",
-  "Map the Unknown"
+  "Map the Unknown",
 ] as const;
 
-const buildGenericWorldSeed = ({ campaignName, description }: WorldSeedInput): SeedResult => {
+const buildGenericWorldSeed = ({
+  campaignName,
+  description,
+}: WorldSeedInput): SeedResult => {
   const location = pickVariant(`${campaignName}:location`, genericLocations);
   const worldTime = pickVariant(`${campaignName}:time`, genericTimes);
   const weather = pickVariant(`${campaignName}:weather`, genericWeather);
   const primaryThreat = pickVariant(`${campaignName}:threat:1`, genericThreats);
   const secondaryThreat = pickVariant(
     `${description}:threat:2`,
-    genericThreats.filter((threat) => threat !== primaryThreat)
+    genericThreats.filter((threat) => threat !== primaryThreat),
   );
-  const openingQuestTitle = pickVariant(`${campaignName}:quest`, genericQuestTitles);
+  const openingQuestTitle = pickVariant(
+    `${campaignName}:quest`,
+    genericQuestTitles,
+  );
   const storyBeat = pickVariant(`${campaignName}:story`, genericStoryBeats);
   const summary = excerpt(description, 240);
 
@@ -144,7 +163,7 @@ const buildGenericWorldSeed = ({ campaignName, description }: WorldSeedInput): S
       activeThreats: [primaryThreat, secondaryThreat],
       sceneSummary: `${campaignName} opens in ${location}. ${summary}`,
       storyBeat,
-      visualPrompt: `${campaignName}, ${location}, ${weather.toLowerCase()}, tabletop adventure scene, cinematic illustration`
+      visualPrompt: `${campaignName}, ${location}, ${weather.toLowerCase()}, tabletop adventure scene, cinematic illustration`,
     },
     initialQuest: {
       title: openingQuestTitle,
@@ -152,9 +171,9 @@ const buildGenericWorldSeed = ({ campaignName, description }: WorldSeedInput): S
       objectives: [
         `Learn who actually controls ${location}`,
         `Secure one ally, route, or resource before the next setback`,
-        `Expose the first clue behind ${secondaryThreat.toLowerCase()}`
-      ]
-    }
+        `Expose the first clue behind ${secondaryThreat.toLowerCase()}`,
+      ],
+    },
   };
 };
 
@@ -172,25 +191,27 @@ const gammaWorldPlugin: GameSystemPlugin = {
       sceneSummary: `The campaign '${campaignName}' begins at the edge of a shattered arcology. ${description}`,
       storyBeat: "The party assembles and takes first contact with the zone.",
       visualPrompt:
-        "Collapsed megastructures, bioluminescent fog, mutant ruins, storm-lit horizon, salvage caravans"
+        "Collapsed megastructures, bioluminescent fog, mutant ruins, storm-lit horizon, salvage caravans",
     },
     initialQuest: {
       title: "Secure a Foothold",
-      summary: "Establish a safe base, gather intel on local factions, and survive the first incursion.",
+      summary:
+        "Establish a safe base, gather intel on local factions, and survive the first incursion.",
       objectives: [
         "Scout a defensible shelter",
         "Recover one critical supply cache",
-        "Identify one faction and their intent"
-      ]
-    }
+        "Identify one faction and their intent",
+      ],
+    },
   }),
   normalizeCharacter: normalizeCharacterBase,
   normalizeCharacterPatch: normalizeCharacterPatchBase,
-  normalizeQuest: normalizeQuestBase
+  normalizeQuest: normalizeQuestBase,
 };
 
 const createGenericPlugin = (systemId: string): GameSystemPlugin => {
-  const displayName = systemId === "generic" ? "Generic RPG" : titleCaseFromSystemId(systemId);
+  const displayName =
+    systemId === "generic" ? "Generic RPG" : titleCaseFromSystemId(systemId);
   return {
     id: systemId,
     displayName,
@@ -198,12 +219,13 @@ const createGenericPlugin = (systemId: string): GameSystemPlugin => {
     seedWorld: buildGenericWorldSeed,
     normalizeCharacter: normalizeCharacterBase,
     normalizeCharacterPatch: normalizeCharacterPatchBase,
-    normalizeQuest: normalizeQuestBase
+    normalizeQuest: normalizeQuestBase,
   };
 };
 
 const pluginMap = new Map<string, GameSystemPlugin>([
-  [gammaWorldPlugin.id, gammaWorldPlugin]
+  [gammaWorldPlugin.id, gammaWorldPlugin],
 ]);
 
-export const getSystemPlugin = (systemId: string) => pluginMap.get(systemId) ?? createGenericPlugin(systemId);
+export const getSystemPlugin = (systemId: string) =>
+  pluginMap.get(systemId) ?? createGenericPlugin(systemId);

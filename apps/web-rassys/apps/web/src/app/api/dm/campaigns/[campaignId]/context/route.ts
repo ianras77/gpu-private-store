@@ -14,11 +14,13 @@ export async function GET(request: Request, context: Params) {
     const { campaignId } = await context.params;
     const { searchParams } = new URL(request.url);
     const actionText =
-      typeof searchParams.get("actionText") === "string" && searchParams.get("actionText")?.trim()
+      typeof searchParams.get("actionText") === "string" &&
+      searchParams.get("actionText")?.trim()
         ? (searchParams.get("actionText") as string)
         : "Context preview request";
     const actorCharacterId =
-      typeof searchParams.get("actorCharacterId") === "string" && searchParams.get("actorCharacterId")?.trim()
+      typeof searchParams.get("actorCharacterId") === "string" &&
+      searchParams.get("actorCharacterId")?.trim()
         ? (searchParams.get("actorCharacterId") as string)
         : undefined;
 
@@ -26,7 +28,7 @@ export async function GET(request: Request, context: Params) {
       auth.session.userId,
       campaignId,
       actionText,
-      actorCharacterId
+      actorCharacterId,
     );
 
     return NextResponse.json({ context: contextPacket });
@@ -35,8 +37,14 @@ export async function GET(request: Request, context: Params) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     if (error instanceof Error && error.message === "campaign_not_found") {
-      return NextResponse.json({ error: "campaign_not_found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "campaign_not_found" },
+        { status: 404 },
+      );
     }
-    return NextResponse.json({ error: "context_preview_failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "context_preview_failed" },
+      { status: 500 },
+    );
   }
 }

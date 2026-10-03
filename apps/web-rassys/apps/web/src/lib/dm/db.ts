@@ -1,4 +1,9 @@
-import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
+import {
+  Pool,
+  type PoolClient,
+  type QueryResult,
+  type QueryResultRow,
+} from "pg";
 import { seedDmReferenceData } from "./reference-seed";
 
 type SqlValue = string | number | boolean | null | Date | object;
@@ -21,7 +26,7 @@ const pool =
     max: Number(process.env.DM_DB_POOL_MAX ?? 15),
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
-    application_name: "web-dm-backend"
+    application_name: "web-dm-backend",
   });
 
 if (!globalForDmDb.dmPool) {
@@ -717,8 +722,8 @@ const schemaStatements = [
       PRIMARY KEY (report_id, sha256)
     )`,
   `CREATE INDEX IF NOT EXISTS rassy_report_versions_approved_idx ON rassy_report_versions(report_type, approved_at DESC)`,
-  `CREATE UNIQUE INDEX IF NOT EXISTS rassy_report_versions_path_sha_idx ON rassy_report_versions(relative_path, sha256)`
-  ,`CREATE TABLE IF NOT EXISTS rassy_report_feedback (
+  `CREATE UNIQUE INDEX IF NOT EXISTS rassy_report_versions_path_sha_idx ON rassy_report_versions(relative_path, sha256)`,
+  `CREATE TABLE IF NOT EXISTS rassy_report_feedback (
       id TEXT PRIMARY KEY,
       report_id TEXT NOT NULL,
       report_sha256 TEXT NOT NULL,
@@ -735,9 +740,9 @@ const schemaStatements = [
       moderated_at TIMESTAMPTZ,
       moderated_by TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-    )`
-  ,`CREATE INDEX IF NOT EXISTS rassy_report_feedback_triage_idx ON rassy_report_feedback(moderation_state, created_at DESC)`
-  ,`CREATE INDEX IF NOT EXISTS rassy_report_feedback_version_idx ON rassy_report_feedback(report_id, report_sha256, created_at DESC)`
+    )`,
+  `CREATE INDEX IF NOT EXISTS rassy_report_feedback_triage_idx ON rassy_report_feedback(moderation_state, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS rassy_report_feedback_version_idx ON rassy_report_feedback(report_id, report_sha256, created_at DESC)`,
 ];
 
 const ensureSchemaInternal = async () => {
@@ -778,16 +783,18 @@ export const ensureDmSchema = async () => {
   return globalForDmDb.dmSchemaPromise;
 };
 
-export const dmQuery = async <T extends QueryResultRow = Record<string, unknown>>(
+export const dmQuery = async <
+  T extends QueryResultRow = Record<string, unknown>,
+>(
   text: string,
-  params: SqlValue[] = []
+  params: SqlValue[] = [],
 ): Promise<QueryResult<T>> => {
   await ensureDmSchema();
   return pool.query<T>(text, params);
 };
 
 export const withDmTransaction = async <T>(
-  work: (client: PoolClient) => Promise<T>
+  work: (client: PoolClient) => Promise<T>,
 ): Promise<T> => {
   await ensureDmSchema();
   const client = await pool.connect();
@@ -804,7 +811,10 @@ export const withDmTransaction = async <T>(
   }
 };
 
-export const withCampaignLock = async <T>(campaignId: string, work: (client: PoolClient) => Promise<T>) => {
+export const withCampaignLock = async <T>(
+  campaignId: string,
+  work: (client: PoolClient) => Promise<T>,
+) => {
   await ensureDmSchema();
   const client = await pool.connect();
   try {
@@ -812,7 +822,9 @@ export const withCampaignLock = async <T>(campaignId: string, work: (client: Poo
     return await work(client);
   } finally {
     try {
-      await client.query("SELECT pg_advisory_unlock(hashtext($1))", [campaignId]);
+      await client.query("SELECT pg_advisory_unlock(hashtext($1))", [
+        campaignId,
+      ]);
     } finally {
       client.release();
     }

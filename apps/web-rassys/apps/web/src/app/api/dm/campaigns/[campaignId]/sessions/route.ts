@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireDmSession } from "../../../../../../lib/dm/http";
-import { endCampaignSession, startCampaignSession } from "../../../../../../lib/dm/service";
+import {
+  endCampaignSession,
+  startCampaignSession,
+} from "../../../../../../lib/dm/service";
 
 type Params = { params: Promise<{ campaignId: string }> };
 
@@ -18,7 +21,10 @@ export async function POST(_: Request, context: Params) {
     if (error instanceof Error && error.message === "forbidden") {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
-    return NextResponse.json({ error: "session_start_failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "session_start_failed" },
+      { status: 500 },
+    );
   }
 }
 

@@ -6,6 +6,8 @@ import { isBoothDossierGrounded } from "../booth-dossier";
 import { buildTrackInsightScaffold, buildTrackKnowledgeCard, buildTrackTurnIntelligence, getTrackInsightMap, syncTrackInsights } from "../library/track-intelligence";
 import { logger } from "../logger";
 import { createLlmCircuitRegistry } from "./llm-circuit";
+import { requestCanonicalListener } from "./canonical-listener";
+import { resolveDJGateway } from "./gateway-routing";
 const decisionSchema = z.object({
     trackId: z.string().optional(),
     trackSlot: z.coerce.number().int().optional(),
@@ -2238,79 +2240,71 @@ const isActionableDecision = (decision, intent) => {
     return hasTalkScript || hasSnippetSlot;
 };
 const callRassyIntelligenceListener = async (systemPrompt, userPrompt, schema, timeoutMs) => {
-    const base = config.RASSY_INTELLIGENCE_URL?.replace(/\/$/, "");
-    if (!base || !config.RASSY_INTELLIGENCE_INTERNAL_TOKEN)
-        return null;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), Math.max(1000, timeoutMs));
+    const result = await requestCanonicalListener({
+        baseUrl: config.RASSY_INTELLIGENCE_URL,
+        internalToken: config.RASSY_INTELLIGENCE_INTERNAL_TOKEN,
+        timeoutMs,
+        prompt: `${systemPrompt}\n\nListener response contract (mandatory): return exactly one JSON object and no prose outside it. Use this shape: {"reply":"string","mood":"string or null","recommendationStatus":"accepted|rejected|considering|none","recommendationSummary":"string or null","matchedTrackId":"track id or null","skipDecision":"approved|rejected|none","reason":"string or null","trackIds":["real supplied track id"]}. Never invent trackIds.\n\nListener context and request:\n${userPrompt}`
+    });
+    if (!result.ok)
+        return result;
+    const content = result.text;
+    let parsed;
     try {
-        const response = await fetch(`${base}/v1/agents/radio-listener/generate`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${config.RASSY_INTELLIGENCE_INTERNAL_TOKEN}`
-            },
-            body: JSON.stringify({
-                prompt: `${systemPrompt}\n\nListener response contract (mandatory): return exactly one JSON object and no prose outside it. Use this shape: {"reply":"string","mood":"string or null","recommendationStatus":"accepted|rejected|considering|none","recommendationSummary":"string or null","matchedTrackId":"track id or null","skipDecision":"approved|rejected|none","reason":"string or null","trackIds":["real supplied track id"]}. Never invent trackIds.\n\nListener context and request:\n${userPrompt}`
-            }),
-            signal: controller.signal
-        });
-        if (!response.ok)
-            return null;
-        const payload = await response.json();
-        const content = typeof payload?.text === "string" ? payload.text : "";
-        if (!content)
-            return null;
-        let parsed;
-        try {
-            parsed = schema.safeParse(JSON.parse(extractJson(content)));
-        }
-        catch {
-            parsed = { success: false };
-        }
-        // A local lane may return a natural-language answer even after the
-        // structured contract was requested. Preserve that real answer rather
-        // than replacing it with the station's canned fallback; deterministic
-        // validation still controls any requested track/action IDs.
-        if (!parsed.success && schema === listenerReplySchema) {
-            const embeddedReply = content.match(/\"reply\"\s*:\s*\"((?:\\\\.|[^\"])*)\"/i)?.[1];
-            let reply = content;
-            if (embeddedReply) {
-                try {
-                    reply = JSON.parse(`\"${embeddedReply}\"`);
-                }
-                catch {
-                    reply = embeddedReply;
-                }
-            }
-            return { reply, mood: null, recommendationStatus: "none", matchedTrackId: null, skipDecision: "none", reason: null, trackIds: [] };
-        }
-        return parsed.success ? parsed.data : null;
+        parsed = schema.safeParse(JSON.parse(extractJson(content)));
     }
     catch {
-        return null;
+        parsed = { success: false };
     }
-    finally {
-        clearTimeout(timeoutId);
+    // Preserve real natural language from the listener model, but never accept
+    // invented track IDs or action fields from an invalid structured reply.
+    if (!parsed.success && schema === listenerReplySchema) {
+        const embeddedReply = content.match(/\"reply\"\s*:\s*\"((?:\\\\.|[^\"])*)\"/i)?.[1];
+        let reply = content;
+        if (embeddedReply) {
+            try {
+                reply = JSON.parse(`\"${embeddedReply}\"`);
+            }
+            catch {
+                reply = embeddedReply;
+            }
+        }
+        return { ok: true, value: { reply, mood: null, recommendationStatus: "none", matchedTrackId: null, skipDecision: "none", reason: null, trackIds: [] } };
     }
+    return parsed.success
+        ? { ok: true, value: parsed.data }
+        : { ok: false, reason: "invalid_response" };
 };
 const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, options) => {
-    if (!config.RASSYMIND_BASE_URL)
-        return null;
     const label = options?.label ?? "unknown";
     if (llmCircuit.shouldSkip(label)) {
         return null;
     }
     if (label === "listener-reply") {
         const intelligenceReply = await callRassyIntelligenceListener(systemPrompt, userPrompt, schema, options?.timeoutMs ?? 8000);
-        if (intelligenceReply) {
+        if (intelligenceReply.ok) {
             llmCircuit.noteSuccess(label);
-            return intelligenceReply;
+            return intelligenceReply.value;
+        }
+        if (config.RASSY_INTELLIGENCE_REQUIRE_CANONICAL && !(intelligenceReply.reason === "http_error" && intelligenceReply.status === 404)) {
+            const circuit = llmCircuit.noteFailure(label);
+            logger.warn({ label, source: "mastra", reason: intelligenceReply.reason, status: intelligenceReply.status, failures: circuit.failures, openedUntil: circuit.openedUntil || null }, "Canonical radio listener request failed");
+            return null;
         }
     }
-    if (config.RASSY_INTELLIGENCE_REQUIRE_CANONICAL)
+    const route = resolveDJGateway({
+        requireCanonical: config.RASSY_INTELLIGENCE_REQUIRE_CANONICAL,
+        intelligenceUrl: config.RASSY_INTELLIGENCE_URL,
+        internalToken: config.RASSY_INTELLIGENCE_INTERNAL_TOKEN,
+        legacyUrl: config.RASSYMIND_BASE_URL,
+        legacyApiKey: config.RASSYMIND_API_KEY,
+    });
+    if (!route.ok) {
+        const circuit = llmCircuit.noteFailure(label);
+        logger.warn({ label, source: route.reason, failures: circuit.failures, openedUntil: circuit.openedUntil || null }, "DJ model route is not configured");
         return null;
-    const endpoint = `${config.RASSYMIND_BASE_URL.replace(/\/$/, "")}/v1/chat/completions`;
+    }
+    const endpoint = `${route.baseUrl}/v1/chat/completions`;
     const buildPayload = (jsonMode = "prompt") => ({
         model: options?.model ?? config.RASSYMIND_MODEL,
         messages: [
@@ -2356,7 +2350,7 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
                     "x-cheshire-timeout-ms": String(proxyTimeoutMs),
                     "x-cheshire-retries": "0",
                     "x-cheshire-retry-delay-ms": "0",
-                    ...(config.RASSYMIND_API_KEY ? { Authorization: `Bearer ${config.RASSYMIND_API_KEY}` } : {})
+                    ...(route.token ? { Authorization: `Bearer ${route.token}` } : {})
                 },
                 body: JSON.stringify(buildPayload(jsonMode)),
                 signal: controller.signal
@@ -2365,7 +2359,8 @@ const callCheshireJson = async (systemPrompt, userPrompt, schema, temperature, o
                 await response.text();
                 if (response.status === 503) {
                     options?.onCapacityFailure?.();
-                    logger.info({ label, lane: laneName, status: response.status }, "Cheshire proxy capacity unavailable; skipping call");
+                    const circuit = llmCircuit.noteFailure(label);
+                    logger.warn({ label, lane: laneName, route: route.source, status: response.status, failures: circuit.failures, openedUntil: circuit.openedUntil || null }, "Canonical DJ model route unavailable; skipping call");
                     return null;
                 }
                 if (response.status === 429 || response.status >= 500) {

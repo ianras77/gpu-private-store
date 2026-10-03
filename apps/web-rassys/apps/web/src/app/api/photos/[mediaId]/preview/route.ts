@@ -9,7 +9,11 @@ export async function GET(
   request: Request,
   context: { params: Promise<{ mediaId: string }> },
 ) {
-  if (!await requireAdmin()) return NextResponse.json({ error: "unauthorized" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
+  if (!(await requireAdmin()))
+    return NextResponse.json(
+      { error: "unauthorized" },
+      { status: 401, headers: { "Cache-Control": "private, no-store" } },
+    );
   const { mediaId } = await context.params;
   return proxyControllerMedia(
     request,
@@ -21,7 +25,11 @@ export async function HEAD(
   request: Request,
   context: { params: Promise<{ mediaId: string }> },
 ) {
-  if (!await requireAdmin()) return new NextResponse(null, { status: 401, headers: { "Cache-Control": "private, no-store" } });
+  if (!(await requireAdmin()))
+    return new NextResponse(null, {
+      status: 401,
+      headers: { "Cache-Control": "private, no-store" },
+    });
   const { mediaId } = await context.params;
   return proxyControllerMedia(
     request,

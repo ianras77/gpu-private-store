@@ -18,7 +18,8 @@ const chunkSize = Number.parseInt(process.argv[4] ?? "1200", 10);
 const enableOcr = process.env.DM_OCR === "1";
 const ocrDpi = Number.parseInt(process.env.DM_OCR_DPI ?? "220", 10);
 const useOcrCache = process.env.DM_OCR_CACHE === "1";
-const ocrCacheDir = process.env.DM_OCR_CACHE_DIR || path.join(dataRoot, "ocr-cache");
+const ocrCacheDir =
+  process.env.DM_OCR_CACHE_DIR || path.join(dataRoot, "ocr-cache");
 
 const hasPdfToText = async () => {
   try {
@@ -41,7 +42,13 @@ const hasTesseract = async () => {
 const ocrPdf = async (sourcePath) => {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "dm-ocr-"));
   const prefix = path.join(tmpDir, "page");
-  await execFileAsync("pdftoppm", ["-r", String(ocrDpi), "-png", sourcePath, prefix]);
+  await execFileAsync("pdftoppm", [
+    "-r",
+    String(ocrDpi),
+    "-png",
+    sourcePath,
+    prefix,
+  ]);
   const files = (await fs.readdir(tmpDir))
     .filter((file) => file.endsWith(".png"))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
@@ -51,7 +58,7 @@ const ocrPdf = async (sourcePath) => {
     const input = path.join(tmpDir, file);
     const outputBase = path.join(tmpDir, path.basename(file, ".png"));
     await execFileAsync("tesseract", [input, outputBase, "-l", "eng"], {
-      maxBuffer: 1024 * 1024 * 20
+      maxBuffer: 1024 * 1024 * 20,
     });
     try {
       const pageText = await fs.readFile(`${outputBase}.txt`, "utf-8");
@@ -71,7 +78,10 @@ const getCacheKey = async (filePath) => {
 };
 
 const chunkText = (text) => {
-  const clean = text.replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  const clean = text
+    .replace(/\s+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
   const chunks = [];
   let current = "";
   for (const line of clean.split("\n")) {
@@ -88,11 +98,15 @@ const chunkText = (text) => {
 
 const main = async () => {
   if (!(await hasPdfToText())) {
-    console.error("pdftotext is not installed. Install poppler-utils to ingest manuals.");
+    console.error(
+      "pdftotext is not installed. Install poppler-utils to ingest manuals.",
+    );
     process.exit(1);
   }
   if (enableOcr && !(await hasTesseract())) {
-    console.error("tesseract-ocr is not installed. Install it or disable DM_OCR.");
+    console.error(
+      "tesseract-ocr is not installed. Install it or disable DM_OCR.",
+    );
     process.exit(1);
   }
 
@@ -110,9 +124,13 @@ const main = async () => {
       const fullPath = path.join(root, manual.path);
       try {
         let text = "";
-        const { stdout } = await execFileAsync("pdftotext", ["-layout", fullPath, "-"], {
-          maxBuffer: 1024 * 1024 * 50
-        });
+        const { stdout } = await execFileAsync(
+          "pdftotext",
+          ["-layout", fullPath, "-"],
+          {
+            maxBuffer: 1024 * 1024 * 50,
+          },
+        );
         text = stdout;
         const meaningfulChars = text.replace(/[\f\s]/g, "").length;
 
@@ -155,8 +173,8 @@ const main = async () => {
             category: manual.category,
             path: manual.path,
             index,
-            text: chunk
-          })
+            text: chunk,
+          }),
         );
         await fs.appendFile(outputPath, entries.join("\n") + "\n");
         totalChunks += entries.length;

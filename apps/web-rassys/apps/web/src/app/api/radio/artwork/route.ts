@@ -20,9 +20,7 @@ const emptyArtwork = () =>
 
 const proxyArtwork = async (request: Request) => {
   try {
-    const now = await fetchRadio<LibraryTrack | null>(
-      "/public/now",
-    );
+    const now = await fetchRadio<LibraryTrack | null>("/public/now");
     if (now?.id) {
       // The live playhead can arrive before the controller's full metadata
       // refresh has completed.  The controller can still read embedded or
@@ -37,10 +35,16 @@ const proxyArtwork = async (request: Request) => {
 
     const artworkUrl = now?.albumArtUrl?.trim();
     if (!artworkUrl) {
-      const params = new URLSearchParams({ title: now?.title ?? "Current record", artist: now?.artist ?? "Mr Rassy Radio" });
+      const params = new URLSearchParams({
+        title: now?.title ?? "Current record",
+        artist: now?.artist ?? "Mr Rassy Radio",
+      });
       return new Response(null, {
         status: 302,
-        headers: { ...baseHeaders, Location: `/api/library/artwork/placeholder?${params.toString()}` },
+        headers: {
+          ...baseHeaders,
+          Location: `/api/library/artwork/placeholder?${params.toString()}`,
+        },
       });
     }
 

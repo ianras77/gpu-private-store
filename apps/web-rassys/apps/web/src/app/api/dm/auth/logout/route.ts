@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     await recordDmAuthEvent({
       userId: session.userId,
       eventType: "logout",
-      request
+      request,
     });
   }
   await clearDmToken(request);

@@ -123,6 +123,7 @@ services:
       MINECRAFT_TROUPE_STATUS_TIMEOUT_MS: ${MINECRAFT_TROUPE_STATUS_TIMEOUT_MS:-2500}
       MINECRAFT_TROUPE_BOT_NAMES: ${MINECRAFT_TROUPE_BOT_NAMES:-}
       BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/web-rassys}
+      LEARNING_STORAGE_PATH: ${LEARNING_STORAGE_PATH:-/media/learning}
       RASSY_REPORTS_ROOT: /reports
     depends_on:
       redis:
@@ -143,6 +144,8 @@ services:
     volumes:
       # Authored thoughts intentionally live in the Runtipi media data area.
       - ${ROOT_FOLDER_HOST:-.}/media/data/web-rassys:${BLOG_STORAGE_PATH:-/media/web-rassys}
+      # Learning modules are content-only files and stay read-only in the app container.
+      - ${HOST_LEARNING_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/learning}:${LEARNING_STORAGE_PATH:-/media/learning}:ro
       - ${APP_DATA_DIR}/app-data/web-rassys/reports:/reports:ro
     restart: unless-stopped
     healthcheck:
@@ -218,10 +221,11 @@ services:
       RADIO_TRACK_COOLDOWN_DAYS: ${RADIO_TRACK_COOLDOWN_DAYS:-7}
       RADIO_ARTIST_COOLDOWN_TRACKS: ${RADIO_ARTIST_COOLDOWN_TRACKS:-10}
       RADIO_QUEUE_TARGET: ${RADIO_QUEUE_TARGET:-6}
-      RADIO_LOCKED_QUEUE_TRACKS: "7"
-      RADIO_SET_TARGET_SIZE: "7"
-      RADIO_SET_MIN_SIZE: "7"
-      RADIO_DECISION_BATCH_SIZE: "7"
+      # One LLM-authored emotional round; the controller executes it between listener requests.
+      RADIO_LOCKED_QUEUE_TRACKS: "11"
+      RADIO_SET_TARGET_SIZE: "11"
+      RADIO_SET_MIN_SIZE: "11"
+      RADIO_DECISION_BATCH_SIZE: "11"
       RADIO_TRANSITIONS_ENABLED: ${RADIO_TRANSITIONS_ENABLED:-true}
       RADIO_TRANSITION_MIN_SONGS: ${RADIO_TRANSITION_MIN_SONGS:-2}
       RADIO_TRANSITION_MAX_SONGS: ${RADIO_TRANSITION_MAX_SONGS:-5}

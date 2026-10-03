@@ -87,7 +87,9 @@ export function SignalOverviewPanel() {
     llmActive && status?.llmDirector?.driving !== false
       ? "LLM in the booth"
       : "Hand-guided booth";
-  const noteHref = latestNote?.id ? `/radio/notes#${latestNote.id}` : "/radio/notes";
+  const noteHref = latestNote?.id
+    ? `/radio/notes#${latestNote.id}`
+    : "/radio/notes";
   const hearingTime =
     typeof hears?.at === "number"
       ? formatTimeAgo(new Date(hears.at).toISOString())
@@ -142,11 +144,11 @@ export function SignalOverviewPanel() {
               <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">
                 On air now
               </div>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-2 text-[10px] uppercase tracking-[0.22em] text-cloud/68">
-                  <span className="glow-dot h-2 w-2 rounded-full" />
-                  {formatRadioMood(status?.mood)}
-                </span>
-              </div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-2 text-[10px] uppercase tracking-[0.22em] text-cloud/68">
+                <span className="glow-dot h-2 w-2 rounded-full" />
+                {formatRadioMood(status?.mood)}
+              </span>
+            </div>
             <div className="mt-4 flex items-start gap-4">
               <div className="rave-chip flex h-12 w-12 items-center justify-center rounded-2xl text-glow">
                 <Radio size={20} />
@@ -170,7 +172,9 @@ export function SignalOverviewPanel() {
                   </Button>
                   <p className="text-xs leading-6 text-cloud/62">{playHint}</p>
                   {streamError && (
-                    <p className="text-xs leading-6 text-comet">{streamError}</p>
+                    <p className="text-xs leading-6 text-comet">
+                      {streamError}
+                    </p>
                   )}
                 </div>
               </div>

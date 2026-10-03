@@ -39,12 +39,12 @@ let seedDone = false;
 
 const gammaWorldDataPathCandidates = [
   path.resolve(process.cwd(), "apps/web/data/gamma-world-5.json"),
-  path.resolve(process.cwd(), "data/gamma-world-5.json")
+  path.resolve(process.cwd(), "data/gamma-world-5.json"),
 ];
 
 const dmLibrarySummaryPathCandidates = [
   path.resolve(process.cwd(), "apps/web/src/data/dm-library-summary.json"),
-  path.resolve(process.cwd(), "src/data/dm-library-summary.json")
+  path.resolve(process.cwd(), "src/data/dm-library-summary.json"),
 ];
 
 const slugify = (value: string) =>
@@ -61,29 +61,39 @@ const excerpt = (value: string, limit: number) => {
   return `${cleaned.slice(0, Math.max(0, limit - 1)).trimEnd()}…`;
 };
 
-const textFromUnknown = (value: unknown) => (typeof value === "string" ? value : "");
+const textFromUnknown = (value: unknown) =>
+  typeof value === "string" ? value : "";
 
 const recordFromUnknown = (value: unknown) =>
-  value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 
 const toNumberMap = (value: unknown) =>
   Object.fromEntries(
     Object.entries(recordFromUnknown(value)).filter(
-      (entry): entry is [string, number] => typeof entry[1] === "number" && Number.isFinite(entry[1])
-    )
+      (entry): entry is [string, number] =>
+        typeof entry[1] === "number" && Number.isFinite(entry[1]),
+    ),
   );
 
 const toStringArray = (value: unknown) =>
-  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+  Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
 
 const idFrom = (prefix: string, value: string) => {
-  const digest = crypto.createHash("sha256").update(value).digest("hex").slice(0, 24);
+  const digest = crypto
+    .createHash("sha256")
+    .update(value)
+    .digest("hex")
+    .slice(0, 24);
   return `${prefix}_${digest}`;
 };
 
 export const shouldRefreshGammaCompendium = ({
   existingCount,
-  expectedCount
+  expectedCount,
 }: {
   existingCount: number;
   expectedCount: number;
@@ -97,15 +107,19 @@ const categoryToEntryType: Record<string, string> = {
   powers: "power",
   drawbacks: "drawback",
   sections: "lore",
-  tables: "table"
+  tables: "table",
 };
 
-const nameFromEntry = (category: string, entry: Record<string, unknown>, index: number) => {
+const nameFromEntry = (
+  category: string,
+  entry: Record<string, unknown>,
+  index: number,
+) => {
   const possible = [
     textFromUnknown(entry.name),
     textFromUnknown(entry.title),
     excerpt(textFromUnknown(entry.text), 90),
-    excerpt(textFromUnknown(entry.raw), 90)
+    excerpt(textFromUnknown(entry.raw), 90),
   ].find((value) => value.trim().length > 0);
   return possible ? possible.trim() : `${category}-${index + 1}`;
 };
@@ -115,7 +129,7 @@ const summaryFromEntry = (entry: Record<string, unknown>) => {
     textFromUnknown(entry.description),
     textFromUnknown(entry.details),
     textFromUnknown(entry.text),
-    textFromUnknown(entry.raw)
+    textFromUnknown(entry.raw),
   ];
   const selected = candidates.find((value) => value.trim().length > 0) ?? "";
   return excerpt(selected, 420);
@@ -126,7 +140,7 @@ const rulesTextFromEntry = (entry: Record<string, unknown>) => {
     textFromUnknown(entry.text),
     textFromUnknown(entry.description),
     textFromUnknown(entry.details),
-    textFromUnknown(entry.raw)
+    textFromUnknown(entry.raw),
   ]
     .map((value) => value.trim())
     .filter((value) => value.length > 0);
@@ -142,7 +156,7 @@ const tagsFromEntry = (category: string, entry: Record<string, unknown>) => {
 const pushCatalogEntries = (
   items: SeedCompendiumEntry[],
   category: string,
-  entries: Array<Record<string, unknown>>
+  entries: Array<Record<string, unknown>>,
 ) => {
   const entryType = categoryToEntryType[category] ?? "reference";
   entries.forEach((entry, index) => {
@@ -156,7 +170,7 @@ const pushCatalogEntries = (
       summary: summaryFromEntry(entry),
       rulesText: rulesTextFromEntry(entry),
       tags: tagsFromEntry(category, entry),
-      data: entry
+      data: entry,
     });
   });
 };
@@ -166,7 +180,12 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
     name: string;
     playerType: string;
     summary: string;
-    attributes: Array<{ key: string; valueNumber?: number; valueText?: string; source?: string }>;
+    attributes: Array<{
+      key: string;
+      valueNumber?: number;
+      valueText?: string;
+      source?: string;
+    }>;
     actions: Array<{
       key: string;
       name: string;
@@ -185,7 +204,7 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
       attributes: [
         { key: "awareness", valueNumber: 12, source: "template" },
         { key: "agility", valueNumber: 13, source: "template" },
-        { key: "tech", valueNumber: 9, source: "template" }
+        { key: "tech", valueNumber: 9, source: "template" },
       ],
       actions: [
         {
@@ -195,7 +214,7 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
           actionType: "utility",
           usesCurrent: 2,
           usesMax: 2,
-          cooldownTurns: 0
+          cooldownTurns: 0,
         },
         {
           key: "shadow_step",
@@ -204,10 +223,10 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
           actionType: "combat",
           usesCurrent: 1,
           usesMax: 1,
-          cooldownTurns: 2
-        }
+          cooldownTurns: 2,
+        },
       ],
-      specialTraits: ["Pathfinder", "Low-Light Vision"]
+      specialTraits: ["Pathfinder", "Low-Light Vision"],
     },
     {
       name: "Mutant Adept",
@@ -216,7 +235,7 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
       attributes: [
         { key: "willpower", valueNumber: 13, source: "template" },
         { key: "mutation_control", valueNumber: 12, source: "template" },
-        { key: "endurance", valueNumber: 8, source: "template" }
+        { key: "endurance", valueNumber: 8, source: "template" },
       ],
       actions: [
         {
@@ -225,7 +244,7 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
           description: "Project focused psychic disruption.",
           actionType: "special",
           usesCurrent: 2,
-          usesMax: 2
+          usesMax: 2,
         },
         {
           key: "rad_shift",
@@ -234,10 +253,10 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
           actionType: "utility",
           usesCurrent: 1,
           usesMax: 1,
-          cooldownTurns: 3
-        }
+          cooldownTurns: 3,
+        },
       ],
-      specialTraits: ["Mutation Affinity", "Psychic Echo"]
+      specialTraits: ["Mutation Affinity", "Psychic Echo"],
     },
     {
       name: "Scrapper",
@@ -246,16 +265,17 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
       attributes: [
         { key: "engineering", valueNumber: 13, source: "template" },
         { key: "salvage", valueNumber: 12, source: "template" },
-        { key: "grit", valueNumber: 10, source: "template" }
+        { key: "grit", valueNumber: 10, source: "template" },
       ],
       actions: [
         {
           key: "jury_rig",
           name: "Jury Rig",
-          description: "Temporarily repair broken gear or environmental machinery.",
+          description:
+            "Temporarily repair broken gear or environmental machinery.",
           actionType: "utility",
           usesCurrent: 2,
-          usesMax: 2
+          usesMax: 2,
         },
         {
           key: "field_patch",
@@ -263,19 +283,20 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
           description: "Restore a small amount of HP to an ally.",
           actionType: "support",
           usesCurrent: 2,
-          usesMax: 2
-        }
+          usesMax: 2,
+        },
       ],
-      specialTraits: ["Improviser", "Salvage Sense"]
+      specialTraits: ["Improviser", "Salvage Sense"],
     },
     {
       name: "Beast Rider",
       playerType: "Vanguard",
-      summary: "Mounted shock specialist with rapid entry and disengage options.",
+      summary:
+        "Mounted shock specialist with rapid entry and disengage options.",
       attributes: [
         { key: "presence", valueNumber: 11, source: "template" },
         { key: "athletics", valueNumber: 12, source: "template" },
-        { key: "bond", valueNumber: 13, source: "template" }
+        { key: "bond", valueNumber: 13, source: "template" },
       ],
       actions: [
         {
@@ -285,7 +306,7 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
           actionType: "combat",
           usesCurrent: 1,
           usesMax: 1,
-          cooldownTurns: 2
+          cooldownTurns: 2,
         },
         {
           key: "beast_guard",
@@ -294,11 +315,11 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
           actionType: "defense",
           usesCurrent: 1,
           usesMax: 1,
-          cooldownTurns: 2
-        }
+          cooldownTurns: 2,
+        },
       ],
-      specialTraits: ["Companion Link", "Mounted Mobility"]
-    }
+      specialTraits: ["Companion Link", "Mounted Mobility"],
+    },
   ];
 
   return templates.map((template, index) => ({
@@ -309,7 +330,7 @@ const gammaTemplateEntries = (): SeedCompendiumEntry[] => {
     summary: template.summary,
     rulesText: template.summary,
     tags: ["template", "archetype", "character_creation"],
-    data: template as Record<string, unknown>
+    data: template as Record<string, unknown>,
   }));
 };
 
@@ -339,20 +360,26 @@ const loadDmLibrarySummary = async (): Promise<DmLibrarySummaryFile | null> => {
   return null;
 };
 
-const parseDmLibrarySystems = (data: DmLibrarySummaryFile | null): DmLibrarySummarySystem[] => {
+const parseDmLibrarySystems = (
+  data: DmLibrarySummaryFile | null,
+): DmLibrarySummarySystem[] => {
   if (!data || !Array.isArray(data.systems)) return [];
 
   return data.systems
-    .filter((entry): entry is Record<string, unknown> => typeof entry === "object" && entry !== null)
+    .filter(
+      (entry): entry is Record<string, unknown> =>
+        typeof entry === "object" && entry !== null,
+    )
     .map((entry) => ({
       id: textFromUnknown(entry.id).trim(),
       name: textFromUnknown(entry.name).trim(),
       manualCount:
-        typeof entry.manualCount === "number" && Number.isFinite(entry.manualCount)
+        typeof entry.manualCount === "number" &&
+        Number.isFinite(entry.manualCount)
           ? Math.max(0, Math.round(entry.manualCount))
           : 0,
       categories: toNumberMap(entry.categories),
-      sampleTitles: toStringArray(entry.sampleTitles).slice(0, 6)
+      sampleTitles: toStringArray(entry.sampleTitles).slice(0, 6),
     }))
     .filter((entry) => entry.id.length > 0 && entry.name.length > 0);
 };
@@ -367,14 +394,24 @@ const buildSystemRulesPrimer = (displayName: string) =>
 
 const buildGammaCompendiumRows = (data: GammaFile): SeedCompendiumEntry[] => {
   const rows: SeedCompendiumEntry[] = [];
-  const topLevelCategories = ["weapons", "events", "characters", "mutations", "powers", "drawbacks"] as const;
+  const topLevelCategories = [
+    "weapons",
+    "events",
+    "characters",
+    "mutations",
+    "powers",
+    "drawbacks",
+  ] as const;
 
   for (const category of topLevelCategories) {
     const bucket = data[category];
     const entries =
-      bucket && typeof bucket === "object" && Array.isArray((bucket as { entries?: unknown }).entries)
+      bucket &&
+      typeof bucket === "object" &&
+      Array.isArray((bucket as { entries?: unknown }).entries)
         ? ((bucket as { entries: unknown[] }).entries.filter(
-            (entry): entry is Record<string, unknown> => typeof entry === "object" && entry !== null
+            (entry): entry is Record<string, unknown> =>
+              typeof entry === "object" && entry !== null,
           ) as Array<Record<string, unknown>>)
         : [];
     pushCatalogEntries(rows, category, entries);
@@ -382,14 +419,16 @@ const buildGammaCompendiumRows = (data: GammaFile): SeedCompendiumEntry[] => {
 
   const sectionEntries = Array.isArray(data.sections)
     ? data.sections.filter(
-        (entry): entry is Record<string, unknown> => typeof entry === "object" && entry !== null
+        (entry): entry is Record<string, unknown> =>
+          typeof entry === "object" && entry !== null,
       )
     : [];
   pushCatalogEntries(rows, "sections", sectionEntries);
 
   const tableEntries = Array.isArray(data.tables)
     ? data.tables.filter(
-        (entry): entry is Record<string, unknown> => typeof entry === "object" && entry !== null
+        (entry): entry is Record<string, unknown> =>
+          typeof entry === "object" && entry !== null,
       )
     : [];
   pushCatalogEntries(rows, "tables", tableEntries);
@@ -416,7 +455,7 @@ export const seedDmReferenceData = async (client: PoolClient) => {
        display_name = EXCLUDED.display_name,
        description = EXCLUDED.description,
        rules_primer = EXCLUDED.rules_primer,
-       updated_at = now()`
+       updated_at = now()`,
   );
 
   await client.query(
@@ -434,7 +473,7 @@ export const seedDmReferenceData = async (client: PoolClient) => {
        display_name = EXCLUDED.display_name,
        description = EXCLUDED.description,
        rules_primer = EXCLUDED.rules_primer,
-       updated_at = now()`
+       updated_at = now()`,
   );
 
   const dmLibrarySystems = parseDmLibrarySystems(await loadDmLibrarySummary());
@@ -464,9 +503,9 @@ export const seedDmReferenceData = async (client: PoolClient) => {
           manualCount: system.manualCount,
           categories: system.categories,
           sampleTitles: system.sampleTitles,
-          source: "dm-library-summary"
-        })
-      ]
+          source: "dm-library-summary",
+        }),
+      ],
     );
   }
 
@@ -498,19 +537,23 @@ export const seedDmReferenceData = async (client: PoolClient) => {
        title = EXCLUDED.title,
        source_uri = EXCLUDED.source_uri,
        version_label = EXCLUDED.version_label,
-       updated_at = now()`
+       updated_at = now()`,
   );
 
   const parsed = await loadGammaWorldData();
-  const rows = parsed ? buildGammaCompendiumRows(parsed) : gammaTemplateEntries();
+  const rows = parsed
+    ? buildGammaCompendiumRows(parsed)
+    : gammaTemplateEntries();
   const existing = await client.query<{ count: number }>(
     `SELECT count(*)::int as count
      FROM dm_compendium_entries
-     WHERE system_id = 'gamma-world'`
+     WHERE system_id = 'gamma-world'`,
   );
   const existingCount = Number(existing.rows[0]?.count ?? 0);
 
-  if (!shouldRefreshGammaCompendium({ existingCount, expectedCount: rows.length })) {
+  if (
+    !shouldRefreshGammaCompendium({ existingCount, expectedCount: rows.length })
+  ) {
     seedDone = true;
     return;
   }
@@ -556,8 +599,8 @@ export const seedDmReferenceData = async (client: PoolClient) => {
         row.summary,
         row.rulesText,
         JSON.stringify(row.tags),
-        JSON.stringify(row.data)
-      ]
+        JSON.stringify(row.data),
+      ],
     );
   }
 

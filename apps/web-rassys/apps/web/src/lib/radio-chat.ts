@@ -1,9 +1,5 @@
-
 export type RadioChatRecommendationStatus =
-  | "accepted"
-  | "rejected"
-  | "considering"
-  | "none";
+  "accepted" | "rejected" | "considering" | "none";
 
 export type RadioChatMessage = {
   id: string;
@@ -20,7 +16,10 @@ export type RadioChatMessage = {
 };
 
 export const createRadioChatRequestId = () => {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return `chat-${Date.now()}-${Math.round(Math.random() * 1_000_000)}`;
@@ -43,7 +42,8 @@ export const isRapidDuplicateRadioChatSubmission = (
   }
 
   const createdAt =
-    typeof lastMessage.createdAt === "number" && Number.isFinite(lastMessage.createdAt)
+    typeof lastMessage.createdAt === "number" &&
+    Number.isFinite(lastMessage.createdAt)
       ? lastMessage.createdAt
       : 0;
   if (!createdAt) return false;
@@ -55,7 +55,9 @@ export const ensureRadioChatClientId = () => {
   return "visitor-bound";
 };
 
-export const normalizeRadioChatMessages = <T extends { id?: string; createdAt?: number }>(
+export const normalizeRadioChatMessages = <
+  T extends { id?: string; createdAt?: number },
+>(
   messages: T[],
 ) => {
   const seen = new Map<string, T>();
@@ -86,4 +88,5 @@ export const normalizeRadioChatMessages = <T extends { id?: string; createdAt?: 
   });
 };
 
-export const buildRadioChatUrl = (_clientId?: string | null) => "/api/radio/chat";
+export const buildRadioChatUrl = (_clientId?: string | null) =>
+  "/api/radio/chat";

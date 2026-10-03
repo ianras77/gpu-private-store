@@ -115,14 +115,17 @@ export async function GET(request: Request) {
   const quality = qualityParam === "lossless" ? "lossless" : "mp3";
   const streamUrl = await buildPublicStreamUrl(request, quality);
   const artworkUrl = await buildPublicArtworkUrl(request);
-  const qualityLabel = quality === "lossless" ? "Lossless / HD" : "MP3 / Standard";
+  const qualityLabel =
+    quality === "lossless" ? "Lossless / HD" : "MP3 / Standard";
   const channelName = `${stationName} · ${qualityLabel}`;
 
   let trackLabel = stationName;
   try {
-    const now = await fetchRadio<{ title?: string; artist?: string; album?: string }>(
-      "/public/now",
-    );
+    const now = await fetchRadio<{
+      title?: string;
+      artist?: string;
+      album?: string;
+    }>("/public/now");
     const title = now?.title?.trim();
     const artist = now?.artist?.trim();
     const album = now?.album?.trim();
@@ -191,11 +194,11 @@ export async function GET(request: Request) {
   ].join("\n");
 
   return new Response(body, {
-      headers: {
-        "Content-Type": "audio/x-mpegurl; charset=utf-8",
-        "Content-Disposition": `inline; filename="mr-rassy-live-radio-${quality}.m3u"`,
-        "Cache-Control": "public, max-age=300",
-        "X-Robots-Tag": "noindex",
-      },
+    headers: {
+      "Content-Type": "audio/x-mpegurl; charset=utf-8",
+      "Content-Disposition": `inline; filename="mr-rassy-live-radio-${quality}.m3u"`,
+      "Cache-Control": "public, max-age=300",
+      "X-Robots-Tag": "noindex",
+    },
   });
 }

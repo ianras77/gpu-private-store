@@ -8,7 +8,11 @@ export function RadioAtmosphere() {
   const key = displayNow?.id ?? displayNow?.title ?? "empty-air";
 
   return (
-    <div className={`radio-atmosphere radio-atmosphere-${state}`} data-track-key={key} aria-hidden="true">
+    <div
+      className={`radio-atmosphere radio-atmosphere-${state}`}
+      data-track-key={key}
+      aria-hidden="true"
+    >
       <div className="radio-atmosphere-orbit" />
       <div className="radio-atmosphere-sheen" />
     </div>

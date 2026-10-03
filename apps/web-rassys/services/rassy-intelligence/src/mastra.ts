@@ -31,6 +31,12 @@ export const agents = {
     model: rassyModel(process.env.RASSYMIND_LISTENER_MODEL ?? "rassy-fast"),
     ...(conversationalMemory ? { memory: conversationalMemory } : {}),
   }),
+  "radio-dj": new Agent({
+    id: "radio-dj",
+    name: "Mr Rassy Radio DJ",
+    instructions: `${constitution}\nYou are the programming and on-air decision agent for Mr Rassy Radio. Use only supplied catalogue, queue, listener, and station facts. Suggest or script bounded decisions; never claim that playback, queue, or listener state changed. When given a required JSON schema, return one valid JSON object only, without markdown or commentary.`,
+    model: rassyModel(process.env.RASSYMIND_LISTENER_MODEL ?? "rassy-fast"),
+  }),
   "dungeon-master": new Agent({
     id: "dungeon-master",
     name: "Dungeon Master",

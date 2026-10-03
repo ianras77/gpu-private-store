@@ -24,13 +24,13 @@ export async function GET(request: Request) {
     const payload = await fetchListeningRoom({
       ...(q ? { q } : {}),
       ...(Number.isFinite(limit) ? { limit } : {}),
-      ...(Number.isFinite(offset) ? { offset } : {})
+      ...(Number.isFinite(offset) ? { offset } : {}),
     });
 
     return NextResponse.json(payload, {
       headers: {
-        "Cache-Control": "no-store"
-      }
+        "Cache-Control": "no-store",
+      },
     });
   } catch {
     return NextResponse.json({ error: "library_unavailable" }, { status: 502 });

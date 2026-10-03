@@ -31,7 +31,7 @@ const responseHeaderAllowlist = [
   "icy-metaint",
   "icy-name",
   "icy-pub",
-  "icy-url"
+  "icy-url",
 ];
 
 const copyHeaders = (source: Headers, target: Headers, names: string[]) => {
@@ -45,7 +45,11 @@ const copyHeaders = (source: Headers, target: Headers, names: string[]) => {
 const resolveUpstreamStreamUrl = (request: Request) => {
   const url = new URL(request.url);
   const quality = url.searchParams.get("quality")?.toLowerCase();
-  return quality === "hires" ? hiresUpstreamStreamUrl : quality === "lossless" ? losslessUpstreamStreamUrl : mp3UpstreamStreamUrl;
+  return quality === "hires"
+    ? hiresUpstreamStreamUrl
+    : quality === "lossless"
+      ? losslessUpstreamStreamUrl
+      : mp3UpstreamStreamUrl;
 };
 
 const proxyStream = async (request: Request, method: "GET" | "HEAD") => {
@@ -55,9 +59,10 @@ const proxyStream = async (request: Request, method: "GET" | "HEAD") => {
   const quality =
     new URL(request.url).searchParams.get("quality")?.toLowerCase() === "hires"
       ? "hires"
-      : new URL(request.url).searchParams.get("quality")?.toLowerCase() === "lossless"
-      ? "lossless"
-      : "mp3";
+      : new URL(request.url).searchParams.get("quality")?.toLowerCase() ===
+          "lossless"
+        ? "lossless"
+        : "mp3";
 
   const timeoutMs = Number(process.env.STREAM_PROXY_TIMEOUT_MS ?? 10000);
   const controller = new AbortController();
@@ -81,7 +86,7 @@ const proxyStream = async (request: Request, method: "GET" | "HEAD") => {
       headers: upstreamHeaders,
       cache: "no-store",
       redirect: "follow",
-      signal: controller.signal
+      signal: controller.signal,
     });
     disarmTimeout();
 
@@ -95,7 +100,7 @@ const proxyStream = async (request: Request, method: "GET" | "HEAD") => {
         headers: fallbackHeaders,
         cache: "no-store",
         redirect: "follow",
-        signal: controller.signal
+        signal: controller.signal,
       });
       disarmTimeout();
     }
@@ -112,13 +117,13 @@ const proxyStream = async (request: Request, method: "GET" | "HEAD") => {
       upstreamResponse.body?.cancel();
       return new Response(null, {
         status: upstreamResponse.status,
-        headers
+        headers,
       });
     }
 
     return new Response(upstreamResponse.body, {
       status: upstreamResponse.status,
-      headers
+      headers,
     });
   } catch {
     return new Response("stream_unavailable", {
@@ -126,8 +131,8 @@ const proxyStream = async (request: Request, method: "GET" | "HEAD") => {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-store",
-        "Access-Control-Allow-Origin": "*"
-      }
+        "Access-Control-Allow-Origin": "*",
+      },
     });
   } finally {
     disarmTimeout();

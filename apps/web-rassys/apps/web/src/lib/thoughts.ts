@@ -94,7 +94,13 @@ const supportedUploadExtensions = new Set([
 ]);
 const supportedAssetExtensions = new Set([
   ...thoughtAssetExtensions,
-  ".txt", ".md", ".markdown", ".json", ".csv", ".doc", ".docx",
+  ".txt",
+  ".md",
+  ".markdown",
+  ".json",
+  ".csv",
+  ".doc",
+  ".docx",
 ]);
 
 const ensureStorage = async () => {
@@ -232,7 +238,10 @@ const parseFrontMatter = (source: string) => {
 
   return {
     data: data as ThoughtFrontMatter,
-    content: lines.slice(index + 1).join("\n").trim(),
+    content: lines
+      .slice(index + 1)
+      .join("\n")
+      .trim(),
   };
 };
 
@@ -386,7 +395,11 @@ const readMarkdownThought = async (relativePath: string) => {
     ]);
     const { data, content } = parseFrontMatter(raw);
     const baseName = path.basename(normalizedPath).replace(/\.[^.]+$/, "");
-    const createdAt = resolveCreatedAt(path.basename(normalizedPath), data, stat);
+    const createdAt = resolveCreatedAt(
+      path.basename(normalizedPath),
+      data,
+      stat,
+    );
     const updatedAt = resolveUpdatedAt(createdAt, data, stat);
 
     return {
@@ -490,7 +503,11 @@ const assetKind = (file: File): ThoughtAsset["kind"] => {
   if (file.type.startsWith("image/")) return "image";
   if (file.type.startsWith("audio/")) return "audio";
   if (file.type.startsWith("video/")) return "video";
-  if (file.type === "application/pdf" || /document|word|text|json|csv|markdown/.test(file.type)) return "document";
+  if (
+    file.type === "application/pdf" ||
+    /document|word|text|json|csv|markdown/.test(file.type)
+  )
+    return "document";
   return "file";
 };
 
@@ -498,12 +515,23 @@ export const saveThoughtAssets = async (files: File[], title?: string) => {
   await ensureStorage();
   const assets: ThoughtAsset[] = [];
   for (const [index, file] of files.entries()) {
-    if (!isSupportedThoughtAssetFile(file)) throw new Error(`Unsupported asset type for ${file.name || `asset-${index + 1}`}`);
+    if (!isSupportedThoughtAssetFile(file))
+      throw new Error(
+        `Unsupported asset type for ${file.name || `asset-${index + 1}`}`,
+      );
     const base = sanitizeAssetBaseName(file.name || title || "thought-asset");
     const ext = path.extname(file.name || "").toLowerCase();
     const filename = `${base}-${randomUUID().slice(0, 8)}${ext}`;
-    await fs.writeFile(path.join(mediaPath, filename), Buffer.from(await file.arrayBuffer()));
-    assets.push({ src: `/api/thoughts/assets/${filename}`, name: file.name || filename, type: file.type || "application/octet-stream", kind: assetKind(file) });
+    await fs.writeFile(
+      path.join(mediaPath, filename),
+      Buffer.from(await file.arrayBuffer()),
+    );
+    assets.push({
+      src: `/api/thoughts/assets/${filename}`,
+      name: file.name || filename,
+      type: file.type || "application/octet-stream",
+      kind: assetKind(file),
+    });
   }
   return assets;
 };

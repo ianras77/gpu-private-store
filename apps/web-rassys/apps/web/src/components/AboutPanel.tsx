@@ -85,9 +85,7 @@ export function AboutPanel() {
               <span className="rave-chip rounded-full px-3 py-2">
                 Family shelf
               </span>
-              <span className="rave-chip rounded-full px-3 py-2">
-                Notebook
-              </span>
+              <span className="rave-chip rounded-full px-3 py-2">Notebook</span>
             </div>
             <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
               <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/52">

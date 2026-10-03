@@ -4,7 +4,7 @@ import { serverConfig } from "./server-config";
 const redis = new Redis(serverConfig.REDIS_URL, {
   maxRetriesPerRequest: 2,
   lazyConnect: true,
-  enableOfflineQueue: false
+  enableOfflineQueue: false,
 });
 
 redis.on("error", () => {
@@ -28,7 +28,7 @@ const memoryRateLimit = (key: string, limit: number, windowSeconds: number) => {
     return {
       allowed: true,
       remaining: Math.max(0, limit - 1),
-      source: "memory"
+      source: "memory",
     };
   }
 
@@ -37,11 +37,15 @@ const memoryRateLimit = (key: string, limit: number, windowSeconds: number) => {
   return {
     allowed: existing.count <= limit,
     remaining: Math.max(0, limit - existing.count),
-    source: "memory"
+    source: "memory",
   };
 };
 
-export const rateLimit = async (key: string, limit: number, windowSeconds: number) => {
+export const rateLimit = async (
+  key: string,
+  limit: number,
+  windowSeconds: number,
+) => {
   try {
     const count = await redis.incr(key);
     if (count === 1) {
@@ -50,7 +54,7 @@ export const rateLimit = async (key: string, limit: number, windowSeconds: numbe
     return {
       allowed: count <= limit,
       remaining: Math.max(0, limit - count),
-      source: "redis"
+      source: "redis",
     };
   } catch {
     return memoryRateLimit(key, limit, windowSeconds);

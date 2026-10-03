@@ -6,7 +6,9 @@ const cookieName = "rassy_admin";
 
 const secretValue = serverConfig.ADMIN_JWT_SECRET.trim();
 const secret = secretValue ? new TextEncoder().encode(secretValue) : null;
-const shouldUseSecureCookies = (process.env.NEXT_PUBLIC_SITE_URL ?? "").startsWith("https://");
+const shouldUseSecureCookies = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? ""
+).startsWith("https://");
 
 type AdminSession = {
   username: string;
@@ -28,7 +30,7 @@ export const issueAdminToken = async (username: string) => {
     httpOnly: true,
     sameSite: "lax",
     secure: shouldUseSecureCookies,
-    path: "/"
+    path: "/",
   });
 };
 
@@ -39,7 +41,7 @@ export const clearAdminToken = async () => {
     sameSite: "lax",
     secure: shouldUseSecureCookies,
     path: "/",
-    maxAge: 0
+    maxAge: 0,
   });
 };
 
@@ -53,8 +55,11 @@ export const getAdminSession = async (): Promise<AdminSession | null> => {
     const verified = await jwtVerify(token, secret);
     return {
       username:
-        String(verified.payload.username ?? verified.payload.sub ?? serverConfig.ADMIN_USERNAME) ||
-        serverConfig.ADMIN_USERNAME
+        String(
+          verified.payload.username ??
+            verified.payload.sub ??
+            serverConfig.ADMIN_USERNAME,
+        ) || serverConfig.ADMIN_USERNAME,
     };
   } catch {
     return null;

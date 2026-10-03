@@ -63,20 +63,20 @@ export function BedtimeStoriesPanel() {
   return (
     <section id="story-shelf" className="mx-auto max-w-6xl px-6 pb-12">
       <div className="space-y-6">
-      {error ? (
-        <div className="rave-panel rounded-[24px] border border-comet/30 px-4 py-3 text-sm text-cloud/78">
-          The bedtime shelf is still catching up. If I just changed the folders,
-          give it a minute.
-        </div>
-      ) : null}
+        {error ? (
+          <div className="rave-panel rounded-[24px] border border-comet/30 px-4 py-3 text-sm text-cloud/78">
+            The bedtime shelf is still catching up. If I just changed the
+            folders, give it a minute.
+          </div>
+        ) : null}
 
-      <AudioShelfPlayer
-        eyebrow="Bedtime Stories"
-        title="Quiet chapters, kept together"
-        description="Every chapter can play here, and the ones ready for podcast apps flow into the feed too."
-        sections={sections}
-        emptyState="No bedtime stories have landed here yet. Add folders under /media/data/podcasts and they will show up on the next refresh."
-      />
+        <AudioShelfPlayer
+          eyebrow="Bedtime Stories"
+          title="Quiet chapters, kept together"
+          description="Every chapter can play here, and the ones ready for podcast apps flow into the feed too."
+          sections={sections}
+          emptyState="No bedtime stories have landed here yet. Add folders under /media/data/podcasts and they will show up on the next refresh."
+        />
       </div>
     </section>
   );

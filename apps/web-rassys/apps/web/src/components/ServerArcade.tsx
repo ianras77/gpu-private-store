@@ -8,7 +8,9 @@ export function ServerArcade() {
         <h2 className="section-title text-3xl">
           The <span className="magical-text">Server Arcade</span>
         </h2>
-        <p className="text-cloud/80">Every cabinet is a real service humming in the rack.</p>
+        <p className="text-cloud/80">
+          Every cabinet is a real service humming in the rack.
+        </p>
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         {arcadeServices.map((service) => (
@@ -24,7 +26,8 @@ export function ServerArcade() {
               className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-glow"
               href={service.href}
             >
-              Launch cabinet <span className="transition group-hover:translate-x-1">→</span>
+              Launch cabinet{" "}
+              <span className="transition group-hover:translate-x-1">→</span>
             </a>
           </Card>
         ))}

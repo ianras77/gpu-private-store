@@ -10,7 +10,7 @@ const responseHeaderAllowlist = [
   "expires",
   "pragma",
   "etag",
-  "last-modified"
+  "last-modified",
 ];
 
 const copyHeaders = (source: Headers, target: Headers, names: string[]) => {
@@ -24,7 +24,7 @@ const copyHeaders = (source: Headers, target: Headers, names: string[]) => {
 export const proxyControllerMedia = async (
   request: Request,
   upstreamPath: string,
-  options: { timeoutMs?: number; cacheControl?: string } = {}
+  options: { timeoutMs?: number; cacheControl?: string } = {},
 ) => {
   const upstreamHeaders = new Headers();
   copyHeaders(request.headers, upstreamHeaders, requestHeaderAllowlist);
@@ -42,26 +42,29 @@ export const proxyControllerMedia = async (
       headers: upstreamHeaders,
       cache: "no-store",
       redirect: "follow",
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     const headers = new Headers();
     copyHeaders(upstreamResponse.headers, headers, responseHeaderAllowlist);
     headers.set("Access-Control-Allow-Origin", "*");
     headers.set("X-Robots-Tag", "noindex");
-    headers.set("Cache-Control", options.cacheControl ?? headers.get("cache-control") ?? "no-store");
+    headers.set(
+      "Cache-Control",
+      options.cacheControl ?? headers.get("cache-control") ?? "no-store",
+    );
 
     if (request.method === "HEAD") {
       upstreamResponse.body?.cancel();
       return new Response(null, {
         status: upstreamResponse.status,
-        headers
+        headers,
       });
     }
 
     return new Response(upstreamResponse.body, {
       status: upstreamResponse.status,
-      headers
+      headers,
     });
   } catch {
     return new Response("media_unavailable", {
@@ -69,8 +72,8 @@ export const proxyControllerMedia = async (
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-store",
-        "Access-Control-Allow-Origin": "*"
-      }
+        "Access-Control-Allow-Origin": "*",
+      },
     });
   } finally {
     clearTimeout(timeoutId);

@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { fetchRadio } from "../../../../lib/radio-api";
 import { rateLimit } from "../../../../lib/rate-limit";
 import { getClientIp, getPublicBaseUrl } from "../../../../lib/request";
-import { normalizeRadioNotes, type RadioNote } from "../../../../lib/radio-notes";
+import {
+  normalizeRadioNotes,
+  type RadioNote,
+} from "../../../../lib/radio-notes";
 import { radioApiLinks } from "../../../../lib/radio-links";
 import { serverConfig } from "../../../../lib/server-config";
 import { fetchUpstreamJson } from "../../../../lib/upstream";
@@ -48,10 +51,8 @@ const toAbsoluteUrl = (baseUrl: string, path: string) => {
   return new URL(path, baseUrl).toString();
 };
 
-const settledValue = <T,>(
-  result: PromiseSettledResult<T>,
-  fallback: T,
-): T => (result.status === "fulfilled" ? result.value : fallback);
+const settledValue = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
+  result.status === "fulfilled" ? result.value : fallback;
 
 export async function GET(request: Request) {
   const ip = await getClientIp();
@@ -87,10 +88,15 @@ export async function GET(request: Request) {
     fetchRadio<{ items?: Record<string, unknown>[] }>("/public/featured"),
   ]);
 
-  const notes = normalizeRadioNotes(settledValue(notesResult, { notes: [] }).notes ?? []);
+  const notes = normalizeRadioNotes(
+    settledValue(notesResult, { notes: [] }).notes ?? [],
+  );
   const featured = settledValue(featuredResult, { items: [] }).items ?? [];
   const now = settledValue<Record<string, unknown> | null>(nowResult, null);
-  const status = settledValue<Record<string, unknown> | null>(statusResult, null);
+  const status = settledValue<Record<string, unknown> | null>(
+    statusResult,
+    null,
+  );
   const dj = settledValue<Record<string, unknown> | null>(djResult, null);
   const hears = settledValue<Record<string, unknown> | null>(hearsResult, null);
   const directMp3Stream =
@@ -101,7 +107,9 @@ export async function GET(request: Request) {
     toAbsoluteUrl(baseUrl, radioApiLinks.stream.lossless);
 
   const payload: RadioSnapshot = {
-    available: Boolean(now || status || dj || hears || notes.length || featured.length),
+    available: Boolean(
+      now || status || dj || hears || notes.length || featured.length,
+    ),
     now,
     status,
     dj,

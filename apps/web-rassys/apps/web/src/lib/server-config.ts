@@ -11,5 +11,5 @@ export const serverConfig = {
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? "",
   ADMIN_JWT_SECRET: process.env.ADMIN_JWT_SECRET ?? "",
   RADIO_ADMIN_API_KEY: process.env.RADIO_ADMIN_API_KEY ?? "",
-  REDIS_URL: process.env.REDIS_URL ?? "redis://redis:6379"
+  REDIS_URL: process.env.REDIS_URL ?? "redis://redis:6379",
 };

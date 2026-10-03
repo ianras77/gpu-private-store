@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="night" cx="32%" cy="20%" r="90%">
+      <stop offset="0" stop-color="#202b49"/>
+      <stop offset="1" stop-color="#080c16"/>
+    </radialGradient>
+    <linearGradient id="signal" x1="220" y1="420" x2="806" y2="620" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#42f5ff"/>
+      <stop offset=".52" stop-color="#ffe66d"/>
+      <stop offset="1" stop-color="#ff4fd8"/>
+    </linearGradient>
+    <radialGradient id="label" cx="30%" cy="20%" r="90%">
+      <stop stop-color="#fff2a1"/>
+      <stop offset="1" stop-color="#ffb52e"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="url(#night)"/>
+  <circle cx="512" cy="512" r="326" fill="#10182b" stroke="#ffffff" stroke-opacity=".12" stroke-width="3"/>
+  <circle cx="512" cy="512" r="278" fill="none" stroke="#42f5ff" stroke-opacity=".17" stroke-width="3"/>
+  <circle cx="512" cy="512" r="230" fill="none" stroke="#ff4fd8" stroke-opacity=".18" stroke-width="3"/>
+  <circle cx="512" cy="512" r="176" fill="#0a1020" stroke="#ffffff" stroke-opacity=".13" stroke-width="4"/>
+  <path d="M244 520h94l49-104 82 212 77-184 54 76h180" fill="none" stroke="url(#signal)" stroke-linecap="round" stroke-linejoin="round" stroke-width="30"/>
+  <circle cx="512" cy="512" r="44" fill="url(#label)" stroke="#fff8d6" stroke-opacity=".7" stroke-width="4"/>
+  <circle cx="512" cy="512" r="11" fill="#11172a"/>
+  <circle cx="512" cy="512" r="354" fill="none" stroke="#ffffff" stroke-opacity=".06" stroke-width="2"/>
+</svg>

@@ -8,7 +8,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  if (!await requireAdmin()) return NextResponse.json({ error: "unauthorized" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
+  if (!(await requireAdmin()))
+    return NextResponse.json(
+      { error: "unauthorized" },
+      { status: 401, headers: { "Cache-Control": "private, no-store" } },
+    );
   const ip = await getClientIp();
   const { allowed } = await rateLimit(`rl:photos:${ip}`, 40, 60);
   if (!allowed) {
@@ -24,13 +28,13 @@ export async function GET(request: Request) {
       sourceRaw === "immich" || sourceRaw === "local" ? sourceRaw : undefined;
     const payload = await fetchPhotoShelf({
       ...(Number.isFinite(limit) ? { limit } : {}),
-      ...(source ? { source } : {})
+      ...(source ? { source } : {}),
     });
 
     return NextResponse.json(payload ?? {}, {
       headers: {
-        "Cache-Control": "no-store"
-      }
+        "Cache-Control": "no-store",
+      },
     });
   } catch {
     return NextResponse.json({ error: "photos_unavailable" }, { status: 502 });

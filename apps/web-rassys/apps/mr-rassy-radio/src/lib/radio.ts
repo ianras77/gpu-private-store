@@ -176,6 +176,7 @@ export type PodcastShowPayload = {
 
 const DEFAULT_SITE_URL = "https://rassys.com";
 const REQUEST_TIMEOUT_MS = 12000;
+const CHAT_REQUEST_TIMEOUT_MS = 22000;
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
@@ -212,14 +213,21 @@ const readJson = async <T>(path: string): Promise<T> => {
 export const fetchRadioChat = () => readJson<RadioChatResult>("/api/radio/chat");
 
 export const sendRadioChat = async (message: string, requestId: string): Promise<RadioChatResult> => {
-  const response = await fetch(`${siteUrl}/api/radio/chat`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, requestId }),
-  });
-  if (!response.ok) throw new Error(`Chat unavailable: ${response.status}`);
-  return (await response.json()) as RadioChatResult;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CHAT_REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetch(`${siteUrl}/api/radio/chat`, {
+      method: "POST",
+      credentials: "include",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({ message, requestId }),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`Chat unavailable: ${response.status}`);
+    return (await response.json()) as RadioChatResult;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 export const fetchRadioDashboard = async (): Promise<RadioDashboard> => {

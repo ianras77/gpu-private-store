@@ -30,12 +30,15 @@ export async function GET(request: Request, context: Params) {
       systemId,
       query,
       entryTypes,
-      limit
+      limit,
     });
 
     return NextResponse.json({ items, total: items.length });
   } catch (error) {
     console.error("dm_compendium_lookup_failed", error);
-    return NextResponse.json({ items: [], total: 0, error: "compendium_lookup_failed" }, { status: 500 });
+    return NextResponse.json(
+      { items: [], total: 0, error: "compendium_lookup_failed" },
+      { status: 500 },
+    );
   }
 }

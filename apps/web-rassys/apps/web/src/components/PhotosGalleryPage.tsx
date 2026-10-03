@@ -5,7 +5,10 @@ import { motion } from "framer-motion";
 import useSWR from "swr";
 import { Camera, Clapperboard, Images, MapPin, Play, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { type PhotoItem, type PhotoShelfPayload } from "../lib/media-controller";
+import {
+  type PhotoItem,
+  type PhotoShelfPayload,
+} from "../lib/media-controller";
 import { PhotoSurface } from "./PhotoSurface";
 import { Button } from "./ui/button";
 
@@ -26,7 +29,7 @@ const formatDate = (value?: string) => {
   return parsed.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    year: "numeric"
+    year: "numeric",
   });
 };
 
@@ -52,8 +55,12 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
     <section className="mx-auto max-w-6xl px-6 pb-8">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-[10px] uppercase tracking-[0.34em] text-cloud/55">{eyebrow}</div>
-          <h2 className="mt-3 text-2xl font-semibold text-white md:text-3xl">{title}</h2>
+          <div className="text-[10px] uppercase tracking-[0.34em] text-cloud/55">
+            {eyebrow}
+          </div>
+          <h2 className="mt-3 text-2xl font-semibold text-white md:text-3xl">
+            {title}
+          </h2>
         </div>
         <div className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[10px] uppercase tracking-[0.24em] text-cloud/62">
           {items.length} items
@@ -72,14 +79,21 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: 0.45,
-                delay: Math.min(index * 0.04, 0.24)
+                delay: Math.min(index * 0.04, 0.24),
               }}
               className={`group overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(150deg,rgba(10,14,30,0.94),rgba(23,8,38,0.82))] shadow-[0_20px_60px_rgba(0,0,0,0.26)] ${
                 isLarge ? "md:col-span-2 xl:col-span-2" : ""
               }`}
             >
-              <button type="button" onClick={() => onSelect(item.id)} aria-label={`Open ${item.title}`} className="block w-full text-left">
-                <div className={`relative ${isLarge ? "aspect-[16/10]" : index % 3 === 0 ? "aspect-[4/5]" : "aspect-[5/6]"}`}>
+              <button
+                type="button"
+                onClick={() => onSelect(item.id)}
+                aria-label={`Open ${item.title}`}
+                className="block w-full text-left"
+              >
+                <div
+                  className={`relative ${isLarge ? "aspect-[16/10]" : index % 3 === 0 ? "aspect-[4/5]" : "aspect-[5/6]"}`}
+                >
                   {item.kind === "video" ? (
                     <>
                       <Image
@@ -87,7 +101,9 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
                         alt={item.title}
                         fill
                         sizes={
-                          isLarge ? "(max-width: 1280px) 100vw, 70vw" : "(max-width: 1280px) 100vw, 33vw"
+                          isLarge
+                            ? "(max-width: 1280px) 100vw, 70vw"
+                            : "(max-width: 1280px) 100vw, 33vw"
                         }
                         className="object-cover transition duration-700 group-hover:scale-[1.02]"
                         unoptimized
@@ -104,14 +120,20 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
                       item={item}
                       alt={item.title}
                       sizes={
-                        isLarge ? "(max-width: 1280px) 100vw, 70vw" : "(max-width: 1280px) 100vw, 33vw"
+                        isLarge
+                          ? "(max-width: 1280px) 100vw, 70vw"
+                          : "(max-width: 1280px) 100vw, 33vw"
                       }
                       className="object-cover transition duration-700 group-hover:scale-[1.02]"
                     />
                   )}
 
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-100" />
-                  {durationLabel && <div className="pointer-events-none absolute bottom-4 left-4 rounded-full border border-white/15 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-white/85">{durationLabel}</div>}
+                  {durationLabel && (
+                    <div className="pointer-events-none absolute bottom-4 left-4 rounded-full border border-white/15 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-white/85">
+                      {durationLabel}
+                    </div>
+                  )}
                 </div>
               </button>
             </motion.article>
@@ -123,16 +145,28 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
 }
 
 export function PhotosGalleryPage() {
-  const { data, error } = useSWR<PhotoShelfPayload>("/api/photos?limit=96", fetcher, {
-    refreshInterval: 30000
-  });
+  const { data, error } = useSWR<PhotoShelfPayload>(
+    "/api/photos?limit=96",
+    fetcher,
+    {
+      refreshInterval: 30000,
+    },
+  );
   const items = Array.isArray(data?.items) ? data.items : EMPTY_ITEMS;
-  const immichItems = useMemo(() => items.filter((item) => item.source === "immich"), [items]);
-  const localItems = useMemo(() => items.filter((item) => item.source === "local"), [items]);
+  const immichItems = useMemo(
+    () => items.filter((item) => item.source === "immich"),
+    [items],
+  );
+  const localItems = useMemo(
+    () => items.filter((item) => item.source === "local"),
+    [items],
+  );
   const primaryItems = immichItems.length > 0 ? immichItems : localItems;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedItem = items.find((item) => item.id === selectedId) ?? null;
-  const selectedStillExists = selectedId ? items.some((item) => item.id === selectedId) : false;
+  const selectedStillExists = selectedId
+    ? items.some((item) => item.id === selectedId)
+    : false;
 
   useEffect(() => {
     if (!selectedId) return;
@@ -162,11 +196,25 @@ export function PhotosGalleryPage() {
 
           <div className="relative flex flex-col gap-5">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.36em] text-cloud/60">The photo wall</div>
-              <h1 className="mt-3 text-4xl font-semibold text-white md:text-6xl">Around home.</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-cloud/68">A living wall of moments. Tap a frame when you want the story behind it.</p>
+              <div className="text-[10px] uppercase tracking-[0.36em] text-cloud/60">
+                The photo wall
+              </div>
+              <h1 className="mt-3 text-4xl font-semibold text-white md:text-6xl">
+                Around home.
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-cloud/68">
+                A living wall of moments. Tap a frame when you want the story
+                behind it.
+              </p>
             </div>
-            <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.22em] text-cloud/55"><span className="rave-chip rounded-full px-3 py-2">{primaryItems.length} frames in view</span><span className="rave-chip rounded-full px-3 py-2">Tap to open details</span></div>
+            <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.22em] text-cloud/55">
+              <span className="rave-chip rounded-full px-3 py-2">
+                {primaryItems.length} frames in view
+              </span>
+              <span className="rave-chip rounded-full px-3 py-2">
+                Tap to open details
+              </span>
+            </div>
           </div>
         </div>
       </section>
@@ -190,8 +238,8 @@ export function PhotosGalleryPage() {
           <PhotoSection
             title={
               immichItems.length > 0
-                ? data?.sources?.immich?.label ?? "Immich album"
-                : data?.sources?.local?.label ?? "Local library"
+                ? (data?.sources?.immich?.label ?? "Immich album")
+                : (data?.sources?.local?.label ?? "Local library")
             }
             eyebrow={immichItems.length > 0 ? "Primary library" : "Gallery"}
             items={primaryItems}
@@ -224,10 +272,16 @@ export function PhotosGalleryPage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/55">
-                  {selectedItem.collection ?? selectedItem.sourceLabel ?? selectedItem.source}
+                  {selectedItem.collection ??
+                    selectedItem.sourceLabel ??
+                    selectedItem.source}
                 </div>
-                <div className="mt-2 text-2xl font-semibold text-white">{selectedItem.title}</div>
-                <div className="mt-2 text-sm text-cloud/70">{formatDate(selectedItem.capturedAt)}</div>
+                <div className="mt-2 text-2xl font-semibold text-white">
+                  {selectedItem.title}
+                </div>
+                <div className="mt-2 text-sm text-cloud/70">
+                  {formatDate(selectedItem.capturedAt)}
+                </div>
               </div>
               <Button variant="secondary" onClick={() => setSelectedId(null)}>
                 <X size={16} />
@@ -244,7 +298,10 @@ export function PhotosGalleryPage() {
                   poster={selectedItem.posterUrl}
                   className="max-h-[72vh] w-full rounded-[20px] object-contain"
                 >
-                  <source src={selectedItem.fileUrl} type={selectedItem.mimeType} />
+                  <source
+                    src={selectedItem.fileUrl}
+                    type={selectedItem.mimeType}
+                  />
                 </video>
               ) : (
                 <div className="relative h-[72vh] w-full overflow-hidden rounded-[20px]">
@@ -261,11 +318,16 @@ export function PhotosGalleryPage() {
 
             <div className="flex flex-wrap gap-3 text-[10px] uppercase tracking-[0.22em] text-cloud/60">
               <span className="rave-chip rounded-full px-3 py-2">
-                {selectedItem.kind === "video" ? <Clapperboard size={14} /> : <Images size={14} />}
+                {selectedItem.kind === "video" ? (
+                  <Clapperboard size={14} />
+                ) : (
+                  <Images size={14} />
+                )}
                 {selectedItem.kind}
               </span>
               <span className="rave-chip rounded-full px-3 py-2">
-                {Math.max(1, Math.round(selectedItem.fileSize / 1024 / 1024))} MB
+                {Math.max(1, Math.round(selectedItem.fileSize / 1024 / 1024))}{" "}
+                MB
               </span>
               {selectedItem.location && (
                 <span className="rave-chip rounded-full px-3 py-2">

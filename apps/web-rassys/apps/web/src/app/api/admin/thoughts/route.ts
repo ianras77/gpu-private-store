@@ -30,24 +30,41 @@ const responseSchema = z.object({
 
 const callNotebookEditor = async (seed: string, title?: string) => {
   try {
-    const text = await requestRassyChannelText("notebook", JSON.stringify({
-      task: "Expand this approved admin seed into a draft notebook/blog post.",
-      seed,
-      title,
-      output: 'Return ONLY strict JSON: {"title":"...","body":"...","excerpt":"..."}.',
-    }), {
-      requestId: `admin-notebook-${Date.now()}`,
-      channelId: "notebook",
-      viewer: { kind: "admin", id: "admin", roles: ["admin"] },
-      permissions: ["admin", "notebook:write"],
-      locale: "en",
-      timeZone: "UTC",
-      modelPolicy: { allowedAliases: ["rassy-mind"], maxCalls: 1, deadlineMs: 35000, priority: "interactive" },
-    });
-    const clean = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+    const text = await requestRassyChannelText(
+      "notebook",
+      JSON.stringify({
+        task: "Expand this approved admin seed into a draft notebook/blog post.",
+        seed,
+        title,
+        output:
+          'Return ONLY strict JSON: {"title":"...","body":"...","excerpt":"..."}.',
+      }),
+      {
+        requestId: `admin-notebook-${Date.now()}`,
+        channelId: "notebook",
+        viewer: { kind: "admin", id: "admin", roles: ["admin"] },
+        permissions: ["admin", "notebook:write"],
+        locale: "en",
+        timeZone: "UTC",
+        modelPolicy: {
+          allowedAliases: ["rassy-mind"],
+          maxCalls: 1,
+          deadlineMs: 35000,
+          priority: "interactive",
+        },
+      },
+    );
+    const clean = text
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
     const start = clean.indexOf("{");
     const end = clean.lastIndexOf("}");
-    return responseSchema.parse(JSON.parse(start >= 0 && end > start ? clean.slice(start, end + 1) : clean));
+    return responseSchema.parse(
+      JSON.parse(
+        start >= 0 && end > start ? clean.slice(start, end + 1) : clean,
+      ),
+    );
   } catch {
     return null;
   }
@@ -88,7 +105,11 @@ const parseRequestBody = async (request: Request) => {
         (value): value is File => value instanceof File && value.size > 0,
       );
 
-    const assets = form.getAll("assets").filter((value): value is File => value instanceof File && value.size > 0);
+    const assets = form
+      .getAll("assets")
+      .filter(
+        (value): value is File => value instanceof File && value.size > 0,
+      );
 
     return { parsed, files, assets };
   }
@@ -98,7 +119,11 @@ const parseRequestBody = async (request: Request) => {
     return { parsed: null, files: [] as File[], assets: [] as File[] };
   }
 
-  return { parsed: bodySchema.safeParse(body), files: [] as File[], assets: [] as File[] };
+  return {
+    parsed: bodySchema.safeParse(body),
+    files: [] as File[],
+    assets: [] as File[],
+  };
 };
 
 export async function POST(request: Request) {
@@ -123,7 +148,13 @@ export async function POST(request: Request) {
   if (files.some((file) => !isSupportedThoughtImageFile(file))) {
     return NextResponse.json({ error: "invalid_image" }, { status: 400 });
   }
-  if (assets.length > 16 || assets.some((file) => file.size > 32 * 1024 * 1024 || !isSupportedThoughtAssetFile(file))) {
+  if (
+    assets.length > 16 ||
+    assets.some(
+      (file) =>
+        file.size > 32 * 1024 * 1024 || !isSupportedThoughtAssetFile(file),
+    )
+  ) {
     return NextResponse.json({ error: "invalid_asset" }, { status: 400 });
   }
 
@@ -163,9 +194,19 @@ export async function POST(request: Request) {
   }
   if (assets.length) {
     try {
-      linkedAssets = await saveThoughtAssets(assets, finalTitle ?? title ?? "Notebook post");
+      linkedAssets = await saveThoughtAssets(
+        assets,
+        finalTitle ?? title ?? "Notebook post",
+      );
     } catch (error) {
-      return NextResponse.json({ error: "asset_processing_failed", detail: error instanceof Error ? error.message : "Asset processing failed." }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "asset_processing_failed",
+          detail:
+            error instanceof Error ? error.message : "Asset processing failed.",
+        },
+        { status: 400 },
+      );
     }
   }
 

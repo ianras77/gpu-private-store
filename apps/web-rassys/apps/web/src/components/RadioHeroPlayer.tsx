@@ -41,7 +41,11 @@ const fetcher = async <T,>(url: string): Promise<T> => {
 };
 
 const formatTrackMeta = (track?: RadioTrack | null) =>
-  [track?.album, track?.year, track?.genres?.filter(Boolean).slice(0, 2).join(" / ")]
+  [
+    track?.album,
+    track?.year,
+    track?.genres?.filter(Boolean).slice(0, 2).join(" / "),
+  ]
     .filter(Boolean)
     .join(" · ");
 
@@ -68,7 +72,10 @@ const normalizeTrackText = (value?: string | null) =>
     .replace(/\s+/g, " ")
     .trim() ?? "";
 
-const noteMatchesTrack = (note: RadioNote | null | undefined, track?: RadioTrack | null) => {
+const noteMatchesTrack = (
+  note: RadioNote | null | undefined,
+  track?: RadioTrack | null,
+) => {
   if (!note || !track) return false;
   if (track.id && note.trackIds?.includes(track.id)) return true;
 
@@ -166,11 +173,12 @@ export function RadioHeroPlayer() {
     null;
 
   const feedbackTrackId = currentTrack?.id ?? null;
-  const { data: feedbackSummary, mutate: mutateFeedback } = useSWR<FeedbackSummary>(
-    feedbackTrackId ? `/api/radio/feedback?trackId=${feedbackTrackId}` : null,
-    fetcher,
-    { refreshInterval: 20000 },
-  );
+  const { data: feedbackSummary, mutate: mutateFeedback } =
+    useSWR<FeedbackSummary>(
+      feedbackTrackId ? `/api/radio/feedback?trackId=${feedbackTrackId}` : null,
+      fetcher,
+      { refreshInterval: 20000 },
+    );
 
   const moodLabel = formatRadioMood(
     dj?.mood ?? currentTrack?.genres?.[0] ?? "after-hours",
@@ -199,7 +207,7 @@ export function RadioHeroPlayer() {
     Boolean(currentTrack?.id && dj?.trackIds?.includes(currentTrack.id)) ||
     Boolean(
       currentTrack?.title &&
-        dj?.script?.toLowerCase().includes(currentTrack.title.toLowerCase()),
+      dj?.script?.toLowerCase().includes(currentTrack.title.toLowerCase()),
     );
   const liveDjScript = djMatchesCurrentTrack ? dj?.script : null;
   const liveDjReason = djMatchesCurrentTrack ? dj?.reason : null;
@@ -225,7 +233,9 @@ export function RadioHeroPlayer() {
     currentNote?.boothDossier?.sections?.listenFor?.body ??
       currentNote?.boothDossier?.nextMove ??
       currentNote?.boothDossier?.deepCut ??
-      (nextTrack ? formatTrackStamp(nextTrack) : "The next move is still forming."),
+      (nextTrack
+        ? formatTrackStamp(nextTrack)
+        : "The next move is still forming."),
     120,
   );
 
@@ -301,7 +311,10 @@ export function RadioHeroPlayer() {
         className="mx-auto max-w-6xl scroll-mt-28 px-6 py-10"
       >
         <div className="relative overflow-hidden rounded-[40px] border border-white/12 bg-[radial-gradient(circle_at_top_left,rgba(255,230,109,0.18),transparent_24%),radial-gradient(circle_at_84%_16%,rgba(66,245,255,0.18),transparent_30%),radial-gradient(circle_at_60%_100%,rgba(255,79,216,0.18),transparent_40%),linear-gradient(155deg,rgba(7,11,27,0.98),rgba(32,8,44,0.94))] shadow-[0_34px_110px_rgba(0,0,0,0.42)]">
-          <div className="absolute inset-0 noise opacity-40" aria-hidden="true" />
+          <div
+            className="absolute inset-0 noise opacity-40"
+            aria-hidden="true"
+          />
 
           <div className="relative grid gap-8 p-6 md:p-8 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-center">
             <div className="flex min-w-0 flex-col gap-4">
@@ -372,166 +385,164 @@ export function RadioHeroPlayer() {
                 </Button>
               </div>
 
-            <div className="mt-5">
-              <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/50">
-                Current room
-              </div>
-              <h2 className="mt-3 break-words text-3xl font-semibold leading-tight text-white md:text-5xl">
-                {currentTrack?.title ?? "Needle in the air"}
-              </h2>
-              <div className="mt-2 break-words text-xl text-cloud/82 md:text-2xl">
-                {currentTrack?.artist ?? "Mr Rassy"}
-              </div>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-cloud/62">
-              <span className="rave-chip rounded-full px-3 py-2">
-                {formatTrackMeta(currentTrack) || "Live radio cut"}
-              </span>
-              <span className="rave-chip rounded-full px-3 py-2">
-                {signalLabel}
-              </span>
-              <span className="rave-chip rounded-full px-3 py-2">
-                Crowd {crowdScore >= 0 ? `+${crowdScore}` : crowdScore}
-              </span>
-            </div>
-
-            <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_300px]">
-              <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
-                <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">
-                  In the booth now
+              <div className="mt-5">
+                <div className="text-[10px] uppercase tracking-[0.3em] text-cloud/50">
+                  Current room
                 </div>
-                <p className="mt-3 text-base leading-8 text-cloud/88 md:text-lg">
-                  {roomLine}
-                </p>
+                <h2 className="mt-3 break-words text-3xl font-semibold leading-tight text-white md:text-5xl">
+                  {currentTrack?.title ?? "Needle in the air"}
+                </h2>
+                <div className="mt-2 break-words text-xl text-cloud/82 md:text-2xl">
+                  {currentTrack?.artist ?? "Mr Rassy"}
+                </div>
               </div>
 
-              <div className="grid gap-3">
-                <div className="rounded-[24px] border border-white/10 bg-black/18 p-4">
-                  <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/55">
-                    Why it landed
+              <div className="mt-5 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-cloud/62">
+                <span className="rave-chip rounded-full px-3 py-2">
+                  {formatTrackMeta(currentTrack) || "Live radio cut"}
+                </span>
+                <span className="rave-chip rounded-full px-3 py-2">
+                  {signalLabel}
+                </span>
+                <span className="rave-chip rounded-full px-3 py-2">
+                  Crowd {crowdScore >= 0 ? `+${crowdScore}` : crowdScore}
+                </span>
+              </div>
+
+              <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_300px]">
+                <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+                  <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">
+                    In the booth now
                   </div>
-                  <p className="mt-3 text-sm leading-7 text-cloud/80">
-                    {whyLine}
+                  <p className="mt-3 text-base leading-8 text-cloud/88 md:text-lg">
+                    {roomLine}
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-white/10 bg-black/18 p-4">
-                  <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/55">
-                    Next move
+
+                <div className="grid gap-3">
+                  <div className="rounded-[24px] border border-white/10 bg-black/18 p-4">
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/55">
+                      Why it landed
+                    </div>
+                    <p className="mt-3 text-sm leading-7 text-cloud/80">
+                      {whyLine}
+                    </p>
                   </div>
-                  <p className="mt-3 text-sm leading-7 text-cloud/80">
-                    {nextMove}
-                  </p>
+                  <div className="rounded-[24px] border border-white/10 bg-black/18 p-4">
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/55">
+                      Next move
+                    </div>
+                    <p className="mt-3 text-sm leading-7 text-cloud/80">
+                      {nextMove}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button
-                className="h-14 min-w-[11.5rem] justify-center text-base md:text-lg"
-                onClick={() => void toggle()}
-                disabled={playStatus === "loading"}
-              >
-                {playing ? <Pause size={18} /> : <Play size={18} />}
-                {playLabel}
-              </Button>
-              <Button
-                variant="secondary"
-                className="h-14 px-5"
-                onClick={() => void sendVote("up")}
-                disabled={voting !== null}
-              >
-                <ThumbsUp size={16} />
-                {voting === "up" ? "Sending..." : `Love this · ${totalUp}`}
-              </Button>
-              <Button
-                variant="secondary"
-                className="h-14 px-5"
-                onClick={() => void sendVote("down")}
-                disabled={voting !== null}
-              >
-                <ThumbsDown size={16} />
-                {voting === "down" ? "Sending..." : `Not this one · ${totalDown}`}
-              </Button>
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-2.5">
-              <Button variant="secondary" className="h-11 px-4" asChild>
-                <Link href="/radio">
-                  <Radio size={16} />
-                  Full booth
-                </Link>
-              </Button>
-              <Button variant="secondary" className="h-11 px-4" asChild>
-                <Link href="/radio#booth-chat">
-                  <MessageCircleMore size={16} />
-                  Talk live
-                </Link>
-              </Button>
-              <Button variant="ghost" className="h-11 px-4" asChild>
-                <a href={directMp3Url} target="_blank" rel="noreferrer">
-                  <Volume2 size={16} />
-                  Live MP3
-                </a>
-              </Button>
-              <Button variant="ghost" className="h-11 px-4" asChild>
-                <a
-                  href={directLosslessUrl}
-                  target="_blank"
-                  rel="noreferrer"
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button
+                  className="h-14 min-w-[11.5rem] justify-center text-base md:text-lg"
+                  onClick={() => void toggle()}
+                  disabled={playStatus === "loading"}
                 >
-                  <Volume2 size={16} />
-                  Live lossless
-                </a>
-              </Button>
-            </div>
-
-            {(voteStatus || streamError) && (
-              <div className="mt-3 text-sm text-cloud/70">
-                {voteStatus ?? streamError}
+                  {playing ? <Pause size={18} /> : <Play size={18} />}
+                  {playLabel}
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="h-14 px-5"
+                  onClick={() => void sendVote("up")}
+                  disabled={voting !== null}
+                >
+                  <ThumbsUp size={16} />
+                  {voting === "up" ? "Sending..." : `Love this · ${totalUp}`}
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="h-14 px-5"
+                  onClick={() => void sendVote("down")}
+                  disabled={voting !== null}
+                >
+                  <ThumbsDown size={16} />
+                  {voting === "down"
+                    ? "Sending..."
+                    : `Not this one · ${totalDown}`}
+                </Button>
               </div>
-            )}
 
-            <div className="mt-3 flex flex-wrap gap-3">
-              <Button
-                variant="ghost"
-                className="px-4 py-2 text-xs"
-                onClick={toggleFallback}
-                disabled={!canFallback}
-              >
-                {useFallback ? "Back to live line" : "Hear the stacks"}
-              </Button>
-              {!useFallback && (
+              <div className="mt-3 flex flex-wrap gap-2.5">
+                <Button variant="secondary" className="h-11 px-4" asChild>
+                  <Link href="/radio">
+                    <Radio size={16} />
+                    Full booth
+                  </Link>
+                </Button>
+                <Button variant="secondary" className="h-11 px-4" asChild>
+                  <Link href="/radio#booth-chat">
+                    <MessageCircleMore size={16} />
+                    Talk live
+                  </Link>
+                </Button>
+                <Button variant="ghost" className="h-11 px-4" asChild>
+                  <a href={directMp3Url} target="_blank" rel="noreferrer">
+                    <Volume2 size={16} />
+                    Live MP3
+                  </a>
+                </Button>
+                <Button variant="ghost" className="h-11 px-4" asChild>
+                  <a href={directLosslessUrl} target="_blank" rel="noreferrer">
+                    <Volume2 size={16} />
+                    Live lossless
+                  </a>
+                </Button>
+              </div>
+
+              {(voteStatus || streamError) && (
+                <div className="mt-3 text-sm text-cloud/70">
+                  {voteStatus ?? streamError}
+                </div>
+              )}
+
+              <div className="mt-3 flex flex-wrap gap-3">
                 <Button
                   variant="ghost"
                   className="px-4 py-2 text-xs"
-                  onClick={toggleLiveSourceMode}
+                  onClick={toggleFallback}
+                  disabled={!canFallback}
                 >
-                  {liveSourceMode === "direct"
-                    ? "Use stable line"
-                    : "Try direct line"}
+                  {useFallback ? "Back to live line" : "Hear the stacks"}
                 </Button>
-              )}
-            </div>
+                {!useFallback && (
+                  <Button
+                    variant="ghost"
+                    className="px-4 py-2 text-xs"
+                    onClick={toggleLiveSourceMode}
+                  >
+                    {liveSourceMode === "direct"
+                      ? "Use stable line"
+                      : "Try direct line"}
+                  </Button>
+                )}
+              </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
-              {statusCards.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-[24px] border border-white/10 bg-black/18 px-4 py-4"
-                >
-                  <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/45">
-                    {item.label}
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+                {statusCards.map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-[24px] border border-white/10 bg-black/18 px-4 py-4"
+                  >
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/45">
+                      {item.label}
+                    </div>
+                    <div className="mt-2 break-words text-sm font-semibold leading-5 text-white">
+                      {item.value}
+                    </div>
+                    <div className="mt-2 text-xs leading-5 text-cloud/62">
+                      {item.meta}
+                    </div>
                   </div>
-                  <div className="mt-2 break-words text-sm font-semibold leading-5 text-white">
-                    {item.value}
-                  </div>
-                  <div className="mt-2 text-xs leading-5 text-cloud/62">
-                    {item.meta}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

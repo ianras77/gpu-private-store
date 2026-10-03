@@ -1,6 +1,6 @@
-const isHttpsSite = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim().startsWith(
-  "https://",
-);
+const isHttpsSite = (process.env.NEXT_PUBLIC_SITE_URL ?? "")
+  .trim()
+  .startsWith("https://");
 
 const securityHeaders = [
   {

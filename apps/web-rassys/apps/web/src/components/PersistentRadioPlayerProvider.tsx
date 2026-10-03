@@ -51,12 +51,7 @@ type RadioHealth = {
 };
 
 type RadioPlayStatus =
-  | "idle"
-  | "loading"
-  | "playing"
-  | "paused"
-  | "buffering"
-  | "error";
+  "idle" | "loading" | "playing" | "paused" | "buffering" | "error";
 
 type RadioStreamQuality = "lossless" | "mp3";
 
@@ -146,7 +141,9 @@ export function PersistentRadioPlayerProvider({
   const liveRetryAttemptsRef = useRef(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const mediaElementSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const mediaElementSourceRef = useRef<MediaElementAudioSourceNode | null>(
+    null,
+  );
   const visualizerAnimationFrameRef = useRef<number | null>(null);
   const visualizerBinsRef = useRef<number[]>([...EMPTY_VISUALIZER_FRAME.bars]);
   const visualizerListenersRef = useRef(
@@ -157,8 +154,7 @@ export function PersistentRadioPlayerProvider({
   const [streamError, setStreamError] = useState<string | null>(null);
   const [playStatus, setPlayStatus] = useState<RadioPlayStatus>("idle");
   const [buffering, setBuffering] = useState(false);
-  const [liveSourceMode, setLiveSourceMode] =
-    useState<LiveSourceMode>("relay");
+  const [liveSourceMode, setLiveSourceMode] = useState<LiveSourceMode>("relay");
   const [useFallback, setUseFallback] = useState(false);
   const [fallbackLocked, setFallbackLocked] = useState(false);
   const [fallbackIndex, setFallbackIndex] = useState(0);
@@ -169,8 +165,7 @@ export function PersistentRadioPlayerProvider({
 
   const relayMp3Url = "/api/radio/stream?quality=mp3";
   const relayLosslessUrl = "/api/radio/stream?quality=lossless";
-  const directMp3Url =
-    process.env.NEXT_PUBLIC_STREAM_URL || relayMp3Url;
+  const directMp3Url = process.env.NEXT_PUBLIC_STREAM_URL || relayMp3Url;
   const directLosslessUrl =
     process.env.NEXT_PUBLIC_STREAM_LOSSLESS_URL || relayLosslessUrl;
   const activeLiveQuality: RadioStreamQuality = preferLosslessPlayback
@@ -181,13 +176,9 @@ export function PersistentRadioPlayerProvider({
   const externalStreamUrl =
     activeLiveQuality === "lossless" ? directLosslessUrl : directMp3Url;
 
-  const { data: nowPlaying } = useSWR<RadioTrack>(
-    "/api/radio/now",
-    fetcher,
-    {
-      refreshInterval: 8000,
-    },
-  );
+  const { data: nowPlaying } = useSWR<RadioTrack>("/api/radio/now", fetcher, {
+    refreshInterval: 8000,
+  });
   const { data: queue } = useSWR<RadioTrack[]>("/api/radio/queue", fetcher, {
     refreshInterval: 12000,
   });
@@ -198,9 +189,13 @@ export function PersistentRadioPlayerProvider({
       refreshInterval: 60000,
     },
   );
-  const { data: liveHealth } = useSWR<RadioHealth>("/api/radio/health", fetcher, {
-    refreshInterval: 20000,
-  });
+  const { data: liveHealth } = useSWR<RadioHealth>(
+    "/api/radio/health",
+    fetcher,
+    {
+      refreshInterval: 20000,
+    },
+  );
 
   const queueItems = Array.isArray(queue) ? queue : [];
   const featuredItems = Array.isArray(featured?.items) ? featured.items : [];
@@ -322,9 +317,11 @@ export function PersistentRadioPlayerProvider({
     try {
       const Context =
         window.AudioContext ||
-        (window as typeof window & {
-          webkitAudioContext?: typeof AudioContext;
-        }).webkitAudioContext;
+        (
+          window as typeof window & {
+            webkitAudioContext?: typeof AudioContext;
+          }
+        ).webkitAudioContext;
       if (!Context) return;
 
       if (!audioContextRef.current) {
@@ -438,7 +435,9 @@ export function PersistentRadioPlayerProvider({
           return;
         }
 
-        setStreamError("The live line is quiet right now. Try again in a moment.");
+        setStreamError(
+          "The live line is quiet right now. Try again in a moment.",
+        );
         setPlaying(false);
         setBuffering(false);
         setPlayStatus("error");
@@ -452,7 +451,9 @@ export function PersistentRadioPlayerProvider({
       ) {
         lastAttemptedStreamUrlRef.current = null;
         setPreferLosslessPlayback(false);
-        setStreamError("The full-quality line is offline. Catching the steady line.");
+        setStreamError(
+          "The full-quality line is offline. Catching the steady line.",
+        );
         setPlaying(true);
         setBuffering(true);
         setPlayStatus("loading");
@@ -466,7 +467,9 @@ export function PersistentRadioPlayerProvider({
       ) {
         if (canFallback) {
           lastAttemptedStreamUrlRef.current = null;
-          setStreamError("The station line is offline. Pulling from the stacks.");
+          setStreamError(
+            "The station line is offline. Pulling from the stacks.",
+          );
           setFallbackLocked(false);
           setUseFallback(true);
           setPlaying(true);
@@ -475,7 +478,9 @@ export function PersistentRadioPlayerProvider({
           return;
         }
 
-        setStreamError("The station line is offline right now. Try again in a moment.");
+        setStreamError(
+          "The station line is offline right now. Try again in a moment.",
+        );
         setPlaying(false);
         setBuffering(false);
         setPlayStatus("error");
@@ -719,7 +724,9 @@ export function PersistentRadioPlayerProvider({
     if (activeLiveQuality === "lossless") {
       lastAttemptedStreamUrlRef.current = null;
       setPreferLosslessPlayback(false);
-      setStreamError("The full-quality line stalled. Catching the steady line.");
+      setStreamError(
+        "The full-quality line stalled. Catching the steady line.",
+      );
       setPlaying(true);
       setBuffering(true);
       setPlayStatus("loading");
@@ -791,7 +798,8 @@ export function PersistentRadioPlayerProvider({
       setPlayStatus("paused");
     };
     window.addEventListener("rassy:library-play", stopForLibraryPlayback);
-    return () => window.removeEventListener("rassy:library-play", stopForLibraryPlayback);
+    return () =>
+      window.removeEventListener("rassy:library-play", stopForLibraryPlayback);
   }, []);
 
   useEffect(() => {
@@ -1049,7 +1057,9 @@ export function PersistentRadioPlayerProvider({
           if (useFallback) {
             setStreamError("That cut slipped away. Catching the next one.");
             if (fallbackList.length > 0) {
-              setFallbackIndex((current) => (current + 1) % fallbackList.length);
+              setFallbackIndex(
+                (current) => (current + 1) % fallbackList.length,
+              );
             }
             setPlaying(true);
             setBuffering(true);

@@ -96,11 +96,7 @@ const readCoords = (value: unknown) => {
       ? coords.z
       : undefined;
 
-  if (
-    typeof x !== "number" &&
-    typeof y !== "number" &&
-    typeof z !== "number"
-  ) {
+  if (typeof x !== "number" && typeof y !== "number" && typeof z !== "number") {
     return null;
   }
 
@@ -162,7 +158,8 @@ const sanitizePublicStatus = (status: BotStatus): BotStatus => {
   return {
     ...status,
     detail: "Microsoft sign-in is waiting in the private bot console.",
-    guidance: "Complete the Microsoft sign-in flow privately to let this bot back into the world.",
+    guidance:
+      "Complete the Microsoft sign-in flow privately to let this bot back into the world.",
   };
 };
 
@@ -172,7 +169,8 @@ const readBotStatus = (
   port: number,
   payload: RemoteStatusPayload,
 ): BotStatus => {
-  const entry = payload.bots?.find(([botName]) => botName === name)?.[1] ?? null;
+  const entry =
+    payload.bots?.find(([botName]) => botName === name)?.[1] ?? null;
 
   if (!entry || typeof entry !== "object") {
     return buildUnreachableStatus(name, host, port, "missing_status");
@@ -269,9 +267,13 @@ export async function GET() {
   }
 
   const botNames = parseBotNames();
-  const initialBots = await Promise.all(botNames.map((name) => fetchBotStatus(name)));
+  const initialBots = await Promise.all(
+    botNames.map((name) => fetchBotStatus(name)),
+  );
   const hasUnreachableBots = initialBots.some((bot) => !bot.reachable);
-  const livePlayers = hasUnreachableBots ? await fetchLivePlayers() : new Set<string>();
+  const livePlayers = hasUnreachableBots
+    ? await fetchLivePlayers()
+    : new Set<string>();
   const bots = initialBots.map((bot) => {
     if (bot.reachable) return bot;
     if (!livePlayers.has(normalizeBotKey(bot.name))) return bot;

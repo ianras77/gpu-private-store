@@ -4,6 +4,13 @@
   "packageManager": "pnpm@10.15.0",
   "pnpm": {
     "overrides": {
+      "brace-expansion@1": "1.1.21",
+      "brace-expansion@2": "2.1.7",
+      "brace-expansion@4": "4.0.1",
+      "brace-expansion@5": "5.0.12",
+      "fast-uri@3": "3.1.8",
+      "fast-uri@4": "4.2.1",
+      "image-size": "2.0.4",
       "postcss": "8.5.23",
       "sharp": "0.35.4",
       "uuid": "11.1.1"
@@ -14,8 +21,13 @@
     "build:web": "pnpm --filter web build",
     "build:intelligence": "pnpm --filter rassy-intelligence build",
     "build:radio": "pnpm --filter radio-controller build",
+    "radio:mobile": "pnpm --filter mr-rassy-radio start",
+    "radio:ios": "pnpm --filter mr-rassy-radio ios",
+    "radio:android": "pnpm --filter mr-rassy-radio android",
+    "radio:typecheck": "pnpm --filter mr-rassy-radio typecheck",
     "test:radio": "pnpm --filter radio-controller test",
     "lint:web": "pnpm --filter web lint",
-    "qualify": "pnpm install --frozen-lockfile && pnpm audit --prod && pnpm run build:intelligence && pnpm run build:radio && pnpm run test:radio && pnpm --filter minecraft-bridge build && pnpm --filter cheshire-proxy build && pnpm run lint:web && pnpm run build:web"
+    "audit:live": "node scripts/audit-live-dependencies.mjs",
+    "qualify": "pnpm install --frozen-lockfile && pnpm run audit:live && pnpm run build:intelligence && pnpm run build:radio && pnpm run test:radio && pnpm --filter minecraft-bridge build && pnpm --filter cheshire-proxy build && pnpm run lint:web && pnpm run build:web"
   }
 }

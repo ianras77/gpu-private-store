@@ -80,7 +80,9 @@ const siteTargets = [
 const targetByHref = new Map<string, (typeof siteTargets)[number]>(
   siteTargets.map((target) => [target.href, target]),
 );
-const allowedTargetHrefs = new Set<string>(siteTargets.map((target) => target.href));
+const allowedTargetHrefs = new Set<string>(
+  siteTargets.map((target) => target.href),
+);
 
 const responseSchema = z.object({
   badge: z.string().min(2).max(28),
@@ -89,7 +91,11 @@ const responseSchema = z.object({
   cta: z.string().min(2).max(28),
   hint: z.string().min(8).max(120),
   href: z.string().min(1).max(120),
-  sigil: z.string().min(2).max(24).regex(/^[a-z][a-z\s-]{1,23}$/i),
+  sigil: z
+    .string()
+    .min(2)
+    .max(24)
+    .regex(/^[a-z][a-z\s-]{1,23}$/i),
 });
 
 const triggerSchema = z.enum(["route", "interval", "manual", "secret-word"]);
@@ -179,9 +185,14 @@ const hashString = (value: string) => {
 
 const readRequestContext = (request: Request): EasterEggRequestContext => {
   const url = new URL(request.url);
-  const parsedTrigger = triggerSchema.safeParse(url.searchParams.get("trigger"));
+  const parsedTrigger = triggerSchema.safeParse(
+    url.searchParams.get("trigger"),
+  );
 
-  const sessionId = request.headers.get("cookie")?.match(/(?:^|;\s*)rassy_visitor=([^;]+)/)?.[1] ?? randomUUID();
+  const sessionId =
+    request.headers
+      .get("cookie")
+      ?.match(/(?:^|;\s*)rassy_visitor=([^;]+)/)?.[1] ?? randomUUID();
   return {
     path: normalizePath(url.searchParams.get("path")),
     trigger: parsedTrigger.success ? parsedTrigger.data : "route",
@@ -197,7 +208,9 @@ const readRequestContext = (request: Request): EasterEggRequestContext => {
 const selectTargetPool = (preferredTargets: string[]) => {
   const pool = preferredTargets
     .map((href) => targetByHref.get(href))
-    .filter((target): target is (typeof siteTargets)[number] => Boolean(target));
+    .filter((target): target is (typeof siteTargets)[number] =>
+      Boolean(target),
+    );
 
   return pool.length > 0 ? pool : [...siteTargets];
 };
@@ -248,7 +261,9 @@ const buildSiteContext = async () => {
       ? statusResult.value
       : null;
   const now =
-    nowResult.status === "fulfilled" && nowResult.value ? nowResult.value : null;
+    nowResult.status === "fulfilled" && nowResult.value
+      ? nowResult.value
+      : null;
   const hears =
     hearsResult.status === "fulfilled" && hearsResult.value
       ? hearsResult.value
@@ -276,21 +291,25 @@ const buildSiteContext = async () => {
     llmActive:
       Boolean(
         status &&
-          typeof status === "object" &&
-          "llmDirector" in status &&
-          (status.llmDirector as Record<string, unknown> | null)?.active === true,
+        typeof status === "object" &&
+        "llmDirector" in status &&
+        (status.llmDirector as Record<string, unknown> | null)?.active === true,
       ) || false,
     nowPlaying:
       now && typeof now === "object"
         ? {
             title:
-              typeof now.title === "string" && now.title.trim() ? now.title : null,
+              typeof now.title === "string" && now.title.trim()
+                ? now.title
+                : null,
             artist:
               typeof now.artist === "string" && now.artist.trim()
                 ? now.artist
                 : null,
             album:
-              typeof now.album === "string" && now.album.trim() ? now.album : null,
+              typeof now.album === "string" && now.album.trim()
+                ? now.album
+                : null,
           }
         : null,
     hears:
@@ -314,7 +333,8 @@ const buildSiteContext = async () => {
                 ? latestNote.title
                 : null,
             excerpt:
-              typeof latestNote.excerpt === "string" && latestNote.excerpt.trim()
+              typeof latestNote.excerpt === "string" &&
+              latestNote.excerpt.trim()
                 ? latestNote.excerpt
                 : null,
           }
@@ -324,9 +344,9 @@ const buildSiteContext = async () => {
 
 const buildRouteSignal = async (path: string): Promise<RouteSignal> => {
   if (path.startsWith("/radio/notes")) {
-    const notesPayload = await fetchRadio<{ notes?: Array<Record<string, unknown>> }>(
-      "/public/notes?limit=3",
-    ).catch(() => null);
+    const notesPayload = await fetchRadio<{
+      notes?: Array<Record<string, unknown>>;
+    }>("/public/notes?limit=3").catch(() => null);
 
     return {
       surface: "booth notebook",
@@ -339,7 +359,9 @@ const buildRouteSignal = async (path: string): Promise<RouteSignal> => {
       ],
       details: {
         recentNotes: Array.isArray(notesPayload?.notes)
-          ? notesPayload.notes.slice(0, 3).map((note) => summarizeRadioNote(note))
+          ? notesPayload.notes
+              .slice(0, 3)
+              .map((note) => summarizeRadioNote(note))
           : [],
       },
     };
@@ -347,9 +369,9 @@ const buildRouteSignal = async (path: string): Promise<RouteSignal> => {
 
   if (path.startsWith("/radio")) {
     const [featuredPayload, notesPayload] = await Promise.all([
-      fetchRadio<{ items?: Array<Record<string, unknown>> }>("/public/featured").catch(
-        () => null,
-      ),
+      fetchRadio<{ items?: Array<Record<string, unknown>> }>(
+        "/public/featured",
+      ).catch(() => null),
       fetchRadio<{ notes?: Array<Record<string, unknown>> }>(
         "/public/notes?limit=3",
       ).catch(() => null),
@@ -367,17 +389,23 @@ const buildRouteSignal = async (path: string): Promise<RouteSignal> => {
       ],
       details: {
         featuredTracks: Array.isArray(featuredPayload?.items)
-          ? featuredPayload.items.slice(0, 4).map((track) => summarizeTrack(track))
+          ? featuredPayload.items
+              .slice(0, 4)
+              .map((track) => summarizeTrack(track))
           : [],
         recentNotes: Array.isArray(notesPayload?.notes)
-          ? notesPayload.notes.slice(0, 3).map((note) => summarizeRadioNote(note))
+          ? notesPayload.notes
+              .slice(0, 3)
+              .map((note) => summarizeRadioNote(note))
           : [],
       },
     };
   }
 
   if (path.startsWith("/listening-room")) {
-    const listeningRoom = await fetchListeningRoom({ limit: 8 }).catch(() => null);
+    const listeningRoom = await fetchListeningRoom({ limit: 8 }).catch(
+      () => null,
+    );
 
     return {
       surface: "listening room",
@@ -429,11 +457,7 @@ const buildRouteSignal = async (path: string): Promise<RouteSignal> => {
       surface: "bedtime stories",
       summary:
         "The visitor is already in the softer room. Keep the whisper calm, authored, and family-safe, with a clue that respects the slower pace of this page.",
-      preferredTargets: [
-        "/real-life-bedtime-stories",
-        "/photos",
-        "/#about",
-      ],
+      preferredTargets: ["/real-life-bedtime-stories", "/photos", "/#about"],
       details: podcasts
         ? {
             totalSeries: podcasts.totalSeries,
@@ -502,7 +526,9 @@ const isWeakCurio = (payload: CurioPayload) => {
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
-  const bodyAndHint = `${payload.body} ${payload.hint}`.replace(/\s+/g, " ").trim();
+  const bodyAndHint = `${payload.body} ${payload.hint}`
+    .replace(/\s+/g, " ")
+    .trim();
 
   return (
     weakCopyPattern.test(combined) ||
@@ -515,7 +541,8 @@ const isWeakCurio = (payload: CurioPayload) => {
 const pickFallback = (preferredTargets: string[], seed: string) => {
   const target = coerceTarget(undefined, preferredTargets, seed);
   const directFallback =
-    fallbackCurios.find((item) => item.href === target.href) ?? fallbackCurios[0];
+    fallbackCurios.find((item) => item.href === target.href) ??
+    fallbackCurios[0];
 
   return {
     ...directFallback,
@@ -536,8 +563,10 @@ const requestMastraCurio = async (input: {
 }) => {
   try {
     const prompt = JSON.stringify({
-      identity: "You are Mr Rassy, the warm, strange, grounded host of Ian Rasmussen's live site.",
-      rules: "Return only JSON with badge,title,body,cta,hint,href,sigil. Use href exactly from routeTargets or siteTargets. Avoid generic marketing copy and invented destinations.",
+      identity:
+        "You are Mr Rassy, the warm, strange, grounded host of Ian Rasmussen's live site.",
+      rules:
+        "Return only JSON with badge,title,body,cta,hint,href,sigil. Use href exactly from routeTargets or siteTargets. Avoid generic marketing copy and invented destinations.",
       input: {
         seed: input.seed,
         requestContext: input.requestContext,
@@ -549,7 +578,9 @@ const requestMastraCurio = async (input: {
         previousAttempt: input.previousAttempt,
       },
     });
-    const intelligenceResult = JSON.parse(await requestRassyChannelText("home", prompt));
+    const intelligenceResult = JSON.parse(
+      await requestRassyChannelText("home", prompt),
+    );
     const intelligenceParsed = responseSchema.safeParse(intelligenceResult);
     if (intelligenceParsed.success) return intelligenceParsed.data;
   } catch {
@@ -619,7 +650,9 @@ export async function GET(request: Request) {
 
   const requestContext = readRequestContext(request);
   const seed = `${new Date().toISOString()}::${requestContext.path}::${requestContext.trigger}`;
-  const routeSignal = await buildRouteSignal(requestContext.path).catch(() => null);
+  const routeSignal = await buildRouteSignal(requestContext.path).catch(
+    () => null,
+  );
   const payload =
     (await callMastra(requestContext).catch(() => null)) ??
     pickFallback(routeSignal?.preferredTargets ?? [], seed);

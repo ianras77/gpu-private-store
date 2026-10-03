@@ -19,11 +19,12 @@ const sleep = async (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-const shouldRetryStatus = (status: number) => status === 408 || status === 425 || status === 429 || status >= 500;
+const shouldRetryStatus = (status: number) =>
+  status === 408 || status === 425 || status === 429 || status >= 500;
 
 const withTimeoutSignal = async <T>(
   timeoutMs: number,
-  fn: (signal: AbortSignal) => Promise<T>
+  fn: (signal: AbortSignal) => Promise<T>,
 ): Promise<T> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -37,7 +38,7 @@ const withTimeoutSignal = async <T>(
 export const fetchUpstream = async (
   url: string,
   init: RequestInit = {},
-  options: UpstreamFetchOptions = {}
+  options: UpstreamFetchOptions = {},
 ): Promise<Response> => {
   const timeoutMs = Math.max(500, options.timeoutMs ?? 8000);
   const method = (init.method ?? "GET").toUpperCase();
@@ -52,14 +53,17 @@ export const fetchUpstream = async (
         fetch(url, {
           ...init,
           cache: "no-store",
-          signal
-        })
+          signal,
+        }),
       );
 
       if (response.ok) return response;
 
       await response.text();
-      const error = new UpstreamError(`upstream_error_${response.status}`, response.status);
+      const error = new UpstreamError(
+        `upstream_error_${response.status}`,
+        response.status,
+      );
 
       if (attempt < retries && shouldRetryStatus(response.status)) {
         await sleep(retryDelayMs * (attempt + 1));
@@ -69,7 +73,9 @@ export const fetchUpstream = async (
       throw error;
     } catch (error) {
       const typedError =
-        error instanceof Error ? error : new Error(typeof error === "string" ? error : "upstream_failed");
+        error instanceof Error
+          ? error
+          : new Error(typeof error === "string" ? error : "upstream_failed");
       lastError = typedError;
       if (attempt < retries) {
         await sleep(retryDelayMs * (attempt + 1));
@@ -85,7 +91,7 @@ export const fetchUpstream = async (
 export const fetchUpstreamJson = async <T>(
   url: string,
   init: RequestInit = {},
-  options: UpstreamFetchOptions = {}
+  options: UpstreamFetchOptions = {},
 ): Promise<T> => {
   const response = await fetchUpstream(url, init, options);
   return (await response.json()) as T;

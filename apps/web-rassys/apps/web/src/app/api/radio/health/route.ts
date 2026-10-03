@@ -46,7 +46,7 @@ const withTimeout = async <T>(
   }
 };
 
-const readJson = async <T,>(response: Response): Promise<T | null> =>
+const readJson = async <T>(response: Response): Promise<T | null> =>
   response.json().catch(() => null);
 
 const probeStream = async (url: string): Promise<StreamProbe> => {
@@ -129,7 +129,8 @@ const probeController = async () => {
     ]);
 
     const readyPayload = await readJson<{ ok?: boolean }>(readyResponse);
-    const statusPayload = await readJson<ControllerStatusPayload>(statusResponse);
+    const statusPayload =
+      await readJson<ControllerStatusPayload>(statusResponse);
     const queueDepth =
       typeof statusPayload?.queueDepth === "number"
         ? statusPayload.queueDepth

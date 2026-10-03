@@ -1,6 +1,9 @@
 import crypto from "crypto";
 import { z } from "zod";
-import { requestRassyChannel, requestRassyEmbedding } from "../rassy-intelligence-client";
+import {
+  requestRassyChannel,
+  requestRassyEmbedding,
+} from "../rassy-intelligence-client";
 import type { DmTurnPatch } from "./types";
 
 export type DmContextPacket = {
@@ -45,12 +48,21 @@ export type DmRassyRequestContext = {
 const dmTurnSchema: z.ZodType<DmTurnPatch> = z.object({
   narration: z.string().min(1),
   shortSummary: z.string().min(1).optional(),
-  resolution: z.object({
-    kind: z.enum(["automatic", "roll_required", "consequence", "choice"]),
-    reason: z.string().max(1000).optional(),
-    roll: z.object({ expression: z.string().min(2).max(24), actorCharacterId: z.string().optional(), difficulty: z.number().int().min(0).max(100).optional(), reason: z.string().max(600).optional() }).optional(),
-    newChoices: z.array(z.string().min(1).max(300)).max(6).optional()
-  }).optional(),
+  resolution: z
+    .object({
+      kind: z.enum(["automatic", "roll_required", "consequence", "choice"]),
+      reason: z.string().max(1000).optional(),
+      roll: z
+        .object({
+          expression: z.string().min(2).max(24),
+          actorCharacterId: z.string().optional(),
+          difficulty: z.number().int().min(0).max(100).optional(),
+          reason: z.string().max(600).optional(),
+        })
+        .optional(),
+      newChoices: z.array(z.string().min(1).max(300)).max(6).optional(),
+    })
+    .optional(),
   worldPatch: z
     .object({
       location: z.string().min(1).optional(),
@@ -59,7 +71,7 @@ const dmTurnSchema: z.ZodType<DmTurnPatch> = z.object({
       activeThreats: z.array(z.string().min(1)).optional(),
       sceneSummary: z.string().min(1).optional(),
       storyBeat: z.string().min(1).optional(),
-      visualPrompt: z.string().min(1).optional()
+      visualPrompt: z.string().min(1).optional(),
     })
     .optional(),
   questPatches: z
@@ -74,11 +86,11 @@ const dmTurnSchema: z.ZodType<DmTurnPatch> = z.object({
           .array(
             z.object({
               text: z.string().min(1),
-              completed: z.boolean().optional()
-            })
+              completed: z.boolean().optional(),
+            }),
           )
-          .optional()
-      })
+          .optional(),
+      }),
     )
     .optional(),
   characterPatches: z
@@ -94,13 +106,13 @@ const dmTurnSchema: z.ZodType<DmTurnPatch> = z.object({
             z.object({
               itemName: z.string().min(1),
               quantityDelta: z.number().int(),
-              detail: z.string().optional()
-            })
+              detail: z.string().optional(),
+            }),
           )
-          .optional()
-      })
+          .optional(),
+      }),
     )
-    .optional()
+    .optional(),
 });
 
 const parseJsonObjectFromText = (text: string): Record<string, unknown> => {
@@ -161,25 +173,52 @@ const toStringArray = (value: unknown): string[] => {
 };
 
 const coerceWorldPatch = (value: unknown) => {
-  const candidate = Array.isArray(value) ? value.find((entry) => isRecord(entry)) : value;
+  const candidate = Array.isArray(value)
+    ? value.find((entry) => isRecord(entry))
+    : value;
   if (!isRecord(candidate)) return undefined;
 
   const worldPatch: Record<string, unknown> = {};
-  const location = pickString(candidate, ["location", "currentLocation", "zone", "area"]);
+  const location = pickString(candidate, [
+    "location",
+    "currentLocation",
+    "zone",
+    "area",
+  ]);
   if (location) worldPatch.location = location;
-  const worldTime = pickString(candidate, ["worldTime", "world_time", "time", "currentTime"]);
+  const worldTime = pickString(candidate, [
+    "worldTime",
+    "world_time",
+    "time",
+    "currentTime",
+  ]);
   if (worldTime) worldPatch.worldTime = worldTime;
   const weather = pickString(candidate, ["weather", "conditions"]);
   if (weather) worldPatch.weather = weather;
   const activeThreats = toStringArray(
-    candidate.activeThreats ?? candidate.active_threats ?? candidate.threats
+    candidate.activeThreats ?? candidate.active_threats ?? candidate.threats,
   );
   if (activeThreats.length) worldPatch.activeThreats = activeThreats;
-  const sceneSummary = pickString(candidate, ["sceneSummary", "scene_summary", "scene", "description"]);
+  const sceneSummary = pickString(candidate, [
+    "sceneSummary",
+    "scene_summary",
+    "scene",
+    "description",
+  ]);
   if (sceneSummary) worldPatch.sceneSummary = sceneSummary;
-  const storyBeat = pickString(candidate, ["storyBeat", "story_beat", "beat", "plotBeat"]);
+  const storyBeat = pickString(candidate, [
+    "storyBeat",
+    "story_beat",
+    "beat",
+    "plotBeat",
+  ]);
   if (storyBeat) worldPatch.storyBeat = storyBeat;
-  const visualPrompt = pickString(candidate, ["visualPrompt", "visual_prompt", "imagePrompt", "visual"]);
+  const visualPrompt = pickString(candidate, [
+    "visualPrompt",
+    "visual_prompt",
+    "imagePrompt",
+    "visual",
+  ]);
   if (visualPrompt) worldPatch.visualPrompt = visualPrompt;
   return Object.keys(worldPatch).length ? worldPatch : undefined;
 };
@@ -199,7 +238,10 @@ const coerceQuestPatches = (value: unknown) => {
     const summary = pickString(entry, ["summary", "description", "details"]);
     if (summary) patch.summary = summary;
     const status = pickString(entry, ["status"]);
-    if (status && ["active", "completed", "failed", "paused"].includes(status)) {
+    if (
+      status &&
+      ["active", "completed", "failed", "paused"].includes(status)
+    ) {
       patch.status = status;
     }
     const progress = pickNumber(entry, ["progress", "percent", "completion"]);
@@ -212,9 +254,16 @@ const coerceQuestPatches = (value: unknown) => {
       const objectives: Array<{ text: string; completed?: boolean }> = [];
       for (const objective of objectivesRaw) {
         if (!isRecord(objective)) continue;
-        const text = pickString(objective, ["text", "objective", "description"]);
+        const text = pickString(objective, [
+          "text",
+          "objective",
+          "description",
+        ]);
         if (!text) continue;
-        const completed = typeof objective.completed === "boolean" ? objective.completed : undefined;
+        const completed =
+          typeof objective.completed === "boolean"
+            ? objective.completed
+            : undefined;
         if (typeof completed === "boolean") {
           objectives.push({ text, completed });
         } else {
@@ -232,7 +281,10 @@ const coerceQuestPatches = (value: unknown) => {
   return result.length ? result : undefined;
 };
 
-const coerceCharacterPatches = (value: unknown, allowedCharacterIds: string[]) => {
+const coerceCharacterPatches = (
+  value: unknown,
+  allowedCharacterIds: string[],
+) => {
   const source = Array.isArray(value) ? value : isRecord(value) ? [value] : [];
   const result: Array<Record<string, unknown>> = [];
 
@@ -244,18 +296,37 @@ const coerceCharacterPatches = (value: unknown, allowedCharacterIds: string[]) =
     if (!characterId) continue;
 
     const patch: Record<string, unknown> = { characterId };
-    const hpDelta = pickNumber(entry, ["hpDelta", "hp_delta", "hpChange", "hp_change"]);
+    const hpDelta = pickNumber(entry, [
+      "hpDelta",
+      "hp_delta",
+      "hpChange",
+      "hp_change",
+    ]);
     if (typeof hpDelta === "number") patch.hpDelta = hpDelta;
-    const hpTemp = pickNumber(entry, ["hpTemp", "hp_temp", "tempHp", "temp_hp"]);
+    const hpTemp = pickNumber(entry, [
+      "hpTemp",
+      "hp_temp",
+      "tempHp",
+      "temp_hp",
+    ]);
     if (typeof hpTemp === "number") patch.hpTemp = hpTemp;
     const status = pickString(entry, ["status", "condition"]);
     if (status) patch.status = status;
-    const notesAppend = pickString(entry, ["notesAppend", "notes_append", "notes"]);
+    const notesAppend = pickString(entry, [
+      "notesAppend",
+      "notes_append",
+      "notes",
+    ]);
     if (notesAppend) patch.notesAppend = notesAppend;
 
-    const inventoryRaw = entry.inventoryDelta ?? entry.inventory_delta ?? entry.inventory;
+    const inventoryRaw =
+      entry.inventoryDelta ?? entry.inventory_delta ?? entry.inventory;
     if (Array.isArray(inventoryRaw)) {
-      const inventoryDelta: Array<{ itemName: string; quantityDelta: number; detail?: string }> = [];
+      const inventoryDelta: Array<{
+        itemName: string;
+        quantityDelta: number;
+        detail?: string;
+      }> = [];
       for (const item of inventoryRaw) {
         if (!isRecord(item)) continue;
         const itemName = pickString(item, ["itemName", "item_name", "name"]);
@@ -263,7 +334,7 @@ const coerceCharacterPatches = (value: unknown, allowedCharacterIds: string[]) =
           "quantityDelta",
           "quantity_delta",
           "delta",
-          "change"
+          "change",
         ]);
         if (!itemName || typeof quantityDelta !== "number") continue;
         const detail = pickString(item, ["detail", "description"]);
@@ -286,7 +357,7 @@ const coerceCharacterPatches = (value: unknown, allowedCharacterIds: string[]) =
 
 const normalizeDmTurnPayload = (
   raw: Record<string, unknown>,
-  context: DmContextPacket
+  context: DmContextPacket,
 ): Record<string, unknown> => {
   const nested = ["patch", "turn", "result", "response", "data"]
     .map((key) => raw[key])
@@ -294,28 +365,34 @@ const normalizeDmTurnPayload = (
   const source = isRecord(nested) ? nested : raw;
 
   const worldPatch =
-    coerceWorldPatch(source.worldPatch ?? source.world_patch ?? source.worldState ?? source.world_state) ??
-    undefined;
+    coerceWorldPatch(
+      source.worldPatch ??
+        source.world_patch ??
+        source.worldState ??
+        source.world_state,
+    ) ?? undefined;
   const questPatches =
-    coerceQuestPatches(source.questPatches ?? source.quest_patches ?? source.quests) ?? undefined;
+    coerceQuestPatches(
+      source.questPatches ?? source.quest_patches ?? source.quests,
+    ) ?? undefined;
   const characterPatches =
     coerceCharacterPatches(
       source.characterPatches ?? source.character_patches ?? source.characters,
-      context.action.allowedCharacterIds ?? []
+      context.action.allowedCharacterIds ?? [],
     ) ?? undefined;
   const contextWorld = isRecord(context.worldState) ? context.worldState : {};
   const contextSceneSummary = pickString(contextWorld, [
     "sceneSummary",
     "scene_summary",
     "storyBeat",
-    "story_beat"
+    "story_beat",
   ]);
   const contextLocation = pickString(contextWorld, ["location"]);
   const contextWeather = pickString(contextWorld, ["weather"]);
   const synthesizedNarration = [
     contextSceneSummary,
     `Action taken: ${context.action.text.slice(0, 240)}`,
-    [contextLocation, contextWeather].filter(Boolean).join(" | ")
+    [contextLocation, contextWeather].filter(Boolean).join(" | "),
   ]
     .filter((entry): entry is string => Boolean(entry && entry.trim()))
     .join(" ");
@@ -329,22 +406,40 @@ const normalizeDmTurnPayload = (
       "openingNarration",
       "opening_narration",
       "story",
-      "text"
+      "text",
     ]) ??
     pickString(source, ["shortSummary", "short_summary", "summary"]) ??
-    (isRecord(worldPatch) && typeof worldPatch.sceneSummary === "string" ? worldPatch.sceneSummary : undefined) ??
+    (isRecord(worldPatch) && typeof worldPatch.sceneSummary === "string"
+      ? worldPatch.sceneSummary
+      : undefined) ??
     synthesizedNarration;
 
-  const shortSummary = pickString(source, ["shortSummary", "short_summary", "summary"]);
-  const rawResolution = isRecord(source.resolution) ? source.resolution : undefined;
-  const resolution = rawResolution ? {
-    kind: ["automatic", "roll_required", "consequence", "choice"].includes(String(rawResolution.kind)) ? rawResolution.kind : "automatic",
-    ...(pickString(rawResolution, ["reason", "why"]) ? { reason: pickString(rawResolution, ["reason", "why"]) } : {}),
-    ...(Array.isArray(rawResolution.newChoices) ? { newChoices: toStringArray(rawResolution.newChoices).slice(0, 6) } : {})
-  } : undefined;
+  const shortSummary = pickString(source, [
+    "shortSummary",
+    "short_summary",
+    "summary",
+  ]);
+  const rawResolution = isRecord(source.resolution)
+    ? source.resolution
+    : undefined;
+  const resolution = rawResolution
+    ? {
+        kind: ["automatic", "roll_required", "consequence", "choice"].includes(
+          String(rawResolution.kind),
+        )
+          ? rawResolution.kind
+          : "automatic",
+        ...(pickString(rawResolution, ["reason", "why"])
+          ? { reason: pickString(rawResolution, ["reason", "why"]) }
+          : {}),
+        ...(Array.isArray(rawResolution.newChoices)
+          ? { newChoices: toStringArray(rawResolution.newChoices).slice(0, 6) }
+          : {}),
+      }
+    : undefined;
 
   const normalized: Record<string, unknown> = {
-    narration
+    narration,
   };
   if (shortSummary) normalized.shortSummary = shortSummary;
   if (resolution) normalized.resolution = resolution;
@@ -370,37 +465,61 @@ const buildSystemPrompt = () =>
     "Use stateVector as source-of-truth for version and turn progression continuity.",
     "If context conflicts, prioritize pinned facts > summaries > recent turns.",
     'JSON shape example: {"narration":"...", "shortSummary":"...", "resolution":{"kind":"automatic|roll_required|consequence|choice","reason":"...","roll":{"expression":"d20","difficulty":13}}, "worldPatch":{}, "questPatches":[], "characterPatches":[]}',
-    "No markdown fencing."
+    "No markdown fencing.",
   ].join("\n");
 
-export const runContextAwareDmTurn = async (context: DmContextPacket, requestContext: DmRassyRequestContext): Promise<DmLlmCallResult> => {
-  const model = process.env.AI_DM_MODEL ?? process.env.RASSYMIND_MODEL ?? "rassy-fast";
+export const runContextAwareDmTurn = async (
+  context: DmContextPacket,
+  requestContext: DmRassyRequestContext,
+): Promise<DmLlmCallResult> => {
+  const model =
+    process.env.AI_DM_MODEL ?? process.env.RASSYMIND_MODEL ?? "rassy-fast";
   const messages: Array<{ role: "system" | "user"; content: string }> = [
     { role: "system", content: buildSystemPrompt() },
     {
       role: "user",
-      content: JSON.stringify(context)
-    }
+      content: JSON.stringify(context),
+    },
   ];
-  const payload = { model, temperature: 0.35, response_format: { type: "json_object" }, messages };
+  const payload = {
+    model,
+    temperature: 0.35,
+    response_format: { type: "json_object" },
+    messages,
+  };
 
-  const promptHash = crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+  const promptHash = crypto
+    .createHash("sha256")
+    .update(JSON.stringify(payload))
+    .digest("hex");
   const intelligenceStarted = Date.now();
   try {
-    const intelligence = await requestRassyChannel("dungeon-master", `${buildSystemPrompt()}\n\nAuthoritative campaign context:\n${JSON.stringify(context)}`, {
-      requestId: promptHash,
-      channelId: "dungeon-master",
-      viewer: { kind: "user", id: requestContext.userId, roles: ["player"] },
-      sessionId: requestContext.sessionId,
-      campaignId: requestContext.campaignId,
-      permissions: ["dm:play"],
-      locale: "en",
-      timeZone: "UTC",
-      modelPolicy: { allowedAliases: ["rassy-mind", "rassy-fast"], maxCalls: 3, deadlineMs: 45000, priority: "interactive" }
-    });
+    const intelligence = await requestRassyChannel(
+      "dungeon-master",
+      `${buildSystemPrompt()}\n\nAuthoritative campaign context:\n${JSON.stringify(context)}`,
+      {
+        requestId: promptHash,
+        channelId: "dungeon-master",
+        viewer: { kind: "user", id: requestContext.userId, roles: ["player"] },
+        sessionId: requestContext.sessionId,
+        campaignId: requestContext.campaignId,
+        permissions: ["dm:play"],
+        locale: "en",
+        timeZone: "UTC",
+        modelPolicy: {
+          allowedAliases: ["rassy-mind", "rassy-fast"],
+          maxCalls: 3,
+          deadlineMs: 45000,
+          priority: "interactive",
+        },
+      },
+    );
     const intelligenceText = intelligence.text;
     const intelligenceJson = parseJsonObjectFromText(intelligenceText);
-    const normalizedIntelligence = normalizeDmTurnPayload(intelligenceJson, context);
+    const normalizedIntelligence = normalizeDmTurnPayload(
+      intelligenceJson,
+      context,
+    );
     const intelligenceParsed = dmTurnSchema.safeParse(normalizedIntelligence);
     if (intelligenceParsed.success) {
       return {
@@ -408,15 +527,23 @@ export const runContextAwareDmTurn = async (context: DmContextPacket, requestCon
         model: process.env.RASSYMIND_MODEL ?? "rassy-mind",
         provider: "rassy-intelligence",
         latencyMs: Date.now() - intelligenceStarted,
-        promptPayload: { ...payload, provider: "rassy-intelligence", ...(intelligence.delegations ? { delegations: intelligence.delegations } : {}) },
+        promptPayload: {
+          ...payload,
+          provider: "rassy-intelligence",
+          ...(intelligence.delegations
+            ? { delegations: intelligence.delegations }
+            : {}),
+        },
         responseText: intelligenceText,
         responseJson: intelligenceJson,
-        promptHash
+        promptHash,
       };
     }
     throw new Error("rassy_intelligence_dm_invalid_response");
   } catch (error) {
-    throw new Error(`rassy_intelligence_dm_failed:${error instanceof Error ? error.message : "unknown"}`);
+    throw new Error(
+      `rassy_intelligence_dm_failed:${error instanceof Error ? error.message : "unknown"}`,
+    );
   }
 };
 
@@ -426,17 +553,19 @@ export const createFallbackTurn = (actionText: string): DmTurnPatch => {
     narration: [
       `Action recorded: ${actionText}`,
       "World continuity preserved under fallback mode.",
-      "The session state was updated and persisted."
+      "The session state was updated and persisted.",
     ].join(" "),
     shortSummary: "Fallback response generated because LLM was unavailable.",
     worldPatch: {
       storyBeat: `Fallback progression at ${now}`,
-      sceneSummary: actionText.slice(0, 240)
-    }
+      sceneSummary: actionText.slice(0, 240),
+    },
   };
 };
 
-export const embedTextWithRassyIntelligence = async (text: string): Promise<number[] | null> => {
+export const embedTextWithRassyIntelligence = async (
+  text: string,
+): Promise<number[] | null> => {
   const trimmed = text.trim();
   if (!trimmed) return null;
 

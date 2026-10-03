@@ -17,10 +17,13 @@ export async function GET() {
     const payload = await fetchPodcastShow();
     return NextResponse.json(payload ?? {}, {
       headers: {
-        "Cache-Control": "no-store"
-      }
+        "Cache-Control": "no-store",
+      },
     });
   } catch {
-    return NextResponse.json({ error: "podcasts_unavailable" }, { status: 502 });
+    return NextResponse.json(
+      { error: "podcasts_unavailable" },
+      { status: 502 },
+    );
   }
 }

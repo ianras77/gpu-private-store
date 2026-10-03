@@ -10,6 +10,9 @@ export async function POST() {
     await callAdmin("/admin/stinger");
     return NextResponse.json({ ok: true });
   } catch {
-    return NextResponse.json({ error: "radio_controller_unavailable" }, { status: 502 });
+    return NextResponse.json(
+      { error: "radio_controller_unavailable" },
+      { status: 502 },
+    );
   }
 }

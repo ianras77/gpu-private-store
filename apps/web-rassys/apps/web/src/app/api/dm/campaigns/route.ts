@@ -6,7 +6,7 @@ import {
   createCampaignForUser,
   getCampaignSnapshotForUser,
   listCampaignsForUser,
-  parseCreateCampaignInput
+  parseCreateCampaignInput,
 } from "../../../../lib/dm/service";
 
 export const runtime = "nodejs";
@@ -37,8 +37,15 @@ export async function POST(request: Request) {
 
     if (shouldBootstrap) {
       try {
-        bootstrapResult = await bootstrapCampaign(auth.session.userId, snapshot.campaign.id, bootstrapPrompt);
-        snapshot = await getCampaignSnapshotForUser(auth.session.userId, snapshot.campaign.id);
+        bootstrapResult = await bootstrapCampaign(
+          auth.session.userId,
+          snapshot.campaign.id,
+          bootstrapPrompt,
+        );
+        snapshot = await getCampaignSnapshotForUser(
+          auth.session.userId,
+          snapshot.campaign.id,
+        );
       } catch {
         bootstrapResult = null;
       }
@@ -47,17 +54,26 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         campaign: snapshot,
-        bootstrap: bootstrapResult
+        bootstrap: bootstrapResult,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json({ error: "invalid", details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "invalid", details: error.issues },
+        { status: 400 },
+      );
     }
     if (error instanceof Error && error.message === "system_not_supported") {
-      return NextResponse.json({ error: "system_not_supported" }, { status: 422 });
+      return NextResponse.json(
+        { error: "system_not_supported" },
+        { status: 422 },
+      );
     }
-    return NextResponse.json({ error: "campaign_create_failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "campaign_create_failed" },
+      { status: 500 },
+    );
   }
 }

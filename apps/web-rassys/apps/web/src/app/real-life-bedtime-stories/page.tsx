@@ -12,10 +12,12 @@ export const metadata: Metadata = {
 
 export default function RealLifeBedtimeStoriesPage() {
   return (
-    <RoomShell theme="stories" channel="stories" agent="storyteller"><main className="min-h-screen pb-6">
-      <BedtimeStoriesHero />
-      <BedtimeStoriesPanel />
-      <Footer />
-    </main></RoomShell>
+    <RoomShell theme="stories" channel="stories" agent="storyteller">
+      <main className="min-h-screen pb-6">
+        <BedtimeStoriesHero />
+        <BedtimeStoriesPanel />
+        <Footer />
+      </main>
+    </RoomShell>
   );
 }
