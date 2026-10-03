@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.deps import get_db, get_current_user
-from app.models import Reward, InventoryItem
-from app.schemas import RewardOut, InventoryItemOut
+
+from app.deps import get_current_user, get_db
+from app.models import InventoryItem, ProgressionLedgerEntry, Reward
+from app.schemas import InventoryItemOut, ProgressionLedgerOut, RewardOut
 from app.services.starter_content import ensure_user_baseline
 
 router = APIRouter(tags=["rewards"])
@@ -22,3 +23,14 @@ def list_inventory(db: Session = Depends(get_db), user=Depends(get_current_user)
         db.commit()
     items = db.query(InventoryItem).filter(InventoryItem.user_id == user.id).order_by(InventoryItem.updated_at.desc()).all()
     return items
+
+
+@router.get("/progression/ledger", response_model=list[ProgressionLedgerOut])
+def list_progression_ledger(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    return (
+        db.query(ProgressionLedgerEntry)
+        .filter(ProgressionLedgerEntry.user_id == user.id)
+        .order_by(ProgressionLedgerEntry.created_at.desc())
+        .limit(200)
+        .all()
+    )

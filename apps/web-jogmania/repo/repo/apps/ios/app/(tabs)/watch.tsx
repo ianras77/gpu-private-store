@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { AdventureSummary } from "@jogmania/shared";
+import type { AdventureSession, AdventureWorld } from "@jogmania/api-client";
 import { useAuth } from "../../components/AuthProvider";
 import { createApiClient } from "../../services/api";
 import {
@@ -31,6 +32,8 @@ export default function WatchScreen() {
   const [courseName, setCourseName] = useState<string | null>(null);
   const [latestAdventure, setLatestAdventure] = useState<AdventureSummary | null>(null);
   const [report, setReport] = useState<SyncReport | null>(null);
+  const [world, setWorld] = useState<AdventureWorld | null>(null);
+  const [story, setStory] = useState<AdventureSession | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -50,6 +53,7 @@ export default function WatchScreen() {
         setPartyId(context.party?.id ?? parties[0]?.id ?? null);
         setCourseId(context.activeCourse?.id ?? null);
         setCourseName(context.activeCourse?.name ?? null);
+        setWorld(await api.getAdventureWorld().catch(() => null));
       })
       .catch(() => {
         if (cancelled) return;
@@ -74,14 +78,19 @@ export default function WatchScreen() {
     setMessage(null);
     setLatestAdventure(null);
     setReport(null);
+    setStory(null);
 
     try {
       const device = await getWatchDevicePayload();
       if (partyId && courseId) {
         await api.enterWorld(partyId, courseId);
       }
+      const mission = courseId ? await api.createAdventureCartridge(courseId, "surprise") : null;
       await api.registerDevice(device);
       const payload = buildMockWatchWorkout();
+      const adventureEvents = mission?.events
+        .filter((event) => event.trigger_kind !== "distance" || event.trigger_value <= payload.distance_m)
+        .map((event) => ({ id: event.id })) ?? [];
       const workout = await api.createWorkout({
         ...payload,
         route_id: courseId,
@@ -92,7 +101,9 @@ export default function WatchScreen() {
           companion_device_id: device.companion_device_id,
           synced_via: "ios",
           course_id: courseId,
-          course_name: courseName
+          course_name: courseName,
+          ...(mission ? { adventure_session_id: mission.id } : {}),
+          adventure_events: adventureEvents
         }
       });
 
@@ -103,6 +114,10 @@ export default function WatchScreen() {
       ]);
 
       setLatestAdventure(adventure);
+      if (mission) {
+        setStory(await api.getAdventureSession(mission.id).catch(() => null));
+      }
+      setWorld(await api.getAdventureWorld().catch(() => null));
       setReport({
         courseName: courseName ?? "Adventure Course",
         points: progression?.points ?? 0,
@@ -123,14 +138,15 @@ export default function WatchScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 24 }}>
       <Text style={styles.title}>Watch Sync</Text>
       <Text style={styles.subtitle}>
-        This is a simulated Apple Watch pipeline until the native watchOS target is ready.
+        Your native Watch now carries a tiny adventure live. This screen sends a sample run so you can preview the story loop.
       </Text>
       <View style={styles.card}>
-        <Text style={styles.cardLabel}>Active Course</Text>
-        <Text style={styles.cardValue}>{courseName ?? "Loading your world..."}</Text>
-        <Text style={styles.message}>
-          Synced watch runs inherit the same course as the phone app so rewards and world events stay unified.
-        </Text>
+          <Text style={styles.cardLabel}>THE ARCADE IS GROWING</Text>
+          <Text style={styles.cardValue}>{courseName ?? "Loading your world..."}</Text>
+          <Text style={styles.message}>
+          {world?.chapter ?? "Marquee Mystery"} · {world?.arcade?.runs ?? 0} adventures · each discovery follows the real distance on your route.
+          </Text>
+          <Text style={styles.message}>Lights: {world?.arcade?.lights?.join(" · ") || "the marquee is waiting"}</Text>
       </View>
       <View style={styles.card}>
         <Text style={styles.cardLabel}>Status</Text>
@@ -147,7 +163,14 @@ export default function WatchScreen() {
           <Text style={styles.cardLabel}>Watch Mission</Text>
           <Text style={styles.cardValue}>{getAdventureHeadline(latestAdventure)}</Text>
           <Text style={styles.message}>{report.courseName}</Text>
-          <Text style={styles.reportLine}>+{report.points} course points</Text>
+          <Text style={styles.reportLine}>+{report.points} arcade sparks</Text>
+          {story?.recap && typeof story.recap.story === "string" ? (
+            <View style={styles.recap}>
+              <Text style={styles.recapTitle}>{String(story.recap.headline ?? "A little story from the trail")}</Text>
+              <Text style={styles.message}>{story.recap.story}</Text>
+              {typeof story.recap.next_hook === "string" ? <Text style={styles.recapHook}>Next: {story.recap.next_hook}</Text> : null}
+            </View>
+          ) : null}
           {report.rewards.length ? (
             <Text style={styles.reportLine}>Unlocked: {report.rewards.join(", ")}</Text>
           ) : null}
@@ -168,7 +191,7 @@ export default function WatchScreen() {
         <Text style={styles.buttonText}>Sync Demo Watch Run</Text>
       </Pressable>
       <Text style={styles.note}>
-        The sync also registers a linked watch profile so your account can track handset-to-watch status.
+        To take a live run, open the Jogmania Watch app. The purple mission card follows distance, taps your wrist for discoveries, and syncs a Worldkeeper recap afterward.
       </Text>
     </ScrollView>
   );
@@ -185,5 +208,8 @@ const styles = StyleSheet.create({
   reportLine: { color: "#f5f7ff", fontSize: 13, marginTop: 8 },
   button: { backgroundColor: "#37e6ff", padding: 14, borderRadius: 999, alignItems: "center" },
   buttonText: { color: "#0a0b12", fontWeight: "700" },
-  note: { color: "#8a91b4", marginTop: 16, fontSize: 12 }
+  note: { color: "#8a91b4", marginTop: 16, fontSize: 12 },
+  recap: { backgroundColor: "#0b1020", borderColor: "#51426c", borderWidth: 1, borderRadius: 12, marginTop: 12, padding: 12 },
+  recapTitle: { color: "#ffd84d", fontWeight: "700", marginTop: 8 },
+  recapHook: { color: "#37e6ff", fontSize: 11, marginTop: 8 }
 });

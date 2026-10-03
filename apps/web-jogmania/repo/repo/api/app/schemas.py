@@ -1,7 +1,16 @@
 import uuid
-from typing import List, Optional, Dict, Any
-from pydantic import AliasChoices, BaseModel, Field, ConfigDict, EmailStr, field_validator, model_validator
 from datetime import datetime
+from typing import Any, Dict, List, Literal, Optional
+
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 
 class AuthResponse(BaseModel):
@@ -136,12 +145,12 @@ class WorkoutCreate(WorkoutBase):
     @field_validator("gps_points")
     @classmethod
     def validate_gps_points(cls, value: List[GpsPointCreate]):
-        if len(value) < 2:
-            raise ValueError("At least 2 GPS points are required")
         return value
 
     @model_validator(mode="after")
     def validate_gps_order(self):
+        if len(self.gps_points) < 2 and self.route_id is None:
+            raise ValueError("A saved course is required when a route trace is unavailable")
         for previous, current in zip(self.gps_points, self.gps_points[1:]):
             if current.timestamp < previous.timestamp:
                 raise ValueError("GPS points must be in chronological order")
@@ -189,6 +198,27 @@ class RouteDetail(RouteOut):
     workouts: List[WorkoutOut]
 
 
+class CourseChapterOut(BaseModel):
+    visits_required: int
+    title: str
+    story: str
+    keepsake: str
+    keepsake_icon: str
+    item_key: str
+    unlocked: bool
+
+
+class CourseMasteryOut(BaseModel):
+    route_id: uuid.UUID
+    route_name: str
+    visits: int
+    level: int
+    title: str
+    progress_percent: int
+    next_chapter: Optional[CourseChapterOut] = None
+    chapters: List[CourseChapterOut]
+
+
 class AdventureSummary(BaseModel):
     title: str
     seed: int
@@ -207,6 +237,89 @@ class AdventureOut(BaseModel):
 
     id: uuid.UUID
     summary_json: Dict[str, Any]
+    created_at: datetime
+
+
+class RunnerPreferences(BaseModel):
+    adventure_tone: Literal["silly", "storybook", "mystery"] = "storybook"
+    run_intention: Literal["easy", "steady", "explore", "repeat", "surprise"] = "surprise"
+    haptics_enabled: bool = True
+    health_data_enabled: bool = False
+    story_feedback: Literal["default", "more_grounded", "more_silly", "shorter"] = "default"
+
+
+class RunnerProfileUpdate(BaseModel):
+    adventure_tone: Optional[Literal["silly", "storybook", "mystery"]] = None
+    run_intention: Optional[Literal["easy", "steady", "explore", "repeat", "surprise"]] = None
+    haptics_enabled: Optional[bool] = None
+    health_data_enabled: Optional[bool] = None
+    story_feedback: Optional[Literal["default", "more_grounded", "more_silly", "shorter"]] = None
+
+
+class AdventureFeedbackCreate(BaseModel):
+    felt_personal: bool
+    style_correction: Literal["default", "more_grounded", "more_silly", "shorter"] = "default"
+
+
+class ProgressionLedgerOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    workout_id: uuid.UUID
+    ledger_version: int
+    reason_code: str
+    sparks: int
+    payload_json: Dict[str, Any]
+    created_at: datetime
+
+
+class RunnerProfileOut(BaseModel):
+    preferences: RunnerPreferences
+    snapshot: Dict[str, Any] = Field(default_factory=dict)
+
+
+class CartridgeCreate(BaseModel):
+    route_id: Optional[uuid.UUID] = None
+    intent: Literal["easy", "steady", "explore", "repeat", "surprise"] = "surprise"
+
+
+class CartridgeEvent(BaseModel):
+    id: str
+    trigger_kind: Literal["distance", "elapsed"]
+    trigger_value: int = Field(ge=1)
+    kind: Literal["discovery", "companion", "collectible", "chapter", "finish"]
+    title: str
+    message: str
+    visual_key: str
+    haptic: Literal["tap", "success", "celebration"] = "tap"
+
+
+class CartridgeOut(BaseModel):
+    id: uuid.UUID
+    title: str
+    world_name: str
+    course_name: str
+    intent: str
+    opening_line: str
+    finish_line: str
+    events: List[CartridgeEvent]
+    reward_preview: str
+    target_distance_m: int = 3200
+    haptics_enabled: bool = True
+    health_data_enabled: bool = False
+    intelligence: Literal["mastra", "fallback"]
+    runner_snapshot: Dict[str, Any] = Field(default_factory=dict)
+
+
+class AdventureSessionOut(BaseModel):
+    id: uuid.UUID
+    route_id: Optional[uuid.UUID] = None
+    status: str
+    cartridge: Dict[str, Any]
+    event_log: List[Dict[str, Any]] = Field(default_factory=list)
+    recap: Dict[str, Any] = Field(default_factory=dict)
+    world_change: Dict[str, Any] = Field(default_factory=dict)
+    workout_id: Optional[uuid.UUID] = None
     created_at: datetime
 
 
@@ -266,7 +379,23 @@ class WorldEventOut(BaseModel):
     title: str
     payload_json: Dict[str, Any]
     created_at: datetime
-    workout_id: Optional[uuid.UUID] = None
+
+
+class WorldDecorationOut(BaseModel):
+    slot: str
+    item_key: str
+    title: str
+    icon: str
+    owned_by_me: bool
+    placed_at: datetime
+
+
+class WorldDecorationPlace(BaseModel):
+    slot: Literal[
+        "roof-left", "roof-center", "roof-right",
+        "window-left", "window-right", "garden-left", "garden-center", "garden-right",
+    ]
+    item_key: Literal["lantern-arch", "prize-fox", "star-bunting", "flower-pot", "neon-puddle"]
 
 
 class PartyCreate(BaseModel):
@@ -276,11 +405,23 @@ class PartyCreate(BaseModel):
     members: List[PartyMemberCreate] = Field(default_factory=list)
 
 
+class PartyJoin(BaseModel):
+    invite_code: str = Field(min_length=6, max_length=16)
+    display_name: str = Field(min_length=1, max_length=40)
+
+    @field_validator("invite_code", "display_name")
+    @classmethod
+    def strip_party_join_fields(cls, value: str):
+        return value.strip()
+
+
 class PartyOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
     name: str
+    invite_code: str
+    is_worldkeeper: bool = False
     created_at: datetime
     members: List[PartyMemberOut] = Field(default_factory=list)
     world: Optional[WorldOut] = None

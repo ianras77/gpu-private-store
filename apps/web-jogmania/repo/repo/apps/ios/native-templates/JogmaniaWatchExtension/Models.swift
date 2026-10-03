@@ -12,6 +12,7 @@ struct RouteSummary: Codable, Identifiable, Hashable {
   let id: String
   let name: String
   let is_course: Bool
+  let distance_m: Double?
 }
 
 struct WorldSummary: Codable {
@@ -30,6 +31,50 @@ struct AdventureContext {
   let party: PartySummary?
   let courses: [RouteSummary]
   let activeCourse: RouteSummary?
+}
+
+struct AdventureCartridge: Codable, Identifiable {
+  let id: String
+  let title: String
+  let world_name: String
+  let course_name: String
+  let intent: String
+  let opening_line: String
+  let finish_line: String
+  let events: [AdventureBeat]
+  let reward_preview: String
+  let target_distance_m: Int
+  let haptics_enabled: Bool
+  let health_data_enabled: Bool?
+  let intelligence: String
+  let runner_snapshot: [String: JSONValue]
+}
+
+struct AdventureBeat: Codable, Identifiable {
+  let id: String
+  let trigger_kind: String
+  let trigger_value: Int
+  let kind: String
+  let title: String
+  let message: String
+  let visual_key: String
+  let haptic: String
+}
+
+struct CachedCartridge: Codable {
+  let cartridge: AdventureCartridge
+  let serverBacked: Bool
+}
+
+struct AdventureBeatLog: Codable {
+  let id: String
+  let title: String
+  let kind: String
+}
+
+struct AdventureCartridgeRequest: Codable {
+  let route_id: String
+  let intent: String
 }
 
 struct DeviceRegisterPayload: Codable {
@@ -119,6 +164,35 @@ struct WorkoutCreatePayload: Codable {
   let gps_points: [GPSPointPayload]
 }
 
+struct QueuedWorkoutUpload: Codable, Identifiable {
+  let id: String
+  let payload: WorkoutCreatePayload
+  let queuedAt: Date
+}
+
+struct WatchRunDraft: Codable {
+  let savedAt: Date
+  let startedAt: Date
+  let activeCourse: RouteSummary?
+  let primaryParty: PartySummary?
+  let currentAdventure: AdventureCartridge?
+  let adventureEvents: [AdventureBeatLog]
+  let gpsPoints: [GPSPointPayload]
+  let distanceMeters: Double
+  let elapsedSeconds: Int
+  let pausedDuration: TimeInterval
+  let pauseStartedAt: Date?
+  let isPaused: Bool
+  let healthDataEnabled: Bool
+  let averageHeartRate: Double?
+  let caloriesBurned: Double?
+  let heartRateSamples: [JSONValue]
+  let lastHeartRateSampleAt: Date?
+  let lastHeartRateSampleBpm: Double?
+  let adventureServerBacked: Bool
+  let phoneDeviceId: String?
+}
+
 struct WorkoutDetail: Codable {
   let id: String
   let raw_payload_json: UploadMetadata?
@@ -127,11 +201,18 @@ struct WorkoutDetail: Codable {
 struct UploadMetadata: Codable {
   let progression: ProgressionSummary?
   let world_events: [WorldEventSummary]?
+  let adventure_recap: AdventureRecap?
+}
+
+struct AdventureRecap: Codable {
+  let headline: String
+  let story: String
+  let evidence_label: String?
+  let next_hook: String?
 }
 
 struct ProgressionSummary: Codable {
   let points: Int
-  let improvement_s_per_km: Double?
   let rewards: [String]
   let inventory: [String: Int]
 }
@@ -146,4 +227,5 @@ struct UploadReport {
   let points: Int
   let rewards: [String]
   let worldEvents: [WorldEventSummary]
+  let recap: AdventureRecap?
 }

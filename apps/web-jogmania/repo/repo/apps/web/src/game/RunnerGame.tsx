@@ -12,7 +12,6 @@ export type RunEvent = {
 export type RunSummary = {
   distance_m: number;
   duration_s: number;
-  avg_pace_s_per_km: number;
   events: RunEvent[];
 };
 
@@ -20,6 +19,8 @@ export type Metrics = {
   pace: number;
   streak: number;
   xp: number;
+  distance_m?: number;
+  elapsed_s?: number;
 };
 
 type RunnerGameProps = {
@@ -240,12 +241,10 @@ export default function RunnerGame({
       finishedRef.current = true;
       const durationS = Math.max(1, Math.floor(elapsedRef.current));
       const distanceM = Math.max(1, Math.floor(distanceRef.current));
-      const avgPace = Math.round(durationS / (distanceM / 1000));
       eventsRef.current.push({ type: reason, ts_s: Math.floor(elapsedRef.current), data: {} });
       onGameOver({
         distance_m: distanceM,
         duration_s: durationS,
-        avg_pace_s_per_km: avgPace,
         events: eventsRef.current
       });
     };
@@ -316,7 +315,11 @@ export default function RunnerGame({
       if (performance.now() - lastMetricUpdate > 200) {
         lastMetricUpdate = performance.now();
         metricsRef.current.pace = pace;
-        onMetrics({ ...metricsRef.current });
+        onMetrics({
+          ...metricsRef.current,
+          distance_m: distanceRef.current,
+          elapsed_s: elapsedRef.current
+        });
       }
     });
 

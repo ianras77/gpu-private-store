@@ -1,32 +1,54 @@
+import random
 import uuid
 
-import random
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
-from app.deps import get_db, get_current_user
-from app.models import Party, PartyMember, World, WorldEvent, Route, Workout, GpsPoint
+from app.deps import get_current_user, get_db
+from app.models import GpsPoint, Party, PartyMember, Route, Workout, World, WorldEvent
 from app.schemas import (
     PartyCreate,
-    PartyOut,
+    PartyJoin,
     PartyMemberCreate,
     PartyMemberOut,
-    WorldOut,
+    PartyOut,
     WorldEnter,
+    WorldEventOut,
+    WorldOut,
     WorldPlay,
-    WorldEventOut
 )
 from app.services.fama_world import pick_world_name
 from app.services.starter_content import ensure_user_baseline
-from app.services.worlds import create_world_event, get_world_event_for_workout, resolve_workout_adventure
+from app.services.worlds import (
+    create_world_event,
+    get_world_event_for_workout,
+    resolve_workout_adventure,
+)
 
 router = APIRouter(prefix="/parties", tags=["parties"])
 
 
+def _party_response(party: Party, user_id) -> PartyOut:
+    response = PartyOut.model_validate(party)
+    is_worldkeeper = party.user_id == user_id
+    updates = {"is_worldkeeper": is_worldkeeper}
+    if response.world is not None and not is_worldkeeper:
+        world_state = dict(response.world.state_json or {})
+        world_state.pop("course_id", None)
+        arcade_state = dict(world_state.get("arcade") or {})
+        arcade_state.pop("last_workout_id", None)
+        world_state["arcade"] = arcade_state
+        updates["world"] = response.world.model_copy(update={"route_id": None, "state_json": world_state})
+    return response.model_copy(update=updates)
+
+
 def _party_or_404(db: Session, party_id: uuid.UUID, user_id):
-    party = db.query(Party).filter(Party.id == party_id, Party.user_id == user_id).first()
+    membership = db.query(PartyMember.party_id).filter(PartyMember.user_id == user_id)
+    party = db.query(Party).filter(
+        Party.id == party_id,
+        or_(Party.user_id == user_id, Party.id.in_(membership)),
+    ).first()
     if not party:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Party not found")
     return party
@@ -36,8 +58,34 @@ def _party_or_404(db: Session, party_id: uuid.UUID, user_id):
 def list_parties(db: Session = Depends(get_db), user=Depends(get_current_user)):
     if ensure_user_baseline(db, user.id):
         db.commit()
-    parties = db.query(Party).filter(Party.user_id == user.id).order_by(Party.created_at.desc()).all()
-    return parties
+    membership = db.query(PartyMember.party_id).filter(PartyMember.user_id == user.id)
+    parties = db.query(Party).filter(
+        or_(Party.user_id == user.id, Party.id.in_(membership))
+    ).order_by(Party.created_at.desc()).all()
+    return [_party_response(party, user.id) for party in parties]
+
+
+@router.post("/join", response_model=PartyOut)
+def join_party(payload: PartyJoin, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    code = payload.invite_code.strip().upper()
+    party = db.query(Party).filter(Party.invite_code == code).first()
+    if party is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invite code not found")
+    if party.user_id != user.id:
+        existing = db.query(PartyMember).filter(
+            PartyMember.party_id == party.id,
+            PartyMember.user_id == user.id,
+        ).first()
+        if existing is None:
+            db.add(PartyMember(
+                party_id=party.id,
+                user_id=user.id,
+                name=payload.display_name.strip(),
+                role="Runner",
+            ))
+            db.commit()
+            db.refresh(party)
+    return _party_response(party, user.id)
 
 
 @router.post("", response_model=PartyOut)
@@ -55,13 +103,28 @@ def create_party(payload: PartyCreate, db: Session = Depends(get_db), user=Depen
 
     db.commit()
     db.refresh(party)
-    return party
+    return _party_response(party, user.id)
 
 
 @router.get("/{party_id}", response_model=PartyOut)
 def get_party(party_id: uuid.UUID, db: Session = Depends(get_db), user=Depends(get_current_user)):
     party = _party_or_404(db, party_id, user.id)
-    return party
+    return _party_response(party, user.id)
+
+
+@router.delete("/{party_id}/leave")
+def leave_party(party_id: uuid.UUID, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    party = _party_or_404(db, party_id, user.id)
+    if party.user_id == user.id:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="The world keeper cannot leave their own arcade")
+    membership = db.query(PartyMember).filter(
+        PartyMember.party_id == party.id,
+        PartyMember.user_id == user.id,
+    ).first()
+    if membership:
+        db.delete(membership)
+        db.commit()
+    return {"left": True}
 
 
 @router.post("/{party_id}/members", response_model=PartyMemberOut)

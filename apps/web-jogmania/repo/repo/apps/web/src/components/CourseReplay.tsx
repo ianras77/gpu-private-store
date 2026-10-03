@@ -1,17 +1,8 @@
 import type { AdventureSummary, GpsPoint, Workout } from "@jogmania/shared";
+import type { AdventureSession } from "@jogmania/api-client";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { SpeedGraph } from "@/components/SpeedGraph";
-import {
-  computeSegmentStats,
-  computeSpeedSeries,
-  consistencyScore,
-  formatDuration,
-  formatPace,
-  heartRateZone,
-  sprintCount,
-  SegmentDefinition
-} from "@/lib/metrics";
+import { computeSegmentStats, formatDuration, SegmentDefinition } from "@/lib/metrics";
 
 type WorkoutDetail = Workout & { gps_points: GpsPoint[]; route_id?: string | null };
 
@@ -21,277 +12,125 @@ function buildSegments(adventure: AdventureSummary | null, totalDistance: number
       index: idx,
       start_m: segment.distance_start_m,
       end_m: Math.min(totalDistance, segment.distance_end_m),
-      label: `Segment ${idx + 1}`,
+      label: segment.chapter_title ?? `Chapter ${idx + 1}`,
       biome: segment.biome,
       hazards: segment.hazards,
       loot: segment.loot
     }));
   }
-  if (!Number.isFinite(totalDistance) || totalDistance <= 0) {
-    return [];
-  }
-  const step = totalDistance / 3;
-  return Array.from({ length: 3 }, (_, idx) => ({
-    index: idx,
-    start_m: step * idx,
-    end_m: step * (idx + 1),
-    label: `Segment ${idx + 1}`
+  if (!Number.isFinite(totalDistance) || totalDistance <= 0) return [];
+  const checkpointSize = 600;
+  const chapterCount = Math.max(1, Math.ceil(totalDistance / checkpointSize));
+  return Array.from({ length: chapterCount }, (_, index) => ({
+    index,
+    start_m: checkpointSize * index,
+    end_m: Math.min(totalDistance, checkpointSize * (index + 1)),
+    label: chapterCount === 1 ? "One Big Adventure" : index === 0 ? "The First Clue" : index === chapterCount - 1 ? "The Grand Finale" : `Field Chapter ${index + 1}`
   }));
 }
 
 export function CourseReplay({
   run,
   adventure,
-  attempts
+  attempts,
+  story
 }: {
   run: WorkoutDetail;
   adventure: AdventureSummary | null;
   attempts: WorkoutDetail[];
+  story?: AdventureSession | null;
 }) {
   const totalDistance = Number.isFinite(run.distance_m) ? run.distance_m : 0;
   const segments = buildSegments(adventure, totalDistance);
   const segmentStats = computeSegmentStats(run.gps_points || [], segments);
-  const previousStats = attempts
-    .filter((attempt) => attempt.id !== run.id)
-    .map((attempt) => computeSegmentStats(attempt.gps_points || [], segments));
+  const souvenirs = adventure?.collectibles ?? [];
+  const visitCount = Math.max(1, attempts.length);
+  const foundMoments = story?.event_log ?? [];
 
-  const bestPrev = segments.map((_, idx) => {
-    const paces = previousStats
-      .map((stats) => stats[idx]?.pace_s_per_km)
-      .filter((pace): pace is number => Number.isFinite(pace));
-    return paces.length ? Math.min(...paces) : null;
-  });
-
-  const scoredSegments = segments.map((segment, idx) => {
-    const stat = segmentStats[idx];
-    const baseline = bestPrev[idx];
-    if (!stat) {
-      return {
-        ...segment,
-        paceLabel: "-",
-        durationLabel: "-",
-        deltaLabel: "Baseline pending",
-        points: 0,
-        improved: false,
-        hazardClear: false,
-        improvementPct: 0
-      };
+  const momentIcon = (visualKey?: string) => {
+    switch (visualKey) {
+      case "marquee": return "✨";
+      case "token": return "🪙";
+      case "mouse": return "🐭";
+      case "fox": return "🦊";
+      case "moth": return "🦋";
+      case "flower":
+      case "garden": return "🌼";
+      case "kite":
+      case "bridge": return "🪁";
+      case "arcade": return "🕹️";
+      default: return "✦";
     }
-    if (!baseline) {
-      return {
-        ...segment,
-        paceLabel: formatPace(stat.pace_s_per_km),
-        durationLabel: formatDuration(stat.duration_s),
-        deltaLabel: "Set baseline",
-        points: 0,
-        improved: false,
-        hazardClear: false,
-        improvementPct: 0
-      };
-    }
-    const delta = baseline - stat.pace_s_per_km;
-    const improvement = delta / baseline;
-    const points = improvement > 0 ? Math.round(improvement * 200) : 0;
-    const hazardClear = improvement >= 0.05;
-    return {
-      ...segment,
-      paceLabel: formatPace(stat.pace_s_per_km),
-      durationLabel: formatDuration(stat.duration_s),
-      deltaLabel: delta > 0 ? `Faster by ${Math.round(delta)} s/km` : "No gain",
-      points,
-      improved: improvement > 0,
-      hazardClear,
-      improvementPct: Math.max(0, Math.round(improvement * 100))
-    };
-  });
-
-  const improvedCount = scoredSegments.filter((segment) => segment.improved).length;
-  const hazardClears = scoredSegments.filter((segment) => segment.hazardClear).length;
-  let streak = 0;
-  let bestStreak = 0;
-  scoredSegments.forEach((segment) => {
-    if (segment.improved) {
-      streak += 1;
-      bestStreak = Math.max(bestStreak, streak);
-    } else {
-      streak = 0;
-    }
-  });
-  const streakBonus = bestStreak >= 2 ? (bestStreak - 1) * 30 : 0;
-  const hazardBonus = hazardClears * 40;
-  const basePoints = segments.length * 50;
-  const speedPoints = scoredSegments.reduce((acc, segment) => acc + segment.points, 0);
-
-  const hrZone = heartRateZone(run.avg_hr);
-  const hrBonus =
-    !run.avg_hr || !Number.isFinite(run.avg_hr)
-      ? 0
-      : run.avg_hr < 120
-        ? 0
-        : run.avg_hr < 140
-          ? 20
-          : run.avg_hr < 160
-            ? 50
-            : run.avg_hr < 175
-              ? 80
-              : 120;
-  const speedSeries = computeSpeedSeries(run.gps_points || []);
-  const flowScore = Math.round(consistencyScore(speedSeries));
-  const flowBonus = flowScore >= 85 ? 120 : flowScore >= 70 ? 60 : 0;
-  const sprints = Math.max(0, Math.round(sprintCount(speedSeries) / 3));
-  const totalPoints = basePoints + speedPoints + hazardBonus + streakBonus + hrBonus + flowBonus;
-  const featureNumber = (key: string) => {
-    const value = adventure?.route_features?.[key];
-    return typeof value === "number" && Number.isFinite(value) ? value : 0;
   };
-  const detectedFeatures = [
-    { label: "Climbs", value: featureNumber("climb_count") },
-    { label: "Turns", value: featureNumber("turn_count") },
-    { label: "Pulse Gates", value: featureNumber("high_hr_moments") },
-    { label: "Sprint Gates", value: featureNumber("pace_surge_count") }
-  ].filter((feature) => feature.value > 0);
-  const rank =
-    totalPoints >= 700 ? "S" : totalPoints >= 550 ? "A" : totalPoints >= 400 ? "B" : "C";
-  const momentum = segments.length
-    ? Math.min(100, Math.round(flowScore * 0.6 + (improvedCount / segments.length) * 40))
-    : 0;
-  const comboMeter = segments.length ? Math.round((bestStreak / segments.length) * 100) : 0;
-  const hazardRate = segments.length ? Math.round((hazardClears / segments.length) * 100) : 0;
 
   return (
     <Card className="p-6 jm-holo">
-      <div className="flex items-start justify-between flex-wrap gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="jm-kicker">Course Replay</p>
-          <h3 className="font-display text-2xl">{adventure?.title ?? "Adventure Course"}</h3>
-          <p className="text-xs text-jm-muted mt-1">Gamified splits, hazards, and performance flow.</p>
+          <p className="jm-kicker">Trail Story</p>
+          <h3 className="font-display text-2xl">{adventure?.title ?? story?.cartridge?.title ?? "A little world in the open air"}</h3>
+          <p className="mt-1 text-sm text-jm-muted">A route-sized story that gets a little more familiar every time you return.</p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Badge tone={hrZone.tone}>{hrZone.label}</Badge>
-          <Badge tone={totalPoints > 0 ? "magenta" : "slate"}>+{totalPoints} pts</Badge>
-        </div>
-      </div>
-
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
-        <div className="jm-score-orb jm-spark">
-          <div className="text-center">
-            <div className="jm-rank">{rank}</div>
-            <div className="text-xs text-jm-muted uppercase tracking-[0.3em]">Rank</div>
-            <div className="mt-2 text-sm text-jm-cyan">{totalPoints} pts</div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <div className="flex items-center justify-between text-xs text-jm-muted">
-              <span>Momentum</span>
-              <span>{momentum}%</span>
-            </div>
-            <div className="jm-meter mt-2">
-              <span style={{ width: `${momentum}%` }} />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between text-xs text-jm-muted">
-              <span>Combo Chain</span>
-              <span>x{bestStreak}</span>
-            </div>
-            <div className="jm-meter mt-2">
-              <span style={{ width: `${comboMeter}%` }} />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between text-xs text-jm-muted">
-              <span>Pitfall Clears</span>
-              <span>{hazardRate}%</span>
-            </div>
-            <div className="jm-meter mt-2">
-              <span style={{ width: `${hazardRate}%` }} />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="p-3 rounded-xl bg-jm-surface/90 border border-white/10">
-              <p className="jm-kicker">Flow</p>
-              <p className="font-display text-xl text-jm-cyan mt-2">{flowScore}</p>
-              <p className="text-xs text-jm-muted mt-1">Bonus +{flowBonus}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-jm-surface/90 border border-white/10">
-              <p className="jm-kicker">Sprint Bursts</p>
-              <p className="font-display text-xl text-jm-acid mt-2">{sprints}</p>
-              <p className="text-xs text-jm-muted mt-1">Speed spikes</p>
-            </div>
-            <div className="p-3 rounded-xl bg-jm-surface/90 border border-white/10">
-              <p className="jm-kicker">Pitfall Clears</p>
-              <p className="font-display text-xl text-jm-magenta mt-2">{hazardClears}</p>
-              <p className="text-xs text-jm-muted mt-1">Bonus +{hazardBonus}</p>
-            </div>
-          </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge tone="cyan">{visitCount} {visitCount === 1 ? "visit" : "visits"}</Badge>
+          {story ? <Badge tone={story.cartridge.intelligence === "mastra" ? "magenta" : "slate"}>{story.cartridge.intelligence === "mastra" ? "Worldkeeper story" : "Arcade story"}</Badge> : null}
         </div>
       </div>
 
-      <div className="mt-6">
-        <SpeedGraph speeds={speedSeries} />
-      </div>
+      {story?.recap && typeof story.recap.story === "string" ? (
+        <div className="mt-5 rounded-2xl border border-neon-yellow/25 bg-gradient-to-br from-[#25133a] to-[#071f2b] p-5">
+          <p className="font-pixel text-neon-yellow text-xs">{String(story.recap.headline ?? "A postcard from the trail")}</p>
+          <p className="mt-3 text-sm leading-6 text-white/85">{story.recap.story}</p>
+          {typeof story.recap.evidence_label === "string" ? <p className="mt-3 text-xs text-neon-cyan">Jogmania noticed: {story.recap.evidence_label}</p> : null}
+          {typeof story.recap.next_hook === "string" ? <p className="mt-2 text-xs text-neon-pink">Next time: {story.recap.next_hook}</p> : null}
+        </div>
+      ) : adventure?.scenes?.[0] ? (
+        <div className="mt-5 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/80">{adventure.scenes[0]}</div>
+      ) : null}
 
-      <div className="mt-5 flex flex-wrap gap-2 text-[0.65rem] text-jm-muted">
-        <span className="jm-chip text-jm-cyan">Split Gains {improvedCount}/{segments.length}</span>
-        <span className="jm-chip text-jm-magenta">Combo x{bestStreak}</span>
-        <span className="jm-chip text-jm-acid">Hazard Bonus +{hazardBonus}</span>
-        <span className="jm-chip text-jm-muted">HR Bonus +{hrBonus}</span>
-        <span className="jm-chip text-jm-cyan">Base {basePoints}</span>
-        <span className="jm-chip text-jm-acid">Speed +{speedPoints}</span>
-        {detectedFeatures.map((feature) => (
-          <span key={feature.label} className="jm-chip text-jm-magenta">
-            {feature.label} {feature.value}
-          </span>
-        ))}
-      </div>
-
-      {adventure?.collectibles?.length ? (
-        <div className="mt-4 flex flex-wrap gap-2 text-[0.65rem] text-jm-muted">
-          {adventure.collectibles.map((item) => (
-            <span key={item} className="jm-chip text-jm-magenta">Loot · {item}</span>
-          ))}
+      {foundMoments.length > 0 ? (
+        <div className="mt-5 rounded-2xl border border-neon-cyan/20 bg-neon-cyan/5 p-4">
+          <p className="jm-kicker">Little moments from the run</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {foundMoments.map((moment) => {
+              const visualKey = story?.cartridge.events.find((event) => event.id === moment.id)?.visual_key;
+              return <span key={moment.id} className="jm-chip border-neon-cyan/15 text-neon-cyan">
+                <span aria-hidden="true" className="mr-1">{momentIcon(visualKey)}</span>{moment.title}
+              </span>;
+            })}
+          </div>
         </div>
       ) : null}
 
-      <div className="mt-6 jm-track md:grid-cols-3">
-        {scoredSegments.map((segment) => (
-          <div key={`${segment.label}-${segment.start_m}`} className="jm-track-segment">
-            <div className="p-4 bg-jm-surface/90 rounded-xl border border-white/10">
-              <p className="text-[0.55rem] uppercase tracking-[0.3em] text-jm-cyan">
-                {segment.biome ?? segment.label}
-              </p>
-              <p className="text-sm text-jm-text mt-2">
-                {segment.paceLabel} · {segment.durationLabel}
-              </p>
-              <p className="text-xs text-jm-muted mt-2">{segment.deltaLabel}</p>
-              <div className="mt-3">
-                <div className="flex items-center justify-between text-[0.55rem] uppercase tracking-[0.3em] text-jm-muted">
-                  <span>Boost</span>
-                  <span>{segment.improvementPct}%</span>
-                </div>
-                <div className="jm-meter mt-2">
-                  <span style={{ width: `${segment.improvementPct}%` }} />
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2 text-[0.6rem] text-jm-muted">
-                {segment.hazards?.slice(0, 2).map((hazard) => (
-                  <span key={hazard} className="jm-chip text-jm-magenta">{hazard}</span>
-                ))}
-                {segment.loot?.slice(0, 1).map((loot) => (
-                  <span key={loot} className="jm-chip text-jm-acid">{loot}</span>
-                ))}
-                {segment.hazardClear && <span className="jm-chip text-jm-acid">Hazard Clear</span>}
-                {segment.points > 0 && <span className="jm-chip text-jm-cyan">+{segment.points} pts</span>}
-              </div>
+      <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
+        {segments.map((segment, index) => {
+          const stat = segmentStats[index];
+          const span = Math.max(0, segment.end_m - segment.start_m);
+          const decoration = souvenirs[index % Math.max(1, souvenirs.length)];
+          return (
+            <div key={`${segment.label}-${segment.start_m}`} className="relative overflow-hidden rounded-2xl border border-white/10 bg-jm-surface/80 p-4">
+              <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-neon-cyan/10 blur-xl" />
+              <p className="relative text-[10px] uppercase tracking-[0.25em] text-jm-cyan">{segment.biome ?? segment.label}</p>
+              <p className="relative mt-2 font-display text-xl text-white">{segment.label}</p>
+              <p className="relative mt-2 text-xs text-jm-muted">{Math.round(segment.start_m)}–{Math.round(segment.end_m)} m of your real route</p>
+              <p className="relative mt-1 text-xs text-jm-muted">{formatDuration(stat?.duration_s ?? 0)} together outside</p>
+              {decoration ? <p className="relative mt-3 rounded-full border border-neon-yellow/20 bg-black/20 px-3 py-1 text-[11px] text-neon-yellow">✦ {decoration}</p> : null}
+              {!decoration && span > 0 ? <p className="relative mt-3 text-[11px] text-jm-muted">A new detail will appear on your next visit.</p> : null}
             </div>
-          </div>
-        ))}
-        {segments.length === 0 && (
-          <p className="text-sm text-jm-muted">Run data will appear once GPS points are available.</p>
-        )}
+          );
+        })}
+        {segments.length === 0 ? <p className="text-sm text-jm-muted">This postcard is still waiting for a route trace.</p> : null}
       </div>
+
+      {story?.world_change && typeof story.world_change.title === "string" ? (
+        <div className="mt-5 flex items-center gap-3 rounded-xl border border-neon-green/20 bg-neon-green/5 p-4">
+          <span aria-hidden="true" className="text-2xl">💡</span>
+          <div>
+            <p className="text-sm text-neon-green">{story.world_change.title}</p>
+            <p className="mt-1 text-xs text-jm-muted">The arcade remembers this run.</p>
+          </div>
+        </div>
+      ) : null}
     </Card>
   );
 }

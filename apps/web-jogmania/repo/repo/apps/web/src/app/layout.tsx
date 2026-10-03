@@ -22,8 +22,8 @@ const pixelFont = Press_Start_2P({
 });
 
 export const metadata = {
-  title: "Jogmania",
-  description: "Retro-future running adventures powered by your real-world workouts."
+  title: "Jogmania — The Outdoor Arcade",
+  description: "Turn your real routes into bright little adventures. Run outside, find surprises, and bring your arcade world to life."
 };
 
 function UmamiAnalytics() {

@@ -729,12 +729,23 @@ function watchAppIconContents() {
 
 function watchAppSwift() {
   return `import SwiftUI
+import WatchKit
 
 @main
 struct JogmaniaWatchApp: App {
+  @WKExtensionDelegateAdaptor(WorkoutRecoveryDelegate.self) private var recoveryDelegate
+
   var body: some Scene {
     WindowGroup {
       ContentView()
+    }
+  }
+}
+
+final class WorkoutRecoveryDelegate: NSObject, WKExtensionDelegate {
+  func handleActiveWorkoutRecovery() {
+    Task { @MainActor in
+      RunSessionStore.shared.recoverActiveWorkoutSession()
     }
   }
 }
@@ -829,7 +840,6 @@ struct UploadMetadata: Codable {
 
 struct ProgressionSummary: Codable {
   let points: Int
-  let improvement_s_per_km: Double?
   let rewards: [String]
   let inventory: [String: Int]
 }
@@ -1937,9 +1947,9 @@ function createProjectScaffold() {
   writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "JogmaniaWatchApp.swift"), watchAppSwift());
   writeGeneratedOrTemplate(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "Models.swift"), "JogmaniaWatchExtension/Models.swift", modelsSwift());
   writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "CompanionBridge.swift"), companionBridgeSwift());
-  writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "JogmaniaAPIClient.swift"), apiClientSwift());
+  writeGeneratedOrTemplate(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "JogmaniaAPIClient.swift"), "JogmaniaWatchExtension/JogmaniaAPIClient.swift", apiClientSwift());
   writeGeneratedOrTemplate(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "RunSessionStore.swift"), "JogmaniaWatchExtension/RunSessionStore.swift", runSessionStoreSwift());
-  writeFile(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "ContentView.swift"), contentViewSwift());
+  writeGeneratedOrTemplate(path.join(IOS_ROOT, WATCH_EXTENSION_NAME, "ContentView.swift"), "JogmaniaWatchExtension/ContentView.swift", contentViewSwift());
   writeFile(path.join(IOS_ROOT, TEST_TARGET, `${TEST_TARGET}.m`), iosTestsSource());
 
   writeFile(path.join(APP_ROOT, "index.js"), indexJS());

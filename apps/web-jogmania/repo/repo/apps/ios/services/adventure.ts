@@ -9,7 +9,6 @@ export type AdventureContext = {
 
 export type WorkoutProgression = {
   points: number;
-  improvement_s_per_km?: number | null;
   rewards: string[];
   inventory: Record<string, number>;
 };
@@ -66,8 +65,6 @@ export function getWorkoutProgression(rawPayloadJson: Record<string, unknown> | 
 
   return {
     points: typeof progression.points === "number" ? progression.points : 0,
-    improvement_s_per_km:
-      typeof progression.improvement_s_per_km === "number" ? progression.improvement_s_per_km : null,
     rewards: asStringArray(progression.rewards),
     inventory: asNumberRecord(progression.inventory)
   };

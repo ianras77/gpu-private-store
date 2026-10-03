@@ -8,13 +8,11 @@ export function LevelCard({
 }: {
   route: Route & {
     distance_m?: number | null;
-    typical_pace_s_per_km?: number | null;
     frequency?: number | null;
     last_run_at?: string | null;
   };
 }) {
   const distanceKm = route.distance_m ? (route.distance_m / 1000).toFixed(2) : "-";
-  const pace = route.typical_pace_s_per_km ? `${Math.round(route.typical_pace_s_per_km)} s/km` : "-";
   const lastRun = route.last_run_at ? new Date(route.last_run_at).toLocaleDateString() : "-";
   const progress = Math.min(100, (route.frequency ?? 0) * 18);
 
@@ -35,8 +33,8 @@ export function LevelCard({
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
           <span className="jm-chip text-jm-cyan">Distance {distanceKm} km</span>
-          <span className="jm-chip text-jm-acid">Pace {pace}</span>
-          <span className="jm-chip text-jm-muted">Last {lastRun}</span>
+          <span className="jm-chip text-jm-acid">{route.frequency ?? 0} adventures</span>
+          <span className="jm-chip text-jm-muted">Last visit {lastRun}</span>
         </div>
         <div className="jm-meter">
           <span style={{ width: `${progress}%` }} />

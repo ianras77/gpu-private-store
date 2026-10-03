@@ -5,7 +5,6 @@ import uuid
 from sqlalchemy.orm import Session
 
 from app.models import Party, PartyMember, Route, World
-from app.services.fama_world import pick_world_name
 from app.services.progression import ensure_starter_pack
 
 
@@ -72,7 +71,7 @@ def ensure_starter_party(db: Session, user_id, routes: list[Route]) -> bool:
         db.add(
             World(
                 party_id=party.id,
-                name=pick_world_name(seed),
+                name="The Lost Arcade",
                 theme="neon",
                 seed=seed,
                 route_id=primary_route_id,
@@ -87,7 +86,7 @@ def ensure_starter_party(db: Session, user_id, routes: list[Route]) -> bool:
         db.add(
             World(
                 party_id=party.id,
-                name=pick_world_name(seed),
+                name="The Lost Arcade",
                 theme="neon",
                 seed=seed,
                 route_id=primary_route_id,

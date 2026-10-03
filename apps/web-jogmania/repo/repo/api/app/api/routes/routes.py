@@ -4,10 +4,42 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.deps import get_db, get_current_user
 from app.models import Route, RouteInstance, Workout
-from app.schemas import RouteOut, RouteDetail, RenameRoute, RouteInstanceOut, WorkoutOut
+from app.schemas import CourseChapterOut, CourseMasteryOut, RouteOut, RouteDetail, RenameRoute, RouteInstanceOut, WorkoutOut
+from app.services.course_story import COURSE_CHAPTERS
 from app.services.starter_content import ensure_user_baseline
 
 router = APIRouter(prefix="/routes", tags=["routes"])
+
+def _course_mastery(db: Session, route: Route) -> CourseMasteryOut:
+    visits = (
+        db.query(RouteInstance)
+        .join(Workout, Workout.id == RouteInstance.workout_id)
+        .filter(RouteInstance.route_id == route.id, Workout.user_id == route.user_id)
+        .count()
+    )
+    chapters = [
+        CourseChapterOut(**chapter, unlocked=visits >= chapter["visits_required"])
+        for chapter in COURSE_CHAPTERS
+    ]
+    level = sum(chapter.unlocked for chapter in chapters)
+    title = chapters[level - 1].title if level else "A path waiting for its postcard"
+    next_chapter = chapters[level] if level < len(chapters) else None
+    if next_chapter is None:
+        progress_percent = 100
+    else:
+        previous_threshold = chapters[level - 1].visits_required if level else 0
+        span = next_chapter.visits_required - previous_threshold
+        progress_percent = min(99, max(0, round((visits - previous_threshold) * 100 / span)))
+    return CourseMasteryOut(
+        route_id=route.id,
+        route_name=route.name,
+        visits=visits,
+        level=level,
+        title=title,
+        progress_percent=progress_percent,
+        next_chapter=next_chapter,
+        chapters=chapters,
+    )
 
 
 def _route_stats(db: Session, route_id):
@@ -75,6 +107,14 @@ def get_route(route_id: uuid.UUID, db: Session = Depends(get_db), user=Depends(g
         instances=[RouteInstanceOut.model_validate(inst) for inst in instances],
         workouts=[WorkoutOut.model_validate(w) for w in workouts]
     )
+
+
+@router.get("/{route_id}/mastery", response_model=CourseMasteryOut)
+def get_course_mastery(route_id: uuid.UUID, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    route = db.query(Route).filter(Route.id == route_id, Route.user_id == user.id).first()
+    if route is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
+    return _course_mastery(db, route)
 
 
 @router.post("/{route_id}/rename", response_model=RouteOut)

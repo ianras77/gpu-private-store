@@ -38,9 +38,9 @@ class Settings(BaseSettings):
 
     cors_origins: List[str] = Field(default_factory=lambda: ["http://localhost:3000", "http://localhost:19006"], alias="CORS_ORIGINS")
 
-    llm_url: str | None = Field(None, alias="ADVENTURE_LLM_URL")
-    llm_api_key: str | None = Field(None, alias="ADVENTURE_LLM_API_KEY")
-    llm_model: str | None = Field(None, alias="ADVENTURE_LLM_MODEL")
+    mastra_url: str | None = Field(None, alias="JOGMANIA_MASTRA_URL")
+    mastra_internal_token: str | None = Field(None, alias="JOGMANIA_MASTRA_INTERNAL_TOKEN")
+    mastra_timeout_seconds: float = Field(12.0, alias="JOGMANIA_MASTRA_TIMEOUT_SECONDS")
 
     class Config:
         env_file = (".env", "../.env", "../../.env")

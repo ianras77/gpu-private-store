@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View, Vibration } from "react-native";
 import type { AdventureSummary, Route } from "@jogmania/shared";
+import type { AdventureCartridge, AdventureEvent, AdventureSession, WorkoutCreatePayload } from "@jogmania/api-client";
 import { useAuth } from "../../components/AuthProvider";
 import { createApiClient } from "../../services/api";
 import {
@@ -13,8 +14,49 @@ import {
 import { elevationGainMeters, haversineMeters } from "../../services/geo";
 import { createHealthKitService, resolveCaptureMode, type LocationPoint } from "../../services/healthkit";
 import { getPhoneDevicePayload } from "../../services/devices";
+import {
+  listQueuedRuns,
+  ownerIdFromToken,
+  queueOfflineRun,
+  readQueuedRunsForOwner,
+  removeQueuedRun
+} from "../../services/offlineRuns";
 
 const CAPTURE_MODE = resolveCaptureMode();
+
+function offlineCartridge(course: Route): AdventureCartridge {
+  const seeds = [
+    ["marquee", "A sign in the weeds", "A little neon sign flickers awake. It says ARCADE!", "marquee", "discovery"],
+    ["prize-counter", "The rattling prize tin", "A brass token rolls out and lands in the prize tin.", "token", "collectible"],
+    ["lantern-crew", "A tiny helper arrives", "A lantern mouse scampers alongside you. Very official.", "mouse", "companion"],
+    ["arcade-lights", "The Lost Arcade", "The whole marquee bursts into color. The arcade is open again!", "arcade", "finish"]
+  ] as const;
+  return {
+    id: `offline-${Date.now()}`,
+    title: "Relight the Lost Arcade",
+    world_name: "The Lost Arcade",
+    course_name: course.name,
+    intent: "surprise",
+    opening_line: "A forgotten arcade sign blinks awake. A lantern mouse has volunteered as your guide.",
+    finish_line: "Every light is on. Somewhere inside, a pinball machine just woke up.",
+    events: seeds.map((seed, index) => ({
+      id: seed[0],
+      trigger_kind: "distance",
+      trigger_value: Math.max(1, Math.round(Math.max(400, course.distance_m ?? 3200) * [0.18, 0.43, 0.72, 1.0][index])),
+      kind: seed[4] as AdventureEvent["kind"],
+      title: seed[1],
+      message: seed[2],
+      visual_key: seed[3],
+      haptic: index === 3 ? "celebration" : index === 1 ? "success" : "tap"
+    })),
+    reward_preview: "An arcade light and a brass token",
+    target_distance_m: Math.max(400, Math.round(course.distance_m ?? 3200)),
+    haptics_enabled: true,
+    health_data_enabled: false,
+    intelligence: "fallback",
+    runner_snapshot: {}
+  };
+}
 
 type RunReport = {
   courseName: string;
@@ -22,7 +64,6 @@ type RunReport = {
   rewards: string[];
   inventory: Array<[string, number]>;
   worldEvents: string[];
-  improvement: number | null;
 };
 
 export default function RunScreen() {
@@ -39,6 +80,11 @@ export default function RunScreen() {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [lastAdventure, setLastAdventure] = useState<AdventureSummary | null>(null);
   const [lastRunReport, setLastRunReport] = useState<RunReport | null>(null);
+  const [cartridge, setCartridge] = useState<AdventureCartridge | null>(null);
+  const [currentBeat, setCurrentBeat] = useState<AdventureEvent | null>(null);
+  const [lastNarrative, setLastNarrative] = useState<AdventureSession | null>(null);
+  const [queuedRunCount, setQueuedRunCount] = useState(0);
+  const [syncingQueuedRuns, setSyncingQueuedRuns] = useState(false);
   const serviceRef = useRef(createHealthKitService(CAPTURE_MODE));
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const pointsRef = useRef<LocationPoint[]>([]);
@@ -47,9 +93,19 @@ export default function RunScreen() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef<string | null>(null);
   const startClockRef = useRef<number | null>(null);
+  const cartridgeRef = useRef<AdventureCartridge | null>(null);
+  const eventLogRef = useRef<Array<{ id: string }>>([]);
+  const cartridgeServerBackedRef = useRef(false);
 
   const selectedCourse = courses.find((route) => route.id === selectedCourseId) ?? null;
-  const paceLive = distance > 0 && elapsed > 0 ? Math.round(elapsed / (distance / 1000)) : 0;
+
+  const refreshQueuedRunCount = async () => {
+    try {
+      setQueuedRunCount((await listQueuedRuns()).length);
+    } catch {
+      setQueuedRunCount(0);
+    }
+  };
 
   const refreshAdventureContext = async () => {
     if (!token) {
@@ -92,6 +148,39 @@ export default function RunScreen() {
   useEffect(() => {
     void refreshAdventureContext();
   }, [token]);
+
+  useEffect(() => {
+    void refreshQueuedRunCount();
+  }, []);
+
+  const syncQueuedRuns = async () => {
+    if (!token || syncingQueuedRuns) return;
+    setSyncingQueuedRuns(true);
+    setError(null);
+    const ownerId = ownerIdFromToken(token);
+    try {
+      const queued = await readQueuedRunsForOwner(ownerId);
+      if (!queued.length) {
+        setNotice("Saved runs belong to a different sign-in, or this token cannot identify its account.");
+        await refreshQueuedRunCount();
+        return;
+      }
+      let synced = 0;
+      for (const run of queued) {
+        await api.createWorkout(run.payload);
+        await removeQueuedRun(run.id);
+        synced += 1;
+      }
+      await refreshQueuedRunCount();
+      setNotice(`${synced} saved ${synced === 1 ? "adventure is" : "adventures are"} back in the arcade.`);
+      await refreshAdventureContext();
+    } catch (err) {
+      await refreshQueuedRunCount();
+      setError(err instanceof Error ? err.message : "Could not sync saved runs. They are still on this phone.");
+    } finally {
+      setSyncingQueuedRuns(false);
+    }
+  };
 
   const startTimer = () => {
     startClockRef.current = Date.now();
@@ -139,6 +228,28 @@ export default function RunScreen() {
     setNotice(null);
     setLastAdventure(null);
     setLastRunReport(null);
+    setLastNarrative(null);
+    setCurrentBeat(null);
+    eventLogRef.current = [];
+    cartridgeRef.current = null;
+    cartridgeServerBackedRef.current = false;
+    setCartridge(null);
+
+    if (token && selectedCourse) {
+      try {
+        const mission = await api.createAdventureCartridge(selectedCourse.id, "surprise");
+        cartridgeRef.current = mission;
+        cartridgeServerBackedRef.current = true;
+        setCartridge(mission);
+        setNotice(mission.opening_line);
+      } catch {
+        const mission = offlineCartridge(selectedCourse);
+        cartridgeRef.current = mission;
+        cartridgeServerBackedRef.current = false;
+        setCartridge(mission);
+        setNotice("The Lost Arcade is waiting. Your run will still be saved if the story service is away.");
+      }
+    }
 
     const permitted = await serviceRef.current.getHealthPermission();
     if (!permitted) {
@@ -178,6 +289,16 @@ export default function RunScreen() {
       const next = [...pointsRef.current, point];
       pointsRef.current = next;
       setPoints(next);
+      const mission = cartridgeRef.current;
+      if (mission) {
+        for (const beat of mission.events) {
+          if (beat.trigger_kind !== "distance" || distanceRef.current < beat.trigger_value) continue;
+          if (eventLogRef.current.some((event) => event.id === beat.id)) continue;
+          eventLogRef.current = [...eventLogRef.current, { id: beat.id }];
+          setCurrentBeat(beat);
+          if (mission.haptics_enabled) Vibration.vibrate(65);
+        }
+      }
     });
   };
 
@@ -189,11 +310,6 @@ export default function RunScreen() {
     }
     setRunning(false);
     stopTimer();
-
-    if (!token) {
-      setError("Sign in to save your run.");
-      return;
-    }
 
     const captured = pointsRef.current;
     if (captured.length < 2) {
@@ -211,9 +327,11 @@ export default function RunScreen() {
     const elevation = elevationGainMeters(captured);
     setElapsed(Math.round(duration));
 
+    let queuedRunId: string;
+    let payload: WorkoutCreatePayload;
     try {
       const device = await getPhoneDevicePayload();
-      const workout = await api.createWorkout({
+      payload = {
         source: "ios",
         started_at: startedAt,
         ended_at: endedAt,
@@ -230,10 +348,29 @@ export default function RunScreen() {
           point_count: captured.length,
           device_id: device.device_id,
           course_id: selectedCourse?.id ?? null,
-          course_name: selectedCourse?.name ?? null
+          course_name: selectedCourse?.name ?? null,
+          ...(cartridgeRef.current && cartridgeServerBackedRef.current ? { adventure_session_id: cartridgeRef.current.id } : {}),
+          adventure_events: eventLogRef.current
         },
         gps_points: captured
-      });
+      };
+      const queued = await queueOfflineRun(payload, ownerIdFromToken(token));
+      queuedRunId = queued.id;
+      await refreshQueuedRunCount();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not protect this run on the phone.");
+      return;
+    }
+
+    if (!token) {
+      setError("Your run is safe on this phone. Sign in, then sync saved adventures.");
+      return;
+    }
+
+    try {
+      const workout = await api.createWorkout(payload);
+      await removeQueuedRun(queuedRunId);
+      await refreshQueuedRunCount();
 
       const [progression, worldEvents, adventure] = await Promise.all([
         Promise.resolve(getWorkoutProgression(workout.raw_payload_json ?? undefined)),
@@ -242,20 +379,23 @@ export default function RunScreen() {
       ]);
 
       setLastAdventure(adventure);
+      if (cartridgeRef.current && cartridgeServerBackedRef.current) {
+        const session = await api.getAdventureSession(cartridgeRef.current.id).catch(() => null);
+        setLastNarrative(session);
+      }
       setLastRunReport({
         courseName: selectedCourse?.name ?? "Adventure Course",
         points: progression?.points ?? 0,
         rewards: progression?.rewards.map(formatInventoryLabel) ?? [],
         inventory: Object.entries(progression?.inventory ?? {}),
-        worldEvents: worldEvents.map((event) => event.title),
-        improvement: progression?.improvement_s_per_km ?? null
+        worldEvents: worldEvents.map((event) => event.title)
       });
       setNotice(`${selectedCourse?.name ?? "Adventure course"} synced to your dashboard.`);
       setError(null);
       await refreshAdventureContext();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to save run.";
-      setError(message);
+      setError(`${message} Your run is safe on this phone; retry the saved adventure when you're back online.`);
     }
   };
 
@@ -268,6 +408,31 @@ export default function RunScreen() {
       <Text style={styles.mode}>Mode: {CAPTURE_MODE === "mock" ? "Mock" : "Live GPS"}</Text>
       {error && <Text style={styles.error}>{error}</Text>}
       {notice && <Text style={styles.notice}>{notice}</Text>}
+
+      {queuedRunCount > 0 ? (
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Saved on this phone</Text>
+          <Text style={styles.cardValue}>{queuedRunCount} {queuedRunCount === 1 ? "adventure" : "adventures"}</Text>
+          <Text style={styles.cardHint}>Your GPS route and arcade moments stay encrypted here until their run can reach the arcade.</Text>
+          {token ? (
+            <Pressable style={[styles.button, styles.syncButton]} onPress={() => { void syncQueuedRuns(); }} disabled={syncingQueuedRuns}>
+              <Text style={styles.buttonText}>{syncingQueuedRuns ? "Syncing saved runs…" : "Sync saved runs"}</Text>
+            </Pressable>
+          ) : <Text style={styles.cardHint}>Sign in with the same account to sync its saved adventures.</Text>}
+        </View>
+      ) : null}
+
+      {(cartridge || currentBeat) ? (
+        <View style={styles.arcadeCard}>
+          <Text style={styles.arcadeKicker}>{cartridge?.world_name ?? "THE LOST ARCADE"} · FIELD ADVENTURE</Text>
+          <Text style={styles.arcadeTitle}>{currentBeat?.title ?? cartridge?.title ?? "A secret is nearby"}</Text>
+          <Text style={styles.arcadeCopy}>{currentBeat?.message ?? cartridge?.opening_line}</Text>
+          <View style={styles.arcadeTrack}>
+            <View style={[styles.arcadeFill, { width: `${Math.min(100, cartridge ? distance / cartridge.target_distance_m * 100 : 0)}%` }]} />
+          </View>
+          <Text style={styles.arcadeFoot}>{currentBeat ? "A little surprise found" : cartridge?.reward_preview}</Text>
+        </View>
+      ) : null}
 
       <View style={styles.card}>
         <Text style={styles.cardLabel}>Adventure Course</Text>
@@ -299,13 +464,15 @@ export default function RunScreen() {
         <View style={styles.card}>
           <Text style={styles.cardLabel}>Mission Report</Text>
           <Text style={styles.cardValue}>{getAdventureHeadline(lastAdventure)}</Text>
-          <Text style={styles.cardHint}>{lastRunReport.courseName}</Text>
-          <Text style={styles.reportLine}>+{lastRunReport.points} course points</Text>
-          {lastRunReport.improvement && lastRunReport.improvement > 0 ? (
-            <Text style={styles.reportLine}>
-              Pace improved by {Math.round(lastRunReport.improvement)} s/km
-            </Text>
+          {lastNarrative?.recap && typeof lastNarrative.recap.story === "string" ? (
+            <>
+              <Text style={styles.arcadeTitle}>{String(lastNarrative.recap.headline ?? "Adventure complete")}</Text>
+              <Text style={styles.flavor}>{lastNarrative.recap.story}</Text>
+              {typeof lastNarrative.recap.next_hook === "string" ? <Text style={styles.arcadeFoot}>Next: {lastNarrative.recap.next_hook}</Text> : null}
+            </>
           ) : null}
+          <Text style={styles.cardHint}>{lastRunReport.courseName}</Text>
+          <Text style={styles.reportLine}>+{lastRunReport.points} arcade sparks</Text>
           {lastRunReport.rewards.length ? (
             <Text style={styles.reportLine}>Unlocked: {lastRunReport.rewards.join(", ")}</Text>
           ) : null}
@@ -324,8 +491,8 @@ export default function RunScreen() {
       ) : null}
 
       <View style={styles.card}>
-        <Text style={styles.cardLabel}>GPS Points</Text>
-        <Text style={styles.cardValue}>{points.length}</Text>
+        <Text style={styles.cardLabel}>Surprises found</Text>
+        <Text style={styles.cardValue}>{eventLogRef.current.length}</Text>
       </View>
       <View style={styles.card}>
         <Text style={styles.cardLabel}>Distance</Text>
@@ -334,10 +501,6 @@ export default function RunScreen() {
       <View style={styles.card}>
         <Text style={styles.cardLabel}>Elapsed</Text>
         <Text style={styles.cardValue}>{Math.floor(elapsed / 60)} min</Text>
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>Pace</Text>
-        <Text style={styles.cardValue}>{paceLive ? `${paceLive} s/km` : "-"}</Text>
       </View>
       <Pressable style={[styles.button, running && styles.buttonStop]} onPress={running ? stopRun : startRun}>
         <Text style={styles.buttonText}>{running ? "Stop Run" : "Start Run"}</Text>
@@ -356,6 +519,13 @@ const styles = StyleSheet.create({
   mode: { color: "#5cc7ff", marginBottom: 12, fontSize: 12 },
   error: { color: "#ff6b6b", marginBottom: 12, fontSize: 12 },
   notice: { color: "#37e6ff", marginBottom: 12, fontSize: 12 },
+  arcadeCard: { backgroundColor: "#2a1245", borderRadius: 18, borderColor: "#37e6ff", borderWidth: 1, padding: 16, marginBottom: 14 },
+  arcadeKicker: { color: "#37e6ff", fontSize: 10, fontWeight: "800", letterSpacing: 1 },
+  arcadeTitle: { color: "#ffd84d", fontSize: 18, fontWeight: "800", marginTop: 8 },
+  arcadeCopy: { color: "#f5f7ff", fontSize: 13, lineHeight: 19, marginTop: 6 },
+  arcadeTrack: { height: 8, borderRadius: 9, backgroundColor: "#120923", overflow: "hidden", marginTop: 12 },
+  arcadeFill: { height: 8, borderRadius: 9, backgroundColor: "#1dffb2" },
+  arcadeFoot: { color: "#aab5d5", fontSize: 11, marginTop: 7 },
   card: { backgroundColor: "#1a1f33", borderRadius: 16, padding: 16, marginBottom: 16 },
   cardLabel: { color: "#8a91b4", fontSize: 12, textTransform: "uppercase" },
   cardValue: { color: "#1dffb2", fontSize: 24, marginTop: 8 },
@@ -378,6 +548,7 @@ const styles = StyleSheet.create({
   reportLine: { color: "#f5f7ff", fontSize: 13, marginTop: 8 },
   flavor: { color: "#8a91b4", fontSize: 12, marginTop: 10, lineHeight: 18 },
   button: { backgroundColor: "#37e6ff", padding: 14, borderRadius: 999, alignItems: "center" },
+  syncButton: { marginTop: 14, backgroundColor: "#ffd84d" },
   buttonStop: { backgroundColor: "#ff3bc7" },
   buttonText: { color: "#0a0b12", fontWeight: "700" },
   note: { color: "#8a91b4", marginTop: 16, fontSize: 12 }

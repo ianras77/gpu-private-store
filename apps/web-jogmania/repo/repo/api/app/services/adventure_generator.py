@@ -1,9 +1,6 @@
 import math
 import random
 from typing import List, Tuple, Dict, Any
-from statistics import mean, stdev
-import httpx
-from app.core.config import settings
 from app.utils.geo import haversine_m
 from datetime import datetime, timezone
 
@@ -72,28 +69,6 @@ def _build_track(points: List[dict]) -> list[TrackPoint]:
     return track
 
 
-def _event_distance_from_timestamp(track: list[TrackPoint], timestamp: float, fallback: float) -> float:
-    if len(track) < 2:
-        return fallback
-    if timestamp <= float(track[0]["timestamp"] or 0):
-        return float(track[0]["distance_m"] or 0)
-    if timestamp >= float(track[-1]["timestamp"] or 0):
-        return float(track[-1]["distance_m"] or fallback)
-
-    for index in range(1, len(track)):
-        previous = track[index - 1]
-        current = track[index]
-        previous_time = float(previous["timestamp"] or 0)
-        current_time = float(current["timestamp"] or previous_time)
-        if current_time >= timestamp:
-            span = max(current_time - previous_time, 1)
-            ratio = (timestamp - previous_time) / span
-            previous_distance = float(previous["distance_m"] or 0)
-            current_distance = float(current["distance_m"] or previous_distance)
-            return previous_distance + (current_distance - previous_distance) * ratio
-    return fallback
-
-
 def _turn_events(track: list[TrackPoint]) -> list[dict[str, Any]]:
     events: list[dict[str, Any]] = []
     if len(track) < 3:
@@ -120,12 +95,11 @@ def _turn_events(track: list[TrackPoint]) -> list[dict[str, Any]]:
             events.append(
                 {
                     "kind": "turn",
-                    "title": "Switchback Snare",
+                    "title": "The Secret Bend",
                     "distance_m": round(float(current["distance_m"] or 0), 1),
                     "intensity": round(min(angle / 120, 1.0), 2),
-                    "description": f"{round(angle)} degree turn became a timing trap.",
-                    "hazard": "switchback snare",
-                    "tone": "magenta",
+                    "description": "The path made a turn, and a tiny door winked from the hedge.",
+                    "tone": "cyan",
                 }
             )
     return events
@@ -152,11 +126,10 @@ def _climb_events(track: list[TrackPoint]) -> list[dict[str, Any]]:
                 events.append(
                     {
                         "kind": "climb",
-                        "title": "Ridge Climb",
+                        "title": "Lantern Hill",
                         "distance_m": round((climb_start + end_distance) / 2, 1),
                         "intensity": round(min(rolling_gain / 35, 1.0), 2),
-                        "description": f"{round(rolling_gain)} meters of gain raised the course.",
-                        "hazard": "ridge climb",
+                        "description": "A little lantern garden appeared on the hillside.",
                         "tone": "acid",
                     }
                 )
@@ -165,145 +138,40 @@ def _climb_events(track: list[TrackPoint]) -> list[dict[str, Any]]:
     return events
 
 
-def _pace_surge_events(track: list[TrackPoint], speeds: list[float]) -> list[dict[str, Any]]:
-    if len(track) < 2 or len(speeds) < 3:
-        return []
-
-    avg_speed = mean(speeds) or 0
-    if avg_speed <= 0:
-        return []
-
-    threshold = avg_speed * 1.25
-    events: list[dict[str, Any]] = []
-    for index, speed in enumerate(speeds, start=1):
-        if speed <= threshold:
-            continue
-        point = track[min(index, len(track) - 1)]
-        events.append(
-            {
-                "kind": "pace_surge",
-                "title": "Sprint Gate",
-                "distance_m": round(float(point["distance_m"] or 0), 1),
-                "intensity": round(min(speed / max(threshold, 0.1), 1.6) / 1.6, 2),
-                "description": "A pace spike turned into a burst gate.",
-                "hazard": "sprint gate",
-                "tone": "cyan",
-            }
-        )
-    return events[:3]
+def _collectibles(turn_count: int, climb_count: int, rng: random.Random) -> List[str]:
+    items = ["Ticket Stub from Nowhere", "Glow Pebble", "Moon Moth Sticker", "Riverglass Marble", "Pocket-Sized Pinball"]
+    count = min(4, 1 + min(2, turn_count // 3) + min(1, climb_count // 2))
+    return rng.sample(items, k=count)
 
 
-def _heart_rate_events(
-    raw_payload: dict[str, Any],
-    avg_hr: float | None,
-    track: list[TrackPoint],
-    distance_m: float,
-) -> tuple[list[dict[str, Any]], float | None]:
-    samples = raw_payload.get("heart_rate_samples")
-    if not isinstance(samples, list):
-        samples = raw_payload.get("heartRateSamples")
-    if not isinstance(samples, list):
-        samples = []
-
-    events: list[dict[str, Any]] = []
-    max_hr = avg_hr
-    for sample in samples:
-        if not isinstance(sample, dict):
-            continue
-        bpm = sample.get("bpm") or sample.get("heart_rate") or sample.get("heartRate")
-        if not isinstance(bpm, (int, float)):
-            continue
-        max_hr = max(float(bpm), max_hr or 0)
-        if bpm < 170:
-            continue
-        sample_distance = sample.get("distance_m")
-        if isinstance(sample_distance, (int, float)):
-            event_distance = float(sample_distance)
-        elif sample.get("timestamp"):
-            event_distance = _event_distance_from_timestamp(track, _to_epoch(sample.get("timestamp")), distance_m * 0.7)
-        else:
-            event_distance = distance_m * 0.7
-        events.append(
-            {
-                "kind": "heart_rate",
-                "title": "Pulse Gate",
-                "distance_m": round(event_distance, 1),
-                "intensity": round(min((float(bpm) - 145) / 45, 1.0), 2),
-                "description": f"{round(float(bpm))} bpm became a pressure gate.",
-                "hazard": "pulse gate",
-                "tone": "magenta",
-            }
-        )
-
-    if not events and avg_hr and avg_hr >= 165:
-        max_hr = max(max_hr or 0, avg_hr)
-        events.append(
-            {
-                "kind": "heart_rate",
-                "title": "Pulse Gate",
-                "distance_m": round(distance_m * 0.7, 1),
-                "intensity": round(min((avg_hr - 145) / 45, 1.0), 2),
-                "description": f"{round(avg_hr)} bpm average raised the danger level.",
-                "hazard": "pulse gate",
-                "tone": "magenta",
-            }
-        )
-    return events[:4], max_hr
-
-
-def _obstacle_density(speeds: List[float], elevation_gain_m: float | None) -> float:
-    if len(speeds) < 2:
-        variability = 0.2
-    else:
-        variability = stdev(speeds) / (mean(speeds) or 1)
-    elev_factor = min((elevation_gain_m or 0) / 300.0, 1.0)
-    density = min(max(0.2 + variability + elev_factor * 0.4, 0.2), 1.0)
-    return round(density, 2)
-
-
-def _collectibles(avg_hr: float | None, calories: float | None) -> List[str]:
-    items = []
-    if avg_hr:
-        if avg_hr >= 165:
-            items.append("Neon Heart Relic")
-        elif avg_hr >= 145:
-            items.append("Pulse Capsule")
-        else:
-            items.append("Glow Band")
-    if calories:
-        if calories >= 600:
-            items.append("Turbo Shake")
-        elif calories >= 350:
-            items.append("Electro Gel")
-        else:
-            items.append("Mint Charge")
-    if not items:
-        items.append("Glow Band")
-    return items
-
-
-def _boss_moment(speeds: List[float], avg_hr: float | None) -> bool:
-    if avg_hr and avg_hr >= 170:
-        return True
-    if not speeds:
-        return False
-    top = sorted(speeds)[int(len(speeds) * 0.9)]
-    return top > (mean(speeds) * 1.35)
-
-
-def _segments(distance_m: float, rng: random.Random, obstacle_density: float) -> List[Dict[str, Any]]:
-    biomes = ["Neon Jungle", "Synth Ruins", "Crystal Ravine", "Laser Lagoon", "Arcade Canopy"]
-    hazards = ["rolling logs", "pitfall chasm", "laser vines", "crystal spikes", "hover bats"]
-    loot = ["gold idol", "energy orb", "arcade token", "relic shard", "aqua gem"]
-
-    splits = [0, distance_m * 0.33, distance_m * 0.66, distance_m]
+def _segments(distance_m: float, rng: random.Random, _story_density: float) -> List[Dict[str, Any]]:
+    biomes = ["Neon Canopy", "Moonlight Boardwalk", "Crystal Picnic Hill", "Jellybean Garden", "Pinball Lagoon"]
+    friends = ["wind-up bird", "crooked sign", "moon puddle", "pinball mushroom", "lantern mouse"]
+    loot = ["golden ticket", "glow pebble", "arcade token", "moth sticker", "riverglass marble"]
+    stage_names = ["The First Clue", "A Curious Detour", "The Prize Hunt", "The Big Reveal", "The Grand Finale"]
+    route_distance = max(1.0, float(distance_m or 0))
+    # The route is paced in physical checkpoints. Short outings stay compact;
+    # longer routes naturally gain chapters rather than always getting thirds.
+    segment_count = max(1, min(8, math.ceil(route_distance / 650)))
+    checkpoint_m = route_distance / segment_count
     segments = []
-    for i in range(3):
-        seg_hazards = rng.sample(hazards, k=max(1, int(1 + obstacle_density * 2)))
+    for i in range(segment_count):
+        seg_hazards = rng.sample(friends, k=1)
         seg_loot = rng.sample(loot, k=2)
+        if segment_count == 1:
+            stage_index = 2
+        elif i == 0:
+            stage_index = 0
+        elif i == segment_count - 1:
+            stage_index = len(stage_names) - 1
+        else:
+            middle_count = segment_count - 2
+            middle_progress = 0 if middle_count == 1 else (i - 1) / (middle_count - 1)
+            stage_index = 1 + round(middle_progress * (len(stage_names) - 3))
         segments.append({
-            "distance_start_m": round(splits[i], 1),
-            "distance_end_m": round(splits[i + 1], 1),
+            "distance_start_m": round(checkpoint_m * i, 1),
+            "distance_end_m": round(route_distance if i == segment_count - 1 else checkpoint_m * (i + 1), 1),
+            "chapter_title": "One Big Adventure" if segment_count == 1 else stage_names[stage_index],
             "biome": rng.choice(biomes),
             "hazards": seg_hazards,
             "loot": seg_loot
@@ -323,42 +191,13 @@ def _segment_index_for_distance(segments: list[dict[str, Any]], distance_m: floa
 def _apply_encounters_to_segments(segments: list[dict[str, Any]], encounters: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for encounter in encounters:
         index = _segment_index_for_distance(segments, float(encounter.get("distance_m") or 0))
-        hazard = encounter.get("hazard")
-        if not isinstance(hazard, str):
+        discovery = encounter.get("title")
+        if not isinstance(discovery, str):
             continue
-        hazards = segments[index].setdefault("hazards", [])
-        if hazard not in hazards:
-            hazards.insert(0, hazard)
+        souvenirs = segments[index].setdefault("loot", [])
+        if discovery not in souvenirs:
+            souvenirs.insert(0, discovery)
     return segments
-
-
-async def _llm_title(seed: int, distance_m: float) -> str | None:
-    if not settings.llm_url:
-        return None
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            payload = {
-                "model": settings.llm_model or "gpt-3.5-turbo",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are a retro fitness narrator. Respond with a short title only."
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Seed {seed}, distance {int(distance_m)} meters."
-                    }
-                ],
-                "max_tokens": 12
-            }
-            headers = {"Authorization": f"Bearer {settings.llm_api_key}"} if settings.llm_api_key else {}
-            res = await client.post(settings.llm_url, json=payload, headers=headers)
-            if res.status_code != 200:
-                return None
-            data = res.json()
-            return data.get("choices", [{}])[0].get("message", {}).get("content", "").strip() or None
-    except Exception:
-        return None
 
 
 def generate_adventure_summary(
@@ -373,20 +212,16 @@ def generate_adventure_summary(
     raw_payload: dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
     rng = random.Random(seed)
-    raw_payload = raw_payload or {}
     track = track or []
-    obstacle_density = _obstacle_density(speeds, elevation_gain_m)
-    collectibles = _collectibles(avg_hr, calories)
     turn_events = _turn_events(track)
     climb_events = _climb_events(track)
-    pace_events = _pace_surge_events(track, speeds)
-    hr_events, max_hr = _heart_rate_events(raw_payload, avg_hr, track, distance_m)
-    boss_moment = _boss_moment(speeds, max_hr or avg_hr)
-    scenes = ["Dawn Launch", "Mirror-Lake Dash", "Temple Sprint"]
+    obstacle_density = 0.0
+    collectibles = _collectibles(len(turn_events), len(climb_events), rng)
+    scenes = ["Moonlit Boardwalk", "Lantern Picnic", "Pinball Garden"]
     rng.shuffle(scenes)
     segments = _segments(distance_m, rng, obstacle_density)
     encounters = sorted(
-        [*climb_events, *turn_events, *hr_events, *pace_events],
+        [*climb_events, *turn_events],
         key=lambda event: (float(event.get("distance_m") or 0), event.get("kind") or ""),
     )
     segments = _apply_encounters_to_segments(segments, encounters)
@@ -403,17 +238,13 @@ def generate_adventure_summary(
     route_features = {
         "turn_count": len(turn_events),
         "climb_count": len(climb_events),
-        "high_hr_moments": len(hr_events),
-        "pace_surge_count": len(pace_events),
         "elevation_gain_m": round(elevation_gain_m or 0, 1),
-        "max_hr": round(max_hr, 1) if max_hr else None,
-        "avg_speed_mps": round(mean(speeds), 2) if speeds else 0,
     }
 
     return {
-        "title": llm_title or f"Synth Jungle Run #{seed % 999}",
+        "title": llm_title or f"{scenes[0]} Story",
         "seed": seed,
-        "boss_moment": boss_moment,
+        "boss_moment": False,
         "obstacle_density": obstacle_density,
         "collectibles": collectibles,
         "scenes": scenes[:3],
@@ -445,20 +276,14 @@ def extract_point_times(points: List[dict]) -> List[Tuple[float, float, float]]:
 
 
 async def build_adventure(points: List[dict], workout: dict, seed: int) -> Dict[str, Any]:
-    timed = extract_point_times(points)
-    speeds = compute_speeds_from_points(timed)
     distance_m = workout.get("distance_m") or 0
-    llm_title = await _llm_title(seed, distance_m)
-    raw_payload = workout.get("raw_payload_json") if isinstance(workout.get("raw_payload_json"), dict) else {}
     track = _build_track(points)
     return generate_adventure_summary(
         distance_m=distance_m,
-        speeds=speeds,
-        avg_hr=workout.get("avg_hr"),
-        calories=workout.get("calories_kcal"),
+        speeds=[],
+        avg_hr=None,
+        calories=None,
         elevation_gain_m=workout.get("elevation_gain_m"),
         seed=seed,
-        llm_title=llm_title,
         track=track,
-        raw_payload=raw_payload,
     )

@@ -2,42 +2,30 @@ import type { RunSummary } from "@/game/RunnerGame";
 
 export type LootItem = {
   name: string;
-  rarity: "common" | "rare" | "epic";
   description: string;
 };
 
-const COMMON_LOOT: LootItem[] = [
-  { name: "Static Charm", rarity: "common", description: "Keeps the CRT humming." },
-  { name: "Glow Band", rarity: "common", description: "A steady pulse of jungle light." },
-  { name: "Arcade Token", rarity: "common", description: "Trade for a pace boost later." }
+const SOUVENIRS: LootItem[] = [
+  { name: "Ticket Stub from Nowhere", description: "A little paper ticket. The date says tomorrow." },
+  { name: "Glow Pebble", description: "Warm as toast, bright as a tiny star." },
+  { name: "Lantern Mouse Badge", description: "Official assistant to the Lost Arcade." },
+  { name: "Moon Moth Sticker", description: "It keeps trying to land on the moon." },
+  { name: "Riverglass Marble", description: "A whole blue evening, small enough to pocket." },
+  { name: "Pocket-Sized Pinball", description: "It makes one very satisfying plink." },
 ];
 
-const RARE_LOOT: LootItem[] = [
-  { name: "Jungle Prism", rarity: "rare", description: "Splits neon light into pace boosts." },
-  { name: "Pulse Capsule", rarity: "rare", description: "Stabilizes streaks under pressure." },
-  { name: "Relic Compass", rarity: "rare", description: "Points toward hidden shortcuts." }
-];
+export function rollLoot(summary: RunSummary): LootItem[] {
+  const relics = summary.events.filter((event) => event.type === "relic").length;
+  const distanceSouvenir = summary.distance_m >= 5000 ? 2 : summary.distance_m >= 1200 ? 1 : 0;
+  const count = Math.min(4, Math.max(1, 1 + Math.min(2, relics) + distanceSouvenir));
+  const seed = Math.floor(summary.distance_m) + Math.floor(summary.duration_s) + relics * 97;
+  const available = [...SOUVENIRS];
+  const selected: LootItem[] = [];
 
-const EPIC_LOOT: LootItem[] = [
-  { name: "Turbo Idol", rarity: "epic", description: "Turns every split into a highlight reel." },
-  { name: "Laser Crown", rarity: "epic", description: "Earned by the fastest jungle runners." },
-  { name: "Void Lantern", rarity: "epic", description: "Lights the course when the pace surges." }
-];
-
-function pickFrom(list: LootItem[]) {
-  return list[Math.floor(Math.random() * list.length)];
-}
-
-export function rollLoot(summary: RunSummary, sessionPoints: number): LootItem[] {
-  const paceScore = summary.avg_pace_s_per_km ? Math.max(0, 420 - summary.avg_pace_s_per_km) : 0;
-  const distanceScore = summary.distance_m / 100;
-  const totalScore = paceScore + distanceScore + sessionPoints * 0.8;
-
-  if (totalScore > 380) {
-    return [pickFrom(EPIC_LOOT), pickFrom(RARE_LOOT)];
+  for (let index = 0; index < count && available.length > 0; index += 1) {
+    const choice = (seed + index * 37) % available.length;
+    selected.push(available.splice(choice, 1)[0]);
   }
-  if (totalScore > 220) {
-    return [pickFrom(RARE_LOOT), pickFrom(COMMON_LOOT)];
-  }
-  return [pickFrom(COMMON_LOOT), pickFrom(COMMON_LOOT)];
+
+  return selected;
 }

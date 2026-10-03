@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import type { Workout } from "@jogmania/shared";
-import type { Device } from "@jogmania/api-client";
+import type { Device, RunnerPreferences, RunnerProfile } from "@jogmania/api-client";
 
 function titleize(value: string) {
   if (value === "ios") return "iPhone";
@@ -26,14 +26,27 @@ export default function SettingsPage() {
   const [enabled, setEnabled] = useCrtToggle();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
+  const [runnerProfile, setRunnerProfile] = useState<RunnerProfile | null>(null);
+  const [savingStory, setSavingStory] = useState(false);
   const [exportUrl, setExportUrl] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [memoryCleared, setMemoryCleared] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     api.listWorkouts().then(setWorkouts).catch(() => setWorkouts([]));
     api.listDevices().then(setDevices).catch(() => setDevices([]));
+    api.getRunnerProfile().then(setRunnerProfile).catch(() => setRunnerProfile(null));
   }, [api, user]);
+
+  const saveStoryPreference = async (patch: Partial<RunnerPreferences>) => {
+    setSavingStory(true);
+    try {
+      setRunnerProfile(await api.updateRunnerProfile(patch));
+    } finally {
+      setSavingStory(false);
+    }
+  };
 
   const pairingCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -69,7 +82,7 @@ export default function SettingsPage() {
 
       <Card className="p-6">
         <p className="jm-kicker">Display</p>
-        <h3 className="font-display text-xl mt-2">Console effects</h3>
+        <h3 className="font-display text-xl mt-2">Arcade sparkle</h3>
         <div className="mt-4 flex items-center justify-between">
           <div>
             <p className="text-sm">CRT Overlay</p>
@@ -83,6 +96,78 @@ export default function SettingsPage() {
             {enabled ? "On" : "Off"}
           </Button>
         </div>
+      </Card>
+
+      <Card className="p-6">
+        <p className="jm-kicker">Your Adventure</p>
+        <h3 className="font-display text-xl mt-2">Make the arcade yours</h3>
+        <p className="text-sm text-jm-muted mt-2">Jogmania learns from the courses you revisit and the chapters you unlock. Pick the voice and feel you want along the way.</p>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <label className="text-sm">
+            <span className="block text-jm-muted mb-2">Story voice</span>
+            <select
+              className="jm-input w-full"
+              value={runnerProfile?.preferences.adventure_tone ?? "storybook"}
+              disabled={!runnerProfile || savingStory}
+              onChange={(event) => void saveStoryPreference({ adventure_tone: event.target.value as RunnerPreferences["adventure_tone"] })}
+            >
+              <option value="storybook">Warm storybook</option>
+              <option value="silly">Silly sidekick</option>
+              <option value="mystery">Curious mystery</option>
+            </select>
+          </label>
+          <label className="text-sm">
+            <span className="block text-jm-muted mb-2">Today&apos;s feeling</span>
+            <select
+              className="jm-input w-full"
+              value={runnerProfile?.preferences.run_intention ?? "surprise"}
+              disabled={!runnerProfile || savingStory}
+              onChange={(event) => void saveStoryPreference({ run_intention: event.target.value as RunnerPreferences["run_intention"] })}
+            >
+              <option value="surprise">Surprise me</option>
+              <option value="easy">A gentle wander</option>
+              <option value="explore">Find something new</option>
+              <option value="steady">A familiar rhythm</option>
+              <option value="repeat">Visit a favorite</option>
+            </select>
+          </label>
+        </div>
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-white/10 bg-jm-surface/70 p-4">
+          <div>
+            <p className="text-sm">Watch story taps</p>
+            <p className="text-xs text-jm-muted mt-1">A soft wrist tap when a little discovery appears.</p>
+          </div>
+          <Button
+            onClick={() => void saveStoryPreference({ haptics_enabled: !runnerProfile?.preferences.haptics_enabled })}
+            variant={runnerProfile?.preferences.haptics_enabled ? "primary" : "outline"}
+            size="sm"
+            disabled={!runnerProfile || savingStory}
+          >
+            {runnerProfile?.preferences.haptics_enabled ? "On" : "Off"}
+          </Button>
+        </div>
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-white/10 bg-jm-surface/70 p-4">
+          <div>
+            <p className="text-sm">Optional heart and energy readings</p>
+            <p className="mt-1 text-xs text-jm-muted">Off by default. Only used for your own run details, never sparks, unlocks, or story claims.</p>
+          </div>
+          <Button
+            onClick={() => void saveStoryPreference({ health_data_enabled: !runnerProfile?.preferences.health_data_enabled })}
+            variant={runnerProfile?.preferences.health_data_enabled ? "primary" : "outline"}
+            size="sm"
+            disabled={!runnerProfile || savingStory}
+          >
+            {runnerProfile?.preferences.health_data_enabled ? "On" : "Off"}
+          </Button>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-jm-surface/70 p-4">
+          <div>
+            <p className="text-sm">Story feedback</p>
+            <p className="mt-1 text-xs text-jm-muted">Current nudge: {runnerProfile?.preferences.story_feedback ?? "default"}. Your run facts stay yours; this only steers the writing.</p>
+          </div>
+          <Button size="sm" variant="outline" disabled={!runnerProfile || savingStory} onClick={() => void api.clearRunnerMemory().then(() => { setRunnerProfile(null); setMemoryCleared(true); })}>Clear story memory</Button>
+        </div>
+        {memoryCleared ? <p className="mt-2 text-xs text-jm-acid">Story memory cleared. Your run history and rewards are untouched.</p> : null}
       </Card>
 
       <Card className="p-6">

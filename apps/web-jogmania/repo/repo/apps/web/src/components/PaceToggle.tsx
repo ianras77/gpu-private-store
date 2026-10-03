@@ -14,7 +14,7 @@ export default function PaceToggle({ enabled, onToggle }: PaceToggleProps) {
           : "border-white/20 text-white/60"
       }`}
     >
-      Simulate GPS Pace: {enabled ? "ON" : "OFF"}
+      Magic Wind: {enabled ? "ON" : "OFF"}
     </button>
   );
 }

@@ -20,6 +20,9 @@ export default function PartiesPage() {
   const [worldTheme, setWorldTheme] = useState("neon");
   const [members, setMembers] = useState(["", "", ""]);
   const [loading, setLoading] = useState(false);
+  const [inviteCode, setInviteCode] = useState("");
+  const [runnerName, setRunnerName] = useState("");
+  const [joinError, setJoinError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -60,6 +63,18 @@ export default function PartiesPage() {
     }
   };
 
+  const handleJoin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setJoinError(null);
+    try {
+      const joined = await api.joinParty(inviteCode, runnerName);
+      setParties((current) => current.some((party) => party.id === joined.id) ? current : [joined, ...current]);
+      setInviteCode("");
+    } catch (err) {
+      setJoinError(err instanceof Error ? err.message : "That invite code did not open a world.");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="p-6 jm-holo">
@@ -67,7 +82,7 @@ export default function PartiesPage() {
           <div>
             <p className="jm-kicker">Party Setup</p>
             <h3 className="font-display text-2xl">Assemble a crew</h3>
-            <p className="text-xs text-jm-muted mt-1">Each party owns a single evolving world.</p>
+            <p className="text-xs text-jm-muted mt-1">Make a crew, or join a pal&apos;s arcade. Every person&apos;s route and pace stay private.</p>
           </div>
           <Badge tone="cyan">{parties.length} parties</Badge>
         </div>
@@ -120,6 +135,16 @@ export default function PartiesPage() {
         </form>
       </Card>
 
+      <Card className="p-5">
+        <p className="jm-kicker">A pal sent you a ticket?</p>
+        <form className="mt-3 flex flex-wrap gap-3" onSubmit={handleJoin}>
+          <input className="jm-input" aria-label="Party invite code" placeholder="Invite code" value={inviteCode} onChange={(event) => setInviteCode(event.target.value)} required />
+          <input className="jm-input" aria-label="Your crew name" placeholder="Name for the crew" value={runnerName} onChange={(event) => setRunnerName(event.target.value)} required />
+          <Button type="submit">Join their world</Button>
+        </form>
+        {joinError ? <p className="mt-2 text-xs text-jm-magenta">{joinError}</p> : null}
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {parties.map((party) => (
           <Link key={party.id} href={`/parties/${party.id}`}>
@@ -133,11 +158,13 @@ export default function PartiesPage() {
               </div>
               <div className="mt-4 flex flex-wrap gap-2 text-xs">
                 <span className="jm-chip text-jm-cyan">World {party.world?.name ?? "Unbound"}</span>
-                <span className="jm-chip text-jm-acid">Theme {party.world?.theme ?? "neon"}</span>
+                <span className="jm-chip text-jm-acid">{String((party.world?.state_json?.arcade as { chapter?: string } | undefined)?.chapter ?? "Marquee Mystery")}</span>
               </div>
+              <p className="mt-3 text-xs text-jm-muted">{Number((party.world?.state_json?.arcade as { runs?: number } | undefined)?.runs ?? 0)} adventures · every saved run brings one more attraction to life</p>
               <div className="mt-4 jm-meter">
-                <span style={{ width: `${Math.min(100, (party.world?.state_json?.sessions as number || 0) * 25)}%` }} />
+                <span style={{ width: `${Math.min(100, Number((party.world?.state_json?.arcade as { chapter_lights?: string[] } | undefined)?.chapter_lights?.length ?? 0) * 20)}%` }} />
               </div>
+              <p className="mt-3 text-[11px] text-jm-muted">Crew ticket: <span className="font-mono text-jm-acid">{party.invite_code}</span></p>
             </Card>
           </Link>
         ))}

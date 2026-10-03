@@ -55,7 +55,7 @@ export default function RunsPage() {
             <option value="distance">Longest</option>
           </select>
         </label>
-        <span className="text-xs text-jm-muted">Open a run to activate it as an Adventure Course.</span>
+        <span className="text-xs text-jm-muted">Open a run to see the story it left on your trail.</span>
       </div>
       <div className="mt-4 space-y-3">
         {filtered.map((run) => (
@@ -69,9 +69,9 @@ export default function RunsPage() {
                 {run.source === "watch" ? "Apple Watch" : run.source === "ios" ? "iPhone" : run.source ?? "Unknown"}
               </p>
               <p className="text-sm">{new Date(run.started_at).toLocaleString()}</p>
-              <p className="text-xs text-jm-muted">{(run.distance_m / 1000).toFixed(2)} km</p>
+              <p className="text-xs text-jm-muted">{(run.distance_m / 1000).toFixed(2)} km · {Math.round(run.duration_s / 60)} minutes outside</p>
             </div>
-            <div className="jm-chip text-jm-cyan">{Math.round(run.avg_pace_s_per_km)} s/km</div>
+            <div className="jm-chip text-jm-cyan">Open postcard ↗</div>
           </Link>
         ))}
         {filtered.length === 0 && <p className="text-sm text-jm-muted">No runs yet.</p>}

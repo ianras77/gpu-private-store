@@ -71,6 +71,46 @@ export type RouteDetail = Route & {
   workouts: Workout[];
 };
 
+export type CourseChapter = {
+  visits_required: number;
+  title: string;
+  story: string;
+  keepsake: string;
+  keepsake_icon: string;
+  item_key: string;
+  unlocked: boolean;
+};
+
+export type CourseMastery = {
+  route_id: string;
+  route_name: string;
+  visits: number;
+  level: number;
+  title: string;
+  progress_percent: number;
+  next_chapter?: CourseChapter | null;
+  chapters: CourseChapter[];
+};
+
+export type WorldDecorationSlot =
+  | "roof-left" | "roof-center" | "roof-right"
+  | "window-left" | "window-right" | "garden-left" | "garden-center" | "garden-right";
+
+export type ArcadeDecoration = {
+  slot: WorldDecorationSlot;
+  item_key: "lantern-arch" | "prize-fox" | "star-bunting" | "flower-pot" | "neon-puddle";
+  title: string;
+  icon: string;
+  owned_by_me: boolean;
+  placed_at: string;
+};
+
+export type ArcadeDecorationChoice = {
+  key: ArcadeDecoration["item_key"];
+  title: string;
+  icon: string;
+};
+
 export type Reward = {
   id: string;
   type: string;
@@ -111,9 +151,97 @@ export type WorldEvent = {
   workout_id?: string | null;
 };
 
+export type AdventureEvent = {
+  id: string;
+  trigger_kind: "distance" | "elapsed";
+  trigger_value: number;
+  kind: "discovery" | "companion" | "collectible" | "chapter" | "finish";
+  title: string;
+  message: string;
+  visual_key: string;
+  haptic: "tap" | "success" | "celebration";
+};
+
+export type AdventureCartridge = {
+  id: string;
+  title: string;
+  world_name: string;
+  course_name: string;
+  intent: "easy" | "steady" | "explore" | "repeat" | "surprise";
+  opening_line: string;
+  finish_line: string;
+  events: AdventureEvent[];
+  reward_preview: string;
+  target_distance_m: number;
+  haptics_enabled: boolean;
+  health_data_enabled: boolean;
+  intelligence: "mastra" | "fallback";
+  runner_snapshot: Record<string, unknown>;
+};
+
+export type RunnerPreferences = {
+  adventure_tone: "silly" | "storybook" | "mystery";
+  run_intention: "easy" | "steady" | "explore" | "repeat" | "surprise";
+  haptics_enabled: boolean;
+  health_data_enabled: boolean;
+  story_feedback: "default" | "more_grounded" | "more_silly" | "shorter";
+};
+
+export type ProgressionLedgerEntry = {
+  id: string;
+  workout_id: string;
+  ledger_version: number;
+  reason_code: string;
+  sparks: number;
+  payload_json: Record<string, unknown>;
+  created_at: string;
+};
+
+export type RunnerProfile = {
+  preferences: RunnerPreferences;
+  snapshot: Record<string, unknown>;
+};
+
+export type AdventureSession = {
+  id: string;
+  route_id?: string | null;
+  status: string;
+  cartridge: AdventureCartridge;
+  event_log: Array<{ id: string; title: string; kind: string }>;
+  recap: Record<string, unknown>;
+  world_change: Record<string, unknown>;
+  workout_id?: string | null;
+  created_at: string;
+};
+
+export type AdventureWorld = {
+  id?: string;
+  name: string;
+  chapter: string;
+  theme?: string;
+  player_level?: number;
+  sparks?: number;
+  next_level_sparks?: number;
+  arcade: {
+    runs?: number;
+    lights?: string[];
+    chapter_lights?: string[];
+    last_light?: string;
+    next_surprise?: string;
+    [key: string]: unknown;
+  };
+  decorations?: ArcadeDecoration[];
+  decoration_slots?: WorldDecorationSlot[];
+  decoration_catalog?: ArcadeDecorationChoice[];
+  decoration_tokens?: number;
+  recent_adventures?: AdventureSession[];
+};
+
 export type Party = {
   id: string;
   name: string;
+  invite_code: string;
+  is_worldkeeper: boolean;
   created_at: string;
   members: PartyMember[];
   world?: World | null;
@@ -251,6 +379,10 @@ export class ApiClient {
     return this.request<RouteDetail>(`/routes/${id}`);
   }
 
+  getCourseMastery(id: string) {
+    return this.request<CourseMastery>(`/routes/${id}/mastery`);
+  }
+
   renameRoute(id: string, name: string) {
     return this.request<Route>(`/routes/${id}/rename`, {
       method: "POST",
@@ -273,6 +405,17 @@ export class ApiClient {
       method: "POST",
       body: JSON.stringify(payload)
     });
+  }
+
+  joinParty(inviteCode: string, displayName: string) {
+    return this.request<Party>("/parties/join", {
+      method: "POST",
+      body: JSON.stringify({ invite_code: inviteCode, display_name: displayName })
+    });
+  }
+
+  leaveParty(id: string) {
+    return this.request<{ left: boolean }>(`/parties/${id}/leave`, { method: "DELETE" });
   }
 
   getParty(id: string) {
@@ -312,12 +455,66 @@ export class ApiClient {
     return this.request<AdventureSummary[]>(`/adventures/by-route/${routeId}`);
   }
 
+  getRunnerProfile() {
+    return this.request<RunnerProfile>("/adventure/profile");
+  }
+
+  updateRunnerProfile(payload: Partial<RunnerPreferences>) {
+    return this.request<RunnerProfile>("/adventure/profile", {
+      method: "PUT",
+      body: JSON.stringify(payload)
+    });
+  }
+
+  clearRunnerMemory() {
+    return this.request<{ cleared: boolean }>("/adventure/profile", { method: "DELETE" });
+  }
+
+  submitAdventureFeedback(sessionId: string, payload: { felt_personal: boolean; style_correction: RunnerPreferences["story_feedback"] }) {
+    return this.request<{ saved: boolean; story_feedback: RunnerPreferences["story_feedback"] }>(`/adventure/sessions/${sessionId}/feedback`, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  }
+
+  createAdventureCartridge(routeId: string, intent: RunnerPreferences["run_intention"] = "surprise") {
+    return this.request<AdventureCartridge>("/adventure/cartridges", {
+      method: "POST",
+      body: JSON.stringify({ route_id: routeId, intent })
+    });
+  }
+
+  getAdventureSession(id: string) {
+    return this.request<AdventureSession>(`/adventure/sessions/${id}`);
+  }
+
+  getAdventureWorld() {
+    return this.request<AdventureWorld>("/adventure/world");
+  }
+
+  placeWorldDecoration(slot: WorldDecorationSlot, itemKey: ArcadeDecoration["item_key"]) {
+    return this.request<ArcadeDecoration>("/adventure/world/decorations", {
+      method: "POST",
+      body: JSON.stringify({ slot, item_key: itemKey })
+    });
+  }
+
+  removeWorldDecoration(slot: WorldDecorationSlot) {
+    return this.request<{ removed: boolean; returned_tokens: number }>(`/adventure/world/decorations/${slot}`, {
+      method: "DELETE"
+    });
+  }
+
   getRewards() {
     return this.request<Reward[]>("/rewards");
   }
 
   getInventory() {
     return this.request<InventoryItem[]>("/inventory");
+  }
+
+  getProgressionLedger() {
+    return this.request<ProgressionLedgerEntry[]>("/progression/ledger");
   }
 
   exportWorkout(workoutId: string) {

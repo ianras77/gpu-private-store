@@ -1,3 +1,6 @@
+import asyncio
+from contextlib import asynccontextmanager, suppress
+
 from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,8 +18,25 @@ from app.api.routes.rewards import router as rewards_router
 from app.api.routes.exports import router as exports_router
 from app.api.routes.parties import router as parties_router
 from app.api.routes.devices import router as devices_router
+from app.api.routes.adventure_play import router as adventure_play_router
+from app.services.story_outbox import story_outbox_loop
 
-app = FastAPI(title=settings.app_name)
+
+@asynccontextmanager
+async def lifespan(_app):
+    worker = None
+    if settings.mastra_url and settings.mastra_internal_token:
+        worker = asyncio.create_task(story_outbox_loop())
+    try:
+        yield
+    finally:
+        if worker:
+            worker.cancel()
+            with suppress(asyncio.CancelledError):
+                await worker
+
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,6 +55,7 @@ app.include_router(rewards_router)
 app.include_router(exports_router)
 app.include_router(parties_router)
 app.include_router(devices_router)
+app.include_router(adventure_play_router)
 
 
 @app.get("/health")

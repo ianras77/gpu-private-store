@@ -28,6 +28,21 @@ services:
     volumes:
       - jogmania_minio:/data
 
+  mastra:
+    image: node:22-alpine
+    working_dir: /repo
+    environment:
+      PORT: '4112'
+      MASTRA_INTERNAL_TOKEN: ${JOGMANIA_MASTRA_INTERNAL_TOKEN:-dev-jogmania-internal}
+      MASTRA_MODEL_BASE_URL: ${JOGMANIA_MASTRA_MODEL_BASE_URL:-http://host.docker.internal:8844/v1}
+      MASTRA_MODEL_API_KEY: ${JOGMANIA_MASTRA_MODEL_API_KEY:-${RASSYMIND_API_KEY:-}}
+      MASTRA_MODEL: ${JOGMANIA_MASTRA_MODEL:-rassy-fast}
+    volumes:
+      - ./repo:/repo
+    command: sh -c "corepack enable && pnpm install --filter @jogmania/mastra... && pnpm --filter @jogmania/mastra start"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   api:
     image: jogmania-api
     build:
@@ -44,8 +59,9 @@ services:
       MINIO_PUBLIC_URL: "http://localhost:${JOGMANIA_MINIO_PORT:-9000}"
       MINIO_ENABLED: "true"
       CORS_ORIGINS: '["http://localhost:${JOGMANIA_WEB_PORT:-3000}","http://localhost:19006"]'
-      ADVENTURE_LLM_URL: http://host.docker.internal:8844/v1/chat/completions
-      ADVENTURE_LLM_MODEL: rassy-fast
+      JOGMANIA_MASTRA_URL: http://mastra:4112
+      JOGMANIA_MASTRA_INTERNAL_TOKEN: ${JOGMANIA_MASTRA_INTERNAL_TOKEN:-dev-jogmania-internal}
+      JOGMANIA_MASTRA_TIMEOUT_SECONDS: "12"
       AUTH_COOKIE_SECURE: "false"
       PYTHONPATH: /app
     volumes:
@@ -59,6 +75,7 @@ services:
       - postgres
       - redis
       - minio
+      - mastra
 
   web:
     image: jogmania-web

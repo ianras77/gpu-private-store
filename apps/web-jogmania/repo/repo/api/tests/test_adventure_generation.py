@@ -4,7 +4,7 @@ from app.services.adventure_generator import build_adventure
 
 
 @pytest.mark.anyio
-async def test_build_adventure_maps_workout_signals_to_game_encounters():
+async def test_build_adventure_maps_course_shape_without_using_health_or_pace():
     points = [
         {
             "lat": 37.78000,
@@ -75,19 +75,20 @@ async def test_build_adventure_maps_workout_signals_to_game_encounters():
     features = summary["route_features"]
     assert features["climb_count"] >= 1
     assert features["turn_count"] >= 1
-    assert features["high_hr_moments"] >= 1
-    assert features["pace_surge_count"] >= 1
+    assert "high_hr_moments" not in features
+    assert "pace_surge_count" not in features
 
     encounter_kinds = {encounter["kind"] for encounter in summary["encounters"]}
-    assert {"climb", "turn", "heart_rate"}.issubset(encounter_kinds)
+    assert encounter_kinds == {"climb", "turn"}
 
     layer_kinds = {layer["kind"] for layer in summary["map_layers"]}
-    assert {"climb", "turn", "heart_rate"}.issubset(layer_kinds)
+    assert layer_kinds == {"climb", "turn"}
+    assert summary["boss_moment"] is False
 
     segment_hazards = {
         hazard
         for segment in summary["segments"]
         for hazard in segment["hazards"]
     }
-    assert "switchback snare" in segment_hazards
-    assert "pulse gate" in segment_hazards
+    assert "switchback snare" not in segment_hazards
+    assert "pulse gate" not in segment_hazards

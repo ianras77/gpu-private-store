@@ -38,6 +38,7 @@ export const RouteSchema = z.object({
 export const AdventureSegmentSchema = z.object({
   distance_start_m: z.number(),
   distance_end_m: z.number(),
+  chapter_title: z.string().optional(),
   biome: z.string(),
   hazards: z.array(z.string()),
   loot: z.array(z.string())

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { pointAtDistance } from "@/lib/metrics";
 import type { AdventureSummary, GpsPoint } from "@jogmania/shared";
+import type { AdventureSession } from "@jogmania/api-client";
 
 export default function RunDetailPage() {
   const params = useParams();
@@ -19,10 +20,52 @@ export default function RunDetailPage() {
   const api = useApi();
   const [run, setRun] = useState<any>(null);
   const [adventure, setAdventure] = useState<AdventureSummary | null>(null);
+  const [story, setStory] = useState<AdventureSession | null>(null);
   const [course, setCourse] = useState<any>(null);
   const [attempts, setAttempts] = useState<any[]>([]);
   const [activating, setActivating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedbackSaved, setFeedbackSaved] = useState(false);
+  const points = useMemo(() => (run?.gps_points ?? []) as GpsPoint[], [run?.gps_points]);
+
+  const markers = useMemo(() => {
+    if (!adventure || !points.length) return [];
+    const tones: Array<"cyan" | "magenta" | "acid"> = ["cyan", "magenta", "acid"];
+    const normalizeTone = (tone: string | undefined, index: number): "cyan" | "magenta" | "acid" => {
+      if (tone === "cyan" || tone === "magenta" || tone === "acid") return tone;
+      return tones[index % tones.length];
+    };
+
+    const layerMarkers = (adventure.map_layers ?? [])
+      .map((layer, idx) => {
+        const pos = pointAtDistance(points, layer.distance_m);
+        if (!pos) return null;
+        return {
+          lat: pos.lat,
+          lon: pos.lon,
+          label: layer.label,
+          tone: normalizeTone(layer.tone, idx)
+        };
+      })
+      .filter(Boolean) as Array<{ lat: number; lon: number; label: string; tone: "cyan" | "magenta" | "acid" }>;
+
+    if (layerMarkers.length) return layerMarkers;
+
+    return adventure.segments
+      .map((segment, idx) => {
+        const mid = (segment.distance_start_m + segment.distance_end_m) / 2;
+        const pos = pointAtDistance(points, mid);
+        if (!pos) return null;
+        const neighbor = segment.hazards?.[0] ?? "A little surprise";
+        return {
+          lat: pos.lat,
+          lon: pos.lon,
+          label: `${segment.biome} · ${neighbor}`,
+          tone: tones[idx % tones.length]
+        };
+      })
+      .filter(Boolean) as Array<{ lat: number; lon: number; label: string; tone: "cyan" | "magenta" | "acid" }>;
+  }, [adventure, points]);
 
   useEffect(() => {
     if (!user || !runId) return;
@@ -32,6 +75,17 @@ export default function RunDetailPage() {
       .getWorkout(runId)
       .then((data) => {
         if (!cancelled) setRun(data);
+        const rawPayload = data.raw_payload_json as Record<string, unknown> | null | undefined;
+        const sessionId = rawPayload?.adventure_session_id;
+        if (typeof sessionId === "string") {
+          api.getAdventureSession(sessionId).then((session) => {
+            if (!cancelled) setStory(session);
+          }).catch(() => {
+            if (!cancelled) setStory(null);
+          });
+        } else if (!cancelled) {
+          setStory(null);
+        }
       })
       .catch((err) => {
         if (cancelled) return;
@@ -98,53 +152,12 @@ export default function RunDetailPage() {
     return <div className="text-jm-muted">Loading run...</div>;
   }
 
-  const points = (run.gps_points || []) as GpsPoint[];
   const startedAt = run.started_at ? new Date(run.started_at) : null;
   const startedAtLabel = startedAt && !Number.isNaN(startedAt.getTime()) ? startedAt : null;
   const distanceKm = Number.isFinite(run.distance_m) ? (run.distance_m / 1000).toFixed(2) : "-";
   const durationMin = Number.isFinite(run.duration_s) ? Math.round(run.duration_s / 60) : "-";
-  const pace = Number.isFinite(run.avg_pace_s_per_km) ? `${Math.round(run.avg_pace_s_per_km)} s/km` : "-";
   const sourceLabel =
     run.source === "watch" ? "Apple Watch" : run.source === "ios" ? "iPhone" : run.source ?? "Unknown";
-
-  const markers = useMemo(() => {
-    if (!adventure || !points.length) return [];
-    const tones: Array<"cyan" | "magenta" | "acid"> = ["cyan", "magenta", "acid"];
-    const normalizeTone = (tone: string | undefined, index: number): "cyan" | "magenta" | "acid" => {
-      if (tone === "cyan" || tone === "magenta" || tone === "acid") return tone;
-      return tones[index % tones.length];
-    };
-
-    const layerMarkers = (adventure.map_layers ?? [])
-      .map((layer, idx) => {
-        const pos = pointAtDistance(points, layer.distance_m);
-        if (!pos) return null;
-        return {
-          lat: pos.lat,
-          lon: pos.lon,
-          label: layer.label,
-          tone: normalizeTone(layer.tone, idx)
-        };
-      })
-      .filter(Boolean) as Array<{ lat: number; lon: number; label: string; tone: "cyan" | "magenta" | "acid" }>;
-
-    if (layerMarkers.length) return layerMarkers;
-
-    return adventure.segments
-      .map((segment, idx) => {
-        const mid = (segment.distance_start_m + segment.distance_end_m) / 2;
-        const pos = pointAtDistance(points, mid);
-        if (!pos) return null;
-        const hazard = segment.hazards?.[0] ?? "Clear";
-        return {
-          lat: pos.lat,
-          lon: pos.lon,
-          label: `${segment.biome} · ${hazard}`,
-          tone: tones[idx % tones.length]
-        };
-      })
-      .filter(Boolean) as Array<{ lat: number; lon: number; label: string; tone: "cyan" | "magenta" | "acid" }>;
-  }, [adventure, points]);
 
   const handleActivateCourse = async () => {
     if (!course || activating) return;
@@ -164,8 +177,8 @@ export default function RunDetailPage() {
       <Card className="p-6 jm-holo">
         <div className="flex items-center justify-between">
           <div>
-            <p className="jm-kicker">Run Detail</p>
-            <h3 className="font-display text-xl">Session Log</h3>
+            <p className="jm-kicker">A Postcard from the Trail</p>
+            <h3 className="font-display text-xl">{story?.recap && typeof story.recap.headline === "string" ? story.recap.headline : "The day the arcade grew"}</h3>
           </div>
           <Badge tone="cyan">{startedAtLabel ? startedAtLabel.toLocaleDateString() : "-"}</Badge>
         </div>
@@ -174,9 +187,22 @@ export default function RunDetailPage() {
           <span className="jm-chip text-jm-muted">{sourceLabel}</span>
           <span className="jm-chip text-jm-cyan">{distanceKm} km</span>
           <span className="jm-chip text-jm-acid">{durationMin} min</span>
-          <span className="jm-chip text-jm-magenta">{pace}</span>
+          <span className="jm-chip text-jm-acid">+{Number(((run.raw_payload_json as Record<string, unknown> | undefined)?.progression as { points?: number } | undefined)?.points ?? 0)} arcade sparks</span>
         </div>
       </Card>
+
+      {story && (
+        <Card className="p-5">
+          <p className="jm-kicker">Help the little storyteller learn</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="mr-2 text-sm text-jm-muted">Did this postcard feel like your run?</span>
+            <Button size="sm" variant="outline" disabled={feedbackSaved} onClick={() => void api.submitAdventureFeedback(story.id, { felt_personal: true, style_correction: "default" }).then(() => setFeedbackSaved(true))}>Yep, that was me</Button>
+            <Button size="sm" variant="outline" disabled={feedbackSaved} onClick={() => void api.submitAdventureFeedback(story.id, { felt_personal: false, style_correction: "more_grounded" }).then(() => setFeedbackSaved(true))}>Keep it closer to the trail</Button>
+            <Button size="sm" variant="outline" disabled={feedbackSaved} onClick={() => void api.submitAdventureFeedback(story.id, { felt_personal: false, style_correction: "more_silly" }).then(() => setFeedbackSaved(true))}>Add a little more mischief</Button>
+          </div>
+          {feedbackSaved ? <p className="mt-2 text-xs text-jm-acid">Got it. The next postcard will take the hint.</p> : null}
+        </Card>
+      )}
 
       {course && (
         <Card className="p-6 jm-holo">
@@ -185,7 +211,7 @@ export default function RunDetailPage() {
               <p className="jm-kicker">Adventure Course</p>
               <h3 className="font-display text-xl">{course.name}</h3>
               <p className="text-xs text-jm-muted mt-1">
-                {course.is_course ? "Course active for progress tracking." : "Activate to track progress and scoring."}
+                {course.is_course ? "This familiar trail is part of your growing world." : "Add this trail to your arcade so it can grow with every visit."}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -203,17 +229,14 @@ export default function RunDetailPage() {
             <span className="jm-chip text-jm-cyan">
               Distance {course.distance_m ? (course.distance_m / 1000).toFixed(2) : "-"} km
             </span>
-            <span className="jm-chip text-jm-acid">
-              Typical Pace {course.typical_pace_s_per_km ? Math.round(course.typical_pace_s_per_km) : "-"} s/km
-            </span>
-            <span className="jm-chip text-jm-muted">Attempts {course.frequency ?? 0}</span>
+            <span className="jm-chip text-jm-muted">{course.frequency ?? 0} visits</span>
           </div>
         </Card>
       )}
 
       <RunMap points={points} markers={markers} />
 
-      <CourseReplay run={run} adventure={adventure} attempts={attempts.length ? attempts : [run]} />
+      <CourseReplay run={run} adventure={adventure} attempts={attempts.length ? attempts : [run]} story={story} />
     </div>
   );
 }

@@ -15,7 +15,7 @@ export default function InsertCoin({ started, onStart }: InsertCoinProps) {
         </div>
         <NeonButton label="Start Run" onClick={onStart} />
         <div className="text-xs text-white/70 font-display">
-          Drop in a coin to start a course run and chase points.
+          Drop in a coin for a tiny practice adventure.
         </div>
       </div>
     </div>

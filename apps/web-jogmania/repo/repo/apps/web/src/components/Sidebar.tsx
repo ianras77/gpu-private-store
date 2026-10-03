@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 
 const links = [
   { href: "/overview", label: "Overview" },
+  { href: "/world", label: "Arcade" },
   { href: "/runs", label: "Runs" },
   { href: "/routes", label: "Courses" },
   { href: "/parties", label: "Parties" },
@@ -23,7 +24,7 @@ export function Sidebar() {
         <div className="flex items-center justify-between">
           <div>
             <p className="jm-kicker">Jogmania</p>
-            <h1 className="font-display text-2xl">Runner Console</h1>
+            <h1 className="font-display text-2xl">Outdoor Arcade</h1>
           </div>
           <div className="flex items-center gap-2">
             <span className="jm-led cyan" />
@@ -50,7 +51,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="mt-auto text-xs text-jm-muted jm-ledge px-4 py-3 rounded-xl">
-        Neon clarity. Zero noise.
+        Little worlds. Big outside.
       </div>
     </aside>
   );

@@ -28,7 +28,7 @@ export function Navbar({
         </div>
         <div>
           <p className="text-[0.6rem] uppercase tracking-[0.4em] text-jm-muted">Jogmania</p>
-          <p className="font-display text-lg text-jm-text">Runner Console</p>
+          <p className="font-display text-lg text-jm-text">The Outdoor Arcade</p>
         </div>
       </Link>
       <nav className="hidden md:flex items-center gap-6 text-[0.7rem] uppercase tracking-[0.3em] text-jm-muted">
