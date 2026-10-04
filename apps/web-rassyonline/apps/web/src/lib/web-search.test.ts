@@ -188,6 +188,10 @@ describe("citation provenance", () => {
   it("rejects URLs that were not returned by the search tool", () => {
     expect(unsupportedCitationUrls("See https://example.com/ok and https://fake.example/nope.", ["https://example.com/ok"])).toEqual(["https://fake.example/nope"]);
   });
+
+  it("recognizes an allowed URL wrapped in Markdown emphasis", () => {
+    expect(unsupportedCitationUrls("See **https://example.com/docs**.", ["https://example.com/docs"])).toEqual([]);
+  });
 });
 
 describe("Mastra web-search execution contract", () => {

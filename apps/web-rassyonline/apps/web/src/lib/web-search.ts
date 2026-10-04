@@ -443,7 +443,7 @@ export type WebSearchInput = { query: string; recency?: string; domains?: string
 
 export function unsupportedCitationUrls(answer: string, returnedUrls: string[]): string[] {
   const allowed = new Set(returnedUrls);
-  return [...answer.matchAll(/https?:\/\/[^\s)\]>]+/g)].map((match) => match[0].replace(/[.,;]+$/, "")).filter((url, index, all) => !allowed.has(url) && all.indexOf(url) === index);
+  return [...answer.matchAll(/https?:\/\/[^\s)\]>]+/g)].map((match) => match[0].replace(/[.,;:!*_~]+$/, "")).filter((url, index, all) => !allowed.has(url) && all.indexOf(url) === index);
 }
 
 export async function executeWebSearch(input: WebSearchInput): Promise<{ status: "ok" | "empty" | "failed"; results: WebSearchResult[]; reason?: SearchFailureReason }> {
