@@ -21,7 +21,7 @@ import { mastraFailureMessage } from "@/mastra/errors";
 import { getModelCapability, modelForAgent } from "@/lib/model-capabilities";
 import { saveConversationTurnData, type ConversationArtifact } from "@/lib/conversation-turn-data";
 import { buildResearchPlan, buildResearchPlanContext } from "@/mastra/research-plan";
-import { buildToolExecutionContext, isResearchToolName, toolFailureText } from "@/mastra/tool-policy";
+import { buildToolExecutionContext, diagramToolChoiceForPrompt, isResearchToolName, toolFailureText } from "@/mastra/tool-policy";
 
 export const dynamic = "force-dynamic";
 type ServerMessage = { role: "user" | "assistant" | "system"; content: string };
@@ -104,6 +104,7 @@ export async function POST(request: NextRequest) {
     }
     const searchRequested = parsed.data.webSearch === "on" || (parsed.data.webSearch === "auto" && Boolean(latestUserMessage && shouldUseWebSearch(latestUserMessage.content)));
     const requiredDomains = latestUserMessage ? requiredSearchDomains(latestUserMessage.content) : [];
+    const forcedToolChoice = latestUserMessage ? diagramToolChoiceForPrompt(latestUserMessage.content) : undefined;
     const researchPlan = latestUserMessage && searchRequested ? buildResearchPlan(researchPrompt) : null;
     const comparisonRequested = researchPlan?.objective === "comparison";
     const executionShape = latestUserMessage ? taskShape(latestUserMessage.content, { mode: parsed.data.mode, searchRequested, knowledgeRequested }) : "conversation";
@@ -202,10 +203,10 @@ export async function POST(request: NextRequest) {
           const synthesisAgent = executionAgent.id === "rassy-local"
             ? executionAgent
             : agentRegistry[researchSynthesisAgent(selectedAgent, preflightResults.length > 0)];
-          const toolChoice = requiredDomains.length ? "none" : selectedAgent === "researcher"
+          const toolChoice = forcedToolChoice ?? (requiredDomains.length ? "none" : selectedAgent === "researcher"
             ? preflightResults.length ? "auto" : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
-            : undefined;
-          const result = await streamMastraChat({ agent: synthesisAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, selectedDocumentIds, includePriorContext: true, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent, executionShape), temperature: parsed.data.temperature, maxTokens: outputLimit, toolChoice: localOnlyExecution(parsed.data.webSearch) ? undefined : toolChoice });
+            : undefined);
+          const result = await streamMastraChat({ agent: synthesisAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, selectedDocumentIds, includePriorContext: true, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent, executionShape), temperature: parsed.data.temperature, maxTokens: outputLimit, toolChoice: localOnlyExecution(parsed.data.webSearch) && !forcedToolChoice ? undefined : toolChoice });
           for await (const part of result.fullStream as AsyncIterable<{ type: string; textDelta?: string; delta?: string; text?: string; reasoning?: string; reasoningDelta?: string; reasoning_content?: string; toolName?: string; toolCallId?: string; output?: unknown; result?: unknown; payload?: Record<string, unknown>; error?: unknown; finishReason?: string }>) {
             const payload = part.payload;
             if (part.type === "finish" || part.type === "finish-step") finishReason = part.finishReason ?? (typeof payload?.finishReason === "string" ? payload.finishReason : finishReason);

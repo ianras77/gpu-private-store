@@ -30,6 +30,17 @@ describe("Mastra chat transport", () => {
     expect(stream).toHaveBeenCalledWith("research this", expect.objectContaining({ toolChoice: "required" }));
   });
 
+  it("forces a specifically requested tool on the first step, then permits the answer step", async () => {
+    const stream = vi.fn().mockResolvedValue({ fullStream: (async function* () {})() });
+    await streamMastraChat({ agent: { stream } as never, threadId: "t", resourceId: "r", toolChoice: { type: "tool", toolName: "diagramStudio" }, messages: [{ role: "user", content: "create a diagram" }] });
+    const options = stream.mock.calls[0]?.[1] as { toolChoice?: unknown; prepareStep?: unknown };
+    const prepareStep = options.prepareStep as unknown as ((input: { stepNumber: number }) => { toolChoice?: string } | undefined) | undefined;
+
+    expect(options.toolChoice).toEqual({ type: "tool", toolName: "diagramStudio" });
+    expect(prepareStep?.({ stepNumber: 0 })).toBeUndefined();
+    expect(prepareStep?.({ stepNumber: 1 })).toEqual({ toolChoice: "auto" });
+  });
+
   it("forwards bounded applied generation settings to Mastra", async () => {
     const stream = vi.fn().mockResolvedValue({ fullStream: (async function* () {})() });
     await streamMastraChat({ agent: { stream } as never, threadId: "t", resourceId: "r", temperature: 0.4, maxTokens: 1024, messages: [{ role: "user", content: "hello" }] });

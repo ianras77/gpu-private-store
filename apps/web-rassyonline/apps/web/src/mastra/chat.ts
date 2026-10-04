@@ -86,7 +86,10 @@ export async function streamMastraChat(input: MastraChatInput) {
       ...(input.temperature === undefined ? {} : { temperature: input.temperature }),
       ...(input.maxTokens === undefined ? {} : { maxOutputTokens: input.maxTokens })
     } }),
-    ...(input.toolChoice ? { toolChoice: input.toolChoice } : {}),
+    ...(input.toolChoice ? {
+      toolChoice: input.toolChoice,
+      ...(typeof input.toolChoice === "object" ? { prepareStep: ({ stepNumber }: { stepNumber: number }) => stepNumber > 0 ? { toolChoice: "auto" as const } : undefined } : {})
+    } : {}),
     requestContext,
     abortSignal: input.signal,
   };
