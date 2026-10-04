@@ -491,6 +491,22 @@ body:has(.app-shell) { background: var(--obsidian); }
 .service-diagram-actions button, .service-diagram-actions a { display:inline-flex; align-items:center; min-height:36px; padding:7px 10px; border:1px solid rgba(157,232,206,.3); border-radius:7px; background:rgba(157,232,206,.06); color:var(--paper); font:600 .69rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace; text-decoration:none; cursor:pointer; }
 .service-diagram-actions button:hover, .service-diagram-actions a:hover { border-color:var(--aqua); background:rgba(157,232,206,.12); }
 .service-diagram-notice { margin:0; padding:0 14px 12px; color:var(--aqua); font-size:.72rem; }
+.excalidraw-editor-backdrop { position:fixed; z-index:10000; inset:0; display:grid; place-items:center; padding:12px; background:rgba(0,0,0,.78); backdrop-filter:blur(8px); }
+.excalidraw-editor-dialog { width:min(1380px,100%); max-height:calc(100dvh - 24px); display:grid; grid-template-rows:auto auto minmax(260px,1fr) auto auto; overflow:hidden; border:1px solid rgba(157,232,206,.3); border-radius:12px; background:#0b0d0d; color:var(--paper); box-shadow:0 24px 100px rgba(0,0,0,.55); }
+.excalidraw-editor-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); }
+.excalidraw-editor-heading > div { display:grid; gap:4px; min-width:0; }
+.excalidraw-editor-heading strong { font-size:.88rem; }
+.excalidraw-editor-heading small, .excalidraw-editor-footer { color:var(--muted); font-size:.7rem; }
+.excalidraw-editor-close { width:34px; height:34px; border:1px solid var(--line); border-radius:7px; background:transparent; color:var(--paper); font-size:1.35rem; cursor:pointer; }
+.excalidraw-editor-toolbar { display:flex; flex-wrap:wrap; gap:7px; padding:10px 14px; border-bottom:1px solid var(--line); }
+.excalidraw-editor-toolbar button, .excalidraw-editor-dialog [role="alert"] button { min-height:34px; padding:6px 10px; border:1px solid rgba(157,232,206,.3); border-radius:7px; background:rgba(157,232,206,.06); color:var(--paper); font:600 .68rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace; cursor:pointer; }
+.excalidraw-editor-toolbar button:disabled { opacity:.45; cursor:wait; }
+.excalidraw-editor-canvas { min-height:0; height:min(72vh,760px); background:#171a1a; }
+.excalidraw-editor-canvas > .excalidraw { width:100%; height:100%; }
+.excalidraw-editor-notice { margin:0; padding:8px 14px 0; color:var(--aqua); font-size:.7rem; }
+.excalidraw-editor-footer { padding:9px 14px 12px; border-top:1px solid var(--line); }
+.excalidraw-editor-footer a { color:var(--aqua); }
+@media (max-width: 620px) { .excalidraw-editor-backdrop { padding:0; }.excalidraw-editor-dialog { width:100%; max-height:100dvh; height:100dvh; border-radius:0; grid-template-rows:auto auto minmax(0,1fr) auto auto; }.excalidraw-editor-canvas { height:auto; min-height:0; }.excalidraw-editor-toolbar { gap:5px; padding:8px; }.excalidraw-editor-toolbar button { flex:1 1 42%; } }
 @media (max-width: 520px) { .visual-artifact { margin: 14px 0; border-radius: 8px; }.chart-artifact { padding-top: 14px; }.chart-bars { min-height: 164px; padding: 0 10px; }.line-chart, .scatter-chart { padding-inline: 10px; }.line-chart svg, .scatter-chart svg { height: 180px; }.math-lab-artifact { border-radius: 8px; } }
 
 /* RASSY ONLINE / QUIET WORKBENCH

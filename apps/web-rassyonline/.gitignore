@@ -2,4 +2,5 @@ apps/web/.next/
 apps/web/node_modules/
 apps/web/coverage/
 apps/web/tsconfig.tsbuildinfo
+apps/web/public/excalidraw-assets/
 apps/web/npm-debug.log*

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import katex from "katex";
 import { applyLocalChatIntent, type WebSearchMode } from "@/lib/chat-intents";
 import { normalizeChartValues, pieChartProportions } from "@/lib/chart-geometry";
@@ -8,6 +9,8 @@ import { parseMarkdownBlocks } from "@/lib/markdown";
 import { ServerEventParser, type ServerEvent } from "@/lib/sse";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, type ThemeId } from "@/lib/theme";
+
+const ExcalidrawEditor = dynamic(() => import("@/components/excalidraw-editor"), { ssr: false });
 
 type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab" | "data-analysis" | "service-diagram"; title?: string; svg?: string; previewSvg?: string; drawioXml?: string; excalidrawJson?: string; mermaid?: string; nodeCount?: number; connectionCount?: number; diagramUrl?: string; drawUrl?: string; layout?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; summary?: { count: number; minimum: number; maximum: number; mean: number; median: number; standardDeviation: number; sum: number }; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
 
@@ -817,9 +820,18 @@ function downloadArtifactFile(filename: string, content: string, type: string): 
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
 }
 
-type DrawioLoadSource = { xml: string } | { descriptor: { format: "mermaid"; data: string } };
+function downloadArtifactUrl(filename: string, url: string): void {
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.rel = "noopener";
+  anchor.click();
+}
 
-function openDiagramInDrawio(source: DrawioLoadSource, title: string, onNotice: (message: string) => void): void {
+type DrawioLoadSource = { xml: string } | { descriptor: { format: "mermaid"; data: string; wrap?: boolean } };
+type DrawioExportFormat = "png" | "svg";
+
+function openDiagramInDrawio(source: DrawioLoadSource, title: string, onNotice: (message: string) => void, onUpdate: (xml: string) => void, exportFormat?: DrawioExportFormat): void {
   const serviceOrigin = "https://diagram.rasies.com";
   const editorUrl = `${serviceOrigin}/?client=1&proto=json&splash=0`;
   const editor = window.open(editorUrl, "_blank");
@@ -838,16 +850,38 @@ function openDiagramInDrawio(source: DrawioLoadSource, title: string, onNotice: 
       catch { if (message === "ready") message = { event: "init" }; else return; }
     }
     if (!message || typeof message !== "object") return;
-    const data = message as { event?: string; xml?: string };
+    const data = message as { event?: string; xml?: string; format?: string; data?: string; error?: string };
     if (data.event === "init" && !loaded) {
       loaded = true;
-      editor.postMessage(JSON.stringify({ action: "load", ...source, title, fit: 1 }), serviceOrigin);
-      onNotice("Diagram loaded in diagram.rasies.com. Save there to download your edited .drawio file.");
+      const descriptorSource = "descriptor" in source ? { descriptor: { ...source.descriptor, wrap: true }, sourceMetadata: { key: "mermaidSource", value: source.descriptor.data } } : source;
+      editor.postMessage(JSON.stringify({ action: "load", ...descriptorSource, title, fit: 1, autosave: 1, exportProtocol: true, zoomEvents: true }), serviceOrigin);
       return;
     }
+    if (data.event === "load") {
+      onNotice("Connected to the draw.io editor API. Edits sync back here; exports from the editor download in this chat.");
+      if (exportFormat) editor.postMessage(JSON.stringify({ action: "export", format: exportFormat, ...(exportFormat === "png" ? { scale: 2 } : {}) }), serviceOrigin);
+    }
+    if (data.event === "autosave" && typeof data.xml === "string" && data.xml.length <= 500_000) onUpdate(data.xml);
     if (data.event === "save" && typeof data.xml === "string" && data.xml.length <= 500_000) {
+      onUpdate(data.xml);
       downloadArtifactFile(`${artifactFileBase(title)}-edited.drawio`, data.xml, "application/vnd.jgraph.mxfile+xml");
       onNotice("Your edited .drawio diagram was downloaded.");
+    }
+    if (data.event === "export") {
+      if (data.error) { onNotice(`draw.io export failed: ${data.error.slice(0, 180)}`); return; }
+      const format = data.format;
+      const exportNames: Record<string, { extension: string; mime: string }> = {
+        png: { extension: "png", mime: "image/png" }, jpg: { extension: "jpg", mime: "image/jpeg" },
+        webp: { extension: "webp", mime: "image/webp" }, svg: { extension: "svg", mime: "image/svg+xml" },
+        xml: { extension: "drawio", mime: "application/vnd.jgraph.mxfile+xml" }, html: { extension: "html", mime: "text/html" }, pdf: { extension: "pdf", mime: "application/pdf" }
+      };
+      const output = exportNames[format ?? ""];
+      const content = format === "xml" ? data.xml ?? data.data : data.data;
+      if (!output || !content || content.length > 16_000_000) { onNotice("The editor returned an unsupported or oversized export."); return; }
+      const filename = `${artifactFileBase(title)}${exportFormat ? `.${output.extension}` : `-export.${output.extension}`}`;
+      if (content.startsWith("data:")) downloadArtifactUrl(filename, content);
+      else downloadArtifactFile(filename, content, output.mime);
+      onNotice(`${format?.toUpperCase()} exported from diagram.rasies.com.`);
     }
     if (data.event === "exit") cleanup();
   };
@@ -856,6 +890,8 @@ function openDiagramInDrawio(source: DrawioLoadSource, title: string, onNotice: 
 
 function ServiceDiagramArtifact({ artifact }: { artifact: VisualArtifact }) {
   const [notice, setNotice] = useState("");
+  const [editedDrawioXml, setEditedDrawioXml] = useState("");
+  const [editingExcalidraw, setEditingExcalidraw] = useState(false);
   const title = artifact.title?.trim().slice(0, 140) || "Rassy diagram";
   const validPayload = typeof artifact.previewSvg === "string" && artifact.previewSvg.length <= 300_000
     && typeof artifact.drawioXml === "string" && artifact.drawioXml.length <= 500_000
@@ -870,16 +906,21 @@ function ServiceDiagramArtifact({ artifact }: { artifact: VisualArtifact }) {
     <header className="service-diagram-heading"><div><strong>{title}</strong><small>Editable service diagram · {artifact.nodeCount ?? "—"} nodes · {artifact.connectionCount ?? "—"} connections</small></div><span>{artifact.layout ?? "grid"} layout</span></header>
     <div className="service-diagram-preview" dangerouslySetInnerHTML={{ __html: preview }} />
     <div className="service-diagram-actions">
-      <button type="button" onClick={() => openDiagramInDrawio({ xml: artifact.drawioXml! }, title, setNotice)}>Edit in diagram.rasies.com</button>
-      {typeof artifact.mermaid === "string" && artifact.mermaid.length <= 500_000 ? <button type="button" onClick={() => openDiagramInDrawio({ descriptor: { format: "mermaid", data: artifact.mermaid! } }, title, setNotice)}>Rebuild Mermaid in draw.io</button> : null}
+      <button type="button" onClick={() => openDiagramInDrawio({ xml: artifact.drawioXml! }, title, setNotice, setEditedDrawioXml)}>Edit in diagram.rasies.com</button>
+      <button type="button" onClick={() => openDiagramInDrawio({ xml: artifact.drawioXml! }, title, setNotice, setEditedDrawioXml, "png")}>Export PNG via draw.io</button>
+      <button type="button" onClick={() => openDiagramInDrawio({ xml: artifact.drawioXml! }, title, setNotice, setEditedDrawioXml, "svg")}>Export SVG via draw.io</button>
+      {typeof artifact.mermaid === "string" && artifact.mermaid.length <= 500_000 ? <button type="button" onClick={() => openDiagramInDrawio({ descriptor: { format: "mermaid", data: artifact.mermaid!, wrap: true } }, title, setNotice, setEditedDrawioXml)}>Rebuild Mermaid in draw.io</button> : null}
       <button type="button" onClick={() => downloadArtifactFile(`${base}.drawio`, artifact.drawioXml!, "application/vnd.jgraph.mxfile+xml")}>Download .drawio</button>
       <a href={serviceDrawUrl} target="_blank" rel="noopener noreferrer">Open draw.rasies.com</a>
+      <button type="button" onClick={() => setEditingExcalidraw(true)}>Edit with Excalidraw API</button>
       <button type="button" onClick={() => downloadArtifactFile(`${base}.excalidraw`, artifact.excalidrawJson!, "application/json")}>Download Excalidraw scene</button>
+      {editedDrawioXml ? <button type="button" onClick={() => downloadArtifactFile(`${base}-latest.drawio`, editedDrawioXml, "application/vnd.jgraph.mxfile+xml")}>Download latest draw.io edits</button> : null}
       {typeof artifact.mermaid === "string" && artifact.mermaid.length <= 500_000 ? <button type="button" onClick={() => downloadArtifactFile(`${base}.mmd`, artifact.mermaid!, "text/plain;charset=utf-8")}>Download Mermaid</button> : null}
       <button type="button" onClick={() => downloadArtifactFile(`${base}.svg`, artifact.previewSvg!, "image/svg+xml")}>Download preview SVG</button>
     </div>
     {notice ? <p className="service-diagram-notice" role="status">{notice}</p> : null}
-    <figcaption>Draw.io opens with the diagram loaded on your self-hosted editor. In Excalidraw, open the downloaded scene file to continue editing.</figcaption>
+    <figcaption>Draw.io uses its editor API for live edit sync and exports. The embedded Excalidraw editor uses its scene API, then saves files you can open in your self-hosted service.</figcaption>
+    {editingExcalidraw ? <ExcalidrawEditor sceneJson={artifact.excalidrawJson!} title={title} onClose={() => setEditingExcalidraw(false)} /> : null}
   </figure>;
 }
 

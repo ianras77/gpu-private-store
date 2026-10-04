@@ -1,5 +1,6 @@
 .next
 node_modules
+public/excalidraw-assets
 .turbo
 coverage
 .env*
