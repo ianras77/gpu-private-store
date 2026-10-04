@@ -3,7 +3,7 @@
 import "@excalidraw/excalidraw/index.css";
 import { Excalidraw, exportToBlob, exportToSvg, serializeAsJSON } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI, ExcalidrawInitialDataState } from "@excalidraw/excalidraw/types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 declare global {
   interface Window {
@@ -39,13 +39,17 @@ function downloadBlob(filename: string, blob: Blob): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
-export default function ExcalidrawEditor({ sceneJson, title, onClose }: { sceneJson: string; title: string; onClose: () => void }) {
+export default function ExcalidrawEditor({ sceneJson, title, onSceneChange, onClose }: { sceneJson: string; title: string; onSceneChange: (scene: string) => void; onClose: () => void }) {
   const initialData = useMemo(() => parseScene(sceneJson), [sceneJson]);
   const [api, setApi] = useState<ExcalidrawImperativeAPI | null>(null);
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState<"scene" | "svg" | "png" | "">("");
   const [elementCount, setElementCount] = useState(initialData?.elements?.length ?? 0);
+  const pendingSceneRef = useRef("");
+  const changeTimerRef = useRef<number | null>(null);
   const baseName = title.trim().replace(/[^\p{L}\p{N}._-]+/gu, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "Rassy-diagram";
+
+  useEffect(() => () => { if (changeTimerRef.current !== null) window.clearTimeout(changeTimerRef.current); }, []);
 
   if (!initialData) return <div className="excalidraw-editor-backdrop"><section className="excalidraw-editor-dialog" role="alert"><p>This Excalidraw scene could not be opened.</p><button type="button" onClick={onClose}>Close</button></section></div>;
 
@@ -53,6 +57,22 @@ export default function ExcalidrawEditor({ sceneJson, title, onClose }: { sceneJ
     if (!api) throw new Error("The Excalidraw editor is still starting.");
     return { elements: api.getSceneElements(), appState: api.getAppState(), files: api.getFiles() };
   };
+  const publishScene = (serialized: string) => {
+    pendingSceneRef.current = serialized;
+    if (changeTimerRef.current !== null) window.clearTimeout(changeTimerRef.current);
+    changeTimerRef.current = window.setTimeout(() => {
+      onSceneChange(pendingSceneRef.current);
+      pendingSceneRef.current = "";
+      changeTimerRef.current = null;
+    }, 450);
+  };
+  const flushPendingScene = () => {
+    if (changeTimerRef.current !== null) window.clearTimeout(changeTimerRef.current);
+    changeTimerRef.current = null;
+    if (pendingSceneRef.current) onSceneChange(pendingSceneRef.current);
+    pendingSceneRef.current = "";
+  };
+  const closeEditor = () => { flushPendingScene(); onClose(); };
   const withBusy = async (action: typeof busy, run: () => Promise<void>) => {
     if (busy) return;
     setBusy(action);
@@ -64,6 +84,7 @@ export default function ExcalidrawEditor({ sceneJson, title, onClose }: { sceneJ
   const saveScene = () => withBusy("scene", async () => {
     const scene = currentScene();
     const serialized = serializeAsJSON(scene.elements, scene.appState, scene.files, "local");
+    onSceneChange(serialized);
     downloadBlob(`${baseName}.excalidraw`, new Blob([serialized], { type: "application/json" }));
     setNotice("Latest edits saved as a native Excalidraw scene.");
   });
@@ -80,11 +101,11 @@ export default function ExcalidrawEditor({ sceneJson, title, onClose }: { sceneJ
     setNotice("High-resolution PNG exported from the edited scene.");
   });
 
-  return <div className="excalidraw-editor-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+  return <div className="excalidraw-editor-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) closeEditor(); }}>
     <section className="excalidraw-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="excalidraw-editor-title">
       <header className="excalidraw-editor-heading">
         <div><strong id="excalidraw-editor-title">Edit with Excalidraw</strong><small>{title} · {elementCount} elements</small></div>
-        <button type="button" className="excalidraw-editor-close" onClick={onClose} aria-label="Close Excalidraw editor">×</button>
+        <button type="button" className="excalidraw-editor-close" onClick={closeEditor} aria-label="Close Excalidraw editor">×</button>
       </header>
       <div className="excalidraw-editor-toolbar">
         <button type="button" onClick={() => api?.scrollToContent(undefined, { fitToViewport: true, animate: true })} disabled={!api}>Fit scene</button>
@@ -96,13 +117,16 @@ export default function ExcalidrawEditor({ sceneJson, title, onClose }: { sceneJ
         <Excalidraw
           initialData={initialData}
           excalidrawAPI={setApi}
-          onChange={(elements) => setElementCount(elements.length)}
+          onChange={(elements, appState, files) => {
+            setElementCount(elements.length);
+            publishScene(serializeAsJSON(elements, appState, files, "local"));
+          }}
           theme="dark"
           name={title}
         />
       </div>
       {notice ? <p className="excalidraw-editor-notice" role="status">{notice}</p> : null}
-      <footer className="excalidraw-editor-footer">Edits stay in this browser session until you export the scene. Downloaded .excalidraw files also open in <a href="https://draw.rasies.com" target="_blank" rel="noopener noreferrer">your self-hosted Excalidraw service</a>.</footer>
+      <footer className="excalidraw-editor-footer">Edits sync to this chat card automatically. Downloaded .excalidraw files also open in <a href="https://draw.rasies.com" target="_blank" rel="noopener noreferrer">your self-hosted Excalidraw service</a>.</footer>
     </section>
   </div>;
 }
