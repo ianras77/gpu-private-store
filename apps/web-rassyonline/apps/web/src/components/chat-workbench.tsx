@@ -3,12 +3,13 @@
 import { ChangeEvent, FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import katex from "katex";
 import { applyLocalChatIntent, type WebSearchMode } from "@/lib/chat-intents";
+import { normalizeChartValues, pieChartProportions } from "@/lib/chart-geometry";
 import { parseMarkdownBlocks } from "@/lib/markdown";
 import { ServerEventParser, type ServerEvent } from "@/lib/sse";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, type ThemeId } from "@/lib/theme";
 
-type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab" | "data-analysis"; title?: string; svg?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; summary?: { count: number; minimum: number; maximum: number; mean: number; median: number; standardDeviation: number; sum: number }; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
+type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab" | "data-analysis" | "service-diagram"; title?: string; svg?: string; previewSvg?: string; drawioXml?: string; excalidrawJson?: string; nodeCount?: number; connectionCount?: number; diagramUrl?: string; drawUrl?: string; layout?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; summary?: { count: number; minimum: number; maximum: number; mean: number; median: number; standardDeviation: number; sum: number }; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
 
 const displayNumber = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, useGrouping: true });
 const preciseNumber = new Intl.NumberFormat(undefined, { maximumFractionDigits: 6, useGrouping: true });
@@ -705,7 +706,7 @@ function MarkdownMessage({ content }: { content: string }) {
           return <blockquote key={index}>{renderInline(block.text)}</blockquote>;
         }
         if (block.type === "rule") return <hr key={index} />;
-        if (block.type === "image") return <figure className="markdown-figure" key={index}><img src={block.url} alt={block.alt || ""} loading="lazy" /><figcaption>{block.alt}</figcaption></figure>;
+        if (block.type === "image") return <figure className="markdown-figure" key={index}><img src={block.url} alt={block.alt || ""} loading="lazy" decoding="async" referrerPolicy="no-referrer" /><figcaption>{block.alt}</figcaption></figure>;
         if (block.type === "callout") return <aside className={`markdown-callout ${block.tone}`} key={index}><strong>{block.tone}</strong><div>{renderInline(block.text)}</div></aside>;
         if (block.type === "table") {
           return (
@@ -776,6 +777,7 @@ function MathExpression({ tex, display = false }: { tex: string; display?: boole
 }
 
 function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
+  if (artifact.kind === "service-diagram") return <ServiceDiagramArtifact artifact={artifact} />;
   if ((artifact.kind === "dot-matrix" || artifact.kind === "math-lab") && artifact.svg) {
     const svg = sanitizeArtifactSvg(artifact.svg);
     if (!svg) return <ArtifactFallback label="This visual artifact could not be safely rendered." />;
@@ -783,11 +785,14 @@ function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
   }
   if (artifact.kind === "ascii-art" && artifact.art) return <figure className="visual-artifact ascii-artifact"><pre>{artifact.art}</pre><figcaption>{artifact.title ?? "ASCII artwork"}</figcaption></figure>;
   if (artifact.kind === "chart" && artifact.labels && artifact.values) {
-    if (artifact.type === "line") return <LineChart artifact={artifact} />;
-    if (artifact.type === "scatter") return <ScatterChart artifact={artifact} />;
+    if (!artifact.labels.length || artifact.labels.length !== artifact.values.length || artifact.labels.some((label) => typeof label !== "string")) return <ArtifactFallback label="This chart has mismatched labels and values." />;
+    const normalized = normalizeChartValues(artifact.values);
+    if (!normalized) return <ArtifactFallback label="This chart contains values that cannot be rendered." />;
+    if (artifact.type === "line") return <LineChart artifact={artifact} normalized={normalized} />;
+    if (artifact.type === "scatter") return <ScatterChart artifact={artifact} normalized={normalized} />;
     if (artifact.type === "pie") return <PieChart artifact={artifact} />;
     if (artifact.type !== "bar") return <ArtifactFallback label={`${artifact.type ?? "This"} chart rendering is not available yet.`} />;
-    const scale = Math.max(1, ...artifact.values.map((value) => Math.abs(value)));
+    const scale = Math.max(...artifact.values.map((value) => Math.abs(value))) || 1;
     return <figure className="visual-artifact chart-artifact"><div className="chart-bars signed">{artifact.labels.map((label, index) => {
       const value = artifact.values?.[index] ?? 0;
       return <div className="chart-bar" key={`${label}-${index}`}><div className="chart-positive">{value > 0 ? <span style={{ height: `${value / scale * 100}%` }} /> : null}</div><div className="chart-negative">{value < 0 ? <span style={{ height: `${-value / scale * 100}%` }} /> : value === 0 ? <i aria-label="zero value" /> : null}</div><b>{label}</b><small>{formatArtifactNumber(value)}</small></div>;
@@ -798,35 +803,110 @@ function ArtifactView({ artifact }: { artifact: VisualArtifact }) {
   return null;
 }
 
-function ScatterChart({ artifact }: { artifact: VisualArtifact }) {
+function artifactFileBase(title: string): string {
+  return title.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 72) || "rassy-diagram";
+}
+
+function downloadArtifactFile(filename: string, content: string, type: string): void {
+  const objectUrl = URL.createObjectURL(new Blob([content], { type }));
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = filename;
+  anchor.rel = "noopener";
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+}
+
+function openDiagramInDrawio(xml: string, title: string, onNotice: (message: string) => void): void {
+  const serviceOrigin = "https://diagram.rasies.com";
+  const editorUrl = `${serviceOrigin}/?client=1&proto=json&splash=0`;
+  const editor = window.open(editorUrl, "_blank");
+  if (!editor) { onNotice("The editor tab was blocked. Download the .drawio file and open it from diagram.rasies.com."); return; }
+  let loaded = false;
+  const timeout = window.setTimeout(() => {
+    window.removeEventListener("message", receive);
+    if (!loaded) onNotice("The diagram editor did not finish loading. Download the .drawio file to open it manually.");
+  }, 45_000);
+  const cleanup = () => { window.clearTimeout(timeout); window.removeEventListener("message", receive); };
+  const receive = (event: MessageEvent) => {
+    if (event.origin !== serviceOrigin || event.source !== editor) return;
+    let message: unknown = event.data;
+    if (typeof message === "string") {
+      try { message = JSON.parse(message) as unknown; }
+      catch { if (message === "ready") message = { event: "init" }; else return; }
+    }
+    if (!message || typeof message !== "object") return;
+    const data = message as { event?: string; xml?: string };
+    if (data.event === "init" && !loaded) {
+      loaded = true;
+      editor.postMessage(JSON.stringify({ action: "load", xml }), serviceOrigin);
+      onNotice("Diagram loaded in diagram.rasies.com. Save there to download your edited .drawio file.");
+      return;
+    }
+    if (data.event === "save" && typeof data.xml === "string" && data.xml.length <= 500_000) {
+      downloadArtifactFile(`${artifactFileBase(title)}-edited.drawio`, data.xml, "application/vnd.jgraph.mxfile+xml");
+      onNotice("Your edited .drawio diagram was downloaded.");
+    }
+    if (data.event === "exit") cleanup();
+  };
+  window.addEventListener("message", receive);
+}
+
+function ServiceDiagramArtifact({ artifact }: { artifact: VisualArtifact }) {
+  const [notice, setNotice] = useState("");
+  const title = artifact.title?.trim().slice(0, 140) || "Rassy diagram";
+  const validPayload = typeof artifact.previewSvg === "string" && artifact.previewSvg.length <= 300_000
+    && typeof artifact.drawioXml === "string" && artifact.drawioXml.length <= 500_000
+    && typeof artifact.excalidrawJson === "string" && artifact.excalidrawJson.length <= 500_000
+    && artifact.diagramUrl === "https://diagram.rasies.com" && artifact.drawUrl === "https://draw.rasies.com";
+  if (!validPayload) return <ArtifactFallback label="This diagram artifact is incomplete or exceeds the safe import size." />;
+  const preview = sanitizeArtifactSvg(artifact.previewSvg!);
+  if (!preview) return <ArtifactFallback label="This diagram preview could not be safely rendered." />;
+  const base = artifactFileBase(title);
+  const serviceDrawUrl = artifact.drawUrl!;
+  return <figure className="visual-artifact service-diagram-artifact">
+    <header className="service-diagram-heading"><div><strong>{title}</strong><small>Editable service diagram · {artifact.nodeCount ?? "—"} nodes · {artifact.connectionCount ?? "—"} connections</small></div><span>{artifact.layout ?? "grid"} layout</span></header>
+    <div className="service-diagram-preview" dangerouslySetInnerHTML={{ __html: preview }} />
+    <div className="service-diagram-actions">
+      <button type="button" onClick={() => openDiagramInDrawio(artifact.drawioXml!, title, setNotice)}>Edit in diagram.rasies.com</button>
+      <button type="button" onClick={() => downloadArtifactFile(`${base}.drawio`, artifact.drawioXml!, "application/vnd.jgraph.mxfile+xml")}>Download .drawio</button>
+      <a href={serviceDrawUrl} target="_blank" rel="noopener noreferrer">Open draw.rasies.com</a>
+      <button type="button" onClick={() => downloadArtifactFile(`${base}.excalidraw`, artifact.excalidrawJson!, "application/json")}>Download Excalidraw scene</button>
+      <button type="button" onClick={() => downloadArtifactFile(`${base}.svg`, artifact.previewSvg!, "image/svg+xml")}>Download preview SVG</button>
+    </div>
+    {notice ? <p className="service-diagram-notice" role="status">{notice}</p> : null}
+    <figcaption>Draw.io opens with the diagram loaded on your self-hosted editor. In Excalidraw, open the downloaded scene file to continue editing.</figcaption>
+  </figure>;
+}
+
+function ScatterChart({ artifact, normalized }: { artifact: VisualArtifact; normalized: NonNullable<ReturnType<typeof normalizeChartValues>> }) {
   const values = artifact.values ?? [];
   const labels = artifact.labels ?? [];
-  const max = Math.max(...values, 1); const min = Math.min(...values, 0); const range = max - min || 1;
-  return <figure className="visual-artifact chart-artifact scatter-chart-artifact"><div className="scatter-chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${artifact.title ?? "Scatter"} chart`}><path className="line-chart-grid" d="M8 8V92H94M8 29H94M8 50H94M8 71H94" />{values.map((value, index) => { const x = values.length === 1 ? 51 : 8 + index / (values.length - 1) * 86; const y = 92 - (value - min) / range * 84; return <circle className="scatter-point" cx={x} cy={y} r="2.1" key={`${labels[index]}-${index}`}><title>{`${labels[index] ?? index + 1}: ${formatArtifactNumber(value)}`}</title></circle>; })}</svg><div className="line-chart-labels">{labels.map((label, index) => <span key={`${label}-${index}`}>{label}<b>{formatArtifactNumber(values[index])}</b></span>)}</div></div><figcaption>{artifact.title ?? "Scatter chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
+  return <figure className="visual-artifact chart-artifact scatter-chart-artifact"><div className="scatter-chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${artifact.title ?? "Scatter"} chart`}><path className="line-chart-grid" d="M8 8V92H94M8 29H94M8 50H94M8 71H94" />{values.map((value, index) => { const x = values.length === 1 ? 51 : 8 + index / (values.length - 1) * 86; const y = 92 - (normalized.values[index] - normalized.minimum) / normalized.range * 84; return <circle className="scatter-point" cx={x} cy={y} r="2.1" key={`${labels[index]}-${index}`}><title>{`${labels[index] ?? index + 1}: ${formatArtifactNumber(value)}`}</title></circle>; })}</svg><div className="line-chart-labels">{labels.map((label, index) => <span key={`${label}-${index}`}>{label}<b>{formatArtifactNumber(values[index])}</b></span>)}</div></div><figcaption>{artifact.title ?? "Scatter chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
 }
 
 function PieChart({ artifact }: { artifact: VisualArtifact }) {
   const values = artifact.values ?? []; const labels = artifact.labels ?? [];
-  const total = values.reduce((sum, value) => sum + Math.max(0, value), 0);
-  if (total <= 0) return <ArtifactFallback label="Pie charts need at least one positive value." />;
+  const proportions = pieChartProportions(values);
+  if (!proportions) return <ArtifactFallback label="Pie charts need non-negative values and at least one positive value." />;
   let cursor = 0;
-  const slices = values.map((value, index) => { const portion = Math.max(0, value) / total; const start = cursor; cursor += portion; const end = cursor; const angle = (fraction: number) => ({ x: 50 + 42 * Math.cos(-Math.PI / 2 + fraction * Math.PI * 2), y: 50 + 42 * Math.sin(-Math.PI / 2 + fraction * Math.PI * 2) }); const a = angle(start); const b = angle(end); const large = portion > .5 ? 1 : 0; return { index, portion, path: portion >= .999 ? "M50 8A42 42 0 1 1 49.999 8Z" : `M50 50L${a.x} ${a.y}A42 42 0 ${large} 1 ${b.x} ${b.y}Z` }; });
+  const slices = proportions.map((portion, index) => { const start = cursor; cursor += portion; const end = cursor; const angle = (fraction: number) => ({ x: 50 + 42 * Math.cos(-Math.PI / 2 + fraction * Math.PI * 2), y: 50 + 42 * Math.sin(-Math.PI / 2 + fraction * Math.PI * 2) }); const a = angle(start); const b = angle(end); const large = portion > .5 ? 1 : 0; return { index, portion, path: portion >= .999 ? "M50 8A42 42 0 1 1 49.999 8Z" : `M50 50L${a.x} ${a.y}A42 42 0 ${large} 1 ${b.x} ${b.y}Z` }; });
   return <figure className="visual-artifact chart-artifact pie-chart-artifact"><div className="pie-chart"><svg viewBox="0 0 100 100" role="img" aria-label={`${artifact.title ?? "Pie"} chart`}>{slices.map((slice) => <path className={`pie-slice slice-${slice.index % 6}`} d={slice.path} key={slice.index}><title>{`${labels[slice.index] ?? slice.index + 1}: ${(slice.portion * 100).toFixed(1)}%`}</title></path>)}</svg><div className="pie-legend">{slices.map((slice) => <span key={slice.index}><i className={`slice-${slice.index % 6}`} />{labels[slice.index] ?? slice.index + 1}<b>{(slice.portion * 100).toFixed(1)}%</b></span>)}</div></div><figcaption>{artifact.title ?? "Pie chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
 }
 
-function LineChart({ artifact }: { artifact: VisualArtifact }) {
+function LineChart({ artifact, normalized }: { artifact: VisualArtifact; normalized: NonNullable<ReturnType<typeof normalizeChartValues>> }) {
   const values = artifact.values ?? [];
   const labels = artifact.labels ?? [];
-  const minimum = Math.min(0, ...values);
-  const maximum = Math.max(0, ...values);
-  const range = maximum - minimum || 1;
+  const minimum = normalized.minimum;
+  const maximum = normalized.maximum;
+  const range = normalized.range;
   const points = values.map((value, index) => {
     const x = values.length === 1 ? 50 : 6 + index / (values.length - 1) * 88;
-    const y = 92 - (value - minimum) / range * 84;
+    const y = 92 - (normalized.values[index] - minimum) / range * 84;
     return { x, y, value, label: labels[index] ?? String(index + 1) };
   });
   const zeroY = minimum < 0 && maximum > 0 ? 92 - (0 - minimum) / range * 84 : null;
-  return <figure className="visual-artifact chart-artifact line-chart-artifact"><div className="line-chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${artifact.title ?? "Line"} chart`}><path className="line-chart-grid" d="M6 8V92H94M6 29H94M6 50H94M6 71H94" />{zeroY !== null ? <path className="line-chart-zero" d={`M6 ${zeroY}H94`} /> : null}<polyline className="line-chart-path" points={points.map((point) => `${point.x},${point.y}`).join(" ")} />{points.map((point) => <circle className="line-chart-point" cx={point.x} cy={point.y} r="1.5" key={point.label}><title>{`${point.label}: ${formatArtifactNumber(point.value)}`}</title></circle>)}</svg><div className="line-chart-labels">{points.map((point) => <span title={`${point.label}: ${formatArtifactNumber(point.value)}`} key={point.label}>{point.label}<b>{formatArtifactNumber(point.value)}</b></span>)}</div></div><figcaption>{artifact.title ?? "Line chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
+  return <figure className="visual-artifact chart-artifact line-chart-artifact"><div className="line-chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${artifact.title ?? "Line"} chart`}><path className="line-chart-grid" d="M6 8V92H94M6 29H94M6 50H94M6 71H94" />{zeroY !== null ? <path className="line-chart-zero" d={`M6 ${zeroY}H94`} /> : null}<polyline className="line-chart-path" points={points.map((point) => `${point.x},${point.y}`).join(" ")} />{points.map((point, index) => <circle className="line-chart-point" cx={point.x} cy={point.y} r="1.5" key={`${point.label}-${index}`}><title>{`${point.label}: ${formatArtifactNumber(point.value)}`}</title></circle>)}</svg><div className="line-chart-labels">{points.map((point, index) => <span title={`${point.label}: ${formatArtifactNumber(point.value)}`} key={`${point.label}-${index}`}>{point.label}<b>{formatArtifactNumber(point.value)}</b></span>)}</div></div><figcaption>{artifact.title ?? "Line chart"} · {artifact.series ?? "Value"}</figcaption></figure>;
 }
 
 function sanitizeArtifactSvg(input: string): string | null {
@@ -834,12 +914,12 @@ function sanitizeArtifactSvg(input: string): string | null {
   const parsed = new DOMParser().parseFromString(input, "image/svg+xml");
   if (parsed.querySelector("parsererror") || parsed.documentElement.localName !== "svg") return null;
   const namespace = "http://www.w3.org/2000/svg";
-  const allowedTags = new Set(["svg", "g", "rect", "circle", "line", "path", "polyline", "polygon", "text", "title"]);
-  const allowedAttributes = new Set(["width", "height", "viewBox", "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "d", "points", "fill", "stroke", "stroke-width", "opacity", "text-anchor", "role", "aria-label", "class"]);
+  const allowedTags = new Set(["svg", "g", "rect", "circle", "ellipse", "line", "path", "polyline", "polygon", "text", "tspan", "title"]);
+  const allowedAttributes = new Set(["width", "height", "viewBox", "x", "y", "dy", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "d", "points", "fill", "stroke", "stroke-width", "stroke-dasharray", "opacity", "text-anchor", "role", "aria-label", "class"]);
   const safeValue = (name: string, value: string) => {
     if (name === "aria-label") return value.length <= 160;
     if (name === "role") return value === "img";
-    if (name === "class") return /^[a-z-]{1,30}$/.test(value);
+    if (name === "class") return value.split(/\s+/).length <= 5 && value.split(/\s+/).every((token) => /^[a-z-]{1,30}$/.test(token));
     if (name === "fill" || name === "stroke") return /^(?:none|white|black|#[0-9a-f]{3,8})$/i.test(value);
     if (name === "text-anchor") return /^(?:start|middle|end)$/.test(value);
     return value.length <= 20_000 && /^[0-9eE+.,%\s\-a-zA-Z]*$/.test(value);

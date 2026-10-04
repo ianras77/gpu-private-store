@@ -16,8 +16,6 @@ export function calculate(expression: string): number {
   const primary = (): number => {
     const token = tokens[index++];
     if (token === "(") { const value = additive(); if (tokens[index++] !== ")") throw new Error("unmatched parenthesis"); return value; }
-    if (token === "-") return -primary();
-    if (token === "+") return primary();
     if (!token) throw new Error("invalid expression");
     if (token.toLowerCase() === "pi") return Math.PI;
     if (token.toLowerCase() === "e") return Math.E;
@@ -30,8 +28,9 @@ export function calculate(expression: string): number {
     if (!Number.isFinite(value)) throw new Error("invalid expression");
     return value;
   };
-  const power = (): number => { let value = primary(); if (peek() === "^") { index++; value = value ** power(); } return value; };
-  const multiplicative = (): number => { let value = power(); while (["*", "/", "%"].includes(peek())) { const op = tokens[index++]; const right = power(); if (op === "*") value *= right; else if (op === "/") value /= right; else value %= right; } return value; };
+  const power = (): number => { let value = primary(); if (peek() === "^") { index++; value = value ** unary(); } return value; };
+  const unary = (): number => { if (peek() === "-") { index++; return -unary(); } if (peek() === "+") { index++; return unary(); } return power(); };
+  const multiplicative = (): number => { let value = unary(); while (["*", "/", "%"].includes(peek())) { const op = tokens[index++]; const right = unary(); if (op === "*") value *= right; else if (op === "/") value /= right; else value %= right; } return value; };
   const additive = (): number => { let value = multiplicative(); while (["+", "-"].includes(peek())) { const op = tokens[index++]; const right = multiplicative(); value = op === "+" ? value + right : value - right; } return value; };
   const result = additive();
   if (index !== tokens.length || !Number.isFinite(result)) throw new Error("invalid arithmetic result");

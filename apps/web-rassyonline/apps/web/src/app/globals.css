@@ -466,6 +466,31 @@ body:has(.app-shell) { background: var(--obsidian); }
 .calculator-graph { position: relative; margin-top: 16px; padding: 10px 10px 0; border: 1px solid var(--line); border-radius: 7px; background: #080a0a; }.calculator-graph svg { display: block; width: 100%; height: 220px; }.graph-grid { fill: none; stroke: rgba(237,241,235,.08); stroke-width: .35; }.graph-axis { fill: none; stroke: rgba(157,232,206,.35); stroke-width: .6; }.graph-line { fill: none; stroke: var(--aqua); stroke-width: 1.2; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 2px rgba(157,232,206,.3)); }.graph-labels { display: flex; justify-content: space-between; padding: 5px 0 4px; color: var(--muted); font: .58rem ui-monospace, monospace; }
 .math-lab-artifact svg .title { fill: #9de8ce; font: 600 14px ui-monospace, monospace; letter-spacing: 2px; text-transform: uppercase; }.math-lab-artifact svg .formula { fill: #edf1eb; font: italic 29px Georgia, serif; }.math-lab-artifact svg .hint, .math-lab-artifact svg .small { fill: #87918b; font: 13px ui-monospace, monospace; }.math-lab-artifact svg .matrix-value, .math-lab-artifact svg .eigenvalues, .math-lab-artifact svg .invariants { fill: #edf1eb; font: 22px ui-monospace, monospace; }.math-lab-artifact svg .eigenvalues { fill: #9de8ce; font-size: 25px; }.math-lab-artifact svg .invariants { font-size: 19px; }.math-lab-artifact svg .bracket { fill: none; stroke: #9de8ce; stroke-width: 3; }.math-lab-artifact svg .rule { stroke:#9de8ce; stroke-width:1; opacity:.5; }.math-lab-artifact svg .grid { fill:none; stroke:#edf1eb; stroke-width:1; opacity:.1; }.math-lab-artifact svg .axis { stroke:#9de8ce; stroke-width:1; opacity:.6; }.math-lab-artifact svg .curve { fill:none; stroke:#9de8ce; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }.math-lab-artifact svg .vector { fill:none; stroke:#9de8ce; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; opacity:.88; }.math-lab-artifact svg .origin { fill:#9de8ce; }
 .math-lab-artifact { width: min(760px, 100%); padding: 0; background: #0b0d0d; }.math-lab-artifact > div { display: block; aspect-ratio: 760 / 430; overflow: hidden; background: #0b0d0d; }.math-lab-artifact svg { display: block; width: 100%; height: 100%; background: #0b0d0d; }.math-lab-artifact svg text { font-variant-numeric: tabular-nums; }.artifact-fallback { padding: 16px; border-left: 3px solid #e7c77e; color: #e7c77e; font-size: .78rem; }
+.service-diagram-artifact { width: min(100%, 920px); padding: 0; }
+.service-diagram-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-bottom:1px solid rgba(157,232,206,.14); }
+.service-diagram-heading > div { display:grid; gap:4px; min-width:0; }
+.service-diagram-heading strong { color:var(--ink); font-size:.95rem; }
+.service-diagram-heading small, .service-diagram-heading > span { color:var(--muted); font: .66rem/1.4 ui-monospace,SFMono-Regular,Menlo,monospace; }
+.service-diagram-preview { max-height:min(68vh,620px); overflow:auto; background:#0b0d0d; overscroll-behavior:contain; }
+.service-diagram-preview .diagram-preview { display:block; width:auto; max-width:none; height:auto; }
+.service-diagram-preview .diagram-canvas { fill:#0b0d0d; }
+.service-diagram-preview .diagram-title { fill:#9de8ce; font:600 20px ui-monospace,SFMono-Regular,Menlo,monospace; }
+.service-diagram-preview .diagram-edge line, .service-diagram-preview .diagram-edge path { fill:none; stroke:#8ca9a1; stroke-width:2; }
+.service-diagram-preview .diagram-edge polygon { fill:#8ca9a1; }
+.service-diagram-preview .diagram-edge-label { fill:#bbc9c4; font:12px ui-monospace,SFMono-Regular,Menlo,monospace; paint-order:stroke; stroke:#0b0d0d; stroke-width:5px; stroke-linejoin:round; }
+.service-diagram-preview .diagram-node-shape { stroke-width:2; }
+.service-diagram-preview .diagram-node.process .diagram-node-shape { fill:#173b36; stroke:#65c8a8; }
+.service-diagram-preview .diagram-node.decision .diagram-node-shape { fill:#45391a; stroke:#e3bd62; }
+.service-diagram-preview .diagram-node.start .diagram-node-shape { fill:#183b2b; stroke:#70c890; }
+.service-diagram-preview .diagram-node.end .diagram-node-shape { fill:#48282b; stroke:#df7f83; }
+.service-diagram-preview .diagram-node.database .diagram-node-shape { fill:#173548; stroke:#6bb9df; }
+.service-diagram-preview .diagram-node.document .diagram-node-shape { fill:#302848; stroke:#a58be0; }
+.service-diagram-preview .diagram-node.actor .diagram-node-shape, .service-diagram-preview .diagram-node.cloud .diagram-node-shape { fill:#203747; stroke:#81c8e8; }
+.service-diagram-preview .diagram-node-label { fill:#f3f8f6; font:13px ui-sans-serif,system-ui,sans-serif; }
+.service-diagram-actions { display:flex; flex-wrap:wrap; gap:8px; padding:12px 14px; border-top:1px solid rgba(157,232,206,.12); }
+.service-diagram-actions button, .service-diagram-actions a { display:inline-flex; align-items:center; min-height:36px; padding:7px 10px; border:1px solid rgba(157,232,206,.3); border-radius:7px; background:rgba(157,232,206,.06); color:var(--ink); font:600 .69rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace; text-decoration:none; cursor:pointer; }
+.service-diagram-actions button:hover, .service-diagram-actions a:hover { border-color:var(--aqua); background:rgba(157,232,206,.12); }
+.service-diagram-notice { margin:0; padding:0 14px 12px; color:var(--aqua); font-size:.72rem; }
 @media (max-width: 520px) { .visual-artifact { margin: 14px 0; border-radius: 8px; }.chart-artifact { padding-top: 14px; }.chart-bars { min-height: 164px; padding: 0 10px; }.line-chart, .scatter-chart { padding-inline: 10px; }.line-chart svg, .scatter-chart svg { height: 180px; }.math-lab-artifact { border-radius: 8px; } }
 
 /* RASSY ONLINE / QUIET WORKBENCH

@@ -11,6 +11,7 @@ import { dotMatrixTool } from "./dot-matrix";
 import { mathLabTool } from "./math-lab";
 import { librarianTool } from "./book-search";
 import { dataAnalysisTool } from "./data-analysis";
+import { diagramStudioTool } from "./diagram-studio";
 
 export const toolRegistry = {
   "document-search": { tool: documentSearchTool, category: "knowledge", risk: "read-only", enabled: true },
@@ -25,7 +26,8 @@ export const toolRegistry = {
   chart: { tool: chartTool, category: "visualization", risk: "read-only", enabled: true },
   "ascii-art": { tool: asciiArtTool, category: "visualization", risk: "read-only", enabled: true },
   "dot-matrix": { tool: dotMatrixTool, category: "visualization", risk: "read-only", enabled: true },
-  "math-lab": { tool: mathLabTool, category: "visualization", risk: "read-only", enabled: true }
+  "math-lab": { tool: mathLabTool, category: "visualization", risk: "read-only", enabled: true },
+  "diagram-studio": { tool: diagramStudioTool, category: "visualization", risk: "read-only", enabled: true }
 } as const;
 
-export const rassyTools = { documentSearch: documentSearchTool, librarian: librarianTool, webSearch: webSearchTool, parallelResearch: parallelResearchTool, adaptiveResearch: adaptiveResearchTool, pageReader: pageReaderTool, calculator: calculatorTool, currentTime: timeTool, dataAnalysis: dataAnalysisTool, chart: chartTool, asciiArt: asciiArtTool, dotMatrix: dotMatrixTool, mathLab: mathLabTool };
+export const rassyTools = { documentSearch: documentSearchTool, librarian: librarianTool, webSearch: webSearchTool, parallelResearch: parallelResearchTool, adaptiveResearch: adaptiveResearchTool, pageReader: pageReaderTool, calculator: calculatorTool, currentTime: timeTool, dataAnalysis: dataAnalysisTool, chart: chartTool, asciiArt: asciiArtTool, dotMatrix: dotMatrixTool, mathLab: mathLabTool, diagramStudio: diagramStudioTool };

@@ -29,6 +29,13 @@ describe("Mastra utility tools", () => {
     expect(calculate("(1847 * 39) / 3")).toBe(24011);
   });
 
+  it("uses conventional unary-minus and exponent precedence", () => {
+    expect(calculate("-2^2")).toBe(-4);
+    expect(calculate("2^-2")).toBe(0.25);
+    expect(calculate("2^3^2")).toBe(512);
+    expect(calculate("(-2)^2")).toBe(4);
+  });
+
   it("supports scientific functions, constants, and powers", () => {
     expect(calculate("sqrt(81) + 2^3 + pi")).toBeCloseTo(20.14159, 4);
     expect(calculate("round(12.6) * abs(-4)")).toBe(52);
