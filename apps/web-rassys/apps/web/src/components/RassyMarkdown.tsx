@@ -7,7 +7,7 @@ import { KnowledgeCheckCard, TeachingBlock } from "./learning/LearningBlocks";
 import type { LearningCheck } from "../lib/learning/schema";
 import { ThoughtImageSurface } from "./ThoughtImageSurface";
 
-type MarkdownVariant = "notebook" | "learning";
+type MarkdownVariant = "editorial" | "learning";
 type Props = {
   markdown: string;
   variant: MarkdownVariant;
@@ -62,7 +62,7 @@ const resolveImage = (
     return `/api/learn/assets/${slug}/${src}`;
   }
   if (
-    variant === "notebook" &&
+    variant === "editorial" &&
     assetBasePath &&
     !/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(src)
   ) {
@@ -128,7 +128,7 @@ export function RassyMarkdown({
   assetBasePath,
   learningSlug,
 }: Props) {
-  const notebook = variant === "notebook";
+  const notebook = variant === "editorial";
   const components: Components = {
     a: ({ node: _node, href, children }) => {
       const safeHref = safeUrl(
@@ -140,11 +140,7 @@ export function RassyMarkdown({
       return (
         <a
           href={safeHref}
-          className={
-            notebook
-              ? "text-sunrise transition hover:text-white"
-              : "text-violet-800 underline decoration-violet-300 underline-offset-4 hover:text-fuchsia-800"
-          }
+          className="rassy-markdown__link"
           target={external ? "_blank" : undefined}
           rel={external ? "noreferrer noopener" : undefined}
         >
@@ -152,141 +148,87 @@ export function RassyMarkdown({
         </a>
       );
     },
-    p: ({ children }) => <p>{children}</p>,
+    p: ({ children }) => (
+      <p className="rassy-markdown__paragraph">{children}</p>
+    ),
     ul: ({ children }) => (
-      <ul
-        className={
-          notebook ? "list-disc space-y-2 pl-6" : "list-disc space-y-2 pl-6"
-        }
-      >
+      <ul className="rassy-markdown__list rassy-markdown__list--unordered">
         {children}
       </ul>
     ),
     ol: ({ children }) => (
-      <ol className="list-decimal space-y-2 pl-6">{children}</ol>
+      <ol className="rassy-markdown__list rassy-markdown__list--ordered">
+        {children}
+      </ol>
     ),
     li: ({ children }) => <li>{children}</li>,
-    h1: ({ children }) =>
-      notebook ? (
-        <h3 className="text-2xl font-semibold text-white">{children}</h3>
-      ) : (
-        <h2 className="learning-subheading">{children}</h2>
-      ),
+    h1: ({ children }) => (
+      <h2 className="rassy-markdown__heading rassy-markdown__heading--1">
+        {children}
+      </h2>
+    ),
     h2: ({ node, children, id }) => {
       const headingId = typeof id === "string" ? id : undefined;
-      return notebook ? (
-        <h3 id={headingId} className="text-2xl font-semibold text-white">
-          {children}
-        </h3>
-      ) : (
-        <h2 id={headingId} className="learning-section-heading">
+      return (
+        <h2
+          id={headingId}
+          className="rassy-markdown__heading rassy-markdown__heading--2"
+        >
           {children}
         </h2>
       );
     },
-    h3: ({ children }) =>
-      notebook ? (
-        <h4 className="text-xl font-semibold text-white">{children}</h4>
-      ) : (
-        <h3 className="learning-subheading">{children}</h3>
-      ),
-    h4: ({ children }) =>
-      notebook ? (
-        <h5 className="text-lg font-semibold text-white">{children}</h5>
-      ) : (
-        <h4 className="learning-small-heading">{children}</h4>
-      ),
+    h3: ({ children }) => (
+      <h3 className="rassy-markdown__heading rassy-markdown__heading--3">
+        {children}
+      </h3>
+    ),
+    h4: ({ children }) => (
+      <h4 className="rassy-markdown__heading rassy-markdown__heading--4">
+        {children}
+      </h4>
+    ),
     h5: ({ children }) => (
-      <h5
-        className={
-          notebook
-            ? "text-base font-semibold text-white"
-            : "learning-small-heading"
-        }
-      >
+      <h5 className="rassy-markdown__heading rassy-markdown__heading--5">
         {children}
       </h5>
     ),
     h6: ({ children }) => (
-      <h6 className="learning-small-heading">{children}</h6>
+      <h6 className="rassy-markdown__heading rassy-markdown__heading--6">
+        {children}
+      </h6>
     ),
     blockquote: ({ children }) => (
-      <blockquote
-        className={
-          notebook
-            ? "border-l-2 border-sunrise/70 pl-4 italic text-cloud/70"
-            : "learning-quote"
-        }
-      >
-        {children}
-      </blockquote>
+      <blockquote className="rassy-markdown__quote">{children}</blockquote>
     ),
     pre: ({ children }) => (
-      <pre
-        className={
-          notebook
-            ? "overflow-x-auto rounded-2xl border border-white/10 bg-black/40 p-4 text-xs text-cloud/90"
-            : "learning-code-block"
-        }
-      >
-        {children}
-      </pre>
+      <pre className="rassy-markdown__pre">{children}</pre>
     ),
     code: ({ children, className }) => (
-      <code
-        className={`${notebook ? "rounded bg-white/10 px-1.5 py-0.5 text-[0.95em] text-white" : "learning-inline-code"} ${className ?? ""}`}
-      >
+      <code className={`rassy-markdown__code ${className ?? ""}`}>
         {children}
       </code>
     ),
-    hr: () => <hr className={notebook ? "border-white/10" : "learning-rule"} />,
+    hr: () => <hr className="rassy-markdown__rule" />,
     table: ({ children }) => (
-      <div className={notebook ? "overflow-x-auto" : "learning-table-wrap"}>
-        <table
-          className={
-            notebook
-              ? "min-w-full border-collapse text-left text-sm"
-              : "learning-table"
-          }
-        >
-          {children}
-        </table>
+      <div className="rassy-markdown__table-wrap">
+        <table className="rassy-markdown__table">{children}</table>
       </div>
     ),
     thead: ({ children }) => (
-      <thead
-        className={
-          notebook
-            ? "border-b border-white/10 text-cloud/60"
-            : "learning-table-head"
-        }
-      >
-        {children}
-      </thead>
+      <thead className="rassy-markdown__table-head">{children}</thead>
     ),
     tbody: ({ children }) => <tbody>{children}</tbody>,
     tr: ({ children }) => (
-      <tr
-        className={notebook ? "border-b border-white/5" : "learning-table-row"}
-      >
-        {children}
-      </tr>
+      <tr className="rassy-markdown__table-row">{children}</tr>
     ),
     th: ({ children }) => (
-      <th
-        className={
-          notebook
-            ? "px-3 py-2 font-semibold text-white"
-            : "learning-table-cell learning-table-header-cell"
-        }
-      >
+      <th className="rassy-markdown__table-cell rassy-markdown__table-header">
         {children}
       </th>
     ),
     td: ({ children }) => (
-      <td className={notebook ? "px-3 py-2" : "learning-table-cell"}>
-        {children}
-      </td>
+      <td className="rassy-markdown__table-cell">{children}</td>
     ),
     img: ({ src, alt = "" }) => {
       const resolved = resolveImage(
@@ -298,7 +240,7 @@ export function RassyMarkdown({
       if (!resolved) return null;
       if (notebook)
         return (
-          <figure className="overflow-hidden rounded-3xl border border-white/10 bg-black/30">
+          <figure className="rassy-markdown__figure rassy-markdown__figure--editorial">
             <div className="relative aspect-[16/10] overflow-hidden">
               <ThoughtImageSurface
                 src={resolved}
@@ -308,14 +250,12 @@ export function RassyMarkdown({
               />
             </div>
             {alt ? (
-              <figcaption className="px-4 py-3 text-xs text-cloud/60">
-                {alt}
-              </figcaption>
+              <figcaption className="rassy-markdown__caption">{alt}</figcaption>
             ) : null}
           </figure>
         );
       return (
-        <figure className="learning-image">
+        <figure className="rassy-markdown__figure rassy-markdown__figure--learning">
           <div className="relative aspect-[16/10] overflow-hidden">
             <Image
               src={resolved}
@@ -326,7 +266,9 @@ export function RassyMarkdown({
               unoptimized
             />
           </div>
-          {alt ? <figcaption>{alt}</figcaption> : null}
+          {alt ? (
+            <figcaption className="rassy-markdown__caption">{alt}</figcaption>
+          ) : null}
         </figure>
       );
     },
@@ -363,14 +305,18 @@ export function RassyMarkdown({
   };
 
   return (
-    <ReactMarkdown
-      remarkPlugins={
-        notebook ? [remarkGfm] : [remarkGfm, remarkDirective, addLearningNodes]
-      }
-      skipHtml
-      components={components}
-    >
-      {markdown}
-    </ReactMarkdown>
+    <div className={`rassy-markdown rassy-markdown--${variant}`}>
+      <ReactMarkdown
+        remarkPlugins={
+          notebook
+            ? [remarkGfm]
+            : [remarkGfm, remarkDirective, addLearningNodes]
+        }
+        skipHtml
+        components={components}
+      >
+        {markdown}
+      </ReactMarkdown>
+    </div>
   );
 }

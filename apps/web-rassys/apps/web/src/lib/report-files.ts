@@ -7,6 +7,7 @@ export type ReportType = (typeof REPORT_TYPES)[number];
 
 const MAX_REPORT_BYTES = 1024 * 1024;
 const MAX_REPORTS = 2000;
+const MAX_IMPORTED_REPORTS_PER_SOURCE = 500;
 const safeName = /^[A-Za-z0-9][A-Za-z0-9._-]{0,180}\.md$/;
 
 export type ReportFile = {
@@ -23,6 +24,16 @@ export const reportRoot = () =>
 export const reportId = (relativePath: string) =>
   createHash("sha256").update(relativePath).digest("hex");
 
+export type OpenFangReportRoots = {
+  analyst?: string;
+  system?: string;
+};
+
+const openFangRootsFromEnvironment = (): OpenFangReportRoots => ({
+  analyst: process.env.OPENFANG_ANALYST_REPORTS_PATH,
+  system: process.env.OPENFANG_SYSTEM_REPORTS_PATH,
+});
+
 async function safeRegularFile(
   root: string,
   relativePath: string,
@@ -38,6 +49,7 @@ async function safeRegularFile(
 
 export async function listReportFiles(
   root = reportRoot(),
+  openFangRoots: OpenFangReportRoots = openFangRootsFromEnvironment(),
 ): Promise<ReportFile[]> {
   let rootStat;
   try {
@@ -111,5 +123,83 @@ export async function listReportFiles(
       }
     }
   }
+
+  const importedSources = [
+    {
+      type: "analyst" as const,
+      root: openFangRoots.analyst,
+      name: /^\d{8}T\d{6}Z-analyst-rassy-(?:watch|daily|deep-dive|db-summary)\.md$/,
+    },
+    {
+      type: "system" as const,
+      root: openFangRoots.system,
+      name: /^\d{8}T\d{6}Z-openfang-system-integration-sweep\.md$/,
+    },
+  ];
+
+  for (const source of importedSources) {
+    if (!source.root) continue;
+    let sourceRoot: string;
+    try {
+      const stat = await lstat(source.root);
+      if (!stat.isDirectory() || stat.isSymbolicLink()) continue;
+      sourceRoot = await realpath(source.root);
+      if (sourceRoot !== source.root) continue;
+    } catch {
+      continue;
+    }
+
+    let entries;
+    try {
+      entries = await readdir(sourceRoot, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    const eligible = entries
+      .filter(
+        (entry) =>
+          entry.isFile() && !entry.isSymbolicLink() && source.name.test(entry.name),
+      )
+      .sort((left, right) => right.name.localeCompare(left.name))
+      .slice(0, MAX_IMPORTED_REPORTS_PER_SOURCE);
+
+    for (const entry of eligible) {
+      const match = entry.name.match(/^(\d{4})(\d{2})\d{2}T\d{6}Z-/);
+      if (!match) continue;
+      const [, year, month] = match;
+      const relativePath = [source.type, year, month, `openfang-${entry.name}`].join(
+        "/",
+      );
+      const fullPath = path.join(sourceRoot, entry.name);
+      let safePath: string | null = null;
+      try {
+        safePath = await safeRegularFile(sourceRoot, entry.name);
+      } catch {
+        continue;
+      }
+      if (!safePath || safePath !== fullPath) continue;
+
+      const bytes = await readFile(safePath);
+      if (bytes.length > MAX_REPORT_BYTES || !bytes.length) continue;
+      let markdown: string;
+      try {
+        markdown = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+      } catch {
+        continue;
+      }
+      if (!markdown.trim() || markdown.includes("\0")) continue;
+      files.push({
+        id: reportId(relativePath),
+        type: source.type,
+        relativePath,
+        sha256: createHash("sha256").update(bytes).digest("hex"),
+        markdown,
+        bytes: bytes.length,
+      });
+      if (files.length >= MAX_REPORTS) return files;
+    }
+  }
+
   return files;
 }

@@ -329,6 +329,202 @@ li {
   }
 }
 
+.rassy-markdown {
+  min-width: 0;
+  color: inherit;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.rassy-markdown--editorial {
+  --rassy-markdown-link: var(--sunrise, #ffe66d);
+  --rassy-markdown-border: rgba(255, 255, 255, 0.12);
+  --rassy-markdown-subtle: rgba(255, 255, 255, 0.72);
+  --rassy-markdown-code-bg: rgba(0, 0, 0, 0.32);
+  --rassy-markdown-code-ink: rgba(255, 255, 255, 0.94);
+  --rassy-markdown-table-head: rgba(255, 255, 255, 0.06);
+}
+
+.rassy-markdown--learning {
+  --rassy-markdown-link: #68487a;
+  --rassy-markdown-border: #ded5e2;
+  --rassy-markdown-subtle: #67546e;
+  --rassy-markdown-code-bg: #1c1623;
+  --rassy-markdown-code-ink: #f6edf9;
+  --rassy-markdown-table-head: #ece6ef;
+}
+
+.rassy-markdown__paragraph {
+  margin-block: 1rem;
+}
+
+.rassy-markdown__paragraph:first-child,
+.rassy-markdown__list:first-child,
+.rassy-markdown__heading:first-child {
+  margin-block-start: 0;
+}
+
+.rassy-markdown__paragraph:last-child,
+.rassy-markdown__list:last-child {
+  margin-block-end: 0;
+}
+
+.rassy-markdown__link {
+  color: var(--rassy-markdown-link);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+
+.rassy-markdown__link:hover {
+  text-decoration-color: currentColor;
+}
+
+.rassy-markdown__heading {
+  margin: 1.5em 0 0.55em;
+  color: inherit;
+  font-family: var(--font-display, Georgia, serif);
+  font-weight: 650;
+  line-height: 1.2;
+  scroll-margin-top: 7rem;
+}
+
+.rassy-markdown__heading--1,
+.rassy-markdown__heading--2 {
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+}
+
+.rassy-markdown__heading--3 {
+  font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+}
+
+.rassy-markdown__heading--4 {
+  font-size: 1.2rem;
+}
+
+.rassy-markdown__heading--5,
+.rassy-markdown__heading--6 {
+  font-size: 1.05rem;
+}
+
+.rassy-markdown__list {
+  display: grid;
+  gap: 0.55rem;
+  margin-block: 1rem;
+  padding-inline-start: 1.5rem;
+}
+
+.rassy-markdown__list--unordered {
+  list-style: disc;
+}
+
+.rassy-markdown__list--ordered {
+  list-style: decimal;
+}
+
+.rassy-markdown__list li {
+  padding-inline-start: 0.15rem;
+}
+
+.rassy-markdown__quote {
+  margin-block: 1.25rem;
+  border-inline-start: 3px solid var(--rassy-markdown-border);
+  padding: 0.2rem 0 0.2rem 1rem;
+  color: var(--rassy-markdown-subtle);
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.1em;
+  font-style: italic;
+}
+
+.rassy-markdown__pre {
+  max-width: 100%;
+  overflow: auto;
+  margin-block: 1.25rem;
+  border: 1px solid var(--rassy-markdown-border);
+  border-radius: 0.9rem;
+  background: var(--rassy-markdown-code-bg);
+  padding: 1rem;
+  color: var(--rassy-markdown-code-ink);
+  font-size: 0.82em;
+  line-height: 1.65;
+  white-space: pre;
+}
+
+.rassy-markdown__code {
+  border-radius: 0.25rem;
+  background: var(--rassy-markdown-code-bg);
+  padding: 0.1rem 0.3rem;
+  color: var(--rassy-markdown-code-ink);
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+.rassy-markdown__pre .rassy-markdown__code {
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  overflow-wrap: normal;
+}
+
+.rassy-markdown__rule {
+  margin-block: 1.8rem;
+  border: 0;
+  border-top: 1px solid var(--rassy-markdown-border);
+}
+
+.rassy-markdown__table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-block: 1.25rem;
+  border: 1px solid var(--rassy-markdown-border);
+  border-radius: 0.75rem;
+}
+
+.rassy-markdown__table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: start;
+  font-size: 0.9em;
+  line-height: 1.55;
+}
+
+.rassy-markdown__table-head {
+  background: var(--rassy-markdown-table-head);
+}
+
+.rassy-markdown__table-row {
+  border-top: 1px solid var(--rassy-markdown-border);
+}
+
+.rassy-markdown__table-cell {
+  min-width: 7rem;
+  padding: 0.65rem 0.75rem;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.rassy-markdown__table-header {
+  font-weight: 700;
+}
+
+.rassy-markdown__figure {
+  overflow: hidden;
+  margin-block: 1.3rem;
+  border: 1px solid var(--rassy-markdown-border);
+  border-radius: 1rem;
+  background: var(--rassy-markdown-code-bg);
+}
+
+.rassy-markdown__caption {
+  padding: 0.6rem 0.85rem;
+  color: var(--rassy-markdown-subtle);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
 .home-rassy-opening {
   background:
     radial-gradient(

@@ -10,6 +10,7 @@ import {
   type RadioTrack,
 } from "./PersistentRadioPlayerProvider";
 import { formatTimeAgo } from "../lib/utils";
+import { RassyMarkdown } from "./RassyMarkdown";
 
 type RadioNoteTrack = {
   id?: string;
@@ -432,12 +433,15 @@ export function MrRassyNotesPanel() {
               <h3 className="mt-5 max-w-4xl break-words text-3xl font-semibold leading-tight text-white md:text-4xl">
                 {currentNote.boothDossier?.headline ?? currentNote.title}
               </h3>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-cloud/84 md:text-lg">
-                {shorten(
-                  currentNote.boothDossier?.intro ?? currentNote.excerpt,
-                  260,
-                )}
-              </p>
+              <div className="mt-4 max-w-3xl text-base leading-7 text-cloud/84 md:text-lg">
+                <RassyMarkdown
+                  markdown={shorten(
+                    currentNote.boothDossier?.intro ?? currentNote.excerpt,
+                    260,
+                  )}
+                  variant="editorial"
+                />
+              </div>
 
               <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
                 <div className="min-w-0 rounded-[28px] border border-white/10 bg-black/18 p-5">
@@ -474,9 +478,12 @@ export function MrRassyNotesPanel() {
                       <div className="mt-3 break-words text-xl font-semibold text-white">
                         {selectedFocus.title}
                       </div>
-                      <p className="mt-3 break-words text-sm leading-7 text-cloud/80 md:text-[15px]">
-                        {selectedFocus.body}
-                      </p>
+                      <div className="mt-3 break-words text-sm leading-7 text-cloud/80 md:text-[15px]">
+                        <RassyMarkdown
+                          markdown={selectedFocus.body}
+                          variant="editorial"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -523,13 +530,17 @@ export function MrRassyNotesPanel() {
                       <div className="text-[10px] uppercase tracking-[0.28em] text-cloud/55">
                         Booth detail
                       </div>
-                      <p className="mt-3 break-words text-sm leading-7 text-cloud/78 md:text-[15px]">
-                        {shorten(
-                          currentNote.boothDossier?.programming?.description ??
-                            currentNote.boothDossier?.deepCut,
-                          180,
-                        )}
-                      </p>
+                      <div className="mt-3 break-words text-sm leading-7 text-cloud/78 md:text-[15px]">
+                        <RassyMarkdown
+                          markdown={shorten(
+                            currentNote.boothDossier?.programming
+                              ?.description ??
+                              currentNote.boothDossier?.deepCut,
+                            180,
+                          )}
+                          variant="editorial"
+                        />
+                      </div>
                     </div>
                   )}
 
@@ -633,9 +644,12 @@ export function MrRassyNotesPanel() {
                               <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/46 sm:pt-1">
                                 {section.label}
                               </div>
-                              <p className="mt-2 break-words text-sm leading-7 text-cloud/82 sm:mt-0 md:text-[15px]">
-                                {section.body}
-                              </p>
+                              <div className="mt-2 break-words text-sm leading-7 text-cloud/82 sm:mt-0 md:text-[15px]">
+                                <RassyMarkdown
+                                  markdown={section.body}
+                                  variant="editorial"
+                                />
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -707,9 +721,15 @@ export function MrRassyNotesPanel() {
                     <div className="mt-3 line-clamp-3 break-words text-base font-semibold leading-6 text-white transition group-hover:text-glow">
                       {note.boothDossier?.headline ?? note.title}
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-cloud/74">
-                      {shorten(note.boothDossier?.intro ?? note.excerpt, 120)}
-                    </p>
+                    <div className="mt-2 text-sm leading-6 text-cloud/74">
+                      <RassyMarkdown
+                        markdown={shorten(
+                          note.boothDossier?.intro ?? note.excerpt,
+                          120,
+                        )}
+                        variant="editorial"
+                      />
+                    </div>
                     <div className="mt-3 break-words text-xs leading-5 text-cloud/58">
                       {note.currentTrack?.title
                         ? `On air: ${note.currentTrack.title}`

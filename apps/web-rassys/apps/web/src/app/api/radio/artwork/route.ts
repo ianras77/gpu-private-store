@@ -20,24 +20,35 @@ const emptyArtwork = () =>
 
 const proxyArtwork = async (request: Request) => {
   try {
-    const now = await fetchRadio<LibraryTrack | null>("/public/now");
-    if (now?.id) {
+    const requestUrl = new URL(request.url);
+    const requestedTrackId = requestUrl.searchParams.get("trackId")?.trim();
+    const now = requestedTrackId
+      ? null
+      : await fetchRadio<LibraryTrack | null>("/public/now");
+    const trackId = requestedTrackId || now?.id;
+    if (trackId) {
       // The live playhead can arrive before the controller's full metadata
       // refresh has completed.  The controller can still read embedded or
       // nearby artwork by track id, so try it rather than showing a synthetic
       // cover merely because the quick catalog has not set hasArtwork yet.
       const response = await proxyControllerMedia(
         request,
-        `/public/library/tracks/${encodeURIComponent(now.id)}/artwork`,
+        `/public/library/tracks/${encodeURIComponent(trackId)}/artwork`,
       );
       if (response.ok) return response;
     }
 
-    const artworkUrl = now?.albumArtUrl?.trim();
+    const artworkUrl = requestedTrackId ? undefined : now?.albumArtUrl?.trim();
     if (!artworkUrl) {
       const params = new URLSearchParams({
-        title: now?.title ?? "Current record",
-        artist: now?.artist ?? "Mr Rassy Radio",
+        title:
+          requestUrl.searchParams.get("title") ??
+          now?.title ??
+          "Current record",
+        artist:
+          requestUrl.searchParams.get("artist") ??
+          now?.artist ??
+          "Mr Rassy Radio",
       });
       return new Response(null, {
         status: 302,

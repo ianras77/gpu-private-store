@@ -281,18 +281,38 @@ export const scanImmichLibraries = async (args: {
   baseUrl: string;
   apiKey: string;
   timeoutMs?: number;
+  albumId?: string;
+  albumName?: string;
 }) => {
   const baseUrl = trimSlash(args.baseUrl);
   const apiKey = args.apiKey.trim();
   const timeoutMs = Math.max(1000, args.timeoutMs ?? 12000);
   if (!baseUrl || !apiKey) throw new Error("immich_not_configured");
 
+  const configuredIds = new Set(
+    (args.albumId ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+  const configuredNames = new Set(
+    (args.albumName ?? "")
+      .split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean),
+  );
+
   const albums = await fetchImmichJson<ImmichAlbumSummary[]>(
     `${baseUrl}/api/albums`, apiKey, timeoutMs
   );
   const publicAlbums = albums.filter((album) => {
     const name = album.albumName?.trim().toLowerCase() ?? "";
-    return name.startsWith("web-rassy-") && Boolean(album.id);
+    const id = album.id?.trim() ?? "";
+    return Boolean(id) && (
+      name.startsWith("web-rassy-") ||
+      configuredIds.has(id) ||
+      configuredNames.has(name)
+    );
   });
   const results = await Promise.all(publicAlbums.map(async (summary) => {
     const detail = await fetchImmichJson<ImmichAlbumDetail>(

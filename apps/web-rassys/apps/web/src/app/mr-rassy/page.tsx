@@ -99,10 +99,14 @@ export default function MrRassyPage() {
         </section>
 
         <div id="on-air" className="relative">
-          <MrRassyStationDeck />
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+            <MrRassyStationDeck />
+          </div>
         </div>
         <div id="what-he-keeps" className="relative">
-          <MrRassyStationIntelligence />
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+            <MrRassyStationIntelligence />
+          </div>
         </div>
       </main>
     </RoomShell>

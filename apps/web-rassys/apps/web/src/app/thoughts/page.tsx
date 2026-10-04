@@ -136,7 +136,7 @@ export default async function ThoughtsPage() {
               <div className="mt-6 flex flex-col gap-4 text-sm leading-7 text-cloud/80">
                 <RassyMarkdown
                   markdown={thought.body}
-                  variant="notebook"
+                  variant="editorial"
                   assetBasePath={thought.assetBasePath}
                 />
               </div>

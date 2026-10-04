@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Search } from "lucide-react";
 import { Footer } from "../../../components/Footer";
 import { Button } from "../../../components/ui/button";
+import { RassyMarkdown } from "../../../components/RassyMarkdown";
 import {
   buildRadioNotesCatalog,
   formatRadioMood,
@@ -162,9 +163,9 @@ const SectionCard = ({
         {section.title}
       </div>
     </div>
-    <p className="mt-3 text-sm leading-7 text-cloud/80 md:mt-0">
-      {section.body}
-    </p>
+    <div className="mt-3 text-sm leading-7 text-cloud/80 md:mt-0">
+      <RassyMarkdown markdown={section.body} variant="editorial" />
+    </div>
   </div>
 );
 
@@ -226,9 +227,12 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
           <h2 className="text-2xl font-semibold text-white md:text-3xl">
             {note.boothDossier?.headline ?? note.title}
           </h2>
-          <p className="mt-4 max-w-3xl text-base leading-8 text-cloud/84">
-            {note.boothDossier?.intro ?? note.excerpt}
-          </p>
+          <div className="mt-4 max-w-3xl text-base leading-8 text-cloud/84">
+            <RassyMarkdown
+              markdown={note.boothDossier?.intro ?? note.excerpt}
+              variant="editorial"
+            />
+          </div>
 
           <div className="mt-5 rounded-[24px] border border-white/10 bg-black/18 p-4">
             <div className="text-[10px] uppercase tracking-[0.24em] text-cloud/50">
@@ -253,9 +257,12 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
               <div className="mt-3 text-lg font-semibold text-white">
                 {note.boothDossier.programming.label}
               </div>
-              <p className="mt-2 text-sm leading-7 text-cloud/80">
-                {note.boothDossier.programming.description}
-              </p>
+              <div className="mt-2 text-sm leading-7 text-cloud/80">
+                <RassyMarkdown
+                  markdown={note.boothDossier.programming.description}
+                  variant="editorial"
+                />
+              </div>
               {playback.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.18em] text-cloud/64">
                   {playback.slice(0, 4).map((item, index) => (
@@ -357,25 +364,34 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
                     <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/48">
                       Why it fits
                     </div>
-                    <p className="mt-2 text-sm leading-7 text-cloud/80">
-                      {track.whyItFits}
-                    </p>
+                    <div className="mt-2 text-sm leading-7 text-cloud/80">
+                      <RassyMarkdown
+                        markdown={track.whyItFits}
+                        variant="editorial"
+                      />
+                    </div>
                   </div>
                   <div>
                     <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/48">
                       Track context
                     </div>
-                    <p className="mt-2 text-sm leading-7 text-cloud/80">
-                      {track.context}
-                    </p>
+                    <div className="mt-2 text-sm leading-7 text-cloud/80">
+                      <RassyMarkdown
+                        markdown={track.context}
+                        variant="editorial"
+                      />
+                    </div>
                   </div>
                   <div>
                     <div className="text-[10px] uppercase tracking-[0.22em] text-cloud/48">
                       Listen for
                     </div>
-                    <p className="mt-2 text-sm leading-7 text-cloud/80">
-                      {track.listenFor}
-                    </p>
+                    <div className="mt-2 text-sm leading-7 text-cloud/80">
+                      <RassyMarkdown
+                        markdown={track.listenFor}
+                        variant="editorial"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -413,10 +429,8 @@ const NoteCard = ({ note }: { note: IndexedRadioNote }) => {
         <summary className="cursor-pointer list-none text-[11px] uppercase tracking-[0.24em] text-cloud/64">
           Open saved booth copy
         </summary>
-        <div className="mt-4 space-y-3 text-sm leading-7 text-cloud/84">
-          {note.script.split(/\n{2,}/).map((paragraph, index) => (
-            <p key={`${note.id}-paragraph-${index}`}>{paragraph}</p>
-          ))}
+        <div className="mt-4 text-sm leading-7 text-cloud/84">
+          <RassyMarkdown markdown={note.script} variant="editorial" />
         </div>
       </details>
     </article>

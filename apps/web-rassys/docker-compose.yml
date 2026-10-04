@@ -125,6 +125,8 @@ services:
       BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/web-rassys}
       LEARNING_STORAGE_PATH: ${LEARNING_STORAGE_PATH:-/media/learning}
       RASSY_REPORTS_ROOT: /reports
+      OPENFANG_ANALYST_REPORTS_PATH: /openfang-reports/analyst-rassy
+      OPENFANG_SYSTEM_REPORTS_PATH: /openfang-reports/system-integration
     depends_on:
       redis:
         condition: service_healthy
@@ -147,6 +149,8 @@ services:
       # Learning modules are content-only files and stay read-only in the app container.
       - ${HOST_LEARNING_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/learning}:${LEARNING_STORAGE_PATH:-/media/learning}:ro
       - ${APP_DATA_DIR}/app-data/web-rassys/reports:/reports:ro
+      - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/analyst-rassy:/openfang-reports/analyst-rassy:ro
+      - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/system-integration:/openfang-reports/system-integration:ro
     restart: unless-stopped
     healthcheck:
       test:
