@@ -11,12 +11,13 @@ const edgeSchema = z.object({
   from: z.string().trim().min(1).max(40),
   to: z.string().trim().min(1).max(40),
   label: z.string().trim().max(40).optional(),
-  style: z.enum(["solid", "dashed", "dotted"]).default("solid")
+  style: z.enum(["solid", "dashed", "dotted"]).default("solid"),
+  direction: z.enum(["forward", "backward", "both", "none"]).default("forward")
 });
 
 export type DiagramNode = z.infer<typeof nodeSchema>;
 export type DiagramEdge = z.infer<typeof edgeSchema>;
-type Layout = "vertical" | "horizontal" | "grid";
+type Layout = "auto" | "vertical" | "horizontal" | "grid";
 type DiagramPosition = DiagramNode & { x: number; y: number; width: number; height: number };
 
 const NODE_WIDTH = 190;
@@ -79,7 +80,81 @@ function svgEdgeLabel(value: string, x: number, y: number): string {
   return `<text class="diagram-edge-label" x="${x.toFixed(1)}" y="${firstY.toFixed(1)}" text-anchor="middle">${lines.map((line, index) => `<tspan x="${x.toFixed(1)}" dy="${index === 0 ? 0 : 18}">${svgEscape(line)}</tspan>`).join("")}</text>`;
 }
 
-function placeNodes(nodes: DiagramNode[], layout: Layout): { nodes: DiagramPosition[]; width: number; height: number } {
+function graphLayers(nodes: DiagramNode[], edges: DiagramEdge[]): DiagramNode[][] {
+  const order = new Map(nodes.map((node, index) => [node.id, index]));
+  const outgoing = new Map(nodes.map((node) => [node.id, [] as string[]]));
+  const incoming = new Map(nodes.map((node) => [node.id, [] as string[]]));
+  const indegree = new Map(nodes.map((node) => [node.id, 0]));
+  for (const edge of edges) {
+    if (edge.from === edge.to || edge.direction === "both" || edge.direction === "none") continue;
+    const source = edge.direction === "backward" ? edge.to : edge.from;
+    const target = edge.direction === "backward" ? edge.from : edge.to;
+    outgoing.get(source)!.push(target);
+    incoming.get(target)!.push(source);
+    indegree.set(target, indegree.get(target)! + 1);
+  }
+  const rank = new Map(nodes.map((node) => [node.id, 0]));
+  const ready = nodes.filter((node) => indegree.get(node.id) === 0).map((node) => node.id);
+  const ranked = new Set<string>();
+  while (ready.length) {
+    ready.sort((left, right) => order.get(left)! - order.get(right)!);
+    const id = ready.shift()!;
+    ranked.add(id);
+    for (const target of outgoing.get(id)!) {
+      rank.set(target, Math.max(rank.get(target)!, rank.get(id)! + 1));
+      indegree.set(target, indegree.get(target)! - 1);
+      if (indegree.get(target) === 0) ready.push(target);
+    }
+  }
+  // Break cycles using a stable source-to-sink heuristic. Prefer nodes with
+  // more outgoing than incoming links; explicit start/end nodes break ties.
+  // The edge that closes a loop then routes back across the ranked layers.
+  const cyclic = nodes.filter((node) => !ranked.has(node.id));
+  while (cyclic.length) {
+    const remaining = new Set(cyclic.map((node) => node.id));
+    cyclic.sort((left, right) => {
+      const score = (node: DiagramNode) => outgoing.get(node.id)!.filter((id) => remaining.has(id)).length - incoming.get(node.id)!.filter((id) => remaining.has(id)).length;
+      const shapePriority = (node: DiagramNode) => node.shape === "start" ? 1 : node.shape === "end" ? -1 : 0;
+      return score(right) - score(left) || shapePriority(right) - shapePriority(left) || order.get(left.id)! - order.get(right.id)!;
+    });
+    const node = cyclic.shift()!;
+    const predecessors = incoming.get(node.id)!.filter((id) => ranked.has(id));
+    rank.set(node.id, predecessors.length ? Math.max(...predecessors.map((id) => rank.get(id)!)) + 1 : 0);
+    ranked.add(node.id);
+  }
+  const layers: DiagramNode[][] = [];
+  for (const node of nodes) {
+    const level = rank.get(node.id)!;
+    (layers[level] ??= []).push(node);
+  }
+  const layerFor = new Map(nodes.map((node) => [node.id, rank.get(node.id)!]));
+  const reorderByNeighbors = (level: number, neighborLevel: number, forward: boolean) => {
+    const positions = new Map((layers[neighborLevel] ?? []).map((node, index) => [node.id, index]));
+    const neighbors = forward ? incoming : outgoing;
+    layers[level]?.sort((left, right) => {
+      const score = (node: DiagramNode) => {
+        const connected = neighbors.get(node.id)!.filter((id) => layerFor.get(id) === neighborLevel).map((id) => positions.get(id)!);
+        return connected.length ? connected.reduce((sum, value) => sum + value, 0) / connected.length : (order.get(node.id)! + nodes.length);
+      };
+      const delta = score(left) - score(right);
+      return Number.isFinite(delta) && delta !== 0 ? delta : order.get(left.id)! - order.get(right.id)!;
+    });
+  };
+  for (let level = 1; level < layers.length; level += 1) reorderByNeighbors(level, level - 1, true);
+  for (let level = layers.length - 2; level >= 0; level -= 1) reorderByNeighbors(level, level + 1, false);
+  return layers;
+}
+
+function placeNodes(nodes: DiagramNode[], edges: DiagramEdge[], layout: Layout): { nodes: DiagramPosition[]; width: number; height: number } {
+  if (layout === "auto") {
+    const layers = graphLayers(nodes, edges);
+    const columns = Math.max(1, ...layers.map((layer) => layer.length));
+    const positioned = layers.flatMap((layer, row) => {
+      const offset = (columns - layer.length) / 2;
+      return layer.map((node, index) => ({ ...node, x: PAD_X + (offset + index) * (NODE_WIDTH + GAP_X), y: PAD_Y + row * (NODE_HEIGHT + GAP_Y), width: NODE_WIDTH, height: NODE_HEIGHT }));
+    });
+    return { nodes: positioned, width: Math.max(720, PAD_X * 2 + columns * NODE_WIDTH + (columns - 1) * GAP_X), height: PAD_Y * 2 + layers.length * NODE_HEIGHT + (layers.length - 1) * GAP_Y };
+  }
   const columns = layout === "vertical" ? 1 : layout === "horizontal" ? nodes.length : Math.ceil(Math.sqrt(nodes.length));
   const rows = Math.ceil(nodes.length / columns);
   const positioned = nodes.map((node, index) => {
@@ -120,12 +195,21 @@ function makePreviewSvg(title: string, positioned: DiagramPosition[], edges: Dia
     if (edge.from === edge.to) {
       const centerX = from.x + from.width / 2;
       const label = edge.label ? svgEdgeLabel(edge.label, centerX, from.y - 20) : "";
-      return `<g class="diagram-edge"><path d="M${(centerX - 34).toFixed(1)} ${from.y}C${(centerX - 56).toFixed(1)} ${(from.y - 64).toFixed(1)} ${(centerX + 56).toFixed(1)} ${(from.y - 64).toFixed(1)} ${(centerX + 34).toFixed(1)} ${from.y}" fill="none" ${dash ? `stroke-dasharray="${dash}"` : ""}/><polygon points="${(centerX + 34).toFixed(1)},${from.y} ${(centerX + 30).toFixed(1)},${(from.y - 10).toFixed(1)} ${(centerX + 41).toFixed(1)},${(from.y - 8).toFixed(1)}"/>${label}</g>`;
+      const rightTip = `${centerX + 34},${from.y} ${centerX + 30},${from.y - 10} ${centerX + 41},${from.y - 8}`;
+      const leftTip = `${centerX - 34},${from.y} ${centerX - 30},${from.y - 10} ${centerX - 41},${from.y - 8}`;
+      const arrows = `${edge.direction === "backward" || edge.direction === "both" ? `<polygon points="${leftTip}"/>` : ""}${edge.direction === "forward" || edge.direction === "both" ? `<polygon points="${rightTip}"/>` : ""}`;
+      return `<g class="diagram-edge"><path d="M${(centerX - 34).toFixed(1)} ${from.y}C${(centerX - 56).toFixed(1)} ${(from.y - 64).toFixed(1)} ${(centerX + 56).toFixed(1)} ${(from.y - 64).toFixed(1)} ${(centerX + 34).toFixed(1)} ${from.y}" fill="none" ${dash ? `stroke-dasharray="${dash}"` : ""}/>${arrows}${label}</g>`;
     }
-    const baseX = line.x2 - line.ux * 12; const baseY = line.y2 - line.uy * 12;
+    const hasStartArrow = edge.direction === "backward" || edge.direction === "both";
+    const hasEndArrow = edge.direction === "forward" || edge.direction === "both";
+    const startBaseX = line.x1 + line.ux * 12; const startBaseY = line.y1 + line.uy * 12;
+    const endBaseX = line.x2 - line.ux * 12; const endBaseY = line.y2 - line.uy * 12;
     const perpX = -line.uy * 5; const perpY = line.ux * 5;
+    const startX = hasStartArrow ? startBaseX : line.x1; const startY = hasStartArrow ? startBaseY : line.y1;
+    const endX = hasEndArrow ? endBaseX : line.x2; const endY = hasEndArrow ? endBaseY : line.y2;
     const label = edge.label ? svgEdgeLabel(edge.label, (line.x1 + line.x2) / 2, (line.y1 + line.y2) / 2 - 8) : "";
-    return `<g class="diagram-edge"><line x1="${line.x1.toFixed(1)}" y1="${line.y1.toFixed(1)}" x2="${baseX.toFixed(1)}" y2="${baseY.toFixed(1)}" ${dash ? `stroke-dasharray="${dash}"` : ""}/><polygon points="${line.x2.toFixed(1)},${line.y2.toFixed(1)} ${(baseX + perpX).toFixed(1)},${(baseY + perpY).toFixed(1)} ${(baseX - perpX).toFixed(1)},${(baseY - perpY).toFixed(1)}"/>${label}</g>`;
+    const arrows = `${hasStartArrow ? `<polygon points="${line.x1.toFixed(1)},${line.y1.toFixed(1)} ${(startBaseX + perpX).toFixed(1)},${(startBaseY + perpY).toFixed(1)} ${(startBaseX - perpX).toFixed(1)},${(startBaseY - perpY).toFixed(1)}"/>` : ""}${hasEndArrow ? `<polygon points="${line.x2.toFixed(1)},${line.y2.toFixed(1)} ${(endBaseX + perpX).toFixed(1)},${(endBaseY + perpY).toFixed(1)} ${(endBaseX - perpX).toFixed(1)},${(endBaseY - perpY).toFixed(1)}"/>` : ""}`;
+    return `<g class="diagram-edge"><line x1="${startX.toFixed(1)}" y1="${startY.toFixed(1)}" x2="${endX.toFixed(1)}" y2="${endY.toFixed(1)}" ${dash ? `stroke-dasharray="${dash}"` : ""}/>${arrows}${label}</g>`;
   }).join("");
   const nodeMarkup = positioned.map((node) => {
     const style = palette[node.shape]; const lines = wrapLabel([node.label, ...(node.detail ? [node.detail] : [])].join(" — "), 24, 4);
@@ -151,11 +235,50 @@ function makeDrawioXml(title: string, positioned: DiagramPosition[], edges: Diag
   });
   const byId = new Map(positioned.map((node) => [node.id, node]));
   edges.forEach((edge, index) => {
-    const style = `edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#8ca9a1;fontColor=#314a44;fontSize=12;${edge.style === "dashed" ? "dashed=1;" : edge.style === "dotted" ? "dashed=1;dashPattern=1 4;" : ""}`;
+    const startArrow = edge.direction === "backward" || edge.direction === "both" ? "block" : "none";
+    const endArrow = edge.direction === "forward" || edge.direction === "both" ? "block" : "none";
+    const style = `edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=${startArrow};startFill=1;endArrow=${endArrow};endFill=1;strokeWidth=2;strokeColor=#8ca9a1;fontColor=#314a44;fontSize=12;${edge.style === "dashed" ? "dashed=1;" : edge.style === "dotted" ? "dashed=1;dashPattern=1 4;" : ""}`;
     cells.push(`<mxCell id="edge_${index + 1}" value="${xmlEscape(edge.label ?? "")}" style="${style}" edge="1" parent="1" source="node_${byId.get(edge.from)!.id}" target="node_${byId.get(edge.to)!.id}"><mxGeometry relative="1" as="geometry"/></mxCell>`);
   });
   const diagramId = shortId(title);
   return `<?xml version="1.0" encoding="UTF-8"?><mxfile host="app.diagrams.net" modified="${new Date().toISOString()}" agent="Rassy Online" version="24.7.17" type="device"><diagram id="${diagramId}" name="${xmlEscape(title.slice(0, 31))}"><mxGraphModel dx="${width}" dy="${height}" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0"><root><mxCell id="0"/><mxCell id="1" parent="0"/>${cells.join("")}</root></mxGraphModel></diagram></mxfile>`;
+}
+
+function mermaidText(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "#quot;").replace(/\r?\n/g, "<br/>");
+}
+
+function makeMermaid(title: string, positioned: DiagramPosition[], edges: DiagramEdge[], layout: Layout): string {
+  const direction = layout === "horizontal" ? "LR" : "TD";
+  const nodeNames = new Map(positioned.map((node, index) => [node.id, `n_${index + 1}`]));
+  const shapeLabel = (node: DiagramPosition) => {
+    const id = nodeNames.get(node.id)!;
+    const label = mermaidText([node.label, ...(node.detail ? [node.detail] : [])].join(" — "));
+    if (node.shape === "decision") return `${id}{"${label}"}`;
+    if (node.shape === "database") return `${id}[("${label}")]`;
+    if (node.shape === "document") return `${id}[["${label}"]]`;
+    if (node.shape === "start" || node.shape === "end") return `${id}(["${label}"])`;
+    if (node.shape === "cloud") return `${id}(("${label}"))`;
+    if (node.shape === "actor") return `${id}>"${label}"]`;
+    return `${id}["${label}"]`;
+  };
+  const lines = [`flowchart ${direction}`, `  %% ${mermaidText(title)}`];
+  for (const node of positioned) lines.push(`  ${shapeLabel(node)}`);
+  for (const edge of edges) {
+    const from = nodeNames.get(edge.from)!; const to = nodeNames.get(edge.to)!;
+    const link = edge.style === "solid" ? "-->" : edge.style === "dotted" ? "-..->" : "-.->";
+    const plainLink = edge.style === "solid" ? "---" : edge.style === "dotted" ? "-..-" : "-.-";
+    const label = edge.label ? `|${mermaidText(edge.label)}|` : "";
+    if (edge.direction === "none") lines.push(`  ${from} ${plainLink}${label} ${to}`);
+    else if (edge.direction === "backward") lines.push(`  ${to} ${link}${label} ${from}`);
+    else if (edge.direction === "both" && edge.style === "solid") lines.push(`  ${from} <-->${edge.label ? `|${mermaidText(edge.label)}|` : ""} ${to}`);
+    else if (edge.direction === "both") {
+      lines.push(`  ${from} ${link}${label} ${to}`);
+      lines.push(`  ${to} ${link}${label} ${from}`);
+    }
+    else lines.push(`  ${from} ${link}${label} ${to}`);
+  }
+  return `${lines.join("\n")}\n`;
 }
 
 type ExcalidrawElement = Record<string, unknown> & { id: string };
@@ -177,7 +300,7 @@ function makeExcalidrawJson(title: string, positioned: DiagramPosition[], edges:
     const points: Array<[number, number]> = loop
       ? [[0, 54], [0, 0], [96, 0], [96, 54]]
       : [[sourceX - originX, sourceY - originY], [targetX - originX, targetY - originY]];
-    return { id: elementId, type: "arrow", x: originX, y: originY, width: loop ? 96 : Math.abs(targetX - sourceX), height: loop ? 54 : Math.abs(targetY - sourceY), angle: 0, strokeColor: "#8ca9a1", backgroundColor: "transparent", fillStyle: "solid", strokeWidth: 2, strokeStyle: edge.style === "solid" ? "solid" : "dashed", roughness: 0, opacity: 100, groupIds: [], frameId: null, roundness: null, seed: hash32(elementId), version: 1, versionNonce: hash32(`${elementId}:nonce`), isDeleted: false, boundElements: edge.label ? [{ id: `et_${shortId(elementId)}`, type: "text" }] : [], updated: now, created: now, link: null, locked: false, points, startBinding: { elementId: sourceId, focus: 0, gap: 4 }, endBinding: { elementId: targetId, focus: 0, gap: 4 }, startArrowhead: null, endArrowhead: "arrow", elbowed: !loop && layout !== "horizontal", moveMidPointsWithElement: true };
+    return { id: elementId, type: "arrow", x: originX, y: originY, width: loop ? 96 : Math.abs(targetX - sourceX), height: loop ? 54 : Math.abs(targetY - sourceY), angle: 0, strokeColor: "#8ca9a1", backgroundColor: "transparent", fillStyle: "solid", strokeWidth: 2, strokeStyle: edge.style === "solid" ? "solid" : "dashed", roughness: 0, opacity: 100, groupIds: [], frameId: null, roundness: null, seed: hash32(elementId), version: 1, versionNonce: hash32(`${elementId}:nonce`), isDeleted: false, boundElements: edge.label ? [{ id: `et_${shortId(elementId)}`, type: "text" }] : [], updated: now, created: now, link: null, locked: false, points, startBinding: { elementId: sourceId, focus: 0, gap: 4 }, endBinding: { elementId: targetId, focus: 0, gap: 4 }, startArrowhead: edge.direction === "backward" || edge.direction === "both" ? "arrow" : null, endArrowhead: edge.direction === "forward" || edge.direction === "both" ? "arrow" : null, elbowed: !loop && layout !== "horizontal", moveMidPointsWithElement: true };
   });
   const edgeLabels = edges.flatMap((edge, index): ExcalidrawElement[] => {
     if (!edge.label) return [];
@@ -204,11 +327,12 @@ function makeExcalidrawJson(title: string, positioned: DiagramPosition[], edges:
 }
 
 export function buildDiagramFiles(input: { title: string; nodes: DiagramNode[]; edges: DiagramEdge[]; layout: Layout }) {
-  const placed = placeNodes(input.nodes, input.layout);
+  const placed = placeNodes(input.nodes, input.edges, input.layout);
   return {
     previewSvg: makePreviewSvg(input.title, placed.nodes, input.edges, placed.width, placed.height),
     drawioXml: makeDrawioXml(input.title, placed.nodes, input.edges, placed.width, placed.height),
     excalidrawJson: makeExcalidrawJson(input.title, placed.nodes, input.edges, input.layout, placed.width, placed.height),
+    mermaid: makeMermaid(input.title, placed.nodes, input.edges, input.layout),
     nodeCount: input.nodes.length,
     connectionCount: input.edges.length,
     width: placed.width,
@@ -218,7 +342,7 @@ export function buildDiagramFiles(input: { title: string; nodes: DiagramNode[]; 
 
 export const diagramInputSchema = z.object({
   title: z.string().trim().min(1).max(140),
-  layout: z.enum(["vertical", "horizontal", "grid"]).default("grid"),
+  layout: z.enum(["auto", "vertical", "horizontal", "grid"]).default("auto"),
   nodes: z.array(nodeSchema).min(1).max(24),
   edges: z.array(edgeSchema).max(60).default([])
 }).superRefine((input, ctx) => {
@@ -235,8 +359,8 @@ export const diagramInputSchema = z.object({
 
 export const diagramStudioTool = createTool({
   id: "diagram-studio",
-  description: "Create a complete, editable diagram for the Rasies diagram and drawing services. Use diagramStudio when users ask for a flowchart, architecture, workflow, sequence, ER, org chart, mind map, decision tree, system map, or visual plan. Return both native draw.io XML (one-click opens directly in https://diagram.rasies.com) and a native Excalidraw .excalidraw scene (download and open in https://draw.rasies.com), plus an in-chat SVG preview. Define every node with a stable id and concise visible label; put explanatory text in detail; connect them with directed edges and labels. Choose vertical for top-to-bottom flow, horizontal for a short sequence, grid for maps. Do not invent facts or relationships. Include the relevant steps, actors, systems, data stores, branches, and labeled decisions so the result is useful and editable. Keep diagrams to at most 24 nodes and 60 connections; split larger systems into overview and detail diagrams.",
+  description: "Create a complete, editable diagram for the Rasies diagram and drawing services. Use diagramStudio for flowcharts, architecture and data-flow diagrams, sequences, ERDs, org charts, mind maps, decision trees, network maps, dependencies, and visual plans. Return native draw.io XML (one-click editable in https://diagram.rasies.com), a native Excalidraw scene (download and open in https://draw.rasies.com), a Mermaid source file, and an in-chat SVG preview. Give nodes stable IDs, concise visible labels, and useful details; label important connections and set each connection direction to forward, backward, both, or none. Use auto layout for connected graphs, vertical for deliberate top-to-bottom flow, horizontal for timelines, and grid for spatial maps. Do not invent facts or relationships. Include relevant steps, actors, systems, stores, branches, and labeled decisions. Keep each diagram to at most 24 nodes and 60 connections; when the request is larger, create a high-level view that names the most important subsystems and offer a detailed second view.",
   inputSchema: diagramInputSchema,
-  outputSchema: z.object({ kind: z.literal("service-diagram"), title: z.string(), layout: z.string(), previewSvg: z.string(), drawioXml: z.string(), excalidrawJson: z.string(), nodeCount: z.number(), connectionCount: z.number(), width: z.number(), height: z.number(), diagramUrl: z.literal("https://diagram.rasies.com"), drawUrl: z.literal("https://draw.rasies.com") }),
+  outputSchema: z.object({ kind: z.literal("service-diagram"), title: z.string(), layout: z.string(), previewSvg: z.string(), drawioXml: z.string(), excalidrawJson: z.string(), mermaid: z.string(), nodeCount: z.number(), connectionCount: z.number(), width: z.number(), height: z.number(), diagramUrl: z.literal("https://diagram.rasies.com"), drawUrl: z.literal("https://draw.rasies.com") }),
   execute: async ({ title, layout, nodes, edges }) => ({ kind: "service-diagram" as const, title, layout, ...buildDiagramFiles({ title, layout, nodes, edges }), diagramUrl: "https://diagram.rasies.com" as const, drawUrl: "https://draw.rasies.com" as const })
 });

@@ -15,7 +15,10 @@ describe("tool execution policy", () => {
   it("forces the native diagram tool for diagram creation requests", () => {
     expect(diagramToolChoiceForPrompt("Create an editable flow diagram with three nodes")).toEqual({ type: "tool", toolName: "diagramStudio" });
     expect(diagramToolChoiceForPrompt("Show me an architecture diagram for this system")).toEqual({ type: "tool", toolName: "diagramStudio" });
+    expect(diagramToolChoiceForPrompt("Draw a network topology with services and queues")).toEqual({ type: "tool", toolName: "diagramStudio" });
+    expect(diagramToolChoiceForPrompt("Update the diagram to add a retry path")).toEqual({ type: "tool", toolName: "diagramStudio" });
     expect(buildToolExecutionContext("Draw an ERD from these tables")).toContain("call diagramStudio");
+    expect(buildToolExecutionContext("Revise the workflow diagram")).toContain("preserve any existing nodes");
     expect(diagramToolChoiceForPrompt("Explain when a diagram tool is useful")).toBeUndefined();
   });
 

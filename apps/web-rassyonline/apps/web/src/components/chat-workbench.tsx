@@ -9,7 +9,7 @@ import { ServerEventParser, type ServerEvent } from "@/lib/sse";
 import type { ChatMode } from "@/lib/rassymind";
 import { detectThemeIntent, getTheme, type ThemeId } from "@/lib/theme";
 
-type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab" | "data-analysis" | "service-diagram"; title?: string; svg?: string; previewSvg?: string; drawioXml?: string; excalidrawJson?: string; nodeCount?: number; connectionCount?: number; diagramUrl?: string; drawUrl?: string; layout?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; summary?: { count: number; minimum: number; maximum: number; mean: number; median: number; standardDeviation: number; sum: number }; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
+type VisualArtifact = { kind: "dot-matrix" | "chart" | "ascii-art" | "calculator" | "math-lab" | "data-analysis" | "service-diagram"; title?: string; svg?: string; previewSvg?: string; drawioXml?: string; excalidrawJson?: string; mermaid?: string; nodeCount?: number; connectionCount?: number; diagramUrl?: string; drawUrl?: string; layout?: string; art?: string; width?: number; height?: number; type?: string; labels?: string[]; values?: number[]; series?: string; expression?: string; result?: number; status?: "ok" | "failed"; error?: string; mode?: string; summary?: { count: number; minimum: number; maximum: number; mean: number; median: number; standardDeviation: number; sum: number }; graph?: { xMin: number; xMax: number; points: Array<{ x: number; y: number | null }> } };
 
 const displayNumber = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, useGrouping: true });
 const preciseNumber = new Intl.NumberFormat(undefined, { maximumFractionDigits: 6, useGrouping: true });
@@ -817,7 +817,9 @@ function downloadArtifactFile(filename: string, content: string, type: string): 
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
 }
 
-function openDiagramInDrawio(xml: string, title: string, onNotice: (message: string) => void): void {
+type DrawioLoadSource = { xml: string } | { descriptor: { format: "mermaid"; data: string } };
+
+function openDiagramInDrawio(source: DrawioLoadSource, title: string, onNotice: (message: string) => void): void {
   const serviceOrigin = "https://diagram.rasies.com";
   const editorUrl = `${serviceOrigin}/?client=1&proto=json&splash=0`;
   const editor = window.open(editorUrl, "_blank");
@@ -839,7 +841,7 @@ function openDiagramInDrawio(xml: string, title: string, onNotice: (message: str
     const data = message as { event?: string; xml?: string };
     if (data.event === "init" && !loaded) {
       loaded = true;
-      editor.postMessage(JSON.stringify({ action: "load", xml }), serviceOrigin);
+      editor.postMessage(JSON.stringify({ action: "load", ...source, title, fit: 1 }), serviceOrigin);
       onNotice("Diagram loaded in diagram.rasies.com. Save there to download your edited .drawio file.");
       return;
     }
@@ -868,10 +870,12 @@ function ServiceDiagramArtifact({ artifact }: { artifact: VisualArtifact }) {
     <header className="service-diagram-heading"><div><strong>{title}</strong><small>Editable service diagram · {artifact.nodeCount ?? "—"} nodes · {artifact.connectionCount ?? "—"} connections</small></div><span>{artifact.layout ?? "grid"} layout</span></header>
     <div className="service-diagram-preview" dangerouslySetInnerHTML={{ __html: preview }} />
     <div className="service-diagram-actions">
-      <button type="button" onClick={() => openDiagramInDrawio(artifact.drawioXml!, title, setNotice)}>Edit in diagram.rasies.com</button>
+      <button type="button" onClick={() => openDiagramInDrawio({ xml: artifact.drawioXml! }, title, setNotice)}>Edit in diagram.rasies.com</button>
+      {typeof artifact.mermaid === "string" && artifact.mermaid.length <= 500_000 ? <button type="button" onClick={() => openDiagramInDrawio({ descriptor: { format: "mermaid", data: artifact.mermaid! } }, title, setNotice)}>Rebuild Mermaid in draw.io</button> : null}
       <button type="button" onClick={() => downloadArtifactFile(`${base}.drawio`, artifact.drawioXml!, "application/vnd.jgraph.mxfile+xml")}>Download .drawio</button>
       <a href={serviceDrawUrl} target="_blank" rel="noopener noreferrer">Open draw.rasies.com</a>
       <button type="button" onClick={() => downloadArtifactFile(`${base}.excalidraw`, artifact.excalidrawJson!, "application/json")}>Download Excalidraw scene</button>
+      {typeof artifact.mermaid === "string" && artifact.mermaid.length <= 500_000 ? <button type="button" onClick={() => downloadArtifactFile(`${base}.mmd`, artifact.mermaid!, "text/plain;charset=utf-8")}>Download Mermaid</button> : null}
       <button type="button" onClick={() => downloadArtifactFile(`${base}.svg`, artifact.previewSvg!, "image/svg+xml")}>Download preview SVG</button>
     </div>
     {notice ? <p className="service-diagram-notice" role="status">{notice}</p> : null}

@@ -32,6 +32,8 @@ describe("diagram studio native service formats", () => {
     expect(output.previewSvg).toContain('role="img"');
     expect(output.previewSvg).toContain("Customer submits order");
     expect(output.drawioXml).toContain("<mxGraphModel");
+    expect(output.mermaid).toContain("flowchart TD");
+    expect(output.mermaid).toContain('n_2{"Validate payment — Check card and stock"}');
     expect(output.drawioXml.match(/vertex="1"/g)).toHaveLength(4);
     expect(output.drawioXml.match(/edge="1"/g)).toHaveLength(4);
     expect(scene).toMatchObject({ type: "excalidraw", version: 2, files: {} });
@@ -104,5 +106,70 @@ describe("diagram studio native service formats", () => {
     expect(output.previewSvg).not.toMatch(/NaN|Infinity/);
     expect(output.drawioXml).not.toMatch(/NaN|Infinity/);
     for (const arrow of arrows) expect((arrow.points as number[][]).flat().every(Number.isFinite)).toBe(true);
+  });
+
+  it("auto-layers nodes from their connections and keeps feedback cycles bounded", () => {
+    const input = diagramInputSchema.parse({
+      title: "Pipeline",
+      nodes: [
+        { id: "target", label: "Target", shape: "end" },
+        { id: "isolated", label: "Independent" },
+        { id: "source", label: "Source", shape: "start" },
+        { id: "middle", label: "Middle" }
+      ],
+      edges: [{ from: "source", to: "middle" }, { from: "middle", to: "target" }, { from: "target", to: "source", label: "feedback" }]
+    });
+    expect(input.layout).toBe("auto");
+    const output = buildDiagramFiles(input);
+    const nodeY = (id: string) => Number(output.drawioXml.match(new RegExp(`<mxCell id="node_${id}"[\\s\\S]*?<mxGeometry x="[^"]+" y="([^"]+)"`))?.[1]);
+
+    expect(nodeY("source")).toBeLessThan(nodeY("middle"));
+    expect(nodeY("middle")).toBeLessThan(nodeY("target"));
+    expect(output.height).toBeLessThan(1_000);
+    expect(output.previewSvg).not.toMatch(/NaN|Infinity/);
+  });
+
+  it("preserves connector direction and line style in draw.io, Excalidraw, Mermaid, and SVG", () => {
+    const input = diagramInputSchema.parse({
+      title: "Service links",
+      layout: "horizontal",
+      nodes: [{ id: "api", label: "API" }, { id: "queue", label: "Queue", shape: "database" }],
+      edges: [
+        { from: "api", to: "queue", label: "publish", direction: "forward", style: "solid" },
+        { from: "api", to: "queue", label: "consume", direction: "backward", style: "dashed" },
+        { from: "api", to: "queue", label: "sync", direction: "both", style: "solid" },
+        { from: "api", to: "queue", label: "related", direction: "none", style: "dotted" }
+      ]
+    });
+    const output = buildDiagramFiles(input);
+    const scene = JSON.parse(output.excalidrawJson) as { elements: Array<{ type: string; startArrowhead?: string | null; endArrowhead?: string | null }> };
+    const arrows = scene.elements.filter((element) => element.type === "arrow");
+
+    expect(arrows).toHaveLength(4);
+    expect(arrows.map(({ startArrowhead, endArrowhead }) => [startArrowhead, endArrowhead])).toEqual([
+      [null, "arrow"], ["arrow", null], ["arrow", "arrow"], [null, null]
+    ]);
+    expect(output.drawioXml).toContain("startArrow=block;startFill=1;endArrow=block");
+    expect(output.drawioXml).toContain("startArrow=none;startFill=1;endArrow=none");
+    expect(output.mermaid).toContain("n_1 -->|publish| n_2");
+    expect(output.mermaid).toContain("n_2 -.->|consume| n_1");
+    expect(output.mermaid).toContain("n_1 <-->|sync| n_2");
+    expect(output.mermaid).toContain("n_1 -..-|related| n_2");
+    expect(output.previewSvg.match(/<polygon points=/g)).toHaveLength(4);
+  });
+
+  it("escapes Mermaid labels and exports every node with a parser-safe identifier", () => {
+    const input = diagramInputSchema.parse({
+      title: "A & B",
+      layout: "auto",
+      nodes: [{ id: "end", label: 'API "one" <ready>', shape: "actor" }, { id: "2-next", label: "Done" }],
+      edges: [{ from: "end", to: "2-next", label: "ready & safe" }]
+    });
+    const output = buildDiagramFiles(input);
+
+    expect(output.mermaid).toContain('n_1>"API #quot;one#quot; &lt;ready&gt;"]');
+    expect(output.mermaid).toContain("n_2");
+    expect(output.mermaid).toContain("ready &amp; safe");
+    expect(output.mermaid).not.toContain("end[");
   });
 });

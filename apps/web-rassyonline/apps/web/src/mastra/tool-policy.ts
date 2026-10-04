@@ -13,9 +13,9 @@ export function isResearchToolName(name: string | undefined): boolean {
 
 export function diagramToolChoiceForPrompt(prompt: string): { type: "tool"; toolName: "diagramStudio" } | undefined {
   const lower = prompt.toLowerCase();
-  const visualType = /\b(?:diagram|flowchart|flow\s+chart|workflow|process\s+flow|sequence\s+diagram|architecture\s+diagram|system\s+map|mind\s+map|decision\s+tree|org(?:anization|anisation)?\s+chart|erd|entity\s+relationship\s+diagram)\b/.test(lower);
-  const createIntent = /\b(?:create|draw|make|build|generate|produce|design|sketch|visuali[sz]e|map)\b/.test(lower);
-  const directRequest = /\b(?:show\s+me|give\s+me|i\s+need|i\s+want)\b.{0,70}\b(?:diagram|flowchart|flow\s+chart|workflow|system\s+map|mind\s+map|decision\s+tree)\b/.test(lower);
+  const visualType = /\b(?:diagram|flowchart|flow\s+chart|workflow|process\s+flow|sequence\s+diagram|architecture\s+diagram|data[- ]flow(?:\s+diagram)?|network\s+(?:map|topology|diagram)|dependency\s+(?:graph|map)|component\s+diagram|class\s+diagram|state\s+diagram|system\s+map|mind\s+map|decision\s+tree|org(?:anization|anisation)?\s+chart|swimlane|sitemap|timeline|erd|entity\s+relationship\s+diagram)\b/.test(lower);
+  const createIntent = /\b(?:create|draw|make|build|generate|produce|design|sketch|visuali[sz]e|map|edit|update|revise|refine|extend|improve|redesign|add\s+(?:a\s+)?(?:node|step|connection|branch))\b/.test(lower);
+  const directRequest = /\b(?:show\s+me|give\s+me|i\s+need|i\s+want)\b.{0,70}\b(?:diagram|flowchart|flow\s+chart|workflow|system\s+map|mind\s+map|decision\s+tree|network\s+map|timeline|sitemap)\b/.test(lower);
   return visualType && createIntent || directRequest ? { type: "tool", toolName: "diagramStudio" } : undefined;
 }
 
@@ -29,7 +29,7 @@ export function buildToolExecutionContext(prompt: string): string {
     "TOOL EXECUTION POLICY: use a tool only when it adds verifiable value; read its output before answering; never claim a tool ran without its returned result.",
     wantsMath ? "For non-trivial arithmetic, validate the number with calculator. For linear systems use mathLab operation=solve with vectorB as a flat vector; matrixB is only for matrix multiplication." : "",
     wantsVisual ? "For supplied numeric series use chart (bar, line, scatter, or pie); for formulas or matrices use mathLab. A visual must explain supplied or tool-verified data, never invented data." : "",
-    wantsDiagram ? "For this diagram request, call diagramStudio and use its returned editable artifact. Do not substitute hand-written SVG, Mermaid, or ASCII." : "",
+    wantsDiagram ? "For this diagram request, call diagramStudio and use its returned editable artifact. Use auto layout for connected graphs, select edge direction deliberately, and preserve any existing nodes or relationships the user asks to revise. Do not substitute hand-written SVG or ASCII for the returned files." : "",
     wantsFresh ? "Fresh factual claims need the configured research path and returned URLs; pageReader is for deepening a returned public source." : "",
     "If a tool returns an error, adapt once with corrected valid arguments or state the bounded limitation; do not fabricate a result or loop on the same call."
   ].filter(Boolean);
