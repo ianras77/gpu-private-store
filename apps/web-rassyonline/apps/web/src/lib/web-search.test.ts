@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildSearchContextMessage, buildSearchProviderQuery, executeWebSearch, interleaveSearchResults, normalizeSearchQuery, officialComparisonQueries, officialSeedResults, requiredSearchDomains, resolveSearchPrompt, SEARCH_REQUEST_TIMEOUT_MS, searchNewsFallback, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
+import { buildSearchContextMessage, buildSearchProviderQuery, combineSearchExecutions, executeWebSearch, interleaveSearchResults, normalizeSearchQuery, officialComparisonQueries, officialSeedResults, requiredSearchDomains, resolveSearchPrompt, SEARCH_REQUEST_TIMEOUT_MS, searchNewsFallback, searchQueryForPrompt, searchRecencyForPrompt, searchWebResources, shouldUseWebSearch, unsupportedCitationUrls } from "./web-search";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -57,6 +57,13 @@ describe("search constraints", () => {
     await expect(searchNewsFallback("latest US Iran war updates")).resolves.toMatchObject([{ title: "US Iran update - Reuters", source: "Reuters", publishedAt: "Sat, 27 Sep 2026 12:00:00 GMT" }]);
     await expect(searchNewsFallback("Mastra documentation")).resolves.toEqual([]);
   });
+  it("keeps news fallback inside requested domains and recency windows", async () => {
+    const now = new Date().toUTCString();
+    const rss = () => new Response(`<?xml version="1.0"?><rss><channel><item><title>US Iran war update</title><link>https://news.google.com/rss/articles/example</link><pubDate>${now}</pubDate><source>Reuters</source></item></channel></rss>`, { status: 200 });
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(() => Promise.resolve(rss())));
+    await expect(searchNewsFallback("latest US Iran war updates", undefined, { domains: ["reuters.com"] })).resolves.toEqual([]);
+    await expect(searchNewsFallback("latest US Iran war updates", undefined, { recency: "day" })).resolves.toHaveLength(1);
+  });
   it("gives each named subject a retrieval path in an official comparison", () => {
     expect(officialComparisonQueries("Mastra and LangGraph. Compare those two using their official documentation.")).toEqual(["Mastra official documentation", "LangGraph official documentation"]);
     expect(officialComparisonQueries("Explain Mastra")).toEqual([]);
@@ -97,6 +104,12 @@ describe("search constraints", () => {
     expect(results.map((result) => result.url)).toEqual(["https://docs.example.org/guide"]);
     expect(new URL(String(fetchMock.mock.calls[0]?.[0])).searchParams.has("indices")).toBe(false);
   });
+  it("fails closed on invalid domain filters instead of widening the search", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(executeWebSearch({ query: "guide", domains: ["not a domain"] })).resolves.toMatchObject({ status: "failed", reason: "invalid_response", results: [] });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 
   it("keeps known official sources for an explicit official-docs comparison", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
@@ -118,6 +131,24 @@ describe("search constraints", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
     const results = await searchWebResources("Who leads the UK government?");
     expect(results.map((result) => result.url)).toEqual(["https://www.gov.uk/government/ministers/prime-minister"]);
+  });
+  it("does not present undated first-party seeds as evidence for a recency request", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    await expect(executeWebSearch({ query: "Who leads the UK government today?" })).resolves.toMatchObject({ status: "failed", results: [] });
+  });
+});
+
+describe("search lane aggregation", () => {
+  it("keeps successful evidence when a separate lane fails", () => {
+    expect(combineSearchExecutions([
+      { query: "left", status: "failed", results: [] },
+      { query: "right", status: "ok", results: [{ title: "Evidence", url: "https://example.org/evidence", snippet: "support" }] }
+    ])).toEqual({ status: "used", results: [{ title: "Evidence", url: "https://example.org/evidence", snippet: "support" }] });
+  });
+
+  it("reports a failed search when every lane fails and empty when healthy lanes find nothing", () => {
+    expect(combineSearchExecutions([{ query: "x", status: "failed", results: [] }]).status).toBe("failed");
+    expect(combineSearchExecutions([{ query: "x", status: "empty", results: [] }]).status).toBe("empty");
   });
 });
 

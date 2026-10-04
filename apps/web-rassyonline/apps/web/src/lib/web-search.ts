@@ -125,8 +125,15 @@ type SearchResponse = {
   }>;
 };
 export type SearchFailureReason = "forbidden" | "rate_limited" | "timeout" | "invalid_response" | "unavailable";
+export type WebSearchExecution = { query: string; status: "ok" | "empty" | "failed"; reason?: SearchFailureReason; results: WebSearchResult[] };
 class WebSearchFailure extends Error {
   constructor(public readonly reason: SearchFailureReason) { super(`Search ${reason}`); }
+}
+
+function normalizedSearchDomains(domains: string[] | undefined): string[] {
+  const requested = domains ?? [];
+  if (requested.length > 10 || requested.some((domain) => !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain.trim()))) throw new WebSearchFailure("invalid_response");
+  return [...new Set(requested.map((domain) => domain.trim().toLowerCase()))];
 }
 
 const SEARCH_INTENT_PATTERNS = [
@@ -265,8 +272,10 @@ function decodeXml(value: string): string {
 }
 
 /** Bounded dated-news fallback when the general discovery backend is empty. */
-export async function searchNewsFallback(query: string, signal?: AbortSignal): Promise<WebSearchResult[]> {
+export async function searchNewsFallback(query: string, signal?: AbortSignal, options: Pick<WebSearchInput, "domains" | "recency"> = {}): Promise<WebSearchResult[]> {
   if (!isNewsResearch(query)) return [];
+  let requestedDomains: string[];
+  try { requestedDomains = normalizedSearchDomains(options.domains); } catch { return []; }
   const url = new URL("https://news.google.com/rss/search");
   url.searchParams.set("q", query.slice(0, 500));
   url.searchParams.set("hl", "en-US");
@@ -274,9 +283,10 @@ export async function searchNewsFallback(query: string, signal?: AbortSignal): P
   url.searchParams.set("ceid", "US:en");
   const response = await fetch(url, { headers: { accept: "application/rss+xml, application/xml, text/xml" }, signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(12_000)]) : AbortSignal.timeout(12_000) });
   if (!response.ok) return [];
-  const body = await response.text();
-  if (body.length > 2 * 1024 * 1024) return [];
-  const items = [...body.matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0, 8).flatMap((match) => {
+  const body = await response.arrayBuffer();
+  if (body.byteLength > MAX_PROVIDER_BODY_BYTES) return [];
+  const xml = new TextDecoder().decode(body);
+  const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0, 8).flatMap((match) => {
     const item = match[1];
     const field = (name: string) => item.match(new RegExp(`<${name}>([\\s\\S]*?)<\\/${name}>`, "i"))?.[1];
     const title = decodeXml(field("title") ?? "");
@@ -287,16 +297,30 @@ export async function searchNewsFallback(query: string, signal?: AbortSignal): P
   });
   // RSS providers do not consistently order a query feed by publication time.
   // A request for "latest" must not quietly put an older headline first.
-  return [...new Map(items.map((item) => [item.url, item])).values()].sort((left, right) => {
+  const windowMs = options.recency === "day" ? 86_400_000 : options.recency === "week" ? 604_800_000 : options.recency === "month" ? 2_592_000_000 : options.recency === "year" ? 31_536_000_000 : null;
+  const terms = searchTerms(searchQueryForPrompt(query));
+  const relevant = [...new Map(items.map((item) => [item.url, item])).values()].filter((item) => {
+    let parsedUrl: URL;
+    try { parsedUrl = new URL(item.url); } catch { return false; }
+    const host = parsedUrl.hostname.toLowerCase().replace(/\.$/, "");
+    if (requestedDomains.length && !requestedDomains.some((domain) => host === domain || host.endsWith(`.${domain}`))) return false;
+    const timestamp = Date.parse(item.publishedAt ?? "");
+    if (windowMs !== null && (!Number.isFinite(timestamp) || timestamp < Date.now() - windowMs || timestamp > Date.now() + 86_400_000)) return false;
+    if (!terms.length) return true;
+    const haystack = `${item.title} ${item.source} ${item.url}`.toLowerCase();
+    const matched = terms.filter((term) => new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(haystack)).length;
+    return matched >= Math.min(2, terms.length);
+  });
+  return relevant.sort((left, right) => {
     const leftTime = Date.parse(left.publishedAt ?? "");
     const rightTime = Date.parse(right.publishedAt ?? "");
     return (Number.isFinite(rightTime) ? rightTime : 0) - (Number.isFinite(leftTime) ? leftTime : 0);
   });
 }
 
-async function finalSearchFallback(query: string, options: Pick<WebSearchInput, "domains" | "max_results"> & { signal?: AbortSignal }): Promise<WebSearchResult[]> {
-  const news = await searchNewsFallback(query, options.signal).catch(() => []);
-  const fallback = news.length ? news : officialSeedResults(query, options.domains);
+async function finalSearchFallback(query: string, options: Pick<WebSearchInput, "domains" | "max_results" | "recency"> & { signal?: AbortSignal }): Promise<WebSearchResult[]> {
+  const news = await searchNewsFallback(query, options.signal, options).catch(() => []);
+  const fallback = news.length ? news : options.recency ? [] : officialSeedResults(query, options.domains);
   return fallback.slice(0, Math.min(options.max_results ?? 5, MAX_RESULTS_PER_TURN));
 }
 
@@ -309,7 +333,7 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
   url.searchParams.set("language", "auto");
   url.searchParams.set("safesearch", "1");
   if (options.recency && SEARCH_RANGES.has(options.recency)) url.searchParams.set("time_range", options.recency);
-  const domains = [...new Set((options.domains ?? []).map((domain) => domain.trim().toLowerCase()).filter((domain) => /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain)))].slice(0, 10);
+  const domains = normalizedSearchDomains(options.domains);
 
   const response = await fetch(url, {
     headers: { accept: "application/json" },
@@ -378,6 +402,8 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
  */
 export async function searchWebResources(query: string, options: Pick<WebSearchInput, "recency" | "domains" | "max_results"> & { signal?: AbortSignal } = {}): Promise<WebSearchResult[]> {
   if (!query.trim() || query.trim().length > 2_000) throw new WebSearchFailure("invalid_response");
+  normalizedSearchDomains(options.domains);
+  options = { ...options, recency: options.recency ?? searchRecencyForPrompt(query) };
   const primary = buildSearchProviderQuery(query);
   let firstPass: WebSearchResult[];
   try {
@@ -413,7 +439,7 @@ export async function searchWebResources(query: string, options: Pick<WebSearchI
   }
 }
 
-export type WebSearchInput = { query: string; recency?: string; domains?: string[]; max_results?: number };
+export type WebSearchInput = { query: string; recency?: string; domains?: string[]; max_results?: number; signal?: AbortSignal };
 
 export function unsupportedCitationUrls(answer: string, returnedUrls: string[]): string[] {
   const allowed = new Set(returnedUrls);
@@ -427,4 +453,9 @@ export async function executeWebSearch(input: WebSearchInput): Promise<{ status:
   } catch (error) {
     return { status: "failed", results: [], reason: error instanceof WebSearchFailure ? error.reason : error instanceof Error && ["TimeoutError", "AbortError"].includes(error.name) ? "timeout" : "unavailable" };
   }
+}
+
+export function combineSearchExecutions(searches: WebSearchExecution[]): { status: "used" | "empty" | "failed"; results: WebSearchResult[] } {
+  const results = interleaveSearchResults(searches.map((search) => search.results));
+  return { status: results.length ? "used" : searches.some((search) => search.status === "failed") ? "failed" : "empty", results };
 }
