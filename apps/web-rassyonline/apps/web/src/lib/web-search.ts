@@ -220,7 +220,8 @@ export function searchQueryForPrompt(query: string): string {
     .replace(/\b(?:a\s+)?(?:short|brief|concise)\s*,?\s*(?:(?:cited|sourced)\s*,?\s*)?(?:description|answer|summary|overview|response)\b.*$/i, " ")
     .replace(/\b(?:and|or|with|using|based on)\s*$/i, "")
     .replace(/[?!]+$/g, "").replace(/\s+/g, " ").trim();
-  return (focused || normalizeSearchQuery(query)).slice(0, 500);
+  const subjectFirst = focused.replace(/\b(?:the\s+)?official\s+(Mastra|LangGraph|Next(?:\.js)?)\s+(documentation|docs?)\b/i, "$1 official $2");
+  return (subjectFirst || normalizeSearchQuery(query)).slice(0, 500);
 }
 
 export function searchRecencyForPrompt(prompt: string): string | undefined {
