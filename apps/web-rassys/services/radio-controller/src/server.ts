@@ -37,6 +37,7 @@ import {
   normalizePodcastSeriesDescription,
   normalizePodcastSeriesTitle,
 } from "./library";
+import { isLibraryScanRecent } from "./library/scan-freshness";
 import { rankTracks, sanitizeRequest } from "./utils/selection";
 import {
   isLiquidsoapReady,
@@ -2231,14 +2232,11 @@ export const buildServer = () => {
     const libraryLastScanAt = libraryLastScanRaw
       ? Number(libraryLastScanRaw)
       : null;
-    const hasRecentLibraryScan =
-      typeof libraryLastScanAt === "number" &&
-      Number.isFinite(libraryLastScanAt) &&
-      Date.now() - libraryLastScanAt <
-        Math.max(
-          5 * 60 * 1000,
-          config.RADIO_LIBRARY_REFRESH_SECONDS * 12 * 1000,
-        );
+    const hasRecentLibraryScan = isLibraryScanRecent(
+      libraryLastScanAt,
+      Date.now(),
+      config.RADIO_LIBRARY_REFRESH_SECONDS,
+    );
     const trackCount = library.getTracks().length;
     const hasFallbackSource = Boolean(config.MPLAYER_STREAM_URL);
     const hasProgramSource = trackCount > 0 || hasFallbackSource;
