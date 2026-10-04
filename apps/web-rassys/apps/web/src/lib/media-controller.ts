@@ -126,6 +126,8 @@ export type PhotoSourceSummary = {
 export type PhotoShelfPayload = {
   items: PhotoItem[];
   total: number;
+  offset?: number;
+  limit?: number;
   counts: {
     images: number;
     videos: number;
@@ -349,12 +351,15 @@ export const fetchPodcastShow = async () => {
 export const fetchPhotoShelf = async (
   params: {
     limit?: number;
+    offset?: number;
     source?: "immich" | "local";
   } = {},
 ) => {
   const query = new URLSearchParams();
   if (typeof params.limit === "number")
     query.set("limit", String(params.limit));
+  if (typeof params.offset === "number")
+    query.set("offset", String(params.offset));
   if (params.source) query.set("source", params.source);
   const data = await fetchRadio<PhotoShelfPayload>(
     `/public/photos${query.size > 0 ? `?${query.toString()}` : ""}`,

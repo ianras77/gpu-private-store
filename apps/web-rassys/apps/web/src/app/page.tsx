@@ -6,10 +6,8 @@ import { HomeRassyOpeningPanel } from "../components/HomeRassyOpeningPanel";
 import { ThoughtsPanel } from "../components/ThoughtsPanel";
 import { HomeFamilyStrip } from "../components/HomeFamilyStrip";
 import { RoomShell } from "../components/RoomShell";
-import { requireAdmin } from "../lib/admin-auth";
 
-export default async function HomePage() {
-  const canViewFamily = await requireAdmin();
+export default function HomePage() {
   return (
     <RoomShell theme="home" channel="home" agent="site-curator">
       <main className="relative overflow-hidden pb-12">
@@ -62,7 +60,7 @@ export default async function HomePage() {
           </div>
         </section>
         <ThoughtsPanel />
-        {canViewFamily ? <HomeFamilyStrip /> : null}
+        <HomeFamilyStrip />
         <Footer />
       </main>
     </RoomShell>

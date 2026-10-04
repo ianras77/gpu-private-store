@@ -2,8 +2,16 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import useSWR from "swr";
-import { Camera, Clapperboard, Images, MapPin, Play, X } from "lucide-react";
+import useSWRInfinite from "swr/infinite";
+import {
+  Camera,
+  Clapperboard,
+  Images,
+  MapPin,
+  Play,
+  Search,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   type PhotoItem,
@@ -12,7 +20,7 @@ import {
 import { PhotoSurface } from "./PhotoSurface";
 import { Button } from "./ui/button";
 
-const EMPTY_ITEMS: PhotoShelfPayload["items"] = [];
+const PHOTO_PAGE_SIZE = 60;
 
 const fetcher = (url: string) =>
   fetch(url, { cache: "no-store" }).then(async (res) => {
@@ -39,6 +47,14 @@ const formatDuration = (seconds?: number) => {
   const minutes = Math.floor(wholeSeconds / 60);
   const remainder = wholeSeconds % 60;
   return `${minutes}:${String(remainder).padStart(2, "0")}`;
+};
+
+const dateGroup = (value?: string) => {
+  if (!value) return "Undated";
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime())
+    ? String(parsed.getFullYear())
+    : "Undated";
 };
 
 type PhotoSectionProps = {
@@ -96,18 +112,24 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
                 >
                   {item.kind === "video" ? (
                     <>
-                      <Image
-                        src={item.posterUrl ?? item.previewUrl ?? ""}
-                        alt={item.title}
-                        fill
-                        sizes={
-                          isLarge
-                            ? "(max-width: 1280px) 100vw, 70vw"
-                            : "(max-width: 1280px) 100vw, 33vw"
-                        }
-                        className="object-cover transition duration-700 group-hover:scale-[1.02]"
-                        unoptimized
-                      />
+                      {item.posterUrl || item.previewUrl ? (
+                        <Image
+                          src={item.posterUrl ?? item.previewUrl ?? ""}
+                          alt={item.title}
+                          fill
+                          sizes={
+                            isLarge
+                              ? "(max-width: 1280px) 100vw, 70vw"
+                              : "(max-width: 1280px) 100vw, 33vw"
+                          }
+                          className="object-cover transition duration-700 group-hover:scale-[1.02]"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/35 text-cloud/55">
+                          <Clapperboard size={28} aria-hidden="true" />
+                        </div>
+                      )}
                       <div className="pointer-events-none absolute left-4 top-4 rounded-full border border-white/10 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.24em] text-white/90">
                         Video
                       </div>
@@ -134,6 +156,9 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
                       {durationLabel}
                     </div>
                   )}
+                  <div className="pointer-events-none absolute bottom-4 right-4 rounded-full border border-white/15 bg-black/45 px-3 py-2 text-[10px] tracking-wide text-white/85">
+                    {formatDate(item.capturedAt)}
+                  </div>
                 </div>
               </button>
             </motion.article>
@@ -145,34 +170,110 @@ function PhotoSection({ title, eyebrow, items, onSelect }: PhotoSectionProps) {
 }
 
 export function PhotosGalleryPage() {
-  const { data, error } = useSWR<PhotoShelfPayload>(
-    "/api/photos?limit=96",
-    fetcher,
-    {
-      refreshInterval: 30000,
+  const [sourceFilter, setSourceFilter] = useState<"all" | "immich" | "local">(
+    "all",
+  );
+  const {
+    data: pages,
+    error,
+    isLoading,
+    size,
+    setSize,
+    isValidating,
+  } = useSWRInfinite<PhotoShelfPayload>(
+    (pageIndex, previousPage) => {
+      if (previousPage && previousPage.items.length === 0) return null;
+      const sourceQuery =
+        sourceFilter === "all" ? "" : `&source=${sourceFilter}`;
+      return `/api/photos?limit=${PHOTO_PAGE_SIZE}&offset=${pageIndex * PHOTO_PAGE_SIZE}${sourceQuery}`;
     },
+    fetcher,
+    { refreshInterval: 30000, revalidateFirstPage: true },
   );
-  const items = Array.isArray(data?.items) ? data.items : EMPTY_ITEMS;
-  const immichItems = useMemo(
-    () => items.filter((item) => item.source === "immich"),
-    [items],
-  );
-  const localItems = useMemo(
-    () => items.filter((item) => item.source === "local"),
-    [items],
-  );
-  const primaryItems = immichItems.length > 0 ? immichItems : localItems;
+  const data = pages?.[0];
+  const items = useMemo(() => {
+    const unique = new Map<string, PhotoItem>();
+    for (const item of pages?.flatMap((page) => page.items) ?? []) {
+      unique.set(item.id, item);
+    }
+    return Array.from(unique.values()).sort((left, right) => {
+      const leftTime = new Date(left.capturedAt).getTime();
+      const rightTime = new Date(right.capturedAt).getTime();
+      return (
+        (Number.isFinite(rightTime) ? rightTime : 0) -
+        (Number.isFinite(leftTime) ? leftTime : 0)
+      );
+    });
+  }, [pages]);
+  const total = data?.total ?? 0;
+  const sourceSummary = data?.sources;
+  const allSourceTotal =
+    (sourceSummary?.immich?.total ?? 0) + (sourceSummary?.local?.total ?? 0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selectedItem = items.find((item) => item.id === selectedId) ?? null;
-  const selectedStillExists = selectedId
-    ? items.some((item) => item.id === selectedId)
-    : false;
+  const [query, setQuery] = useState("");
+  const [kindFilter, setKindFilter] = useState<"all" | "image" | "video">(
+    "all",
+  );
+  const [collectionFilter, setCollectionFilter] = useState("all");
+  const collections = useMemo(
+    () =>
+      Array.from(
+        new Set([
+          ...items
+            .map((item) => item.collection?.trim())
+            .filter((value): value is string => Boolean(value)),
+          ...(sourceFilter === "all" || sourceFilter === "immich"
+            ? (data?.sources?.immich?.libraries ?? [])
+            : []),
+          ...(sourceFilter === "all" || sourceFilter === "local"
+            ? (data?.sources?.local?.libraries ?? [])
+            : []),
+        ]),
+      ).sort((left, right) => left.localeCompare(right)),
+    [data?.sources, items, sourceFilter],
+  );
+  const visibleItems = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return items.filter((item) => {
+      if (kindFilter !== "all" && item.kind !== kindFilter) return false;
+      if (collectionFilter !== "all" && item.collection !== collectionFilter)
+        return false;
+      if (
+        normalizedQuery &&
+        ![
+          item.title,
+          item.collection,
+          item.location,
+          item.camera,
+          item.relativePath,
+        ]
+          .filter(Boolean)
+          .some((value) => value!.toLowerCase().includes(normalizedQuery))
+      )
+        return false;
+      return true;
+    });
+  }, [collectionFilter, items, kindFilter, query]);
+  const groups = useMemo(() => {
+    const grouped = new Map<string, PhotoItem[]>();
+    for (const item of visibleItems) {
+      const key = dateGroup(item.capturedAt);
+      grouped.set(key, [...(grouped.get(key) ?? []), item]);
+    }
+    return Array.from(grouped.entries()).sort((left, right) =>
+      right[0].localeCompare(left[0], undefined, { numeric: true }),
+    );
+  }, [visibleItems]);
+  const selectedIndex = visibleItems.findIndex(
+    (item) => item.id === selectedId,
+  );
+  const selectedItem = selectedIndex >= 0 ? visibleItems[selectedIndex] : null;
+  const hasMore = items.length < total;
+  const loadingMore = isValidating && size > 1;
 
   useEffect(() => {
-    if (!selectedId) return;
-    if (selectedStillExists) return;
-    setSelectedId(null);
-  }, [selectedId, selectedStillExists]);
+    if (selectedId && selectedIndex < 0) setSelectedId(null);
+  }, [selectedId, selectedIndex]);
 
   useEffect(() => {
     if (!selectedItem) return;
@@ -180,12 +281,36 @@ export function PhotosGalleryPage() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setSelectedId(null);
+      } else if (event.key === "ArrowLeft" && visibleItems.length > 1) {
+        event.preventDefault();
+        setSelectedId(
+          visibleItems[
+            (selectedIndex - 1 + visibleItems.length) % visibleItems.length
+          ]!.id,
+        );
+      } else if (event.key === "ArrowRight" && visibleItems.length > 1) {
+        event.preventDefault();
+        setSelectedId(
+          visibleItems[(selectedIndex + 1) % visibleItems.length]!.id,
+        );
       }
     };
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selectedItem]);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [selectedIndex, selectedItem, visibleItems]);
+
+  const openAdjacent = (offset: -1 | 1) => {
+    if (visibleItems.length < 2 || selectedIndex < 0) return;
+    const nextIndex =
+      (selectedIndex + offset + visibleItems.length) % visibleItems.length;
+    setSelectedId(visibleItems[nextIndex]!.id);
+  };
 
   return (
     <>
@@ -197,32 +322,145 @@ export function PhotosGalleryPage() {
           <div className="relative flex flex-col gap-5">
             <div>
               <div className="text-[10px] uppercase tracking-[0.36em] text-cloud/60">
-                The photo wall
+                FAMILY LIBRARY
               </div>
               <h1 className="mt-3 text-4xl font-semibold text-white md:text-6xl">
-                Around home.
+                The moments we keep.
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-cloud/68">
-                A living wall of moments. Tap a frame when you want the story
-                behind it.
+                A shared album for photographs and little films from home.
+                Browse by year, filter by collection, and open any frame to see
+                it full size.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.22em] text-cloud/55">
               <span className="rave-chip rounded-full px-3 py-2">
-                {primaryItems.length} frames in view
+                {total} family memories
               </span>
               <span className="rave-chip rounded-full px-3 py-2">
-                Tap to open details
+                {items.filter((item) => item.kind === "image").length} photos
               </span>
+              <span className="rave-chip rounded-full px-3 py-2">
+                {items.filter((item) => item.kind === "video").length} films in
+                view
+              </span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_190px_220px]">
+              <label className="relative block">
+                <span className="sr-only">Search the family library</span>
+                <Search
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-cloud/45"
+                  size={16}
+                  aria-hidden="true"
+                />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Find a place, person, or moment"
+                  className="w-full rounded-2xl border border-white/12 bg-black/25 py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-cloud/38 focus:border-aurora/55"
+                />
+              </label>
+              <label>
+                <span className="sr-only">Filter by media type</span>
+                <select
+                  value={kindFilter}
+                  onChange={(event) =>
+                    setKindFilter(
+                      event.target.value as "all" | "image" | "video",
+                    )
+                  }
+                  className="w-full rounded-2xl border border-white/12 bg-[#160e22] px-4 py-3 text-sm text-white outline-none focus:border-aurora/55"
+                >
+                  <option value="all">All memories</option>
+                  <option value="image">Photos</option>
+                  <option value="video">Videos</option>
+                </select>
+              </label>
+              <label>
+                <span className="sr-only">Filter by collection</span>
+                <select
+                  value={collectionFilter}
+                  onChange={(event) => setCollectionFilter(event.target.value)}
+                  className="w-full rounded-2xl border border-white/12 bg-[#160e22] px-4 py-3 text-sm text-white outline-none focus:border-aurora/55"
+                >
+                  <option value="all">Every collection</option>
+                  {collections.map((collection) => (
+                    <option key={collection} value={collection}>
+                      {collection}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
           </div>
         </div>
       </section>
 
+      {data?.sources && (
+        <section className="mx-auto max-w-6xl px-6 pb-8">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                id: "all" as const,
+                label: "All family media",
+                total: allSourceTotal,
+                libraries: ["Immich albums and local folders"],
+              },
+              {
+                id: "immich" as const,
+                label: "Immich albums",
+                total: sourceSummary?.immich?.total ?? 0,
+                libraries: sourceSummary?.immich?.libraries ?? [],
+              },
+              {
+                id: "local" as const,
+                label: "Local photo folders",
+                total: sourceSummary?.local?.total ?? 0,
+                libraries: sourceSummary?.local?.libraries ?? [],
+              },
+            ].map((source) => (
+              <button
+                key={source.id}
+                type="button"
+                aria-pressed={sourceFilter === source.id}
+                onClick={() => {
+                  setSourceFilter(source.id);
+                  setCollectionFilter("all");
+                  void setSize(1);
+                }}
+                className={`rounded-[24px] border p-4 text-left transition ${
+                  sourceFilter === source.id
+                    ? "border-aurora/55 bg-aurora/[0.08]"
+                    : "border-white/10 bg-black/15 hover:border-white/25"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-semibold text-white">
+                    {source.label}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-cloud/55">
+                    {source.total} items
+                  </span>
+                </div>
+                <div className="mt-2 line-clamp-2 text-xs leading-5 text-cloud/60">
+                  {source.libraries.length
+                    ? source.libraries.slice(0, 3).join(" · ")
+                    : source.id === "immich"
+                      ? "No Immich albums indexed yet"
+                      : source.id === "local"
+                        ? "No local photo folders indexed yet"
+                        : "Immich albums and local photo folders"}
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       {error ? (
         <section className="mx-auto max-w-6xl px-6 pb-8">
           <div className="rounded-[28px] border border-comet/30 bg-black/20 px-5 py-4 text-sm text-cloud/78">
-            The gallery is still settling.
+            The family library is unavailable right now. Try again in a moment.
           </div>
         </section>
       ) : null}
@@ -230,30 +468,54 @@ export function PhotosGalleryPage() {
       {!items.length ? (
         <section className="mx-auto max-w-6xl px-6 pb-16">
           <div className="rounded-[30px] border border-dashed border-white/12 bg-black/10 px-6 py-8 text-sm text-cloud/70">
-            Nothing here yet.
+            {isLoading
+              ? "Loading the Immich albums and local photo folders…"
+              : error
+                ? "The family library could not be reached."
+                : sourceFilter === "immich"
+                  ? "No photos or videos were found in the configured Immich albums."
+                  : sourceFilter === "local"
+                    ? "No photos or videos were found in the mounted local folders."
+                    : "No family photos or videos are in the Immich albums or mounted local folders yet."}
           </div>
         </section>
       ) : (
         <>
-          <PhotoSection
-            title={
-              immichItems.length > 0
-                ? (data?.sources?.immich?.label ?? "Immich album")
-                : (data?.sources?.local?.label ?? "Local library")
-            }
-            eyebrow={immichItems.length > 0 ? "Primary library" : "Gallery"}
-            items={primaryItems}
-            onSelect={setSelectedId}
-          />
-
-          {immichItems.length > 0 && localItems.length > 0 && (
-            <PhotoSection
-              title={data?.sources?.local?.label ?? "Local drop"}
-              eyebrow="Secondary library"
-              items={localItems}
-              onSelect={setSelectedId}
-            />
+          {!visibleItems.length ? (
+            <section className="mx-auto max-w-6xl px-6 pb-8">
+              <div className="rounded-[28px] border border-white/10 bg-black/20 p-6 text-sm text-cloud/72">
+                No memories match these filters. Clear the search or choose
+                another collection.
+              </div>
+            </section>
+          ) : (
+            groups.map(([year, yearItems]) => (
+              <PhotoSection
+                key={year}
+                title={year}
+                eyebrow="Memories from"
+                items={yearItems}
+                onSelect={setSelectedId}
+              />
+            ))
           )}
+          <section className="mx-auto max-w-6xl px-6 pb-12 text-center">
+            <p className="mb-4 text-xs text-cloud/55">
+              Showing {items.length} of {total} memories
+              {data?.sources?.immich?.total || data?.sources?.local?.total
+                ? ` · ${data.sources?.immich?.total ?? 0} shared album · ${data.sources?.local?.total ?? 0} local`
+                : ""}
+            </p>
+            {hasMore ? (
+              <Button
+                variant="secondary"
+                disabled={loadingMore}
+                onClick={() => void setSize(size + 1)}
+              >
+                {loadingMore ? "Loading more memories…" : "Load more memories"}
+              </Button>
+            ) : null}
+          </section>
         </>
       )}
 
@@ -263,6 +525,7 @@ export function PhotosGalleryPage() {
           role="dialog"
           aria-modal="true"
           aria-label={selectedItem.title}
+          tabIndex={-1}
           onClick={() => setSelectedId(null)}
         >
           <div
@@ -289,7 +552,7 @@ export function PhotosGalleryPage() {
               </Button>
             </div>
 
-            <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[26px] border border-white/10 bg-black/30 p-2">
+            <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[26px] border border-white/10 bg-black/30 p-2">
               {selectedItem.kind === "video" ? (
                 <video
                   autoPlay
@@ -306,13 +569,33 @@ export function PhotosGalleryPage() {
               ) : (
                 <div className="relative h-[72vh] w-full overflow-hidden rounded-[20px]">
                   <PhotoSurface
-                    item={selectedItem}
+                    item={{ ...selectedItem, previewUrl: selectedItem.fileUrl }}
                     alt={selectedItem.title}
                     sizes="100vw"
                     className="object-contain"
                     priority
                   />
                 </div>
+              )}
+              {visibleItems.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => openAdjacent(-1)}
+                    aria-label="Previous memory"
+                    className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/55 text-3xl leading-none text-white backdrop-blur hover:bg-black/80"
+                  >
+                    <span aria-hidden="true">‹</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openAdjacent(1)}
+                    aria-label="Next memory"
+                    className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/55 text-3xl leading-none text-white backdrop-blur hover:bg-black/80"
+                  >
+                    <span aria-hidden="true">›</span>
+                  </button>
+                </>
               )}
             </div>
 
@@ -324,6 +607,9 @@ export function PhotosGalleryPage() {
                   <Images size={14} />
                 )}
                 {selectedItem.kind}
+              </span>
+              <span className="rave-chip rounded-full px-3 py-2">
+                {selectedIndex + 1} / {visibleItems.length}
               </span>
               <span className="rave-chip rounded-full px-3 py-2">
                 {Math.max(1, Math.round(selectedItem.fileSize / 1024 / 1024))}{" "}

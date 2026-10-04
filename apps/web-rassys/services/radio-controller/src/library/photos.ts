@@ -12,19 +12,19 @@ const IMAGE_MIME_TYPES: Record<string, string> = {
   ".gif": "image/gif",
   ".avif": "image/avif",
   ".heic": "image/heic",
-  ".heif": "image/heif"
+  ".heif": "image/heif",
 };
 
 const VIDEO_MIME_TYPES: Record<string, string> = {
   ".mp4": "video/mp4",
   ".mov": "video/quicktime",
   ".m4v": "video/mp4",
-  ".webm": "video/webm"
+  ".webm": "video/webm",
 };
 
 const MEDIA_EXTENSIONS = new Set([
   ...Object.keys(IMAGE_MIME_TYPES),
-  ...Object.keys(VIDEO_MIME_TYPES)
+  ...Object.keys(VIDEO_MIME_TYPES),
 ]);
 
 const hashId = (value: string) =>
@@ -35,10 +35,10 @@ const toRelativePath = (root: string, file: string) =>
 
 const humanizeTitle = (file: string) => {
   const basename = path.basename(file, path.extname(file)).trim();
-  return basename
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim() || "Family moment";
+  return (
+    basename.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim() ||
+    "Family moment"
+  );
 };
 
 const inferLocalCollection = (relativePath: string) => {
@@ -58,16 +58,25 @@ const isMediaFile = (filepath: string) =>
 
 const getMediaMimeType = (filepath: string) => {
   const ext = path.extname(filepath).toLowerCase();
-  return IMAGE_MIME_TYPES[ext] ?? VIDEO_MIME_TYPES[ext] ?? "application/octet-stream";
+  return (
+    IMAGE_MIME_TYPES[ext] ?? VIDEO_MIME_TYPES[ext] ?? "application/octet-stream"
+  );
 };
 
 const getMediaKind = (filepath: string): PhotoMedia["kind"] =>
-  Object.prototype.hasOwnProperty.call(VIDEO_MIME_TYPES, path.extname(filepath).toLowerCase())
+  Object.prototype.hasOwnProperty.call(
+    VIDEO_MIME_TYPES,
+    path.extname(filepath).toLowerCase(),
+  )
     ? "video"
     : "image";
 
 const collectMediaFiles = async (root: string) => {
   await assertDirectory(root);
+  const resolvedRoot = await fs.realpath(root);
+  const isInsideRoot = (candidate: string) =>
+    candidate === resolvedRoot ||
+    candidate.startsWith(`${resolvedRoot}${path.sep}`);
 
   const files: string[] = [];
   const seenFiles = new Set<string>();
@@ -84,6 +93,7 @@ const collectMediaFiles = async (root: string) => {
     } catch {
       continue;
     }
+    if (!isInsideRoot(resolvedDirectory)) continue;
 
     if (seenDirectories.has(resolvedDirectory)) continue;
     seenDirectories.add(resolvedDirectory);
@@ -92,7 +102,7 @@ const collectMediaFiles = async (root: string) => {
     try {
       entries = await fs.readdir(currentDirectory, {
         encoding: "utf8",
-        withFileTypes: true
+        withFileTypes: true,
       });
     } catch {
       continue;
@@ -117,30 +127,43 @@ const collectMediaFiles = async (root: string) => {
       if (!entry.isSymbolicLink()) continue;
 
       let targetStat: Awaited<ReturnType<typeof fs.stat>>;
+      let targetPath: string;
       try {
-        targetStat = await fs.stat(fullPath);
+        targetPath = await fs.realpath(fullPath);
+        if (!isInsideRoot(targetPath)) continue;
+        targetStat = await fs.stat(targetPath);
       } catch {
         continue;
       }
 
       if (targetStat.isDirectory()) {
-        pendingDirectories.push(fullPath);
+        pendingDirectories.push(targetPath);
         continue;
       }
 
-      if (!targetStat.isFile() || !isMediaFile(fullPath) || seenFiles.has(fullPath)) continue;
-      seenFiles.add(fullPath);
-      files.push(fullPath);
+      if (
+        !targetStat.isFile() ||
+        !isMediaFile(targetPath) ||
+        seenFiles.has(targetPath)
+      )
+        continue;
+      seenFiles.add(targetPath);
+      files.push(targetPath);
     }
   }
 
   return files;
 };
 
-const toPhotoMedia = async (file: string, root: string): Promise<PhotoMedia> => {
+const toPhotoMedia = async (
+  file: string,
+  root: string,
+): Promise<PhotoMedia> => {
   const stat = await fs.stat(file);
   const capturedAt =
-    Number.isFinite(stat.birthtimeMs) && stat.birthtimeMs > 0 ? stat.birthtimeMs : stat.mtimeMs;
+    Number.isFinite(stat.birthtimeMs) && stat.birthtimeMs > 0
+      ? stat.birthtimeMs
+      : stat.mtimeMs;
 
   return {
     id: hashId(file),
@@ -155,25 +178,31 @@ const toPhotoMedia = async (file: string, root: string): Promise<PhotoMedia> => 
     updatedAt: stat.mtime.toISOString(),
     source: "local",
     sourceLabel: "Local library",
-    collection: inferLocalCollection(toRelativePath(root, file))
+    collection: inferLocalCollection(toRelativePath(root, file)),
   };
 };
 
 export const sortPhotoMedia = (items: PhotoMedia[]) =>
   items.sort((left, right) => {
-    const updatedDiff = new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
+    const updatedDiff =
+      new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
     if (updatedDiff !== 0) return updatedDiff;
     return left.relativePath.localeCompare(right.relativePath);
   });
 
 export const scanPhotos = async (photosPath: string) => {
   const files = await collectMediaFiles(photosPath);
-  const items = await Promise.all(files.map((file) => toPhotoMedia(file, photosPath)));
+  const items = await Promise.all(
+    files.map((file) => toPhotoMedia(file, photosPath)),
+  );
   return sortPhotoMedia(items);
 };
 
-export const scanPhotosQuick = async (photosPath: string) => scanPhotos(photosPath);
+export const scanPhotosQuick = async (photosPath: string) =>
+  scanPhotos(photosPath);
 
-export const isBrowserSafeImage = (item: Pick<PhotoMedia, "kind" | "extension">) =>
+export const isBrowserSafeImage = (
+  item: Pick<PhotoMedia, "kind" | "extension">,
+) =>
   item.kind === "image" &&
   [".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"].includes(item.extension);

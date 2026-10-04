@@ -1,6 +1,5 @@
 import { proxyControllerMedia } from "../../../../../lib/proxy-media";
-import { requireAdmin } from "../../../../../lib/admin-auth";
-import { NextResponse } from "next/server";
+import { limitPublicPhotoMedia } from "../../../../../lib/public-photo-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,15 +8,13 @@ export async function GET(
   request: Request,
   context: { params: Promise<{ mediaId: string }> },
 ) {
-  if (!(await requireAdmin()))
-    return NextResponse.json(
-      { error: "unauthorized" },
-      { status: 401, headers: { "Cache-Control": "private, no-store" } },
-    );
+  const limited = await limitPublicPhotoMedia();
+  if (limited) return limited;
   const { mediaId } = await context.params;
   return proxyControllerMedia(
     request,
     `/public/photos/${encodeURIComponent(mediaId)}/preview`,
+    { cacheControl: "public, max-age=300, stale-while-revalidate=3600" },
   );
 }
 
@@ -25,14 +22,16 @@ export async function HEAD(
   request: Request,
   context: { params: Promise<{ mediaId: string }> },
 ) {
-  if (!(await requireAdmin()))
-    return new NextResponse(null, {
-      status: 401,
-      headers: { "Cache-Control": "private, no-store" },
+  const limited = await limitPublicPhotoMedia();
+  if (limited)
+    return new Response(null, {
+      status: limited.status,
+      headers: limited.headers,
     });
   const { mediaId } = await context.params;
   return proxyControllerMedia(
     request,
     `/public/photos/${encodeURIComponent(mediaId)}/preview`,
+    { cacheControl: "public, max-age=300, stale-while-revalidate=3600" },
   );
 }

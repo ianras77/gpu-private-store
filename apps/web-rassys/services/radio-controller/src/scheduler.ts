@@ -190,6 +190,8 @@ const loadPhotoSources = async (mode) => {
             const immichPhotos = await scanImmichLibraries({
                 baseUrl: config.IMMICH_BASE_URL,
                 apiKey: config.IMMICH_API_KEY,
+                albumId: config.IMMICH_ALBUM_ID,
+                albumName: config.IMMICH_ALBUM_NAME,
                 timeoutMs: config.IMMICH_REQUEST_TIMEOUT_MS
             });
             nextPhotos.push(...immichPhotos);

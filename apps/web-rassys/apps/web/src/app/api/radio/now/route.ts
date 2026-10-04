@@ -16,15 +16,16 @@ export async function GET() {
     const data = await fetchRadio<LibraryTrack | null>("/public/now");
     const track = enrichTrack(data);
     if (track) {
-      const params = new URLSearchParams({
+      const artworkParams = new URLSearchParams({
+        trackId: track.id,
         title: track.title ?? "Current record",
         artist: track.artist ?? "Mr Rassy Radio",
       });
-      // A track id is immutable for the library: point the browser at it
-      // directly so the image is cached for the entire song and revisits.
-      const albumArtUrl = track.hasArtwork
-        ? `/api/library/tracks/${encodeURIComponent(track.id)}/artwork`
-        : `/api/library/artwork/placeholder?${params.toString()}`;
+      // The quick current-track metadata may not yet know that an embedded or
+      // nearby cover exists. Let the artwork route try the controller lookup
+      // before it falls back to generated art, and key the URL by track so the
+      // browser refreshes it when playback advances.
+      const albumArtUrl = `/api/radio/artwork?${artworkParams.toString()}`;
       return NextResponse.json({ ...track, albumArtUrl, hasArtwork: true });
     }
     return NextResponse.json(track ?? {});

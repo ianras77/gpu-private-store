@@ -1004,8 +1004,61 @@ export function PersistentRadioPlayerProvider({
         onEnded={() => {
           clearPlayWatchdog();
           clearBufferRecoveryWatchdog();
-          if (!useFallback || fallbackList.length === 0) return;
-          setFallbackIndex((current) => (current + 1) % fallbackList.length);
+          if (useFallback) {
+            if (fallbackList.length > 0) {
+              setFallbackIndex((current) => (current + 1) % fallbackList.length);
+            }
+            return;
+          }
+          if (!playing) return;
+
+          if (activeLiveQuality === "lossless") {
+            lastAttemptedStreamUrlRef.current = null;
+            setPreferLosslessPlayback(false);
+            setStreamError(
+              "The full-quality line ended. Catching the steady station line.",
+            );
+            setPlaying(true);
+            setBuffering(true);
+            setPlayStatus("loading");
+            return;
+          }
+
+          if (liveSourceMode === "direct") {
+            resetLiveRetries();
+            lastAttemptedStreamUrlRef.current = null;
+            setStreamError(
+              "The direct station line ended. Catching the stable line.",
+            );
+            setLiveSourceMode("relay");
+            setPlaying(true);
+            setBuffering(true);
+            setPlayStatus("buffering");
+            return;
+          }
+
+          if (
+            queueLiveRetry("The station line ended. Reconnecting the live line.")
+          ) {
+            return;
+          }
+
+          if (canFallback) {
+            setStreamError(
+              "The station line ended. Pulling from the stacks while it reconnects.",
+            );
+            setFallbackLocked(false);
+            setUseFallback(true);
+            setPlaying(true);
+            setBuffering(true);
+            setPlayStatus("buffering");
+            return;
+          }
+
+          setStreamError("The station line ended. Tap play to reconnect.");
+          setPlaying(false);
+          setBuffering(false);
+          setPlayStatus("error");
         }}
         onPlay={() => {
           void ensureVisualizerReady();

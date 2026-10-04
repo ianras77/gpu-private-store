@@ -58,7 +58,6 @@ const withinSizeLimit = (record: ArtworkRecord) => {
       byteLength: record.byteLength,
       maxBytes: ARTWORK_CACHE_MAX_BYTES,
       source: record.source,
-      sourceUrl: record.sourceUrl,
     },
     "Skipping oversized artwork cache entry",
   );
@@ -121,10 +120,12 @@ const loadRemoteArtwork = async (
       data,
       byteLength: data.length,
       source: "remote",
-      sourceUrl,
     });
   } catch (error) {
-    logger.warn({ error, sourceUrl }, "Remote artwork fetch failed");
+    logger.warn(
+      { errorType: error instanceof Error ? error.name : "unknown" },
+      "Remote artwork fetch failed",
+    );
     return null;
   } finally {
     clearTimeout(timeoutId);
