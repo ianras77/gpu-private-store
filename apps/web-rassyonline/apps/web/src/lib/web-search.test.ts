@@ -49,8 +49,9 @@ describe("shouldUseWebSearch", () => {
 describe("search constraints", () => {
   it("offers curated first-party seeds without violating explicit source limits", () => {
     const mastraSeeds = officialSeedResults("Mastra official documentation");
-    expect(mastraSeeds.map((result) => result.url)).toEqual(["https://mastra.ai/"]);
+    expect(mastraSeeds.map((result) => result.url)).toEqual(["https://mastra.ai/docs/agents/overview"]);
     expect(mastraSeeds[0]).not.toHaveProperty("pattern");
+    expect(officialSeedResults("Mastra tool registration documentation")[0]?.url).toBe("https://mastra.ai/docs/agents/tools");
     expect(officialSeedResults("Who leads the UK government?").map((result) => result.url)).toEqual(["https://www.gov.uk/government/ministers/prime-minister"]);
     expect(officialSeedResults("Mastra official documentation", ["example.org"])).toEqual([]);
   });
@@ -127,16 +128,25 @@ describe("search constraints", () => {
       { title: "Unrelated", url: "https://noise.example/", content: "nothing useful" }
     ] }), { status: 200, headers: { "content-type": "application/json" } })));
     const results = await searchWebResources("Mastra official documentation");
-    expect(results.map((result) => result.url)).toEqual(["https://mastra.ai/"]);
+    expect(results.map((result) => result.url)).toEqual(["https://mastra.ai/docs/agents/overview"]);
   });
-  it("keeps live first-party results whose full URLs include trailing slashes", async () => {
+  it("replaces the generic Mastra homepage with the official tools guide for tool-registration research", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => new Response(JSON.stringify({ results: [
+      { title: "Mastra official documentation", url: "https://mastra.ai/", content: "Official Mastra framework documentation and product site." }
+    ] }), { status: 200, headers: { "content-type": "application/json" } })));
+    const results = await searchWebResources("Research current official Mastra documentation for tool registration and how an agent exposes a tool");
+    expect(results.map((result) => result.url)).toContain("https://mastra.ai/docs/agents/tools");
+    expect(results.map((result) => result.url)).not.toContain("https://mastra.ai/");
+  });
+  it("uses a current docs route instead of generic official-homepage noise", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
       { title: "TypeScript AI Framework for Agents and Apps | Mastra", url: "https://mastra.ai/", content: "Mastra provides agents, workflows, memory, workspaces and observability." },
       { title: "Mastra on GitHub", url: "https://github.com/mastra-ai/mastra", content: "Mastra is a TypeScript framework." },
       { title: "Official definition", url: "https://dictionary.example/official", content: "The meaning of official is a person who holds office." }
     ] }), { status: 200, headers: { "content-type": "application/json" } })));
     const results = await searchWebResources("Search the web for the official Mastra documentation and give me a short, cited description.");
-    expect(results.map((result) => result.url)).toEqual(["https://mastra.ai/", "https://github.com/mastra-ai/mastra"]);
+    expect(results.map((result) => result.url)).toContain("https://mastra.ai/docs/agents/overview");
+    expect(results.map((result) => result.url)).not.toContain("https://mastra.ai/");
   });
   it("uses a first-party fallback when discovery is unavailable", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));

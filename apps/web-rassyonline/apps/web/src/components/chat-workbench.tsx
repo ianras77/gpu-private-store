@@ -930,7 +930,7 @@ function sanitizeArtifactSvg(input: string): string | null {
     for (const attribute of Array.from(source.attributes)) {
       if (allowedAttributes.has(attribute.name) && safeValue(attribute.name, attribute.value)) target.setAttribute(attribute.name, attribute.value);
     }
-    if (source.localName === "text" || source.localName === "title") target.textContent = source.textContent?.slice(0, 1000) ?? "";
+    if ((source.localName === "text" || source.localName === "title") && !source.children.length) target.textContent = source.textContent?.slice(0, 1000) ?? "";
     for (const child of Array.from(source.children)) {
       if (child.namespaceURI !== namespace || !allowedTags.has(child.localName)) continue;
       const next = clean.createElementNS(namespace, child.localName);

@@ -65,7 +65,8 @@ const OFFICIAL_ENTITY_SOURCES: Array<[RegExp, RegExp]> = [
   [/\bnext(?:\.js)?\b/i, /(?:^|\.)nextjs\.org(?:\/|$)|^github\.com\/vercel\/next\.js/i]
 ];
 const OFFICIAL_ENTITY_SEEDS: Array<{ pattern: RegExp; title: string; url: string; snippet: string }> = [
-  { pattern: /\bmastra\b/i, title: "Mastra official documentation", url: "https://mastra.ai/", snippet: "Official Mastra framework documentation and product site." },
+  { pattern: /\bmastra\b.{0,120}\b(?:tools?|mcp|agent|registration|createtool)\b/i, title: "Mastra Docs: Tools", url: "https://mastra.ai/docs/agents/tools", snippet: "Official Mastra documentation for typed tools, schemas, createTool, and adding tools to an Agent." },
+  { pattern: /\bmastra\b/i, title: "Mastra Docs: Agents", url: "https://mastra.ai/docs/agents/overview", snippet: "Official Mastra agent documentation, including agent setup, tools, memory, and streaming." },
   { pattern: /\blanggraph\b/i, title: "LangGraph official documentation", url: "https://docs.langchain.com/oss/javascript/langgraph/overview", snippet: "Official LangGraph documentation from LangChain." },
   { pattern: /\bnext(?:\.js)?\b/i, title: "Next.js official documentation", url: "https://nextjs.org/docs", snippet: "Official Next.js documentation from Vercel." },
   // This is a stable official index, not a stored answer. It is used only
@@ -372,7 +373,7 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
       } catch { return false; }
     })
     .sort((left, right) => relevanceScore(right, searchTerms(searchQueryForPrompt(relevanceQuery))) - relevanceScore(left, searchTerms(searchQueryForPrompt(relevanceQuery))));
-  const officialSources = /\bofficial\s+(?:documentation|docs?|sources?)\b/i.test(relevanceQuery)
+  const officialSources = /\bofficial\b.{0,80}\b(?:documentation|docs?|sources?)\b/i.test(relevanceQuery)
     ? OFFICIAL_ENTITY_SOURCES.filter(([entity]) => entity.test(relevanceQuery)).map(([, source]) => source)
     : [];
   const windowMs = options.recency === "day" ? 86_400_000 : options.recency === "week" ? 604_800_000 : options.recency === "month" ? 2_592_000_000 : options.recency === "year" ? 31_536_000_000 : null;
@@ -387,7 +388,11 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
         if (!inWindow(result)) return false;
         const parsedUrl = new URL(result.url);
         const sourceKey = `${result.source}${parsedUrl.pathname}`;
-        if (officialSources.length) return officialSources.some((pattern) => pattern.test(sourceKey));
+        if (officialSources.length) {
+          if (parsedUrl.pathname === "/" || !officialSources.some((pattern) => pattern.test(sourceKey))) return false;
+          const matchedTerms = terms.filter((term) => new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(`${result.title} ${result.snippet} ${result.url}`)).length;
+          return relevanceScore(result, terms) >= Math.max(5, Math.ceil(terms.length * 2)) && matchedTerms >= Math.min(2, terms.length);
+        }
         const score = relevanceScore(result, terms);
         const haystack = `${result.title} ${result.snippet} ${result.url}`.toLowerCase();
         const matchedTerms = terms.filter((term) => new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(haystack)).length;
