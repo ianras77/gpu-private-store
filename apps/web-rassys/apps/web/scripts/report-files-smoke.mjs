@@ -28,6 +28,12 @@ await writeFile(
   path.join(analystRoot, "20261004T120000Z-analyst-rassy-watch.md"),
   importedAnalyst,
 );
+const mirroredMonth = path.join(root, "analyst", "2026", "10");
+await mkdir(mirroredMonth, { recursive: true });
+await writeFile(
+  path.join(mirroredMonth, "20261004T120000Z-analyst-rassy-watch.md"),
+  importedAnalyst,
+);
 await writeFile(
   path.join(systemRoot, "20261004T120000Z-openfang-system-integration-sweep.md"),
   importedSystem,
@@ -55,5 +61,5 @@ assert.equal(
   createHash("sha256").update(importedSystem).digest("hex"),
 );
 console.log(
-  "Report containment, symlink rejection, OpenFang source indexing, and byte hashes passed",
+  "Report containment, symlink rejection, OpenFang source indexing, duplicate suppression, and byte hashes passed",
 );

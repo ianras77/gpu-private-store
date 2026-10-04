@@ -65,6 +65,7 @@ export async function listReportFiles(
     throw new Error("invalid_reports_root");
   }
   const files: ReportFile[] = [];
+  const knownReportBytes = new Set<string>();
   for (const type of REPORT_TYPES) {
     const typePath = path.join(root, type);
     let years;
@@ -111,14 +112,16 @@ export async function listReportFiles(
             continue;
           }
           if (!markdown.trim() || markdown.includes("\0")) continue;
+          const sha256 = createHash("sha256").update(bytes).digest("hex");
           files.push({
             id: reportId(relativePath),
             type,
             relativePath,
-            sha256: createHash("sha256").update(bytes).digest("hex"),
+            sha256,
             markdown,
             bytes: bytes.length,
           });
+          knownReportBytes.add(`${type}:${sha256}`);
         }
       }
     }
@@ -189,14 +192,18 @@ export async function listReportFiles(
         continue;
       }
       if (!markdown.trim() || markdown.includes("\0")) continue;
+      const sha256 = createHash("sha256").update(bytes).digest("hex");
+      const dedupeKey = `${source.type}:${sha256}`;
+      if (knownReportBytes.has(dedupeKey)) continue;
       files.push({
         id: reportId(relativePath),
         type: source.type,
         relativePath,
-        sha256: createHash("sha256").update(bytes).digest("hex"),
+        sha256,
         markdown,
         bytes: bytes.length,
       });
+      knownReportBytes.add(dedupeKey);
       if (files.length >= MAX_REPORTS) return files;
     }
   }

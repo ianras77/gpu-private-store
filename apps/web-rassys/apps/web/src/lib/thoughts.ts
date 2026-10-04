@@ -44,6 +44,7 @@ type ThoughtFrontMatter = {
 };
 
 const storagePath =
+  process.env.NOTES_STORAGE_PATH ??
   process.env.BLOG_STORAGE_PATH ??
   path.join(process.cwd(), "content", "thoughts");
 const mediaPath = path.join(storagePath, "media");

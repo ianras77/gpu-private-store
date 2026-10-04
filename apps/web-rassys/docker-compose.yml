@@ -122,9 +122,9 @@ services:
       MINECRAFT_TROUPE_BOT_PORT: ${MINECRAFT_TROUPE_BOT_PORT:-3000}
       MINECRAFT_TROUPE_STATUS_TIMEOUT_MS: ${MINECRAFT_TROUPE_STATUS_TIMEOUT_MS:-2500}
       MINECRAFT_TROUPE_BOT_NAMES: ${MINECRAFT_TROUPE_BOT_NAMES:-}
-      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/web-rassys}
+      NOTES_STORAGE_PATH: ${NOTES_STORAGE_PATH:-/media/notes}
       LEARNING_STORAGE_PATH: ${LEARNING_STORAGE_PATH:-/media/learning}
-      RASSY_REPORTS_ROOT: /reports
+      RASSY_REPORTS_ROOT: ${RASSY_REPORTS_STORAGE_PATH:-/media/reports}
       OPENFANG_ANALYST_REPORTS_PATH: /openfang-reports/analyst-rassy
       OPENFANG_SYSTEM_REPORTS_PATH: /openfang-reports/system-integration
     depends_on:
@@ -144,11 +144,12 @@ services:
       - traefik.http.routers.web-rassys.tls.certresolver=myresolver
       - traefik.http.services.web-rassys.loadbalancer.server.port=3000
     volumes:
-      # Authored thoughts intentionally live in the Runtipi media data area.
-      - ${ROOT_FOLDER_HOST:-.}/media/data/web-rassys:${BLOG_STORAGE_PATH:-/media/web-rassys}
+      # Each reader has its own persistent source under media/data/web-rassys.
+      - ${HOST_NOTES_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/notes}:${NOTES_STORAGE_PATH:-/media/notes}
       # Learning modules are content-only files and stay read-only in the app container.
       - ${HOST_LEARNING_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/learning}:${LEARNING_STORAGE_PATH:-/media/learning}:ro
-      - ${APP_DATA_DIR}/app-data/web-rassys/reports:/reports:ro
+      # OpenFang exports reports into this shared root; the web reader stays read-only.
+      - ${HOST_REPORTS_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/reports}:${RASSY_REPORTS_STORAGE_PATH:-/media/reports}:ro
       - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/analyst-rassy:/openfang-reports/analyst-rassy:ro
       - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/system-integration:/openfang-reports/system-integration:ro
     restart: unless-stopped
@@ -273,7 +274,7 @@ services:
       - internal
     volumes:
       - ${ROOT_FOLDER_HOST}/media/data/music:${MUSIC_LIBRARY_PATH:-/media/music}:ro
-      - ${ROOT_FOLDER_HOST}/media/data/music:/mnt/cannonball:ro
+      - /mnt/cannonball:/mnt/cannonball:ro
       - type: bind
         source: ${HOST_MUSIC_SYMLINK_ROOT:-${ROOT_FOLDER_HOST}/media/data/music}
         target: ${HOST_MUSIC_SYMLINK_ROOT:-/media/music}
@@ -329,7 +330,7 @@ services:
     volumes:
       - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys/infra/liquidsoap/rassy.liq:/etc/liquidsoap/rassy.liq:ro
       - ${ROOT_FOLDER_HOST}/media/data/music:${MUSIC_LIBRARY_PATH:-/media/music}:ro
-      - ${ROOT_FOLDER_HOST}/media/data/music:/mnt/cannonball:ro
+      - /mnt/cannonball:/mnt/cannonball:ro
       - type: bind
         source: ${HOST_MUSIC_SYMLINK_ROOT:-${ROOT_FOLDER_HOST}/media/data/music}
         target: ${HOST_MUSIC_SYMLINK_ROOT:-/media/music}
