@@ -182,6 +182,11 @@ describe("normalizeSearchQuery", () => {
     expect(normalizeSearchQuery("Please search the web for the latest Python release")).toBe("the latest Python release");
     expect(normalizeSearchQuery("latest Python release")).toBe("latest Python release");
   });
+
+  it("removes answer-format wording without changing the search subject", () => {
+    expect(searchQueryForPrompt("Search the web for official Mastra documentation and give me a short, cited description.")).toBe("official Mastra documentation");
+    expect(searchQueryForPrompt("Search for the latest Python release and give me a brief summary.")).toBe("the Python release");
+  });
 });
 
 describe("citation provenance", () => {

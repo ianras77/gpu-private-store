@@ -217,6 +217,8 @@ export function searchQueryForPrompt(query: string): string {
     .replace(/\b(can you|could you|would you|please|tell me|i want to know|i need to know|find out|give me|show me|look into)\b/gi, " ")
     .replace(/\b(what is|what are|who is|where is|when is|how does|how do|why is|why are)\b/gi, " ")
     .replace(/\b(latest|recent|currently|today|tonight|right now|this week|this month|breaking|newest)\b/gi, " ")
+    .replace(/\b(?:a\s+)?(?:short|brief|concise)\s*,?\s*(?:(?:cited|sourced)\s*,?\s*)?(?:description|answer|summary|overview|response)\b.*$/i, " ")
+    .replace(/\b(?:and|or|with|using|based on)\s*$/i, "")
     .replace(/[?!]+$/g, "").replace(/\s+/g, " ").trim();
   return (focused || normalizeSearchQuery(query)).slice(0, 500);
 }
