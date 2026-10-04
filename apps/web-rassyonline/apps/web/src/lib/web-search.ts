@@ -384,12 +384,14 @@ async function searchWebResourcesForQuery(providerQuery: string, relevanceQuery:
   const relevant = terms.length
     ? normalized.filter((result) => {
         if (!inWindow(result)) return false;
-        const sourceKey = `${result.source}${new URL(result.url).pathname}`;
+        const parsedUrl = new URL(result.url);
+        const sourceKey = `${result.source}${parsedUrl.pathname}`;
         if (officialSources.length) return officialSources.some((pattern) => pattern.test(sourceKey));
         const score = relevanceScore(result, terms);
         const haystack = `${result.title} ${result.snippet} ${result.url}`.toLowerCase();
         const matchedTerms = terms.filter((term) => new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z0-9])`, "i").test(haystack)).length;
-        const trustedMastraSource = /(?:^|\.)mastra\.ai$|github\.com\/mastra-ai\//i.test(result.url);
+        const host = parsedUrl.hostname.toLowerCase();
+        const trustedMastraSource = host === "mastra.ai" || host.endsWith(".mastra.ai") || (host === "github.com" && /^\/mastra-ai(?:\/|$)/i.test(parsedUrl.pathname));
         return score >= Math.max(5, Math.ceil(terms.length * 2)) && (matchedTerms >= (terms.length > 1 ? Math.max(2, Math.ceil(terms.length * 0.5)) : 1) || trustedMastraSource);
       })
     : normalized.filter((result) => inWindow(result) && (!officialSources.length || officialSources.some((pattern) => pattern.test(`${result.source}${new URL(result.url).pathname}`))));

@@ -129,6 +129,15 @@ describe("search constraints", () => {
     const results = await searchWebResources("Mastra official documentation");
     expect(results.map((result) => result.url)).toEqual(["https://mastra.ai/"]);
   });
+  it("keeps live first-party results whose full URLs include trailing slashes", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [
+      { title: "TypeScript AI Framework for Agents and Apps | Mastra", url: "https://mastra.ai/", content: "Mastra provides agents, workflows, memory, workspaces and observability." },
+      { title: "Mastra on GitHub", url: "https://github.com/mastra-ai/mastra", content: "Mastra is a TypeScript framework." },
+      { title: "Official definition", url: "https://dictionary.example/official", content: "The meaning of official is a person who holds office." }
+    ] }), { status: 200, headers: { "content-type": "application/json" } })));
+    const results = await searchWebResources("Search the web for the official Mastra documentation and give me a short, cited description.");
+    expect(results.map((result) => result.url)).toEqual(["https://mastra.ai/", "https://github.com/mastra-ai/mastra"]);
+  });
   it("uses a first-party fallback when discovery is unavailable", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
     const results = await searchWebResources("Who leads the UK government?");
