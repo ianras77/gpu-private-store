@@ -48,7 +48,9 @@ describe("shouldUseWebSearch", () => {
 
 describe("search constraints", () => {
   it("offers curated first-party seeds without violating explicit source limits", () => {
-    expect(officialSeedResults("Mastra official documentation").map((result) => result.url)).toEqual(["https://mastra.ai/"]);
+    const mastraSeeds = officialSeedResults("Mastra official documentation");
+    expect(mastraSeeds.map((result) => result.url)).toEqual(["https://mastra.ai/"]);
+    expect(mastraSeeds[0]).not.toHaveProperty("pattern");
     expect(officialSeedResults("Who leads the UK government?").map((result) => result.url)).toEqual(["https://www.gov.uk/government/ministers/prime-minister"]);
     expect(officialSeedResults("Mastra official documentation", ["example.org"])).toEqual([]);
   });

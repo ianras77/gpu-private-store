@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { agentForMode, buildExecutionBrief, maxStepsForMode, selectMastraAgent, taskShape } from "./routing";
+import { agentForMode, buildExecutionBrief, maxStepsForMode, researchSynthesisAgent, selectMastraAgent, taskShape } from "./routing";
 
 describe("Mastra automatic routing", () => {
   it("keeps ordinary conversation on Rassy", () => {
@@ -8,6 +8,12 @@ describe("Mastra automatic routing", () => {
 
   it("promotes freshness-sensitive requests to research", () => {
     expect(selectMastraAgent({ mode: "general", searchRequested: true })).toBe("researcher");
+  });
+
+  it("uses the no-web grounded agent after preflight returned evidence", () => {
+    expect(researchSynthesisAgent("researcher", true)).toBe("researcher-grounded");
+    expect(researchSynthesisAgent("researcher", false)).toBe("researcher");
+    expect(researchSynthesisAgent("coder", true)).toBe("coder");
   });
 
   it("keeps research capability selection separate from plain chat", () => {

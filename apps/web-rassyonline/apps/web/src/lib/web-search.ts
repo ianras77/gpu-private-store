@@ -260,7 +260,7 @@ export function officialSeedResults(query: string, domains: string[] = []): WebS
       const host = new URL(seed.url).hostname;
       return !requested.length || requested.some((domain) => host === domain || host.endsWith(`.${domain}`));
     })
-    .map((seed) => ({ ...seed, source: new URL(seed.url).hostname, status: "ok" as const }));
+    .map((seed) => ({ title: seed.title, url: seed.url, snippet: seed.snippet, source: new URL(seed.url).hostname, status: "ok" as const }));
 }
 
 function isNewsResearch(query: string): boolean {

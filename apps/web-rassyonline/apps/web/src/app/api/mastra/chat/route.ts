@@ -12,7 +12,7 @@ import { buildDocumentContextMessage } from "@/lib/document-memory";
 import { getReadyDocumentIdsForUser } from "@/lib/documents";
 import { embedTexts, rerankTexts } from "@/lib/rassymind";
 import { searchUserDocuments } from "@/lib/qdrant";
-import { buildExecutionBrief, maxStepsForMode, selectMastraAgent, taskShape, type MastraAgentId } from "@/mastra/routing";
+import { buildExecutionBrief, maxStepsForMode, researchSynthesisAgent, selectMastraAgent, taskShape, type MastraAgentId } from "@/mastra/routing";
 import { checkAnonymousThrottle } from "@/lib/anonymous-throttle";
 import { readPublicPage } from "@/mastra/tools/page-reader";
 import { buildCurrentTimeContext } from "@/mastra/tools/time";
@@ -196,13 +196,16 @@ export async function POST(request: NextRequest) {
             if (preflightResults.length) send("artifact", { kind: "source-board", status: "ready", sources: preflightResults });
           }
           if (request.signal.aborted) throw new Error("request cancelled");
-          // Research remains available after preflight: the model may pursue
-          // a new uncovered subquestion. adaptiveResearch owns per-turn query
-          // deduplication, so this is flexible without reopening loop risk.
+          // Once preflight supplies evidence, use the grounded researcher.
+          // Its tool set excludes web search, preventing the model from
+          // repeating the same lookup before it has synthesized the packet.
+          const synthesisAgent = executionAgent.id === "rassy-local"
+            ? executionAgent
+            : agentRegistry[researchSynthesisAgent(selectedAgent, preflightResults.length > 0)];
           const toolChoice = requiredDomains.length ? "none" : selectedAgent === "researcher"
             ? preflightResults.length ? "auto" : comparisonRequested ? { type: "tool" as const, toolName: "parallelResearch" } : "required"
             : undefined;
-          const result = await streamMastraChat({ agent: executionAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, selectedDocumentIds, includePriorContext: true, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent, executionShape), temperature: parsed.data.temperature, maxTokens: outputLimit, toolChoice: localOnlyExecution(parsed.data.webSearch) ? undefined : toolChoice });
+          const result = await streamMastraChat({ agent: synthesisAgent, messages, threadId, resourceId: guestIdentity, userId: user?.id, selectedDocumentIds, includePriorContext: true, signal: request.signal, maxSteps: maxStepsForMode(parsed.data.mode, selectedAgent, executionShape), temperature: parsed.data.temperature, maxTokens: outputLimit, toolChoice: localOnlyExecution(parsed.data.webSearch) ? undefined : toolChoice });
           for await (const part of result.fullStream as AsyncIterable<{ type: string; textDelta?: string; delta?: string; text?: string; reasoning?: string; reasoningDelta?: string; reasoning_content?: string; toolName?: string; toolCallId?: string; output?: unknown; result?: unknown; payload?: Record<string, unknown>; error?: unknown; finishReason?: string }>) {
             const payload = part.payload;
             if (part.type === "finish" || part.type === "finish-step") finishReason = part.finishReason ?? (typeof payload?.finishReason === "string" ? payload.finishReason : finishReason);

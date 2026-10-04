@@ -1,4 +1,8 @@
-export type MastraAgentId = "rassy" | "researcher" | "knowledge" | "coder" | "utility";
+export type MastraAgentId = "rassy" | "researcher" | "researcher-grounded" | "knowledge" | "coder" | "utility";
+
+export function researchSynthesisAgent(agent: MastraAgentId, hasPreflightEvidence: boolean): MastraAgentId {
+  return agent === "researcher" && hasPreflightEvidence ? "researcher-grounded" : agent;
+}
 
 export type TaskShape = "conversation" | "research" | "knowledge" | "build" | "analysis";
 
