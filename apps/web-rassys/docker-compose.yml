@@ -1,7 +1,7 @@
 services:
   rassy-intelligence:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
+      context: /data/apps/web-rassy
       dockerfile: services/rassy-intelligence/Dockerfile
     environment:
       NODE_ENV: production
@@ -28,7 +28,7 @@ services:
 
   web:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
+      context: /data/apps/web-rassy
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_STREAM_URL: ${NEXT_PUBLIC_STREAM_URL:-}
@@ -40,9 +40,9 @@ services:
         NEXT_PUBLIC_RADIO_API_URL: ${NEXT_PUBLIC_RADIO_API_URL}
         NEXT_PUBLIC_MINECRAFT_API_URL: ${NEXT_PUBLIC_MINECRAFT_API_URL}
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYS_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-        NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYS_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
-        DATABASE_URL: ${DATABASE_URL:-}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYS_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-c8ce4a6c-f5ac-40b9-9777-1f0570c75708}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYS_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassys.com,www.rassys.com}}
+        NEXT_PUBLIC_WWC_VISIBLE: ${NEXT_PUBLIC_WWC_VISIBLE:-true}
     environment:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
@@ -54,8 +54,34 @@ services:
       NEXT_PUBLIC_MUSIC_LIBRARY_URL: ${NEXT_PUBLIC_MUSIC_LIBRARY_URL}
       NEXT_PUBLIC_MINECRAFT_MAP_URL: ${NEXT_PUBLIC_MINECRAFT_MAP_URL}
       NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYS_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-      NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYS_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYS_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-c8ce4a6c-f5ac-40b9-9777-1f0570c75708}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYS_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassys.com,www.rassys.com}}
+      NEXT_PUBLIC_WWC_VISIBLE: ${NEXT_PUBLIC_WWC_VISIBLE:-true}
+      WWC_COLLECTION_ENABLED: ${WWC_COLLECTION_ENABLED:-false}
+      WWC_ADMIN_ENABLED: ${WWC_ADMIN_ENABLED:-false}
+      WWC_COHORT: ${WWC_COHORT:-}
+      WWC_DATABASE_URL: ${WWC_DATABASE_URL:-}
+      WWC_DATABASE_CONFIG_CONFIRMED: ${WWC_DATABASE_CONFIG_CONFIRMED:-false}
+      WWC_DATABASE_ROLE_CONFIRMED: ${WWC_DATABASE_ROLE_CONFIRMED:-false}
+      WWC_DATABASE_PERSISTENCE_CONFIRMED: ${WWC_DATABASE_PERSISTENCE_CONFIRMED:-false}
+      WWC_CONTACT_METHOD: ${WWC_CONTACT_METHOD:-}
+      WWC_PRIVACY_NOTICE_VERSION: ${WWC_PRIVACY_NOTICE_VERSION:-}
+      WWC_PRIVACY_NOTICE_APPROVED: ${WWC_PRIVACY_NOTICE_APPROVED:-false}
+      WWC_RETENTION_DAYS: ${WWC_RETENTION_DAYS:-}
+      WWC_RETENTION_APPROVED: ${WWC_RETENTION_APPROVED:-false}
+      WWC_BACKUP_EXPIRY_DAYS: ${WWC_BACKUP_EXPIRY_DAYS:-}
+      WWC_BACKUP_POLICY_CONFIRMED: ${WWC_BACKUP_POLICY_CONFIRMED:-false}
+      WWC_BACKUP_ENCRYPTION_CONFIRMED: ${WWC_BACKUP_ENCRYPTION_CONFIRMED:-false}
+      WWC_BACKUP_ACCESS_CONFIRMED: ${WWC_BACKUP_ACCESS_CONFIRMED:-false}
+      WWC_BACKUP_RESTORE_TESTED: ${WWC_BACKUP_RESTORE_TESTED:-false}
+      WWC_RETENTION_CLEANUP_ENABLED: ${WWC_RETENTION_CLEANUP_ENABLED:-false}
+      WWC_IDEMPOTENCY_REPLAY_DAYS: ${WWC_IDEMPOTENCY_REPLAY_DAYS:-}
+      WWC_INFRA_LOG_RETENTION_HOURS: ${WWC_INFRA_LOG_RETENTION_HOURS:-}
+      WWC_INFRA_LOG_POLICY_CONFIRMED: ${WWC_INFRA_LOG_POLICY_CONFIRMED:-false}
+      WWC_PROXY_TRUST_CONFIRMED: ${WWC_PROXY_TRUST_CONFIRMED:-false}
+      WWC_RATE_LIMIT_IP_HEADER: ${WWC_RATE_LIMIT_IP_HEADER:-}
+      WWC_RATE_LIMIT_SECRET: ${WWC_RATE_LIMIT_SECRET:-}
+      WWC_TRUSTED_ORIGIN: ${WWC_TRUSTED_ORIGIN:-https://rassys.com}
       STREAM_HEALTHCHECK_URL: ${STREAM_HEALTHCHECK_URL:-http://icecast:${ICECAST_PORT:-8000}/live.mp3}
       STREAM_PROXY_URL: ${STREAM_PROXY_URL:-http://icecast:${ICECAST_PORT:-8000}/live.mp3}
       STREAM_LOSSLESS_PROXY_URL: ${STREAM_LOSSLESS_PROXY_URL:-http://icecast:${ICECAST_PORT:-8000}/live-lossless.ogg}
@@ -170,7 +196,7 @@ services:
 
   radio-controller:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
+      context: /data/apps/web-rassy
       dockerfile: services/radio-controller/Dockerfile
     environment:
       NODE_ENV: production
@@ -300,7 +326,7 @@ services:
 
   minecraft-bridge:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
+      context: /data/apps/web-rassy
       dockerfile: services/minecraft-bridge/Dockerfile
     environment:
       PORT: 4100
@@ -327,7 +353,7 @@ services:
   liquidsoap:
     image: savonet/liquidsoap:v2.2.5
     volumes:
-      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys/infra/liquidsoap/rassy.liq:/etc/liquidsoap/rassy.liq:ro
+      - /data/apps/web-rassy/infra/liquidsoap/rassy.liq:/etc/liquidsoap/rassy.liq:ro
       - ${ROOT_FOLDER_HOST}/media/data/music:${MUSIC_LIBRARY_PATH:-/media/music}:ro
       - ${ROOT_FOLDER_HOST}/media/data/music:/mnt/cannonball:ro
       - type: bind
@@ -377,7 +403,7 @@ services:
 
   icecast:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys/infra/icecast
+      context: /data/apps/web-rassy/infra/icecast
     environment:
       ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-}
       ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD:-}

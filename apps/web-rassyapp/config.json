@@ -6,19 +6,33 @@
   "dynamic_config": true,
   "id": "web-rassyapp",
   "description": "Code Console is a multi-user AI coding workspace built on Next.js and Prisma. It provides a focused surface for chat, code context, memory, plugins, model settings, and user management over an existing Cheshire Cat deployment. The WebSocket chat adapter uses the official `ccat-api` client. This repository now includes .",
-  "tipi_version": 11,
-  "version": "v1.14.8",
+  "tipi_version": 13,
+  "version": "v1.14.10",
   "categories": [
     "ai"
   ],
   "short_desc": "Code Console is a multi-user AI coding workspace built on Next.js and Prisma. It provides a focused surface for chat, co",
   "author": "https://github.com/ianras77/web-rassy.app.git",
   "source": "https://github.com/ianras77/web-rassy.app",
-  "form_fields": [{"type":"password","label":"RassyMind API key","required":true,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyMind API key",
+      "required": true,
+      "env_variable": "RASSYMIND_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyMind base URL",
+      "required": false,
+      "env_variable": "RASSYMIND_BASE_URL",
+      "default": "http://host.docker.internal:8844"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1774316487248,
-  "updated_at": 1779580800000
+  "updated_at": 1791631826674
 }

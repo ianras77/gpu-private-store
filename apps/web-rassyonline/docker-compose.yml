@@ -3,8 +3,12 @@ services:
     image: runtipi-local-web-rassyonline-web:latest
     pull_policy: build
     build:
-      context: ./apps/web
+      context: /data/apps/web-rassyonline/apps/web
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSY_ONLINE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-cffcee31-e16a-49fe-a14f-f5927f2fde71}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSY_ONLINE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassy.online}}
     user: "1001:1001"
     restart: unless-stopped
     read_only: true
@@ -19,6 +23,9 @@ services:
       NEXT_TELEMETRY_DISABLED: "1"
       HOSTNAME: 0.0.0.0
       PORT: "3000"
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSY_ONLINE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-cffcee31-e16a-49fe-a14f-f5927f2fde71}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSY_ONLINE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassy.online}}
       RASSY_ONLINE_PUBLIC_BASE_URL: ${RASSY_ONLINE_PUBLIC_BASE_URL:-https://rassy.online}
       RASSY_ONLINE_AUTH_SECRET: ${RASSY_ONLINE_AUTH_SECRET}
       RASSY_ONLINE_BOOTSTRAP_ADMIN_EMAIL: ${RASSY_ONLINE_BOOTSTRAP_ADMIN_EMAIL:-}
@@ -75,8 +82,12 @@ services:
     image: runtipi-local-web-rassyonline-web:latest
     pull_policy: build
     build:
-      context: ./apps/web
+      context: /data/apps/web-rassyonline/apps/web
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSY_ONLINE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-cffcee31-e16a-49fe-a14f-f5927f2fde71}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSY_ONLINE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassy.online}}
     command: ["node", "worker.mjs"]
     user: "1001:1001"
     restart: unless-stopped

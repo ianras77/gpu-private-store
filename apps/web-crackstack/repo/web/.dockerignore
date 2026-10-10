@@ -1,5 +1,0 @@
-node_modules
-apps/*/.next
-packages/*/dist
-coverage
-npm-debug.log*

@@ -3,7 +3,7 @@ services:
     image: runtipi-local-web-rasies-rasies-portal:latest
     pull_policy: build
     build:
-      context: /data/apps/2-Migrated/web-rasies
+      context: /data/apps/web-rasies
       dockerfile: Dockerfile
       args:
         VITE_UMAMI_SCRIPT_URL: ${VITE_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}

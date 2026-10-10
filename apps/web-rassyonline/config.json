@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-rassyonline",
   "description": "A magical Runtipi-native RassyMind web app with public chat, accounts, per-user vector workspaces, document toggles, and admin controls.",
-  "tipi_version": 4,
-  "version": "0.1.8",
+  "tipi_version": 6,
+  "version": "0.1.10",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -15,7 +15,7 @@
   ],
   "short_desc": "Magical public RassyMind chat with accounts, documents, vectors, and admin controls.",
   "author": "Ian Rasmussen",
-  "source": "https://github.com/ianras77/gpu-private-store",
+  "source": "https://github.com/ianras77/web-rassyonline",
   "form_fields": [
     {
       "type": "text",
@@ -108,5 +108,5 @@
   ],
   "no_gui": false,
   "created_at": 1782669600000,
-  "updated_at": 1783558053000
+  "updated_at": 1791631826674
 }

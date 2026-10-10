@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-astro",
   "description": "Five branded astrology fronts powered by one shared API, Postgres, Redis, and a Qdrant-backed lore engine.",
-  "tipi_version": 5,
-  "version": "1.1.0",
+  "tipi_version": 7,
+  "version": "1.1.2",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -16,11 +16,25 @@
   "short_desc": "Five branded astrology experiences on one shared API and data stack.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-astrology",
-  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844/v1"}],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyMind API key",
+      "required": false,
+      "env_variable": "RASSYMIND_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyMind base URL",
+      "required": false,
+      "env_variable": "RASSYMIND_BASE_URL",
+      "default": "http://host.docker.internal:8844/v1"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1776589448000,
-  "updated_at": 1779494400000
+  "updated_at": 1791631826674
 }

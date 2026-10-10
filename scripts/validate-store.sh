@@ -12,6 +12,9 @@
 
         status=0
         while IFS= read -r -d '' app_dir; do
+          if [[ ! -f "${app_dir}/config.json" ]]; then
+            continue
+          fi
           for required in config.json docker-compose.yml metadata/description.md; do
             if [[ ! -f "${app_dir}/${required}" ]]; then
               echo "missing ${required} in ${app_dir}" >&2

@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-lickingvape",
   "description": "Dark anonymous quit-vaping wall with Next.js, FastAPI, LLM-assisted moderation, Postgres, and a mode-based Stripe Scribe.",
-  "tipi_version": 7,
-  "version": "1.0.7",
+  "tipi_version": 9,
+  "version": "1.0.9",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -16,11 +16,25 @@
   "short_desc": "Dark anonymous quit-vaping wall with LLM-assisted moderation.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-lickingvape",
-  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyMind API key",
+      "required": false,
+      "env_variable": "RASSYMIND_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyMind base URL",
+      "required": false,
+      "env_variable": "RASSYMIND_BASE_URL",
+      "default": "http://host.docker.internal:8844"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1776589448000,
-  "updated_at": 1780020471060
+  "updated_at": 1791631826674
 }

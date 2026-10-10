@@ -1,7 +1,7 @@
 services:
   trt-api:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-totallyrighteoustales/repo
+      context: /data/apps/web-totallyrighteoustales
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
@@ -72,7 +72,7 @@ services:
       CAT_OLLAMA_API_KEY: ${RASSYMIND_API_KEY:-}
     volumes:
       - ${APP_DATA_DIR}/app-data/web-totallyrighteoustales/named/trt-cat-data:/data
-      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-totallyrighteoustales/repo/ops/bootstrap_cat_ollama.py:/app/cat/bootstrap/bootstrap_cat_ollama.py:ro
+      - /data/apps/web-totallyrighteoustales/ops/bootstrap_cat_ollama.py:/app/cat/bootstrap/bootstrap_cat_ollama.py:ro
     extra_hosts:
       - host.docker.internal:host-gateway
     command:
@@ -124,7 +124,7 @@ services:
 
   trt-web:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-totallyrighteoustales/repo
+      context: /data/apps/web-totallyrighteoustales
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
@@ -159,7 +159,7 @@ services:
 
   trt-worker:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-totallyrighteoustales/repo
+      context: /data/apps/web-totallyrighteoustales
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}

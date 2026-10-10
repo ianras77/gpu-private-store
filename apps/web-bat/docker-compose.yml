@@ -20,7 +20,7 @@ x-bat-runtime-env: &bat-runtime-env
   CAT_PRIMARY_ENABLED: "false"
   CAT_SECONDARY_MEMORY_ENABLED: "false"
   EMBEDDING_REQUEST_TIMEOUT_SECONDS: ${EMBEDDING_REQUEST_TIMEOUT_SECONDS:-12}
-  EMBEDDING_REQUEST_RETRIES: ${EMBEDDING_REQUEST_RETRIES:-1}
+  EMBEDDING_REQUEST_RETRIES: ${EMBEDDING_REQUEST_RETRIES:-2}
   EMBEDDING_BATCH_SIZE: ${EMBEDDING_BATCH_SIZE:-8}
   ENABLE_MANUAL_REVIEW: ${ENABLE_MANUAL_REVIEW:-true}
   AUTO_PUBLISH: ${AUTO_PUBLISH:-false}
@@ -48,6 +48,7 @@ x-bat-runtime-env: &bat-runtime-env
   RETRIEVAL_MAX_SOURCES: ${RETRIEVAL_MAX_SOURCES:-10}
   RETRIEVAL_MAX_THEMES: ${RETRIEVAL_MAX_THEMES:-6}
   RETRIEVAL_MAX_TRENDS: ${RETRIEVAL_MAX_TRENDS:-8}
+  RETRIEVAL_MAX_HISTORICAL_SOURCE_AGE_DAYS: ${RETRIEVAL_MAX_HISTORICAL_SOURCE_AGE_DAYS:-3650}
   ANALYSIS_SOURCE_LIMIT: ${ANALYSIS_SOURCE_LIMIT:-10}
   ANALYSIS_THEME_LIMIT: ${ANALYSIS_THEME_LIMIT:-8}
   ANALYSIS_RECENT_EDITORIAL_LIMIT: ${ANALYSIS_RECENT_EDITORIAL_LIMIT:-16}
@@ -71,7 +72,7 @@ x-bat-host-gateway: &bat-host-gateway
 
 services:
   bat-api:
-    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/api
+    build: /data/apps/web-bat/blondesagainsttrump/apps/api
     environment:
       <<: *bat-runtime-env
     extra_hosts: *bat-host-gateway
@@ -101,18 +102,21 @@ services:
       - tipi_main
     x-runtipi:
       add_to_main_network: true
+    pull_policy: build
 
   bat-mastra:
-    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/mastra
+    build: /data/apps/web-bat/blondesagainsttrump/apps/mastra
     environment:
       MASTRA_PORT: 8090
       BAT_API_URL: http://bat-api:8000
       BAT_INTERNAL_SERVICE_TOKEN: ${BAT_INTERNAL_SERVICE_TOKEN:?BAT_INTERNAL_SERVICE_TOKEN must be set}
+      MASTRA_DATABASE_URL: ${MASTRA_DATABASE_URL:-postgresql://bat:${BAT_POSTGRES_PASSWORD:?BAT_POSTGRES_PASSWORD must be set}@bat-postgres:5432/bat}
       MASTRA_PERSIST_REPORTS: ${MASTRA_PERSIST_REPORTS:-true}
       RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
       RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
       RASSYMIND_MODEL: ${RASSYMIND_MODEL:-rassy-mind}
       RASSYMIND_EDITORIAL_MODEL: ${RASSYMIND_EDITORIAL_MODEL:-rassy-fast}
+      RASSYMIND_EDITORIAL_COMPOSITION_MODEL: ${RASSYMIND_EDITORIAL_COMPOSITION_MODEL:-rassy-mind}
       MASTRA_SCHEDULE_ENABLED: ${MASTRA_SCHEDULE_ENABLED:-true}
       MASTRA_SCHEDULE_INTERVAL_SECONDS: ${MASTRA_SCHEDULE_INTERVAL_SECONDS:-21600}
       MASTRA_SCHEDULE_SOURCE_MAX_AGE_HOURS: ${MASTRA_SCHEDULE_SOURCE_MAX_AGE_HOURS:-30}
@@ -135,6 +139,7 @@ services:
       - tipi_main
     x-runtipi:
       add_to_main_network: true
+    pull_policy: build
 
   bat-postgres:
     image: postgres:16
@@ -144,13 +149,13 @@ services:
       POSTGRES_PASSWORD: ${BAT_POSTGRES_PASSWORD:?BAT_POSTGRES_PASSWORD must be set}
     volumes:
       - ${APP_DATA_DIR:-./.docker-data}/app-data/web-bat/named/bat-postgres-data:/var/lib/postgresql/data
-      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
-      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/002_seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
-      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/003_trend_observation_uniqueness.sql:/docker-entrypoint-initdb.d/003_trend_observation_uniqueness.sql:ro
-      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/004_reports.sql:/docker-entrypoint-initdb.d/004_reports.sql:ro
-      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/005_report_runtime.sql:/docker-entrypoint-initdb.d/005_report_runtime.sql:ro
-      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/006_mastra_editorial_integration.sql:/docker-entrypoint-initdb.d/006_mastra_editorial_integration.sql:ro
-      - ${ROOT_FOLDER_HOST:-../..}/apps/${APP_STORE_ID:-}/web-bat/infra/sql/007_legacy_provenance_reconciliation.sql:/docker-entrypoint-initdb.d/007_legacy_provenance_reconciliation.sql:ro
+      - /data/apps/web-bat/blondesagainsttrump/infra/sql/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+      - /data/apps/web-bat/blondesagainsttrump/infra/sql/002_seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
+      - /data/apps/web-bat/blondesagainsttrump/infra/sql/003_trend_observation_uniqueness.sql:/docker-entrypoint-initdb.d/003_trend_observation_uniqueness.sql:ro
+      - /data/apps/web-bat/blondesagainsttrump/infra/sql/004_reports.sql:/docker-entrypoint-initdb.d/004_reports.sql:ro
+      - /data/apps/web-bat/blondesagainsttrump/infra/sql/005_report_runtime.sql:/docker-entrypoint-initdb.d/005_report_runtime.sql:ro
+      - /data/apps/web-bat/blondesagainsttrump/infra/sql/006_mastra_editorial_integration.sql:/docker-entrypoint-initdb.d/006_mastra_editorial_integration.sql:ro
+      - /data/apps/web-bat/blondesagainsttrump/infra/sql/007_legacy_provenance_reconciliation.sql:/docker-entrypoint-initdb.d/007_legacy_provenance_reconciliation.sql:ro
     healthcheck:
       test:
         - CMD-SHELL
@@ -189,7 +194,7 @@ services:
     restart: unless-stopped
 
   bat-social-publisher:
-    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/social-publisher
+    build: /data/apps/web-bat/blondesagainsttrump/apps/social-publisher
     healthcheck:
       test:
         - CMD
@@ -202,24 +207,25 @@ services:
       start_period: 15s
     restart: unless-stopped
     image: runtipi-local-web-bat-social-publisher:latest
+    pull_policy: build
 
   bat-web:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST:-../..}/apps}/${APP_STORE_ID:-}/web-bat/apps/web
+      context: /data/apps/web-bat/blondesagainsttrump/apps/web
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${WEB_BAT_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-        NEXT_PUBLIC_UMAMI_DOMAINS: ${WEB_BAT_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${WEB_BAT_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-0e0a1d16-8941-4f1b-a487-21eefc3ebf16}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${WEB_BAT_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-blondesagainsttrump.com}}
     environment:
       API_INTERNAL_BASE_URL: ${API_INTERNAL_BASE_URL:-http://bat-api:8000}
       MASTRA_URL: http://bat-mastra:8090
       BAT_INTERNAL_SERVICE_TOKEN: ${BAT_INTERNAL_SERVICE_TOKEN:?BAT_INTERNAL_SERVICE_TOKEN must be set}
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
       NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${WEB_BAT_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-      NEXT_PUBLIC_UMAMI_DOMAINS: ${WEB_BAT_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${WEB_BAT_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-0e0a1d16-8941-4f1b-a487-21eefc3ebf16}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${WEB_BAT_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-blondesagainsttrump.com}}
       HOSTNAME: 0.0.0.0
       PORT: "3000"
       NEXT_TELEMETRY_DISABLED: "1"
@@ -245,8 +251,10 @@ services:
     x-runtipi:
       is_main: true
       internal_port: 3000
+    pull_policy: build
 
 networks:
+
   tipi_main:
     external: true
     name: runtipi_tipi_main_network
