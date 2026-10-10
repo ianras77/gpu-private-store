@@ -20,6 +20,8 @@ services:
   crackstack-redis:
     image: redis:7
     restart: unless-stopped
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-crackstack/named/crackstack-redis:/data
 
   crackstack-minio:
     image: minio/minio:RELEASE.2024-01-16T16-07-38Z
