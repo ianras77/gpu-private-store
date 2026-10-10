@@ -1,6 +1,6 @@
 services:
   lickingvape-api:
-    build: /data/apps/web-lickingvape/apps/api
+    build: /host-apps/web-lickingvape/apps/api
     restart: unless-stopped
     pull_policy: build
     environment:
@@ -120,7 +120,7 @@ services:
       internal_port: 3000
 
   lickingvape-worker:
-    build: /data/apps/web-lickingvape/apps/worker
+    build: /host-apps/web-lickingvape/apps/worker
     restart: unless-stopped
     pull_policy: build
     environment:
