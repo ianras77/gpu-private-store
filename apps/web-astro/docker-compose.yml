@@ -133,8 +133,10 @@ services:
       - ${ASTRO_JUPITERSEEK_PORT:-3201}:3000
     healthcheck:
       test:
-        - CMD-SHELL
-        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
       interval: 15s
       timeout: 5s
       retries: 12
@@ -164,8 +166,10 @@ services:
       - ${ASTRO_MALEFICME_PORT:-3202}:3000
     healthcheck:
       test:
-        - CMD-SHELL
-        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
       interval: 15s
       timeout: 5s
       retries: 12
@@ -192,8 +196,10 @@ services:
       - ${ASTRO_SATURNLEO_PORT:-3203}:3000
     healthcheck:
       test:
-        - CMD-SHELL
-        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
       interval: 15s
       timeout: 5s
       retries: 12
@@ -220,8 +226,10 @@ services:
       - ${ASTRO_SATURNSEER_PORT:-3204}:3000
     healthcheck:
       test:
-        - CMD-SHELL
-        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
       interval: 15s
       timeout: 5s
       retries: 12
@@ -248,8 +256,10 @@ services:
       - ${ASTRO_ORACLEVEIL_PORT:-3205}:3000
     healthcheck:
       test:
-        - CMD-SHELL
-        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
       interval: 15s
       timeout: 5s
       retries: 12
