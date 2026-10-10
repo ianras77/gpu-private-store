@@ -1,4 +1,14 @@
 services:
+  dependencies:
+    image: node:22-alpine
+    restart: "no"
+    working_dir: /repo
+    volumes:
+      - /data/apps/web-jogmania/repo:/repo
+    command: >-
+      sh -c "corepack enable && pnpm install --filter @jogmania/web... --filter
+      @jogmania/mastra... --frozen-lockfile"
+
   mastra:
     image: node:22-alpine
     restart: unless-stopped
@@ -13,7 +23,10 @@ services:
     command:
     - sh
     - -c
-    - corepack enable && cd /repo && pnpm install --filter @jogmania/mastra... --frozen-lockfile && pnpm --filter @jogmania/mastra start
+    - corepack enable && cd /repo && pnpm --filter @jogmania/mastra start
+    depends_on:
+      dependencies:
+        condition: service_completed_successfully
     extra_hosts:
     - host.docker.internal:host-gateway
     healthcheck:
@@ -131,7 +144,7 @@ services:
     volumes:
     - ${APP_DATA_DIR}/app-data/web-jogmania/named/jogmania-redis:/data
   web:
-    image: node:20-alpine
+    image: node:22-alpine
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_BASE_URL: ${JOGMANIA_PUBLIC_API_BASE_URL:-http://${APP_HOST}:${JOGMANIA_API_PORT:-3178}}
@@ -146,6 +159,8 @@ services:
     - sh
     - /repo/apps/web/runtipi-start.sh
     depends_on:
+      dependencies:
+        condition: service_completed_successfully
       api:
         condition: service_healthy
     healthcheck:
