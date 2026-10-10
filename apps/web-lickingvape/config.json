@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-lickingvape",
   "description": "Dark anonymous quit-vaping wall with Next.js, FastAPI, LLM-assisted moderation, Postgres, and a mode-based Stripe Scribe.",
-  "tipi_version": 9,
-  "version": "1.0.9",
+  "tipi_version": 10,
+  "version": "1.0.10",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -36,5 +36,5 @@
   ],
   "no_gui": false,
   "created_at": 1776589448000,
-  "updated_at": 1791631826674
+  "updated_at": 1791651233638
 }

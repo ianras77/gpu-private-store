@@ -33,7 +33,7 @@ services:
     image: astro-api:1.1.0
     pull_policy: build
     build:
-      context: /data/apps/web-astrology
+      context: /host-apps/web-astrology
       dockerfile: infra/Dockerfile.api
     restart: unless-stopped
     init: true
@@ -116,7 +116,7 @@ services:
     image: astro-web-jupiterseek:1.1.0
     pull_policy: build
     build:
-      context: /data/apps/web-astrology
+      context: /host-apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-jupiterseek"
@@ -147,7 +147,7 @@ services:
     image: astro-web-maleficme:1.1.0
     pull_policy: build
     build:
-      context: /data/apps/web-astrology
+      context: /host-apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-maleficme"
@@ -175,7 +175,7 @@ services:
     image: astro-web-saturnleo:1.1.0
     pull_policy: build
     build:
-      context: /data/apps/web-astrology
+      context: /host-apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-saturnleo"
@@ -203,7 +203,7 @@ services:
     image: astro-web-saturnseer:1.1.0
     pull_policy: build
     build:
-      context: /data/apps/web-astrology
+      context: /host-apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-saturnseer"
@@ -231,7 +231,7 @@ services:
     image: astro-web-oracleveil:1.1.0
     pull_policy: build
     build:
-      context: /data/apps/web-astrology
+      context: /host-apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-oracleveil"

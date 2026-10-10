@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-jogmania",
   "description": "Jogmania turns Apple Watch and iPhone runs into a playful outdoor arcade adventure, with live watch story beats, a world that lights up, and Mastra-crafted runner-aware recaps.",
-  "tipi_version": 16,
-  "version": "1.1.5",
+  "tipi_version": 17,
+  "version": "1.1.6",
   "categories": [
     "ai",
     "utilities"
@@ -60,5 +60,5 @@
   ],
   "no_gui": false,
   "created_at": 1774316487225,
-  "updated_at": 1791631826674
+  "updated_at": 1791651233638
 }

@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-totallyrighteoustales",
   "description": "A modern Gutenberg storytelling studio for crafting, revising, sharing, and hearting medium-to-long tales across web and iOS.",
-  "tipi_version": 11,
-  "version": "0.5.6",
+  "tipi_version": 12,
+  "version": "0.5.7",
   "categories": [
     "ai",
     "utilities"
@@ -35,5 +35,5 @@
   ],
   "no_gui": false,
   "created_at": 1774316487251,
-  "updated_at": 1791631826674
+  "updated_at": 1791651233638
 }

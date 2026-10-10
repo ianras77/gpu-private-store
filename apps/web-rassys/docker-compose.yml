@@ -1,7 +1,7 @@
 services:
   rassy-intelligence:
     build:
-      context: /data/apps/web-rassy
+      context: /host-apps/web-rassy
       dockerfile: services/rassy-intelligence/Dockerfile
     environment:
       NODE_ENV: production
@@ -28,7 +28,7 @@ services:
 
   web:
     build:
-      context: /data/apps/web-rassy
+      context: /host-apps/web-rassy
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_STREAM_URL: ${NEXT_PUBLIC_STREAM_URL:-}
@@ -196,7 +196,7 @@ services:
 
   radio-controller:
     build:
-      context: /data/apps/web-rassy
+      context: /host-apps/web-rassy
       dockerfile: services/radio-controller/Dockerfile
     environment:
       NODE_ENV: production
@@ -326,7 +326,7 @@ services:
 
   minecraft-bridge:
     build:
-      context: /data/apps/web-rassy
+      context: /host-apps/web-rassy
       dockerfile: services/minecraft-bridge/Dockerfile
     environment:
       PORT: 4100
@@ -403,7 +403,7 @@ services:
 
   icecast:
     build:
-      context: /data/apps/web-rassy/infra/icecast
+      context: /host-apps/web-rassy/infra/icecast
     environment:
       ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-}
       ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD:-}

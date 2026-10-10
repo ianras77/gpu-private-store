@@ -211,7 +211,7 @@ services:
 
   bat-web:
     build:
-      context: /data/apps/web-bat/blondesagainsttrump/apps/web
+      context: /host-apps/web-bat/blondesagainsttrump/apps/web
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}

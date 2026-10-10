@@ -90,7 +90,7 @@ services:
 
   lickingvape-web:
     build:
-      context: /data/apps/web-lickingvape/apps/web
+      context: /host-apps/web-lickingvape/apps/web
       args:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${LICKINGVAPE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}

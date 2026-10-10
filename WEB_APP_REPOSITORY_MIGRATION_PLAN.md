@@ -26,23 +26,23 @@ For a source-code release, push the app repository change to GitHub, fast-forwar
 | web-totallyrighteoustales:gpu-private-store | [web-totallyrighteoustales](https://github.com/ianras77/web-totallyrighteoustales) | /data/apps/web-totallyrighteoustales | web-totallyrighteoustales_gpu-private-store | API, web, and worker builds; preserve Postgres and Cheshire Cat data |
 | web-usmender:gpu-private-store | [web-usmender](https://github.com/ianras77/web-usmender) | /data/apps/web-usmender | web-usmender_gpu-private-store | API, web, worker, and Matrix appservice builds; preserve Postgres, Matrix, appservice, and both cat data stores |
 
-Every app keeps the existing Runtipi ID, Compose project, host port, app-data target, and shared media target. The package version and tipi_version must both advance when the new source wiring is published.
+Every app keeps the same Runtipi app URN, Compose project, host port, app-data target, and shared media target. Runtipi assigns a new internal integer row ID after uninstall/reinstall; record both the old and new values. The package version and tipi_version must both advance when source wiring changes.
 
 ## Current app-store package versions
 
 | App | Package version | tipi_version |
 | --- | ---: | ---: |
-| web-astro | 1.1.2 | 7 |
-| web-bat | 2.0.2 | 31 |
-| web-crackstack | 1.0.8 | 9 |
-| web-jogmania | 1.1.5 | 16 |
-| web-lickingvape | 1.0.9 | 9 |
-| web-rasies | 1.0.11 | 12 |
-| web-rassyapp | v1.14.10 | 13 |
-| web-rassyonline | 0.1.10 | 6 |
-| web-rassys | 1.0.33 | 27 |
-| web-totallyrighteoustales | 0.5.6 | 11 |
-| web-usmender | 24 | 9 |
+| web-astro | 1.1.3 | 8 |
+| web-bat | 2.0.3 | 32 |
+| web-crackstack | 1.0.9 | 10 |
+| web-jogmania | 1.1.6 | 17 |
+| web-lickingvape | 1.0.10 | 10 |
+| web-rasies | 1.0.12 | 13 |
+| web-rassyapp | v1.14.11 | 14 |
+| web-rassyonline | 0.1.11 | 7 |
+| web-rassys | 1.0.34 | 28 |
+| web-totallyrighteoustales | 0.5.7 | 12 |
+| web-usmender | 25 | 10 |
 
 The BAT package retains the live Mastra service. All four BAT build services explicitly use pull_policy: build; no service is removed or renamed as part of this source move.
 
@@ -88,10 +88,12 @@ For each mapped repository:
 ### 2. Publish and validate the app-store package
 
 - Set each source link to its matching standalone GitHub repository.
-- Point every build context and app-source bind at the mapped /data/apps checkout. Jogmania remains bind-mounted from its repository layout; its appdata and media mounts are separate.
+- Mount exactly the eleven canonical source checkouts read-only into the Runtipi container at /host-apps/<repository-folder>. This makes the full Git working trees available to Runtipi's Compose client without exposing the historical 1-WIP or 2-Migrated folders.
+- Point build contexts at /host-apps/<repository-folder>/<path>. Runtipi resolves build contexts inside its own container, where /data/apps is occupied by Runtipi-managed app definitions. Keep service bind sources as absolute /data/apps/<repository-folder>/<path>; Docker resolves those bind sources on the host.
+- Jogmania remains bind-mounted from its repository layout; its appdata and media mounts are separate.
 - Keep only config.json, docker-compose.yml, and metadata/ in each store package. Do not publish private app source in the store repository.
 - Confirm app IDs, service names, port assignments, healthchecks, Compose project naming, app-data targets, shared media sources, and secret variable names are unchanged.
-- Render every Compose file with its installed app environment without printing values. Verify all build contexts and source bind files exist; compare app-data and media mounts against the current package.
+- Render every Compose file with its installed app environment without printing values. Verify each /host-apps build context exists and is read-only inside Runtipi, each /data/apps bind source exists on the Docker host, and app-data/media mounts match the current package.
 - Run the store package validator and inspect the complete package diff before publishing to the active custom-store branch.
 
 ### 3. Synchronize Runtipi's store
@@ -149,10 +151,10 @@ This order is a scheduling aid only; an app still waits for its own backup and h
 - Verify all eleven source checkouts are clean and match their published GitHub commits.
 - Verify all eleven app-store packages contain only their Runtipi manifest, Compose, and metadata/assets.
 - Verify every source link, build context, and source mount maps to the correct GitHub repository and /data/apps folder.
-- Verify Runtipi has the same eleven installed IDs and Compose project names, with their original app-data and media mounts intact.
+- Verify Runtipi has the same eleven app URNs and Compose project names, with the original app-data and media mounts intact; record each replacement numeric row ID.
 - Record each verified backup artifact, repository SHA, app-store SHA, package version, service health, and endpoint result.
 - Leave 1-WIP and 2-Migrated as read-only historical references; no live Runtipi package points to them.
 
 ## Rollout record
 
-Package/source separation is in progress. All eleven dedicated source repositories have been created or reconciled under /data/apps and pushed to their GitHub repositories. App-store package links, build paths, backup artifacts, reinstalls, and live endpoint checks remain gated by the implementation stages above.
+All eleven dedicated source repositories are published under /data/apps and linked from the custom app store. The Runtipi Compose client needs explicit read-only /host-apps mounts for build contexts; service bind paths continue to resolve against host /data/apps. Backups, reinstalls, and live endpoint checks remain in progress.

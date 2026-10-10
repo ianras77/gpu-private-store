@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-rassyapp",
   "description": "Code Console is a multi-user AI coding workspace built on Next.js and Prisma. It provides a focused surface for chat, code context, memory, plugins, model settings, and user management over an existing Cheshire Cat deployment. The WebSocket chat adapter uses the official `ccat-api` client. This repository now includes .",
-  "tipi_version": 13,
-  "version": "v1.14.10",
+  "tipi_version": 14,
+  "version": "v1.14.11",
   "categories": [
     "ai"
   ],
@@ -34,5 +34,5 @@
   ],
   "no_gui": false,
   "created_at": 1774316487248,
-  "updated_at": 1791631826674
+  "updated_at": 1791651233638
 }

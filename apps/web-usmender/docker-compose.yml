@@ -97,7 +97,7 @@ services:
       start_period: 60s
   matrix-appservice:
     build:
-      context: /data/apps/web-usmender
+      context: /host-apps/web-usmender
       dockerfile: apps/matrix-appservice/Dockerfile
     pull_policy: build
     restart: unless-stopped
@@ -126,7 +126,7 @@ services:
     image: runtipi-local-web-usmender-matrix-appservice:latest
   worker:
     build:
-      context: /data/apps/web-usmender
+      context: /host-apps/web-usmender
       dockerfile: apps/worker/Dockerfile
     pull_policy: build
     restart: unless-stopped
@@ -147,7 +147,7 @@ services:
     image: runtipi-local-web-usmender-worker:latest
   api:
     build:
-      context: /data/apps/web-usmender
+      context: /host-apps/web-usmender
       dockerfile: apps/api/Dockerfile
     pull_policy: build
     restart: unless-stopped
@@ -208,7 +208,7 @@ services:
       start_period: 5s
   web:
     build:
-      context: /data/apps/web-usmender
+      context: /host-apps/web-usmender
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}

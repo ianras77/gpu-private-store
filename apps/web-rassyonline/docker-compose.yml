@@ -3,7 +3,7 @@ services:
     image: runtipi-local-web-rassyonline-web:latest
     pull_policy: build
     build:
-      context: /data/apps/web-rassyonline/apps/web
+      context: /host-apps/web-rassyonline/apps/web
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
@@ -82,7 +82,7 @@ services:
     image: runtipi-local-web-rassyonline-web:latest
     pull_policy: build
     build:
-      context: /data/apps/web-rassyonline/apps/web
+      context: /host-apps/web-rassyonline/apps/web
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}

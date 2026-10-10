@@ -57,7 +57,7 @@ services:
 
   crackstack-backend:
     build:
-      context: /data/apps/web-crack/backend
+      context: /host-apps/web-crack/backend
       dockerfile: Dockerfile
     image: runtipi-local-web-crackstack-backend:latest
     pull_policy: build
@@ -100,7 +100,7 @@ services:
 
   crackstack-xlcrack:
     build:
-      context: /data/apps/web-crack/web
+      context: /host-apps/web-crack/web
       dockerfile: Dockerfile
       args:
         APP_NAME: xlcrack
@@ -140,7 +140,7 @@ services:
 
   crackstack-tapecrack:
     build:
-      context: /data/apps/web-crack/web
+      context: /host-apps/web-crack/web
       dockerfile: Dockerfile
       args:
         APP_NAME: tapecrack
