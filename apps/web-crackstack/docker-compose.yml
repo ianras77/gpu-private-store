@@ -62,6 +62,7 @@ services:
     build:
       context: /host-apps/web-crack/backend
       dockerfile: Dockerfile
+      network: host
     image: runtipi-local-web-crackstack-backend:latest
     pull_policy: build
     restart: unless-stopped
@@ -105,6 +106,7 @@ services:
     build:
       context: /host-apps/web-crack/web
       dockerfile: Dockerfile
+      network: host
       args:
         APP_NAME: xlcrack
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
@@ -145,6 +147,7 @@ services:
     build:
       context: /host-apps/web-crack/web
       dockerfile: Dockerfile
+      network: host
       args:
         APP_NAME: tapecrack
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
