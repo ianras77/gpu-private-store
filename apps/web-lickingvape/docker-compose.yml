@@ -54,12 +54,13 @@ services:
     volumes:
       - ${APP_DATA_DIR}/app-data/web-lickingvape/named/lickingvape-cat-data:/data
       - /data/apps/web-lickingvape/scripts/configure_cat_ollama.py:/app/cat/bootstrap/auto_configure_ollama.py:ro
+      - /data/apps/web-lickingvape/scripts/run_cat_with_retry.py:/app/cat/bootstrap/run_cat_with_retry.py:ro
     extra_hosts:
       - host.docker.internal:host-gateway
     command:
       - /bin/sh
       - -lc
-      - python3 /app/cat/bootstrap/auto_configure_ollama.py || true; exec python3 -m cat.main
+      - python3 /app/cat/bootstrap/auto_configure_ollama.py || true; exec python3 /app/cat/bootstrap/run_cat_with_retry.py
     healthcheck:
       test:
         - CMD
