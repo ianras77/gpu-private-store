@@ -139,6 +139,7 @@ services:
       - tipi_main
     x-runtipi:
       add_to_main_network: true
+    image: runtipi-local-web-bat-mastra:latest
     pull_policy: build
 
   bat-postgres:
