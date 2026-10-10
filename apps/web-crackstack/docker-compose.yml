@@ -57,7 +57,7 @@ services:
 
   crackstack-backend:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-crackstack/repo/backend
+      context: /data/apps/2-Migrated/web-crack/backend
       dockerfile: Dockerfile
     image: runtipi-local-web-crackstack-backend:latest
     pull_policy: build
@@ -68,7 +68,7 @@ services:
       CRACKSTACK_AUTO_MIGRATE_ON_STARTUP: ${CRACKSTACK_AUTO_MIGRATE_ON_STARTUP:-1}
       CRACKSTACK_DATA_DIR: /app/data
       LOCALAI_BASE_URL: ${CRACKSTACK_LLM_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
-      LOCALAI_MODEL: ${CRACKSTACK_LLM_MODEL:-rassy-mind}
+      LOCALAI_MODEL: ${CRACKSTACK_LLM_MODEL:-rassy-fast}
       LOCALAI_API_KEY: ${RASSYMIND_API_KEY:-${CRACKSTACK_LLM_API_KEY:-}}
     extra_hosts:
       - host.docker.internal:host-gateway
@@ -100,7 +100,7 @@ services:
 
   crackstack-xlcrack:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-crackstack/repo/web
+      context: /data/apps/2-Migrated/web-crack/web
       dockerfile: Dockerfile
       args:
         APP_NAME: xlcrack
@@ -140,7 +140,7 @@ services:
 
   crackstack-tapecrack:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-crackstack/repo/web
+      context: /data/apps/2-Migrated/web-crack/web
       dockerfile: Dockerfile
       args:
         APP_NAME: tapecrack

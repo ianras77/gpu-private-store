@@ -1,5 +1,0 @@
-.docker-data/
-.pytest_cache/
-**/__pycache__/
-apps/web/.next/
-apps/web/node_modules/

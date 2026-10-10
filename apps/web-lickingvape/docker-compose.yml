@@ -1,6 +1,6 @@
 services:
   lickingvape-api:
-    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-lickingvape/repo/apps/api
+    build: /data/apps/2-Migrated/web-lickingvape/apps/api
     restart: unless-stopped
     pull_policy: build
     environment:
@@ -44,14 +44,14 @@ services:
       INTERNAL_TOOL_TOKEN: ${LICKINGVAPE_INTERNAL_TOOL_TOKEN:-change-me}
       OLLAMA_GENERAL_BASE_URL: ${LICKINGVAPE_OLLAMA_GENERAL_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
       OLLAMA_EMBED_BASE_URL: ${LICKINGVAPE_OLLAMA_EMBED_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}}
-      OLLAMA_GENERAL_MODEL: ${LICKINGVAPE_OLLAMA_GENERAL_MODEL:-rassy-mind}
+      OLLAMA_GENERAL_MODEL: ${LICKINGVAPE_OLLAMA_GENERAL_MODEL:-rassy-fast}
       OLLAMA_EMBED_MODEL: ${LICKINGVAPE_OLLAMA_EMBED_MODEL:-rassy-embed}
       CAT_OLLAMA_API_KEY: ${RASSYMIND_API_KEY:-}
       EDITOR_WORLD_CONTEXT_QUERY_LIMIT: ${LICKINGVAPE_EDITOR_WORLD_CONTEXT_QUERY_LIMIT:-2}
       EDITOR_WORLD_CONTEXT_ITEMS_LIMIT: ${LICKINGVAPE_EDITOR_WORLD_CONTEXT_ITEMS_LIMIT:-3}
     volumes:
       - ${APP_DATA_DIR}/app-data/web-lickingvape/named/lickingvape-cat-data:/data
-      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-lickingvape/repo/scripts/configure_cat_ollama.py:/app/cat/bootstrap/auto_configure_ollama.py:ro
+      - /data/apps/2-Migrated/web-lickingvape/scripts/configure_cat_ollama.py:/app/cat/bootstrap/auto_configure_ollama.py:ro
     extra_hosts:
       - host.docker.internal:host-gateway
     command:
@@ -90,7 +90,7 @@ services:
 
   lickingvape-web:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-lickingvape/repo/apps/web
+      context: /data/apps/2-Migrated/web-lickingvape/apps/web
       args:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${LICKINGVAPE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
@@ -120,7 +120,7 @@ services:
       internal_port: 3000
 
   lickingvape-worker:
-    build: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-lickingvape/repo/apps/worker
+    build: /data/apps/2-Migrated/web-lickingvape/apps/worker
     restart: unless-stopped
     pull_policy: build
     environment:

@@ -1,11 +1,13 @@
 services:
   rassy-intelligence:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
+      context: /data/apps/2-Migrated/web-rassy
       dockerfile: services/rassy-intelligence/Dockerfile
     environment:
       NODE_ENV: production
       PORT: 1866
+      # Mastra is the application gateway; this private hop is used only by
+      # its model adapter and must not be pointed back at Mastra.
       RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
       RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
       RASSY_INTELLIGENCE_INTERNAL_TOKEN: ${RASSY_INTELLIGENCE_INTERNAL_TOKEN:-}
@@ -17,7 +19,7 @@ services:
       - host.docker.internal:host-gateway
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:1866/healthz || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:1866/readyz || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 10
@@ -26,21 +28,21 @@ services:
 
   web:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
+      context: /data/apps/2-Migrated/web-rassy
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_STREAM_URL: ${NEXT_PUBLIC_STREAM_URL:-}
         NEXT_PUBLIC_STREAM_LOSSLESS_URL: ${NEXT_PUBLIC_STREAM_LOSSLESS_URL:-}
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://rassys.com}
         NEXT_PUBLIC_MUSIC_LIBRARY_URL: ${NEXT_PUBLIC_MUSIC_LIBRARY_URL}
         NEXT_PUBLIC_MINECRAFT_MAP_URL: ${NEXT_PUBLIC_MINECRAFT_MAP_URL}
         NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS: ${NEXT_PUBLIC_MINECRAFT_SERVER_ADDRESS}
         NEXT_PUBLIC_RADIO_API_URL: ${NEXT_PUBLIC_RADIO_API_URL}
         NEXT_PUBLIC_MINECRAFT_API_URL: ${NEXT_PUBLIC_MINECRAFT_API_URL}
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYS_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-        NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYS_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
-        DATABASE_URL: ${DATABASE_URL:-}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYS_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-c8ce4a6c-f5ac-40b9-9777-1f0570c75708}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYS_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassys.com,www.rassys.com}}
+        NEXT_PUBLIC_WWC_VISIBLE: ${NEXT_PUBLIC_WWC_VISIBLE:-true}
     environment:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
@@ -48,12 +50,38 @@ services:
       NEXT_TELEMETRY_DISABLED: "1"
       NEXT_PUBLIC_STREAM_URL: ${NEXT_PUBLIC_STREAM_URL:-}
       NEXT_PUBLIC_STREAM_LOSSLESS_URL: ${NEXT_PUBLIC_STREAM_LOSSLESS_URL:-}
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://rassys.com}
       NEXT_PUBLIC_MUSIC_LIBRARY_URL: ${NEXT_PUBLIC_MUSIC_LIBRARY_URL}
       NEXT_PUBLIC_MINECRAFT_MAP_URL: ${NEXT_PUBLIC_MINECRAFT_MAP_URL}
       NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYS_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-      NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYS_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYS_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-c8ce4a6c-f5ac-40b9-9777-1f0570c75708}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYS_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassys.com,www.rassys.com}}
+      NEXT_PUBLIC_WWC_VISIBLE: ${NEXT_PUBLIC_WWC_VISIBLE:-true}
+      WWC_COLLECTION_ENABLED: ${WWC_COLLECTION_ENABLED:-false}
+      WWC_ADMIN_ENABLED: ${WWC_ADMIN_ENABLED:-false}
+      WWC_COHORT: ${WWC_COHORT:-}
+      WWC_DATABASE_URL: ${WWC_DATABASE_URL:-}
+      WWC_DATABASE_CONFIG_CONFIRMED: ${WWC_DATABASE_CONFIG_CONFIRMED:-false}
+      WWC_DATABASE_ROLE_CONFIRMED: ${WWC_DATABASE_ROLE_CONFIRMED:-false}
+      WWC_DATABASE_PERSISTENCE_CONFIRMED: ${WWC_DATABASE_PERSISTENCE_CONFIRMED:-false}
+      WWC_CONTACT_METHOD: ${WWC_CONTACT_METHOD:-}
+      WWC_PRIVACY_NOTICE_VERSION: ${WWC_PRIVACY_NOTICE_VERSION:-}
+      WWC_PRIVACY_NOTICE_APPROVED: ${WWC_PRIVACY_NOTICE_APPROVED:-false}
+      WWC_RETENTION_DAYS: ${WWC_RETENTION_DAYS:-}
+      WWC_RETENTION_APPROVED: ${WWC_RETENTION_APPROVED:-false}
+      WWC_BACKUP_EXPIRY_DAYS: ${WWC_BACKUP_EXPIRY_DAYS:-}
+      WWC_BACKUP_POLICY_CONFIRMED: ${WWC_BACKUP_POLICY_CONFIRMED:-false}
+      WWC_BACKUP_ENCRYPTION_CONFIRMED: ${WWC_BACKUP_ENCRYPTION_CONFIRMED:-false}
+      WWC_BACKUP_ACCESS_CONFIRMED: ${WWC_BACKUP_ACCESS_CONFIRMED:-false}
+      WWC_BACKUP_RESTORE_TESTED: ${WWC_BACKUP_RESTORE_TESTED:-false}
+      WWC_RETENTION_CLEANUP_ENABLED: ${WWC_RETENTION_CLEANUP_ENABLED:-false}
+      WWC_IDEMPOTENCY_REPLAY_DAYS: ${WWC_IDEMPOTENCY_REPLAY_DAYS:-}
+      WWC_INFRA_LOG_RETENTION_HOURS: ${WWC_INFRA_LOG_RETENTION_HOURS:-}
+      WWC_INFRA_LOG_POLICY_CONFIRMED: ${WWC_INFRA_LOG_POLICY_CONFIRMED:-false}
+      WWC_PROXY_TRUST_CONFIRMED: ${WWC_PROXY_TRUST_CONFIRMED:-false}
+      WWC_RATE_LIMIT_IP_HEADER: ${WWC_RATE_LIMIT_IP_HEADER:-}
+      WWC_RATE_LIMIT_SECRET: ${WWC_RATE_LIMIT_SECRET:-}
+      WWC_TRUSTED_ORIGIN: ${WWC_TRUSTED_ORIGIN:-https://rassys.com}
       STREAM_HEALTHCHECK_URL: ${STREAM_HEALTHCHECK_URL:-http://icecast:${ICECAST_PORT:-8000}/live.mp3}
       STREAM_PROXY_URL: ${STREAM_PROXY_URL:-http://icecast:${ICECAST_PORT:-8000}/live.mp3}
       STREAM_LOSSLESS_PROXY_URL: ${STREAM_LOSSLESS_PROXY_URL:-http://icecast:${ICECAST_PORT:-8000}/live-lossless.ogg}
@@ -65,7 +93,9 @@ services:
       RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       DATABASE_URL: ${DATABASE_URL:-}
-      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
+      # Keep the compatibility surface on the Mastra service as well. This
+      # prevents old controller code from silently talking to the legacy edge.
+      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://rassy-intelligence:1866}
       AI_BASE_URL: ${AI_BASE_URL:-http://rassy-intelligence:1866}
       AI_DM_MODEL: ${AI_DM_MODEL:-${RASSYMIND_MODEL:-rassy-mind}}
       AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-45000}
@@ -76,13 +106,9 @@ services:
       RASSY_INTELLIGENCE_REQUIRE_CANONICAL: ${RASSY_INTELLIGENCE_REQUIRE_CANONICAL:-true}
       RASSYMIND_MODEL: ${RASSYMIND_MODEL:-rassy-mind}
       RASSYMIND_LISTENER_MODEL: ${RASSYMIND_LISTENER_MODEL:-rassy-fast}
+      RADIO_CHAT_LLM_TIMEOUT_MS: ${RADIO_CHAT_LLM_TIMEOUT_MS:-20000}
       RASSYMIND_REQUEST_RETRIES: ${RASSYMIND_REQUEST_RETRIES:-0}
       RASSYMIND_RETRY_DELAY_MS: ${RASSYMIND_RETRY_DELAY_MS:-0}
-      CHESHIRE_BASE_URL: ${AI_BASE_URL:-http://rassy-intelligence:1866}
-      CHESHIRE_API_KEY: ${RASSYMIND_API_KEY:-}
-      CHESHIRE_MODEL: ${CHESHIRE_MODEL:-${RASSYMIND_GENERIC_MODEL:-rassy-fast}}
-      CHESHIRE_EMBED_MODEL: ${RASSYMIND_EMBED_MODEL:-rassy-embed}
-      CHESHIRE_REQUEST_TIMEOUT_MS: ${RASSYMIND_REQUEST_TIMEOUT_MS:-45000}
       STATION_DESCRIPTION: ${STATION_DESCRIPTION:-}
       STATION_NAME: ${STATION_NAME:-Mr Rassy Radio}
       ICECAST_PUBLIC_URL: ${ICECAST_PUBLIC_URL:-}
@@ -122,7 +148,11 @@ services:
       MINECRAFT_TROUPE_BOT_PORT: ${MINECRAFT_TROUPE_BOT_PORT:-3000}
       MINECRAFT_TROUPE_STATUS_TIMEOUT_MS: ${MINECRAFT_TROUPE_STATUS_TIMEOUT_MS:-2500}
       MINECRAFT_TROUPE_BOT_NAMES: ${MINECRAFT_TROUPE_BOT_NAMES:-}
-      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/thoughts}
+      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/web-rassys}
+      LEARNING_STORAGE_PATH: ${LEARNING_STORAGE_PATH:-/media/learning}
+      RASSY_REPORTS_ROOT: /reports
+      OPENFANG_ANALYST_REPORTS_PATH: /openfang-reports/analyst-rassy
+      OPENFANG_SYSTEM_REPORTS_PATH: /openfang-reports/system-integration
     depends_on:
       redis:
         condition: service_healthy
@@ -130,9 +160,23 @@ services:
         condition: service_healthy
     networks:
       - internal
+      - tipi_main_network
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=runtipi_tipi_main_network
+      - traefik.http.routers.web-rassys.rule=Host(`rassys.com`) || Host(`www.rassys.com`)
+      - traefik.http.routers.web-rassys.entrypoints=websecure
+      - traefik.http.routers.web-rassys.tls=true
+      - traefik.http.routers.web-rassys.tls.certresolver=myresolver
+      - traefik.http.services.web-rassys.loadbalancer.server.port=3000
     volumes:
       # Authored thoughts intentionally live in the Runtipi media data area.
-      - ${ROOT_FOLDER_HOST:-.}/media/data/thoughts:${BLOG_STORAGE_PATH:-/media/thoughts}
+      - ${ROOT_FOLDER_HOST:-.}/media/data/web-rassys:${BLOG_STORAGE_PATH:-/media/web-rassys}
+      # Learning modules are content-only files and stay read-only in the app container.
+      - ${HOST_LEARNING_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/learning}:${LEARNING_STORAGE_PATH:-/media/learning}:ro
+      - ${APP_DATA_DIR}/app-data/web-rassys/reports:/reports:ro
+      - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/analyst-rassy:/openfang-reports/analyst-rassy:ro
+      - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/system-integration:/openfang-reports/system-integration:ro
     restart: unless-stopped
     healthcheck:
       test:
@@ -144,13 +188,15 @@ services:
       start_period: 30s
     image: runtipi-local-web-rassys-web:latest
     pull_policy: build
+    ports:
+      - "3187:3000"
     x-runtipi:
       is_main: true
       internal_port: 3000
 
   radio-controller:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
+      context: /data/apps/2-Migrated/web-rassy
       dockerfile: services/radio-controller/Dockerfile
     environment:
       NODE_ENV: production
@@ -158,13 +204,15 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       DATABASE_URL: ${DATABASE_URL:-}
       RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-}
-      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
+      # Legacy-compatible controller calls also terminate at Mastra.
+      RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://rassy-intelligence:1866}
       RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
       RASSY_INTELLIGENCE_URL: ${RASSY_INTELLIGENCE_URL:-http://rassy-intelligence:1866}
       RASSY_INTELLIGENCE_INTERNAL_TOKEN: ${RASSY_INTELLIGENCE_INTERNAL_TOKEN:-}
       RASSY_INTELLIGENCE_REQUIRE_CANONICAL: ${RASSY_INTELLIGENCE_REQUIRE_CANONICAL:-true}
       RASSYMIND_MODEL: ${RASSYMIND_MODEL:-rassy-mind}
       RASSYMIND_LISTENER_MODEL: ${RASSYMIND_LISTENER_MODEL:-rassy-fast}
+      RADIO_CHAT_LLM_TIMEOUT_MS: ${RADIO_CHAT_LLM_TIMEOUT_MS:-20000}
       RASSYMIND_REQUEST_RETRIES: ${RASSYMIND_REQUEST_RETRIES:-0}
       RASSYMIND_RETRY_DELAY_MS: ${RASSYMIND_RETRY_DELAY_MS:-0}
       RADIO_EMBED_MODEL: ${RASSYMIND_EMBED_MODEL:-rassy-embed}
@@ -203,10 +251,11 @@ services:
       RADIO_TRACK_COOLDOWN_DAYS: ${RADIO_TRACK_COOLDOWN_DAYS:-7}
       RADIO_ARTIST_COOLDOWN_TRACKS: ${RADIO_ARTIST_COOLDOWN_TRACKS:-10}
       RADIO_QUEUE_TARGET: ${RADIO_QUEUE_TARGET:-6}
-      RADIO_LOCKED_QUEUE_TRACKS: "7"
-      RADIO_SET_TARGET_SIZE: "7"
-      RADIO_SET_MIN_SIZE: "7"
-      RADIO_DECISION_BATCH_SIZE: "7"
+      # One LLM-authored emotional round; the controller executes it between listener requests.
+      RADIO_LOCKED_QUEUE_TRACKS: "11"
+      RADIO_SET_TARGET_SIZE: "11"
+      RADIO_SET_MIN_SIZE: "11"
+      RADIO_DECISION_BATCH_SIZE: "11"
       RADIO_TRANSITIONS_ENABLED: ${RADIO_TRANSITIONS_ENABLED:-true}
       RADIO_TRANSITION_MIN_SONGS: ${RADIO_TRANSITION_MIN_SONGS:-2}
       RADIO_TRANSITION_MAX_SONGS: ${RADIO_TRANSITION_MAX_SONGS:-5}
@@ -250,7 +299,7 @@ services:
       - internal
     volumes:
       - ${ROOT_FOLDER_HOST}/media/data/music:${MUSIC_LIBRARY_PATH:-/media/music}:ro
-      - /mnt/cannonball:/mnt/cannonball:ro
+      - ${ROOT_FOLDER_HOST}/media/data/music:/mnt/cannonball:ro
       - type: bind
         source: ${HOST_MUSIC_SYMLINK_ROOT:-${ROOT_FOLDER_HOST}/media/data/music}
         target: ${HOST_MUSIC_SYMLINK_ROOT:-/media/music}
@@ -277,7 +326,7 @@ services:
 
   minecraft-bridge:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys
+      context: /data/apps/2-Migrated/web-rassy
       dockerfile: services/minecraft-bridge/Dockerfile
     environment:
       PORT: 4100
@@ -304,9 +353,9 @@ services:
   liquidsoap:
     image: savonet/liquidsoap:v2.2.5
     volumes:
-      - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rassys/infra/liquidsoap/rassy.liq:/etc/liquidsoap/rassy.liq:ro
+      - /data/apps/2-Migrated/web-rassy/infra/liquidsoap/rassy.liq:/etc/liquidsoap/rassy.liq:ro
       - ${ROOT_FOLDER_HOST}/media/data/music:${MUSIC_LIBRARY_PATH:-/media/music}:ro
-      - /mnt/cannonball:/mnt/cannonball:ro
+      - ${ROOT_FOLDER_HOST}/media/data/music:/mnt/cannonball:ro
       - type: bind
         source: ${HOST_MUSIC_SYMLINK_ROOT:-${ROOT_FOLDER_HOST}/media/data/music}
         target: ${HOST_MUSIC_SYMLINK_ROOT:-/media/music}
@@ -330,9 +379,9 @@ services:
       STATION_NAME: ${STATION_NAME:-Mr Rassy Radio}
       STATION_DESCRIPTION: ${STATION_DESCRIPTION:-Live radio from Ian Rasmussen's shelves, with Mr Rassy in the booth.}
       STATION_GENRE: ${STATION_GENRE:-eclectic}
-      RADIO_TRANSITION_DEFAULT_SECONDS: ${RADIO_TRANSITION_DEFAULT_SECONDS:-4.5}
-      RADIO_TRANSITION_FADE_IN_SECONDS: ${RADIO_TRANSITION_FADE_IN_SECONDS:-3.0}
-      RADIO_TRANSITION_FADE_OUT_SECONDS: ${RADIO_TRANSITION_FADE_OUT_SECONDS:-3.0}
+      RADIO_TRANSITION_DEFAULT_SECONDS: ${RADIO_TRANSITION_DEFAULT_SECONDS:-0.35}
+      RADIO_TRANSITION_FADE_IN_SECONDS: ${RADIO_TRANSITION_FADE_IN_SECONDS:-0.35}
+      RADIO_TRANSITION_FADE_OUT_SECONDS: ${RADIO_TRANSITION_FADE_OUT_SECONDS:-0.35}
       RADIO_PROCESSING_ENABLED: ${RADIO_PROCESSING_ENABLED:-true}
     command:
       - liquidsoap
@@ -354,7 +403,7 @@ services:
 
   icecast:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-rassys/infra/icecast
+      context: /data/apps/2-Migrated/web-rassy/infra/icecast
     environment:
       ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-}
       ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD:-}
@@ -428,3 +477,6 @@ x-runtipi:
 
 networks:
   internal: null
+  tipi_main_network:
+    external: true
+    name: runtipi_tipi_main_network

@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-rassys",
   "description": "Public site, live radio, Minecraft bridge, RassyMind, Icecast, Liquidsoap, Redis, and Postgres in one stack.",
-  "tipi_version": 22,
-  "version": "1.0.28",
+  "tipi_version": 26,
+  "version": "1.0.32",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -17,6 +17,10 @@
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-rassy",
   "form_fields": [{"type":"password","label":"RassyMind API key","required":true,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"},{"type":"random","label":"Mr Rassy internal token","min":48,"env_variable":"RASSY_INTELLIGENCE_INTERNAL_TOKEN"},
+    {"type":"text","label":"Immich base URL","required":false,"env_variable":"IMMICH_BASE_URL"},
+    {"type":"password","label":"Immich API key","required":false,"env_variable":"IMMICH_API_KEY"},
+    {"type":"text","label":"Immich public album name(s)","required":false,"env_variable":"IMMICH_ALBUM_NAME"},
+    {"type":"text","label":"Immich public album ID(s)","required":false,"env_variable":"IMMICH_ALBUM_ID"},
     {
       "type": "random",
       "label": "Admin Password",
@@ -59,5 +63,5 @@
   ],
   "no_gui": false,
   "created_at": 1776589448000,
-  "updated_at": 1785722503949
+  "updated_at": 1791126891278
 }

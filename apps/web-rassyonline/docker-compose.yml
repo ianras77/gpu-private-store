@@ -3,14 +3,29 @@ services:
     image: runtipi-local-web-rassyonline-web:latest
     pull_policy: build
     build:
-      context: ./apps/web
+      context: /data/apps/2-Migrated/web-rassyonline/apps/web
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSY_ONLINE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-cffcee31-e16a-49fe-a14f-f5927f2fde71}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSY_ONLINE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassy.online}}
+    user: "1001:1001"
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 768m
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
       HOSTNAME: 0.0.0.0
       PORT: "3000"
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSY_ONLINE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-cffcee31-e16a-49fe-a14f-f5927f2fde71}}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSY_ONLINE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassy.online}}
       RASSY_ONLINE_PUBLIC_BASE_URL: ${RASSY_ONLINE_PUBLIC_BASE_URL:-https://rassy.online}
       RASSY_ONLINE_AUTH_SECRET: ${RASSY_ONLINE_AUTH_SECRET}
       RASSY_ONLINE_BOOTSTRAP_ADMIN_EMAIL: ${RASSY_ONLINE_BOOTSTRAP_ADMIN_EMAIL:-}
@@ -25,6 +40,8 @@ services:
       QDRANT_API_KEY: ${RASSY_ONLINE_QDRANT_API_KEY}
     volumes:
       - ${APP_DATA_DIR}/app-data/web-rassyonline/uploads:/app-data/uploads
+      - ${APP_DATA_DIR}/app-data/web-rassyonline/artifacts:/app-data/artifacts
+      - /data/runtipi/media/data/books:/books:ro
     extra_hosts:
       - host.docker.internal:host-gateway
     depends_on:
@@ -60,6 +77,41 @@ services:
     x-runtipi:
       is_main: true
       internal_port: 3000
+
+  rassy-online-worker:
+    image: runtipi-local-web-rassyonline-web:latest
+    pull_policy: build
+    build:
+      context: /data/apps/2-Migrated/web-rassyonline/apps/web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSY_ONLINE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-cffcee31-e16a-49fe-a14f-f5927f2fde71}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSY_ONLINE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassy.online}}
+    command: ["node", "worker.mjs"]
+    user: "1001:1001"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 768m
+    environment:
+      NODE_ENV: production
+      RUN_WORKER_ID: ${RUN_WORKER_ID:-rassy-online-worker}
+      RUN_WORKER_POLL_MS: ${RUN_WORKER_POLL_MS:-2000}
+      DATABASE_URL: postgresql://rassy_online:${RASSY_ONLINE_POSTGRES_PASSWORD}@rassy-online-postgres:5432/rassy_online
+    volumes:
+      - ${APP_DATA_DIR}/app-data/web-rassyonline/uploads:/app-data/uploads
+      - ${APP_DATA_DIR}/app-data/web-rassyonline/artifacts:/app-data/artifacts
+      - ${APP_DATA_DIR}/app-data/web-rassyonline/project-fix-fixtures:/app-data/project-fix-fixtures
+      - ${APP_DATA_DIR}/app-data/web-rassyonline/project-fix-workspaces:/app-data/project-fix-workspaces
+      - /data/runtipi/media/data/books:/books:ro
+    depends_on:
+      rassy-online-postgres:
+        condition: service_healthy
 
   rassy-online-postgres:
     image: postgres:16-alpine

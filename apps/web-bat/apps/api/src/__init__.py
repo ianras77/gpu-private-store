@@ -1,1 +1,0 @@
-"""BlondesAgainstTrump API package."""

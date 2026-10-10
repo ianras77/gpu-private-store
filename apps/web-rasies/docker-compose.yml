@@ -3,20 +3,20 @@ services:
     image: runtipi-local-web-rasies-rasies-portal:latest
     pull_policy: build
     build:
-      context: ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-rasies
+      context: /data/apps/2-Migrated/web-rasies
       dockerfile: Dockerfile
       args:
         VITE_UMAMI_SCRIPT_URL: ${VITE_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-        VITE_UMAMI_WEBSITE_ID: ${RASIES_UMAMI_WEBSITE_ID:-${VITE_UMAMI_WEBSITE_ID:-}}
-        VITE_UMAMI_DOMAINS: ${RASIES_UMAMI_DOMAINS:-${VITE_UMAMI_DOMAINS:-}}
+        VITE_UMAMI_WEBSITE_ID: ${RASIES_UMAMI_WEBSITE_ID:-${VITE_UMAMI_WEBSITE_ID:-9be67bc4-5187-41d4-be0b-29b286125043}}
+        VITE_UMAMI_DOMAINS: ${RASIES_UMAMI_DOMAINS:-${VITE_UMAMI_DOMAINS:-www.rasies.com}}
     restart: unless-stopped
     ports:
       - "${APP_PORT:-3186}:3000"
     environment:
       - PORT=3000
       - VITE_UMAMI_SCRIPT_URL=${VITE_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-      - VITE_UMAMI_WEBSITE_ID=${RASIES_UMAMI_WEBSITE_ID:-${VITE_UMAMI_WEBSITE_ID:-}}
-      - VITE_UMAMI_DOMAINS=${RASIES_UMAMI_DOMAINS:-${VITE_UMAMI_DOMAINS:-}}
+      - VITE_UMAMI_WEBSITE_ID=${RASIES_UMAMI_WEBSITE_ID:-${VITE_UMAMI_WEBSITE_ID:-9be67bc4-5187-41d4-be0b-29b286125043}}
+      - VITE_UMAMI_DOMAINS=${RASIES_UMAMI_DOMAINS:-${VITE_UMAMI_DOMAINS:-www.rasies.com}}
       - PUBLIC_BASE_URL=https://www.rasies.com
       - PUBLIC_PROBE_URL=http://127.0.0.1:3000
       - PERSONAL_SITE_URL=https://rassys.com
