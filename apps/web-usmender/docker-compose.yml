@@ -13,10 +13,10 @@ services:
       PYTHONDONTWRITEBYTECODE: "1"
     volumes:
     - ${APP_DATA_DIR}/app-data/web-usmender/named/cat-primary-data:/app/cat/data
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/data:/app/cat/seed-data:ro
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/plugins:/app/cat/plugins:ro
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/static:/app/cat/static:ro
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/bootstrap:/app/cat/bootstrap:ro
+    - /data/apps/web-usmender/services/cat/data:/app/cat/seed-data:ro
+    - /data/apps/web-usmender/services/cat/plugins:/app/cat/plugins:ro
+    - /data/apps/web-usmender/services/cat/static:/app/cat/static:ro
+    - /data/apps/web-usmender/services/cat/bootstrap:/app/cat/bootstrap:ro
     extra_hosts:
     - host.docker.internal:host-gateway
     command:
@@ -49,10 +49,10 @@ services:
       PYTHONDONTWRITEBYTECODE: "1"
     volumes:
     - ${APP_DATA_DIR}/app-data/web-usmender/named/cat-support-data:/app/cat/data
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/data:/app/cat/seed-data:ro
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/plugins:/app/cat/plugins:ro
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/static:/app/cat/static:ro
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/cat/bootstrap:/app/cat/bootstrap:ro
+    - /data/apps/web-usmender/services/cat/data:/app/cat/seed-data:ro
+    - /data/apps/web-usmender/services/cat/plugins:/app/cat/plugins:ro
+    - /data/apps/web-usmender/services/cat/static:/app/cat/static:ro
+    - /data/apps/web-usmender/services/cat/bootstrap:/app/cat/bootstrap:ro
     extra_hosts:
     - host.docker.internal:host-gateway
     command:
@@ -79,7 +79,7 @@ services:
       SYNAPSE_REPORT_STATS: "no"
     volumes:
     - ${APP_DATA_DIR}/app-data/web-usmender/named/matrix-data:/data
-    - ${ROOT_FOLDER_HOST}/apps/${APP_STORE_ID}/web-usmender/repo/services/matrix/appservice:/data/appservice:ro
+    - /data/apps/web-usmender/services/matrix/appservice:/data/appservice:ro
     entrypoint:
     - /bin/sh
     - -lc
@@ -97,7 +97,7 @@ services:
       start_period: 60s
   matrix-appservice:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-usmender/repo
+      context: /data/apps/web-usmender
       dockerfile: apps/matrix-appservice/Dockerfile
     pull_policy: build
     restart: unless-stopped
@@ -126,7 +126,7 @@ services:
     image: runtipi-local-web-usmender-matrix-appservice:latest
   worker:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-usmender/repo
+      context: /data/apps/web-usmender
       dockerfile: apps/worker/Dockerfile
     pull_policy: build
     restart: unless-stopped
@@ -147,7 +147,7 @@ services:
     image: runtipi-local-web-usmender-worker:latest
   api:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-usmender/repo
+      context: /data/apps/web-usmender
       dockerfile: apps/api/Dockerfile
     pull_policy: build
     restart: unless-stopped
@@ -208,7 +208,7 @@ services:
       start_period: 5s
   web:
     build:
-      context: ${RUNTIPI_APP_BUILD_ROOT:-${ROOT_FOLDER_HOST}/apps}/${APP_STORE_ID}/web-usmender/repo
+      context: /data/apps/web-usmender
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}

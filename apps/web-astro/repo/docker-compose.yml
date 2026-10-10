@@ -1,4 +1,0 @@
-name: astro
-
-include:
-  - ./infra/docker-compose.yml

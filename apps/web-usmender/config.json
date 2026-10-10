@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-usmender",
   "description": "USMender is a mobile-first repair messenger built around a local Matrix core. Users see USMender rooms, private drafts, mediator approvals, trust controls, and mobile clients while Matrix/Synapse stays local underneath as the durable room/event substrate.",
-  "tipi_version": 7,
-  "version": "22",
+  "tipi_version": 9,
+  "version": "24",
   "categories": [
     "ai",
     "utilities"
@@ -15,11 +15,25 @@
   "short_desc": "Mobile-first repair messenger wrapped around a local Matrix core with LLM/RAG mediation in the send path.",
   "author": "https://github.com/ianras77/web-usmender.git",
   "source": "https://github.com/ianras77/web-usmender",
-  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyMind API key",
+      "required": false,
+      "env_variable": "RASSYMIND_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyMind base URL",
+      "required": false,
+      "env_variable": "RASSYMIND_BASE_URL",
+      "default": "http://host.docker.internal:8844"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1774316487258,
-  "updated_at": 1779580800000
+  "updated_at": 1791631826674
 }

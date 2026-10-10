@@ -33,7 +33,7 @@ services:
     image: astro-api:1.1.0
     pull_policy: build
     build:
-      context: ./repo
+      context: /data/apps/web-astrology
       dockerfile: infra/Dockerfile.api
     restart: unless-stopped
     init: true
@@ -71,7 +71,7 @@ services:
       RASSYMIND_CAPABILITIES_JSON: ${RASSYMIND_CAPABILITIES_JSON:-}
       RASSYMIND_BASE_URL: ${ASTRO_RASSYMIND_BASE_URL:-${RASSYMIND_BASE_URL:-http://host.docker.internal:8844/v1}}
       ASTRO_RASSYMIND_FAST_MODEL: ${ASTRO_RASSYMIND_FAST_MODEL:-rassy-fast}
-      ASTRO_RASSYMIND_MIND_MODEL: ${ASTRO_RASSYMIND_MIND_MODEL:-rassy-fast}
+      ASTRO_RASSYMIND_MIND_MODEL: ${ASTRO_RASSYMIND_MIND_MODEL:-rassy-mind}
       ASTRO_REPORT_MAX_PARALLEL_STEPS: ${ASTRO_REPORT_MAX_PARALLEL_STEPS:-2}
       ASTRO_REPORT_MAX_MODEL_CALLS: ${ASTRO_REPORT_MAX_MODEL_CALLS:-24}
       ASTRO_REPORT_MAX_TOOL_CALLS: ${ASTRO_REPORT_MAX_TOOL_CALLS:-48}
@@ -116,14 +116,14 @@ services:
     image: astro-web-jupiterseek:1.1.0
     pull_policy: build
     build:
-      context: ./repo
+      context: /data/apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-jupiterseek"
         NEXT_PUBLIC_API_BASE: http://astro-api:4020
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_JUPITERSEEK_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_JUPITERSEEK_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_JUPITERSEEK_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-3d8e5d02-c69b-4e25-8c49-8d1b05c35e8b}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_JUPITERSEEK_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-jupiterseek.com}}
     restart: unless-stopped
     init: true
     depends_on:
@@ -134,7 +134,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - node -e "fetch('http://127.0.0.1:3000/').then((response) => process.exit(response.ok?0:1)).catch(() => process.exit(1))"
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
       interval: 15s
       timeout: 5s
       retries: 12
@@ -147,14 +147,14 @@ services:
     image: astro-web-maleficme:1.1.0
     pull_policy: build
     build:
-      context: ./repo
+      context: /data/apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-maleficme"
         NEXT_PUBLIC_API_BASE: http://astro-api:4020
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_MALEFICME_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_MALEFICME_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_MALEFICME_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-096aaadf-56c3-46e8-bd89-1634205a4c2c}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_MALEFICME_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-maleficme.com}}
     restart: unless-stopped
     init: true
     depends_on:
@@ -165,7 +165,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - node -e "fetch('http://127.0.0.1:3000/').then((response) => process.exit(response.ok?0:1)).catch(() => process.exit(1))"
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
       interval: 15s
       timeout: 5s
       retries: 12
@@ -175,14 +175,14 @@ services:
     image: astro-web-saturnleo:1.1.0
     pull_policy: build
     build:
-      context: ./repo
+      context: /data/apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-saturnleo"
         NEXT_PUBLIC_API_BASE: http://astro-api:4020
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_SATURNLEO_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_SATURNLEO_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_SATURNLEO_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-e80b376f-76fe-4dec-9cd2-9943608550c2}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_SATURNLEO_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-saturnleo.com}}
     restart: unless-stopped
     init: true
     depends_on:
@@ -193,7 +193,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - node -e "fetch('http://127.0.0.1:3000/').then((response) => process.exit(response.ok?0:1)).catch(() => process.exit(1))"
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
       interval: 15s
       timeout: 5s
       retries: 12
@@ -203,14 +203,14 @@ services:
     image: astro-web-saturnseer:1.1.0
     pull_policy: build
     build:
-      context: ./repo
+      context: /data/apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-saturnseer"
         NEXT_PUBLIC_API_BASE: http://astro-api:4020
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_SATURNSEER_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_SATURNSEER_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_SATURNSEER_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-4534d087-5126-4b56-8b3e-e02870a9ddc1}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_SATURNSEER_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-saturnseer.com}}
     restart: unless-stopped
     init: true
     depends_on:
@@ -221,7 +221,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - node -e "fetch('http://127.0.0.1:3000/').then((response) => process.exit(response.ok?0:1)).catch(() => process.exit(1))"
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
       interval: 15s
       timeout: 5s
       retries: 12
@@ -231,14 +231,14 @@ services:
     image: astro-web-oracleveil:1.1.0
     pull_policy: build
     build:
-      context: ./repo
+      context: /data/apps/web-astrology
       dockerfile: infra/Dockerfile.web
       args:
         APP_NAME: "@astro/web-oracleveil"
         NEXT_PUBLIC_API_BASE: http://astro-api:4020
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
-        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_ORACLEVEIL_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
-        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_ORACLEVEIL_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${ASTRO_ORACLEVEIL_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-ce6ce25c-828e-4661-bde0-bf0f8bcfd427}}
+        NEXT_PUBLIC_UMAMI_DOMAINS: ${ASTRO_ORACLEVEIL_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-oracleveil.com}}
     restart: unless-stopped
     init: true
     depends_on:
@@ -249,7 +249,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - node -e "fetch('http://127.0.0.1:3000/').then((response) => process.exit(response.ok?0:1)).catch(() => process.exit(1))"
+        - wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
       interval: 15s
       timeout: 5s
       retries: 12

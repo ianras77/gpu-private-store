@@ -1,7 +1,0 @@
-**/.next
-**/node_modules
-**/.turbo
-**/coverage
-**/.env*
-**/.DS_Store
-**/npm-debug.log*

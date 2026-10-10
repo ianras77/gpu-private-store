@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-bat",
   "description": "Cowgirl-sharp anti-Trump editorial blog with Next.js, FastAPI automation, channel heat, linked receipts, and live research workflows.",
-  "tipi_version": 29,
-  "version": "1.0.28",
+  "tipi_version": 31,
+  "version": "2.0.2",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -16,11 +16,25 @@
   "short_desc": "Cowgirl-sharp anti-Trump blog with live channels, heat, and receipts.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-bat",
-  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyMind API key",
+      "required": false,
+      "env_variable": "RASSYMIND_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyMind base URL",
+      "required": false,
+      "env_variable": "RASSYMIND_BASE_URL",
+      "default": "http://host.docker.internal:8844"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1776589448000,
-  "updated_at": 1783814400000
+  "updated_at": 1791631826674
 }

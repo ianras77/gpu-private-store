@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-crackstack",
   "description": "Agentic data workbench with XLCRACK and TAPECRACK fronts on one backend with Postgres, Redis, MinIO, and Temporal.",
-  "tipi_version": 7,
-  "version": "1.0.6",
+  "tipi_version": 9,
+  "version": "1.0.8",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
@@ -16,11 +16,25 @@
   "short_desc": "Agentic data workbench with two branded fronts and one shared backend.",
   "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-crack",
-  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyMind API key",
+      "required": false,
+      "env_variable": "RASSYMIND_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyMind base URL",
+      "required": false,
+      "env_variable": "RASSYMIND_BASE_URL",
+      "default": "http://host.docker.internal:8844"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1776589448000,
-  "updated_at": 1779494400000
+  "updated_at": 1791631826674
 }

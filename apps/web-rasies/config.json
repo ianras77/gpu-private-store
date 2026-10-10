@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-rasies",
   "description": "A welcoming self-hosted family site with stories, thoughts, music, search, chat, status checks, and a Minecraft map, all gathered into one warm home-on-the-web.",
-  "tipi_version": 10,
-  "version": "1.0.9",
+  "tipi_version": 12,
+  "version": "1.0.11",
   "categories": [
     "ai",
     "utilities"
@@ -15,11 +15,25 @@
   "short_desc": "Warm self-hosted family site with stories, music, search, chat, and home-cloud tools.",
   "author": "https://github.com/ianras77/web-rasies.git",
   "source": "https://github.com/ianras77/web-rasies",
-  "form_fields": [{"type":"password","label":"RassyMind API key","required":false,"env_variable":"RASSYMIND_API_KEY"},{"type":"text","label":"RassyMind base URL","required":false,"env_variable":"RASSYMIND_BASE_URL","default":"http://host.docker.internal:8844"}],
+  "form_fields": [
+    {
+      "type": "password",
+      "label": "RassyMind API key",
+      "required": false,
+      "env_variable": "RASSYMIND_API_KEY"
+    },
+    {
+      "type": "text",
+      "label": "RassyMind base URL",
+      "required": false,
+      "env_variable": "RASSYMIND_BASE_URL",
+      "default": "http://host.docker.internal:8844"
+    }
+  ],
   "supported_architectures": [
     "amd64"
   ],
   "no_gui": false,
   "created_at": 1774316487234,
-  "updated_at": 1781279976000
+  "updated_at": 1791631826674
 }
