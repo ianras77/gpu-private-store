@@ -5,6 +5,7 @@ services:
     build:
       context: /host-apps/web-rasies
       dockerfile: Dockerfile
+      network: host
       args:
         VITE_UMAMI_SCRIPT_URL: ${VITE_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         VITE_UMAMI_WEBSITE_ID: ${RASIES_UMAMI_WEBSITE_ID:-${VITE_UMAMI_WEBSITE_ID:-9be67bc4-5187-41d4-be0b-29b286125043}}
