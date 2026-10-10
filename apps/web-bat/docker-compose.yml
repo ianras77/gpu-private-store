@@ -182,6 +182,8 @@ services:
 
   bat-redis:
     image: redis:7.4.2-alpine
+    volumes:
+      - ${APP_DATA_DIR:-./.docker-data}/app-data/web-bat/named/bat-redis-data:/data
     healthcheck:
       test:
         - CMD
