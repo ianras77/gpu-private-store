@@ -24,7 +24,8 @@ services:
       - ${APP_DATA_DIR}/app-data/web-crackstack/named/crackstack-redis:/data
 
   crackstack-minio:
-    image: minio/minio:RELEASE.2024-01-16T16-07-38Z
+    # Unmodified MinIO upstream release mirrored after upstream images were withdrawn.
+    image: dappros/minio:RELEASE.2025-09-07T16-13-09Z
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:

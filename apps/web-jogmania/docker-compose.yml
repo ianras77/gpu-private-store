@@ -93,7 +93,8 @@ services:
     x-runtipi:
       add_to_main_network: true
   minio:
-    image: minio/minio:latest
+    # Pin the exact MinIO release already used by the live data store.
+    image: dappros/minio:RELEASE.2025-09-07T16-13-09Z
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -127,6 +128,8 @@ services:
   redis:
     image: redis:7
     restart: unless-stopped
+    volumes:
+    - ${APP_DATA_DIR}/app-data/web-jogmania/named/jogmania-redis:/data
   web:
     image: node:20-alpine
     restart: unless-stopped
