@@ -17,13 +17,11 @@ A modern Gutenberg storytelling studio for crafting, revising, sharing, and hear
 - Primary edge remains `192.168.1.57` (`runtipi.rasies.com`).
 - Recommended exposure: eligible for selective edge proxying later.
 
-## Migration notes
+## Source ownership
 
-- Source tree today: `/data/repos/apps/web-totallyrighteoustales`.
-- Recommended source repo target: `/data/repos/apps/web-totallyrighteoustales`.
-- Conversion strategy: `validated-with-data-copy`.
-- Migration complexity: `medium`.
-- Keep the monorepo shape intact: `apps/web`, `apps/api`, and `apps/ios` stay together in the source repo, while only the Linux-hosted services are packaged into Runtipi.
+- The full product source lives in `/data/apps/web-totallyrighteoustales` and the private GitHub repository `https://github.com/ianras77/web-totallyrighteoustales` on `main`.
+- Keep the monorepo shape intact: `apps/web`, `apps/api`, and `apps/ios` stay together in the source repository, while only the Linux-hosted services are packaged into Runtipi.
+- This app-store entry contains the Runtipi definition and builds from the standalone source checkout mounted at `/host-apps/web-totallyrighteoustales`.
 
 ## Data notes
 
@@ -32,7 +30,7 @@ A modern Gutenberg storytelling studio for crafting, revising, sharing, and hear
 - Migrate the preserved legacy Docker volumes into:
   - `${APP_DATA_DIR}/app-data/web-totallyrighteoustales/named/trt-postgres`
   - `${APP_DATA_DIR}/app-data/web-totallyrighteoustales/named/trt-cat-data`
-- The Cheshire bootstrap helper is read directly from `/data/repos/apps/web-totallyrighteoustales/ops/bootstrap_cat_ollama.py`.
+- The Cheshire bootstrap helper is read directly from `/data/apps/web-totallyrighteoustales/ops/bootstrap_cat_ollama.py`.
 
 ## Port notes
 

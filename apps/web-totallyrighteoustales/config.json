@@ -6,14 +6,14 @@
   "dynamic_config": true,
   "id": "web-totallyrighteoustales",
   "description": "A modern Gutenberg storytelling studio for crafting, revising, sharing, and hearting medium-to-long tales across web and iOS.",
-  "tipi_version": 12,
-  "version": "0.5.7",
+  "tipi_version": 13,
+  "version": "0.5.8",
   "categories": [
     "ai",
     "utilities"
   ],
   "short_desc": "A modern Gutenberg storytelling studio for crafted long-form tales.",
-  "author": "https://github.com/ianras77/web-totallyrighteoustales.git",
+  "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-totallyrighteoustales",
   "form_fields": [
     {
@@ -35,5 +35,5 @@
   ],
   "no_gui": false,
   "created_at": 1774316487251,
-  "updated_at": 1791651233638
+  "updated_at": 1791705292796
 }
