@@ -70,11 +70,15 @@ x-bat-runtime-env: &bat-runtime-env
 x-bat-host-gateway: &bat-host-gateway
   - host.docker.internal:host-gateway
 
+x-bat-source-labels: &bat-source-labels
+  org.opencontainers.image.revision: 01d83bde3cf829b02174a6c2ba8680ada044ef4f
+
 services:
   bat-api:
     build:
       context: /host-apps/web-bat/blondesagainsttrump/apps/api
       network: host
+      labels: *bat-source-labels
     environment:
       <<: *bat-runtime-env
     extra_hosts: *bat-host-gateway
@@ -110,6 +114,7 @@ services:
     build:
       context: /host-apps/web-bat/blondesagainsttrump/apps/mastra
       network: host
+      labels: *bat-source-labels
     environment:
       MASTRA_PORT: 8090
       BAT_API_URL: http://bat-api:8000
@@ -204,6 +209,7 @@ services:
     build:
       context: /host-apps/web-bat/blondesagainsttrump/apps/social-publisher
       network: host
+      labels: *bat-source-labels
     healthcheck:
       test:
         - CMD
@@ -223,6 +229,7 @@ services:
       context: /host-apps/web-bat/blondesagainsttrump/apps/web
       dockerfile: Dockerfile
       network: host
+      labels: *bat-source-labels
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
