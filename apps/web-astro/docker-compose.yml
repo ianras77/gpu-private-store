@@ -30,7 +30,7 @@ services:
       - ${APP_DATA_DIR}/app-data/web-astro/named/astro-qdrant:/qdrant/storage
 
   astro-api:
-    image: astro-api:1.1.0
+    image: astro-api:1.1.4
     pull_policy: build
     build:
       context: /host-apps/web-astrology
@@ -113,7 +113,7 @@ services:
       add_to_main_network: true
 
   astro-web-jupiterseek:
-    image: astro-web-jupiterseek:1.1.0
+    image: astro-web-jupiterseek:1.1.4
     pull_policy: build
     build:
       context: /host-apps/web-astrology
@@ -146,7 +146,7 @@ services:
       internal_port: 3000
 
   astro-web-maleficme:
-    image: astro-web-maleficme:1.1.0
+    image: astro-web-maleficme:1.1.4
     pull_policy: build
     build:
       context: /host-apps/web-astrology
@@ -176,7 +176,7 @@ services:
       start_period: 45s
 
   astro-web-saturnleo:
-    image: astro-web-saturnleo:1.1.0
+    image: astro-web-saturnleo:1.1.4
     pull_policy: build
     build:
       context: /host-apps/web-astrology
@@ -206,7 +206,7 @@ services:
       start_period: 45s
 
   astro-web-saturnseer:
-    image: astro-web-saturnseer:1.1.0
+    image: astro-web-saturnseer:1.1.4
     pull_policy: build
     build:
       context: /host-apps/web-astrology
@@ -236,7 +236,7 @@ services:
       start_period: 45s
 
   astro-web-oracleveil:
-    image: astro-web-oracleveil:1.1.0
+    image: astro-web-oracleveil:1.1.4
     pull_policy: build
     build:
       context: /host-apps/web-astrology
