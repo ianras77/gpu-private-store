@@ -20,6 +20,8 @@ For a source release, push the source repo, synchronize its checkout at `/data/a
 
 The source repositories are private, so a second server needs its own GitHub deploy key or equivalent read-only Git credential. The custom store itself is public.
 
+ClosePeeps remains a separate release-gated source repository, not an installable app-store package. Its GitHub `main` now includes commit `f564be9` (hide the out-of-scope Memories tab). A06-A09 and the manual staging, restore, security, simulator, and device evidence are still missing, so no Runtipi package or live app deployment has been published for it.
+
 ## App and repository map
 
 The registry row IDs are Runtipi's current internal IDs after reinstall; the stable installed identity is the `app:gpu-private-store` URN. Source commits below were verified as clean local Git checkouts after publishing.

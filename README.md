@@ -20,6 +20,10 @@ This public Runtipi app store contains eleven app definitions. Application sourc
 
 The app-store repository is [gpu-private-store](https://github.com/ianras77/gpu-private-store), branch `main`. The app repositories are private; the app store contains no GitHub credentials.
 
+## Separate source repo awaiting its Runtipi release
+
+[`web-closepeeps`](https://github.com/ianras77/web-closepeeps) is also maintained as an independent private source repository. Its current source is not yet a Runtipi package: the repository's release gate still lacks A06-A09 proof and required staging, restore, security, simulator, and device evidence. Keep it out of the installable catalog until those gates pass; the source checklist explicitly does not authorize a live beta deployment yet.
+
 ## Install on another Runtipi server
 
 1. Give the server's operator account read access to the private source repositories. Authenticate GitHub on the host with `gh auth login` and configure Git with `gh auth setup-git`, or use an approved SSH deploy-key setup. Keep credentials on that server, outside this repository and app configuration.
