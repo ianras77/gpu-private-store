@@ -1,3 +1,6 @@
+x-app-source-labels: &app-source-labels
+  org.opencontainers.image.revision: 27d1da26b31fffd88747a4af1e83cdad338e8bd0
+
 services:
   crackstack-postgres:
     image: postgres:16
@@ -63,6 +66,7 @@ services:
       context: /host-apps/web-crack/backend
       dockerfile: Dockerfile
       network: host
+      labels: *app-source-labels
     image: runtipi-local-web-crackstack-backend:latest
     pull_policy: build
     restart: unless-stopped
@@ -112,6 +116,7 @@ services:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${CRACKSTACK_XLCRACK_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
         NEXT_PUBLIC_UMAMI_DOMAINS: ${CRACKSTACK_XLCRACK_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+      labels: *app-source-labels
     image: runtipi-local-web-crackstack-xlcrack:latest
     pull_policy: build
     restart: unless-stopped
@@ -153,6 +158,7 @@ services:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${CRACKSTACK_TAPECRACK_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
         NEXT_PUBLIC_UMAMI_DOMAINS: ${CRACKSTACK_TAPECRACK_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+      labels: *app-source-labels
     image: runtipi-local-web-crackstack-tapecrack:latest
     pull_policy: build
     restart: unless-stopped

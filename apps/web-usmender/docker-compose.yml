@@ -1,3 +1,6 @@
+x-app-source-labels: &app-source-labels
+  org.opencontainers.image.revision: d6a4db6d0b9b05f850bdab22912ba7aea6419fe8
+
 services:
   cat:
     image: ghcr.io/cheshire-cat-ai/core:latest
@@ -100,6 +103,7 @@ services:
       context: /host-apps/web-usmender
       dockerfile: apps/matrix-appservice/Dockerfile
       network: host
+      labels: *app-source-labels
     pull_policy: build
     restart: unless-stopped
     environment:
@@ -130,6 +134,7 @@ services:
       context: /host-apps/web-usmender
       dockerfile: apps/worker/Dockerfile
       network: host
+      labels: *app-source-labels
     pull_policy: build
     restart: unless-stopped
     environment:
@@ -152,6 +157,7 @@ services:
       context: /host-apps/web-usmender
       dockerfile: apps/api/Dockerfile
       network: host
+      labels: *app-source-labels
     pull_policy: build
     restart: unless-stopped
     environment:
@@ -220,6 +226,7 @@ services:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${USMENDER_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
         NEXT_PUBLIC_UMAMI_DOMAINS: ${USMENDER_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+      labels: *app-source-labels
     pull_policy: build
     restart: unless-stopped
     environment:

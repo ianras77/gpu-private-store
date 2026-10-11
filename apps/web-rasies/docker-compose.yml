@@ -1,3 +1,6 @@
+x-app-source-labels: &app-source-labels
+  org.opencontainers.image.revision: 2d3076059468cf30199abbe13dfe89aa2353e6b8
+
 services:
   rasies-portal:
     image: runtipi-local-web-rasies-rasies-portal:latest
@@ -10,6 +13,7 @@ services:
         VITE_UMAMI_SCRIPT_URL: ${VITE_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         VITE_UMAMI_WEBSITE_ID: ${RASIES_UMAMI_WEBSITE_ID:-${VITE_UMAMI_WEBSITE_ID:-9be67bc4-5187-41d4-be0b-29b286125043}}
         VITE_UMAMI_DOMAINS: ${RASIES_UMAMI_DOMAINS:-${VITE_UMAMI_DOMAINS:-www.rasies.com}}
+      labels: *app-source-labels
     restart: unless-stopped
     ports:
       - "${APP_PORT:-3186}:3000"

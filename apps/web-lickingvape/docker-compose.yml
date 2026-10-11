@@ -1,8 +1,12 @@
+x-app-source-labels: &app-source-labels
+  org.opencontainers.image.revision: 9ebb45f5c9f6192bf1b9cac5b26e5b4d6249e20d
+
 services:
   lickingvape-api:
     build:
       context: /host-apps/web-lickingvape/apps/api
       network: host
+      labels: *app-source-labels
     restart: unless-stopped
     pull_policy: build
     environment:
@@ -99,6 +103,7 @@ services:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${LICKINGVAPE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
         NEXT_PUBLIC_UMAMI_DOMAINS: ${LICKINGVAPE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+      labels: *app-source-labels
     restart: unless-stopped
     pull_policy: build
     environment:
@@ -127,6 +132,7 @@ services:
     build:
       context: /host-apps/web-lickingvape/apps/worker
       network: host
+      labels: *app-source-labels
     restart: unless-stopped
     pull_policy: build
     environment:

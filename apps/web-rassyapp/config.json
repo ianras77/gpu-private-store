@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-rassyapp",
   "description": "Code Console is a multi-user AI coding workspace built on Next.js and Prisma, connected to a Cheshire Cat instance and RassyMind. It provides chat, code context, memory, plugins, model settings, and user management.",
-  "tipi_version": 15,
-  "version": "v1.14.11",
+  "tipi_version": 16,
+  "version": "v1.14.12",
   "categories": [
     "ai"
   ],
@@ -34,5 +34,5 @@
   ],
   "no_gui": false,
   "created_at": 1774316487248,
-  "updated_at": 1791676784200
+  "updated_at": 1791750409446
 }

@@ -1,3 +1,6 @@
+x-app-source-labels: &app-source-labels
+  org.opencontainers.image.revision: d15bd6559476723c71bd756601450c1b52502b5d
+
 services:
   app:
     build:
@@ -8,6 +11,7 @@ services:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYAPP_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
         NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSYAPP_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-}}
+      labels: *app-source-labels
     pull_policy: build
     environment:
       DATABASE_URL: ${RASSY_DATABASE_URL:-file:/data/dev.db}
@@ -43,6 +47,7 @@ services:
       context: /host-apps/web-rassy.app
       dockerfile: docker/cat-core.Dockerfile
       network: host
+      labels: *app-source-labels
     pull_policy: build
     environment:
       CCAT_QDRANT_HOST: cheshire-cat-vector-memory
