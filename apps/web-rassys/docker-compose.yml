@@ -174,10 +174,10 @@ services:
     volumes:
       # Thoughts use their own content root so report and learning files never
       # get rendered as personal notes.
-      - ${HOST_BLOG_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/thoughts}:${BLOG_STORAGE_PATH:-/media/thoughts}
+      - ${ROOT_FOLDER_HOST:-.}/media/data/thoughts:${BLOG_STORAGE_PATH:-/media/thoughts}
       # Learning modules are content-only files and stay read-only in the app container.
       - ${HOST_LEARNING_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/learning}:${LEARNING_STORAGE_PATH:-/media/learning}:ro
-      - ${HOST_REPORTS_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/reports}:/reports:ro
+      - ${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/reports:/reports:ro
       - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/analyst-rassy:/openfang-reports/analyst-rassy:ro
       - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/system-integration:/openfang-reports/system-integration:ro
     restart: unless-stopped
