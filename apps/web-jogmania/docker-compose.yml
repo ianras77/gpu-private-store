@@ -34,7 +34,7 @@ services:
     - corepack enable && cd /repo && pnpm --filter @jogmania/mastra start
     depends_on:
       dependencies:
-        condition: service_completed_successfully
+        condition: service_healthy
     extra_hosts:
     - host.docker.internal:host-gateway
     healthcheck:
@@ -168,7 +168,7 @@ services:
     - /repo/apps/web/runtipi-start.sh
     depends_on:
       dependencies:
-        condition: service_completed_successfully
+        condition: service_healthy
       api:
         condition: service_healthy
     healthcheck:
