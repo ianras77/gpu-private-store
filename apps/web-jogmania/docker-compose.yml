@@ -1,7 +1,7 @@
 services:
   dependencies:
     image: node:22-alpine
-    restart: "no"
+    restart: unless-stopped
     environment:
       CI: "true"
     working_dir: /repo
@@ -9,7 +9,13 @@ services:
       - /data/apps/web-jogmania/repo:/repo
     command: >-
       sh -c "corepack enable && pnpm install --force --filter @jogmania/web... --filter
-      @jogmania/mastra... --frozen-lockfile"
+      @jogmania/mastra... --frozen-lockfile && tail -f /dev/null"
+    healthcheck:
+      test: ["CMD-SHELL", "test -d /repo/node_modules && test -d /repo/apps/mastra/node_modules"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   mastra:
     image: node:22-alpine
