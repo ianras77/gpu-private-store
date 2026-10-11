@@ -150,7 +150,7 @@ services:
       MINECRAFT_TROUPE_BOT_PORT: ${MINECRAFT_TROUPE_BOT_PORT:-3000}
       MINECRAFT_TROUPE_STATUS_TIMEOUT_MS: ${MINECRAFT_TROUPE_STATUS_TIMEOUT_MS:-2500}
       MINECRAFT_TROUPE_BOT_NAMES: ${MINECRAFT_TROUPE_BOT_NAMES:-}
-      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/web-rassys}
+      BLOG_STORAGE_PATH: ${BLOG_STORAGE_PATH:-/media/thoughts}
       LEARNING_STORAGE_PATH: ${LEARNING_STORAGE_PATH:-/media/learning}
       RASSY_REPORTS_ROOT: /reports
       OPENFANG_ANALYST_REPORTS_PATH: /openfang-reports/analyst-rassy
@@ -172,11 +172,12 @@ services:
       - traefik.http.routers.web-rassys.tls.certresolver=myresolver
       - traefik.http.services.web-rassys.loadbalancer.server.port=3000
     volumes:
-      # Authored thoughts intentionally live in the Runtipi media data area.
-      - ${ROOT_FOLDER_HOST:-.}/media/data/web-rassys:${BLOG_STORAGE_PATH:-/media/web-rassys}
+      # Thoughts use their own content root so report and learning files never
+      # get rendered as personal notes.
+      - ${HOST_BLOG_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/thoughts}:${BLOG_STORAGE_PATH:-/media/thoughts}
       # Learning modules are content-only files and stay read-only in the app container.
       - ${HOST_LEARNING_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/learning}:${LEARNING_STORAGE_PATH:-/media/learning}:ro
-      - ${APP_DATA_DIR}/app-data/web-rassys/reports:/reports:ro
+      - ${HOST_REPORTS_PATH:-${ROOT_FOLDER_HOST:-.}/media/data/web-rassys/reports}:/reports:ro
       - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/analyst-rassy:/openfang-reports/analyst-rassy:ro
       - ${OPENFANG_REPORTS_HOST_PATH:-/data/apps/openfang/reports}/system-integration:/openfang-reports/system-integration:ro
     restart: unless-stopped
