@@ -1,160 +1,95 @@
-# Web app repositories and Runtipi reinstallation plan
+# Web app repository and Runtipi migration record
 
-Updated: 2026-10-10 UTC
+Updated: 2026-10-11 UTC
+Status: migration, cleanup, and first-server rollout complete; final verification passed on 2026-10-11 UTC.
 
-## Goal and deployment model
+## Outcome and deployment model
 
-Each of the eleven custom web-* applications has one full source repository under /data/apps and one dedicated GitHub repository. The Runtipi app-store entry keeps the app ID, Compose project, persistent data mounts, user configuration, and shared media wiring. The app-store entry contains only Runtipi configuration, Compose, and store metadata/assets; application source lives in the separate repository.
+The eleven custom `web-*` applications have full source checkouts under `/data/apps`, each connected to its own GitHub repository. The public Runtipi store is [ianras77/gpu-private-store](https://github.com/ianras77/gpu-private-store), branch `main`. Its packages contain Runtipi manifests, Compose wiring, and store metadata; application source remains in the individual (private) repositories.
 
-The published store is https://github.com/ianras77/gpu-private-store on branch main. The `source` field in each package is the standalone GitHub repository link displayed with that app. Runtipi pulls app definitions from the configured app-store repository; it does not clone the standalone source repository from the link. Compose builds use read-only source checkouts mounted into Runtipi at /host-apps/<repository-folder>, while bind mounts such as /data/apps/<repository-folder>/... resolve on the Docker host.
+Each package's `source` field links to the matching application repository. Runtipi installs package definitions from the configured app store; the `source` link is repository metadata, not an instruction for Runtipi to clone source. The Compose client sees read-only source checkouts under `/host-apps/<repo-folder>`, while Docker host bind mounts use `/data/apps/<repo-folder>/...`.
 
-For a source-code release, push the app repository change to GitHub, fast-forward its matching checkout under /data/apps, then run the Runtipi app update for that installed app. For a package change, update the app-store entry, increase both version and tipi_version, run Runtipi's app-store update, then update or reinstall the app through Runtipi. This makes the division between source publication and managed deployment explicit.
+For a source release, push the source repo, synchronize its checkout at `/data/apps`, and update the installed Runtipi app. For package changes, bump both `version` and `tipi_version`, publish the store change, run the Runtipi app-store update, and update the installed app. These are separate releases and must be recorded separately.
 
-## Web app map
+### Use this store on another Runtipi server
 
-| Runtipi app ID | GitHub repository | Canonical source folder | Existing Compose project | Source wiring to preserve |
-| --- | --- | --- | --- | --- |
-| web-astro:gpu-private-store | [web-astrology](https://github.com/ianras77/web-astrology) | /data/apps/web-astrology | web-astro_gpu-private-store | Six app/API builds; Astro Postgres, Redis, Qdrant, index data, and shared esoterica mounts |
-| web-bat:gpu-private-store | [web-bat](https://github.com/ianras77/web-bat) | /data/apps/web-bat/blondesagainsttrump | web-bat | API, Mastra, social publisher, and web builds; preserve Postgres/Qdrant data and SQL initialization mounts |
-| web-crackstack:gpu-private-store | [web-crack](https://github.com/ianras77/web-crack) | /data/apps/web-crack | web-crackstack_gpu-private-store | Backend, TAPECRACK, and XLCRACK builds; preserve Postgres, Redis, MinIO, and Temporal state |
-| web-jogmania:gpu-private-store | [web-jogmania](https://github.com/ianras77/web-jogmania) | /data/apps/web-jogmania/repo | web-jogmania_gpu-private-store | API and web source bind mounts; preserve Postgres and MinIO data |
-| web-lickingvape:gpu-private-store | [web-lickingvape](https://github.com/ianras77/web-lickingvape) | /data/apps/web-lickingvape | web-lickingvape_gpu-private-store | API, web, and worker builds; preserve Postgres and Cheshire Cat data |
-| web-rasies:gpu-private-store | [web-rasies](https://github.com/ianras77/web-rasies) | /data/apps/web-rasies | web-rasies_gpu-private-store | Portal build; preserve Mastra state and podcast, thoughts, DJ, and music mounts |
-| web-rassyapp:gpu-private-store | [web-rassy.app](https://github.com/ianras77/web-rassy.app) | /data/apps/web-rassy.app | web-rassyapp_gpu-private-store | Main app and Cheshire Cat builds; preserve Postgres, Qdrant, plugin, and cat data |
-| web-rassyonline:gpu-private-store | [web-rassyonline](https://github.com/ianras77/web-rassyonline) | /data/apps/web-rassyonline | web-rassyonline_gpu-private-store | Web and worker builds; preserve accounts, uploads, artifacts, fixture/workspace data, Postgres, and Qdrant |
-| web-rassys:gpu-private-store | [web-rassy](https://github.com/ianras77/web-rassy) | /data/apps/web-rassy | web-rassys_gpu-private-store | Five builds including web, intelligence, radio, Minecraft, and Icecast; preserve Postgres, Redis, reports, shared media, and Liquidsoap config |
-| web-totallyrighteoustales:gpu-private-store | [web-totallyrighteoustales](https://github.com/ianras77/web-totallyrighteoustales) | /data/apps/web-totallyrighteoustales | web-totallyrighteoustales_gpu-private-store | API, web, and worker builds; preserve Postgres and Cheshire Cat data |
-| web-usmender:gpu-private-store | [web-usmender](https://github.com/ianras77/web-usmender) | /data/apps/web-usmender | web-usmender_gpu-private-store | API, web, worker, and Matrix appservice builds; preserve Postgres, Matrix, appservice, and both cat data stores |
+1. Add `https://github.com/ianras77/gpu-private-store` as the custom app store and update the store index.
+2. Before installing an app, give that server read access to its private source repository and clone the repository into the exact `/data/apps` path in the table below. BAT and Jogmania have their Git roots one directory below their app folder.
+3. Configure the Runtipi host's Compose source mount so the Runtipi container can read each checkout under `/host-apps/<repo-folder>`. The store Compose files use those source mounts for builds and keep app data/media as separate host mounts.
+4. Install the app from the custom store. Preserve any chosen ports/domains and configure that server's own secrets and app-data. Do not copy this server's credentials or databases to another server.
 
-Every app keeps the same Runtipi app URN, Compose project, host port, app-data target, and shared media target. Runtipi assigns a new internal integer row ID after uninstall/reinstall; record both the old and new values. The package version and tipi_version must both advance when source wiring changes.
+The source repositories are private, so a second server needs its own GitHub deploy key or equivalent read-only Git credential. The custom store itself is public.
 
-## Current app-store package versions
+## App and repository map
 
-| App | Package version | tipi_version |
-| --- | ---: | ---: |
-| web-astro | 1.1.4 | 9 |
-| web-bat | 2.0.5 | 34 |
-| web-crackstack | 1.0.12 | 13 |
-| web-jogmania | 1.1.7 | 21 |
-| web-lickingvape | 1.0.12 | 12 |
-| web-rasies | 1.0.13 | 15 |
-| web-rassyapp | v1.14.11 | 15 |
-| web-rassyonline | 0.1.16 | 12 |
-| web-rassys | 1.0.36 | 30 |
-| web-totallyrighteoustales | 0.5.9 | 14 |
-| web-usmender | 26 | 12 |
+The registry row IDs are Runtipi's current internal IDs after reinstall; the stable installed identity is the `app:gpu-private-store` URN. Source commits below were verified as clean local Git checkouts after publishing.
 
-The BAT package retains the live Mastra service. All four BAT build services explicitly use pull_policy: build; no service is removed or renamed as part of this source move.
+| Runtipi app | GitHub repository | `/data/apps` Git root | Source commit | Package `version` / `tipi_version` | Port | Registry row |
+| --- | --- | --- | --- | --- | ---: | ---: |
+| `web-astro` | [web-astrology](https://github.com/ianras77/web-astrology) | `/data/apps/web-astrology` | `281c0d3` | `1.1.4` / 9 | 3201 | 74 |
+| `web-bat` | [web-bat](https://github.com/ianras77/web-bat) | `/data/apps/web-bat` (`blondesagainsttrump/` source) | `c0dba9b` | `2.0.6` / 35 | 3197 | 77 |
+| `web-crackstack` | [web-crack](https://github.com/ianras77/web-crack) | `/data/apps/web-crack` | `27d1da2` | `1.0.12` / 13 | 3212 | 70 |
+| `web-jogmania` | [web-jogmania](https://github.com/ianras77/web-jogmania) | `/data/apps/web-jogmania` (`repo/` source) | `103ad8d` | `1.1.9` / 23 | 3177 | 69 |
+| `web-lickingvape` | [web-lickingvape](https://github.com/ianras77/web-lickingvape) | `/data/apps/web-lickingvape` | `9ebb45f` | `1.0.12` / 12 | 3195 | 71 |
+| `web-rasies` | [web-rasies](https://github.com/ianras77/web-rasies) | `/data/apps/web-rasies` | `2d30760` | `1.0.13` / 15 | 3186 | 66 |
+| `web-rassyapp` | [web-rassy.app](https://github.com/ianras77/web-rassy.app) | `/data/apps/web-rassy.app` | `d15bd65` | `v1.14.11` / 15 | 3194 | 73 |
+| `web-rassyonline` | [web-rassyonline](https://github.com/ianras77/web-rassyonline) | `/data/apps/web-rassyonline` | `b40569f` | `0.1.16` / 12 | 3199 | 75 |
+| `web-rassys` | [web-rassy](https://github.com/ianras77/web-rassy) | `/data/apps/web-rassy` | `373da48` | `1.0.36` / 30 | 3187 | 78 |
+| `web-totallyrighteoustales` | [web-totallyrighteoustales](https://github.com/ianras77/web-totallyrighteoustales) | `/data/apps/web-totallyrighteoustales` | `6ed50a5` | `0.5.9` / 14 | 3190 | 72 |
+| `web-usmender` | [web-usmender](https://github.com/ianras77/web-usmender) | `/data/apps/web-usmender` | `d6a4db6` | `26` / 12 | 3294 | 65 |
 
-## Live persistent bind sources and clean-install destinations
+The source package manifests were synchronized with their current store package revisions where those repositories carry a `config.json`. Source working trees were clean at final source audit. The store `source` mappings were checked against all eleven repositories.
 
-Observed from Docker bind mounts on 2026-10-10. These live paths, rather than the app name or generated app.env alone, define the current data. The intended clean install target is the app-specific Runtipi root `/data/runtipi/app-data/gpu-private-store/<app>/` plus the same volume suffix already in that app's Compose definition. Before starting a reinstalled app, prove that each Compose bind resolves to the preserved data.
+## Runtipi deployment and acceptance
 
-| App | Current persistent bind sources | Migration handling |
+Each of the eleven Runtipi apps was backed up, uninstalled, and reinstalled from `gpu-private-store` with the original URN, host port, persistent data, user configuration, and shared media preserved. All registry rows report `running`; their package versions, ports, URNs, and row IDs are in the table above. The Runtipi-generated definitions use the published package revisions listed above.
+
+All eleven homepage ports returned HTTP 200 after rollout. Additional checks returned HTTP 200 for Jogmania API `/healthz` on 3178, BAT API `/api/v1/health/live` on 8017, Tales API `/health` on 3191, and Rassys Icecast on 3188. Defined container healthchecks were healthy; auxiliary services without healthchecks were confirmed running. The final post-update verification is recorded below.
+
+Two package-specific corrections were required during rollout:
+
+- BAT package 2.0.6 / T35 sets host networking for the four source builds, so package builds can reach dependencies on the Docker host.
+- Jogmania package 1.1.9 / T23 keeps its dependency service alive and healthy, and makes application services wait for that healthy dependency. This prevents the Runtipi status reconciler from treating a completed one-shot dependency container as a stopped app.
+
+Jogmania's supported Runtipi updater completed successfully after T23 publication. Its app `version` and installed package are 23, and the app is running on the original port. Runtipi's `template_version` registry field still reads 21; the updater did not refresh that historical field. It does not change the active package manifest (T23), runtime Compose definition, app version, or app health, so the registry field was not edited directly.
+
+Rassys had an invalid pre-migration registry row without a template URN/version. Reinstall corrected it to `web-rassys:gpu-private-store`, version/template 30, running, port 3187, row 78. Its Postgres, Redis, radio, Icecast, Liquidsoap, Minecraft bridge, reports, and shared media binds were restored and verified.
+
+## Persistent data and protected rollback archives
+
+Every app was snapshotted before uninstall. The archives are under `/data/runtipi/backups/web-app-migration-20261010/`, are mode `0600`, and have the following SHA-256 checksums. Retain these until the normal backup retention policy has safely superseded them.
+
+| App | Snapshot artifact | SHA-256 |
 | --- | --- | --- |
-| web-astro | `/data/runtipi/app-data/gpu-private-store/web-astro/app-data/web-astro/named/{astro-index,astro-postgres,astro-redis,astro-qdrant}` | Already under its per-app root; retain the source through reinstall and verify exact paths. |
-| web-bat | `/app-data/web-bat/named/{bat-postgres-data,bat-qdrant-data}` | Offline archive while stopped; place into the new app-specific Runtipi root before first start. |
-| web-crackstack | `/app-data/web-crackstack/named/{crackstack-backend,crackstack-minio,crackstack-postgres}` | Offline archive while stopped; restore all three into the new app-specific root before first start. |
-| web-jogmania | `/app-data/web-jogmania/named/{jogmania-minio,jogmania-pg}` | Offline archive while stopped; restore both into the new app-specific root before first start. |
-| web-lickingvape | `/app-data/web-lickingvape/named/{lickingvape-cat-data,lickingvape-postgres}` | Offline archive while stopped; restore both into the new app-specific root before first start. |
-| web-rasies | `/data/runtipi/app-data/gpu-private-store/app-data/web-rasies/named/mastra` | Move from store-level app-data into the per-app root and preserve the Mastra state. |
-| web-rassyapp | `/app-data/web-rassyapp/named/{prisma-data,cat-data,cat-plugins,cat-static,qdrant-storage}` | Offline archive while stopped; restore all five into the new app-specific root before first start. |
-| web-rassyonline | `/data/runtipi/app-data/gpu-private-store/web-rassyonline/app-data/web-rassyonline/{artifacts,project-fix-fixtures,project-fix-workspaces,uploads,postgres,qdrant}` | Already under its per-app root; preserve the full tree and verify each target. |
-| web-rassys | `/data/runtipi/app-data/gpu-private-store/web-rassys/app-data/web-rassys/named/{pg-data,redis-data}` | Already under its per-app root; retain and verify. Preserve OpenFang reports at `/data/apps/openfang/reports/{analyst-rassy,system-integration}` and `/mnt/cannonball` separately. |
-| web-totallyrighteoustales | `/app-data/web-totallyrighteoustales/named/{trt-cat-data,trt-postgres}` | Offline archive while stopped; restore both into the new app-specific root before first start. |
-| web-usmender | `/app-data/web-usmender/named/{cat-primary-data,cat-support-data}` and `/data/runtipi/app-data/gpu-private-store/web-usmender/app-data/web-usmender/named/{matrix-appservice-data,matrix-data,postgres-data}` | Offline archive Cat state while stopped; preserve existing Runtipi-root Matrix/Postgres state and verify all five targets. |
+| Astro | `web-astro-reinstall-pre-uninstall-20261011.tar.gz` | `7c5fe92866217f8a7441f1eb3322def4c0f6e0bbb5c43abcfb1b5ac5a409923a` |
+| BAT | `web-bat-reinstall-pre-uninstall-20261011.tar.gz` | `47b349659a7b53911e19c2795547c598d82a08dc18dd19771441c941bfbaa494` |
+| Crackstack | `web-crackstack-reinstall-pre-uninstall-20261011.tar.gz` | `0ea4d8ceb7931357320e4ec3b4717e183904b499f3c55528c50536d3779fd69d` |
+| Jogmania | `web-jogmania-reinstall-pre-uninstall-20261011.tar.gz` | `f8146d41cd288e3cbc33b3a355a726296d4ded65a95e12eef9b60bd41f6f9211` |
+| LickingVape | `web-lickingvape-reinstall-pre-uninstall-20261011.tar.gz` | `2f43880835743dc8d0d522f466d3292aca5e6eacec8a61a06eab1d7ec7d68e9a` |
+| Rasies | `web-rasies-reinstall-pre-uninstall-20261011.tar.gz` | `a76f4fdbad875046aef00982bb121539845c3f3cf76aad9d2e8e9317a27c38e7` |
+| Rassyapp | `web-rassyapp-reinstall-pre-uninstall-20261011.tar.gz` | `df402f30723ae9ddd267874ac589dc3ad6aa19774288d33d717767c5b0d11602` |
+| RassyOnline | `web-rassyonline-reinstall-pre-uninstall-20261011.tar.gz` | `b3f7cac0c6332df244740224df98374d86103d2c7052e2cf4adcb708b97ccde6` |
+| Rassys | `web-rassys-final-pre-uninstall-20261011.tar.gz` | `cb562b85d2c9ac509d827a1ce0c86f7a02b19d5970da4b9e720ec5c368223938` |
+| Totally Righteous Tales | `web-totallyrighteoustales-reinstall-pre-uninstall-20261011.tar.gz` | `4eedd16f654defff0a6e921b2fbd48c6de8839751b8005879b7fbff8c5bc2b69` |
+| Usmender | `web-usmender-reinstall-pre-uninstall-20261011.tar.gz` | `9b604c969d8128b7f8ef90045a406152a248c2d6da5559c6eba8edcd6a5f42b6` |
 
-Shared media mounts remain at `/data/runtipi/media/data` and are not part of these app-data copies. Source-code binds currently served from `/data/runtipi/apps/gpu-private-store/<app>/repo` move to the mapped `/data/apps` Git checkout. `/app-data` volumes are outside Runtipi's normal `app-data/<store>/<app>` folder and are not protected by assuming the standard Runtipi backup covers them.
+The active app-data roots are now namespaced at `/data/runtipi/app-data/gpu-private-store/<app>/`. Shared media remains under `/data/runtipi/media/data/`. Rassys OpenFang report mounts remain on their existing shared host paths. No shared media was deleted or copied into an app snapshot.
 
-Runtipi's backup archive includes the installed app definition as well as `app-data/` and `user-config/`. Restoring the whole archive after reinstall can put the old vendored app definition back. Keep the archive intact as rollback evidence; on the migration path restore persistent data and protected user configuration while ensuring the installed definition remains the newly published store package. Verify the installed package SHA/version again after any restore.
+## Cleanup and preserved projects
 
-## Existing /data/apps inventory
+Inactive legacy data roots (`web-astro`, `web-rassyonline`, `blondesagainsttrump`, and the old `app-data/web-rassys`) were verified absent from current container binds, archived, then removed. The protected archive is `legacy-app-data-roots-pre-cleanup-20261011.tar.gz`, SHA-256 `b4b81f1d0cd56640a854e23d419d9e2edb730f89a0fdd7670618cae242b51e86`. Superseded per-app `app.env` backups were archived before removal in `web-app-env-backups-pre-cleanup-20261011.tar.gz`, SHA-256 `493170c4413f7c7c0ce6a4aaee37bf9645b523b359fdbab20377639eb89aefe5`. Both archives are mode `0600`.
 
-These top-level product folders are already standalone Git repositories and remain independent projects: aider, opencode, mc_troupe, nextcloud, openfang, plex, qwencode, rassymind, and web-closepeeps. Their existing branches and local edits are preserved. In particular, dirty local work in Nextcloud, Qwen Code, RassyMind, and ClosePeeps is not staged or reset by this web-app migration.
+Four restore-generated directories for Tales and Usmender were removed after checksum dry-runs proved their file contents exactly matched the live directories. Temporary install JSON files containing protected configuration were deleted. `/data/runtipi/app-data/gpt`, shared media, the old `1-WIP` and `2-Migrated` references, and unrelated application data were preserved.
 
-The canonical Hermes Git checkout is currently `/opt/rassy-hermes` (GitHub `ianras77/rassy-hermes`), while `/data/apps/hermes` is a separate integration/release-candidate workspace and is not itself a Git repository. Reconcile and consolidate those contents into `/data/apps/hermes` without moving the live runtime or losing the workspace's local material. `/data/apps/gpu-private-store` is a managed app-store mirror, not a product repository. `.github`, `.pytest_cache`, and the old reference directories `1-WIP` and `2-Migrated` are not application source checkouts. Do not use either old reference folder in new Compose paths or source-sync commands.
+Core `/data/apps` repository audit: `rassymind`, `hermes`, `openfang`, `qwencode`, `opencode`, `aider`, `mc_troupe`, `nextcloud`, and `plex` already have independent Git repositories/remotes. Hermes was consolidated into the clean `ianras77/rassy-hermes` checkout at `/data/apps/hermes` and its live runtime stayed at `/opt/rassy-hermes`; the pre-consolidation workspace is archived as `hermes-integration-workspace-pre-repository-20261011.tar.gz` (SHA-256 `bf0c427e0d15742e52bf62542992bfb87c058d2ee8544768e60247f9949f5e47`). Existing unrelated local changes in RassyMind, OpenFang, Qwen Code, Nextcloud, and ClosePeeps were preserved and not bundled into this web-app migration.
 
-## Implementation stages and gates
+## Final verification record
 
-### 1. Verify source repositories
+- `./scripts/validate-store.sh`: passed.
+- Store package/source mapping: all eleven `source` links match the standalone repositories.
+- Source checkouts: eleven Git roots, expected remotes/commits, clean status.
+- Runtipi registry: eleven stable app URNs present, all rows `running` after reinstall; Jogmania retains only the noted historical `template_version` field.
+- HTTP: all eleven app homepage ports returned 200; additional API/radio checks are listed above.
+- Tests: not run (not requested).
 
-For each mapped repository:
-
-- Confirm the folder is a Git root with the intended origin, private/public visibility, default branch, and no unexpected staged or untracked files.
-- Confirm the published GitHub branch contains the complete current source snapshot. Keep real .env files, protected credentials, generated output, runtime databases, uploads, and host media out of commits.
-- Remove operational defaults that still point at 1-WIP, 2-Migrated, or an app-store source mirror. Historical audit notes may describe the old layout, but must be labeled historical.
-- Ensure every source bind path in the app-store Compose exists in the canonical repository. Keep empty-but-required bind directories represented by a tracked .gitkeep.
-
-### 2. Publish and validate the app-store package
-
-- Set each source link to its matching standalone GitHub repository.
-- Mount exactly the eleven canonical source checkouts read-only into the Runtipi container at /host-apps/<repository-folder>. This makes the full Git working trees available to Runtipi's Compose client without exposing the historical 1-WIP or 2-Migrated folders.
-- Point build contexts at /host-apps/<repository-folder>/<path>. Runtipi resolves build contexts inside its own container, where /data/apps is occupied by Runtipi-managed app definitions. Keep service bind sources as absolute /data/apps/<repository-folder>/<path>; Docker resolves those bind sources on the host.
-- Jogmania remains bind-mounted from its repository layout; its appdata and media mounts are separate.
-- Keep only config.json, docker-compose.yml, and metadata/ in each store package. Do not publish private app source in the store repository.
-- Confirm app IDs, service names, port assignments, healthchecks, Compose project naming, app-data targets, shared media sources, and secret variable names are unchanged.
-- Render every Compose file with its installed app environment without printing values. Verify each /host-apps build context exists and is read-only inside Runtipi, each /data/apps bind source exists on the Docker host, and app-data/media mounts match the current package.
-- Run the store package validator and inspect the complete package diff before publishing to the active custom-store branch.
-
-### 3. Synchronize Runtipi's store
-
-- Push the reviewed app-store commit to `main` on `ianras77/gpu-private-store`.
-- Update the configured store from Runtipi and confirm the eleven package definitions and links match the published commit.
-- Confirm Runtipi has recognized each higher version and tipi_version before uninstalling anything.
-
-### 4. Baseline and back up each installed app
-
-Handle one app at a time. Before its uninstall:
-
-1. Record whether the app is running, its full Compose project and service names, container health, current host port/domain, and actual bind sources from Docker labels/inspection.
-2. Record the exact app-data path and all app-specific user-config files without printing their contents. Confirm shared media is mounted from /data/runtipi/media and is not included in app deletion.
-3. Create a Runtipi backup with runtipi-cli app backup <app-id>:gpu-private-store; verify the backup is listed and non-empty.
-4. Stop only this app, then make an offline archive of every actual persistent bind source from Docker inspection, including off-root `/app-data` paths. Record each archive size and checksum, preserve ownership/permissions, and verify the archive listing. Keep shared media out of app-data archives. Do not proceed if any source is missing, unreadable, or cannot be inspected.
-5. Record current database/service health and a reachable app endpoint so the reinstall has a real before/after comparison.
-
-Never infer the data path from an app name alone: read the running Compose bind source first. Runtipi's uninstall removes app data, so the backup check is a hard gate before every uninstall.
-
-### 5. Uninstall, reinstall, and restore one app
-
-For the app whose backups passed:
-
-1. Use Runtipi to uninstall the namespaced app ID. Do not remove shared media or the source checkout.
-2. Install the same package again from the configured gpu-private-store app store branch, keeping its app ID, port, and exposure choices.
-3. Reconcile the verified backup into the new install. Preserve its protected user-config files and persistent data, but keep the newly published app definition; do not blindly restore the archive's older `app/` directory. Place any off-root data copy at the exact newly rendered Compose source before starting services.
-4. Start the app, then confirm the generated Compose project name and every build/source bind point at that app's /data/apps repository.
-5. Verify persistent services can read the original data, all expected healthchecks are healthy, the prior host port/domain responds, and the app's primary user flow returns a meaningful response.
-6. Compare rendered pages/API responses and external routing to the pre-uninstall baseline. Record the app version, source Git commit, package Git commit, service health, and endpoint result.
-7. Do not begin the next app until the current app passes. If it fails, stop the app, restore its prior package revision and verified backup, and prove the old endpoint is back before continuing.
-
-The CLI exposes backup, uninstall, restore, and update commands but no install command. Reinstallation is performed from the Runtipi app-store UI using the same installed store and app ID.
-
-### 6. Rollout order
-
-Roll out in this order, with the per-app backup and acceptance gates above applied to each:
-
-1. web-rasies — one portal service and media mounts.
-2. web-jogmania — two source-mounted application services plus Postgres and MinIO.
-3. web-crackstack — backend/web builds and Postgres, Redis, MinIO, Temporal persistence.
-4. web-lickingvape — API/web/worker and Cheshire Cat/Postgres state.
-5. web-totallyrighteoustales — API/web/worker and Cat/Postgres state.
-6. web-rassyapp — app/Cat builds and vector, plugin, and database state.
-7. web-astro — six image builds and four data services.
-8. web-usmender — Matrix, appservice, Postgres, Cat, and worker data.
-9. web-rassyonline — accounts, uploaded files, artifacts, workspace fixtures, Postgres, and Qdrant.
-10. web-bat — preserve the current API, Mastra scheduler, social publisher, web UI, Postgres, and Qdrant.
-11. web-rassys — perform last because it combines the radio, live media, Minecraft bridge, databases, reports, and multiple shared host mounts.
-
-This order is a scheduling aid only; an app still waits for its own backup and health gates.
-
-### 7. Close-out
-
-- Verify all eleven source checkouts are clean and match their published GitHub commits.
-- Verify all eleven app-store packages contain only their Runtipi manifest, Compose, and metadata/assets.
-- Verify every source link, build context, and source mount maps to the correct GitHub repository and /data/apps folder.
-- Verify Runtipi has the same eleven app URNs and Compose project names, with the original app-data and media mounts intact; record each replacement numeric row ID.
-- Record each verified backup artifact, repository SHA, app-store SHA, package version, service health, and endpoint result.
-- Leave 1-WIP and 2-Migrated as read-only historical references; no live Runtipi package points to them.
-
-## Rollout record
-
-All eleven dedicated web-app source repositories are linked from the public custom store, and the latest package metadata is published on `main`. The app-source repositories are private and require per-server GitHub read access. App backups, package synchronization, data-root reconciliation, uninstall/reinstall, and runtime acceptance are tracked as separate completion gates; see the current rollout record before treating an app as finished.
+The user-visible repository and deployment split is complete: GitHub source repos hold app source, `gpu-private-store` holds Runtipi package configuration, and Runtipi manages installs/updates while retaining app data and shared media on the server.
