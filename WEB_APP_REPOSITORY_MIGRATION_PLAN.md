@@ -1,7 +1,7 @@
 # Web app repository and Runtipi migration record
 
 Updated: 2026-10-11 UTC
-Status: migration, cleanup, and first-server rollout complete; final verification passed on 2026-10-11 UTC.
+Status: migration, package alignment, first-server rollout, and final verification complete on 2026-10-11 UTC.
 
 ## Outcome and deployment model
 
@@ -26,17 +26,17 @@ The registry row IDs are Runtipi's current internal IDs after reinstall; the sta
 
 | Runtipi app | GitHub repository | `/data/apps` Git root | Source commit | Package `version` / `tipi_version` | Port | Registry row |
 | --- | --- | --- | --- | --- | ---: | ---: |
-| `web-astro` | [web-astrology](https://github.com/ianras77/web-astrology) | `/data/apps/web-astrology` | `281c0d3` | `1.1.4` / 9 | 3201 | 74 |
-| `web-bat` | [web-bat](https://github.com/ianras77/web-bat) | `/data/apps/web-bat` (`blondesagainsttrump/` source) | `c0dba9b` | `2.0.6` / 35 | 3197 | 77 |
-| `web-crackstack` | [web-crack](https://github.com/ianras77/web-crack) | `/data/apps/web-crack` | `27d1da2` | `1.0.12` / 13 | 3212 | 70 |
-| `web-jogmania` | [web-jogmania](https://github.com/ianras77/web-jogmania) | `/data/apps/web-jogmania` (`repo/` source) | `103ad8d` | `1.1.9` / 23 | 3177 | 69 |
-| `web-lickingvape` | [web-lickingvape](https://github.com/ianras77/web-lickingvape) | `/data/apps/web-lickingvape` | `9ebb45f` | `1.0.12` / 12 | 3195 | 71 |
-| `web-rasies` | [web-rasies](https://github.com/ianras77/web-rasies) | `/data/apps/web-rasies` | `2d30760` | `1.0.13` / 15 | 3186 | 66 |
-| `web-rassyapp` | [web-rassy.app](https://github.com/ianras77/web-rassy.app) | `/data/apps/web-rassy.app` | `d15bd65` | `v1.14.11` / 15 | 3194 | 73 |
-| `web-rassyonline` | [web-rassyonline](https://github.com/ianras77/web-rassyonline) | `/data/apps/web-rassyonline` | `b40569f` | `0.1.16` / 12 | 3199 | 75 |
-| `web-rassys` | [web-rassy](https://github.com/ianras77/web-rassy) | `/data/apps/web-rassy` | `373da48` | `1.0.36` / 30 | 3187 | 78 |
-| `web-totallyrighteoustales` | [web-totallyrighteoustales](https://github.com/ianras77/web-totallyrighteoustales) | `/data/apps/web-totallyrighteoustales` | `6ed50a5` | `0.5.9` / 14 | 3190 | 72 |
-| `web-usmender` | [web-usmender](https://github.com/ianras77/web-usmender) | `/data/apps/web-usmender` | `d6a4db6` | `26` / 12 | 3294 | 65 |
+| `web-astro` | [web-astrology](https://github.com/ianras77/web-astrology) | `/data/apps/web-astrology` | `281c0d395e44` | `1.1.5` / 11 | 3201 | 74 |
+| `web-bat` | [web-bat](https://github.com/ianras77/web-bat) | `/data/apps/web-bat` (`blondesagainsttrump/` source) | `01d83bde3cf8` | `2.0.7` / 37 | 3197 | 77 |
+| `web-crackstack` | [web-crack](https://github.com/ianras77/web-crack) | `/data/apps/web-crack` | `27d1da26b31f` | `1.0.13` / 14 | 3212 | 70 |
+| `web-jogmania` | [web-jogmania](https://github.com/ianras77/web-jogmania) | `/data/apps/web-jogmania` (`repo/` source) | `103ad8d62ff3` | `1.1.10` / 26 | 3177 | 69 |
+| `web-lickingvape` | [web-lickingvape](https://github.com/ianras77/web-lickingvape) | `/data/apps/web-lickingvape` | `9ebb45f5c9f6` | `1.0.13` / 13 | 3195 | 71 |
+| `web-rasies` | [web-rasies](https://github.com/ianras77/web-rasies) | `/data/apps/web-rasies` | `2d3076059468` | `1.0.14` / 16 | 3186 | 66 |
+| `web-rassyapp` | [web-rassy.app](https://github.com/ianras77/web-rassy.app) | `/data/apps/web-rassy.app` | `d15bd6559476` | `v1.14.12` / 16 | 3194 | 73 |
+| `web-rassyonline` | [web-rassyonline](https://github.com/ianras77/web-rassyonline) | `/data/apps/web-rassyonline` | `d14e536c938d` | `0.1.17` / 14 | 3199 | 75 |
+| `web-rassys` | [web-rassy](https://github.com/ianras77/web-rassy) | `/data/apps/web-rassy` | `d695a3672433` | `1.0.42` / 36 | 3187 | 78 |
+| `web-totallyrighteoustales` | [web-totallyrighteoustales](https://github.com/ianras77/web-totallyrighteoustales) | `/data/apps/web-totallyrighteoustales` | `6ed50a5b41aa` | `0.5.10` / 15 | 3190 | 72 |
+| `web-usmender` | [web-usmender](https://github.com/ianras77/web-usmender) | `/data/apps/web-usmender` | `d6a4db6d0b9b` | `27` / 13 | 3294 | 65 |
 
 The source package manifests were synchronized with their current store package revisions where those repositories carry a `config.json`. Source working trees were clean at final source audit. The store `source` mappings were checked against all eleven repositories.
 
@@ -46,14 +46,18 @@ Each of the eleven Runtipi apps was backed up, uninstalled, and reinstalled from
 
 All eleven homepage ports returned HTTP 200 after rollout. Additional checks returned HTTP 200 for Jogmania API `/healthz` on 3178, BAT API `/api/v1/health/live` on 8017, Tales API `/health` on 3191, and Rassys Icecast on 3188. Defined container healthchecks were healthy; auxiliary services without healthchecks were confirmed running. The final post-update verification is recorded below.
 
+The latest package versions above include release-provenance labels on every locally built image, tied to the source commit shown in the table. Jogmania's four host-mounted application services carry the same source revision in their container labels.
+
+Mastra is the current architecture in BAT, Jogmania, Rasies, Rassys, and Rassy Online. LickingVape, Rassyapp, Totally Righteous Tales, and Usmender still run Cheshire Cat in their current source and package configuration; those Cat services match the current GitHub source and were not replaced by an uncommitted migration. Astro's source documents a separately gated Mastra migration and its current package does not claim to have completed it.
+
 Two package-specific corrections were required during rollout:
 
-- BAT package 2.0.6 / T35 sets host networking for the four source builds, so package builds can reach dependencies on the Docker host.
-- Jogmania package 1.1.9 / T23 keeps its dependency service alive and healthy, and makes application services wait for that healthy dependency. This prevents the Runtipi status reconciler from treating a completed one-shot dependency container as a stopped app.
+- BAT package 2.0.7 / T37 sets host networking for the four source builds, so package builds can reach dependencies on the Docker host.
+- Jogmania package 1.1.10 / T26 keeps its dependency service alive and healthy, and makes application services wait for that healthy dependency. This prevents the Runtipi status reconciler from treating a completed one-shot dependency container as a stopped app.
 
-Jogmania's supported Runtipi updater completed successfully after T23 publication. Its app `version` and installed package are 23, and the app is running on the original port. Runtipi's `template_version` registry field still reads 21; the updater did not refresh that historical field. It does not change the active package manifest (T23), runtime Compose definition, app version, or app health, so the registry field was not edited directly.
+Jogmania's supported Runtipi updater completed successfully after T26 publication. Its active app package is 1.1.10 / T26 and it is running on the original port. Runtipi may retain an older historical `template_version` registry field after package updates; the active package files and running services were checked directly instead of editing that internal field.
 
-Rassys had an invalid pre-migration registry row without a template URN/version. Reinstall corrected it to `web-rassys:gpu-private-store`, version/template 30, running, port 3187, row 78. Its Postgres, Redis, radio, Icecast, Liquidsoap, Minecraft bridge, reports, and shared media binds were restored and verified.
+Rassys had an invalid pre-migration registry row without a template URN/version. Reinstall corrected it to `web-rassys:gpu-private-store`, running on port 3187, row 78. Its package is now 1.0.42 / T36. Postgres, Redis, radio, Icecast, Liquidsoap, Minecraft bridge, reports, survey routes, and shared media binds were restored and verified. Survey collection remains deliberately disabled until its privacy, database-role, persistence, backup/restore, retention, and operator-readiness gates are satisfied.
 
 ## Persistent data and protected rollback archives
 
@@ -87,9 +91,12 @@ Core `/data/apps` repository audit: `rassymind`, `hermes`, `openfang`, `qwencode
 
 - `./scripts/validate-store.sh`: passed.
 - Store package/source mapping: all eleven `source` links match the standalone repositories.
-- Source checkouts: eleven Git roots, expected remotes/commits, clean status.
-- Runtipi registry: eleven stable app URNs present, all rows `running` after reinstall; Jogmania retains only the noted historical `template_version` field.
-- HTTP: all eleven app homepage ports returned 200; additional API/radio checks are listed above.
+- Source checkouts: all eleven deployed Git roots plus the separate ClosePeeps Git root are clean, and each local HEAD equals the GitHub default-branch HEAD.
+- Store package files: all eleven installed `config.json` and `docker-compose.yml` files match this store checkout.
+- Live images: all 32 app-built images carry the exact source revision from their GitHub repository; Jogmania's four source-mounted app services carry the same revision. Astro is live on 1.1.5 and the unused 1.1.4 tag aliases were removed.
+- Runtipi: all eleven app stacks are running, with all defined healthchecks healthy; app web roots returned HTTP 200 on their configured local ports.
+- Public routes: Rassys health reports source `d695a3672433`; Rassy Online health reports source `d14e536c938d`; BAT, Rassys Reports/What We Carry, and Rassy Online pages returned HTTP 200.
+- ClosePeeps: its source is current in its own GitHub repository, but it is intentionally not a Runtipi package or live web app. Its own release checklist still blocks live deployment on uncompleted production readiness and restore gates.
 - Tests: not run (not requested).
 
 The user-visible repository and deployment split is complete: GitHub source repos hold app source, `gpu-private-store` holds Runtipi package configuration, and Runtipi manages installs/updates while retaining app data and shared media on the server.
