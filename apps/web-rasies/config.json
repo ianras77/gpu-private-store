@@ -6,14 +6,14 @@
   "dynamic_config": true,
   "id": "web-rasies",
   "description": "A welcoming self-hosted family site with stories, thoughts, music, search, chat, status checks, and a Minecraft map, all gathered into one warm home-on-the-web.",
-  "tipi_version": 14,
+  "tipi_version": 15,
   "version": "1.0.13",
   "categories": [
     "ai",
     "utilities"
   ],
   "short_desc": "Warm self-hosted family site with stories, music, search, chat, and home-cloud tools.",
-  "author": "https://github.com/ianras77/web-rasies.git",
+  "author": "Ian Rasmussen",
   "source": "https://github.com/ianras77/web-rasies",
   "form_fields": [
     {

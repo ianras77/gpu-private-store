@@ -99,6 +99,7 @@ services:
     build:
       context: /host-apps/web-usmender
       dockerfile: apps/matrix-appservice/Dockerfile
+      network: host
     pull_policy: build
     restart: unless-stopped
     environment:
@@ -128,6 +129,7 @@ services:
     build:
       context: /host-apps/web-usmender
       dockerfile: apps/worker/Dockerfile
+      network: host
     pull_policy: build
     restart: unless-stopped
     environment:
@@ -149,6 +151,7 @@ services:
     build:
       context: /host-apps/web-usmender
       dockerfile: apps/api/Dockerfile
+      network: host
     pull_policy: build
     restart: unless-stopped
     environment:
@@ -210,6 +213,7 @@ services:
     build:
       context: /host-apps/web-usmender
       dockerfile: apps/web/Dockerfile
+      network: host
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
         API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:3001}

@@ -6,7 +6,7 @@ Updated: 2026-10-10 UTC
 
 Each of the eleven custom web-* applications has one full source repository under /data/apps and one dedicated GitHub repository. The Runtipi app-store entry keeps the app ID, Compose project, persistent data mounts, user configuration, and shared media wiring. The app-store entry contains only Runtipi configuration, Compose, and store metadata/assets; application source lives in the separate repository.
 
-The configured Runtipi store currently checks out gpu-private-store on branch codex/rassys-openfang-20260926. Publish the package migration to that active branch so this Runtipi instance reads the same definitions. The package config.json source field is a repository link displayed as metadata. Runtipi pulls the app definition from the configured app-store repository; it does not clone the standalone source repository from that link. Compose builds and source binds therefore use the local GitHub checkout under /data/apps.
+The published store is https://github.com/ianras77/gpu-private-store on branch main. The `source` field in each package is the standalone GitHub repository link displayed with that app. Runtipi pulls app definitions from the configured app-store repository; it does not clone the standalone source repository from the link. Compose builds use read-only source checkouts mounted into Runtipi at /host-apps/<repository-folder>, while bind mounts such as /data/apps/<repository-folder>/... resolve on the Docker host.
 
 For a source-code release, push the app repository change to GitHub, fast-forward its matching checkout under /data/apps, then run the Runtipi app update for that installed app. For a package change, update the app-store entry, increase both version and tipi_version, run Runtipi's app-store update, then update or reinstall the app through Runtipi. This makes the division between source publication and managed deployment explicit.
 
@@ -32,17 +32,17 @@ Every app keeps the same Runtipi app URN, Compose project, host port, app-data t
 
 | App | Package version | tipi_version |
 | --- | ---: | ---: |
-| web-astro | 1.1.3 | 8 |
-| web-bat | 2.0.3 | 32 |
-| web-crackstack | 1.0.9 | 10 |
-| web-jogmania | 1.1.6 | 17 |
-| web-lickingvape | 1.0.10 | 10 |
-| web-rasies | 1.0.12 | 13 |
-| web-rassyapp | v1.14.11 | 14 |
-| web-rassyonline | 0.1.11 | 7 |
-| web-rassys | 1.0.34 | 28 |
-| web-totallyrighteoustales | 0.5.7 | 12 |
-| web-usmender | 25 | 10 |
+| web-astro | 1.1.4 | 9 |
+| web-bat | 2.0.5 | 34 |
+| web-crackstack | 1.0.12 | 13 |
+| web-jogmania | 1.1.7 | 21 |
+| web-lickingvape | 1.0.12 | 12 |
+| web-rasies | 1.0.13 | 15 |
+| web-rassyapp | v1.14.11 | 15 |
+| web-rassyonline | 0.1.16 | 12 |
+| web-rassys | 1.0.36 | 30 |
+| web-totallyrighteoustales | 0.5.9 | 14 |
+| web-usmender | 26 | 12 |
 
 The BAT package retains the live Mastra service. All four BAT build services explicitly use pull_policy: build; no service is removed or renamed as part of this source move.
 
@@ -72,7 +72,7 @@ Runtipi's backup archive includes the installed app definition as well as `app-d
 
 These top-level product folders are already standalone Git repositories and remain independent projects: aider, opencode, mc_troupe, nextcloud, openfang, plex, qwencode, rassymind, and web-closepeeps. Their existing branches and local edits are preserved. In particular, dirty local work in Nextcloud, Qwen Code, RassyMind, and ClosePeeps is not staged or reset by this web-app migration.
 
-The /data/apps/hermes folder is an integration/release-candidate workspace, not the Hermes source checkout; its README identifies /opt/rassy-hermes as the protected source deployment and the rassy-hermes GitHub repository as that source. /data/apps/gpu-private-store is a managed app-store mirror, not a product repository. .github, .pytest_cache, and the old reference directories 1-WIP and 2-Migrated are not application source checkouts. Do not use either old reference folder in new Compose paths or source-sync commands.
+The canonical Hermes Git checkout is currently `/opt/rassy-hermes` (GitHub `ianras77/rassy-hermes`), while `/data/apps/hermes` is a separate integration/release-candidate workspace and is not itself a Git repository. Reconcile and consolidate those contents into `/data/apps/hermes` without moving the live runtime or losing the workspace's local material. `/data/apps/gpu-private-store` is a managed app-store mirror, not a product repository. `.github`, `.pytest_cache`, and the old reference directories `1-WIP` and `2-Migrated` are not application source checkouts. Do not use either old reference folder in new Compose paths or source-sync commands.
 
 ## Implementation stages and gates
 
@@ -98,7 +98,7 @@ For each mapped repository:
 
 ### 3. Synchronize Runtipi's store
 
-- Push the reviewed app-store commit to codex/rassys-openfang-20260926, the branch currently checked out for the configured gpu-private-store.
+- Push the reviewed app-store commit to `main` on `ianras77/gpu-private-store`.
 - Update the configured store from Runtipi and confirm the eleven package definitions and links match the published commit.
 - Confirm Runtipi has recognized each higher version and tipi_version before uninstalling anything.
 
@@ -157,4 +157,4 @@ This order is a scheduling aid only; an app still waits for its own backup and h
 
 ## Rollout record
 
-All eleven dedicated source repositories are published under /data/apps and linked from the custom app store. The Runtipi Compose client needs explicit read-only /host-apps mounts for build contexts; service bind paths continue to resolve against host /data/apps. Backups, reinstalls, and live endpoint checks remain in progress.
+All eleven dedicated web-app source repositories are linked from the public custom store, and the latest package metadata is published on `main`. The app-source repositories are private and require per-server GitHub read access. App backups, package synchronization, data-root reconciliation, uninstall/reinstall, and runtime acceptance are tracked as separate completion gates; see the current rollout record before treating an app as finished.
