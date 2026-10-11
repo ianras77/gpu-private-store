@@ -33,6 +33,7 @@ services:
       dockerfile: apps/web/Dockerfile
       network: host
       args:
+        APP_SOURCE_REVISION: d695a367243307d9f3320576603919155d2cec6d
         NEXT_PUBLIC_STREAM_URL: ${NEXT_PUBLIC_STREAM_URL:-}
         NEXT_PUBLIC_STREAM_LOSSLESS_URL: ${NEXT_PUBLIC_STREAM_LOSSLESS_URL:-}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://rassys.com}
@@ -47,6 +48,7 @@ services:
         NEXT_PUBLIC_WWC_VISIBLE: ${NEXT_PUBLIC_WWC_VISIBLE:-true}
     environment:
       NODE_ENV: production
+      APP_SOURCE_REVISION: d695a367243307d9f3320576603919155d2cec6d
       HOSTNAME: 0.0.0.0
       PORT: "3000"
       NEXT_TELEMETRY_DISABLED: "1"
