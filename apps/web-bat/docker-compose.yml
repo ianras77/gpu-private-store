@@ -72,7 +72,9 @@ x-bat-host-gateway: &bat-host-gateway
 
 services:
   bat-api:
-    build: /host-apps/web-bat/blondesagainsttrump/apps/api
+    build:
+      context: /host-apps/web-bat/blondesagainsttrump/apps/api
+      network: host
     environment:
       <<: *bat-runtime-env
     extra_hosts: *bat-host-gateway
@@ -105,7 +107,9 @@ services:
     pull_policy: build
 
   bat-mastra:
-    build: /host-apps/web-bat/blondesagainsttrump/apps/mastra
+    build:
+      context: /host-apps/web-bat/blondesagainsttrump/apps/mastra
+      network: host
     environment:
       MASTRA_PORT: 8090
       BAT_API_URL: http://bat-api:8000
@@ -197,7 +201,9 @@ services:
     restart: unless-stopped
 
   bat-social-publisher:
-    build: /host-apps/web-bat/blondesagainsttrump/apps/social-publisher
+    build:
+      context: /host-apps/web-bat/blondesagainsttrump/apps/social-publisher
+      network: host
     healthcheck:
       test:
         - CMD
@@ -216,6 +222,7 @@ services:
     build:
       context: /host-apps/web-bat/blondesagainsttrump/apps/web
       dockerfile: Dockerfile
+      network: host
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
