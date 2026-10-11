@@ -3,6 +3,7 @@ services:
     build:
       context: /host-apps/web-rassy.app
       dockerfile: Dockerfile
+      network: host
       args:
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSYAPP_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}}
@@ -41,6 +42,7 @@ services:
     build:
       context: /host-apps/web-rassy.app
       dockerfile: docker/cat-core.Dockerfile
+      network: host
     pull_policy: build
     environment:
       CCAT_QDRANT_HOST: cheshire-cat-vector-memory
