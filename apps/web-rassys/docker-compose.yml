@@ -12,7 +12,7 @@ services:
       RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://host.docker.internal:8844}
       RASSYMIND_API_KEY: ${RASSYMIND_API_KEY:-}
       RASSY_INTELLIGENCE_INTERNAL_TOKEN: ${RASSY_INTELLIGENCE_INTERNAL_TOKEN:-}
-      DATABASE_URL: ${DATABASE_URL:-}
+      DATABASE_URL: postgresql://rassy:${POSTGRES_PASSWORD}@postgres:5432/rassy
       RASSY_MASTRA_SCHEMA: ${RASSY_MASTRA_SCHEMA:-rassy_mastra}
     networks:
       - internal
@@ -94,7 +94,7 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-}
       RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      DATABASE_URL: ${DATABASE_URL:-}
+      DATABASE_URL: postgresql://rassy:${POSTGRES_PASSWORD}@postgres:5432/rassy
       # Keep the compatibility surface on the Mastra service as well. This
       # prevents old controller code from silently talking to the legacy edge.
       RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://rassy-intelligence:1866}
@@ -205,7 +205,7 @@ services:
       NODE_ENV: production
       PORT: 4000
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      DATABASE_URL: ${DATABASE_URL:-}
+      DATABASE_URL: postgresql://rassy:${POSTGRES_PASSWORD}@postgres:5432/rassy
       RADIO_ADMIN_API_KEY: ${RADIO_ADMIN_API_KEY:-}
       # Legacy-compatible controller calls also terminate at Mastra.
       RASSYMIND_BASE_URL: ${RASSYMIND_BASE_URL:-http://rassy-intelligence:1866}
