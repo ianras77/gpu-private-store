@@ -6,7 +6,7 @@ Jogmania turns iPhone and Apple Watch walk and run workouts into replayable adve
 
 The Runtipi package runs Jogmania's web app, API, Mastra service, Postgres, Redis, and MinIO services. The iOS client and shared packages remain in the product repository and are not installed as Linux services by Runtipi.
 
-The app's current source is maintained at [github.com/ianras77/web-jogmania](https://github.com/ianras77/web-jogmania). Runtipi builds and runs the Linux services from that repository's checked-out source tree on the host.
+The app's current source is maintained at [github.com/ianras77/web-jogmania](https://github.com/ianras77/web-jogmania). Runtipi's web, API, and Mastra containers run code mounted from a host checkout of this repository.
 
 ## Data and network
 
