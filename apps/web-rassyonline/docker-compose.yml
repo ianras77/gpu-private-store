@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
       network: host
       args:
+        APP_SOURCE_REVISION: d14e536c938d38466025091a18dcfba84b63a9e7
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSY_ONLINE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-cffcee31-e16a-49fe-a14f-f5927f2fde71}}
         NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSY_ONLINE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassy.online}}
@@ -87,6 +88,7 @@ services:
       dockerfile: Dockerfile
       network: host
       args:
+        APP_SOURCE_REVISION: d14e536c938d38466025091a18dcfba84b63a9e7
         NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-https://umami.rasies.com/script.js}
         NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${RASSY_ONLINE_UMAMI_WEBSITE_ID:-${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-cffcee31-e16a-49fe-a14f-f5927f2fde71}}
         NEXT_PUBLIC_UMAMI_DOMAINS: ${RASSY_ONLINE_UMAMI_DOMAINS:-${NEXT_PUBLIC_UMAMI_DOMAINS:-rassy.online}}
