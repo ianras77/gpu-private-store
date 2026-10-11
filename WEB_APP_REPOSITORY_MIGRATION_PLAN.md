@@ -1,7 +1,7 @@
 # Web app repository and Runtipi migration record
 
 Updated: 2026-10-11 UTC
-Status: migration, package alignment, first-server rollout, and final verification complete on 2026-10-11 UTC.
+Status: all installable web-app source checkouts, GitHub default branches, store package references, and running app image revisions match. Persisted BAT editorial data and the requested Rassys birthday thought still need separate recovery/freshness work; ClosePeeps remains outside the installable store pending its release gates.
 
 ## Outcome and deployment model
 
@@ -36,7 +36,7 @@ The registry row IDs are Runtipi's current internal IDs after reinstall; the sta
 | `web-rasies` | [web-rasies](https://github.com/ianras77/web-rasies) | `/data/apps/web-rasies` | `2d3076059468` | `1.0.14` / 16 | 3186 | 66 |
 | `web-rassyapp` | [web-rassy.app](https://github.com/ianras77/web-rassy.app) | `/data/apps/web-rassy.app` | `d15bd6559476` | `v1.14.12` / 16 | 3194 | 73 |
 | `web-rassyonline` | [web-rassyonline](https://github.com/ianras77/web-rassyonline) | `/data/apps/web-rassyonline` | `d14e536c938d` | `0.1.17` / 14 | 3199 | 75 |
-| `web-rassys` | [web-rassy](https://github.com/ianras77/web-rassy) | `/data/apps/web-rassy` | `d695a3672433` | `1.0.42` / 36 | 3187 | 78 |
+| `web-rassys` | [web-rassy](https://github.com/ianras77/web-rassy) | `/data/apps/web-rassy` | `db9aceeffbba` | `1.0.43` / 37 | 3187 | 78 |
 | `web-totallyrighteoustales` | [web-totallyrighteoustales](https://github.com/ianras77/web-totallyrighteoustales) | `/data/apps/web-totallyrighteoustales` | `6ed50a5b41aa` | `0.5.10` / 15 | 3190 | 72 |
 | `web-usmender` | [web-usmender](https://github.com/ianras77/web-usmender) | `/data/apps/web-usmender` | `d6a4db6d0b9b` | `27` / 13 | 3294 | 65 |
 
@@ -59,7 +59,7 @@ Two package-specific corrections were required during rollout:
 
 Jogmania's supported Runtipi updater completed successfully after T26 publication. Its active app package is 1.1.10 / T26 and it is running on the original port. Runtipi may retain an older historical `template_version` registry field after package updates; the active package files and running services were checked directly instead of editing that internal field.
 
-Rassys had an invalid pre-migration registry row without a template URN/version. Reinstall corrected it to `web-rassys:gpu-private-store`, running on port 3187, row 78. Its package is now 1.0.42 / T36. Postgres, Redis, radio, Icecast, Liquidsoap, Minecraft bridge, reports, survey routes, and shared media binds were restored and verified. Survey collection remains deliberately disabled until its privacy, database-role, persistence, backup/restore, retention, and operator-readiness gates are satisfied.
+Rassys had an invalid pre-migration registry row without a template URN/version. Reinstall corrected it to `web-rassys:gpu-private-store`, running on port 3187, row 78. Its package is now 1.0.43 / T37 at source commit `db9aceeffbba`. Postgres, Redis, radio, Icecast, Liquidsoap, Minecraft bridge, reports, survey routes, and shared media binds are healthy. The live homepage identifies Rassys.com and includes the DM navigation entry; the notebook route is present. The persistent thoughts API currently returns only “The station is open” from 2026-08-29, so the requested birthday thought is still absent from app data. Survey collection remains deliberately disabled until its privacy, database-role, persistence, backup/restore, retention, and operator-readiness gates are satisfied.
 
 ## Persistent data and protected rollback archives
 
@@ -95,10 +95,11 @@ Core `/data/apps` repository audit: `rassymind`, `hermes`, `openfang`, `qwencode
 - Store package/source mapping: all eleven `source` links match the standalone repositories.
 - Source checkouts: all eleven deployed Git roots plus the separate ClosePeeps Git root are clean, and each local HEAD equals the GitHub default-branch HEAD.
 - Store package files: all eleven installed `config.json` and `docker-compose.yml` files match this store checkout.
-- Live images: all 32 app-built images carry the exact source revision from their GitHub repository; Jogmania's four source-mounted app services carry the same revision. Astro is live on 1.1.5 and the unused 1.1.4 tag aliases were removed.
+- Live images: all 32 app-built images carry the exact source revision from their GitHub default branch; Jogmania's four source-mounted app services carry the same revision. Astro is live on 1.1.5 and the unused 1.1.4 tag aliases were removed.
 - Runtipi: all eleven app stacks are running, with all defined healthchecks healthy; app web roots returned HTTP 200 on their configured local ports.
-- Public routes: Rassys health reports source `d695a3672433`; Rassy Online health reports source `d14e536c938d`; BAT, Rassys Reports/What We Carry, and Rassy Online pages returned HTTP 200.
-- ClosePeeps: its source is current in its own GitHub repository, but it is intentionally not a Runtipi package or live web app. Its own release checklist still blocks live deployment on uncompleted production readiness and restore gates.
+- Public routes: Rassys health reports source `db9acee`; Rassy Online health reports source `d14e536c938d`; BAT, Rassys Reports/What We Carry, and Rassy Online pages returned HTTP 200.
+- Content freshness is a separate result from source freshness. BAT source and running images match GitHub commit `01d83bde3cf8`, but `/api/v1/themes` entries are last seen 2026-08-30 and its newest recorded editorial pipeline event is 2026-09-06. Mastra restarted at 2026-10-11 20:21 UTC with its normal six-hour first-cycle delay; no current editorial publish is claimed before that scheduled cycle runs and passes its freshness and quality gates.
+- ClosePeeps source and GitHub `main` match at `f564be94`, but it is not present as an installable store package and no ClosePeeps app container is running. Its private-alpha release evidence still lacks A06-A09 and external staging, restore, simulator, and device proof.
 - Tests: not run (not requested).
 
 The user-visible repository and deployment split is complete: GitHub source repos hold app source, `gpu-private-store` holds Runtipi package configuration, and Runtipi manages installs/updates while retaining app data and shared media on the server.
