@@ -2,6 +2,7 @@ services:
   trt-api:
     build:
       context: /host-apps/web-totallyrighteoustales
+      network: host
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
@@ -125,6 +126,7 @@ services:
   trt-web:
     build:
       context: /host-apps/web-totallyrighteoustales
+      network: host
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
@@ -160,6 +162,7 @@ services:
   trt-worker:
     build:
       context: /host-apps/web-totallyrighteoustales
+      network: host
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${TRT_PUBLIC_API_URL:-http://${APP_HOST}:${TRT_API_HOST_PORT:-3191}}
