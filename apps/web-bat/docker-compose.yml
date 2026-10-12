@@ -71,7 +71,7 @@ x-bat-host-gateway: &bat-host-gateway
   - host.docker.internal:host-gateway
 
 x-bat-source-labels: &bat-source-labels
-  org.opencontainers.image.revision: 77943e4ba8dd2ab8fa478ee95fe2805223b30b64
+  org.opencontainers.image.revision: bba09e43baa8f66fa76b301027a17279b5c17089
 
 services:
   bat-api:
