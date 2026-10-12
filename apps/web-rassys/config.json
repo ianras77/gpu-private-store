@@ -6,8 +6,8 @@
   "dynamic_config": true,
   "id": "web-rassys",
   "description": "Public site, live radio, Minecraft bridge, RassyMind, Icecast, Liquidsoap, Redis, and Postgres in one stack.",
-  "tipi_version": 37,
-  "version": "1.0.43",
+  "tipi_version": 38,
+  "version": "1.0.44",
   "min_tipi_version": "v4.0.0",
   "categories": [
     "ai",
