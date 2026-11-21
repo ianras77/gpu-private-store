@@ -32,7 +32,7 @@ Beszel reports this host's CPU, memory, network, sensors, OS and data disks, ZFS
 - Bind mount `/dev/dri` -> `/dev/dri`
 - Bind mount `/` -> `/host`
 - Bind mount `/proc` -> `/host/proc`
-- Bind mount `/dev/nvme0n1` -> `/dev/nvme0n1` for NVMe disk health reporting.
+- Bind mounts `/dev/nvme0` and `/dev/nvme0n1` for NVMe disk health reporting; `SMART_DEVICES` selects the NVMe controller explicitly.
 - Bind mount `/dev/zfs` -> `/dev/zfs` and use `zpool` and `zfs` helper wrappers from `${APP_DATA_DIR}/zfs-tools` to run the host's ZFS tools through the read-only `/host` view.
 - Bind mounts `/data`, `/backup`, `/models`, `/models-fast`, and `/mnt/cannonball` under `/extra-filesystems` so Beszel can report each mounted volume's usage.
 - Use `FILESYSTEM=sda2__OS` so root disk charts track the OS partition instead of the most active data disk.

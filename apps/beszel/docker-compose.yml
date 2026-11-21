@@ -15,6 +15,7 @@ services:
     - /dev/sdf:/dev/sdf
     - /dev/sdg:/dev/sdg
     - /dev/sdh:/dev/sdh
+    - /dev/nvme0:/dev/nvme0
     - /dev/nvme0n1:/dev/nvme0n1
     - /dev/zfs:/dev/zfs
     volumes:
@@ -33,6 +34,7 @@ services:
     environment:
       LISTEN: 45876
       FILESYSTEM: sda2__OS
+      SMART_DEVICES: /dev/nvme0:nvme
       SYS_SENSORS: /host/sys/class/hwmon
       GPU_COLLECTOR: nvidia-smi
       NVIDIA_VISIBLE_DEVICES: all
