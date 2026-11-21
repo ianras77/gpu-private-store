@@ -1,6 +1,6 @@
 # Beszel
 
-Beszel reports this host's CPU, memory, network, sensors, OS and data disks, NVIDIA GPUs, and Docker containers to the existing hub.
+Beszel reports this host's CPU, memory, network, sensors, OS and data disks, ZFS pool health, NVIDIA GPUs, and Docker containers to the existing hub.
 
 ## Deployment stance
 
@@ -33,6 +33,7 @@ Beszel reports this host's CPU, memory, network, sensors, OS and data disks, NVI
 - Bind mount `/` -> `/host`
 - Bind mount `/proc` -> `/host/proc`
 - Bind mount `/dev/nvme0n1` -> `/dev/nvme0n1` for NVMe disk health reporting.
+- Bind mount `/dev/zfs` -> `/dev/zfs` and expose host `zpool` and `zfs` tools through the read-only `/host` view for ZFS pool and dataset metrics.
 - Bind mounts `/data`, `/backup`, `/models`, `/models-fast`, and `/mnt/cannonball` under `/extra-filesystems` so Beszel can report each mounted volume's usage.
 - Use `FILESYSTEM=sda2__OS` so root disk charts track the OS partition instead of the most active data disk.
 - Use `SYS_SENSORS=/host/sys/class/hwmon` to read host temperature and fan sensors.

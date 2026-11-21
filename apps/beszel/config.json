@@ -5,13 +5,13 @@
   "exposable": false,
   "dynamic_config": true,
   "id": "beszel",
-  "description": "Beszel reports this host's CPU, memory, network, sensors, OS and data disks, NVIDIA GPUs, and Docker containers to the existing hub.",
-  "tipi_version": 6,
+  "description": "Beszel reports this host's CPU, memory, network, sensors, OS and data disks, ZFS pool health, NVIDIA GPUs, and Docker containers to the existing hub.",
+  "tipi_version": 7,
   "version": "0.18.7",
   "categories": [
     "utilities"
   ],
-  "short_desc": "Full host, disk, GPU, network, sensor, and Docker monitoring for Beszel.",
+  "short_desc": "Full host, disk, ZFS, GPU, network, sensor, and Docker monitoring for Beszel.",
   "author": "https://github.com/ianras77/beszel.git",
   "source": "https://github.com/ianras77/beszel",
   "form_fields": [],
@@ -20,5 +20,5 @@
   ],
   "no_gui": true,
   "created_at": 1774316487138,
-  "updated_at": 1795223914000
+  "updated_at": 1795224053000
 }

@@ -16,6 +16,7 @@ services:
     - /dev/sdg:/dev/sdg
     - /dev/sdh:/dev/sdh
     - /dev/nvme0n1:/dev/nvme0n1
+    - /dev/zfs:/dev/zfs
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock:ro
     - ${APP_DATA_DIR}/app-data/beszel/named/beszel-agent:/var/lib/beszel-agent
@@ -27,6 +28,8 @@ services:
     - /models:/extra-filesystems/models:ro
     - /models-fast:/extra-filesystems/models-fast:ro
     - /mnt/cannonball:/extra-filesystems/cannonball:ro
+    - ./zfs/zpool:/usr/local/bin/zpool:ro
+    - ./zfs/zfs:/usr/local/bin/zfs:ro
     environment:
       LISTEN: 45876
       FILESYSTEM: sda2__OS
