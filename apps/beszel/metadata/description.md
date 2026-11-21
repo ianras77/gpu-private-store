@@ -1,6 +1,6 @@
 # Beszel
 
-Beszel runs the NVIDIA-aware node agent for server, disk, GPU, and Docker status reporting on this host.
+Beszel reports this host's CPU, memory, network, sensors, OS and data disks, NVIDIA GPUs, and Docker containers to the existing hub.
 
 ## Deployment stance
 
@@ -14,7 +14,7 @@ Beszel runs the NVIDIA-aware node agent for server, disk, GPU, and Docker status
 - Recommended source repo target: `/data/repos/apps/beszel`
 - Conversion strategy: `auto-with-manual-review`
 - Migration complexity: `medium`
-- The original compose file used host networking. This Runtipi package instead exposes a single explicit agent port while preserving the host-observability mounts the agent needs.
+- Beszel needs the host network namespace to report the server's real network interfaces. This package uses host networking and listens directly on port `45876`, without Runtipi or Traefik routing.
 
 ## Data notes
 
@@ -25,13 +25,17 @@ Beszel runs the NVIDIA-aware node agent for server, disk, GPU, and Docker status
 
 - Reserve `80` and `443` on this node for Runtipi itself.
 - This is an internal node agent, not a browser UI app.
-- Agent traffic stays on `45876` so it can report into the existing Beszel hub without re-keying the node.
+- The agent listens on `45876` and reports into the existing Beszel hub without re-keying the node.
 
 - Bind mount `/var/run/docker.sock` -> `/var/run/docker.sock`
 - Runtipi app-data mount `${APP_DATA_DIR}/app-data/beszel/named/beszel-agent` -> `/var/lib/beszel-agent`
 - Bind mount `/dev/dri` -> `/dev/dri`
 - Bind mount `/` -> `/host`
 - Bind mount `/proc` -> `/host/proc`
+- Bind mount `/dev/nvme0n1` -> `/dev/nvme0n1` for NVMe disk health reporting.
+- Bind mounts `/data`, `/backup`, `/models`, `/models-fast`, and `/mnt/cannonball` under `/extra-filesystems` so Beszel can report each mounted volume's usage.
+- Use `FILESYSTEM=sda2__OS` so root disk charts track the OS partition instead of the most active data disk.
+- Use `SYS_SENSORS=/host/sys/class/hwmon` to read host temperature and fan sensors.
 - NVIDIA runtime reservation exposes all host GPUs to the agent with the `utility` capability.
 - GPU telemetry is collected with `nvidia-smi` so Beszel can report GPU usage, memory, temperature, and power draw.
 
