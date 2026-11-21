@@ -28,8 +28,8 @@ services:
     - /models:/extra-filesystems/models:ro
     - /models-fast:/extra-filesystems/models-fast:ro
     - /mnt/cannonball:/extra-filesystems/cannonball:ro
-    - ./zfs/zpool:/usr/local/bin/zpool:ro
-    - ./zfs/zfs:/usr/local/bin/zfs:ro
+    - ${APP_DATA_DIR}/zfs-tools/zpool:/usr/local/bin/zpool:ro
+    - ${APP_DATA_DIR}/zfs-tools/zfs:/usr/local/bin/zfs:ro
     environment:
       LISTEN: 45876
       FILESYSTEM: sda2__OS
