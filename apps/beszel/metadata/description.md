@@ -34,7 +34,7 @@ Beszel reports this host's CPU, memory, network, sensors, OS and data disks, ZFS
 - Bind mount `/proc` -> `/host/proc`
 - Bind mounts `/dev/nvme0` and `/dev/nvme0n1` for NVMe disk health reporting; `SMART_DEVICES` selects the NVMe controller explicitly.
 - Bind mount `/dev/zfs` -> `/dev/zfs` and use `zpool` and `zfs` helper wrappers from `${APP_DATA_DIR}/zfs-tools` to run the host's ZFS tools through the read-only `/host` view.
-- Bind mounts `/data`, `/backup`, `/models`, `/models-fast`, and `/mnt/cannonball` under `/extra-filesystems` so Beszel can report each mounted volume's usage.
+- Beszel discovers ZFS pools and datasets through the ZFS tools; model, NVMe, and network-share volumes are mounted under `/extra-filesystems` for usage reporting.
 - Use `FILESYSTEM=sda2__OS` so root disk charts track the OS partition instead of the most active data disk.
 - Use `SYS_SENSORS=/host/sys/class/hwmon` to read host temperature and fan sensors.
 - NVIDIA runtime reservation exposes all host GPUs to the agent with the `utility` capability.

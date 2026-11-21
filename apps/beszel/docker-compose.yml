@@ -24,8 +24,6 @@ services:
     - /dev/dri:/dev/dri:ro
     - /:/host:ro
     - /proc:/host/proc:ro
-    - /data:/extra-filesystems/data:ro
-    - /backup:/extra-filesystems/backup:ro
     - /models:/extra-filesystems/models:ro
     - /models-fast:/extra-filesystems/models-fast:ro
     - /mnt/cannonball:/extra-filesystems/cannonball:ro

@@ -6,7 +6,7 @@
   "dynamic_config": true,
   "id": "beszel",
   "description": "Beszel reports this host's CPU, memory, network, sensors, OS and data disks, ZFS pool health, NVIDIA GPUs, and Docker containers to the existing hub.",
-  "tipi_version": 9,
+  "tipi_version": 10,
   "version": "0.18.7",
   "categories": [
     "utilities"
@@ -20,5 +20,5 @@
   ],
   "no_gui": true,
   "created_at": 1774316487138,
-  "updated_at": 1795224167000
+  "updated_at": 1795224204000
 }
